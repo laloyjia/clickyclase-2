@@ -29,10 +29,6 @@ var FIREBASE_CONFIG = {
     console.log('[ElectroLearn] Firebase inicializado ✔');
   }
   window.EL_DB   = firebase.firestore();
-  window.EL_DB.settings({
-    experimentalForceLongPolling: true,
-    merge: true
-  });
   window.EL_AUTH = firebase.auth();
   window.EL_AUTH.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
     .catch(function(err) {
