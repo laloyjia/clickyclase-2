@@ -42,30 +42,52 @@ function buildContext(datos) {
     datos.especialidad ? `Especialidad EMTP: ${datos.especialidad}`           : '',
     datos.nivel        ? `Nivel / Curso: ${datos.nivel}`                      : '',
     datos.unidad       ? `Unidad: ${datos.unidad}`                            : '',
-    datos.oa           ? `Objetivo de Aprendizaje / AE: ${datos.oa}`         : '',
     datos.horas        ? `Duración: ${datos.horas} horas pedagógicas`        : '',
     datos.tema         ? `Tema específico: ${datos.tema}`                     : '',
     datos.taxonomia    ? BLOOM[datos.taxonomia] || `Taxonomía: ${datos.taxonomia}` : '',
     datos.tiposPreguntas && datos.tiposPreguntas.length
-                       ? `Tipos de preguntas: ${Array.isArray(datos.tiposPreguntas) ? datos.tiposPreguntas.join(', ') : datos.tiposPreguntas}` : '',
+                       ? `Tipos de preguntas/actividades: ${Array.isArray(datos.tiposPreguntas) ? datos.tiposPreguntas.join(', ') : datos.tiposPreguntas}` : '',
     datos.nPreguntas   ? `Cantidad total de preguntas/ítems: ${datos.nPreguntas}` : '',
     datos.extra        ? `Indicaciones adicionales: ${datos.extra}`           : '',
   ].filter(Boolean).join('\n');
 
-  // NEE tips
+  // ── Bloque de OAs Mineduc ─────────────────────────────────
+  let oaBlock = '';
+  const oasSel = datos.oas_seleccionados;
+  const oaManual = datos.oa;
+
+  if (oasSel && oasSel.length > 0) {
+    // OAs reales desde el currículum Mineduc
+    oaBlock = '\n\n─── OBJETIVOS DE APRENDIZAJE (Programa Mineduc) ───\n' +
+      oasSel.map(o => `• ${o.codigo}: ${o.descripcion}`).join('\n') +
+      '\n\nINSTRUCCIÓN CURRICULAR: Tu documento DEBE:\n' +
+      '1. Citar explícitamente los códigos OA en el objetivo de la clase (ej: "OA3, OA7").\n' +
+      '2. Diseñar cada actividad alineada a los indicadores de esos OA.\n' +
+      '3. Incluir los códigos OA en la rúbrica o tabla de especificaciones.\n' +
+      '4. Los indicadores de logro deben ser verificables y corresponder al OA citado.';
+  } else if (oaManual) {
+    oaBlock = `\n\nObjetivo de Aprendizaje / AE: ${oaManual}\n` +
+      'INSTRUCCIÓN: Cita el código OA en el objetivo de la clase y en los indicadores de logro.';
+  }
+
+  // ── Bloque NEE ───────────────────────────────────────────
   const neeTips = (datos.nee && datos.nee.length)
-    ? '\n\nADAPTACIONES NEE (incluir al final de la planificación/guía como sección "ATENCIÓN A LA DIVERSIDAD"):\n' +
+    ? '\n\n─── ATENCIÓN A LA DIVERSIDAD (NEE diagnosticadas) ───\n' +
+      'Incorporar como sección final del documento:\n' +
       datos.nee.map(k => '• ' + (NEE_TIPS[k] || k)).join('\n')
     : '';
 
-  return lines + neeTips;
+  return lines + oaBlock + neeTips;
 }
 
 // ── Prompts por herramienta ──────────────────────────────────
 function buildPrompt(tipo, datos) {
+  const hasOAs = (datos.oas_seleccionados && datos.oas_seleccionados.length > 0) || datos.oa;
+
   const intro = `Eres un experto pedagógico en educación chilena (Mineduc).
-Conoces el currículum: Plan Común, Educación Básica y EMTP con sus especialidades y módulos.
+Conoces el currículum nacional: Educación Básica 1°-8°, Plan Común 1°-4° Medio y EMTP.
 Redactas en español formal chileno, de forma práctica y lista para usar en aula.
+${hasOAs ? 'FUNDAMENTAL: El documento debe estar ALINEADO CURRICULAMENTE con los OA indicados — citar sus códigos en los objetivos y la evaluación.' : ''}
 Responde SOLO con el documento solicitado, sin saludos ni comentarios adicionales.
 Usa secciones en MAYÚSCULAS, bullets (•) y numeración donde corresponda.\n\n`;
 
@@ -77,21 +99,39 @@ Usa secciones en MAYÚSCULAS, bullets (•) y numeración donde corresponda.\n\n
 ${ctx}
 
 ESTRUCTURA REQUERIDA:
-OBJETIVO DE LA CLASE
-HABILIDADES A DESARROLLAR
-INICIO (tiempo aprox.)
+═══════════════════════════════════════════════
+PLANIFICACIÓN DE CLASE
+Institución: [${datos.colegio || '_____________'}]
+Asignatura: ${datos.asignatura || '___'}  |  Nivel: ${datos.nivel || '___'}  |  Duración: ${datos.horas || '___'}
+${hasOAs ? 'Objetivo(s) de Aprendizaje Mineduc: [citar códigos OA aquí]' : 'OA / AE: _______________'}
+Unidad: ${datos.unidad || '___'}  |  Tema: ${datos.tema || '___'}
+═══════════════════════════════════════════════
+
+OBJETIVO DE LA CLASE (vinculado al OA citado)
+HABILIDADES A DESARROLLAR (según eje curricular)
+ACTITUDES Y VALORES
+
+INICIO (____min)
 • Activación de conocimientos previos
-• Motivación / contextualización
-DESARROLLO (tiempo principal)
-• Actividades secuenciadas y detalladas
-• Recursos y materiales necesarios
-• Estrategias de enseñanza diferenciadas
-CIERRE
-• Síntesis de aprendizajes
-• Evaluación formativa
+• Motivación / problema o pregunta desafiante
+• Conexión con el OA
+
+DESARROLLO (____min)
+• Actividades secuenciadas (al menos 3, cada una con recursos y descripción)
+• Estrategias diferenciadas (trabajo individual, parejas, grupal)
+• Recursos: materiales físicos y/o digitales
+
+CIERRE (____min)
+• Síntesis y plenario
+• Evaluación formativa (ticket de salida, pregunta, autoevaluación)
+
 TAREA / EXTENSIÓN (si aplica)
-INDICADORES DE LOGRO
-${datos.nee && datos.nee.length ? 'ATENCIÓN A LA DIVERSIDAD (tips NEE)' : ''}`,
+
+INDICADORES DE LOGRO (deben ser verificables y corresponder al OA citado):
+• El/la estudiante [verbo observable]...
+• El/la estudiante [verbo observable]...
+
+${datos.nee && datos.nee.length ? 'ATENCIÓN A LA DIVERSIDAD (NEE)' : ''}`,
 
     guia: `${intro}Genera una GUÍA DE APRENDIZAJE completa para estudiantes chilenos:
 ${ctx}
@@ -100,28 +140,41 @@ ${datos.tiposPreguntas && datos.tiposPreguntas.length ? 'Las actividades deben i
 ${datos.nPreguntas ? 'Incluye un total de ' + datos.nPreguntas + ' actividades/ítems.' : ''}
 
 ESTRUCTURA:
-ENCABEZADO (Nombre, Curso, Fecha, Asignatura)
-OBJETIVO DE APRENDIZAJE
-INTRODUCCIÓN AL TEMA
-CONCEPTOS CLAVE (definiciones y ejemplos)
-ACTIVIDADES DE DESARROLLO (numeradas, variadas según los formatos indicados)
-PREGUNTAS DE REFLEXIÓN (nivel taxonómico: ${datos.taxonomia || 'analizar'})
-AUTOEVALUACIÓN (escala o rúbrica simple)`,
+══════════════════════════════════════
+GUÍA DE APRENDIZAJE
+Institución: ${datos.colegio || '_____________'}
+Asignatura: ${datos.asignatura || '___'}  |  Nivel: ${datos.nivel || '___'}
+${hasOAs ? 'OA(s): [citar código OA]' : 'OA / AE: _______________'}
+Nombre: ___________________  Curso: ___  Fecha: ___
+══════════════════════════════════════
+OBJETIVO DE APRENDIZAJE (citar código OA si aplica)
+INTRODUCCIÓN AL TEMA (contexto real o situación problema)
+CONCEPTOS CLAVE (definiciones precisas + ejemplos cotidianos o técnicos)
+ACTIVIDADES DE DESARROLLO (numeradas, variadas: ${datos.tiposPreguntas && datos.tiposPreguntas.length ? datos.tiposPreguntas.join(', ') : 'individual, parejas, grupo'})
+PREGUNTAS DE REFLEXIÓN (nivel ${datos.taxonomia || 'analizar'} en taxonomía de Bloom)
+AUTOEVALUACIÓN (escala de 1-4 o lista de cotejo)`,
 
     prueba: `${intro}Genera un INSTRUMENTO DE EVALUACIÓN (prueba escrita) para estudiantes chilenos:
 ${ctx}
 
 ${datos.tiposPreguntas && datos.tiposPreguntas.length
-  ? 'PARTES A INCLUIR SEGÚN LOS TIPOS SELECCIONADOS: ' + (Array.isArray(datos.tiposPreguntas) ? datos.tiposPreguntas.join(', ') : datos.tiposPreguntas)
+  ? 'PARTES A INCLUIR: ' + (Array.isArray(datos.tiposPreguntas) ? datos.tiposPreguntas.join(', ') : datos.tiposPreguntas)
   : 'Incluye: Selección Múltiple, Verdadero/Falso y Desarrollo.'}
 ${datos.nPreguntas ? 'TOTAL DE ÍTEMS: ' + datos.nPreguntas + ' (distribuidos entre las partes)' : 'Mínimo 15 ítems en total.'}
 
 ESTRUCTURA:
-ENCABEZADO (Institución${datos.colegio ? ': ' + datos.colegio : ''}, Asignatura, Nivel, Fecha, Puntaje)
+══════════════════════════════════════════════
+Institución: ${datos.colegio || '_____________'}
+Asignatura: ${datos.asignatura || '___'}  |  Nivel: ${datos.nivel || '___'}  |  Fecha: ___________
+${hasOAs ? 'OA evaluado(s): [citar código OA]' : 'OA / AE: _______________'}
+Puntaje total: ___  |  Puntaje mínimo de aprobación: ___
+Nombre estudiante: _________________________  Curso: ___
+══════════════════════════════════════════════
 INSTRUCCIONES GENERALES
 ${getPartesPrueba(datos)}
-PAUTA DE CORRECCIÓN (indicando respuesta correcta y puntaje por ítem)
-TABLA DE ESPECIFICACIONES (objetivo, habilidad Bloom, puntaje)`,
+PAUTA DE CORRECCIÓN (respuesta correcta y puntaje por ítem)
+TABLA DE ESPECIFICACIONES:
+  OA | Contenido | Tipo ítem | N° ítem | Habilidad Bloom | Puntaje`,
 
     apunte: `${intro}Genera un APUNTE DE CONTENIDO completo para estudiantes chilenos:
 ${ctx}
@@ -129,15 +182,21 @@ ${ctx}
 ${datos.nPreguntas ? 'Incluye ' + datos.nPreguntas + ' preguntas de comprensión al final.' : ''}
 
 ESTRUCTURA:
-TÍTULO E INSTITUCIÓN${datos.colegio ? ' (' + datos.colegio + ')' : ''}
-INTRODUCCIÓN (relevancia del tema)
+══════════════════════════════════════
+${datos.colegio || 'Institución Educativa'}
+APUNTE DE CONTENIDO — ${datos.asignatura || 'Asignatura'}
+Nivel: ${datos.nivel || '___'}  |  Tema: ${datos.tema || '___'}
+${hasOAs ? 'Vinculado a: [citar código OA]' : ''}
+══════════════════════════════════════
+INTRODUCCIÓN (relevancia del tema, conexión con la vida real)
 CONTENIDO PRINCIPAL
   — Conceptos fundamentales con definiciones precisas
-  — Ejemplos del contexto técnico/laboral chileno
-  — Tablas, fórmulas o esquemas donde corresponda
-RESUMEN / IDEAS CLAVE
-GLOSARIO TÉCNICO
-PREGUNTAS DE COMPRENSIÓN (nivel ${datos.taxonomia || 'aplicar'} en taxonomía de Bloom)`,
+  — Ejemplos del contexto chileno (técnico, laboral o cotidiano)
+  — Tablas comparativas, fórmulas o esquemas donde corresponda
+  — Aplicaciones prácticas
+RESUMEN / IDEAS CLAVE (bullets concisos)
+GLOSARIO TÉCNICO (términos del área)
+PREGUNTAS DE COMPRENSIÓN (${datos.nPreguntas || '5-8'} preguntas, nivel ${datos.taxonomia || 'aplicar'} en taxonomía de Bloom)`,
 
     revision: `${intro}Realiza una REVISIÓN PEDAGÓGICA del siguiente material:
 ${ctx}

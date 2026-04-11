@@ -851,7 +851,17 @@ function abrirHerramienta(tipo) {
     <div class="fg"><label>Horas / Duración</label><input id="hHoras" placeholder="ej: 2 horas pedagógicas"></div>
   </div>
 
-  <div class="fg"><label>Objetivo de Aprendizaje / AE</label><input id="hOA" placeholder="ej: Identificar componentes de un circuito y sus funciones..."></div>
+  <div class="fg"><label>Objetivo de Aprendizaje / AE (escribe o selecciona abajo)</label><input id="hOA" placeholder="ej: OA3 — Leer textos con fluidez y comprensión..."></div>
+
+  <div class="fg" style="margin-bottom:6px">
+    <label style="display:flex;align-items:center;gap:6px">
+      📋 OA del Programa Mineduc
+      <span style="font-size:.68rem;background:rgba(99,102,241,.15);color:#818cf8;padding:2px 7px;border-radius:10px;font-weight:600">selecciona uno o más</span>
+    </label>
+    <div id="oaContainer" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px;min-height:48px;max-height:180px;overflow-y:auto">
+      <p style="font-size:.75rem;color:var(--muted);font-style:italic">Selecciona asignatura y nivel para ver los OA disponibles.</p>
+    </div>
+  </div>
 
   <div class="fggrid${tipo === 'prueba' || tipo === 'guia' || tipo === 'apunte' ? '3' : ''}">
     <div class="fg"><label>Nivel taxonómico (Bloom)</label>
@@ -894,10 +904,113 @@ function abrirHerramienta(tipo) {
 </div>`;
 
   document.getElementById('modalHerr').style.display = 'flex';
+
+  // Wire up dynamic OA loader when asig or nivel changes
+  var elAsig  = document.getElementById('hAsig');
+  var elNivel = document.getElementById('hNivel');
+  function _onCambioCurso() { _loadOAsEnModal(); }
+  if (elAsig)  elAsig.addEventListener('change',  _onCambioCurso);
+  if (elNivel) elNivel.addEventListener('change', _onCambioCurso);
+  // Auto-load if both already have values (TP case)
+  _loadOAsEnModal();
 }
 
 function cerrarHerramienta() {
   document.getElementById('modalHerr').style.display = 'none';
+}
+
+// ── OA Loader dinámico ────────────────────────────────────────
+// Mapeo nombre asignatura → sigla CURRICULA_CHILE
+var _ASIG_SIGLA_MAP = {
+  'lenguaje':             'LEN', 'lenguaje y comunicación': 'LEN', 'lengua y literatura': 'LEN',
+  'matemática':           'MAT', 'matematica':              'MAT',
+  'ciencias naturales':   'CN',  'historia':                'HCS',
+  'historia, geografía y cs': 'HCS', 'inglés':              'ING',
+  'física':               'FIS', 'química':                 'QUI',
+  'biología':             'BIO'
+};
+// Mapeo nombre nivel → clave CURRICULA_CHILE
+var _NIVEL_KEY_MAP = {
+  '1b':'1B','1º básico':'1B','1° básico':'1B','primero básico':'1B',
+  '2b':'2B','2º básico':'2B','2° básico':'2B','segundo básico':'2B',
+  '3b':'3B','3º básico':'3B','3° básico':'3B','tercero básico':'3B',
+  '4b':'4B','4º básico':'4B','4° básico':'4B','cuarto básico':'4B',
+  '5b':'5B','5º básico':'5B','5° básico':'5B','quinto básico':'5B',
+  '6b':'6B','6º básico':'6B','6° básico':'6B','sexto básico':'6B',
+  '7b':'7B','7º básico':'7B','7° básico':'7B','séptimo básico':'7B',
+  '8b':'8B','8º básico':'8B','8° básico':'8B','octavo básico':'8B',
+  '1m':'1M','1º medio':'1M','1° medio':'1M','primero medio':'1M',
+  '2m':'2M','2º medio':'2M','2° medio':'2M','segundo medio':'2M',
+  '3m':'3M','3º medio':'3M','3° medio':'3M','tercer medio':'3M',
+  '4m':'4M','4º medio':'4M','4° medio':'4M','cuarto medio':'4M'
+};
+
+function _resolveNivelKey(raw) {
+  if (!raw) return null;
+  var k = raw.trim().toLowerCase();
+  if (_NIVEL_KEY_MAP[k]) return _NIVEL_KEY_MAP[k];
+  // Try direct: "1B", "7B", "1M"
+  if (/^[1-8][bBmM]$/.test(raw.trim())) return raw.trim().toUpperCase();
+  return null;
+}
+
+function _resolveAsigSigla(raw) {
+  if (!raw) return null;
+  var k = raw.trim().toLowerCase().replace(/[áéíóúñ]/g, function(c){
+    return {á:'a',é:'e',í:'i',ó:'o',ú:'u',ñ:'n'}[c]||c;
+  });
+  if (_ASIG_SIGLA_MAP[k]) return _ASIG_SIGLA_MAP[k];
+  // Partial match
+  for (var key in _ASIG_SIGLA_MAP) {
+    if (k.indexOf(key) !== -1 || key.indexOf(k) !== -1) return _ASIG_SIGLA_MAP[key];
+  }
+  return null;
+}
+
+function _loadOAsEnModal() {
+  var container = document.getElementById('oaContainer');
+  if (!container) return;
+
+  var asigRaw  = document.getElementById('hAsig')  ? document.getElementById('hAsig').value  : '';
+  var nivelRaw = document.getElementById('hNivel') ? document.getElementById('hNivel').value : '';
+
+  var sigla = _resolveAsigSigla(asigRaw);
+  var nivel = _resolveNivelKey(nivelRaw);
+
+  if (!sigla || !nivel || typeof CURRICULA_CHILE === 'undefined') {
+    container.innerHTML = '<p style="font-size:.75rem;color:var(--muted);font-style:italic">Selecciona asignatura y nivel para ver los OA disponibles.</p>';
+    return;
+  }
+
+  var oas = CURRICULA_CHILE.getOAs(sigla, nivel);
+  if (!oas || !oas.length) {
+    container.innerHTML = '<p style="font-size:.75rem;color:var(--muted);font-style:italic">No hay OAs registrados para esta combinación.</p>';
+    return;
+  }
+
+  // Group by eje
+  var byEje = {};
+  oas.forEach(function(o) {
+    var eje = o.eje || 'General';
+    if (!byEje[eje]) byEje[eje] = [];
+    byEje[eje].push(o);
+  });
+
+  var html = '<div style="display:flex;flex-wrap:wrap;gap:6px 12px;">';
+  Object.keys(byEje).forEach(function(eje) {
+    if (eje) html += '<div style="width:100%;font-size:.7rem;color:var(--muted);font-weight:700;margin-top:6px;text-transform:uppercase;letter-spacing:.05em">' + eje + '</div>';
+    byEje[eje].forEach(function(o) {
+      var desc = o.desc || o.descripcion || '';
+      // Truncate desc for tooltip
+      var tip = desc.replace(/"/g,'&quot;');
+      html += '<label title="' + tip + '" style="display:flex;align-items:flex-start;gap:5px;cursor:pointer;font-size:.78rem;color:var(--text);font-weight:400;max-width:320px">' +
+        '<input type="checkbox" class="oaCheck" data-codigo="' + o.codigo + '" data-desc="' + tip + '" style="accent-color:#6366f1;margin-top:2px;flex-shrink:0">' +
+        '<span><strong>' + o.codigo + '</strong> — ' + (desc.slice(0,60) || '…') + (desc.length > 60 ? '…' : '') + '</span>' +
+        '</label>';
+    });
+  });
+  html += '</div>';
+  container.innerHTML = html;
 }
 
 function _getDatosHerr() {
@@ -917,22 +1030,38 @@ function _getDatosHerr() {
     if (el.checked) nee.push(el.value);
   });
 
+  // Collect selected OAs from Mineduc selector
+  var oasSeleccionados = [];
+  document.querySelectorAll('.oaCheck').forEach(function(el) {
+    if (el.checked) {
+      oasSeleccionados.push({
+        codigo:     el.getAttribute('data-codigo'),
+        descripcion: el.getAttribute('data-desc')
+      });
+    }
+  });
+
+  // Build the OA text field: use manual input OR selected OAs OR both
+  var oaManual = _v('hOA');
+  var oaTexto  = oaManual || oasSeleccionados.map(function(o){ return o.codigo + ': ' + o.descripcion; }).join('; ') || '';
+
   return {
-    colegio:           _v('hColegio') || user.colegio || '',
-    asignatura:        _v('hAsig')    || (user.asignaturas && user.asignaturas[0]) || '',
-    modulo:            _v('hModulo'),
-    nivel:             _v('hNivel'),
-    unidad:            _v('hUnidad'),
-    tema:              _v('hTema'),
-    horas:             _v('hHoras'),
-    oa:                _v('hOA'),
-    taxonomia:         _v('hTaxonomia'),
-    nPreguntas:        _v('hNPreguntas'),
-    tiposPreguntas:    tiposPreg,
-    nee:               nee,
-    extra:             _v('hExtra'),
-    especialidad:      user.especialidad || '',
-    texto_a_revisar:   _v('hTextoRevisar')
+    colegio:              _v('hColegio') || user.colegio || '',
+    asignatura:           _v('hAsig')    || (user.asignaturas && user.asignaturas[0]) || '',
+    modulo:               _v('hModulo'),
+    nivel:                _v('hNivel'),
+    unidad:               _v('hUnidad'),
+    tema:                 _v('hTema'),
+    horas:                _v('hHoras'),
+    oa:                   oaTexto,
+    oas_seleccionados:    oasSeleccionados,   // array [{codigo, descripcion}]
+    taxonomia:            _v('hTaxonomia'),
+    nPreguntas:           _v('hNPreguntas'),
+    tiposPreguntas:       tiposPreg,
+    nee:                  nee,
+    extra:                _v('hExtra'),
+    especialidad:         user.especialidad || '',
+    texto_a_revisar:      _v('hTextoRevisar')
   };
 }
 
