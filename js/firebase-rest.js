@@ -136,11 +136,25 @@ var EL_DB = (function () {
   // ════════════════════════════════════════════════════════════
   //  DocumentReference
   // ════════════════════════════════════════════════════════════
-  function DocRef(collName, docId) {
-    this.collName = collName;
-    this.id       = docId;
-    this.path     = collName + '/' + docId;
+  // fullPath: complete path including any parent segments, e.g. "col/id" or "col/id/sub/subId"
+  function DocRef(fullPath, docId) {
+    // Support both DocRef(collName, id) and DocRef(fullPath) where fullPath already includes the id
+    if (docId !== undefined) {
+      this.id   = docId;
+      this.path = fullPath + '/' + docId;
+    } else {
+      // fullPath is already the complete document path
+      var parts  = fullPath.split('/');
+      this.id    = parts[parts.length - 1];
+      this.path  = fullPath;
+    }
+    this.collName = this.path.split('/').slice(0, -1).join('/'); // parent collection path
   }
+
+  /** Returns a subcollection reference under this document */
+  DocRef.prototype.collection = function (subCollName) {
+    return new CollRef(subCollName, this.path);
+  };
 
   /** GET — retorna { exists, id, data() } */
   DocRef.prototype.get = function () {
@@ -240,22 +254,29 @@ var EL_DB = (function () {
 
   // ════════════════════════════════════════════════════════════
   //  CollectionReference
+  //  parentPath: full path of the parent document for subcollections (optional)
   // ════════════════════════════════════════════════════════════
-  function CollRef(collName) {
-    this.collName  = collName;
-    this._filters  = [];
-    this._orders   = [];
-    this._limitVal = null;
+  function CollRef(collName, parentPath) {
+    this.collName   = collName;
+    this.parentPath = parentPath || null; // e.g. "calendarios_docentes/uid123"
+    this._filters   = [];
+    this._orders    = [];
+    this._limitVal  = null;
   }
 
+  CollRef.prototype._fullCollPath = function () {
+    return this.parentPath ? this.parentPath + '/' + this.collName : this.collName;
+  };
+
   CollRef.prototype.doc = function (id) {
-    return new DocRef(this.collName, id || _genId());
+    var docPath = this._fullCollPath() + '/' + (id || _genId());
+    return new DocRef(docPath);
   };
 
   CollRef.prototype.add = function (data) {
     // POST genera auto-ID en el servidor
     var self = this;
-    return _fetch(_baseUrl + '/' + self.collName, {
+    return _fetch(_baseUrl + '/' + self._fullCollPath(), {
       method: 'POST',
       body:   JSON.stringify(_toFSDoc(data))
     }).then(function (result) {
@@ -266,36 +287,42 @@ var EL_DB = (function () {
     });
   };
 
-  CollRef.prototype.where = function (field, op, value) {
-    var c       = new CollRef(this.collName);
-    c._filters  = this._filters.concat([{ field: field, op: op, value: value }]);
+  CollRef.prototype._clone = function () {
+    var c       = new CollRef(this.collName, this.parentPath);
+    c._filters  = this._filters.slice();
     c._orders   = this._orders.slice();
     c._limitVal = this._limitVal;
+    return c;
+  };
+
+  CollRef.prototype.where = function (field, op, value) {
+    var c      = this._clone();
+    c._filters = this._filters.concat([{ field: field, op: op, value: value }]);
     return c;
   };
 
   CollRef.prototype.orderBy = function (field, dir) {
-    var c       = new CollRef(this.collName);
-    c._filters  = this._filters.slice();
-    c._orders   = this._orders.concat([{
+    var c     = this._clone();
+    c._orders = this._orders.concat([{
       field:     field,
       direction: (dir === 'asc') ? 'ASCENDING' : 'DESCENDING'
     }]);
-    c._limitVal = this._limitVal;
     return c;
   };
 
   CollRef.prototype.limit = function (n) {
-    var c       = new CollRef(this.collName);
-    c._filters  = this._filters.slice();
-    c._orders   = this._orders.slice();
+    var c       = this._clone();
     c._limitVal = n;
     return c;
   };
 
   CollRef.prototype.get = function () {
-    var self = this;
-    var sq   = { from: [{ collectionId: self.collName }] };
+    var self    = this;
+    // For subcollections: query runs relative to parent document path
+    var queryBase = self.parentPath
+      ? _baseUrl + '/' + self.parentPath + ':runQuery'
+      : _baseUrl + ':runQuery';
+    var sq = { from: [{ collectionId: self.collName }] };
 
     // Filtros
     if (self._filters.length === 1) {
@@ -333,7 +360,7 @@ var EL_DB = (function () {
 
     if (self._limitVal) sq.limit = self._limitVal;
 
-    return _fetch(_baseUrl + ':runQuery', {
+    return _fetch(queryBase, {
       method: 'POST',
       body:   JSON.stringify({ structuredQuery: sq })
     }).then(function (results) {
@@ -363,8 +390,8 @@ var EL_DB = (function () {
 
   /** onSnapshot: polling cada 8 s (REST no soporta streams) */
   CollRef.prototype.onSnapshot = function (callback) {
-    var self    = this;
-    var active  = true;
+    var self   = this._clone();
+    var active = true;
     function poll() {
       if (!active) return;
       self.get().then(function (snap) {

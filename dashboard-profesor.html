@@ -132,6 +132,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
       <a class="nav-item" onclick="showSec('modulos')">📦 Mis Módulos/Asignaturas</a>
       <a class="nav-item" onclick="showSec('materiales')">📚 Mis Materiales</a>
       <a class="nav-item" onclick="showSec('planificaciones')">📅 Mis Planificaciones</a>
+      <a class="nav-item" onclick="showSec('calendario')">📆 Calendario de Clases</a>
 
       <div class="nav-section">Recursos</div>
       <a class="nav-item" onclick="showSec('biblioteca')">📖 Biblioteca</a>
@@ -361,6 +362,31 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
       </div>
     </section>
 
+    <!-- CALENDARIO -->
+    <section id="sec-calendario" style="display:none">
+      <div class="page-header">
+        <h1>📆 Calendario de Clases</h1>
+        <p>Organiza y planifica tus clases mes a mes</p>
+      </div>
+      <div class="card" style="margin-bottom:20px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:12px">
+          <div style="display:flex;align-items:center;gap:10px">
+            <button onclick="calNavMes(-1)" class="btn btn-outline btn-sm">‹</button>
+            <span id="calTitulo" style="font-family:'Space Grotesk',sans-serif;font-size:1.1rem;font-weight:700;min-width:180px;text-align:center"></span>
+            <button onclick="calNavMes(1)" class="btn btn-outline btn-sm">›</button>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="calNuevoEvento()">+ Agregar clase / evento</button>
+        </div>
+        <div id="calGrid"></div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">📋 Eventos del mes</div>
+        </div>
+        <div id="calListaEventos"></div>
+      </div>
+    </section>
+
   </main>
 </div>
 
@@ -383,6 +409,7 @@ function showSec(id) {
   if (id === 'planificaciones') loadMisPlanificaciones();
   if (id === 'biblioteca')     loadBiblioteca();
   if (id === 'modulos')        renderModulosDetalle();
+  if (id === 'calendario')     calRender();
 }
 
 // ── Verificar sesión y cargar datos ──────────────────────────
@@ -725,6 +752,21 @@ var _herr = {
   taller:        { titulo:'🔧 Guía para Taller',        color:'#06b6d4' }
 };
 
+var NEE_CHILE = [
+  { key:'tea',         label:'TEA — Espectro Autista' },
+  { key:'tdah',        label:'TDAH — Déficit Atencional' },
+  { key:'dislexia',    label:'Dislexia (DEA Lectura)' },
+  { key:'discalculia', label:'Discalculia (DEA Matemática)' },
+  { key:'disgrafia',   label:'Disgrafía (DEA Escritura)' },
+  { key:'hipoacusia',  label:'Hipoacusia / Sordera' },
+  { key:'baja-vision', label:'Baja Visión / Ceguera' },
+  { key:'deficit-int', label:'Déficit Intelectual' },
+  { key:'tl',          label:'Trastorno del Lenguaje (TEL)' },
+  { key:'motor',       label:'Trastorno Motor / Físico' },
+  { key:'emocional',   label:'Trastorno Emocional / Conductual' },
+  { key:'dotacion',    label:'Altas Capacidades / Dotación' }
+];
+
 function abrirHerramienta(tipo) {
   var h = _herr[tipo];
   var user = _profeUser || {};
@@ -746,34 +788,100 @@ function abrirHerramienta(tipo) {
     user.modulos.forEach(function(m){ modOpts += '<option>'+m+'</option>'; });
   }
 
-  var extraFields = tipo === 'revision'
-    ? '<div class="fg"><label>Material a revisar (pega el texto aquí) *</label><textarea id="hTextoRevisar" rows="6" placeholder="Pega aquí tu prueba, guía u otro instrumento..."></textarea></div>'
+  var modField = isTP
+    ? '<div class="fg"><label>Módulo TP</label><select id="hModulo"><option value="">— Seleccionar —</option>'+modOpts+'</select></div>'
     : '';
 
-  var modField = isTP
-    ? '<div class="fg"><label>Módulo</label><select id="hModulo"><option value="">— Seleccionar —</option>'+modOpts+'</select></div>'
+  // ── Campos extra por tipo ──────────────────────────────────────
+  var extraRevision = tipo === 'revision'
+    ? '<div class="fg"><label>Material a revisar *</label><textarea id="hTextoRevisar" rows="5" placeholder="Pega aquí tu prueba, guía u otro instrumento..."></textarea></div>'
     : '';
+
+  // Tipos de pregunta (prueba, guia, apunte)
+  var tiposPreg = (tipo === 'prueba' || tipo === 'guia' || tipo === 'apunte')
+    ? '<div class="fg" style="margin-bottom:14px"><label>Tipos de preguntas / actividades</label>' +
+      '<div style="display:flex;flex-wrap:wrap;gap:8px 16px;padding:10px;background:var(--surface2);border:1px solid var(--border);border-radius:8px">' +
+      '<label style="display:flex;align-items:center;gap:6px;font-size:.82rem;color:var(--text);font-weight:400;cursor:pointer"><input type="checkbox" id="pAlt" value="alternativas" style="accent-color:'+h.color+'"> Selección múltiple</label>' +
+      '<label style="display:flex;align-items:center;gap:6px;font-size:.82rem;color:var(--text);font-weight:400;cursor:pointer"><input type="checkbox" id="pVF" value="vf" style="accent-color:'+h.color+'"> Verdadero / Falso</label>' +
+      '<label style="display:flex;align-items:center;gap:6px;font-size:.82rem;color:var(--text);font-weight:400;cursor:pointer"><input type="checkbox" id="pDes" value="desarrollo" style="accent-color:'+h.color+'"> Desarrollo</label>' +
+      '<label style="display:flex;align-items:center;gap:6px;font-size:.82rem;color:var(--text);font-weight:400;cursor:pointer"><input type="checkbox" id="pCorta" value="corta" style="accent-color:'+h.color+'"> Respuesta corta</label>' +
+      '<label style="display:flex;align-items:center;gap:6px;font-size:.82rem;color:var(--text);font-weight:400;cursor:pointer"><input type="checkbox" id="pEmp" value="emparejamiento" style="accent-color:'+h.color+'"> Emparejamiento</label>' +
+      '<label style="display:flex;align-items:center;gap:6px;font-size:.82rem;color:var(--text);font-weight:400;cursor:pointer"><input type="checkbox" id="pCasos" value="casos" style="accent-color:'+h.color+'"> Análisis de caso</label>' +
+      '</div></div>'
+    : '';
+
+  // NEE (solo planificación)
+  var neeField = tipo === 'planificacion'
+    ? '<div class="fg" style="margin-bottom:14px"><label>NEE diagnosticadas en el curso (opcional)</label>' +
+      '<div style="display:flex;flex-wrap:wrap;gap:6px 14px;padding:10px;background:var(--surface2);border:1px solid var(--border);border-radius:8px">' +
+      NEE_CHILE.map(function(n){
+        return '<label style="display:flex;align-items:center;gap:5px;font-size:.78rem;color:var(--text);font-weight:400;cursor:pointer">' +
+               '<input type="checkbox" class="neeCheck" value="'+n.key+'" style="accent-color:#6366f1"> '+n.label+'</label>';
+      }).join('') +
+      '</div></div>'
+    : '';
+
+  // Institución educativa
+  var colegioVal = user.colegio || '';
 
   document.getElementById('modalHerr').innerHTML = `
-<div style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:28px;width:min(680px,95vw);max-height:92vh;overflow-y:auto;position:relative">
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:28px;width:min(720px,96vw);max-height:93vh;overflow-y:auto;position:relative">
   <button onclick="cerrarHerramienta()" style="position:absolute;top:14px;right:14px;background:var(--surface2);border:none;color:var(--muted);cursor:pointer;border-radius:8px;width:30px;height:30px;font-size:1rem">✕</button>
-  <h2 style="font-size:1.2rem;margin-bottom:6px">${h.titulo}</h2>
-  <p style="color:var(--muted);font-size:.8rem;margin-bottom:20px">Completa los campos y usa el asistente IA para generar un borrador editable</p>
-  <div id="herrNotif" class="notif"></div>
-  <style>.fg{display:flex;flex-direction:column;gap:5px;margin-bottom:14px}.fg label{font-size:.78rem;color:var(--muted);font-weight:500}.fg input,.fg select,.fg textarea{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-size:.875rem;outline:none;resize:vertical}.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:${h.color}}.fggrid{display:grid;grid-template-columns:1fr 1fr;gap:14px}</style>
-  <div class="fggrid">
-    <div class="fg"><label>Asignatura / Módulo</label><select id="hAsig"><option value="">— Seleccionar —</option>${asigOpts}</select></div>
-    ${modField || '<div class="fg"><label>Nivel / Curso</label><select id="hNivel"><option value="">— Seleccionar —</option>'+nivOpts+'</select></div>'}
-    ${modField ? '<div class="fg"><label>Nivel</label><select id="hNivel"><option value="">—</option>'+nivOpts+'</select></div>' : ''}
-    <div class="fg"><label>Tema específico</label><input id="hTema" placeholder="ej: Circuitos eléctricos en serie"></div>
-    <div class="fg"><label>Horas / Duración</label><input id="hHoras" placeholder="ej: 2 horas"></div>
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
+    <span style="font-size:1.4rem">${h.titulo.split(' ')[0]}</span>
+    <h2 style="font-size:1.15rem">${h.titulo.substring(h.titulo.indexOf(' ')+1)}</h2>
   </div>
-  <div class="fg"><label>Objetivo de Aprendizaje / AE</label><input id="hOA" placeholder="ej: Identificar componentes de un circuito..."></div>
-  ${extraFields}
-  <div class="fg"><label>Indicaciones adicionales (opcional)</label><input id="hExtra" placeholder="ej: Énfasis en normas de seguridad, incluir diagrama..."></div>
-  <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap">
+  <p style="color:var(--muted);font-size:.8rem;margin-bottom:18px">Completa los campos y usa el asistente IA para generar un borrador editable</p>
+  <div id="herrNotif" class="notif"></div>
+  <style>
+    .fg{display:flex;flex-direction:column;gap:5px;margin-bottom:14px}
+    .fg label{font-size:.78rem;color:var(--muted);font-weight:500}
+    .fg input,.fg select,.fg textarea{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-size:.875rem;outline:none;resize:vertical}
+    .fg input:focus,.fg select:focus,.fg textarea:focus{border-color:${h.color}}
+    .fggrid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    .fggrid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+  </style>
+
+  <div class="fggrid">
+    <div class="fg"><label>Institución educativa</label><input id="hColegio" placeholder="ej: Liceo Salesiano de Talca" value="${colegioVal}"></div>
+    <div class="fg"><label>Asignatura / Módulo</label><select id="hAsig"><option value="">— Seleccionar —</option>${asigOpts}</select></div>
+    ${modField || ''}
+    <div class="fg"><label>Nivel / Curso</label><select id="hNivel"><option value="">— Seleccionar —</option>${nivOpts}</select></div>
+    <div class="fg"><label>Tema específico</label><input id="hTema" placeholder="ej: Circuitos eléctricos en serie"></div>
+    <div class="fg"><label>Horas / Duración</label><input id="hHoras" placeholder="ej: 2 horas pedagógicas"></div>
+  </div>
+
+  <div class="fg"><label>Objetivo de Aprendizaje / AE</label><input id="hOA" placeholder="ej: Identificar componentes de un circuito y sus funciones..."></div>
+
+  <div class="fggrid${tipo === 'prueba' || tipo === 'guia' || tipo === 'apunte' ? '3' : ''}">
+    <div class="fg"><label>Nivel taxonómico (Bloom)</label>
+      <select id="hTaxonomia">
+        <option value="">— Sin especificar —</option>
+        <option value="recordar">Recordar — conocimiento factual</option>
+        <option value="comprender">Comprender — explicar e interpretar</option>
+        <option value="aplicar">Aplicar — usar en situaciones nuevas</option>
+        <option value="analizar">Analizar — descomponer y comparar</option>
+        <option value="evaluar">Evaluar — juzgar y justificar</option>
+        <option value="crear">Crear — diseñar y producir algo nuevo</option>
+      </select>
+    </div>
+    ${tipo === 'prueba' || tipo === 'guia' || tipo === 'apunte'
+      ? '<div class="fg"><label>N° de preguntas / ítems</label><input id="hNPreguntas" type="number" min="1" max="80" placeholder="ej: 20"></div>'
+      : ''}
+    ${tipo === 'prueba' || tipo === 'guia' || tipo === 'apunte'
+      ? '<div class="fg"><label>Unidad / Período</label><input id="hUnidad" placeholder="ej: Unidad 2 — Electricidad"></div>'
+      : ''}
+  </div>
+
+  ${tiposPreg}
+  ${neeField}
+  ${extraRevision}
+
+  <div class="fg"><label>Indicaciones adicionales (opcional)</label><input id="hExtra" placeholder="ej: Énfasis en normas de seguridad, incluir diagrama, nivel básico..."></div>
+
+  <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;align-items:center">
     <button id="btnIA" class="btn-ia" onclick="usarIA('${tipo}')">✨ Generar con IA</button>
-    <span style="font-size:.75rem;color:var(--muted);align-self:center">o escribe directamente abajo →</span>
+    <span style="font-size:.75rem;color:var(--muted)">o escribe directamente en el borrador →</span>
   </div>
   <div class="fg">
     <label>Resultado / Borrador editable</label>
@@ -794,16 +902,37 @@ function cerrarHerramienta() {
 
 function _getDatosHerr() {
   var user = _profeUser || {};
+  function _v(id) { var el = document.getElementById(id); return el ? el.value : ''; }
+
+  // Collect question types (checkboxes)
+  var tiposPreg = [];
+  ['pAlt','pVF','pDes','pCorta','pEmp','pCasos'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el && el.checked) tiposPreg.push(el.value);
+  });
+
+  // Collect NEE (checkboxes with class neeCheck)
+  var nee = [];
+  document.querySelectorAll('.neeCheck').forEach(function(el) {
+    if (el.checked) nee.push(el.value);
+  });
+
   return {
-    asignatura:        (document.getElementById('hAsig')  ? document.getElementById('hAsig').value  : '') || (user.asignaturas && user.asignaturas[0]) || '',
-    modulo:            document.getElementById('hModulo') ? document.getElementById('hModulo').value : '',
-    nivel:             document.getElementById('hNivel')  ? document.getElementById('hNivel').value  : '',
-    tema:              document.getElementById('hTema')   ? document.getElementById('hTema').value   : '',
-    horas:             document.getElementById('hHoras')  ? document.getElementById('hHoras').value  : '',
-    oa:                document.getElementById('hOA')     ? document.getElementById('hOA').value     : '',
-    extra:             document.getElementById('hExtra')  ? document.getElementById('hExtra').value  : '',
+    colegio:           _v('hColegio') || user.colegio || '',
+    asignatura:        _v('hAsig')    || (user.asignaturas && user.asignaturas[0]) || '',
+    modulo:            _v('hModulo'),
+    nivel:             _v('hNivel'),
+    unidad:            _v('hUnidad'),
+    tema:              _v('hTema'),
+    horas:             _v('hHoras'),
+    oa:                _v('hOA'),
+    taxonomia:         _v('hTaxonomia'),
+    nPreguntas:        _v('hNPreguntas'),
+    tiposPreguntas:    tiposPreg,
+    nee:               nee,
+    extra:             _v('hExtra'),
     especialidad:      user.especialidad || '',
-    texto_a_revisar:   document.getElementById('hTextoRevisar') ? document.getElementById('hTextoRevisar').value : ''
+    texto_a_revisar:   _v('hTextoRevisar')
   };
 }
 
@@ -835,21 +964,27 @@ function guardarHerramienta(tipo) {
   var datos = _getDatosHerr();
   var tipoLabel = {planificacion:'Planificación',guia:'Guía',prueba:'Prueba',apunte:'Apunte',revision:'Revisión',taller:'Guía Taller'};
   var entrada = {
-    titulo:      (tipoLabel[tipo]||tipo) + (datos.tema?' — '+datos.tema:'') + (datos.asignatura?' ('+datos.asignatura+')':''),
-    tipo:        tipo,
-    contenido:   resultado,
-    asignatura:  datos.asignatura,
-    modulo:      datos.modulo,
-    nivel:       datos.nivel,
-    oa:          datos.oa,
-    horas:       datos.horas,
-    profesor:    user.nombre || user.email,
-    email:       user.email,
-    uid:         user.uid,
-    generadoIA:  true,
-    fechaISO:    new Date().toISOString(),
-    vistas:      0,
-    activo:      true
+    titulo:          (tipoLabel[tipo]||tipo) + (datos.tema?' — '+datos.tema:'') + (datos.asignatura?' ('+datos.asignatura+')':''),
+    tipo:            tipo,
+    contenido:       resultado,
+    asignatura:      datos.asignatura,
+    modulo:          datos.modulo,
+    nivel:           datos.nivel,
+    unidad:          datos.unidad || '',
+    oa:              datos.oa,
+    horas:           datos.horas,
+    taxonomia:       datos.taxonomia || '',
+    nPreguntas:      datos.nPreguntas || '',
+    tiposPreguntas:  datos.tiposPreguntas || [],
+    nee:             datos.nee || [],
+    colegio:         datos.colegio || user.colegio || '',
+    profesor:        user.nombre || user.email,
+    email:           user.email,
+    uid:             user.uid,
+    generadoIA:      true,
+    fechaISO:        new Date().toISOString(),
+    vistas:          0,
+    activo:          true
   };
   ELDB.materiales.crear(entrada)
     .then(function() {
@@ -864,10 +999,221 @@ function guardarHerramienta(tipo) {
       n.className = 'notif err show';
     });
 }
+
+// ═══════════════════════════════════════════════════════════════
+//  CALENDARIO DE CLASES
+// ═══════════════════════════════════════════════════════════════
+var _calYear  = new Date().getFullYear();
+var _calMonth = new Date().getMonth();  // 0-based
+var _calEventos = [];
+
+var CAL_COLORES = {
+  clase:         { bg:'rgba(99,102,241,.18)',  border:'#6366f1', label:'🎓 Clase' },
+  evaluacion:    { bg:'rgba(239,68,68,.18)',   border:'#ef4444', label:'📊 Evaluación' },
+  taller:        { bg:'rgba(6,182,212,.18)',   border:'#06b6d4', label:'🔧 Taller' },
+  reunion:       { bg:'rgba(245,158,11,.18)',  border:'#f59e0b', label:'📌 Reunión' },
+  otro:          { bg:'rgba(148,163,184,.12)', border:'#94a3b8', label:'📎 Otro' }
+};
+
+function calNavMes(dir) {
+  _calMonth += dir;
+  if (_calMonth > 11) { _calMonth = 0;  _calYear++; }
+  if (_calMonth < 0)  { _calMonth = 11; _calYear--; }
+  calRender();
+}
+
+function calRender() {
+  var user = _profeUser || {};
+  var titulo = new Date(_calYear, _calMonth, 1)
+    .toLocaleDateString('es-CL', { month:'long', year:'numeric' });
+  document.getElementById('calTitulo').textContent =
+    titulo.charAt(0).toUpperCase() + titulo.slice(1);
+
+  // Cargar eventos del mes desde Firestore
+  var colRef = EL_DB.collection('calendarios_docentes')
+    .doc(user.uid || 'anon')
+    .collection('eventos');
+
+  var inicioMes = new Date(_calYear, _calMonth, 1).toISOString().slice(0,7); // YYYY-MM
+  colRef.get().then(function(snap) {
+    _calEventos = snap.docs
+      .map(function(d) { return Object.assign({ _id: d.id }, d.data()); })
+      .filter(function(e) { return e.fecha && e.fecha.startsWith(inicioMes); });
+    calDibujarGrid();
+    calDibujarLista();
+  }).catch(function() {
+    _calEventos = [];
+    calDibujarGrid();
+    calDibujarLista();
+  });
+}
+
+function calDibujarGrid() {
+  var primerDia = new Date(_calYear, _calMonth, 1).getDay(); // 0=Dom
+  primerDia = (primerDia + 6) % 7; // convertir a 0=Lun
+  var diasMes  = new Date(_calYear, _calMonth + 1, 0).getDate();
+  var hoy      = new Date();
+  var esHoyMes = hoy.getFullYear() === _calYear && hoy.getMonth() === _calMonth;
+
+  var dias = ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
+  var html = '<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:4px">' +
+    dias.map(function(d){ return '<div style="text-align:center;font-size:.7rem;font-weight:700;color:var(--muted);padding:6px 0">'+d+'</div>'; }).join('') +
+    '</div>';
+
+  html += '<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px">';
+
+  // Celdas vacías del inicio
+  for (var i = 0; i < primerDia; i++) {
+    html += '<div style="min-height:72px;border-radius:8px;background:rgba(255,255,255,.02)"></div>';
+  }
+
+  // Días
+  for (var d = 1; d <= diasMes; d++) {
+    var esHoy = esHoyMes && hoy.getDate() === d;
+    var fechaStr = _calYear + '-' + String(_calMonth+1).padStart(2,'0') + '-' + String(d).padStart(2,'0');
+    var evsDia = _calEventos.filter(function(e){ return e.fecha === fechaStr; });
+    var dotsHtml = evsDia.slice(0,3).map(function(e){
+      var c = CAL_COLORES[e.tipo] || CAL_COLORES.otro;
+      return '<div style="font-size:.65rem;background:'+c.bg+';border-left:2px solid '+c.border+';border-radius:3px;padding:1px 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px">'+(e.titulo||'Evento')+'</div>';
+    }).join('');
+    if (evsDia.length > 3) dotsHtml += '<div style="font-size:.6rem;color:var(--muted);padding-left:2px">+' + (evsDia.length-3) + ' más</div>';
+
+    html += '<div onclick="calVerDia(\''+fechaStr+'\')" style="min-height:72px;border-radius:8px;background:'+(esHoy?'rgba(99,102,241,.18)':'var(--surface2)')+';border:1px solid '+(esHoy?'var(--accent)':'var(--border)')+';padding:6px;cursor:pointer;transition:border-color .15s" onmouseover="this.style.borderColor=\'var(--accent)\'" onmouseout="this.style.borderColor=\''+(esHoy?'var(--accent)':'var(--border)')+'\'">'+
+      '<div style="font-size:.78rem;font-weight:'+(esHoy?'800':'600')+';color:'+(esHoy?'var(--accent)':'var(--text)')+'">'+d+'</div>'+
+      dotsHtml +
+      '</div>';
+  }
+
+  html += '</div>';
+  document.getElementById('calGrid').innerHTML = html;
+}
+
+function calDibujarLista() {
+  var el = document.getElementById('calListaEventos');
+  if (!_calEventos.length) {
+    el.innerHTML = '<div class="empty-state"><span class="emoji">📆</span><p>Sin eventos este mes. Haz clic en un día o en "+ Agregar clase".</p></div>';
+    return;
+  }
+  var sorted = _calEventos.slice().sort(function(a,b){ return a.fecha < b.fecha ? -1 : 1; });
+  el.innerHTML = '<div style="display:flex;flex-direction:column;gap:8px">' +
+    sorted.map(function(e) {
+      var c = CAL_COLORES[e.tipo] || CAL_COLORES.otro;
+      var fecha = e.fecha ? new Date(e.fecha+'T12:00:00').toLocaleDateString('es-CL',{weekday:'short',day:'numeric',month:'short'}) : '—';
+      return '<div style="display:flex;align-items:flex-start;gap:12px;padding:12px 14px;background:'+c.bg+';border:1px solid '+c.border+';border-radius:10px">' +
+        '<div style="flex:1">' +
+        '<div style="font-size:.88rem;font-weight:700">'+(e.titulo||'Sin título')+'</div>' +
+        '<div style="font-size:.75rem;color:var(--muted);margin-top:2px">'+c.label+' · '+fecha+(e.hora?' · '+e.hora:'')+(e.asignatura?' · '+e.asignatura:'')+'</div>' +
+        (e.descripcion?'<div style="font-size:.78rem;color:var(--text);margin-top:4px;opacity:.8">'+e.descripcion+'</div>':'') +
+        '</div>' +
+        '<button onclick="calEliminarEvento(\''+e._id+'\')" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:1rem;padding:2px;flex-shrink:0" title="Eliminar">🗑️</button>' +
+        '</div>';
+    }).join('') + '</div>';
+}
+
+function calVerDia(fecha) {
+  // Pre-fill date in new event modal
+  calNuevoEvento(fecha);
+}
+
+function calNuevoEvento(fechaPre) {
+  var user = _profeUser || {};
+  var asigOpts = '';
+  if (user.asignaturas && user.asignaturas.length) {
+    user.asignaturas.forEach(function(a){ asigOpts += '<option>'+a+'</option>'; });
+  }
+  if (user.especialidad) asigOpts += '<option>'+user.especialidad+'</option>';
+
+  var fechaHoy = fechaPre || new Date().toISOString().slice(0,10);
+
+  document.getElementById('modalCal').innerHTML = `
+<div style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:28px;width:min(480px,95vw);position:relative">
+  <button onclick="cerrarModalCal()" style="position:absolute;top:14px;right:14px;background:var(--surface2);border:none;color:var(--muted);cursor:pointer;border-radius:8px;width:30px;height:30px;font-size:1rem">✕</button>
+  <h2 style="font-size:1.1rem;margin-bottom:18px">📆 Agregar evento / clase</h2>
+  <div id="calNotif" class="notif"></div>
+  <style>.cg{display:flex;flex-direction:column;gap:5px;margin-bottom:12px}.cg label{font-size:.78rem;color:var(--muted);font-weight:500}.cg input,.cg select,.cg textarea{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-size:.875rem;outline:none}.cg input:focus,.cg select:focus{border-color:#6366f1}.cggrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}</style>
+  <div class="cg"><label>Título del evento *</label><input id="calTit" placeholder="ej: Clase — Electricidad Básica"></div>
+  <div class="cggrid">
+    <div class="cg"><label>Fecha *</label><input id="calFecha" type="date" value="${fechaHoy}"></div>
+    <div class="cg"><label>Hora (opcional)</label><input id="calHora" type="time"></div>
+  </div>
+  <div class="cggrid">
+    <div class="cg"><label>Tipo de evento</label>
+      <select id="calTipo">
+        <option value="clase">🎓 Clase</option>
+        <option value="evaluacion">📊 Evaluación</option>
+        <option value="taller">🔧 Taller</option>
+        <option value="reunion">📌 Reunión / Otro compromiso</option>
+        <option value="otro">📎 Otro</option>
+      </select>
+    </div>
+    <div class="cg"><label>Asignatura</label>
+      <select id="calAsig"><option value="">— General —</option>${asigOpts}</select>
+    </div>
+  </div>
+  <div class="cg"><label>Descripción (opcional)</label><textarea id="calDesc" rows="2" placeholder="Objetivos, observaciones, materiales necesarios..."></textarea></div>
+  <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:6px">
+    <button class="btn btn-outline btn-sm" onclick="cerrarModalCal()">Cancelar</button>
+    <button class="btn btn-primary" onclick="calGuardarEvento()">💾 Guardar evento</button>
+  </div>
+</div>`;
+  document.getElementById('modalCal').style.display = 'flex';
+}
+
+function cerrarModalCal() {
+  document.getElementById('modalCal').style.display = 'none';
+}
+
+function calGuardarEvento() {
+  var user = _profeUser || {};
+  var tit   = document.getElementById('calTit').value.trim();
+  var fecha = document.getElementById('calFecha').value;
+  if (!tit || !fecha) {
+    var n = document.getElementById('calNotif');
+    n.textContent = '⚠️ Título y fecha son obligatorios'; n.className='notif warn show'; return;
+  }
+  var entrada = {
+    titulo:      tit,
+    fecha:       fecha,
+    hora:        document.getElementById('calHora').value || '',
+    tipo:        document.getElementById('calTipo').value,
+    asignatura:  document.getElementById('calAsig').value || '',
+    descripcion: document.getElementById('calDesc').value.trim(),
+    uid:         user.uid,
+    email:       user.email,
+    creadoEn:    new Date().toISOString()
+  };
+  EL_DB.collection('calendarios_docentes')
+    .doc(user.uid || 'anon')
+    .collection('eventos')
+    .add(entrada)
+    .then(function() {
+      cerrarModalCal();
+      calRender();
+    })
+    .catch(function(e) {
+      var n = document.getElementById('calNotif');
+      n.textContent = '❌ Error: '+e.message; n.className='notif err show';
+    });
+}
+
+function calEliminarEvento(id) {
+  if (!confirm('¿Eliminar este evento?')) return;
+  var user = _profeUser || {};
+  EL_DB.collection('calendarios_docentes')
+    .doc(user.uid || 'anon')
+    .collection('eventos')
+    .doc(id)
+    .delete()
+    .then(function() { calRender(); })
+    .catch(function(e) { alert('Error: '+e.message); });
+}
 </script>
 
 <!-- Modal Herramienta IA -->
 <div id="modalHerr" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;align-items:center;justify-content:center;padding:16px"></div>
+
+<!-- Modal Calendario -->
+<div id="modalCal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;align-items:center;justify-content:center;padding:16px"></div>
 
 </body>
 </html>
