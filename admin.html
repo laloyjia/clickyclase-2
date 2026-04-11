@@ -738,7 +738,7 @@ function renderBasicaGrid(){
       '</div>'+
       '<div style="padding:14px">'+
         '<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:10px">'+
-        a.niveles.map(function(n){return '<span style="font-size:.72rem;padding:3px 8px;background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2);border-radius:6px;color:#34d399">'+n.replace(\'B\',\'°B\')+'</span>';}).join('')+
+        a.niveles.map(function(n){return '<span style="font-size:.72rem;padding:3px 8px;background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2);border-radius:6px;color:#34d399">'+n.replace("B","°B")+'</span>';}).join('')+
         '</div>'+
         '<button class="btn btn-outline btn-sm" onclick="openAddRecursoMod(\''+a.sigla+'\',\'basica\')">➕ Recurso</button>'+
       '</div>'+
