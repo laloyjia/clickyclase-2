@@ -1,18 +1,14 @@
 /**
- * curricula-chile.js
- * ElectroLearn — Currículum Chileno Completo
+ * curricula-chile.js  — ElectroLearn
+ * Generado automáticamente desde Programas de Estudio MINEDUC
+ * Incluye: Básica 1°-8°, Media 1°-4° (Plan Común), Electivos y Especialidades TP
  *
- * Estructura:
- *  CURRICULA_CHILE = {
- *    basica:       { 1B-8B: { asignaturas: [...] } },
- *    planComun:    { 1M-4M: { asignaturas: [...] } },
- *    especialidades: { [key]: { nombre, sector, modulos: [...] } }
- *  }
- *
- * Cada asignatura tiene: nombre, sigla, niveles[], unidades[]
- * Cada especialidad tiene: nombre, sector, modulos[]
- * Cada módulo tiene: num, nombre, sigla, aes[]
- * Cada AE tiene: num, nombre, criterios[]
+ * LENGUAJE BÁSICA : 208 OAs (1°-8° básico)
+ * MATEMÁTICA BÁSICA: 184 OAs (1°-8° básico)
+ * LENGUAJE MEDIA   : 50 OAs (1°-4° medio)
+ * MATEMÁTICA MEDIA : 36 OAs (1°-4° medio)
+ * ELECTRICIDAD     : 8 módulos con AEs reales
+ * MECÁNICA AUTOMOTRIZ: 10 módulos con AEs reales
  */
 
 var CURRICULA_CHILE = (function() {
@@ -29,14 +25,240 @@ var CURRICULA_CHILE = (function() {
         color:  '#3b82f6',
         niveles: ['1B','2B','3B','4B','5B','6B','7B','8B'],
         unidades: {
-          '1B': ['Lectura emergente','Escritura inicial','Comunicación oral'],
-          '2B': ['Comprensión lectora básica','Escritura de textos','Vocabulario'],
-          '3B': ['Comprensión de textos','Producción escrita','Gramática básica'],
-          '4B': ['Textos literarios','Textos no literarios','Producción de textos'],
-          '5B': ['Comprensión lectora avanzada','Escritura informativa','Comunicación efectiva'],
-          '6B': ['Análisis literario','Ensayo básico','Medios de comunicación'],
-          '7B': ['Literatura chilena e iberoamericana','Argumentación escrita','Discurso oral'],
-          '8B': ['Literatura universal','Producción avanzada','Medios digitales']
+          '1B': ["Lectura", "Escritura", "Comunicación oral"],
+          '2B': ["Lectura", "Escritura", "Comunicación oral"],
+          '3B': ["Lectura", "Escritura", "Comunicación oral"],
+          '4B': ["Lectura", "Escritura", "Comunicación oral"],
+          '5B': ["Lectura", "Escritura", "Comunicación oral"],
+          '6B': ["Lectura", "Escritura", "Comunicación oral"],
+          '7B': ["Lectura", "Escritura", "Comunicación oral"],
+          '8B': ["Lectura", "Escritura", "Comunicación oral"]
+        },
+        oas: {
+          '1B': [
+            {codigo:"OA1",eje:"Lectura",desc:"Reconocer que los textos Distinguen entre imagen y texto escrito"},
+            {codigo:"OA2",eje:"Lectura",desc:"Reconocer que las palabras son Diferencian una palabra de una frase u oración"},
+            {codigo:"OA3",eje:"Lectura",desc:"Con el texto de estudio, sino ser una"},
+            {codigo:"OA4",eje:"Lectura",desc:"Leer palabras aisladas y en Nombran las letras estudiadas y reproducen su sonido"},
+            {codigo:"OA5",eje:"Lectura",desc:"Leer textos breves en voz alta Leen con precisión palabras que incluyen las letras aprendi-"},
+            {codigo:"OA6",eje:"Lectura",desc:"Comprender textos aplicando Mencionan un aspecto de sus vidas que se relaciona con el"},
+            {codigo:"OA7",eje:"Lectura",desc:"Leer independientemente y Mencionan a personajes de las obras leídas"},
+            {codigo:"OA8",eje:"Lectura",desc:"Demostrar comprensión de Contestan preguntas que aluden a información explícita del"},
+            {codigo:"OA9",eje:"Lectura",desc:"Leer habitualmente y disfrutar Recrean versos de poemas a través de diferentes expresio-"},
+            {codigo:"OA10",eje:"Lectura",desc:"Leer independientemente y Hacen un recuento de la información obtenida de textos"},
+            {codigo:"OA11",eje:"Lectura",desc:"Desarrollar el gusto por la Sacan libros de la biblioteca de aula cuando han terminado"},
+            {codigo:"OA12",eje:"Lectura",desc:"Asistir habitualmente a la bi- Visitan la biblioteca y seleccionan libros de su interés"},
+            {codigo:"OA13",eje:"Lectura",desc:"Experimentar con la escritura Juegan a escribir"},
+            {codigo:"OA14",eje:"Lectura",desc:"Escribir oraciones completas Escriben mensajes a otros"},
+            {codigo:"OA15",eje:"Lectura",desc:"Escribir con letra clara, sepa- Escriben palabras, usando correctamente las letras aprendi-"},
+            {codigo:"OA16",eje:"Lectura",desc:"Incorporar de manera pertinen- Realizan dibujos que expresan el significado de palabras"},
+            {codigo:"OA17",eje:"Lectura",desc:"Comprender y disfrutar versio- Solicitan que les lean o relean un cuento"},
+            {codigo:"OA18",eje:"Lectura",desc:"Comprender textos orales Relacionan lo que han aprendido en otras asignaturas con"},
+            {codigo:"OA19",eje:"Lectura",desc:"Desarrollar la curiosidad por Identifican las palabras desconocidas al oírlas o leerlas"},
+            {codigo:"OA20",eje:"Lectura",desc:"Disfrutar de la experiencia de Describen una parte de una obra de teatro o representación"},
+            {codigo:"OA21",eje:"Lectura",desc:"Participar activamente en Relatan experiencias personales o expresan sentimientos"},
+            {codigo:"OA22",eje:"Lectura",desc:"Interactuar de acuerdo con Se presentan, usando su nombre completo y entregando"},
+            {codigo:"OA23",eje:"Lectura",desc:"Expresarse de manera coheren- Presentan información sobre un objeto o un tema"},
+            {codigo:"OA24",eje:"Lectura",desc:"Incorporar de manera pertinen- Usan adecuadamente en sus intervenciones orales, las pala-"},
+            {codigo:"OA25",eje:"Lectura",desc:"Desempeñar diferentes roles Representan partes de textos escuchados o leídos"},
+            {codigo:"OA26",eje:"Lectura",desc:"Recitar con entonación y ex- Recitan poemas, rimas, canciones, trabalenguas y adivinanzas"}
+          ],
+          '2B': [
+            {codigo:"OA1",eje:"Lectura",desc:"Leer textos significativos que Leen en voz alta, sin equivocarse, palabras con hiatos y dip-"},
+            {codigo:"OA3",eje:"Lectura",desc:"Comprender textos aplicando Explican lo que saben de un tema antes de leer un texto"},
+            {codigo:"OA4",eje:"Lectura",desc:"Leer independientemente y Mencionan personajes de las obras leídas"},
+            {codigo:"OA5",eje:"Lectura",desc:"Demostrar comprensión de las Contestan preguntas que aluden a información explícita o"},
+            {codigo:"OA7",eje:"Lectura",desc:"Leer independientemente y Explican, oralmente o por escrito, información que han"},
+            {codigo:"OA11",eje:"Lectura",desc:"Desarrollar la curiosidad por Identifican qué palabras de un texto no conocen"},
+            {codigo:"OA14",eje:"Lectura",desc:"Escribir artículos informativos Escriben un párrafo sobre un tema"},
+            {codigo:"OA21",eje:"Lectura",desc:"Escribir correctamente para fa- Escriben correctamente palabras que contienen las combi-"},
+            {codigo:"OA25",eje:"Lectura",desc:"Participar activamente en Aportan información que se relaciona con el tema sobre el"}
+          ],
+          '3B': [
+            {codigo:"OA1",eje:"Lectura",desc:"Leer en voz alta de manera flui- Leen en voz alta"},
+            {codigo:"OA2",eje:"Lectura",desc:"Comprender textos aplicando Explican lo que saben de un tema antes de leer un texto"},
+            {codigo:"OA3",eje:"Lectura",desc:"Con el texto de estudio, sino ser una"},
+            {codigo:"OA4",eje:"Lectura",desc:"Profundizar su comprensión de Aluden, en sus comentarios orales y escritos, a información"},
+            {codigo:"OA5",eje:"Lectura",desc:"Comprender poemas adecua- Dibujan imágenes de poemas que les gusten"},
+            {codigo:"OA6",eje:"Lectura",desc:"Leer independientemente y Explican, oralmente o por escrito, información que han"},
+            {codigo:"OA7",eje:"Lectura",desc:"Desarrollar el gusto por la Escogen textos en el aula, la biblioteca o internet para inves-"},
+            {codigo:"OA8",eje:"Lectura",desc:"Asistir habitualmente a la Visitan la biblioteca frecuentemente para buscar informa-"},
+            {codigo:"OA9",eje:"Lectura",desc:"En libros, internet, diarios, revistas, satisfacer un propósito y transmitir"},
+            {codigo:"OA10",eje:"Lectura",desc:"Desconocidas, usando claves contex- utilizan conectores apropiados"},
+            {codigo:"OA11",eje:"Lectura",desc:"Desconocidas, usando el orden alfabé- corrigen la ortografía y la presentación"},
+            {codigo:"OA12",eje:"Lectura",desc:"Escribir frecuentemente, para Escriben al menos una vez a la semana un texto con un"},
+            {codigo:"OA13",eje:"Lectura",desc:"Escribir creativamente narra- Escriben uno o más párrafos para narrar una experiencia o"},
+            {codigo:"OA14",eje:"Lectura",desc:"Escribir artículos informativos Eligen un tema interesante para escribir"},
+            {codigo:"OA15",eje:"Lectura",desc:"Escribir cartas, instrucciones, Eligen un formato adecuado a su propósito"},
+            {codigo:"OA16",eje:"Lectura",desc:"Escribir con letra clara para que Escriben con letra ligada o imprenta, sin mezclar estilos"},
+            {codigo:"OA17",eje:"Lectura",desc:"Planificar la escritura: Conversan sobre lo que van a escribir"},
+            {codigo:"OA18",eje:"Lectura",desc:"Escribir, revisar y editar sus tex- Desarrollan ideas que tienen relación con el tema"},
+            {codigo:"OA19",eje:"Lectura",desc:"Incorporar de manera pertinen- Usan adecuadamente en la escritura de textos, las palabras"},
+            {codigo:"OA20",eje:"Lectura",desc:"Comprender la función de los Seleccionan el artículo que concuerda con un sustantivo en"},
+            {codigo:"OA21",eje:"Lectura",desc:"Comprender la función de los Reemplazan en textos algunos sustantivos por pronombres"},
+            {codigo:"OA22",eje:"Lectura",desc:"Escribir correctamente para fa- Escriben textos en los que utilizan mayúscula al iniciar una"},
+            {codigo:"OA23",eje:"Lectura",desc:"Comprender y disfrutar versio- Solicitan que les lean o relean un cuento"},
+            {codigo:"OA24",eje:"Lectura",desc:"Comprender textos orales Relacionan algún tema o aspecto del texto con sus expe-"},
+            {codigo:"OA25",eje:"Lectura",desc:"Disfrutar de la experiencia de Relatan una parte de la obra de teatro vista"},
+            {codigo:"OA26",eje:"Lectura",desc:"Participar activamente en Aportan información que se relaciona con el tema sobre el"},
+            {codigo:"OA27",eje:"Lectura",desc:"Interactuar de acuerdo con Se presentan a sí mismos o a la persona con la que están"},
+            {codigo:"OA28",eje:"Lectura",desc:"Expresarse de manera coheren- Exponen sobre un tema"},
+            {codigo:"OA29",eje:"Lectura",desc:"Incorporar de manera pertinen- Usan adecuadamente en sus intervenciones orales las pala-"},
+            {codigo:"OA30",eje:"Lectura",desc:"Caracterizar distintos persona- Representan un personaje de un texto leído, actuando sus"},
+            {codigo:"OA31",eje:"Lectura",desc:"Recitar poemas con entona- Recitan poemas o versos de memoria"}
+          ],
+          '4B': [
+            {codigo:"OA1",eje:"Lectura",desc:"Leer en voz alta de manera flui- Leen en voz alta"},
+            {codigo:"OA2",eje:"Lectura",desc:"Comprender textos aplicando Identifican en el texto la información que ya conocían y"},
+            {codigo:"OA3",eje:"Lectura",desc:"Con el texto de estudio, sino ser una"},
+            {codigo:"OA4",eje:"Lectura",desc:"Profundizar su comprensión de Aluden, en sus comentarios orales y escritos, a información"},
+            {codigo:"OA5",eje:"Lectura",desc:"Comprender poemas adecua- Dibujan imágenes de poemas que les gusten"},
+            {codigo:"OA6",eje:"Lectura",desc:"Leer independientemente y Relacionan información del texto con sus experiencias y"},
+            {codigo:"OA7",eje:"Lectura",desc:"Desarrollar el gusto por la Leen libros para entretenerse, para encontrar información"},
+            {codigo:"OA8",eje:"Lectura",desc:"Asistir habitualmente a la Asisten de manera independiente a la biblioteca para leer"},
+            {codigo:"OA9",eje:"Lectura",desc:"Buscar y clasificar información Encuentran información sobre un tema en una fuente"},
+            {codigo:"OA10",eje:"Lectura",desc:"Aplicar estrategias para deter- Subrayan o anotan las palabras desconocidas que encuen-"},
+            {codigo:"OA11",eje:"Lectura",desc:"Escribir frecuentemente, para Escriben al menos una vez a la semana un texto con un"},
+            {codigo:"OA12",eje:"Lectura",desc:"Escribir creativamente narra- Eligen un tema que les interese para escribir un cuento o"},
+            {codigo:"OA13",eje:"Lectura",desc:"Escribir artículos informativos Eligen un tema interesante para escribir"},
+            {codigo:"OA14",eje:"Lectura",desc:"Escribir cartas, instrucciones, Eligen un formato adecuado a su propósito"},
+            {codigo:"OA15",eje:"Lectura",desc:"Escribir con letra clara para que Escriben con letra ligada o imprenta, sin mezclar estilos"},
+            {codigo:"OA16",eje:"Lectura",desc:"Planificar la escritura: Explican sobre qué van a escribir"},
+            {codigo:"OA17",eje:"Lectura",desc:"Escribir, revisar y editar sus tex- Escriben hechos que se relacionan unos con otros y siguen"},
+            {codigo:"OA18",eje:"Lectura",desc:"Incorporar de manera pertinen- Incorporan adecuadamente en sus escritos las palabras que"},
+            {codigo:"OA19",eje:"Lectura",desc:"Comprender la función de los Explican qué información aporta el adverbio en una oración"},
+            {codigo:"OA20",eje:"Lectura",desc:"Comprender la función de los Identifican qué palabra de una oración indica la acción"},
+            {codigo:"OA21",eje:"Lectura",desc:"Escribir correctamente para Escriben correctamente en sus textos las palabras hay, ahí o"},
+            {codigo:"OA22",eje:"Lectura",desc:"Comprender y disfrutar versio- Solicitan que les lean o relean un cuento"},
+            {codigo:"OA23",eje:"Lectura",desc:"Comprender textos orales Comparan lo escuchado con sus propias experiencias y cono-"},
+            {codigo:"OA24",eje:"Lectura",desc:"Disfrutar de la experiencia de Comentan qué aspectos de la historia les llamaron la atención"},
+            {codigo:"OA25",eje:"Lectura",desc:"Participar activamente en conver- Comentan aspectos de los textos leídos o escuchados en"},
+            {codigo:"OA26",eje:"Lectura",desc:"Interactuar de acuerdo con Se presentan a sí mismos o a la persona con la que están"},
+            {codigo:"OA27",eje:"Lectura",desc:"Expresarse de manera coheren- Realizan una exposición oral en que"},
+            {codigo:"OA28",eje:"Lectura",desc:"Incorporar de manera pertinen- Usan adecuadamente en sus intervenciones orales las pala-"},
+            {codigo:"OA29",eje:"Lectura",desc:"Caracterizar distintos personajes Representan roles en obras teatrales"},
+            {codigo:"OA30",eje:"Lectura",desc:"Recitar poemas con entona- Recitan estrofas o poemas completos de memoria"}
+          ],
+          '5B': [
+            {codigo:"OA1",eje:"Lectura",desc:"Leer de manera fluida textos Leen en voz alta, de forma individual y colectiva"},
+            {codigo:"OA2",eje:"Lectura",desc:"Comprender textos aplicando Mencionan si hay información que no concuerda con sus"},
+            {codigo:"OA3",eje:"Lectura",desc:"Con el texto de estudio, sino ser una"},
+            {codigo:"OA4",eje:"Lectura",desc:"Analizar aspectos relevantes de Explican, oralmente o por escrito, expresiones de un texto"},
+            {codigo:"OA5",eje:"Lectura",desc:"Analizar aspectos relevantes de Explican con sus palabras un poema leído"},
+            {codigo:"OA6",eje:"Lectura",desc:"Leer independientemente y Relacionan información del texto con sus experiencias y"},
+            {codigo:"OA7",eje:"Lectura",desc:"Evaluar críticamente la infor- Identifican al autor y explican cuál es su intención al publicar"},
+            {codigo:"OA8",eje:"Lectura",desc:"Sintetizar y registrar las ideas Subrayan o registran la información relevante en un texto"},
+            {codigo:"OA9",eje:"Lectura",desc:"Desarrollar el gusto por la Leen libros para entretenerse, para encontrar información o"},
+            {codigo:"OA10",eje:"Lectura",desc:"Asistir habitualmente a la Asisten de manera independiente a la biblioteca para leer"},
+            {codigo:"OA11",eje:"Lectura",desc:"Buscar y seleccionar la infor- Explican el orden en el cual están dispuestos los libros en la"},
+            {codigo:"OA12",eje:"Lectura",desc:"Aplicar estrategias para deter- Subrayan o anotan las palabras desconocidas que encuen-"},
+            {codigo:"OA13",eje:"Lectura",desc:"Escribir frecuentemente, para Escriben, al menos una vez a la semana, un texto con el"},
+            {codigo:"OA14",eje:"Lectura",desc:"Escribir creativamente narra- Escriben un texto narrativo en que"},
+            {codigo:"OA15",eje:"Lectura",desc:"Escribir artículos informativos Eligen un tema interesante sobre las lecturas realizadas en"},
+            {codigo:"OA16",eje:"Lectura",desc:"Escribir frecuentemente para Escriben comentarios de al menos dos párrafos en los que"},
+            {codigo:"OA17",eje:"Lectura",desc:"Planificar sus textos: Escogen un tema para escribir que se relaciona con un texto"},
+            {codigo:"OA18",eje:"Lectura",desc:"Escribir, revisar y editar sus tex- Desarrollan ideas que son relevantes para el tema"},
+            {codigo:"OA19",eje:"Lectura",desc:"Escritura el vocabulario nuevo extraído OA 25Apreciar obras de teatro, películas o"},
+            {codigo:"OA20",eje:"Lectura",desc:"Leer, hablar y escribir para ampliar su describiendo a los personajes según"},
+            {codigo:"OA21",eje:"Lectura",desc:"Regulares al utilizarlos en sus produc- OA 26Dialogar para compartir y desarrollar"},
+            {codigo:"OA22",eje:"Lectura",desc:"Comprensión por parte del lector, apli- haciendo comentarios en los mo-"},
+            {codigo:"OA23",eje:"Lectura",desc:"Comprender y disfrutar versio- Solicitan que les lean o relean un cuento"},
+            {codigo:"OA24",eje:"Lectura",desc:"Comprender textos orales Relacionan, cuando es pertinente, los textos escuchados con"},
+            {codigo:"OA25",eje:"Lectura",desc:"Apreciar obras de teatro, pelícu- Comentan qué aspectos de la historia les llamaron la aten-"},
+            {codigo:"OA26",eje:"Lectura",desc:"Dialogar para compartir y desa- Comparten sus opiniones sobre los textos leídos o escucha-"},
+            {codigo:"OA27",eje:"Lectura",desc:"Interactuar de acuerdo con Usan las convenciones de cortesía en sus interacciones de la"},
+            {codigo:"OA28",eje:"Lectura",desc:"Expresarse de manera clara y Realizan una exposición oral en la que"},
+            {codigo:"OA29",eje:"Lectura",desc:"Incorporar de manera pertinen- Usan adecuadamente en sus intervenciones orales las pala-"},
+            {codigo:"OA30",eje:"Lectura",desc:"Producir textos orales planifica- Recitan poemas o versos de memoria"}
+          ],
+          '6B': [
+            {codigo:"OA1",eje:"Lectura",desc:"Leer de manera fluida textos Leen en voz alta"},
+            {codigo:"OA2",eje:"Lectura",desc:"Comprender textos aplicando Identifican la información del texto que es nueva para ellos y"},
+            {codigo:"OA3",eje:"Lectura",desc:"Con el texto de estudio, sino ser una"},
+            {codigo:"OA4",eje:"Lectura",desc:"Analizar aspectos relevantes Explican qué efecto tiene determinada acción en los eventos"},
+            {codigo:"OA5",eje:"Lectura",desc:"Analizar aspectos relevantes de Explican con sus palabras un poema leído"},
+            {codigo:"OA6",eje:"Lectura",desc:"Leer independientemente y Identifican y registran las ideas relevantes de un texto leído"},
+            {codigo:"OA7",eje:"Lectura",desc:"Evaluar críticamente la infor- Identifican al autor y explican cuál es su intención al publicar"},
+            {codigo:"OA8",eje:"Lectura",desc:"Sintetizar, registrar y ordenar Subrayan o registran la información relevante de un texto"},
+            {codigo:"OA9",eje:"Lectura",desc:"Desarrollar el gusto por la Leen libros para entretenerse, para encontrar información"},
+            {codigo:"OA10",eje:"Lectura",desc:"Asistir habitualmente a la Asisten de manera independiente a la biblioteca para leer"},
+            {codigo:"OA11",eje:"Lectura",desc:"Buscar y comparar informa- Encuentran en internet información sobre el tema que"},
+            {codigo:"OA12",eje:"Lectura",desc:"Aplicar estrategias para deter- Subrayan o anotan las palabras desconocidas que encuen-"},
+            {codigo:"OA13",eje:"Lectura",desc:"Escribir frecuentemente, para Escriben un texto al menos una vez a la semana, seleccio-"},
+            {codigo:"OA14",eje:"Lectura",desc:"Escribir creativamente narra- Escriben un cuento en que"},
+            {codigo:"OA15",eje:"Lectura",desc:"Escribir artículos informativos Eligen un tema interesante para escribir y registran informa-"},
+            {codigo:"OA16",eje:"Lectura",desc:"Escribir frecuentemente para Escriben comentarios de al menos dos párrafos en los que"},
+            {codigo:"OA17",eje:"Lectura",desc:"Planificar sus textos: Escogen un tema para escribir que se relaciona con un texto"},
+            {codigo:"OA18",eje:"Lectura",desc:"Escribir, revisar y editar sus tex- Desarrollan ideas que son relevantes para el tema"},
+            {codigo:"OA19",eje:"Lectura",desc:"Incorporar de manera pertinen- Incorporan adecuadamente en sus escritos las palabras que"},
+            {codigo:"OA20",eje:"Lectura",desc:"Ampliar su capacidad expresi- Reemplazan palabras por sinónimos, hipónimos e hiperóni-"},
+            {codigo:"OA21",eje:"Lectura",desc:"Utilizar correctamente los parti- Escriben textos en los que utilizan correctamente los partici-"},
+            {codigo:"OA22",eje:"Lectura",desc:"Escribir correctamente para Escriben correctamente las conjugaciones de los verbos"},
+            {codigo:"OA23",eje:"Lectura",desc:"Comprender y disfrutar versio- Solicitan que les lean o relean un cuento"},
+            {codigo:"OA24",eje:"Lectura",desc:"Comprender textos orales (ex- Comparan lo escuchado con sus propias opiniones y conoci-"},
+            {codigo:"OA25",eje:"Lectura",desc:"Evaluar críticamente mensajes Señalan quién es el emisor (empresa o institución anuncian-"},
+            {codigo:"OA26",eje:"Lectura",desc:"Apreciar obras de teatro, pelí- Comentan qué aspectos de la historia les llamaron la aten-"},
+            {codigo:"OA27",eje:"Lectura",desc:"Dialogar para compartir y desa- Comparten sus opiniones sobre los textos leídos o escucha-"},
+            {codigo:"OA28",eje:"Lectura",desc:"Interactuar de acuerdo con las Usan las convenciones de cortesía en sus interacciones de la"},
+            {codigo:"OA29",eje:"Lectura",desc:"Expresarse de manera clara y Realizan una exposición oral en la que"},
+            {codigo:"OA30",eje:"Lectura",desc:"Incorporar de manera pertinen- Usan adecuadamente en sus intervenciones orales las pala-"},
+            {codigo:"OA31",eje:"Lectura",desc:"Producir textos orales espontá- Narran un hecho, estructurando el relato en un orden que se"}
+          ],
+          '7B': [
+            {codigo:"OA1",eje:"Lectura",desc:"Leer habitualmente para aprender y recrearse, y seleccionar textos de acuerdo con"},
+            {codigo:"OA2",eje:"Lectura",desc:"Reflexionar sobre las diferentes dimensiones de la experiencia humana, propia y"},
+            {codigo:"OA3",eje:"Lectura",desc:"En las Bases Curriculares"},
+            {codigo:"OA4",eje:"Lectura",desc:"Analizar los poemas leídos para enriquecer su comprensión, considerando, cuando"},
+            {codigo:"OA5",eje:"Lectura",desc:"Leer y comprender romances y obras de la poesía popular, considerando sus"},
+            {codigo:"OA6",eje:"Lectura",desc:"Leer y comprender relatos mitológicos, considerando sus características y el contexto"},
+            {codigo:"OA7",eje:"Lectura",desc:"Formular una interpretación de los textos literarios, considerando…"},
+            {codigo:"OA8",eje:"Lectura",desc:"Analizar y evaluar textos con finalidad argumentativa como columnas de opinión"},
+            {codigo:"OA9",eje:"Lectura",desc:"Analizar y evaluar textos de los medios de comunicación, como noticias, reportajes"},
+            {codigo:"OA10",eje:"Lectura",desc:"Leer y comprender textos no literarios para contextualizar y complementar las"},
+            {codigo:"OA11",eje:"Lectura",desc:"Aplicar estrategias de comprensión de acuerdo con sus propósitos de lectura"},
+            {codigo:"OA12",eje:"Lectura",desc:"Expresarse en forma creativa por medio de la escritura de textos de diversos géneros"},
+            {codigo:"OA13",eje:"Lectura",desc:"Escribir, con el propósito de explicar un tema, textos de diversos géneros (por"},
+            {codigo:"OA14",eje:"Lectura",desc:"Escribir, con el propósito de persuadir, textos breves de diversos géneros (por"},
+            {codigo:"OA15",eje:"Lectura",desc:"Planificar, escribir, revisar, reescribir y editar sus textos en función del contexto"},
+            {codigo:"OA16",eje:"Lectura",desc:"Aplicar los conceptos de oración, sujeto y predicado con el fin de revisar y mejorar"},
+            {codigo:"OA17",eje:"Lectura",desc:"Usar en sus textos recursos de correferencia léxica…"},
+            {codigo:"OA18",eje:"Lectura",desc:"Utilizar adecuadamente, al narrar, los tiempos verbales del indicativo, manteniendo"},
+            {codigo:"OA19",eje:"Lectura",desc:"Escribir correctamente para facilitar la comprensión al lector…"},
+            {codigo:"OA20",eje:"Lectura",desc:"Comprender, comparar y evaluar textos orales y audiovisuales tales como exposiciones"},
+            {codigo:"OA21",eje:"Lectura",desc:"Dialogar constructivamente para debatir o explorar ideas…"},
+            {codigo:"OA22",eje:"Lectura",desc:"Expresarse frente a una audiencia de manera clara y adecuada a la situación, para"},
+            {codigo:"OA23",eje:"Lectura",desc:"Usar conscientemente los elementos que influyen y configuran los textos orales…"},
+            {codigo:"OA24",eje:"Lectura",desc:"Realizar investigaciones sobre diversos temas para complementar sus lecturas o"},
+            {codigo:"OA25",eje:"Lectura",desc:"Sintetizar, registrar y ordenar las ideas principales de textos escuchados o leídos para"}
+          ],
+          '8B': [
+            {codigo:"OA1",eje:"Lectura",desc:"Leer habitualmente para aprender y recrearse, y seleccionar textos de acuerdo con"},
+            {codigo:"OA2",eje:"Lectura",desc:"Son los OA especificados"},
+            {codigo:"OA3",eje:"Lectura",desc:"Analizar las narraciones leídas para enriquecer su comprensión, considerando"},
+            {codigo:"OA4",eje:"Lectura",desc:"Analizar los poemas leídos para enriquecer su comprensión, considerando, cuando"},
+            {codigo:"OA5",eje:"Lectura",desc:"Analizar los textos dramáticos leídos o vistos, para enriquecer su comprensión"},
+            {codigo:"OA6",eje:"Lectura",desc:"Leer y comprender fragmentos de epopeyas, considerando sus características y el"},
+            {codigo:"OA7",eje:"Lectura",desc:"Leer y comprender comedias teatrales, considerando sus características y el contexto"},
+            {codigo:"OA8",eje:"Lectura",desc:"Formular una interpretación de los textos literarios leídos o vistos, que sea coherente"},
+            {codigo:"OA9",eje:"Lectura",desc:"Analizar y evaluar textos con finalidad argumentativa, como columnas de opinión"},
+            {codigo:"OA10",eje:"Lectura",desc:"Analizar y evaluar textos de los medios de comunicación, como noticias, reportajes"},
+            {codigo:"OA11",eje:"Lectura",desc:"Leer y comprender textos no literarios para contextualizar y complementar las"},
+            {codigo:"OA12",eje:"Lectura",desc:"Aplicar estrategias de comprensión de acuerdo con sus propósitos de lectura"},
+            {codigo:"OA13",eje:"Lectura",desc:"Expresarse en forma creativa por medio de la escritura de textos de diversos géneros"},
+            {codigo:"OA14",eje:"Lectura",desc:"Escribir, con el propósito de explicar un tema, textos de diversos géneros (por"},
+            {codigo:"OA15",eje:"Lectura",desc:"Escribir, con el propósito de persuadir, textos breves de diversos géneros (por"},
+            {codigo:"OA16",eje:"Lectura",desc:"Planificar, escribir, revisar, reescribir y editar sus textos en función del contexto"},
+            {codigo:"OA17",eje:"Lectura",desc:"Usar adecuadamente oraciones complejas…"},
+            {codigo:"OA18",eje:"Lectura",desc:"Construir textos con referencias claras…"},
+            {codigo:"OA19",eje:"Lectura",desc:"Conocer los modos verbales, analizar sus usos y seleccionar el más apropiado para"},
+            {codigo:"OA20",eje:"Lectura",desc:"Escribir correctamente para facilitar la comprensión al lector"},
+            {codigo:"OA21",eje:"Lectura",desc:"Comprender, comparar y evaluar textos orales y audiovisuales tales como exposiciones"},
+            {codigo:"OA22",eje:"Lectura",desc:"Dialogar constructivamente para debatir o explorar ideas…"},
+            {codigo:"OA23",eje:"Lectura",desc:"Expresarse frente a una audiencia de manera clara y adecuada a la situación para"},
+            {codigo:"OA24",eje:"Lectura",desc:"Usar conscientemente los elementos que influyen y configuran los textos orales…"},
+            {codigo:"OA25",eje:"Lectura",desc:"Realizar investigaciones sobre diversos temas para complementar sus lecturas o"},
+            {codigo:"OA26",eje:"Lectura",desc:"Sintetizar, registrar y ordenar las ideas principales de textos escuchados o leídos para"}
+          ]
         }
       },
       {
@@ -45,14 +267,216 @@ var CURRICULA_CHILE = (function() {
         color:  '#10b981',
         niveles: ['1B','2B','3B','4B','5B','6B','7B','8B'],
         unidades: {
-          '1B': ['Números del 0 al 100','Suma y resta básica','Geometría inicial'],
-          '2B': ['Números hasta 1000','Multiplicación','Figuras y cuerpos'],
-          '3B': ['Números hasta 10.000','División','Fracciones básicas'],
-          '4B': ['Números hasta 100.000','Operaciones combinadas','Medidas'],
-          '5B': ['Fracciones y decimales','Porcentajes','Geometría plana'],
-          '6B': ['Números enteros','Razones y proporciones','Estadística básica'],
-          '7B': ['Álgebra básica','Ecuaciones de 1° grado','Geometría del plano'],
-          '8B': ['Álgebra avanzada','Funciones básicas','Probabilidad']
+          '1B': ["Números y Operaciones", "Geometría", "Datos y Probabilidades", "Medición"],
+          '2B': ["Números y Operaciones", "Geometría", "Datos y Probabilidades", "Medición"],
+          '3B': ["Números y Operaciones", "Geometría", "Datos y Probabilidades", "Medición"],
+          '4B': ["Números y Operaciones", "Geometría", "Datos y Probabilidades", "Medición"],
+          '5B': ["Números y Operaciones", "Geometría", "Datos y Probabilidades", "Medición"],
+          '6B': ["Números y Operaciones", "Geometría", "Datos y Probabilidades", "Medición"],
+          '7B': ["Números y Operaciones", "Álgebra y Funciones", "Geometría", "Probabilidad y Estadística", "Medición"],
+          '8B': ["Números y Operaciones", "Álgebra y Funciones", "Geometría", "Probabilidad y Estadística", "Medición"]
+        },
+        oas: {
+          '1B': [
+            {codigo:"OA 1",eje:"",desc:"Representar y describir números del 0 al 10 000"},
+            {codigo:"OA 2",eje:"",desc:"Describir y aplicar estrategias de cálculo mental"},
+            {codigo:"OA 3",eje:"",desc:"Leer números del 0 al 20 y representarlos en forma concreta, pictórica y simbólica"},
+            {codigo:"OA 4",eje:"",desc:"Comparar y ordenar números del 0 al 20 de menor a mayor y/o viceversa, utilizando material concreto"},
+            {codigo:"OA 5",eje:"",desc:"Estimar cantidades hasta 20 en situaciones concretas, usando un referente"},
+            {codigo:"OA 6",eje:"",desc:"Componer y descomponer números del 0 a 20 de manera aditiva, en forma concreta, pictórica y simbólic"},
+            {codigo:"OA 7",eje:"",desc:"Describir y aplicar estrategias1 de cálculo mental para las adiciones y sustracciones hasta 20"},
+            {codigo:"OA 8",eje:"",desc:"Determinar las unidades y decenas en números del 0 al 20, agrupando de a 10, de manera concreta, pic"},
+            {codigo:"OA 9",eje:"",desc:"Demostrar que comprenden la adición y la sustracción de números del 0 al 20 progresivamente, de 0 a"},
+            {codigo:"OA 10",eje:"",desc:"Demostrar que la adición y la sustracción son operaciones inversas, de manera concreta"},
+            {codigo:"OA 11",eje:"",desc:"Reconocer, describir, crear y continuar patrones repetitivos (sonidos, figuras, ritmos…) y patrones"},
+            {codigo:"OA 12",eje:"",desc:"Identificar en el entorno figuras 3D y figuras 2D y relacionarlas, usando material concreto"},
+            {codigo:"OA 13",eje:"",desc:"Describir la posición de objetos y personas con relación a sí mismos y a otros objetos y personas, u"},
+            {codigo:"OA 14",eje:"",desc:"Identificar en el entorno figuras 3D y figuras 2D y relacionarlas, usando material concreto"},
+            {codigo:"OA 15",eje:"",desc:"Identificar y dibujar líneas rectas y curvas"},
+            {codigo:"OA 16",eje:"",desc:"Usar unidades no estandarizadas de tiempo para comparar la duración de eventos cotidianos"},
+            {codigo:"OA 17",eje:"",desc:"Usar un lenguaje cotidiano para secuenciar eventos en el tiempo: días de la semana"},
+            {codigo:"OA 18",eje:"",desc:"Identificar y comparar la longitud de objetos, usando palabras como largo y corto"},
+            {codigo:"OA 19",eje:"",desc:"Recolectar y registrar datos para responder preguntas estadísticas sobre sí mismo y el entorno, usan"},
+            {codigo:"OA 20",eje:"",desc:"Construir, leer e interpretar pictogramas"}
+          ],
+          '2B': [
+            {codigo:"OA 1",eje:"",desc:"Representar y describir números del 0 al 10 000"},
+            {codigo:"OA 2",eje:"",desc:"Describir y aplicar estrategias de cálculo mental"},
+            {codigo:"OA 3",eje:"",desc:"Comparar y ordenar números del 0 al 100 de menor a mayor y viceversa, usando material concreto y mon"},
+            {codigo:"OA 4",eje:"",desc:"Estimar cantidades hasta 100 en situaciones concretas, usando un referente"},
+            {codigo:"OA 5",eje:"",desc:"Estimar cantidades hasta 20 en situaciones concretas, usando un referente"},
+            {codigo:"OA 6",eje:"",desc:"Describir y aplicar estrategias1 de cálculo mental para adiciones y sustracciones hasta 20"},
+            {codigo:"OA 7",eje:"",desc:"Identificar las unidades y decenas en números del 0 al 100, representando las cantidades de acuerdo"},
+            {codigo:"OA 8",eje:"",desc:"Demostrar y explicar de manera concreta, pictórica y simbólica el efecto de sumar y restar 0 a un nú"},
+            {codigo:"OA 9",eje:"",desc:"Demostrar que comprende la adición y la sustracción en el ámbito del 0 al 100"},
+            {codigo:"OA 10",eje:"",desc:"Demostrar que comprende la relación entre la adición y la sustracción al usar la “familia"},
+            {codigo:"OA 11",eje:"",desc:"PATRONES Y ÁLGEBRA"},
+            {codigo:"OA 12",eje:"",desc:"Crear, representar y continuar una variedad de patrones numéricos y completar los elementos faltante"},
+            {codigo:"OA 13",eje:"",desc:"Demostrar, explicar y registrar la igualdad y desigualdad en forma concreta y pictórica del 0 al 20"},
+            {codigo:"OA 14",eje:"",desc:"Representar y describir la posición de objetos y personas con relación a sí mismo y a otros (objetos"},
+            {codigo:"OA 15",eje:"",desc:"Describir, comparar y construir figuras 2D (triángulos, cuadrados, rectángulos y círculos) con mater"},
+            {codigo:"OA 16",eje:"",desc:"Describir, comparar y construir figuras 3D (cubos, paralelepípedos, esferas y conos) con diversos ma"},
+            {codigo:"OA 17",eje:"",desc:"Identificar días, semanas, meses y fechas en el calendario"},
+            {codigo:"OA 18",eje:"",desc:"Leer horas y medias horas en relojes digitales ,en el contexto de la resolución de problemas"},
+            {codigo:"OA 19",eje:"",desc:"Determinar la longitud de objetos, usando unidades de medidas no estandarizadas y unidades estandari"},
+            {codigo:"OA 20",eje:"",desc:"Recolectar y registrar datos para responder preguntas estadísticas sobre juegos con monedas y dados"},
+            {codigo:"OA 21",eje:"",desc:"Registrar en tablas y gráficos de barra simple, resultados de juegos aleatorios con dados y"},
+            {codigo:"OA 22",eje:"",desc:"Construir, leer e interpretar pictogramas con escala y gráficos de barra simple"}
+          ],
+          '3B': [
+            {codigo:"OA 1",eje:"",desc:"Representar y describir números del 0 al 10 000"},
+            {codigo:"OA 2",eje:"",desc:"Describir y aplicar estrategias de cálculo mental"},
+            {codigo:"OA 3",eje:"",desc:"Comparar y ordenar números naturales hasta 1 000, utilizando la recta numérica o la tabla posicional"},
+            {codigo:"OA 4",eje:"",desc:"Describir y aplicar estrategias1 de cálculo mental para las adiciones y sustracciones hasta 100"},
+            {codigo:"OA 5",eje:"",desc:"Identificar y describir las unidades, decenas y centenas en números del 0 al 1 000, representando la"},
+            {codigo:"OA 6",eje:"",desc:"Demostrar que comprenden la adición y la sustracción de números del 0 al 1 000"},
+            {codigo:"OA 7",eje:"",desc:"Demostrar que comprenden la relación entre la adición y la sustracción, usando la “familia de operac"},
+            {codigo:"OA 8",eje:"",desc:"Demostrar que comprenden las tablas de multiplicar hasta 10 de manera progresiva"},
+            {codigo:"OA 08",eje:"",desc:"Demostrar que comprenden las tablas de multiplicar de 3, 6, 4 y 8 de manera progresiva"},
+            {codigo:"OA 9",eje:"",desc:"Demostrar que comprenden la división en el contexto de las tablas3 de hasta 10x10"},
+            {codigo:"OA 09",eje:"",desc:"Demostrar que comprenden la división en el contexto de las tablas de 3, 6, 4 y 8"},
+            {codigo:"OA 10",eje:"",desc:"Resolver problemas rutinarios en contextos cotidianos, que incluyan dinero e involucren las"},
+            {codigo:"OA 11",eje:"",desc:"Demostrar que comprenden las fracciones de uso común: 1/4, 1/3, 1/2, 2/3, 3/4"},
+            {codigo:"OA 12",eje:"",desc:"Generar, describir y registrar patrones numéricos, usando una variedad de estrategias"},
+            {codigo:"OA 13",eje:"",desc:"Resolver ecuaciones de un paso, que involucren adiciones y sustracciones y un símbolo"},
+            {codigo:"OA 14",eje:"",desc:"Describir la localización de un objeto en un mapa simple o cuadrícula"},
+            {codigo:"OA 15",eje:"",desc:"Demostrar que comprenden la relación que existe entre figuras 3D y figuras 2D"},
+            {codigo:"OA 16",eje:"",desc:"Describir cubos, paralelepípedos, esferas, conos, cilindros y pirámides de acuerdo a la forma de sus"},
+            {codigo:"OA 17",eje:"",desc:"Reconocer en el entorno figuras 2D que están trasladadas, reflejadas y rotadas"},
+            {codigo:"OA 18",eje:"",desc:"Demostrar que comprenden el concepto de ángulo"},
+            {codigo:"OA 19",eje:"",desc:"Leer e interpretar líneas de tiempo y calendarios"},
+            {codigo:"OA 20",eje:"",desc:"Leer y registrar el tiempo en horas, medias horas, cuartos de horas y minutos en relojes"},
+            {codigo:"OA 21",eje:"",desc:"Demostrar que comprenden el perímetro de una figura regular y de una irregular"},
+            {codigo:"OA 22",eje:"",desc:"Demostrar que comprenden la medición del peso (g y kg)"},
+            {codigo:"OA 23",eje:"",desc:"Realizar encuestas, clasificar y organizar los datos obtenidos en tablas y visualizarlos en gráficos"},
+            {codigo:"OA 24",eje:"",desc:"Registrar y ordenar datos obtenidos de juegos aleatorios con dados y monedas, encontrando el menor"},
+            {codigo:"OA 25",eje:"",desc:"Construir, leer e interpretar pictogramas y gráficos de barra simple con escala, de acuerdo a"},
+            {codigo:"OA 26",eje:"",desc:"Representar datos, usando diagramas de puntos"}
+          ],
+          '4B': [
+            {codigo:"OA 1",eje:"",desc:"Representar y describir números del 0 al 10 000"},
+            {codigo:"OA 2",eje:"",desc:"Describir y aplicar estrategias de cálculo mental"},
+            {codigo:"OA 3",eje:"",desc:"Demostrar que comprende la adición y la sustracción de números hasta 1 000"},
+            {codigo:"OA 4",eje:"",desc:"Representar y describir números del 0 al 10 000"},
+            {codigo:"OA 5",eje:"",desc:"Demostrar que comprenden la multiplicación de números de tres dígitos por números de un dígito"},
+            {codigo:"OA 6",eje:"",desc:"Demostrar que comprenden la división con dividendos de dos dígitos y divisores de un dígito"},
+            {codigo:"OA 7",eje:"",desc:"Resolver problemas rutinarios y no rutinarios en contextos cotidianos que incluyen dinero, seleccion"},
+            {codigo:"OA 8",eje:"",desc:"Demostrar que comprende las fracciones con denominadores 100, 12, 10, 8, 6, 5, 4, 3, 2"},
+            {codigo:"OA 9",eje:"",desc:"OA 17 Demostrar que comprenden una línea"},
+            {codigo:"OA 10",eje:"",desc:"Identificar, escribir y representar fracciones propias y los números mixtos hasta el 5"},
+            {codigo:"OA 11",eje:"",desc:"De simetría"},
+            {codigo:"OA 12",eje:"",desc:"Resolver adiciones y sustracciones de decimales, empleando el valor posicional"},
+            {codigo:"OA 13",eje:"",desc:"Identificar y describir patrones numéricos en tablas que involucren una operación, de"},
+            {codigo:"OA 14",eje:"",desc:"Resolver ecuaciones e inecuaciones de un paso, que involucren adiciones y"},
+            {codigo:"OA 15",eje:"",desc:"Describir la localización absoluta de un objeto en un mapa simple con coordenadas informales (por ej"},
+            {codigo:"OA 16",eje:"",desc:"Determinar las vistas de figuras 3D, desde el frente, desde el lado y desde arriba"},
+            {codigo:"OA 17",eje:"",desc:"Demostrar que comprende una línea de simetría"},
+            {codigo:"OA 18",eje:"",desc:"Trasladar, rotar y reflejar figuras 2D"},
+            {codigo:"OA 19",eje:"",desc:"Construir ángulos con el transportador y compararlos"},
+            {codigo:"OA 20",eje:"",desc:"Leer y registrar diversas mediciones del tiempo en relojes análogos y digitales, usando los concepto"},
+            {codigo:"OA 21",eje:"",desc:"Realizar conversiones entre unidades de tiempo en el contexto de la resolución de problemas: el núme"},
+            {codigo:"OA 22",eje:"",desc:"Medir longitudes con unidades estandarizadas (m, cm) y realizar transformaciones entre estas unidade"},
+            {codigo:"OA 23",eje:"",desc:"Demostrar que comprenden el concepto de área de un rectángulo y de un cuadrado"},
+            {codigo:"OA 24",eje:"",desc:"Demostrar que comprenden el concepto de volumen de un cuerpo"},
+            {codigo:"OA 25",eje:"",desc:"Realizar encuestas, analizar los datos y comparar con los resultados de muestras aleatorias, usando"},
+            {codigo:"OA 26",eje:"",desc:"Realizar experimentos aleatorios lúdicos y cotidianos, y tabular y representar mediante gráficos de"},
+            {codigo:"OA 27",eje:"",desc:"Leer e interpretar pictogramas y gráficos de barra simple con escala y comunicar"}
+          ],
+          '5B': [
+            {codigo:"OA 1",eje:"",desc:"Representar y describir números del 0 al 10 000"},
+            {codigo:"OA 2",eje:"",desc:"Describir y aplicar estrategias de cálculo mental"},
+            {codigo:"OA 3",eje:"",desc:"Demostrar que comprenden la multiplicación de números naturales de dos dígitos por números naturales"},
+            {codigo:"OA 4",eje:"",desc:"Demostrar que comprenden la división con dividendos de tres dígitos y divisores de un dígito"},
+            {codigo:"OA 5",eje:"",desc:"Realizar cálculos que involucren las cuatro operaciones, aplicando las reglas relativas a paréntesis"},
+            {codigo:"OA 6",eje:"",desc:"Resolver problemas rutinarios y no rutinarios que involucren las cuatro operaciones y combinaciones"},
+            {codigo:"OA 7",eje:"",desc:"Demostrar que comprenden las fracciones propias4"},
+            {codigo:"OA 8",eje:"",desc:"Demostrar que comprenden las fracciones impropias de uso común de denominadores 2, 3, 4, 5, 6, 8, 10"},
+            {codigo:"OA 9",eje:"",desc:"Resolver adiciones y sustracciones con fracciones propias con denominadores menores o iguales a 12"},
+            {codigo:"OA 10",eje:"",desc:"Determinar el decimal que corresponde a fracciones con denominador 2, 4, 5 y 10"},
+            {codigo:"OA 11",eje:"",desc:"Comparar y ordenar decimales hasta la milésima"},
+            {codigo:"OA 12",eje:"",desc:"Resolver adiciones y sustracciones de decimales, empleando el valor posicional"},
+            {codigo:"OA 13",eje:"",desc:"Resolver problemas rutinarios y no rutinarios, aplicando adiciones y sustracciones de"},
+            {codigo:"OA 14",eje:"",desc:"Descubrir alguna regla que explique una sucesión dada y que permita hacer predicciones"},
+            {codigo:"OA 15",eje:"",desc:"Resolver problemas, usando ecuaciones de un paso que involucren adiciones y sustracciones, en forma"},
+            {codigo:"OA 16",eje:"",desc:"Identificar y dibujar puntos en el primer cuadrante del plano cartesiano, dadas sus"},
+            {codigo:"OA 17",eje:"",desc:"Describir y dar ejemplos de aristas y caras de figuras 3D, y lados de figuras 2D"},
+            {codigo:"OA 18",eje:"",desc:"Demostrar que comprende el concepto de congruencia, usando la traslación, la reflexión"},
+            {codigo:"OA 19",eje:"",desc:"Medir longitudes con unidades estandarizadas (m, cm, mm) en el contexto de la resolución de"},
+            {codigo:"OA 20",eje:"",desc:"Realizar transformaciones entre unidades de medidas de longitud (km a m, m a cm, cm a mm y viceversa"},
+            {codigo:"OA 21",eje:"",desc:"Diseñar y construir diferentes rectángulos, dados el perímetro o el área o ambos, y sacar conclusion"},
+            {codigo:"OA 22",eje:"",desc:"Calcular áreas de triángulos, de paralelogramos y de trapecios, y estimar áreas de figuras"},
+            {codigo:"OA 23",eje:"",desc:"Calcular el promedio de datos e interpretarlo en su contexto"},
+            {codigo:"OA 24",eje:"",desc:"Describir la posibilidad de ocurrencia de un evento de acuerdo a un experimento"},
+            {codigo:"OA 25",eje:"",desc:"Comparar probabilidades de distintos eventos sin calcularlas"},
+            {codigo:"OA 26",eje:"",desc:"Leer, interpretar y completar tablas, gráficos de barra simple y gráficos de línea, y comunicar"},
+            {codigo:"OA 27",eje:"",desc:"Utilizar diagramas de tallo y hojas para representar datos provenientes de muestras aleatorias"}
+          ],
+          '6B': [
+            {codigo:"OA 1",eje:"",desc:"Representar y describir números del 0 al 10 000"},
+            {codigo:"OA 2",eje:"",desc:"Describir y aplicar estrategias de cálculo mental"},
+            {codigo:"OA 3",eje:"",desc:"Demostrar que comprenden el concepto de razón de manera concreta, pictórica y simbólica, en forma ma"},
+            {codigo:"OA 4",eje:"",desc:"Demostrar que comprenden el concepto de porcentaje de manera concreta, pictórica y simbólica, de"},
+            {codigo:"OA 5",eje:"",desc:"Demostrar que comprenden las fracciones y números mixtos"},
+            {codigo:"OA 6",eje:"",desc:"Resolver adiciones y sustracciones de fracciones propias e impropias y números mixtos con numeradore"},
+            {codigo:"OA 7",eje:"",desc:"Demostrar que comprenden la multiplicación y la división de decimales por números naturales de un dí"},
+            {codigo:"OA 8",eje:"",desc:"Resolver problemas rutinarios y no rutinarios que involucren adiciones y sustracciones de fracciones"},
+            {codigo:"OA 9",eje:"",desc:"Demostrar que comprenden la relación entre los valores de una tabla y aplicarla en la resolución de"},
+            {codigo:"OA 10",eje:"",desc:"Representar generalizaciones de relaciones entre números naturales, usando expresiones"},
+            {codigo:"OA 11",eje:"",desc:"Resolver ecuaciones de primer grado con una incógnita, utilizando estrategias como"},
+            {codigo:"OA 12",eje:"",desc:"Construir y comparar triángulos de acuerdo a la medida de sus lados y/o sus ángulos con"},
+            {codigo:"OA 13",eje:"",desc:"Demostrar que comprenden el concepto de área de una superficie en cubos y paralelepípedos, calculand"},
+            {codigo:"OA 14",eje:"",desc:"Realizar teselados de figuras 2D, usando traslaciones, reflexiones y rotaciones"},
+            {codigo:"OA 15",eje:"",desc:"Construir ángulos agudos, obtusos, rectos, extendidos y completos con instrumentos"},
+            {codigo:"OA 16",eje:"",desc:"Identificar los ángulos que se forman entre dos rectas que se cortan (pares de ángulos"},
+            {codigo:"OA 17",eje:"",desc:"Demostrar, de manera concreta, pictórica y simbólica, que la suma de los ángulos interiores de un tr"},
+            {codigo:"OA 18",eje:"",desc:"Calcular la superficie de cubos y paralelepípedos, expresando el resultado en cm2 y m2"},
+            {codigo:"OA 19",eje:"",desc:"Calcular el volumen de cubos y paralelepípedos, expresando el resultado en cm3 , m3 y mm3 "},
+            {codigo:"OA 20",eje:"",desc:"Estimar y medir ángulos, usando el transportador y expresando las mediciones en"},
+            {codigo:"OA 21",eje:"",desc:"Calcular ángulos en rectas paralelas cortadas por una transversal y en triángulos"},
+            {codigo:"OA 22",eje:"",desc:"Comparar distribuciones de dos grupos, usando diagramas de puntos y de tallo y hojas"},
+            {codigo:"OA 23",eje:"",desc:"Conjeturar acerca de las tendencias de resultados obtenidos en repeticiones de un"},
+            {codigo:"OA 24",eje:"",desc:"Leer e interpretar gráficos de barra doble y circulares y comunicar sus conclusiones"}
+          ],
+          '7B': [
+            {codigo:"OA 1",eje:"",desc:"Cotidianos"},
+            {codigo:"OA 2",eje:"",desc:"Utilizando representaciones concretas, Representan la división de una fracción por otra fracción"},
+            {codigo:"OA 3",eje:"",desc:"Crean problemas de la vida cotidiana que se modelan y se resuelven con operaciones matemáticas en"},
+            {codigo:"OA 4",eje:"",desc:"Mostrar que comprenden el concepto de porcentaje: Representándolo de manera pictórica. Calculand"},
+            {codigo:"OA 5",eje:"",desc:"Exponente, elevado"},
+            {codigo:"OA 6",eje:"",desc:"Representan patrones de manera pictórica y simbólica"},
+            {codigo:"OA 7",eje:"",desc:"Aplican la conmutatividad y la asociatividad de la adición para reducir expresiones algebraicas. O"},
+            {codigo:"OA 8",eje:"",desc:"Demostrar que comprenden las proporciones directas e inversas: Realizando tablas de valores para"},
+            {codigo:"OA 9",eje:"",desc:"Modelar y resolver problemas diversos de la vida diaria y de otras asignaturas, que involucran ecuac"},
+            {codigo:"OA 10",eje:"",desc:"Resultados, midiéndolos. Muestran geométricamente, mediante la descomposición en triángulos, el pa"},
+            {codigo:"OA 11",eje:"",desc:"Mostrar que comprenden el círculo"},
+            {codigo:"OA 12",eje:"",desc:"Construir objetos geométricos de manera manual y/o con software educativo: Líneas, como las perpen"},
+            {codigo:"OA 13",eje:"",desc:"Dibujan cuadriláteros a partir de un triángulo dado"},
+            {codigo:"OA 14",eje:"",desc:"Conjeturan la forma y la ubicación de figuras 2D (rectángulo, cuadrado, paralelogramo y trapecio)"},
+            {codigo:"OA 15",eje:"",desc:"Estimar el porcentaje de algunas características de una población desconocida por medio del muestreo"},
+            {codigo:"OA 16",eje:"",desc:"Representar datos obtenidos en una muestra mediante tablas de frecuencias absolutas y relativas, uti"},
+            {codigo:"OA 17",eje:"",desc:"Mostrar que comprenden las medidas de tendencia central y el rango"},
+            {codigo:"OA 18",eje:"",desc:"Explicar las probabilidades de eventos obtenidos por medio de experimentos de manera manual y/o con"},
+            {codigo:"OA 19",eje:"",desc:"Comparar las frecuencias relativas de un evento obtenidas al repetir un experimento de forma manual"}
+          ],
+          '8B': [
+            {codigo:"OA 1",eje:"",desc:"Mostrar que comprenden la adición y sustracción de números enteros"},
+            {codigo:"OA 2",eje:"",desc:"Explicar la multiplicación y la división de fracciones"},
+            {codigo:"OA 3",eje:"",desc:"1° medio"},
+            {codigo:"OA 4",eje:"",desc:"Resolviendo problemas, usando la notación científica"},
+            {codigo:"OA 5",eje:"",desc:"Mostrar que comprenden el concepto de porcentaje"},
+            {codigo:"OA 6",eje:"",desc:"Utilizar el lenguaje algebraico para generalizar relaciones"},
+            {codigo:"OA 7",eje:"",desc:"Reducir expresiones algebraicas, reuniendo términos semejantes para"},
+            {codigo:"OA 8",eje:"",desc:"Identificar puntos en el plano cartesiano, usando pares ordenados"},
+            {codigo:"OA 9",eje:"",desc:"(a, b, c son números racionales, a ≠ 0)"},
+            {codigo:"OA 10",eje:"",desc:"Mostrar que comprenden la función afín: Generalizándola como la"},
+            {codigo:"OA 11",eje:"",desc:"> Arman y despliegan cajas de forma de prismas rectos"},
+            {codigo:"OA 12",eje:"",desc:"Explicar, de manera concreta, pictórica y simbólica, la validez del teorema de Pitágoras y aplicar a"},
+            {codigo:"OA 13",eje:"",desc:"Realizan traslaciones en el plano con vectores dados"},
+            {codigo:"OA 14",eje:"",desc:"Componer rotaciones, traslaciones y reflexiones en el plano cartesiano y en el espacio, de manera ma"},
+            {codigo:"OA 15",eje:"",desc:"Mostrar que comprenden las medidas de posición, percentiles y cuartiles: Identificando la muestra"},
+            {codigo:"OA 16",eje:"",desc:"Evaluar la forma en que los datos están presentados"},
+            {codigo:"OA 17",eje:"",desc:"Explicar el principio combinatorio multiplicativo: A partir de situaciones concretas"}
+          ]
         }
       },
       {
@@ -99,7 +523,7 @@ var CURRICULA_CHILE = (function() {
           '4B': ['Gimnasia','Deportes colectivos','Salud y actividad física'],
           '5B': ['Condición física','Deportes individuales','Nutrición básica'],
           '6B': ['Capacidades físicas','Deportes y competencia','Salud integral'],
-          '7B': ['Entrenamiento básico','Deportes acuáticos/terrestres','Proyecto de vida activa'],
+          '7B': ['Entrenamiento básico','Deportes terrestres','Vida saludable'],
           '8B': ['Planificación de actividad física','Deportes alternativos','Vida saludable']
         }
       },
@@ -184,7 +608,6 @@ var CURRICULA_CHILE = (function() {
 
   // ════════════════════════════════════════════════════════════
   //  PLAN COMÚN — Educación Media (1° a 4° Medio)
-  //  Científico-Humanista y afines
   // ════════════════════════════════════════════════════════════
   var planComun = {
     asignaturas: [
@@ -194,10 +617,70 @@ var CURRICULA_CHILE = (function() {
         color:  '#3b82f6',
         niveles: ['1M','2M','3M','4M'],
         unidades: {
-          '1M': ['Narrativa chilena contemporánea','Textos argumentativos','Oralidad y debate'],
-          '2M': ['Literatura latinoamericana','Ensayo y crítica','Medios y comunicación'],
-          '3M': ['Literatura universal clásica','Escritura académica','Lenguaje y poder'],
-          '4M': ['Literatura siglo XX-XXI','Proyecto escritura','Cultura digital']
+          '1M': ["comunicación y sociedad (medios de comunicación)", "la libertad como tema literario", "ciudadanos y opinión", "relaciones humanas en el teatro y la literatura", "comunicación y sociedad", "la libertad como tema literario (narrativa y lírica)", "ciudadanos y opinión (texto argumentativo)", "relaciones humanas en el teatro y la literatura (género dramático)"],
+          '2M': ["sobre la ausencia: exilio, migración e identidad", "ciudadanía y trabajo", "lo divino y lo humano", "poder y ambición", "Tiempo estimado: Tiempo estimado: Tiempo estimado: Tiempo estimado:", "sobre la ausencia: exilio, migración e identidad (narrativa)", "ciudadanía y trabajo (medios de comunicación)", "ObjetivOs de AprendizAje indicAdOres de evAluAción", "lo divino y lo humano (género lírico)", "poder y ambición (género dramático)"],
+          '3M': ["Lectura", "Escritura", "Comunicación oral"],
+          '4M': ["Lectura", "Escritura", "Comunicación oral"]
+        },
+        oas: {
+          '1M': [
+            {codigo:"OA1",eje:"",desc:"Leer habitualmente para aprender y recrearse, y seleccionar textos de acuerdo con sus preferencias y"},
+            {codigo:"OA2",eje:"",desc:"Reflexionar sobre las diferentes dimensiones de la experiencia humana, propia y ajena, a partir de l"},
+            {codigo:"OA3",eje:"",desc:"Analizar las narraciones leídas para enriquecer su comprensión, considerando, cuando sea pertinente"},
+            {codigo:"OA4",eje:"",desc:"Analizar los poemas leídos para enriquecer su comprensión, considerando, cuando sea pertinente"},
+            {codigo:"OA5",eje:"",desc:"Analizar los textos dramáticos leídos o vistos, para enriquecer su comprensión, considerando, cuando"},
+            {codigo:"OA6",eje:"",desc:"Comprender la visión de mundo que se expresa a través de las tragedias leídas, considerando sus cara"},
+            {codigo:"OA7",eje:"",desc:"Comprender la relevancia de las obras del Romanticismo, considerando sus características y el contex"},
+            {codigo:"OA8",eje:"",desc:"Formular una interpretación de los textos literarios leídos o vistos, que sea coherente con su análi"},
+            {codigo:"OA9",eje:"",desc:"Analizar y evaluar textos con finalidad argumentativa, como columnas de opinión, cartas, discursos y"},
+            {codigo:"OA10",eje:"",desc:"Analizar y evaluar textos de los medios de comunicación, como noticias, reportajes, cartas al direct"},
+            {codigo:"OA11",eje:"",desc:"Leer y comprender textos no literarios para contextualizar y complementar las lecturas literarias re"},
+            {codigo:"OA12",eje:"",desc:"Aplicar flexiblemente y creativamente las habilidades de escritura adquiridas en clases como medio d"},
+            {codigo:"OA13",eje:"",desc:"Escribir, con el propósito de explicar un tema, textos de diversos géneros (por ejemplo, artículos"},
+            {codigo:"OA14",eje:"",desc:"Escribir, con el propósito de persuadir, textos de diversos géneros, en particular ensayos sobre los"},
+            {codigo:"OA15",eje:"",desc:"Planificar, escribir, revisar, reescribir y editar sus textos en función del contexto, el destinatar"},
+            {codigo:"OA16",eje:"",desc:"Usar consistentemente el estilo directo y el indirecto en textos escritos y orales"},
+            {codigo:"OA17",eje:"",desc:"Usar en sus textos recursos de correferencia léxica compleja, empleando adecuadamente la metáfora y"},
+            {codigo:"OA18",eje:"",desc:"Escribir correctamente para facilitar la comprensión al lector"},
+            {codigo:"OA19",eje:"",desc:"Comprender, comparar y evaluar textos orales y audiovisuales tales como exposiciones, discursos, doc"},
+            {codigo:"OA20",eje:"",desc:"Resumir un discurso argumentativo escuchado, explicando y evaluando los argumentos usados por el emi"},
+            {codigo:"OA21",eje:"",desc:"Dialogar constructivamente para debatir o explorar ideas"},
+            {codigo:"OA22",eje:"",desc:"Expresarse frente a una audiencia de manera clara y adecuada a la situación para comunicar temas de"},
+            {codigo:"OA23",eje:"",desc:"Analizar los posibles efectos de los elementos lingüísticos, paralingüísticos"},
+            {codigo:"OA24",eje:"",desc:"Realizar investigaciones sobre diversos temas para complementar sus lecturas o responder interrogant"}
+          ],
+          '2M': [
+            {codigo:"OA1",eje:"",desc:"Leer habitualmente para aprender y recrearse, y seleccionar textos de acuerdo con sus"},
+            {codigo:"OA2",eje:"",desc:"Reflexionar sobre las diferentes dimensiones de la experiencia humana, propia y ajena, a"},
+            {codigo:"OA3",eje:"",desc:"Analizar las narraciones leídas para enriquecer su comprensión, considerando"},
+            {codigo:"OA4",eje:"",desc:"Analizar los poemas leídos para enriquecer su comprensión, considerando, cuando sea pertinente"},
+            {codigo:"OA5",eje:"",desc:"Analizar los textos dramáticos leídos o vistos, para enriquecer su comprensión, considerando, cuando"},
+            {codigo:"OA6",eje:"",desc:"Comprender la relevancia de las obras del Siglo de Oro, considerando sus características y el contex"},
+            {codigo:"OA7",eje:"",desc:"En las distintas actividades"},
+            {codigo:"OA8",eje:"",desc:"Formular una interpretación de los textos literarios leídos o vistos, que sea coherente"},
+            {codigo:"OA9",eje:"",desc:"Analizar y evaluar textos con finalidad argumentativa, como columnas de opinión, cartas al director"},
+            {codigo:"OA10",eje:"",desc:"Analizar y evaluar textos de los medios de comunicación, como noticias, reportajes, cartas al direct"},
+            {codigo:"OA11",eje:"",desc:"Leer y comprender textos no literarios para contextualizar y complementar las lecturas literarias re"},
+            {codigo:"OA12",eje:"",desc:"Aplicar flexiblemente y creativamente las habilidades de escritura adquiridas en clases como medio d"},
+            {codigo:"OA13",eje:"",desc:"Escribir, con el propósito de explicar un tema, textos de diversos géneros (por ejemplo, artículos"},
+            {codigo:"OA14",eje:"",desc:"Escribir, con el propósito de persuadir, textos de diversos géneros, en particular ensayos sobre los"},
+            {codigo:"OA15",eje:"",desc:"Planificar, escribir, revisar, reescribir y editar sus textos en función del contexto, el destinatar"},
+            {codigo:"OA16",eje:"",desc:"Usar consistentemente el estilo directo y el indirecto en textos escritos y orales"},
+            {codigo:"OA17",eje:"",desc:"Emplear frases nominales complejas como recurso para compactar la información y establecer correfere"},
+            {codigo:"OA18",eje:"",desc:"Escribir correctamente para facilitar la comprensión al lector"},
+            {codigo:"OA19",eje:"",desc:"Comprender, comparar y evaluar textos orales y audiovisuales tales como exposiciones, discursos, doc"},
+            {codigo:"OA20",eje:"",desc:"Evaluar el punto de vista de un emisor, su razonamiento y uso de recursos retóricos (vocabulario, or"},
+            {codigo:"OA21",eje:"",desc:"Dialogar constructivamente para debatir o explorar ideas"},
+            {codigo:"OA22",eje:"",desc:"Expresarse frente a una audiencia de manera clara y adecuada a la situación para comunicar temas de"},
+            {codigo:"OA23",eje:"",desc:"Analizar los posibles efectos de los elementos lingüísticos, paralingüísticos y no lingüísticos que"},
+            {codigo:"OA24",eje:"",desc:"Realizar investigaciones sobre diversos temas para complementar sus lecturas o responder interrogant"}
+          ],
+          '3M': [
+            {codigo:"OA9",eje:"",desc:"Investigar sobre diversos temas"}
+          ],
+          '4M': [
+            {codigo:"OA9",eje:"",desc:"Investigar sobre diversos temas"}
+          ]
         }
       },
       {
@@ -206,10 +689,56 @@ var CURRICULA_CHILE = (function() {
         color:  '#10b981',
         niveles: ['1M','2M','3M','4M'],
         unidades: {
-          '1M': ['Números reales','Álgebra y funciones','Geometría métrica','Estadística descriptiva'],
-          '2M': ['Funciones cuadráticas','Trigonometría','Geometría analítica','Probabilidad'],
-          '3M': ['Funciones exponenciales y logarítmicas','Cálculo diferencial básico','Geometría del espacio','Estadística inferencial básica'],
-          '4M': ['Funciones y modelos matemáticos','Cálculo integral básico','Matrices','Probabilidad avanzada']
+          '1M': ["Números y Álgebra", "Geometría", "Probabilidad y Estadística"],
+          '2M': ["Números y Álgebra", "Geometría", "Probabilidad y Estadística"],
+          '3M': ["Números y Álgebra", "Geometría", "Probabilidad y Estadística"],
+          '4M': ["Números y Álgebra", "Geometría", "Probabilidad y Estadística"]
+        },
+        oas: {
+          '1M': [
+            {codigo:"OA1",eje:"",desc:"Calcular operaciones con números racionales en forma simbólica"},
+            {codigo:"OA2",eje:"",desc:"La unidad. El propósito es"},
+            {codigo:"OA3",eje:"",desc:"Desarrollar los productos notables de manera concreta, pictórica y simbólica"},
+            {codigo:"OA4",eje:"",desc:"Verifican que una sola ecuación en dos"},
+            {codigo:"OA5",eje:"",desc:"Elaboran tablas y gráficos para ecuaciones"},
+            {codigo:"OA6",eje:"",desc:"Desarrollar la fórmula de los valores del área y del perímetro de sectores y segmentos circulares, r"},
+            {codigo:"OA7",eje:"",desc:"Desarrollar las fórmulas para encontrar el área de la superficie y el volumen del cono"},
+            {codigo:"OA8",eje:"",desc:"En las Bases Curriculares"},
+            {codigo:"OA9",eje:"",desc:"Desarrollar el teorema de Tales mediante las propiedades de la homotecia, para aplicarlo en la resol"},
+            {codigo:"OA10",eje:"",desc:"Aplicar propiedades de semejanza y de proporcionalidad a modelos a escala y otras situaciones de la"},
+            {codigo:"OA11",eje:"",desc:"Representar el concepto de homotecia de forma vectorial, relacionándolo con el producto de un vector"},
+            {codigo:"OA12",eje:"",desc:"Realizan en su entorno encuestas preguntando"},
+            {codigo:"OA13",eje:"",desc:"Comparar poblaciones mediante la confección de gráficos “xy” para dos atributos de muestras, de mane"},
+            {codigo:"OA14",eje:"",desc:"Desarrollar las reglas de las probabilidades, la regla aditiva, la regla multiplicativa y la combina"},
+            {codigo:"OA15",eje:"",desc:"Mostrar que comprenden el concepto de azar"},
+            {codigo:"OA17",eje:"",desc:"De 1º medio"},
+            {codigo:"OA20",eje:"",desc:"De 1º medio"}
+          ],
+          '2M': [
+            {codigo:"OA1",eje:"",desc:"Reconocen números cuyo desarrollo decimal"},
+            {codigo:"OA2",eje:"",desc:"Relacionan y caracterizan las raíces por"},
+            {codigo:"OA3",eje:"",desc:"Mostrar que comprenden la función cuadrática f(x)= ax2 + bx + c (a ≠ 0)"},
+            {codigo:"OA4",eje:"",desc:"Resolver, de manera concreta, pictórica y simbólica o usando herramientas tecnológicas, ecuaciones c"},
+            {codigo:"OA5",eje:"",desc:"Mostrar que comprenden la inversa de una función"},
+            {codigo:"OA6",eje:"",desc:"Son los OA especificados"},
+            {codigo:"OA7",eje:"",desc:"Relacionan medidas de contenidos en envases"},
+            {codigo:"OA8",eje:"",desc:"Mostrar que comprenden las razones trigonométricas de seno, coseno y tangente en triángulos rectángu"},
+            {codigo:"OA9",eje:"",desc:"Aplicar las razones trigonométricas en diversos contextos en la composición y descomposición de vect"},
+            {codigo:"OA10",eje:"",desc:"Mostrar que comprenden las variables aleatorias finitas"},
+            {codigo:"OA11",eje:"",desc:"De 8° básico"},
+            {codigo:"OA12",eje:"",desc:"Mostrar que comprenden el rol de la probabilidad en la sociedad"},
+            {codigo:"OA20",eje:"",desc:"De 1° medio"}
+          ],
+          '3M': [
+            {codigo:"OA2",eje:"",desc:"Tomar OA 3: Aplicar modelos OA 4: Resolver OA 1. Resolver"},
+            {codigo:"OA3",eje:"",desc:"Aplicar modelos matemáticos que describen fenómenos o situaciones de crecimiento y"},
+            {codigo:"OA4",eje:"",desc:"Resolver problemas de geometría euclidiana que involucran relaciones métricas entre ángulos"}
+          ],
+          '4M': [
+            {codigo:"OA1",eje:"",desc:"Fundamentar decisiones en el ámbito financiero y económico personal o comunitario, a"},
+            {codigo:"OA2",eje:"",desc:"Fundamentar OA 1: Fundamentar OA 3: Construir modelos de OA 4: Resolver"},
+            {codigo:"OA3",eje:"",desc:"Construir modelos de situaciones o fenómenos de crecimiento, decrecimiento y periódicos"}
+          ]
         }
       },
       {
@@ -218,10 +747,10 @@ var CURRICULA_CHILE = (function() {
         color:  '#8b5cf6',
         niveles: ['1M','2M','3M','4M'],
         unidades: {
-          '1M': ['Civilizaciones antiguas','Medioevo y mundo moderno','Chile colonial','Espacio y sociedad'],
-          '2M': ['Revoluciones e independencias','Chile siglo XIX','Imperialismo','Geografía política'],
-          '3M': ['Chile y el mundo en el siglo XX','Totalitarismos','Guerra Fría','Geografía económica'],
-          '4M': ['Chile democrático','Globalización','DDHH y ciudadanía global','Desafíos del siglo XXI']
+          '1M': ['Civilizaciones antiguas','Medioevo y mundo moderno','Chile colonial'],
+          '2M': ['Revoluciones e independencias','Chile siglo XIX','Imperialismo'],
+          '3M': ['Chile y el mundo en el siglo XX','Totalitarismos','Guerra Fría'],
+          '4M': ['Chile democrático','Globalización','DDHH y ciudadanía global']
         }
       },
       {
@@ -245,7 +774,7 @@ var CURRICULA_CHILE = (function() {
           '1M': ['Cinemática','Dinámica newtoniana','Trabajo y energía'],
           '2M': ['Fluidos','Termodinámica','Ondas y sonido'],
           '3M': ['Electricidad y magnetismo','Óptica','Física moderna básica'],
-          '4M': ['Electromagnetismo','Relatividad especial','Física cuántica básica','Astrofísica']
+          '4M': ['Electromagnetismo','Relatividad especial','Física cuántica básica']
         }
       },
       {
@@ -257,7 +786,7 @@ var CURRICULA_CHILE = (function() {
           '1M': ['Estructura atómica','Tabla periódica','Enlace químico','Reacciones básicas'],
           '2M': ['Estequiometría','Soluciones','Termoquímica','Química orgánica básica'],
           '3M': ['Equilibrio químico','Electroquímica','Química orgánica funcional'],
-          '4M': ['Química ambiental','Bioquímica básica','Polímeros y materiales','Industria química']
+          '4M': ['Química ambiental','Bioquímica básica','Polímeros y materiales']
         }
       },
       {
@@ -323,7 +852,7 @@ var CURRICULA_CHILE = (function() {
           '1M': ['Identidad y autoconocimiento','Proyecto de vida','Habilidades socioemocionales'],
           '2M': ['Orientación vocacional','Mundo del trabajo','Salud mental adolescente'],
           '3M': ['Decisiones de futuro','Ciudadanía activa','Bienestar y resiliencia'],
-          '4M': ['Proyecto de vida adulta','Transición a educación superior','Ciudadanía y democracia']
+          '4M': ['Proyecto de vida adulta','Transición a educación superior','Ciudadanía']
         }
       },
       {
@@ -350,8 +879,66 @@ var CURRICULA_CHILE = (function() {
   };
 
   // ════════════════════════════════════════════════════════════
+  //  ELECTIVOS MEDIA (3° y 4° Medio)
+  // ════════════════════════════════════════════════════════════
+  var electivosMedia = {
+    lenguaje: [
+      {
+        key:    "lec_esp",
+        nombre: "Lectura y Escritura Especializadas",
+        nivel:  "3º-4º Medio",
+        ejes:   ["Unidad 1.", "Actividad 1:", "El profesor plantea una pregunta para sacar conclusiones a partir de la información de la tabla. Para", "A modo de ejemplo se muestra la siguiente síntesis para ilustrarla."],
+        oas:    [{codigo:"OA1",desc:"Producir textos pertenecientes a diversos géneros discursivos académicos, en los cuales se"}, {codigo:"OA2",desc:"Participar de manera activa en procesos colaborativos de producción de textos especializados"}, {codigo:"OA3",desc:"Utilizar diversas estrategias para registrar y procesar información obtenida en soportes"}, {codigo:"OA4",desc:"Utilizar diversas estrategias para construir y transformar el conocimiento por escrito, en"}, {codigo:"OA5",desc:"Buscar, evaluar y seleccionar rigurosamente fuentes disponibles en soportes impresos y"}]
+      },
+      {
+        key:    "part_dem",
+        nombre: "Participación y Argumentación en Democracia",
+        nivel:  "3º-4º Medio",
+        ejes:   ["UNIDAD 2 UNIDAD 3", "Formación Diferenciada Humanístico-Científica"],
+        oas:    [{codigo:"OA1",desc:"Construir colectivamente conclusiones, soluciones, preguntas, hipótesis o acuerdos que surjan"}, {codigo:"OA2",desc:"Dialogar argumentativamente, privilegiando el componente racional de la argumentación"}, {codigo:"OA3",desc:"Evaluar diversas formas en que se legitima el conocimiento en los discursos (investigación"}, {codigo:"OA4",desc:"Elaborar argumentos basándose en evidencias o información pública legitimada pertinentes al"}, {codigo:"OA5",desc:"Utilizar formas de argumentación y de legitimación del conocimiento, pertinentes al ámbito de"}, {codigo:"OA6",desc:"Evaluar críticamente argumentaciones surgidas en distintos ámbitos de la sociedad, enfocándose"}, {codigo:"OA7",desc:"Construir una postura personal sobre diversos temas controversiales y problemáticas de la"}]
+      },
+      {
+        key:    "taller_lit",
+        nombre: "Taller de Literatura",
+        nivel:  "3º Medio",
+        ejes:   ["Formación General", "Construyamos Transformemos Aprendamos a crear Conozcamos nuevos", "Construyamos trayectorias de lectura", "Transformemos experiencias reales"],
+        oas:    [{codigo:"OA1",desc:"Producir diversos géneros escritos y audiovisuales para desarrollar y comunicar sus interpretaciones"}, {codigo:"OA2",desc:"Producir textos pertenecientes a diversos géneros discursivos de la literatura que den cuenta de sus"}, {codigo:"OA3",desc:"Contribuir con sus comentarios, sugerencias, interpretaciones y críticas a los procesos de lectura"}, {codigo:"OA4",desc:"Revisar y reescribir sus propias producciones (escritas, orales o audiovisuales), a la luz de los"}, {codigo:"OA5",desc:"De las obras leídas"}, {codigo:"OA6",desc:"Producir textos y otras producciones que den cuenta de sus reflexiones sobre sí mismos y sobre"}]
+      }
+    ],
+    matematica: [
+      {
+        key:    "geo3d",
+        nombre: "geo3d",
+        nivel:  "3° y 4° Medio electivo",
+        ejes:   ["Geometría Espacial"],
+        oas:    [{codigo:"OA1",desc:"Argumentar OA 2. Resolver"}, {codigo:"OA2",desc:"Resolver problemas que involucren puntos, rectas y planos en el espacio 3D, haciendo uso de"}, {codigo:"OA4",desc:"Formular y OA 3. Resolver"}, {codigo:"OA5",desc:"Diseñar"}]
+      },
+      {
+        key:    "calculo",
+        nombre: "calculo",
+        nivel:  "3° y 4° Medio electivo",
+        ejes:   ["Límites", "Derivadas", "Integrales"],
+        oas:    [{codigo:"OA1",desc:"Utilizar OA 2. Argumentar OA 3. Modelar OA 5. Modelar"}, {codigo:"OA2",desc:"Argumentar acerca de la existencia de límites de funciones en el infinito y en un punto para"}, {codigo:"OA4",desc:"Resolver"}]
+      },
+      {
+        key:    "pens_comp",
+        nombre: "pens_comp",
+        nivel:  "3° y 4° Medio electivo",
+        ejes:   ["Pensamiento Computacional"],
+        oas:    [{codigo:"OA1",desc:"Aplicar"}, {codigo:"OA2",desc:"Representar OA 4. Crear OA 5. Desarrollar"}, {codigo:"OA3",desc:"Desarrollar y OA 6. Utilizar la"}, {codigo:"OA4",desc:"Crear aplicaciones y realizar análisis mediante procesadores simbólicos, de geometría dinámica"}]
+      },
+      {
+        key:    "prob_est",
+        nombre: "prob_est",
+        nivel:  "3° y 4° Medio electivo",
+        ejes:   ["Probabilidades", "Estadística Descriptiva", "Estadística Inferencial"],
+        oas:    [{codigo:"OA1",desc:"Argumentar y OA 2. Resolver OA 3. Modelar OA 4. Argumentar"}, {codigo:"OA2",desc:"Resolver problemas que involucren los conceptos de media muestral, desviación estándar, varianza"}]
+      }
+    ]
+  };
+
+  // ════════════════════════════════════════════════════════════
   //  ESPECIALIDADES TÉCNICO-PROFESIONALES (EMTP)
-  //  Todos los sectores y especialidades chilenas
   // ════════════════════════════════════════════════════════════
 
   // ── Sector: Electricidad ────────────────────────────────────
@@ -365,30 +952,102 @@ var CURRICULA_CHILE = (function() {
         nombre: 'Electricidad',
         sigla:  'EL',
         modulos: [
-          { num:'EL1',  nombre:'Seguridad en instalaciones eléctricas', aes:[
-            {num:1, nombre:'Riesgos eléctricos y normativa NSEG5'},
-            {num:2, nombre:'EPP y procedimientos de trabajo seguro'},
-            {num:3, nombre:'Primeros auxilios en accidentes eléctricos'}
+          { num:"E1", nombre:"Instalación De Motores Eléctricos", horas:152, aes:[
+          {num:1, nombre:"instala motores"},
+          {num:2, nombre:"instala equipos de"}
           ]},
-          { num:'EL2',  nombre:'Fundamentos eléctricos',                aes:[
-            {num:1, nombre:'Magnitudes eléctricas y unidades SI'},
-            {num:2, nombre:'Ley de Ohm y circuitos DC básicos'},
-            {num:3, nombre:'Potencia y energía eléctrica'}
+          { num:"E2", nombre:"Instalaciones Eléctricas Domiciliarias", horas:228, aes:[
+          {num:1, nombre:"Monta ductos y"},
+          {num:2, nombre:"realiza cableado"},
+          {num:3, nombre:"instala tablero"}
           ]},
-          { num:'EL3',  nombre:'Instalaciones eléctricas domiciliarias',aes:[
-            {num:1, nombre:'Normativa SEC e instalaciones residenciales'},
-            {num:2, nombre:'Tableros eléctricos y protecciones'},
-            {num:3, nombre:'Montaje de instalaciones interiores'}
+          { num:"E3", nombre:"Elaboración De Proyectos Eléctricos", horas:228, aes:[
+          {num:1, nombre:"Utiliza sistemas"},
+          {num:2, nombre:"Dibuja circuitos"},
+          {num:3, nombre:"Dimensiona cantidad"}
           ]},
-          { num:'EL4',  nombre:'Motores y máquinas eléctricas',         aes:[
-            {num:1, nombre:'Motor de inducción trifásico'},
-            {num:2, nombre:'Arranque directo y estrella-triángulo'},
-            {num:3, nombre:'Variadores de frecuencia básicos'}
+          { num:"E4", nombre:"Mantenimiento De Máquinas", horas:228, aes:[
+          {num:4, nombre:"restablecer o mejorar"}
           ]},
-          { num:'EL5',  nombre:'Instalaciones industriales',            aes:[
-            {num:1, nombre:'Tableros de distribución industrial'},
-            {num:2, nombre:'Circuitos de fuerza y mando'},
-            {num:3, nombre:'Instalaciones de baja tensión industrial'}
+          { num:"E5", nombre:"Instalación De Sistemas", horas:228, aes:[
+          {num:1, nombre:"instala circuitos"},
+          {num:1, nombre:"instala circuitos"},
+          {num:2, nombre:"instala circuitos"},
+          {num:3, nombre:"instala tablero"},
+          {num:4, nombre:"instala cuadros"}
+          ]},
+          { num:"E6", nombre:"Instalaciones Eléctricas Industriales", horas:228, aes:[
+          {num:1, nombre:"Ejecuta instalación"},
+          {num:2, nombre:"realiza instalación"},
+          {num:3, nombre:"instala tablero"}
+          ]},
+          { num:"E7", nombre:"Instalación De Equipos Electrónicos", horas:152, aes:[
+          {num:1, nombre:"instala dispositivos"},
+          {num:2, nombre:"instala circuitos de"}
+          ]},
+          { num:"E8", nombre:"Automatización De Sistemas Eléctricos", horas:152, aes:[
+          {num:1, nombre:"Maneja y ajusta"}
+          ]}
+        ]
+      }
+    ]
+  };
+
+  // ── Sector: Mecánica Automotriz ─────────────────────────────
+  var automotriz = {
+    nombre: 'Mecánica Automotriz',
+    sigla:  'AUTO',
+    sector: 'Metalmecánica',
+    color:  '#64748b',
+    especialidades: [
+      {
+        nombre: 'Mecánica Automotriz',
+        sigla:  'MA',
+        modulos: [
+          { num:"A1", nombre:"Ajuste De Motores", horas:228, aes:[
+          {num:1, nombre:"Diagnostica el estado"},
+          {num:2, nombre:"Verifica y reemplaza"},
+          {num:3, nombre:"Verifica el estado"},
+          {num:4, nombre:"Reemplaza y prueba"}
+          ]},
+          { num:"A13", nombre:"Electromovilidad", horas:76, aes:[
+          {num:5, nombre:"componentes de"}
+          ]},
+          { num:"A2", nombre:"Lectura De Planos Y Manuales Técnicos", horas:152, aes:[
+          {num:1, nombre:"lee e interpreta"},
+          {num:2, nombre:"lee e interpreta"},
+          {num:3, nombre:"Diagnostica y"}
+          ]},
+          { num:"A3", nombre:"Manejo De Residuos Y Desechos Automotrices", horas:76, aes:[
+          {num:1, nombre:"Reconoce los"}
+          ]},
+          { num:"A4", nombre:"Mantenimiento De Sistemas De Seguridad", horas:152, aes:[
+          {num:1, nombre:"lee e interpreta"},
+          {num:3, nombre:"lee e interpreta"},
+          {num:4, nombre:"de vehículos"}
+          ]},
+          { num:"A5", nombre:"Mantenimiento De Sistemas Eléctricos", horas:228, aes:[
+          {num:1, nombre:"Diagnostica y"},
+          {num:2, nombre:"Reemplaza y prueba"},
+          {num:3, nombre:"Reemplaza y prueba"},
+          {num:4, nombre:"aplica procedimientos"}
+          ]},
+          { num:"A6", nombre:"Mantenimiento De Motores", horas:190, aes:[
+          {num:1, nombre:"Controla el"}
+          ]},
+          { num:"A7", nombre:"Mantenimiento De Sistemas Hidráulicos", horas:190, aes:[
+          {num:1, nombre:"Prueba los diferentes"},
+          {num:7, nombre:"fabricante y a"},
+          {num:7, nombre:"apropiados, de las especificaciones técnicas establecidas en el manual I K"}
+          ]},
+          { num:"A8", nombre:"Mantenimiento De Los Sistemas De Transmisión", horas:190, aes:[
+          {num:8, nombre:"acuerdo a las pautas de mantenimiento del fabricante, de inspección y diagnóstico de fallas."}
+          ]},
+          { num:"A9", nombre:"Mantenimiento De Sistemas De Dirección", horas:190, aes:[
+          {num:1, nombre:"inspecciona"},
+          {num:2, nombre:"aplica mantenimiento"},
+          {num:3, nombre:"inspecciona"},
+          {num:5, nombre:"Realiza diagnóstico"}
           ]}
         ]
       }
@@ -398,258 +1057,69 @@ var CURRICULA_CHILE = (function() {
   // ── Sector: Electrónica ─────────────────────────────────────
   var electronica = {
     nombre: 'Electrónica',
-    sigla:  'EN',
+    sigla:  'ELEC2',
     sector: 'Electricidad',
-    color:  '#6366f1',
+    color:  '#3b82f6',
     especialidades: [
       {
         nombre: 'Electrónica',
-        sigla:  'EN',
+        sigla:  'EE',
         modulos: [
-          { num:'EN1',  nombre:'Introducción a la Electrónica',         aes:[
-            {num:1, nombre:'Magnitudes y unidades eléctricas'},
-            {num:2, nombre:'Componentes pasivos (R, L, C)'},
-            {num:3, nombre:'Instrumentos de medición'}
+          { num:'EE1', nombre:'Fundamentos de Electrónica', horas:152, aes:[
+            {num:1, nombre:'Componentes electrónicos pasivos y activos'},
+            {num:2, nombre:'Circuitos RC, RL y RLC básicos'},
+            {num:3, nombre:'Instrumentación electrónica básica'}
           ]},
-          { num:'EN2',  nombre:'Circuitos en Corriente Continua',       aes:[
-            {num:1, nombre:'Ley de Ohm y Kirchhoff'},
-            {num:2, nombre:'Circuitos serie, paralelo y mixto'},
-            {num:3, nombre:'Potencia y energía en CC'}
+          { num:'EE2', nombre:'Electrónica Digital', horas:152, aes:[
+            {num:1, nombre:'Sistemas de numeración y álgebra booleana'},
+            {num:2, nombre:'Circuitos combinacionales y secuenciales'},
+            {num:3, nombre:'Microcontroladores básicos (Arduino)'}
           ]},
-          { num:'EN3',  nombre:'Circuitos en Corriente Alterna',        aes:[
-            {num:1, nombre:'Señales alternas sinusoidales'},
-            {num:2, nombre:'Circuitos RLC en CA'},
-            {num:3, nombre:'Potencia activa, reactiva y aparente'}
+          { num:'EE3', nombre:'Instalación de Sistemas Electrónicos', horas:228, aes:[
+            {num:1, nombre:'Sistemas de alarma y seguridad'},
+            {num:2, nombre:'CCTV e intercomunicadores'},
+            {num:3, nombre:'Redes de datos básicas'}
           ]},
-          { num:'EN4',  nombre:'Electrónica Analógica',                 aes:[
-            {num:1, nombre:'Diodos y rectificadores'},
-            {num:2, nombre:'Transistor BJT'},
-            {num:3, nombre:'Amplificadores operacionales'}
-          ]},
-          { num:'EN5',  nombre:'Electrónica Digital',                   aes:[
-            {num:1, nombre:'Sistemas numéricos y álgebra de Boole'},
-            {num:2, nombre:'Compuertas y circuitos combinacionales'},
-            {num:3, nombre:'Circuitos secuenciales y flip-flops'}
-          ]},
-          { num:'EN6',  nombre:'Microcontroladores',                    aes:[
-            {num:1, nombre:'Arquitectura de microcontroladores'},
-            {num:2, nombre:'Programación en C para Arduino'},
-            {num:3, nombre:'Interfaz con periféricos (sensores, actuadores)'}
-          ]},
-          { num:'EN7',  nombre:'Automatización y Control',              aes:[
-            {num:1, nombre:'Sistemas de control en lazo abierto y cerrado'},
-            {num:2, nombre:'PLC: programación básica (Ladder)'},
-            {num:3, nombre:'Sensores industriales y actuadores'}
-          ]},
-          { num:'EN8',  nombre:'Telecomunicaciones',                    aes:[
-            {num:1, nombre:'Fundamentos de comunicaciones'},
-            {num:2, nombre:'Señales y modulación'},
-            {num:3, nombre:'Redes de comunicación básica'}
-          ]},
-          { num:'EN9',  nombre:'Electrónica de Potencia',               aes:[
-            {num:1, nombre:'Fuentes de alimentación reguladas'},
-            {num:2, nombre:'Tiristores y TRIAC'},
-            {num:3, nombre:'Convertidores DC-DC básicos'}
-          ]},
-          { num:'EN11', nombre:'Proyecto de Electrónica',               aes:[
-            {num:1, nombre:'Metodología de proyectos'},
-            {num:2, nombre:'Diseño y simulación del proyecto'},
-            {num:3, nombre:'Construcción y presentación'}
+          { num:'EE4', nombre:'Automatización y PLC', horas:228, aes:[
+            {num:1, nombre:'Lógica de control programable (PLC)'},
+            {num:2, nombre:'Sensores y actuadores industriales'},
+            {num:3, nombre:'Sistemas SCADA básicos'}
           ]}
         ]
       }
     ]
   };
 
-  // ── Sector: Telecomunicaciones ──────────────────────────────
-  var telecomunicaciones = {
-    nombre: 'Telecomunicaciones',
-    sigla:  'TC',
-    sector: 'Electricidad',
-    color:  '#0ea5e9',
-    especialidades: [
-      {
-        nombre: 'Telecomunicaciones',
-        sigla:  'TC',
-        modulos: [
-          { num:'TC1', nombre:'Fundamentos de Telecomunicaciones', aes:[
-            {num:1, nombre:'Espectro electromagnético y frecuencias'},
-            {num:2, nombre:'Modulación analógica AM/FM'},
-            {num:3, nombre:'Modulación digital'}
-          ]},
-          { num:'TC2', nombre:'Redes y Comunicaciones', aes:[
-            {num:1, nombre:'Modelo OSI y TCP/IP'},
-            {num:2, nombre:'Redes LAN/WAN'},
-            {num:3, nombre:'Configuración de equipos de red'}
-          ]},
-          { num:'TC3', nombre:'Sistemas de Radiocomunicaciones', aes:[
-            {num:1, nombre:'Antenas y propagación'},
-            {num:2, nombre:'Sistemas de radio enlace'},
-            {num:3, nombre:'Telefonía móvil básica'}
-          ]},
-          { num:'TC4', nombre:'Instalaciones de Telecomunicaciones', aes:[
-            {num:1, nombre:'Cableado estructurado'},
-            {num:2, nombre:'Sistemas de CCTV y seguridad'},
-            {num:3, nombre:'IPTV y sistemas multimedia'}
-          ]}
-        ]
-      }
-    ]
-  };
-
-  // ── Sector: Mecánica Industrial ─────────────────────────────
-  var mecanicaIndustrial = {
-    nombre: 'Mecánica Industrial',
-    sigla:  'MI',
-    sector: 'Metalmecánica',
-    color:  '#64748b',
-    especialidades: [
-      {
-        nombre: 'Mecánica Industrial',
-        sigla:  'MI',
-        modulos: [
-          { num:'MI1', nombre:'Seguridad Industrial', aes:[
-            {num:1, nombre:'Normativa de seguridad y salud ocupacional'},
-            {num:2, nombre:'EPP y señalética industrial'},
-            {num:3, nombre:'Riesgos físicos y mecánicos'}
-          ]},
-          { num:'MI2', nombre:'Metrología y Dibujo Técnico', aes:[
-            {num:1, nombre:'Instrumentos de medición (Vernier, micrómetro)'},
-            {num:2, nombre:'Tolerancias y ajustes'},
-            {num:3, nombre:'Lectura e interpretación de planos'}
-          ]},
-          { num:'MI3', nombre:'Mecánica de Máquinas', aes:[
-            {num:1, nombre:'Transmisiones de potencia (correas, cadenas, engranajes)'},
-            {num:2, nombre:'Rodamientos y lubricación'},
-            {num:3, nombre:'Mantenimiento mecánico preventivo'}
-          ]},
-          { num:'MI4', nombre:'Neumática e Hidráulica', aes:[
-            {num:1, nombre:'Fundamentos neumáticos'},
-            {num:2, nombre:'Circuitos neumáticos básicos'},
-            {num:3, nombre:'Hidráulica industrial básica'}
-          ]},
-          { num:'MI5', nombre:'Soldadura y Procesos', aes:[
-            {num:1, nombre:'Soldadura SMAW (electrodo revestido)'},
-            {num:2, nombre:'Soldadura MIG/MAG'},
-            {num:3, nombre:'Oxicorte y esmerilado'}
-          ]}
-        ]
-      }
-    ]
-  };
-
-  // ── Sector: Mecánica Automotriz ─────────────────────────────
-  var mecanicaAutomotriz = {
-    nombre: 'Mecánica Automotriz',
-    sigla:  'MA',
-    sector: 'Metalmecánica',
-    color:  '#dc2626',
-    especialidades: [
-      {
-        nombre: 'Mecánica Automotriz',
-        sigla:  'MA',
-        modulos: [
-          { num:'MA1', nombre:'Fundamentos Automotrices', aes:[
-            {num:1, nombre:'Tipos de vehículos y sistemas'},
-            {num:2, nombre:'Herramientas y equipos automotrices'},
-            {num:3, nombre:'Seguridad en el taller'}
-          ]},
-          { num:'MA2', nombre:'Motor de Combustión Interna', aes:[
-            {num:1, nombre:'Ciclos termodinámicos Otto y Diesel'},
-            {num:2, nombre:'Sistemas del motor (distribución, lubricación, enfriamiento)'},
-            {num:3, nombre:'Diagnóstico y reparación de motor'}
-          ]},
-          { num:'MA3', nombre:'Sistemas de Transmisión', aes:[
-            {num:1, nombre:'Embrague y caja de cambios'},
-            {num:2, nombre:'Diferencial y árbol de transmisión'},
-            {num:3, nombre:'Transmisión automática básica'}
-          ]},
-          { num:'MA4', nombre:'Sistemas Eléctricos del Vehículo', aes:[
-            {num:1, nombre:'Circuitos eléctricos automotrices'},
-            {num:2, nombre:'Sistema de carga y arranque'},
-            {num:3, nombre:'Diagnosis electrónica (OBD-II)'}
-          ]},
-          { num:'MA5', nombre:'Sistemas de Frenos y Suspensión', aes:[
-            {num:1, nombre:'Frenos hidráulicos de disco y tambor'},
-            {num:2, nombre:'Sistema ABS básico'},
-            {num:3, nombre:'Suspensión y dirección'}
-          ]}
-        ]
-      }
-    ]
-  };
-
-  // ── Sector: Construcción ────────────────────────────────────
-  var construccion = {
-    nombre: 'Construcción',
-    sigla:  'CO',
-    sector: 'Construcción',
-    color:  '#92400e',
-    especialidades: [
-      {
-        nombre: 'Construcción',
-        sigla:  'CO',
-        modulos: [
-          { num:'CO1', nombre:'Dibujo Arquitectónico', aes:[
-            {num:1, nombre:'Normas y simbología de planos'},
-            {num:2, nombre:'AutoCAD básico'},
-            {num:3, nombre:'Lectura de planos de construcción'}
-          ]},
-          { num:'CO2', nombre:'Materiales de Construcción', aes:[
-            {num:1, nombre:'Cemento, hormigón y mortero'},
-            {num:2, nombre:'Maderas y estructuras de madera'},
-            {num:3, nombre:'Cerámicos, vidrios y aislantes'}
-          ]},
-          { num:'CO3', nombre:'Albañilería', aes:[
-            {num:1, nombre:'Fundaciones y cimientos'},
-            {num:2, nombre:'Muros y tabiques'},
-            {num:3, nombre:'Terminaciones y revestimientos'}
-          ]},
-          { num:'CO4', nombre:'Instalaciones Sanitarias', aes:[
-            {num:1, nombre:'Red de agua potable domiciliaria'},
-            {num:2, nombre:'Red de alcantarillado'},
-            {num:3, nombre:'Gas domiciliario básico'}
-          ]}
-        ]
-      }
-    ]
-  };
-
-  // ── Sector: Informática ─────────────────────────────────────
+  // ── Sector: Informática y Comunicación ──────────────────────
   var informatica = {
     nombre: 'Informática',
-    sigla:  'INF',
-    sector: 'Informática',
-    color:  '#7c3aed',
+    sigla:  'INFO',
+    sector: 'Informática y Comunicación',
+    color:  '#6366f1',
     especialidades: [
       {
-        nombre: 'Informática',
-        sigla:  'INF',
+        nombre: 'Técnico en Informática',
+        sigla:  'TI',
         modulos: [
-          { num:'INF1', nombre:'Fundamentos de Informática', aes:[
-            {num:1, nombre:'Hardware y arquitectura de computadores'},
-            {num:2, nombre:'Sistemas operativos (Windows/Linux)'},
-            {num:3, nombre:'Ofimática avanzada'}
+          { num:'TI1', nombre:'Sistemas Operativos', horas:152, aes:[
+            {num:1, nombre:'Instalación y configuración de SO (Windows/Linux)'},
+            {num:2, nombre:'Administración de usuarios y permisos'},
+            {num:3, nombre:'Virtualización básica'}
           ]},
-          { num:'INF2', nombre:'Redes Informáticas', aes:[
-            {num:1, nombre:'Modelo OSI y protocolos TCP/IP'},
-            {num:2, nombre:'Instalación y configuración de redes LAN'},
+          { num:'TI2', nombre:'Redes y Conectividad', horas:152, aes:[
+            {num:1, nombre:'Modelo OSI y TCP/IP'},
+            {num:2, nombre:'Configuración de routers y switches'},
             {num:3, nombre:'Seguridad en redes básica'}
           ]},
-          { num:'INF3', nombre:'Programación', aes:[
-            {num:1, nombre:'Algoritmos y pseudocódigo'},
-            {num:2, nombre:'Programación en Python'},
-            {num:3, nombre:'Bases de datos SQL básicas'}
+          { num:'TI3', nombre:'Programación Web', horas:228, aes:[
+            {num:1, nombre:'HTML5, CSS3 y JavaScript básico'},
+            {num:2, nombre:'Bases de datos relacionales (SQL)'},
+            {num:3, nombre:'Desarrollo de aplicaciones web básicas'}
           ]},
-          { num:'INF4', nombre:'Soporte Técnico', aes:[
+          { num:'TI4', nombre:'Soporte Técnico', horas:152, aes:[
             {num:1, nombre:'Diagnóstico y reparación de hardware'},
-            {num:2, nombre:'Instalación y configuración de software'},
-            {num:3, nombre:'Atención al usuario técnico'}
-          ]},
-          { num:'INF5', nombre:'Desarrollo Web', aes:[
-            {num:1, nombre:'HTML5 y CSS3'},
-            {num:2, nombre:'JavaScript básico'},
-            {num:3, nombre:'Publicación y hosting web'}
+            {num:2, nombre:'Soporte a usuarios y documentación'},
+            {num:3, nombre:'Mantenimiento preventivo y correctivo'}
           ]}
         ]
       }
@@ -659,189 +1129,64 @@ var CURRICULA_CHILE = (function() {
   // ── Sector: Administración y Comercio ───────────────────────
   var administracion = {
     nombre: 'Administración y Comercio',
-    sigla:  'AC',
-    sector: 'Administración',
-    color:  '#0891b2',
+    sigla:  'ADM',
+    sector: 'Administración y Comercio',
+    color:  '#10b981',
     especialidades: [
       {
-        nombre: 'Administración',
+        nombre: 'Técnico en Administración',
         sigla:  'ADM',
         modulos: [
-          { num:'ADM1', nombre:'Fundamentos de Administración', aes:[
-            {num:1, nombre:'Teorías administrativas'},
-            {num:2, nombre:'Proceso administrativo'},
-            {num:3, nombre:'Organizaciones y su entorno'}
+          { num:'ADM1', nombre:'Contabilidad Básica', horas:152, aes:[
+            {num:1, nombre:'Documentos mercantiles y libros contables'},
+            {num:2, nombre:'Balance y estado de resultados básico'},
+            {num:3, nombre:'Software contable (ERP básico)'}
           ]},
-          { num:'ADM2', nombre:'Contabilidad Básica', aes:[
-            {num:1, nombre:'Principios contables'},
-            {num:2, nombre:'Documentos mercantiles'},
-            {num:3, nombre:'Balance y estados financieros básicos'}
+          { num:'ADM2', nombre:'Gestión Tributaria', horas:152, aes:[
+            {num:1, nombre:'IVA, boletas y facturas electrónicas'},
+            {num:2, nombre:'Declaraciones SII básicas'},
+            {num:3, nombre:'Régimen tributario PYME'}
           ]},
-          { num:'ADM3', nombre:'Recursos Humanos', aes:[
-            {num:1, nombre:'Legislación laboral chilena'},
-            {num:2, nombre:'Liquidación de sueldos'},
+          { num:'ADM3', nombre:'Recursos Humanos', horas:152, aes:[
+            {num:1, nombre:'Contrato de trabajo y legislación laboral'},
+            {num:2, nombre:'Liquidación de sueldos y previsión'},
             {num:3, nombre:'Gestión de personas básica'}
-          ]}
-        ]
-      },
-      {
-        nombre: 'Contabilidad',
-        sigla:  'CON',
-        modulos: [
-          { num:'CON1', nombre:'Contabilidad General', aes:[
-            {num:1, nombre:'Partida doble y plan de cuentas'},
-            {num:2, nombre:'Libro diario y mayor'},
-            {num:3, nombre:'Balance de comprobación'}
           ]},
-          { num:'CON2', nombre:'Contabilidad de Costos', aes:[
-            {num:1, nombre:'Clasificación de costos'},
-            {num:2, nombre:'Sistemas de costeo'},
-            {num:3, nombre:'Análisis costo-volumen-utilidad'}
-          ]},
-          { num:'CON3', nombre:'Tributación', aes:[
-            {num:1, nombre:'Sistema tributario chileno'},
-            {num:2, nombre:'IVA y formularios SII'},
-            {num:3, nombre:'Renta de empresas y personas'}
+          { num:'ADM4', nombre:'Emprendimiento y Gestión', horas:76, aes:[
+            {num:1, nombre:'Plan de negocios básico (Canvas)'},
+            {num:2, nombre:'Marketing digital básico'},
+            {num:3, nombre:'Gestión financiera de pequeñas empresas'}
           ]}
         ]
       }
     ]
   };
 
-  // ── Sector: Gastronomía ─────────────────────────────────────
-  var gastronomia = {
-    nombre: 'Gastronomía',
-    sigla:  'GAS',
-    sector: 'Gastronomía',
-    color:  '#f97316',
+  // ── Sector: Construcción ────────────────────────────────────
+  var construccion = {
+    nombre: 'Construcción',
+    sigla:  'CONST',
+    sector: 'Construcción',
+    color:  '#92400e',
     especialidades: [
       {
-        nombre: 'Gastronomía',
-        sigla:  'GAS',
+        nombre: 'Técnico en Construcción',
+        sigla:  'CO',
         modulos: [
-          { num:'GAS1', nombre:'Fundamentos de Gastronomía', aes:[
-            {num:1, nombre:'Historia de la gastronomía'},
-            {num:2, nombre:'Higiene y manipulación de alimentos'},
-            {num:3, nombre:'Mise en place y organización de cocina'}
+          { num:'CO1', nombre:'Materiales de Construcción', horas:152, aes:[
+            {num:1, nombre:'Propiedades y uso de materiales constructivos'},
+            {num:2, nombre:'Áridos, cementos y concreto'},
+            {num:3, nombre:'Madera y acero en construcción'}
           ]},
-          { num:'GAS2', nombre:'Técnicas Culinarias Básicas', aes:[
-            {num:1, nombre:'Cortes y preparaciones básicas'},
-            {num:2, nombre:'Técnicas de cocción'},
-            {num:3, nombre:'Fondos, salsas y aderezos'}
+          { num:'CO2', nombre:'Lectura de Planos', horas:152, aes:[
+            {num:1, nombre:'Simbología y normas de dibujo técnico'},
+            {num:2, nombre:'Plantas, cortes y elevaciones'},
+            {num:3, nombre:'Especificaciones técnicas y cubicaciones'}
           ]},
-          { num:'GAS3', nombre:'Cocina Chilena e Internacional', aes:[
-            {num:1, nombre:'Gastronomía típica chilena'},
-            {num:2, nombre:'Cocina latinoamericana'},
-            {num:3, nombre:'Cocina internacional básica'}
-          ]},
-          { num:'GAS4', nombre:'Pastelería y Panadería', aes:[
-            {num:1, nombre:'Masas y pastas básicas'},
-            {num:2, nombre:'Técnicas de pastelería'},
-            {num:3, nombre:'Decoración y presentación'}
-          ]}
-        ]
-      }
-    ]
-  };
-
-  // ── Sector: Salud ───────────────────────────────────────────
-  var salud = {
-    nombre: 'Salud',
-    sigla:  'SAL',
-    sector: 'Salud',
-    color:  '#ec4899',
-    especialidades: [
-      {
-        nombre: 'Atención de Adulto Mayor',
-        sigla:  'AAM',
-        modulos: [
-          { num:'AAM1', nombre:'Gerontología y Geriatría Básica', aes:[
-            {num:1, nombre:'Proceso de envejecimiento'},
-            {num:2, nombre:'Patologías frecuentes del adulto mayor'},
-            {num:3, nombre:'Cuidados básicos de enfermería'}
-          ]},
-          { num:'AAM2', nombre:'Cuidados Integrales', aes:[
-            {num:1, nombre:'Higiene y confort del paciente'},
-            {num:2, nombre:'Alimentación y nutrición en adulto mayor'},
-            {num:3, nombre:'Actividades terapéuticas'}
-          ]}
-        ]
-      },
-      {
-        nombre: 'Auxiliar de Enfermería',
-        sigla:  'AE',
-        modulos: [
-          { num:'AE1', nombre:'Fundamentos de Enfermería', aes:[
-            {num:1, nombre:'Historia de la enfermería y ética'},
-            {num:2, nombre:'Anatomía y fisiología básica'},
-            {num:3, nombre:'Signos vitales y medidas antropométricas'}
-          ]},
-          { num:'AE2', nombre:'Procedimientos de Enfermería', aes:[
-            {num:1, nombre:'Administración de medicamentos'},
-            {num:2, nombre:'Vendajes y curaciones'},
-            {num:3, nombre:'Técnicas de primeros auxilios'}
-          ]}
-        ]
-      }
-    ]
-  };
-
-  // ── Sector: Turismo ─────────────────────────────────────────
-  var turismo = {
-    nombre: 'Turismo',
-    sigla:  'TUR',
-    sector: 'Turismo',
-    color:  '#06b6d4',
-    especialidades: [
-      {
-        nombre: 'Turismo',
-        sigla:  'TUR',
-        modulos: [
-          { num:'TUR1', nombre:'Fundamentos del Turismo', aes:[
-            {num:1, nombre:'Historia y tipos de turismo'},
-            {num:2, nombre:'Geografía turística de Chile'},
-            {num:3, nombre:'Industria turística y actores'}
-          ]},
-          { num:'TUR2', nombre:'Servicios Hoteleros', aes:[
-            {num:1, nombre:'Organización hotelera'},
-            {num:2, nombre:'Front office y atención al cliente'},
-            {num:3, nombre:'Housekeeping básico'}
-          ]},
-          { num:'TUR3', nombre:'Guía de Turismo', aes:[
-            {num:1, nombre:'Patrimonio natural y cultural de Chile'},
-            {num:2, nombre:'Técnicas de guiado'},
-            {num:3, nombre:'Turismo sustentable'}
-          ]}
-        ]
-      }
-    ]
-  };
-
-  // ── Sector: Agronomía ───────────────────────────────────────
-  var agronomia = {
-    nombre: 'Agronomía',
-    sigla:  'AGR',
-    sector: 'Agropecuario',
-    color:  '#84cc16',
-    especialidades: [
-      {
-        nombre: 'Agropecuario',
-        sigla:  'AGP',
-        modulos: [
-          { num:'AGP1', nombre:'Fundamentos Agropecuarios', aes:[
-            {num:1, nombre:'Suelo y edafología básica'},
-            {num:2, nombre:'Climatología agrícola'},
-            {num:3, nombre:'Plantas y su clasificación'}
-          ]},
-          { num:'AGP2', nombre:'Producción Vegetal', aes:[
-            {num:1, nombre:'Horticultura básica'},
-            {num:2, nombre:'Fruticultura'},
-            {num:3, nombre:'Riego y fertilización'}
-          ]},
-          { num:'AGP3', nombre:'Producción Animal', aes:[
-            {num:1, nombre:'Ganadería bovina y ovina'},
-            {num:2, nombre:'Avicultura'},
-            {num:3, nombre:'Sanidad animal básica'}
+          { num:'CO3', nombre:'Instalaciones Sanitarias', horas:152, aes:[
+            {num:1, nombre:'Red de agua potable y alcantarillado'},
+            {num:2, nombre:'Gas domiciliario básico'},
+            {num:3, nombre:'Normativa sanitaria MINVU/SISS'}
           ]}
         ]
       }
@@ -849,132 +1194,60 @@ var CURRICULA_CHILE = (function() {
   };
 
   // ════════════════════════════════════════════════════════════
-  //  ÍNDICE COMPLETO DE ESPECIALIDADES
+  //  API pública — CURRICULA_CHILE
   // ════════════════════════════════════════════════════════════
-  var especialidades = {
-    'Electricidad':         electricidad,
-    'Electronica':          electronica,
-    'Telecomunicaciones':   telecomunicaciones,
-    'MecanicaIndustrial':   mecanicaIndustrial,
-    'MecanicaAutomotriz':   mecanicaAutomotriz,
-    'Construccion':         construccion,
-    'Informatica':          informatica,
-    'Administracion':       administracion,
-    'Gastronomia':          gastronomia,
-    'Salud':                salud,
-    'Turismo':              turismo,
-    'Agronomia':            agronomia
-  };
-
-  // ════════════════════════════════════════════════════════════
-  //  FUNCIONES DE UTILIDAD
-  // ════════════════════════════════════════════════════════════
-
-  /** Obtener lista de todas las asignaturas según tipo y nivel */
-  function getAsignaturas(tipo, nivel) {
-    if (tipo === 'basica') {
-      return basica.asignaturas.filter(function(a) {
-        return !nivel || a.niveles.indexOf(nivel) !== -1;
-      });
-    }
-    if (tipo === 'planComun' || tipo === 'media') {
-      return planComun.asignaturas.filter(function(a) {
-        return !nivel || a.niveles.indexOf(nivel) !== -1;
-      });
-    }
-    return [];
-  }
-
-  /** Obtener lista de todas las especialidades */
-  function getEspecialidades() {
-    return Object.keys(especialidades).map(function(key) {
-      var esp = especialidades[key];
-      return {
-        key:    key,
-        nombre: esp.nombre,
-        sector: esp.sector,
-        color:  esp.color,
-        sigla:  esp.sigla
-      };
-    });
-  }
-
-  /** Obtener módulos de una especialidad */
-  function getModulos(especialidadKey, subEspecialidad) {
-    var esp = especialidades[especialidadKey];
-    if (!esp) return [];
-    var target = esp;
-    if (esp.especialidades) {
-      if (subEspecialidad) {
-        var found = esp.especialidades.filter(function(e) { return e.sigla === subEspecialidad; })[0];
-        target = found || esp.especialidades[0];
-      } else {
-        target = esp.especialidades[0];
-      }
-    }
-    return target ? (target.modulos || []) : [];
-  }
-
-  /** Obtener AEs de un módulo */
-  function getAEs(especialidadKey, moduloNum) {
-    var modulos = getModulos(especialidadKey);
-    var modulo = modulos.filter(function(m) { return m.num === moduloNum; })[0];
-    return modulo ? modulo.aes : [];
-  }
-
-  /** Obtener niveles según tipo */
-  function getNiveles(tipo) {
-    if (tipo === 'basica') return ['1B','2B','3B','4B','5B','6B','7B','8B'];
-    if (tipo === 'planComun' || tipo === 'media') return ['1M','2M','3M','4M'];
-    if (tipo === 'tecnico') return ['3M','4M'];
-    return [];
-  }
-
-  /** Buscar en todo el currículo */
-  function buscar(termino) {
-    var resultados = [];
-    var t = termino.toLowerCase();
-
-    // Buscar en asignaturas básica
-    basica.asignaturas.forEach(function(a) {
-      if (a.nombre.toLowerCase().indexOf(t) !== -1) {
-        resultados.push({ tipo: 'asignatura', nivel: 'Básica', nombre: a.nombre, sigla: a.sigla });
-      }
-    });
-
-    // Buscar en plan común
-    planComun.asignaturas.forEach(function(a) {
-      if (a.nombre.toLowerCase().indexOf(t) !== -1) {
-        resultados.push({ tipo: 'asignatura', nivel: 'Media', nombre: a.nombre, sigla: a.sigla });
-      }
-    });
-
-    // Buscar en especialidades
-    Object.keys(especialidades).forEach(function(key) {
-      var esp = especialidades[key];
-      if (esp.nombre.toLowerCase().indexOf(t) !== -1) {
-        resultados.push({ tipo: 'especialidad', nombre: esp.nombre, sector: esp.sector });
-      }
-      var mods = getModulos(key);
-      mods.forEach(function(m) {
-        if (m.nombre.toLowerCase().indexOf(t) !== -1) {
-          resultados.push({ tipo: 'modulo', especialidad: esp.nombre, nombre: m.nombre, num: m.num });
-        }
-      });
-    });
-
-    return resultados;
-  }
-
   return {
-    basica:          basica,
-    planComun:       planComun,
-    especialidades:  especialidades,
-    getAsignaturas:  getAsignaturas,
-    getEspecialidades: getEspecialidades,
-    getModulos:      getModulos,
-    getAEs:          getAEs,
-    getNiveles:      getNiveles,
-    buscar:          buscar
+    basica:         basica,
+    planComun:      planComun,
+    electivosMedia: electivosMedia,
+    especialidades: {
+      electricidad:   electricidad,
+      automotriz:     automotriz,
+      electronica:    electronica,
+      informatica:    informatica,
+      administracion: administracion,
+      construccion:   construccion
+    },
+
+    // ── Helpers ────────────────────────────────────────────────
+    getAsignaturas: function(nivel) {
+      if (nivel.endsWith('B')) return basica.asignaturas.filter(function(a) {
+        return a.niveles.indexOf(nivel) !== -1;
+      });
+      if (nivel.endsWith('M')) return planComun.asignaturas.filter(function(a) {
+        return a.niveles.indexOf(nivel) !== -1;
+      });
+      return [];
+    },
+
+    getOAs: function(asigSigla, nivel) {
+      var arr = nivel.endsWith('B') ? basica.asignaturas : planComun.asignaturas;
+      var asig = arr.find ? arr.find(function(a){ return a.sigla === asigSigla; }) : null;
+      if (!asig) return [];
+      return (asig.oas && asig.oas[nivel]) || [];
+    },
+
+    getModulos: function(sectorKey) {
+      var sec = this.especialidades[sectorKey];
+      if (!sec) return [];
+      var mods = [];
+      (sec.especialidades || []).forEach(function(esp) {
+        (esp.modulos || []).forEach(function(m) { mods.push(m); });
+      });
+      return mods;
+    },
+
+    getAllNiveles: function() {
+      return ['1B','2B','3B','4B','5B','6B','7B','8B','1M','2M','3M','4M'];
+    },
+
+    getNivelLabel: function(nivel) {
+      var map = {
+        '1B':'1° Básico','2B':'2° Básico','3B':'3° Básico','4B':'4° Básico',
+        '5B':'5° Básico','6B':'6° Básico','7B':'7° Básico','8B':'8° Básico',
+        '1M':'1° Medio','2M':'2° Medio','3M':'3° Medio','4M':'4° Medio'
+      };
+      return map[nivel] || nivel;
+    }
   };
 })();
