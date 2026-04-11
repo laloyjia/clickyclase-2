@@ -23,7 +23,7 @@ var ELDB = (function() {
      */
     guardar: function(data) {
       var entrada = Object.assign({}, data, {
-        publicadoEn:  firebase.firestore.FieldValue.serverTimestamp(),
+        publicadoEn:  EL_DB.FieldValue.serverTimestamp(),
         fechaISO:     new Date().toISOString(),
         activo:       true,
         vistas:       0
@@ -67,7 +67,7 @@ var ELDB = (function() {
 
     incrementarVistas: function(id) {
       return EL_DB.collection(EL_COLLECTIONS.MATERIALES).doc(id).update({
-        vistas: firebase.firestore.FieldValue.increment(1)
+        vistas: EL_DB.FieldValue.increment(1)
       });
     },
 
@@ -96,7 +96,7 @@ var ELDB = (function() {
   var planificaciones = {
     guardar: function(data) {
       var entrada = Object.assign({}, data, {
-        publicadoEn: firebase.firestore.FieldValue.serverTimestamp(),
+        publicadoEn: EL_DB.FieldValue.serverTimestamp(),
         fechaISO:    new Date().toISOString(),
         activo:      true
       });
@@ -152,7 +152,7 @@ var ELDB = (function() {
     registrar: function(uid, evalData) {
       var entrada = Object.assign({}, evalData, {
         uid:        uid,
-        realizadoEn: firebase.firestore.FieldValue.serverTimestamp(),
+        realizadoEn: EL_DB.FieldValue.serverTimestamp(),
         fechaISO:   new Date().toISOString()
       });
 
@@ -165,8 +165,8 @@ var ELDB = (function() {
       // 2. Actualizar XP y estadísticas del usuario
       var userRef = EL_DB.collection(EL_COLLECTIONS.USERS).doc(uid);
       batch.update(userRef, {
-        xp:            firebase.firestore.FieldValue.increment(evalData.xpGanado || 0),
-        totalEvals:    firebase.firestore.FieldValue.increment(1),
+        xp:            EL_DB.FieldValue.increment(evalData.xpGanado || 0),
+        totalEvals:    EL_DB.FieldValue.increment(1),
         ultimaEval:    new Date().toISOString()
       });
 
@@ -332,7 +332,7 @@ var ELDB = (function() {
             EL_DB.collection(EL_COLLECTIONS.MATERIALES).add(Object.assign(m, {
               activo: true,
               migrado: true,
-              publicadoEn: firebase.firestore.FieldValue.serverTimestamp()
+              publicadoEn: EL_DB.FieldValue.serverTimestamp()
             }))
           );
         });
@@ -346,7 +346,7 @@ var ELDB = (function() {
             EL_DB.collection(EL_COLLECTIONS.PLANIFICACIONES).add(Object.assign(p, {
               activo: true,
               migrado: true,
-              publicadoEn: firebase.firestore.FieldValue.serverTimestamp()
+              publicadoEn: EL_DB.FieldValue.serverTimestamp()
             }))
           );
         });

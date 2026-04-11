@@ -2,6 +2,10 @@
  * firebase-config.js
  * ElectroLearn — Configuración Firebase
  * Proyecto: electrolearn-prod
+ *
+ * IMPORTANTE: EL_DB ya NO usa el SDK de Firestore (que da "client is offline").
+ * EL_DB es inicializado en firebase-rest.js via Firestore REST API (HTTPS puro).
+ * Este archivo solo inicializa Firebase App + Auth (que sí funcionan).
  */
 
 // ─────────────────────────────────────────────────────────────
@@ -17,7 +21,8 @@ var FIREBASE_CONFIG = {
 };
 
 // ─────────────────────────────────────────────────────────────
-//  Inicialización (Firebase v9 compat — funciona sin bundler)
+//  Inicialización: Firebase App + Auth solamente
+//  (Firestore SDK removido — se usa firebase-rest.js en su lugar)
 // ─────────────────────────────────────────────────────────────
 (function initFirebase() {
   if (typeof firebase === 'undefined') {
@@ -26,20 +31,24 @@ var FIREBASE_CONFIG = {
   }
   if (!firebase.apps || firebase.apps.length === 0) {
     firebase.initializeApp(FIREBASE_CONFIG);
-    console.log('[ElectroLearn] Firebase inicializado ✔');
+    console.log('[ElectroLearn] Firebase inicializado (App + Auth) OK');
   }
-  window.EL_DB   = firebase.firestore();
+
+  // Solo Auth — NO inicializamos Firestore SDK (da "client is offline")
   window.EL_AUTH = firebase.auth();
   window.EL_AUTH.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
-    .catch(function(err) {
-      console.warn('[ElectroLearn] Persistencia:', err.message);
+    .catch(function (err) {
+      console.warn('[ElectroLearn] Persistencia Auth:', err.message);
     });
+
+  // EL_DB lo inicializa firebase-rest.js (debe cargarse después de este script)
+  // _init() se llama al final de este archivo una vez que EL_DB esté disponible
 })();
 
 // ─────────────────────────────────────────────────────────────
 //  Constantes globales de la app
 // ─────────────────────────────────────────────────────────────
-var EL_VERSION  = '2.0.0';
+var EL_VERSION  = '2.1.0';
 var EL_APP_NAME = 'ElectroLearn';
 
 // Correos de administrador
@@ -66,3 +75,26 @@ var EL_COLLECTIONS = {
   CURRICULA:       'curricula',
   RECURSOS:        'recursos_curricula'
 };
+
+// ─────────────────────────────────────────────────────────────
+//  Activar el cliente REST de Firestore
+//  (EL_DB se declara en firebase-rest.js, que debe cargarse ANTES)
+//  Si por algún motivo ya está declarado, solo llamamos _init()
+// ─────────────────────────────────────────────────────────────
+(function activarRestDB() {
+  if (typeof EL_DB !== 'undefined' && typeof EL_DB._init === 'function') {
+    EL_DB._init(FIREBASE_CONFIG.projectId);
+    console.log('[ElectroLearn] EL_DB REST activado para proyecto:', FIREBASE_CONFIG.projectId);
+  } else {
+    // EL_DB aún no está cargado (orden de scripts incorrecto)
+    // Programamos la activación para cuando el DOM esté listo
+    document.addEventListener('DOMContentLoaded', function () {
+      if (typeof EL_DB !== 'undefined' && typeof EL_DB._init === 'function') {
+        EL_DB._init(FIREBASE_CONFIG.projectId);
+        console.log('[ElectroLearn] EL_DB REST activado (deferred)');
+      } else {
+        console.error('[ElectroLearn] EL_DB no disponible — ¿se cargó firebase-rest.js?');
+      }
+    });
+  }
+})();

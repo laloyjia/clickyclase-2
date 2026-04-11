@@ -8,7 +8,7 @@
 <!-- Firebase SDK v9 compat -->
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+<script src="js/firebase-rest.js"></script>
 <script src="js/firebase-config.js"></script>
 <script src="js/firebase-auth.js"></script>
 <script src="js/firebase-db.js"></script>
@@ -354,6 +354,31 @@ tr:hover td{background:rgba(99,102,241,.05)}
   </div>
 </div>
 
+<!-- MODAL EDITAR PERMISOS PROFESOR -->
+<div class="modal-bg" id="modalPermProf">
+  <div class="modal" style="max-width:600px">
+    <button class="modal-close" onclick="closeModal('modalPermProf')">✕</button>
+    <h2>🔑 Editar Permisos del Profesor</h2>
+    <div id="ppNotif" class="notif"></div>
+    <div id="ppNombreInfo" style="background:var(--surface2);border-radius:10px;padding:12px 16px;margin-bottom:16px;font-size:.875rem"></div>
+    <input type="hidden" id="ppUid">
+    <div class="form-group" style="margin-bottom:14px">
+      <label>Tipo de docente</label>
+      <select id="ppTipo" onchange="ppBuildAsig()">
+        <option value="">— Seleccionar —</option>
+        <option value="basica">📚 Educación Básica</option>
+        <option value="media">🎓 Plan Común (Enseñanza Media)</option>
+        <option value="tecnico">⚙️ Técnico-Profesional (EMTP)</option>
+      </select>
+    </div>
+    <div id="ppAsigSection"></div>
+    <div style="text-align:right;margin-top:20px;display:flex;gap:8px;justify-content:flex-end">
+      <button class="btn btn-outline" onclick="closeModal('modalPermProf')">Cancelar</button>
+      <button class="btn btn-primary" id="btnGuardarPermisos" onclick="guardarPermisos()">💾 Guardar Permisos</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL RECURSO CURRICULAR -->
 <div class="modal-bg" id="modalRecurso">
   <div class="modal" style="max-width:520px">
@@ -398,8 +423,10 @@ var _rCurrentTab='tp';
 
 ELAuth.requireAuth(['admin','profesor']);
 ELAuth.onUserReady(function(user){
-  if(!user){return;}
-  if(user.role!=='admin'&&user.email!==EL_ADMIN_EMAIL){
+  if(!user){window.location.href='index.html';return;}
+  var adminEmails=window.EL_ADMIN_EMAILS||[EL_ADMIN_EMAIL];
+  var esAdmin=user.role==='admin'||adminEmails.indexOf(user.email)!==-1;
+  if(!esAdmin){
     alert('Acceso solo para administradores.');window.location.href='dashboard.html';return;
   }
   document.getElementById('adminEmail').textContent=user.nombre||user.email;
@@ -414,7 +441,12 @@ function loadData(){
     document.getElementById('sEsts').textContent=u.filter(function(x){return x.role==='estudiante';}).length;
     renderUsers(u);
     renderProfs(u.filter(function(x){return x.role==='profesor'||x.role==='admin';}));
-  }).catch(console.error);
+    mostrarToastDB(true,'✅ Base de datos conectada');
+  }).catch(function(e){
+    console.error('[Admin] Error cargando usuarios:',e);
+    mostrarToastDB(false,'❌ Error DB: '+e.message);
+    document.getElementById('usersTbody').innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--red)">Error cargando datos: '+e.message+'</td></tr>';
+  });
   ELDB.materiales.listar().then(function(m){
     allMats=m;document.getElementById('sMats').textContent=m.length;renderMats(m);
   }).catch(console.error);
@@ -457,7 +489,7 @@ function renderProfs(list){
   tb.innerHTML=list.map(function(p){
     var tipo=p.tipoProfesor==='basica'?'📚 Básica':p.tipoProfesor==='media'?'🎓 Plan Común':p.tipoProfesor==='tecnico'?'⚙️ EMTP':'—';
     var asig=p.asignaturas&&p.asignaturas.length?p.asignaturas.join(', '):(p.especialidad||'—');
-    return '<tr><td><strong>'+(p.nombre||'—')+'</strong></td><td style="color:var(--muted)">'+p.email+'</td><td>'+tipo+'</td><td style="font-size:.8rem">'+asig+'</td><td style="font-size:.8rem">'+(p.niveles&&p.niveles.join(', ')||'—')+'</td><td><button class="btn btn-outline btn-sm" onclick="editUser(\''+p.uid+'\')">✏️</button></td></tr>';
+    return '<tr><td><strong>'+(p.nombre||'—')+'</strong></td><td style="color:var(--muted)">'+p.email+'</td><td>'+tipo+'</td><td style="font-size:.8rem">'+asig+'</td><td style="font-size:.8rem">'+(p.niveles&&p.niveles.join(', ')||'—')+'</td><td style="display:flex;gap:6px"><button class="btn btn-outline btn-sm" onclick="editUser(\''+p.uid+'\')">✏️ Datos</button><button class="btn btn-primary btn-sm" onclick="editarPermisos(\''+p.uid+'\')">🔑 Permisos</button></td></tr>';
   }).join('');
 }
 
@@ -794,6 +826,150 @@ function guardarRecurso(){
         if(_rCurrentTab==='tp') loadRModulos();
       },1200);
     }).catch(function(e){notif('rNotif','❌ '+e.message,'err');});
+}
+
+// ══════════════════════════════════════════════════════════════
+//  EDITAR PERMISOS DE PROFESOR
+// ══════════════════════════════════════════════════════════════
+var _ppData = {tipo:'',asignaturas:[],niveles:[],especialidad:'',modulos:[]};
+
+function editarPermisos(uid) {
+  var prof = allUsers.find(function(u){ return u.uid === uid; });
+  if (!prof) { alert('Profesor no encontrado'); return; }
+  document.getElementById('ppUid').value = uid;
+  document.getElementById('ppNombreInfo').innerHTML =
+    '<strong>'+( prof.nombre||'Sin nombre')+'</strong> &nbsp;·&nbsp; <span style="color:var(--muted)">'+prof.email+'</span>';
+  _ppData = {
+    tipo:        prof.tipoProfesor || '',
+    asignaturas: (prof.asignaturas || []).slice(),
+    niveles:     (prof.niveles     || []).slice(),
+    especialidad: prof.especialidad || '',
+    modulos:     (prof.modulos     || []).slice()
+  };
+  document.getElementById('ppTipo').value = _ppData.tipo;
+  ppBuildAsig();
+  document.getElementById('modalPermProf').classList.add('open');
+}
+
+function ppBuildAsig() {
+  _ppData.tipo = document.getElementById('ppTipo').value;
+  var sec = document.getElementById('ppAsigSection');
+  var html = '';
+  if (_ppData.tipo === 'basica') {
+    html += '<h4 style="margin-bottom:8px;font-size:.85rem;color:var(--muted)">📚 Asignaturas — Educación Básica</h4>';
+    html += '<div class="multi-select-box" id="ppAsigBox">';
+    CURRICULA_CHILE.basica.asignaturas.forEach(function(a) {
+      var chk = _ppData.asignaturas.indexOf(a.nombre) !== -1 ? 'checked' : '';
+      html += '<label><input type="checkbox" value="'+a.nombre+'" onchange="ppTgAsig(this)" '+chk+'><span class="cdot" style="background:'+a.color+'"></span>'+a.nombre+'</label>';
+    });
+    html += '</div>';
+    html += '<h4 style="margin:14px 0 8px;font-size:.85rem;color:var(--muted)">Niveles asignados</h4>';
+    html += '<div class="multi-select-box" id="ppNivBox">';
+    ['1B','2B','3B','4B','5B','6B','7B','8B'].forEach(function(n) {
+      var chk = _ppData.niveles.indexOf(n) !== -1 ? 'checked' : '';
+      html += '<label><input type="checkbox" value="'+n+'" onchange="ppTgNiv(this)" '+chk+'>'+n+'</label>';
+    });
+    html += '</div>';
+  } else if (_ppData.tipo === 'media') {
+    html += '<h4 style="margin-bottom:8px;font-size:.85rem;color:var(--muted)">🎓 Asignaturas — Plan Común</h4>';
+    html += '<div class="multi-select-box" id="ppAsigBox">';
+    CURRICULA_CHILE.planComun.asignaturas.forEach(function(a) {
+      var chk = _ppData.asignaturas.indexOf(a.nombre) !== -1 ? 'checked' : '';
+      html += '<label><input type="checkbox" value="'+a.nombre+'" onchange="ppTgAsig(this)" '+chk+'><span class="cdot" style="background:'+a.color+'"></span>'+a.nombre+'</label>';
+    });
+    html += '</div>';
+    html += '<h4 style="margin:14px 0 8px;font-size:.85rem;color:var(--muted)">Niveles</h4>';
+    html += '<div class="multi-select-box" id="ppNivBox">';
+    ['1M','2M','3M','4M'].forEach(function(n) {
+      var chk = _ppData.niveles.indexOf(n) !== -1 ? 'checked' : '';
+      html += '<label><input type="checkbox" value="'+n+'" onchange="ppTgNiv(this)" '+chk+'>'+n+' Medio</label>';
+    });
+    html += '</div>';
+  } else if (_ppData.tipo === 'tecnico') {
+    html += '<div class="form-group" style="margin-bottom:14px"><label>Especialidad EMTP</label>';
+    html += '<select id="ppEspSel" onchange="ppLoadMods()"><option value="">— Selecciona —</option>';
+    CURRICULA_CHILE.getEspecialidades().forEach(function(e) {
+      var sel = _ppData.especialidad === e.key ? 'selected' : '';
+      html += '<option value="'+e.key+'" '+sel+'>'+e.nombre+' ('+e.sector+')</option>';
+    });
+    html += '</select></div>';
+    html += '<div id="ppModsBox"></div>';
+    html += '<h4 style="margin:14px 0 8px;font-size:.85rem;color:var(--muted)">Niveles</h4>';
+    html += '<div class="multi-select-box" id="ppNivBox">';
+    ['3M','4M'].forEach(function(n) {
+      var chk = _ppData.niveles.indexOf(n) !== -1 ? 'checked' : '';
+      html += '<label><input type="checkbox" value="'+n+'" onchange="ppTgNiv(this)" '+chk+'>'+n+' Medio</label>';
+    });
+    html += '</div>';
+  } else {
+    html = '<p style="color:var(--muted);font-size:.875rem">Selecciona un tipo de docente arriba para ver las opciones de asignación.</p>';
+  }
+  sec.innerHTML = html;
+  if (_ppData.tipo === 'tecnico' && _ppData.especialidad) ppLoadMods();
+}
+
+function ppLoadMods() {
+  var sel = document.getElementById('ppEspSel');
+  if (!sel) return;
+  _ppData.especialidad = sel.value;
+  var box = document.getElementById('ppModsBox');
+  if (!_ppData.especialidad) { box.innerHTML = ''; return; }
+  var mods = CURRICULA_CHILE.getModulos(_ppData.especialidad);
+  var html = '<h4 style="margin-bottom:8px;font-size:.85rem;color:var(--muted)">Módulos asignados</h4><div class="multi-select-box">';
+  mods.forEach(function(m) {
+    var chk = _ppData.modulos.indexOf(m.num) !== -1 ? 'checked' : '';
+    html += '<label><input type="checkbox" value="'+m.num+'" onchange="ppTgMod(this)" '+chk+'>'+m.num+' – '+m.nombre+'</label>';
+  });
+  html += '</div>';
+  box.innerHTML = html;
+}
+
+function ppTgAsig(cb) { if(cb.checked){if(_ppData.asignaturas.indexOf(cb.value)===-1)_ppData.asignaturas.push(cb.value);}else{_ppData.asignaturas=_ppData.asignaturas.filter(function(a){return a!==cb.value;});}}
+function ppTgNiv(cb)  { if(cb.checked){if(_ppData.niveles.indexOf(cb.value)===-1)_ppData.niveles.push(cb.value);}else{_ppData.niveles=_ppData.niveles.filter(function(n){return n!==cb.value;});}}
+function ppTgMod(cb)  { if(cb.checked){if(_ppData.modulos.indexOf(cb.value)===-1)_ppData.modulos.push(cb.value);}else{_ppData.modulos=_ppData.modulos.filter(function(m){return m!==cb.value;});}}
+
+function guardarPermisos() {
+  var uid = document.getElementById('ppUid').value;
+  if (!uid) return;
+  var btn = document.getElementById('btnGuardarPermisos');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Guardando…';
+  var datos = {
+    tipoProfesor: _ppData.tipo,
+    asignaturas:  _ppData.asignaturas,
+    niveles:      _ppData.niveles,
+    especialidad: _ppData.especialidad,
+    modulos:      _ppData.modulos
+  };
+  ELDB.usuarios.actualizar(uid, datos)
+    .then(function() {
+      notif('ppNotif','✅ Permisos actualizados correctamente','ok');
+      loadData();
+      btn.disabled = false; btn.innerHTML = '💾 Guardar Permisos';
+      setTimeout(function(){ closeModal('modalPermProf'); }, 1800);
+    })
+    .catch(function(e) {
+      notif('ppNotif','❌ Error: '+e.message,'err');
+      btn.disabled = false; btn.innerHTML = '💾 Guardar Permisos';
+    });
+}
+
+// ══════════════════════════════════════════════════════════════
+//  TOAST DE ESTADO DE CONEXIÓN
+// ══════════════════════════════════════════════════════════════
+function mostrarToastDB(ok, msg) {
+  var t = document.getElementById('dbToast');
+  if (!t) {
+    t = document.createElement('div');
+    t.id = 'dbToast';
+    t.style.cssText = 'position:fixed;bottom:20px;right:20px;z-index:9999;padding:12px 20px;border-radius:10px;font-size:.85rem;font-weight:600;transition:all .3s;display:none';
+    document.body.appendChild(t);
+  }
+  t.textContent = msg;
+  t.style.background = ok ? 'rgba(16,185,129,.9)' : 'rgba(239,68,68,.9)';
+  t.style.color = '#fff';
+  t.style.display = 'block';
+  clearTimeout(t._timer);
+  t._timer = setTimeout(function(){ t.style.display='none'; }, ok ? 3000 : 6000);
 }
 
 // Inicializar recursos cuando se carga esa sección
