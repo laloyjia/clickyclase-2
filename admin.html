@@ -429,6 +429,7 @@ function showSec(el,id){
   document.querySelectorAll('.nav-item[data-sec]').forEach(function(n){n.classList.remove('active');});
   document.getElementById('sec-'+id).style.display='block';
   el.classList.add('active');
+  if(id==='recursos'&&!_recursosInit){_recursosInit=true;initRecursos();}
 }
 
 function renderUsers(list){
@@ -797,11 +798,6 @@ function guardarRecurso(){
 
 // Inicializar recursos cuando se carga esa sección
 var _recursosInit=false;
-var _origShowSec=showSec;
-function showSec(el,id){
-  _origShowSec(el,id);
-  if(id==='recursos'&&!_recursosInit){_recursosInit=true;initRecursos();}
-}
 </script>
 </body>
 </html>
