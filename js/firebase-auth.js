@@ -29,12 +29,29 @@ var ELAuth = (function() {
       return;
     }
 
+  // Reintentar fetch de Firestore cuando el cliente está offline (timing issue)
+  function _fetchUserDocConReintentos(uid, intentos) {
+    intentos = intentos || 0;
+    return EL_DB.collection(EL_COLLECTIONS.USERS).doc(uid).get()
+      .catch(function(err) {
+        var esOffline = err.message && (err.message.indexOf('offline') !== -1 || err.code === 'unavailable');
+        if (esOffline && intentos < 6) {
+          console.log('[ELAuth] Firestore offline, reintentando en 2s... (' + (intentos+1) + '/6)');
+          return new Promise(function(resolve, reject) {
+            setTimeout(function() {
+              _fetchUserDocConReintentos(uid, intentos + 1).then(resolve).catch(reject);
+            }, 2000);
+          });
+        }
+        throw err;
+      });
+  }
+
     EL_AUTH.onAuthStateChanged(function(fbUser) {
       if (fbUser) {
         _firebaseUser = fbUser;
-        // Cargar datos del usuario desde Firestore
-        EL_DB.collection(EL_COLLECTIONS.USERS).doc(fbUser.uid)
-          .get()
+        // Cargar datos del usuario desde Firestore (con reintentos si está offline)
+        _fetchUserDocConReintentos(fbUser.uid)
           .then(function(doc) {
             if (doc.exists) {
               _currentUser = Object.assign({ uid: fbUser.uid, email: fbUser.email }, doc.data());
