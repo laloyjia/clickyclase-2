@@ -47,15 +47,8 @@ var FIREBASE_CONFIG = {
       console.warn('[ElectroLearn] No se pudo configurar persistencia:', err.message);
     });
 
-  // Habilitar caché offline de Firestore
-  window.EL_DB.enablePersistence({ synchronizeTabs: true })
-    .catch(function(err) {
-      if (err.code === 'failed-precondition') {
-        console.warn('[ElectroLearn] Persistencia offline no disponible (múltiples pestañas)');
-      } else if (err.code === 'unimplemented') {
-        console.warn('[ElectroLearn] Persistencia offline no soportada por este navegador');
-      }
-    });
+  // NOTA: enablePersistence desactivado — puede causar conflictos al abrir localmente
+  // Se puede reactivar después del despliegue en Vercel si se desea caché offline
 })();
 
 // ─────────────────────────────────────────────────────────────
@@ -63,7 +56,15 @@ var FIREBASE_CONFIG = {
 // ─────────────────────────────────────────────────────────────
 var EL_VERSION   = '2.0.0';
 var EL_APP_NAME  = 'ElectroLearn';
-var EL_ADMIN_EMAIL = 'profesor@electrolearn.cl';
+
+// ── Correos de administrador (agrega aquí todos los que necesiten acceso total) ──
+var EL_ADMIN_EMAIL  = 'eduyanezjara@gmail.com';   // correo principal
+var EL_ADMIN_EMAILS = [
+  'eduyanezjara@gmail.com',
+  'eyanez@salesianostalca.cl',
+  'laloadmin@electrolearn.cl',
+  'profesor@electrolearn.cl'
+];
 
 // Roles disponibles
 var EL_ROLES = {

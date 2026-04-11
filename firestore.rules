@@ -2,83 +2,12 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // ── Funciones helper ──────────────────────────────────────
-    function isAuth() {
-      return request.auth != null;
-    }
-    function isAdmin() {
-      return isAuth() && (
-        get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data.role == 'admin'
-        || request.auth.token.email == 'profesor@electrolearn.cl'
-      );
-    }
-    function isProfesor() {
-      return isAuth() && (
-        get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data.role == 'profesor'
-        || isAdmin()
-      );
-    }
-    function isOwner(uid) {
-      return isAuth() && request.auth.uid == uid;
-    }
+    // ── Reglas temporales de arranque ──────────────────────────
+    // Permiten leer/escribir a cualquier usuario autenticado
+    // Una vez que todo funcione, reemplaza con las reglas estrictas
 
-    // ── Colección: usuarios ───────────────────────────────────
-    match /usuarios/{uid} {
-      // Cualquier usuario autenticado puede leer su propio perfil
-      allow read: if isOwner(uid) || isAdmin();
-      // El usuario puede crear su propio perfil (registro)
-      allow create: if isOwner(uid);
-      // El usuario puede actualizar su propio perfil; admin puede actualizar cualquiera
-      allow update: if isOwner(uid) || isAdmin();
-      // Solo admin puede eliminar
-      allow delete: if isAdmin();
-    }
-
-    // ── Colección: materiales ─────────────────────────────────
-    match /materiales/{docId} {
-      // Cualquier usuario autenticado puede leer materiales activos
-      allow read: if isAuth();
-      // Solo profesores y admin pueden crear materiales
-      allow create: if isProfesor();
-      // El creador o admin pueden editar/eliminar
-      allow update, delete: if isAdmin() || (
-        isProfesor() && resource.data.email == request.auth.token.email
-      );
-    }
-
-    // ── Colección: planificaciones ────────────────────────────
-    match /planificaciones/{docId} {
-      allow read: if isAuth();
-      allow create: if isProfesor();
-      allow update, delete: if isAdmin() || (
-        isProfesor() && resource.data.email == request.auth.token.email
-      );
-    }
-
-    // ── Colección: evaluaciones ───────────────────────────────
-    match /evaluaciones/{docId} {
-      // El estudiante puede leer sus propias evaluaciones; profesor/admin pueden leer todas
-      allow read: if isAuth() && (
-        resource.data.uid == request.auth.uid || isProfesor()
-      );
-      // El estudiante crea sus evaluaciones
-      allow create: if isAuth() && request.resource.data.uid == request.auth.uid;
-      allow update, delete: if isAdmin();
-    }
-
-    // ── Colección: codigos_acceso ─────────────────────────────
-    match /codigos_acceso/{docId} {
-      // Solo admin puede crear códigos
-      allow read, create: if isAdmin();
-      // Cualquier usuario autenticado puede marcar un código como usado (registro)
-      allow update: if isAuth() && request.resource.data.usado == true;
-      allow delete: if isAdmin();
-    }
-
-    // ── Colección: curricula (lectura pública) ────────────────
-    match /curricula/{docId} {
-      allow read: if isAuth();
-      allow write: if isAdmin();
+    match /{document=**} {
+      allow read, write: if request.auth != null;
     }
   }
 }

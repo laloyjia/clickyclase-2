@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>⚙️ Setup — ElectroLearn</title>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="js/firebase-config.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#0f172a;color:#e2e8f0;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+.wrap{display:flex;flex-direction:column;gap:20px;width:100%;max-width:480px}
+.card{background:#1e293b;border:1px solid rgba(99,102,241,.3);border-radius:20px;padding:32px;box-shadow:0 25px 50px rgba(0,0,0,.5)}
+h2{font-size:1.2rem;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.form-group{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+label{font-size:.8rem;color:#94a3b8;font-weight:500}
+input,select{background:#0f172a;border:1px solid rgba(99,102,241,.3);border-radius:10px;padding:11px 14px;color:#e2e8f0;font-size:.9rem;outline:none;transition:border-color .2s;width:100%}
+input:focus{border-color:#6366f1}
+.btn{width:100%;padding:12px;border-radius:10px;border:none;cursor:pointer;font-size:.9rem;font-weight:700;color:#fff;transition:all .2s;margin-top:4px}
+.btn-create{background:linear-gradient(135deg,#6366f1,#8b5cf6)}
+.btn-reset{background:linear-gradient(135deg,#f59e0b,#ef4444)}
+.btn:hover{opacity:.9;transform:translateY(-1px)}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.msg{border-radius:10px;padding:12px 16px;font-size:.85rem;margin-top:14px;display:none;line-height:1.6}
+.msg.ok{background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);color:#10b981}
+.msg.err{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:#ef4444}
+.msg.info{background:rgba(99,102,241,.1);border:1px solid rgba(99,102,241,.3);color:#a5b4fc}
+.msg.show{display:block}
+.spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;margin-right:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
+code{background:rgba(99,102,241,.15);padding:2px 8px;border-radius:6px;font-size:.85em;color:#a5b4fc}
+a{color:#6366f1;font-weight:600}
+.divider{text-align:center;color:#475569;font-size:.8rem;margin:4px 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div style="text-align:center">
+    <div style="font-size:2.5rem">⚙️</div>
+    <h1 style="font-size:1.4rem;color:#6366f1;margin-top:8px">ElectroLearn — Setup</h1>
+    <p style="color:#64748b;font-size:.85rem;margin-top:4px">Gestión de cuenta de administrador</p>
+  </div>
+
+  <!-- CARD 1: Crear usuario nuevo -->
+  <div class="card">
+    <h2>👤 Crear cuenta de administrador</h2>
+    <div class="form-group">
+      <label>Nombre completo</label>
+      <input id="cNombre" type="text" value="Eduardo Yáñez">
+    </div>
+    <div class="form-group">
+      <label>Correo electrónico</label>
+      <input id="cEmail" type="email" value="eyanez@salesianostalca.cl">
+    </div>
+    <div class="form-group">
+      <label>Contraseña (mín. 6 caracteres)</label>
+      <input id="cPass" type="password" placeholder="Elige una contraseña segura">
+    </div>
+    <div class="form-group">
+      <label>Confirmar contraseña</label>
+      <input id="cPass2" type="password" placeholder="Repite la contraseña">
+    </div>
+    <div class="form-group">
+      <label>Rol</label>
+      <select id="cRol">
+        <option value="admin">Administrador</option>
+        <option value="profesor">Profesor</option>
+      </select>
+    </div>
+    <button class="btn btn-create" id="btnCrear" onclick="crearCuenta()">Crear cuenta</button>
+    <div class="msg" id="msgCrear"></div>
+  </div>
+
+  <div class="divider">── o ──</div>
+
+  <!-- CARD 2: Reset de contraseña -->
+  <div class="card">
+    <h2>🔑 Restablecer contraseña</h2>
+    <p style="color:#94a3b8;font-size:.85rem;margin-bottom:14px">
+      Si ya tienes cuenta pero no recuerdas la contraseña, ingresa tu correo y te enviaremos un enlace para restablecerla.
+    </p>
+    <div class="form-group">
+      <label>Correo electrónico</label>
+      <input id="rEmail" type="email" placeholder="tu@correo.cl">
+    </div>
+    <button class="btn btn-reset" id="btnReset" onclick="resetPassword()">Enviar enlace de restablecimiento</button>
+    <div class="msg" id="msgReset"></div>
+  </div>
+
+  <!-- CARD 3: Listar usuarios en Auth -->
+  <div class="card">
+    <h2>🔍 Verificar mi correo registrado</h2>
+    <p style="color:#94a3b8;font-size:.85rem;margin-bottom:14px">
+      Ingresa tu contraseña actual para ver con qué correo exacto estás registrado en Firebase.
+    </p>
+    <div class="form-group">
+      <label>Correo que crees que usaste</label>
+      <input id="vEmail" type="email" placeholder="tu@correo.cl">
+    </div>
+    <div class="form-group">
+      <label>Contraseña</label>
+      <input id="vPass" type="password" placeholder="Tu contraseña">
+    </div>
+    <button class="btn btn-create" id="btnVerif" onclick="verificarLogin()">Intentar ingresar</button>
+    <div class="msg" id="msgVerif"></div>
+  </div>
+
+  <p style="text-align:center;font-size:.75rem;color:#475569">
+    ⚠️ Elimina este archivo después de configurar tu cuenta
+  </p>
+</div>
+
+<script>
+var auth = firebase.auth();
+var db   = firebase.firestore();
+
+// ── Crear cuenta ───────────────────────────────────────────────
+function crearCuenta() {
+  var nombre = document.getElementById('cNombre').value.trim();
+  var email  = document.getElementById('cEmail').value.trim();
+  var pass   = document.getElementById('cPass').value;
+  var pass2  = document.getElementById('cPass2').value;
+  var rol    = document.getElementById('cRol').value;
+  var btn    = document.getElementById('btnCrear');
+
+  if (!nombre || !email || !pass) { showMsg('msgCrear','❌ Completa todos los campos.','err'); return; }
+  if (pass.length < 6)            { showMsg('msgCrear','❌ Contraseña mín. 6 caracteres.','err'); return; }
+  if (pass !== pass2)             { showMsg('msgCrear','❌ Las contraseñas no coinciden.','err'); return; }
+
+  btn.disabled  = true;
+  btn.innerHTML = '<span class="spinner"></span> Creando…';
+
+  auth.createUserWithEmailAndPassword(email, pass)
+    .then(function(cred) {
+      var uid = cred.user.uid;
+      return db.collection('usuarios').doc(uid).set({
+        uid: uid, nombre: nombre, email: email, role: rol,
+        xp: 0, nivel: 1, badges: [], evaluaciones: [], activo: true,
+        tipoProfesor: 'tecnico', especialidad: 'Electrónica',
+        asignaturas: [], modulos: ['EN1','EN2','EN3','EN4','EN5','EN6','EN7','EN8','EN9','EN11'],
+        niveles: ['3M','4M'], creadoEn: new Date().toISOString()
+      });
+    })
+    .then(function() {
+      showMsg('msgCrear',
+        '✅ <strong>¡Cuenta creada!</strong><br>' +
+        '📧 Correo: <code>' + email + '</code><br>' +
+        '🔑 Usa la contraseña que ingresaste<br><br>' +
+        '<a href="index.html">👉 Ir a iniciar sesión →</a>',
+      'ok');
+      btn.innerHTML = '✅ Creado';
+    })
+    .catch(function(e) {
+      btn.disabled  = false;
+      btn.innerHTML = 'Crear cuenta';
+      var m = e.message || '';
+      if (m.includes('email-already-in-use')) m = 'Ya existe una cuenta con ese correo. Usa la opción de restablecimiento abajo.';
+      else if (m.includes('invalid-email'))   m = 'Formato de correo inválido.';
+      else if (m.includes('api-key'))         m = 'Error de configuración Firebase. Verifica firebase-config.js';
+      showMsg('msgCrear','❌ ' + m,'err');
+    });
+}
+
+// ── Reset contraseña ───────────────────────────────────────────
+function resetPassword() {
+  var email = document.getElementById('rEmail').value.trim();
+  var btn   = document.getElementById('btnReset');
+  if (!email) { showMsg('msgReset','❌ Ingresa tu correo.','err'); return; }
+
+  btn.disabled  = true;
+  btn.innerHTML = '<span class="spinner"></span> Enviando…';
+
+  auth.sendPasswordResetEmail(email)
+    .then(function() {
+      showMsg('msgReset',
+        '✅ <strong>¡Correo enviado!</strong><br>' +
+        'Revisa tu bandeja de entrada (y la carpeta de spam) para el correo de: <code>' + email + '</code><br><br>' +
+        'Haz clic en el enlace del correo para crear una nueva contraseña.<br>' +
+        'Después vuelve a <a href="index.html">iniciar sesión →</a>',
+      'ok');
+      btn.disabled  = false;
+      btn.innerHTML = 'Enviar enlace de restablecimiento';
+    })
+    .catch(function(e) {
+      btn.disabled  = false;
+      btn.innerHTML = 'Enviar enlace de restablecimiento';
+      var m = e.message || '';
+      if (m.includes('user-not-found'))    m = 'No existe ninguna cuenta con ese correo. Créala arriba.';
+      else if (m.includes('invalid-email'))m = 'Formato de correo inválido.';
+      showMsg('msgReset','❌ ' + m,'err');
+    });
+}
+
+// ── Verificar login ────────────────────────────────────────────
+function verificarLogin() {
+  var email = document.getElementById('vEmail').value.trim();
+  var pass  = document.getElementById('vPass').value;
+  var btn   = document.getElementById('btnVerif');
+  if (!email || !pass) { showMsg('msgVerif','❌ Ingresa correo y contraseña.','err'); return; }
+
+  btn.disabled  = true;
+  btn.innerHTML = '<span class="spinner"></span> Verificando…';
+
+  auth.signInWithEmailAndPassword(email, pass)
+    .then(function(cred) {
+      showMsg('msgVerif',
+        '✅ <strong>¡Login correcto!</strong><br>' +
+        'Correo registrado: <code>' + cred.user.email + '</code><br>' +
+        'UID: <code>' + cred.user.uid + '</code><br><br>' +
+        '<a href="index.html">👉 Ir al sistema →</a>',
+      'ok');
+      btn.disabled  = false;
+      btn.innerHTML = 'Intentar ingresar';
+    })
+    .catch(function(e) {
+      btn.disabled  = false;
+      btn.innerHTML = 'Intentar ingresar';
+      var m = e.message || '';
+      if (m.includes('invalid-login-credentials') || m.includes('wrong-password') || m.includes('INVALID_PASSWORD')) {
+        m = 'Contraseña incorrecta para ese correo. Prueba con el restablecimiento.';
+      } else if (m.includes('user-not-found') || m.includes('EMAIL_NOT_FOUND')) {
+        m = 'No existe cuenta con ese correo. Créala en la sección de arriba.';
+      } else if (m.includes('too-many-requests')) {
+        m = 'Demasiados intentos. Espera unos minutos o restablece la contraseña.';
+      }
+      showMsg('msgVerif','❌ ' + m,'err');
+    });
+}
+
+function showMsg(id, html, tipo) {
+  var el = document.getElementById(id);
+  el.innerHTML = html;
+  el.className = 'msg ' + tipo + ' show';
+}
+</script>
+</body>
+</html>

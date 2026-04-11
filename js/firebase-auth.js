@@ -58,10 +58,21 @@ var ELAuth = (function() {
             _readyCallbacks = [];
           })
           .catch(function(err) {
-            console.error('[ELAuth] Error cargando perfil:', err);
-            _currentUser = null;
+            console.warn('[ELAuth] Firestore no disponible, usando perfil básico:', err.message);
+            // Si Firestore falla (no existe aún, offline, etc.) permitir el login
+            // con un perfil básico derivado de Firebase Auth
+            var adminEmails = window.EL_ADMIN_EMAILS || [EL_ADMIN_EMAIL];
+            var esAdmin = adminEmails.indexOf(fbUser.email) !== -1;
+            _currentUser = {
+              uid:    fbUser.uid,
+              email:  fbUser.email,
+              nombre: fbUser.displayName || fbUser.email.split('@')[0],
+              role:   esAdmin ? EL_ROLES.ADMIN : EL_ROLES.ESTUDIANTE,
+              xp: 0, nivel: 1, badges: [], evaluaciones: [],
+              _offlineMode: true  // flag para saber que Firestore no estaba disponible
+            };
             _authReady = true;
-            _readyCallbacks.forEach(function(cb) { cb(null); });
+            _readyCallbacks.forEach(function(cb) { cb(_currentUser); });
             _readyCallbacks = [];
           });
       } else {
@@ -78,11 +89,24 @@ var ELAuth = (function() {
   function login(email, password) {
     return EL_AUTH.signInWithEmailAndPassword(email, password)
       .then(function(cred) {
-        return EL_DB.collection(EL_COLLECTIONS.USERS).doc(cred.user.uid).get();
+        _firebaseUser = cred.user;
+        // Intentar cargar perfil Firestore, pero no fallar si no está disponible
+        return EL_DB.collection(EL_COLLECTIONS.USERS).doc(cred.user.uid).get()
+          .catch(function() { return null; }); // Firestore offline → continuar igual
       })
       .then(function(doc) {
-        if (doc.exists) {
-          _currentUser = Object.assign({ uid: _firebaseUser ? _firebaseUser.uid : '' }, doc.data());
+        if (doc && doc.exists) {
+          _currentUser = Object.assign({ uid: _firebaseUser.uid, email: _firebaseUser.email }, doc.data());
+        } else if (!_currentUser) {
+          // Perfil de respaldo si Firestore no responde
+          var adminEmails = window.EL_ADMIN_EMAILS || [EL_ADMIN_EMAIL];
+          var esAdmin = adminEmails.indexOf(_firebaseUser.email) !== -1;
+          _currentUser = {
+            uid: _firebaseUser.uid, email: _firebaseUser.email,
+            nombre: _firebaseUser.email.split('@')[0],
+            role: esAdmin ? EL_ROLES.ADMIN : EL_ROLES.ESTUDIANTE,
+            xp: 0, nivel: 1, badges: [], evaluaciones: [], _offlineMode: true
+          };
         }
         return _currentUser;
       });
@@ -127,8 +151,9 @@ var ELAuth = (function() {
         return;
       }
       if (allowedRoles && allowedRoles.length > 0) {
+        var adminEmails = window.EL_ADMIN_EMAILS || [EL_ADMIN_EMAIL];
         var allowed = allowedRoles.indexOf(user.role) !== -1
-          || user.email === EL_ADMIN_EMAIL;
+          || adminEmails.indexOf(user.email) !== -1;
         if (!allowed) {
           alert('No tienes permisos para acceder a esta sección.');
           window.location.href = 'dashboard.html';
@@ -201,7 +226,7 @@ var ELAuth = (function() {
   }
 
   function adminCrearProfesor(data) {
-    if (!_currentUser || (_currentUser.role !== EL_ROLES.ADMIN && _currentUser.email !== EL_ADMIN_EMAIL)) {
+    if (!_currentUser || (_currentUser.role !== EL_ROLES.ADMIN && !(window.EL_ADMIN_EMAILS||[EL_ADMIN_EMAIL]).includes(_currentUser.email))) {
       return Promise.reject(new Error('Solo el administrador puede crear profesores.'));
     }
     data.role = EL_ROLES.PROFESOR;
@@ -209,7 +234,7 @@ var ELAuth = (function() {
   }
 
   function adminCrearEstudiante(data) {
-    if (!_currentUser || (_currentUser.role !== EL_ROLES.ADMIN && _currentUser.email !== EL_ADMIN_EMAIL)) {
+    if (!_currentUser || (_currentUser.role !== EL_ROLES.ADMIN && !(window.EL_ADMIN_EMAILS||[EL_ADMIN_EMAIL]).includes(_currentUser.email))) {
       return Promise.reject(new Error('Solo el administrador puede crear estudiantes.'));
     }
     data.role = EL_ROLES.ESTUDIANTE;
@@ -218,7 +243,7 @@ var ELAuth = (function() {
 
   // ── Cambiar contraseña de un usuario (via REST) ───────────────
   function adminCambiarPassword(uid, newPassword) {
-    if (!_currentUser || (_currentUser.role !== EL_ROLES.ADMIN && _currentUser.email !== EL_ADMIN_EMAIL)) {
+    if (!_currentUser || (_currentUser.role !== EL_ROLES.ADMIN && !(window.EL_ADMIN_EMAILS||[EL_ADMIN_EMAIL]).includes(_currentUser.email))) {
       return Promise.reject(new Error('Solo el administrador puede cambiar contraseñas.'));
     }
 

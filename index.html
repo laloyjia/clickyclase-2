@@ -156,12 +156,14 @@ function doLogin(e) {
       btn.disabled  = false;
       btn.innerHTML = 'Iniciar Sesión';
       var msg = error.message || 'Error al iniciar sesión';
-      if (msg.includes('INVALID_LOGIN_CREDENTIALS') || msg.includes('INVALID_PASSWORD') || msg.includes('EMAIL_NOT_FOUND')) {
+      if (msg.includes('INVALID_LOGIN_CREDENTIALS') || msg.includes('INVALID_PASSWORD') || msg.includes('EMAIL_NOT_FOUND') || msg.includes('invalid-login-credentials')) {
         msg = 'Correo o contraseña incorrectos.';
-      } else if (msg.includes('TOO_MANY_ATTEMPTS')) {
-        msg = 'Demasiados intentos. Intenta más tarde.';
-      } else if (msg.includes('USER_DISABLED')) {
+      } else if (msg.includes('TOO_MANY_ATTEMPTS') || msg.includes('too-many-requests')) {
+        msg = 'Demasiados intentos. Espera unos minutos e intenta de nuevo.';
+      } else if (msg.includes('USER_DISABLED') || msg.includes('user-disabled')) {
         msg = 'Tu cuenta ha sido desactivada. Contacta al administrador.';
+      } else if (msg.includes('offline') || msg.includes('network') || msg.includes('not-found')) {
+        msg = 'Sin conexión a la base de datos. Verifica tu internet e intenta de nuevo.';
       }
       err.textContent = '❌ ' + msg;
     });
