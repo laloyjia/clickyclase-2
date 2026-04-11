@@ -1,0 +1,1096 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evaluaciones - ElectroLearn</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        /* ============================================
+           EVALUACIONES — Estilos especificos
+           ============================================ */
+        .eval-container {
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 90px 20px 60px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Pasos del wizard */
+        .wizard-steps {
+            display: flex;
+            justify-content: center;
+            gap: 0;
+            margin-bottom: 2.5rem;
+        }
+        .wstep {
+            display: flex;
+            align-items: center;
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+        .wstep-circle {
+            width: 30px; height: 30px;
+            border-radius: 50%;
+            background: var(--glass);
+            border: 2px solid var(--glass-border);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.8rem; font-weight: 700;
+            margin-right: 6px;
+            transition: all 0.3s;
+        }
+        .wstep.active .wstep-circle {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+            box-shadow: 0 0 12px rgba(99,102,241,0.5);
+        }
+        .wstep.done .wstep-circle {
+            background: var(--success);
+            border-color: var(--success);
+            color: white;
+        }
+        .wstep-line {
+            width: 50px; height: 2px;
+            background: var(--glass-border);
+            margin: 0 6px;
+        }
+        .wstep.done ~ .wstep-line,
+        .wstep.active ~ .wstep-line { background: var(--primary); }
+
+        /* Seccion del configurador */
+        .config-section {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            padding: 1.8rem;
+            margin-bottom: 1.5rem;
+            backdrop-filter: blur(10px);
+        }
+        .config-section h2 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.1rem;
+            color: var(--secondary);
+            margin-bottom: 1.2rem;
+            display: flex; align-items: center; gap: 0.5rem;
+        }
+        .config-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+        @media (max-width: 600px) { .config-row { grid-template-columns: 1fr; } }
+
+        .campo-ev { margin-bottom: 1rem; }
+        .campo-ev label {
+            display: block;
+            font-size: 0.88rem; font-weight: 600;
+            color: var(--text); margin-bottom: 0.4rem;
+        }
+        .campo-ev select, .campo-ev input {
+            width: 100%;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-sm);
+            color: var(--text);
+            font-size: 0.9rem;
+            padding: 0.65rem 1rem;
+            font-family: inherit;
+            transition: border 0.2s;
+        }
+        .campo-ev select:focus, .campo-ev input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        .campo-ev select option { background: #1e1b4b; }
+
+        /* Dificultad selector con iconos */
+        .dif-btns {
+            display: flex; gap: 0.7rem;
+        }
+        .dif-btn {
+            flex: 1; padding: 0.6rem 0.5rem;
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-sm);
+            color: var(--text-muted);
+            font-size: 0.82rem; font-weight: 600;
+            cursor: pointer; text-align: center;
+            transition: all 0.2s;
+        }
+        .dif-btn.active { border-color: var(--primary); color: var(--primary-light); background: rgba(99,102,241,0.1); }
+        .dif-btn:hover { border-color: var(--primary); }
+
+        /* === QUIZ AREA === */
+        #quizArea { display: none; }
+
+        .quiz-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        .quiz-titulo {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+        .quiz-meta {
+            display: flex; gap: 1rem; align-items: center;
+        }
+        .quiz-timer {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--secondary);
+            min-width: 60px;
+            text-align: center;
+        }
+        .quiz-timer.warning { color: #f59e0b; }
+        .quiz-timer.danger { color: #ef4444; animation: pulsar 1s infinite; }
+        @keyframes pulsar { 0%,100%{opacity:1} 50%{opacity:0.5} }
+
+        /* Barra de progreso del quiz */
+        .quiz-progress-wrap {
+            background: rgba(255,255,255,0.08);
+            border-radius: 10px;
+            height: 8px;
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+        }
+        .quiz-progress-bar {
+            height: 100%;
+            border-radius: 10px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            transition: width 0.4s ease;
+        }
+        .quiz-progress-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 0.4rem;
+            text-align: right;
+        }
+
+        /* Tarjeta de pregunta */
+        .pregunta-card {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+            animation: fadeInUp 0.35s ease;
+        }
+        @keyframes fadeInUp {
+            from { opacity:0; transform: translateY(20px); }
+            to { opacity:1; transform: translateY(0); }
+        }
+
+        .pregunta-numero {
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: var(--primary-light);
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+        }
+        .pregunta-texto {
+            font-size: 1.02rem;
+            line-height: 1.65;
+            margin-bottom: 0.5rem;
+            color: var(--text);
+        }
+        .afirmacion-texto {
+            font-size: 0.95rem;
+            font-style: italic;
+            line-height: 1.6;
+            color: var(--text-muted);
+            padding: 0.8rem 1rem;
+            border-left: 3px solid var(--primary);
+            background: rgba(99,102,241,0.06);
+            border-radius: 0 8px 8px 0;
+            margin: 0.8rem 0 1.2rem;
+        }
+
+        /* Opciones MC */
+        .opciones-list { list-style: none; padding: 0; margin: 1.2rem 0 0; }
+        .opcion-btn {
+            width: 100%;
+            display: flex; align-items: flex-start; gap: 0.8rem;
+            padding: 0.9rem 1.2rem;
+            background: rgba(255,255,255,0.04);
+            border: 1.5px solid var(--glass-border);
+            border-radius: var(--radius-sm);
+            color: var(--text);
+            font-size: 0.92rem; line-height: 1.5;
+            cursor: pointer;
+            text-align: left;
+            font-family: inherit;
+            transition: all 0.2s;
+            margin-bottom: 0.6rem;
+        }
+        .opcion-btn:hover:not(:disabled) { border-color: var(--primary); background: rgba(99,102,241,0.08); }
+        .opcion-btn .opcion-letra {
+            min-width: 26px; height: 26px;
+            border-radius: 50%;
+            background: var(--glass-border);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.75rem; font-weight: 700;
+            flex-shrink: 0;
+        }
+        .opcion-btn.correcta { border-color: #22c55e; background: rgba(34,197,94,0.12); }
+        .opcion-btn.incorrecta { border-color: #ef4444; background: rgba(239,68,68,0.1); }
+        .opcion-btn.correcta .opcion-letra { background: #22c55e; color: white; }
+        .opcion-btn.incorrecta .opcion-letra { background: #ef4444; color: white; }
+
+        /* Botones V/F */
+        .vf-btns {
+            display: flex; gap: 1rem;
+            margin: 1.5rem 0 0;
+        }
+        .vf-btn {
+            flex: 1; padding: 1rem;
+            border-radius: var(--radius-sm);
+            border: 2px solid var(--glass-border);
+            background: var(--glass);
+            color: var(--text);
+            font-size: 1rem; font-weight: 700;
+            cursor: pointer; font-family: inherit;
+            transition: all 0.2s;
+        }
+        .vf-btn.verdadero:hover:not(:disabled) { border-color: #22c55e; background: rgba(34,197,94,0.1); }
+        .vf-btn.falso:hover:not(:disabled) { border-color: #ef4444; background: rgba(239,68,68,0.1); }
+        .vf-btn.sel-correcta { border-color: #22c55e; background: rgba(34,197,94,0.15); color: #22c55e; }
+        .vf-btn.sel-incorrecta { border-color: #ef4444; background: rgba(239,68,68,0.1); color: #ef4444; }
+        .vf-btn.reveal-correcta { border-color: #22c55e; background: rgba(34,197,94,0.08); }
+
+        /* Explicacion feedback */
+        .explicacion-box {
+            margin-top: 1rem;
+            padding: 1rem 1.2rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.88rem; line-height: 1.6;
+            animation: fadeInUp 0.3s ease;
+        }
+        .explicacion-box.correcta { background: rgba(34,197,94,0.1); border-left: 3px solid #22c55e; }
+        .explicacion-box.incorrecta { background: rgba(239,68,68,0.08); border-left: 3px solid #ef4444; }
+
+        .btn-siguiente {
+            margin-top: 1.2rem;
+            width: 100%;
+            padding: 0.9rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border: none; border-radius: var(--radius-sm);
+            color: white; font-size: 1rem; font-weight: 700;
+            font-family: inherit; cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        .btn-siguiente:hover { opacity: 0.9; }
+
+        /* === PANTALLA DE RESULTADOS === */
+        #resultadoArea { display: none; }
+
+        .resultado-hero {
+            text-align: center;
+            padding: 2.5rem 1rem;
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            backdrop-filter: blur(10px);
+            margin-bottom: 1.5rem;
+        }
+        .resultado-emoji { font-size: 4rem; margin-bottom: 0.5rem; }
+        .resultado-nota {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 4rem; font-weight: 800;
+            background: linear-gradient(135deg, var(--primary-light), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.1;
+        }
+        .resultado-sub { color: var(--text-muted); margin-top: 0.3rem; font-size: 0.95rem; }
+
+        .stats-resultado {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        @media(max-width:600px) { .stats-resultado { grid-template-columns: repeat(2, 1fr); } }
+        .stat-res {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-sm);
+            padding: 1rem;
+            text-align: center;
+        }
+        .stat-res .val {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.6rem; font-weight: 700;
+        }
+        .stat-res .lbl { font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; }
+
+        /* XP ganado */
+        .xp-ganado-card {
+            background: linear-gradient(135deg, rgba(99,102,241,0.15), rgba(0,206,201,0.15));
+            border: 1px solid rgba(99,102,241,0.3);
+            border-radius: var(--radius-sm);
+            padding: 1.2rem;
+            margin-bottom: 1rem;
+        }
+        .xp-row {
+            display: flex; justify-content: space-between; align-items: center;
+            font-size: 0.9rem; padding: 0.3rem 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .xp-row:last-child { border: none; font-weight: 700; font-size: 1rem; color: var(--secondary); }
+
+        /* Insignias desbloqueadas */
+        .insignias-nuevas {
+            display: flex; flex-wrap: wrap; gap: 0.8rem;
+            justify-content: center;
+            margin: 1rem 0;
+        }
+        .insignia-nueva {
+            background: var(--glass);
+            border: 1px solid rgba(251,191,36,0.4);
+            border-radius: var(--radius-sm);
+            padding: 0.7rem 1rem;
+            display: flex; align-items: center; gap: 0.5rem;
+            animation: bounceIn 0.5s ease;
+        }
+        @keyframes bounceIn {
+            0% { transform: scale(0.5); opacity: 0; }
+            70% { transform: scale(1.1); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .insignia-nueva .ins-icon { font-size: 1.5rem; }
+        .insignia-nueva .ins-nombre { font-size: 0.82rem; font-weight: 700; }
+        .insignia-nueva .ins-desc { font-size: 0.72rem; color: var(--text-muted); }
+
+        /* Revision de preguntas */
+        .revision-pregunta {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-sm);
+            padding: 1rem 1.2rem;
+            margin-bottom: 0.7rem;
+            font-size: 0.88rem;
+        }
+        .revision-correcta { border-left: 3px solid #22c55e; }
+        .revision-incorrecta { border-left: 3px solid #ef4444; }
+
+        /* === BARRA DE NIVEL (mini) === */
+        .nivel-mini {
+            display: flex; align-items: center; gap: 0.8rem;
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-sm);
+            padding: 0.7rem 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .nivel-icon { font-size: 1.4rem; }
+        .nivel-info { flex: 1; }
+        .nivel-nombre { font-size: 0.85rem; font-weight: 700; }
+        .nivel-xp { font-size: 0.75rem; color: var(--text-muted); }
+        .nivel-barra-wrap {
+            background: rgba(255,255,255,0.08);
+            border-radius: 10px;
+            height: 6px;
+            margin-top: 4px;
+            overflow: hidden;
+        }
+        .nivel-barra {
+            height: 100%;
+            border-radius: 10px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            transition: width 1s ease;
+        }
+
+        /* Botones de accion */
+        .eval-btns {
+            display: flex; gap: 0.8rem; flex-wrap: wrap;
+            margin-top: 1.5rem;
+        }
+        .eval-btn {
+            flex: 1; min-width: 160px;
+            padding: 0.85rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.95rem; font-weight: 700;
+            font-family: inherit; cursor: pointer;
+            transition: all 0.2s; border: none;
+        }
+        .eval-btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+        }
+        .eval-btn-secondary {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            color: var(--text);
+        }
+        .eval-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+    </style>
+</head>
+<body>
+
+    <!-- Fondo animado -->
+    <div class="orbs"><div class="orb orb1"></div><div class="orb orb2"></div><div class="orb orb3"></div></div>
+
+    <!-- NAVBAR -->
+    <nav class="navbar">
+        <div class="nav-brand"><span class="nav-icon">⚡</span><span>ElectroLearn</span></div>
+        <div class="nav-links">
+            <a href="dashboard.html">Dashboard</a>
+            <a href="material.html" id="navMaterial" style="display:none">Material</a>
+            <a href="evaluaciones.html" class="active">Evaluaciones</a>
+            <a href="ranking.html">Ranking</a>
+            <a href="#" onclick="logout()" class="nav-btn">Salir</a>
+        </div>
+    </nav>
+
+    <main class="eval-container">
+
+        <!-- Nivel mini -->
+        <div class="nivel-mini" id="nivelMini">
+            <div class="nivel-icon" id="nivelIcon">⚡</div>
+            <div class="nivel-info">
+                <div class="nivel-nombre" id="nivelNombre">Aprendiz &mdash; 0 XP</div>
+                <div class="nivel-barra-wrap">
+                    <div class="nivel-barra" id="nivelBarra" style="width:0%"></div>
+                </div>
+                <div class="nivel-xp" id="nivelXPLabel"></div>
+            </div>
+        </div>
+
+        <!-- WIZARD STEPS -->
+        <div class="wizard-steps" id="wizardSteps">
+            <div class="wstep active" id="wstep1"><div class="wstep-circle">1</div><span>Seleccionar</span></div>
+            <div class="wstep-line"></div>
+            <div class="wstep" id="wstep2"><div class="wstep-circle">2</div><span>Evaluacion</span></div>
+            <div class="wstep-line"></div>
+            <div class="wstep" id="wstep3"><div class="wstep-circle">3</div><span>Resultados</span></div>
+        </div>
+
+        <!-- =============================================
+             PASO 1: CONFIGURACION
+        ============================================= -->
+        <div id="configArea">
+            <div style="text-align:center; margin-bottom:2rem;">
+                <h1 style="font-family:'Space Grotesk';font-size:1.8rem;font-weight:800;">
+                    ✍️ Evaluaciones Interactivas
+                </h1>
+                <p class="text-muted" style="margin-top:0.4rem;">
+                    Selecciona el modulo y aprendizaje esperado. La plataforma genera el quiz automaticamente.
+                </p>
+            </div>
+
+            <div class="config-section">
+                <h2>📚 Objetivos Curriculares</h2>
+                <div class="config-row">
+                    <div class="campo-ev">
+                        <label>Curso</label>
+                        <select id="evCurso" onchange="evFiltrarModulos()">
+                            <option value="">-- Seleccionar curso --</option>
+                            <option value="3ro">3ro Medio E</option>
+                            <option value="4to">4to Medio E</option>
+                        </select>
+                    </div>
+                    <div class="campo-ev">
+                        <label>Modulo</label>
+                        <select id="evModulo" onchange="evCargarOA()">
+                            <option value="">-- Selecciona un curso primero --</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="campo-ev">
+                    <label>Objetivo de Aprendizaje (OA)</label>
+                    <select id="evOA" onchange="evCargarAE()">
+                        <option value="">-- Selecciona un modulo primero --</option>
+                    </select>
+                    <div id="evInfoOA" class="info-box" style="display:none; margin-top:0.4rem;"></div>
+                </div>
+                <div class="campo-ev">
+                    <label>Aprendizaje Esperado (AE)</label>
+                    <select id="evAE" onchange="evMostrarInfoAE()">
+                        <option value="">-- Selecciona un OA primero --</option>
+                    </select>
+                    <div id="evInfoAE" class="info-box" style="display:none; margin-top:0.4rem;"></div>
+                </div>
+            </div>
+
+            <div class="config-section">
+                <h2>⚙️ Configuracion del Quiz</h2>
+                <div class="config-row">
+                    <div class="campo-ev">
+                        <label>Numero de preguntas</label>
+                        <select id="evNumPregs">
+                            <option value="5">5 preguntas (rapido)</option>
+                            <option value="8" selected>8 preguntas (estandar)</option>
+                            <option value="10">10 preguntas (completo)</option>
+                        </select>
+                    </div>
+                    <div class="campo-ev">
+                        <label>Tiempo limite</label>
+                        <select id="evTiempo">
+                            <option value="0">Sin limite de tiempo</option>
+                            <option value="10" selected>10 minutos</option>
+                            <option value="15">15 minutos</option>
+                            <option value="20">20 minutos</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="campo-ev">
+                    <label>Dificultad</label>
+                    <div class="dif-btns">
+                        <button class="dif-btn active" onclick="setDif(this,'basico')">⭐ Basico</button>
+                        <button class="dif-btn" onclick="setDif(this,'intermedio')">⭐⭐ Intermedio</button>
+                        <button class="dif-btn" onclick="setDif(this,'avanzado')">⭐⭐⭐ Avanzado</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Info XP disponible -->
+            <div class="config-section" style="background:linear-gradient(135deg,rgba(99,102,241,0.1),rgba(0,206,201,0.1)); border-color:rgba(99,102,241,0.25);">
+                <h2>🏆 XP disponible en este quiz</h2>
+                <div style="display:flex; gap:1.5rem; flex-wrap:wrap; font-size:0.88rem; color:var(--text-muted);">
+                    <span>⚡ <strong>+12 XP</strong> por respuesta correcta</span>
+                    <span>🎯 <strong>+50 XP</strong> bonus por 80%+</span>
+                    <span>💯 <strong>+100 XP</strong> bonus por puntuacion perfecta</span>
+                    <span>⚡ <strong>+30 XP</strong> bonus por velocidad (&lt;5 min, 80%+)</span>
+                </div>
+            </div>
+
+            <button class="btn-generar" onclick="iniciarQuiz()" style="width:100%;margin:0;">
+                ⚡ Iniciar Evaluacion
+            </button>
+        </div>
+
+        <!-- =============================================
+             PASO 2: QUIZ
+        ============================================= -->
+        <div id="quizArea">
+            <div class="quiz-header">
+                <div>
+                    <div class="quiz-titulo" id="quizTitulo"></div>
+                    <div style="font-size:0.8rem;color:var(--text-muted)" id="quizSubtitulo"></div>
+                </div>
+                <div class="quiz-meta">
+                    <div class="quiz-timer" id="quizTimer">--:--</div>
+                </div>
+            </div>
+
+            <div class="quiz-progress-label" id="quizProgLabel">Pregunta 1 de 8</div>
+            <div class="quiz-progress-wrap">
+                <div class="quiz-progress-bar" id="quizProgBar" style="width:0%"></div>
+            </div>
+
+            <div id="preguntaContainer"></div>
+        </div>
+
+        <!-- =============================================
+             PASO 3: RESULTADOS
+        ============================================= -->
+        <div id="resultadoArea">
+
+            <div class="resultado-hero" id="resultadoHero">
+                <div class="resultado-emoji" id="resultEmoji">🎉</div>
+                <div class="resultado-nota" id="resultNota">7.0</div>
+                <div class="resultado-sub" id="resultSub">Evaluacion completada</div>
+            </div>
+
+            <div class="stats-resultado">
+                <div class="stat-res">
+                    <div class="val" id="statCorrectas" style="color:#22c55e">0</div>
+                    <div class="lbl">Correctas</div>
+                </div>
+                <div class="stat-res">
+                    <div class="val" id="statIncorrectas" style="color:#ef4444">0</div>
+                    <div class="lbl">Incorrectas</div>
+                </div>
+                <div class="stat-res">
+                    <div class="val" id="statPorcentaje" style="color:var(--secondary)">0%</div>
+                    <div class="lbl">Porcentaje</div>
+                </div>
+                <div class="stat-res">
+                    <div class="val" id="statTiempo" style="color:var(--primary-light)">0:00</div>
+                    <div class="lbl">Tiempo</div>
+                </div>
+            </div>
+
+            <!-- XP Ganado -->
+            <div class="xp-ganado-card" id="xpGanadoCard">
+                <h3 style="font-size:0.95rem; margin-bottom:0.7rem; color:var(--secondary);">⚡ Puntos XP ganados</h3>
+                <div id="xpDetalle"></div>
+                <div style="margin-top:0.7rem; font-size:0.82rem; color:var(--text-muted);">
+                    XP total: <span id="xpTotal" style="color:var(--secondary); font-weight:700;">0</span>
+                </div>
+            </div>
+
+            <!-- Nuevas insignias -->
+            <div id="nuevasInsignias" style="display:none; margin-bottom:1.5rem;">
+                <h3 style="font-size:0.95rem; margin-bottom:0.8rem; color:#fbbf24;">🏅 ¡Nuevas insignias desbloqueadas!</h3>
+                <div class="insignias-nuevas" id="insigniasList"></div>
+            </div>
+
+            <!-- Nivel actualizado -->
+            <div id="nivelActualizado" style="margin-bottom:1.5rem;"></div>
+
+            <!-- Revision de preguntas -->
+            <div class="config-section">
+                <h2>📋 Revision de respuestas</h2>
+                <div id="revisionContainer"></div>
+            </div>
+
+            <div class="eval-btns">
+                <button class="eval-btn eval-btn-primary" onclick="nuevaEval()">🔄 Nueva evaluacion</button>
+                <button class="eval-btn eval-btn-secondary" onclick="window.location.href='ranking.html'">🏆 Ver Ranking</button>
+                <button class="eval-btn eval-btn-secondary" onclick="window.location.href='dashboard.html'">🏠 Dashboard</button>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
+    <script src="js/auth.js"></script>
+    <script src="js/datos-curriculares.js"></script>
+    <script src="js/gamification.js"></script>
+    <script>
+    /* ============================================
+       EVALUACIONES — Logica principal
+       ============================================ */
+
+    var currentUser = null;
+    var dificultadSeleccionada = 'basico';
+    var quizState = {
+        preguntas: [],
+        actual: 0,
+        correctas: 0,
+        respuestas: [],
+        timerInterval: null,
+        tiempoSegundos: 0,
+        tiempoLimite: 0,
+        modulo: null,
+        aeNum: null,
+        oaId: null
+    };
+
+    // =============================================
+    // INICIALIZACION
+    // =============================================
+    document.addEventListener('DOMContentLoaded', function() {
+        currentUser = getCurrentUser();
+        if (!currentUser) { window.location.href = 'index.html'; return; }
+
+        if (currentUser.role === 'profesor') {
+            document.getElementById('navMaterial').style.display = 'inline';
+        }
+
+        actualizarNivelMini();
+    });
+
+    function actualizarNivelMini() {
+        var xp = currentUser.xp || 0;
+        var info = xpParaSiguienteNivel(xp);
+        var pct = porcentajeNivel(xp);
+        document.getElementById('nivelIcon').textContent = info.actual.icon;
+        document.getElementById('nivelNombre').textContent = info.actual.nombre + ' — ' + xp + ' XP';
+        document.getElementById('nivelBarra').style.width = pct + '%';
+        document.getElementById('nivelBarra').style.background = 'linear-gradient(90deg, ' + info.actual.color + ', var(--secondary))';
+        if (info.siguiente) {
+            document.getElementById('nivelXPLabel').textContent = info.xpFalta + ' XP para ' + info.siguiente.nombre;
+        } else {
+            document.getElementById('nivelXPLabel').textContent = '¡Nivel maximo alcanzado!';
+        }
+    }
+
+    // =============================================
+    // CASCADA DE SELECTS
+    // =============================================
+    function evFiltrarModulos() {
+        var nivel = document.getElementById('evCurso').value;
+        var sel = document.getElementById('evModulo');
+        sel.innerHTML = '<option value="">-- Seleccionar modulo --</option>';
+        if (!nivel) return;
+        Object.keys(MODULOS).forEach(function(k) {
+            var m = MODULOS[k];
+            if (m.nivel === nivel) {
+                var opt = document.createElement('option');
+                opt.value = m.num;
+                opt.textContent = m.num + ' — ' + m.nombre + ' (' + m.horas + 'h)';
+                sel.appendChild(opt);
+            }
+        });
+        document.getElementById('evOA').innerHTML = '<option value="">-- Selecciona un modulo --</option>';
+        document.getElementById('evInfoOA').style.display = 'none';
+        document.getElementById('evAE').innerHTML = '<option value="">-- Selecciona un OA --</option>';
+        document.getElementById('evInfoAE').style.display = 'none';
+    }
+
+    function evCargarOA() {
+        var modId = document.getElementById('evModulo').value;
+        var sel = document.getElementById('evOA');
+        sel.innerHTML = '<option value="">-- Seleccionar OA --</option>';
+        if (!modId || !MODULOS[modId]) return;
+        var mod = MODULOS[modId];
+        Object.keys(mod.oas).forEach(function(k) {
+            var opt = document.createElement('option');
+            opt.value = k;
+            opt.textContent = k;
+            sel.appendChild(opt);
+        });
+        document.getElementById('evAE').innerHTML = '<option value="">-- Selecciona un OA --</option>';
+        document.getElementById('evInfoAE').style.display = 'none';
+    }
+
+    function evCargarAE() {
+        var modId = document.getElementById('evModulo').value;
+        var oaId = document.getElementById('evOA').value;
+        var sel = document.getElementById('evAE');
+        sel.innerHTML = '<option value="">-- Seleccionar AE --</option>';
+        document.getElementById('evInfoOA').style.display = 'none';
+        if (!modId || !oaId) return;
+        var mod = MODULOS[modId];
+        var infoOA = document.getElementById('evInfoOA');
+        infoOA.textContent = oaId + ': ' + mod.oas[oaId];
+        infoOA.style.display = 'block';
+        Object.keys(mod.aes).forEach(function(k) {
+            var ae = mod.aes[k];
+            var opt = document.createElement('option');
+            opt.value = k;
+            opt.textContent = 'AE ' + k + ': ' + (ae.texto.length > 90 ? ae.texto.substring(0, 90) + '...' : ae.texto);
+            sel.appendChild(opt);
+        });
+    }
+
+    function evMostrarInfoAE() {
+        var modId = document.getElementById('evModulo').value;
+        var aeNum = document.getElementById('evAE').value;
+        var infoAE = document.getElementById('evInfoAE');
+        if (!modId || !aeNum || !MODULOS[modId] || !MODULOS[modId].aes[aeNum]) {
+            infoAE.style.display = 'none'; return;
+        }
+        infoAE.textContent = 'AE ' + aeNum + ': ' + MODULOS[modId].aes[aeNum].texto;
+        infoAE.style.display = 'block';
+    }
+
+    function setDif(btn, dif) {
+        document.querySelectorAll('.dif-btn').forEach(function(b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+        dificultadSeleccionada = dif;
+    }
+
+    // =============================================
+    // INICIAR QUIZ
+    // =============================================
+    function iniciarQuiz() {
+        var modId = document.getElementById('evModulo').value;
+        var oaId = document.getElementById('evOA').value;
+        var aeNum = document.getElementById('evAE').value;
+
+        if (!modId || !oaId || !aeNum) {
+            alert('Por favor selecciona: Curso, Modulo, OA y AE antes de iniciar.');
+            return;
+        }
+
+        var mod = MODULOS[modId];
+        var ae = mod.aes[aeNum];
+        var numPregs = parseInt(document.getElementById('evNumPregs').value);
+        var tiempoMin = parseInt(document.getElementById('evTiempo').value);
+
+        // Generar banco de preguntas
+        var banco = generarBancoPreguntas(mod, ae, aeNum, oaId);
+        var preguntas = banco.slice(0, numPregs);
+
+        quizState = {
+            preguntas: preguntas,
+            actual: 0,
+            correctas: 0,
+            respuestas: [],
+            timerInterval: null,
+            tiempoSegundos: 0,
+            tiempoLimite: tiempoMin * 60,
+            modulo: modId,
+            aeNum: aeNum,
+            oaId: oaId,
+            mod: mod,
+            ae: ae,
+            curso: document.getElementById('evCurso').value
+        };
+
+        // UI: pasar a quiz
+        document.getElementById('configArea').style.display = 'none';
+        document.getElementById('quizArea').style.display = 'block';
+        document.getElementById('quizTitulo').innerHTML = '📚 ' + mod.num + ' &mdash; ' + mod.nombre;
+        document.getElementById('quizSubtitulo').textContent = 'AE ' + aeNum + ' · ' + preguntas.length + ' preguntas';
+
+        // Wizard
+        document.getElementById('wstep1').classList.remove('active');
+        document.getElementById('wstep1').classList.add('done');
+        document.getElementById('wstep2').classList.add('active');
+
+        // Timer
+        if (tiempoMin > 0) {
+            quizState.timerInterval = setInterval(tickTimer, 1000);
+        } else {
+            document.getElementById('quizTimer').textContent = '';
+        }
+
+        mostrarPregunta();
+    }
+
+    // =============================================
+    // TIMER
+    // =============================================
+    function tickTimer() {
+        quizState.tiempoSegundos++;
+        var restante = quizState.tiempoLimite > 0 ? quizState.tiempoLimite - quizState.tiempoSegundos : quizState.tiempoSegundos;
+        var el = document.getElementById('quizTimer');
+
+        if (quizState.tiempoLimite > 0) {
+            // Cuenta regresiva
+            if (restante <= 0) {
+                clearInterval(quizState.timerInterval);
+                finalizarQuiz(true);
+                return;
+            }
+            el.textContent = Math.floor(restante / 60) + ':' + String(restante % 60).padStart(2, '0');
+            el.className = 'quiz-timer' + (restante < 60 ? ' danger' : restante < 120 ? ' warning' : '');
+        } else {
+            // Cuenta ascendente
+            el.textContent = Math.floor(quizState.tiempoSegundos / 60) + ':' + String(quizState.tiempoSegundos % 60).padStart(2, '0');
+        }
+    }
+
+    // =============================================
+    // MOSTRAR PREGUNTA
+    // =============================================
+    var letras = ['A', 'B', 'C', 'D'];
+
+    function mostrarPregunta() {
+        var idx = quizState.actual;
+        var total = quizState.preguntas.length;
+        var p = quizState.preguntas[idx];
+
+        // Progreso
+        var pct = Math.round((idx / total) * 100);
+        document.getElementById('quizProgBar').style.width = pct + '%';
+        document.getElementById('quizProgLabel').textContent = 'Pregunta ' + (idx + 1) + ' de ' + total;
+
+        var html = '<div class="pregunta-card">';
+        html += '<div class="pregunta-numero">Pregunta ' + (idx + 1) + ' de ' + total + ' &nbsp;&bull;&nbsp; ' + p.puntos + ' pts</div>';
+        html += '<div class="pregunta-texto">' + p.pregunta + '</div>';
+
+        if (p.tipo === 'mc') {
+            html += '<ul class="opciones-list">';
+            p.opciones.forEach(function(op, i) {
+                html += '<li><button class="opcion-btn" onclick="responderMC(this,' + i + ')" data-opcion="' + i + '">' +
+                    '<span class="opcion-letra">' + letras[i] + '</span>' +
+                    '<span>' + op + '</span></button></li>';
+            });
+            html += '</ul>';
+        } else if (p.tipo === 'vf') {
+            html += '<div class="afirmacion-texto">' + p.afirmacion + '</div>';
+            html += '<div class="vf-btns">' +
+                '<button class="vf-btn verdadero" onclick="responderVF(this,true)">✅ Verdadero</button>' +
+                '<button class="vf-btn falso" onclick="responderVF(this,false)">❌ Falso</button>' +
+                '</div>';
+        }
+
+        html += '<div id="feedbackBox" style="display:none;"></div>';
+        html += '<button class="btn-siguiente" id="btnSiguiente" style="display:none;" onclick="siguiente()">' +
+            (quizState.actual < quizState.preguntas.length - 1 ? '➡️ Siguiente pregunta' : '🏁 Ver resultados') +
+            '</button>';
+        html += '</div>';
+
+        document.getElementById('preguntaContainer').innerHTML = html;
+    }
+
+    function responderMC(btn, idx) {
+        var p = quizState.preguntas[quizState.actual];
+        var correcta = p.opciones[idx] === p.correcta;
+
+        // Deshabilitar todos los botones
+        document.querySelectorAll('.opcion-btn').forEach(function(b) { b.disabled = true; });
+
+        // Marcar respuestas
+        document.querySelectorAll('.opcion-btn').forEach(function(b, i) {
+            if (p.opciones[i] === p.correcta) b.classList.add('correcta');
+        });
+        if (!correcta) btn.classList.add('incorrecta');
+
+        mostrarFeedback(correcta, p.explicacion);
+        registrarRespuesta(correcta);
+    }
+
+    function responderVF(btn, esVerdadero) {
+        var p = quizState.preguntas[quizState.actual];
+        var correcta = esVerdadero === p.correcta;
+
+        // Deshabilitar
+        document.querySelectorAll('.vf-btn').forEach(function(b) { b.disabled = true; });
+
+        // Revelar respuesta correcta
+        document.querySelectorAll('.vf-btn').forEach(function(b) {
+            if ((b.classList.contains('verdadero') && p.correcta) ||
+                (b.classList.contains('falso') && !p.correcta)) {
+                b.classList.add('reveal-correcta');
+            }
+        });
+        if (!correcta) btn.classList.add('sel-incorrecta');
+        else btn.classList.add('sel-correcta');
+
+        mostrarFeedback(correcta, p.explicacion);
+        registrarRespuesta(correcta);
+    }
+
+    function mostrarFeedback(correcta, explicacion) {
+        var fb = document.getElementById('feedbackBox');
+        fb.className = 'explicacion-box ' + (correcta ? 'correcta' : 'incorrecta');
+        fb.innerHTML = (correcta ? '✅ <strong>¡Correcto!</strong> ' : '❌ <strong>Incorrecto.</strong> ') + explicacion;
+        fb.style.display = 'block';
+        document.getElementById('btnSiguiente').style.display = 'block';
+    }
+
+    function registrarRespuesta(correcta) {
+        if (correcta) quizState.correctas++;
+        quizState.respuestas.push({
+            pregunta: quizState.preguntas[quizState.actual],
+            correcta: correcta
+        });
+    }
+
+    function siguiente() {
+        quizState.actual++;
+        if (quizState.actual >= quizState.preguntas.length) {
+            finalizarQuiz(false);
+        } else {
+            mostrarPregunta();
+        }
+    }
+
+    // =============================================
+    // FINALIZAR QUIZ
+    // =============================================
+    function finalizarQuiz(timeout) {
+        if (quizState.timerInterval) clearInterval(quizState.timerInterval);
+
+        var total = quizState.preguntas.length;
+        var correctas = quizState.correctas;
+        var score = Math.round((correctas / total) * 100);
+        var nota = calcularNota(score);
+        var tiempoSeg = quizState.tiempoSegundos;
+
+        // Guardar resultado
+        var resultado = {
+            fecha: new Date().toISOString(),
+            modulo: quizState.modulo,
+            moduloNombre: quizState.mod.nombre,
+            aeNum: quizState.aeNum,
+            oaId: quizState.oaId,
+            nivel: quizState.curso,
+            total: total,
+            correctas: correctas,
+            score: score,
+            nota: nota,
+            tiempoSegundos: tiempoSeg
+        };
+
+        var gameResult = guardarResultadoQuiz(currentUser, resultado);
+        currentUser = getCurrentUser(); // Actualizar con nuevos XP
+
+        // Mostrar resultados
+        document.getElementById('quizArea').style.display = 'none';
+        document.getElementById('resultadoArea').style.display = 'block';
+
+        document.getElementById('wstep2').classList.remove('active');
+        document.getElementById('wstep2').classList.add('done');
+        document.getElementById('wstep3').classList.add('active');
+
+        // Emoji segun nota
+        var emoji = nota >= 6.5 ? '🌟' : nota >= 5.5 ? '🎉' : nota >= 4.0 ? '✅' : nota >= 3.0 ? '😅' : '💪';
+        document.getElementById('resultEmoji').textContent = timeout ? '⏰' : emoji;
+        document.getElementById('resultNota').textContent = nota.toFixed(1);
+        document.getElementById('resultSub').textContent =
+            (timeout ? 'Tiempo agotado. ' : '') +
+            correctas + ' de ' + total + ' correctas — ' + score + '%' +
+            (nota >= 4.0 ? ' — ¡Aprobado!' : ' — Sigue estudiando');
+
+        document.getElementById('statCorrectas').textContent = correctas;
+        document.getElementById('statIncorrectas').textContent = total - correctas;
+        document.getElementById('statPorcentaje').textContent = score + '%';
+        var min = Math.floor(tiempoSeg / 60), seg = tiempoSeg % 60;
+        document.getElementById('statTiempo').textContent = min + ':' + String(seg).padStart(2, '0');
+
+        // XP detalle
+        var xpInfo = gameResult.xpGanado;
+        var xpHtml = '';
+        xpInfo.detalle.forEach(function(d) {
+            xpHtml += '<div class="xp-row"><span>' + d.label + '</span><span style="color:var(--secondary);font-weight:700;">+' + d.xp + ' XP</span></div>';
+        });
+        xpHtml += '<div class="xp-row"><span>TOTAL GANADO</span><span>+' + xpInfo.total + ' XP</span></div>';
+        document.getElementById('xpDetalle').innerHTML = xpHtml;
+        document.getElementById('xpTotal').textContent = (currentUser.xp || 0) + ' XP totales';
+
+        // Insignias nuevas
+        if (gameResult.nuevasInsignias.length > 0) {
+            var insHtml = '';
+            gameResult.nuevasInsignias.forEach(function(ins) {
+                insHtml += '<div class="insignia-nueva">' +
+                    '<span class="ins-icon">' + ins.icon + '</span>' +
+                    '<div><div class="ins-nombre">' + ins.nombre + '</div>' +
+                    '<div class="ins-desc">' + ins.desc + '</div></div>' +
+                    '</div>';
+            });
+            document.getElementById('insigniasList').innerHTML = insHtml;
+            document.getElementById('nuevasInsignias').style.display = 'block';
+        }
+
+        // Nivel actualizado
+        var nivInfo = xpParaSiguienteNivel(currentUser.xp || 0);
+        var pct = porcentajeNivel(currentUser.xp || 0);
+        document.getElementById('nivelActualizado').innerHTML =
+            '<div class="nivel-mini">' +
+            '<div class="nivel-icon">' + nivInfo.actual.icon + '</div>' +
+            '<div class="nivel-info">' +
+            '<div class="nivel-nombre">' + nivInfo.actual.nombre + ' &mdash; ' + (currentUser.xp || 0) + ' XP</div>' +
+            '<div class="nivel-barra-wrap"><div class="nivel-barra" style="width:' + pct + '%;background:linear-gradient(90deg,' + nivInfo.actual.color + ',var(--secondary))"></div></div>' +
+            '<div class="nivel-xp">' + (nivInfo.siguiente ? (nivInfo.xpFalta + ' XP para ' + nivInfo.siguiente.nombre) : '¡Nivel maximo!') + '</div>' +
+            '</div></div>';
+
+        // Actualizar mini nivel
+        actualizarNivelMini();
+
+        // Revision de preguntas
+        var revHtml = '';
+        quizState.respuestas.forEach(function(r, i) {
+            revHtml += '<div class="revision-pregunta ' + (r.correcta ? 'revision-correcta' : 'revision-incorrecta') + '">' +
+                '<strong>' + (r.correcta ? '✅' : '❌') + ' P' + (i + 1) + '.</strong> ' +
+                r.pregunta.pregunta.replace(/<[^>]*>/g, '').substring(0, 100) + '...<br>' +
+                '<span style="font-size:0.8rem;color:var(--text-muted);">' + r.pregunta.explicacion.replace(/<[^>]*>/g, '') + '</span>' +
+                '</div>';
+        });
+        document.getElementById('revisionContainer').innerHTML = revHtml;
+    }
+
+    function nuevaEval() {
+        location.reload();
+    }
+
+    function mostrarToast(msg) {
+        var t = document.getElementById('toast');
+        t.textContent = msg;
+        t.classList.add('visible');
+        setTimeout(function() { t.classList.remove('visible'); }, 2500);
+    }
+    </script>
+</body>
+</html>

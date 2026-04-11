@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ranking - ElectroLearn</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        /* ============================================
+           RANKING — Estilos especificos
+           ============================================ */
+        .rank-container {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 90px 20px 60px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Tabs de navegacion */
+        .rank-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-sm);
+            padding: 0.4rem;
+        }
+        .rank-tab {
+            flex: 1;
+            padding: 0.65rem 0.5rem;
+            border: none;
+            border-radius: calc(var(--radius-sm) - 2px);
+            background: transparent;
+            color: var(--text-muted);
+            font-size: 0.88rem;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+        .rank-tab.active {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 2px 8px rgba(99,102,241,0.4);
+        }
+        .rank-tab:hover:not(.active) { color: var(--text); }
+
+        /* Panel */
+        .rank-panel { display: none; }
+        .rank-panel.visible { display: block; }
+
+        /* ===  PODIO TOP 3 === */
+        .podio {
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            gap: 0.8rem;
+            margin: 2rem auto 2.5rem;
+            max-width: 500px;
+        }
+        .podio-lugar {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.4rem;
+        }
+        .podio-avatar {
+            width: 60px; height: 60px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.4rem; font-weight: 800;
+            border: 3px solid transparent;
+            position: relative;
+        }
+        .podio-nombre { font-size: 0.78rem; font-weight: 700; text-align: center; max-width: 80px; }
+        .podio-xp { font-size: 0.72rem; color: var(--text-muted); }
+        .podio-base {
+            width: 80px;
+            border-radius: 6px 6px 0 0;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.4rem; font-weight: 800;
+            color: white;
+        }
+
+        .lugar-1 .podio-avatar { border-color: #fbbf24; background: rgba(251,191,36,0.15); }
+        .lugar-1 .podio-base { height: 90px; background: linear-gradient(180deg, #fbbf24, #f59e0b); }
+        .lugar-2 .podio-avatar { border-color: #94a3b8; background: rgba(148,163,184,0.15); }
+        .lugar-2 .podio-base { height: 65px; background: linear-gradient(180deg, #94a3b8, #64748b); }
+        .lugar-3 .podio-avatar { border-color: #f97316; background: rgba(249,115,22,0.15); }
+        .lugar-3 .podio-base { height: 50px; background: linear-gradient(180deg, #f97316, #ea580c); }
+
+        /* Corona del 1er lugar */
+        .lugar-1 .podio-avatar::before {
+            content: '👑';
+            position: absolute;
+            top: -22px;
+            font-size: 1.1rem;
+        }
+
+        /* === TABLA DE RANKING === */
+        .rank-table {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+        .rank-row {
+            display: grid;
+            grid-template-columns: 50px 1fr 100px 100px 80px;
+            align-items: center;
+            padding: 0.9rem 1.2rem;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+            transition: background 0.2s;
+            gap: 0.5rem;
+        }
+        @media(max-width:600px) {
+            .rank-row { grid-template-columns: 40px 1fr 70px 70px; }
+            .rank-col-eval { display: none; }
+        }
+        .rank-row:hover { background: rgba(255,255,255,0.04); }
+        .rank-row.yo { background: rgba(99,102,241,0.1); border-left: 3px solid var(--primary); }
+        .rank-row.top1 { background: rgba(251,191,36,0.07); }
+        .rank-row.top2 { background: rgba(148,163,184,0.05); }
+        .rank-row.top3 { background: rgba(249,115,22,0.06); }
+        .rank-header {
+            background: rgba(255,255,255,0.05);
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        .rank-pos { font-family: 'Space Grotesk'; font-size: 1rem; font-weight: 800; text-align: center; }
+        .rank-user { display: flex; align-items: center; gap: 0.7rem; }
+        .rank-avatar {
+            width: 36px; height: 36px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.9rem; font-weight: 700;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            flex-shrink: 0;
+        }
+        .rank-nombre { font-weight: 600; font-size: 0.9rem; }
+        .rank-curso { font-size: 0.73rem; color: var(--text-muted); }
+        .rank-nivel-badge {
+            font-size: 0.72rem; font-weight: 700;
+            padding: 0.15rem 0.5rem; border-radius: 20px;
+            display: inline-block;
+        }
+        .rank-xp-cell { font-family: 'Space Grotesk'; font-weight: 700; text-align: right; font-size: 0.95rem; }
+        .rank-nota-cell { text-align: right; font-size: 0.9rem; }
+        .rank-eval-cell { text-align: center; font-size: 0.85rem; color: var(--text-muted); }
+
+        /* === MI PERFIL XP === */
+        .mi-stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        @media(max-width:600px) { .mi-stats { grid-template-columns: repeat(2, 1fr); } }
+        .mi-stat {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-sm);
+            padding: 1rem;
+            text-align: center;
+        }
+        .mi-stat .val {
+            font-family: 'Space Grotesk';
+            font-size: 1.5rem; font-weight: 800;
+        }
+        .mi-stat .lbl { font-size: 0.73rem; color: var(--text-muted); margin-top: 2px; }
+
+        /* Barra de nivel */
+        .nivel-card {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            backdrop-filter: blur(10px);
+        }
+        .nivel-icon-big { font-size: 3rem; }
+        .nivel-info-block { flex: 1; }
+        .nivel-nombre-big {
+            font-family: 'Space Grotesk';
+            font-size: 1.4rem; font-weight: 800;
+        }
+        .nivel-desc { font-size: 0.85rem; color: var(--text-muted); margin: 2px 0 8px; }
+        .nivel-barra-wrap {
+            background: rgba(255,255,255,0.08);
+            border-radius: 10px;
+            height: 10px;
+            overflow: hidden;
+        }
+        .nivel-barra {
+            height: 100%;
+            border-radius: 10px;
+            transition: width 1.2s ease;
+        }
+        .nivel-barra-label { font-size: 0.78rem; color: var(--text-muted); margin-top: 4px; }
+
+        /* === VITRINA DE INSIGNIAS === */
+        .insignias-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 1rem;
+        }
+        .insignia-card {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-sm);
+            padding: 1rem;
+            text-align: center;
+            transition: all 0.2s;
+        }
+        .insignia-card.desbloqueada {
+            border-color: rgba(251,191,36,0.4);
+            background: rgba(251,191,36,0.05);
+        }
+        .insignia-card.bloqueada { opacity: 0.4; filter: grayscale(0.8); }
+        .insignia-card:hover { transform: translateY(-2px); }
+        .insignia-icon { font-size: 2.2rem; margin-bottom: 0.4rem; }
+        .insignia-nombre { font-size: 0.82rem; font-weight: 700; }
+        .insignia-desc { font-size: 0.72rem; color: var(--text-muted); margin-top: 2px; }
+        .insignia-desbloqueada-label {
+            font-size: 0.68rem;
+            color: #fbbf24;
+            font-weight: 700;
+            margin-top: 4px;
+        }
+
+        /* === PROGRESO POR MODULO === */
+        .modulos-progreso {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+        @media(max-width:600px) { .modulos-progreso { grid-template-columns: 1fr; } }
+        .mod-prog-card {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-sm);
+            padding: 1rem;
+        }
+        .mod-prog-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 0.5rem;
+        }
+        .mod-prog-nombre { font-size: 0.85rem; font-weight: 700; }
+        .mod-prog-num {
+            font-size: 0.72rem; font-weight: 700;
+            padding: 0.1rem 0.5rem; border-radius: 20px;
+            background: rgba(99,102,241,0.15); color: var(--primary-light);
+        }
+        .mod-prog-barra-wrap {
+            background: rgba(255,255,255,0.08);
+            border-radius: 10px; height: 6px; overflow: hidden;
+        }
+        .mod-prog-barra {
+            height: 100%; border-radius: 10px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            transition: width 1s ease;
+        }
+        .mod-prog-stats {
+            display: flex; gap: 1rem;
+            font-size: 0.72rem; color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        /* Historial de evaluaciones */
+        .historial-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.8rem 1rem;
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-sm);
+            margin-bottom: 0.5rem;
+        }
+        .hist-nota {
+            font-family: 'Space Grotesk';
+            font-size: 1.2rem; font-weight: 800;
+            min-width: 40px; text-align: center;
+        }
+        .hist-info { flex: 1; }
+        .hist-modulo { font-size: 0.85rem; font-weight: 600; }
+        .hist-fecha { font-size: 0.73rem; color: var(--text-muted); }
+        .hist-xp { font-size: 0.8rem; color: var(--secondary); font-weight: 700; }
+    </style>
+</head>
+<body>
+
+    <div class="orbs"><div class="orb orb1"></div><div class="orb orb2"></div><div class="orb orb3"></div></div>
+
+    <!-- NAVBAR -->
+    <nav class="navbar">
+        <div class="nav-brand"><span class="nav-icon">⚡</span><span>ElectroLearn</span></div>
+        <div class="nav-links">
+            <a href="dashboard.html">Dashboard</a>
+            <a href="material.html" id="navMaterial" style="display:none">Material</a>
+            <a href="evaluaciones.html">Evaluaciones</a>
+            <a href="ranking.html" class="active">Ranking</a>
+            <a href="#" onclick="logout()" class="nav-btn">Salir</a>
+        </div>
+    </nav>
+
+    <main class="rank-container">
+
+        <div style="text-align:center; margin-bottom:2rem;">
+            <h1 style="font-family:'Space Grotesk';font-size:1.8rem;font-weight:800;">🏆 Ranking & Logros</h1>
+            <p class="text-muted" style="margin-top:0.4rem;">Compite, aprende y desbloquea insignias en la especialidad de Electronica</p>
+        </div>
+
+        <!-- TABS -->
+        <div class="rank-tabs">
+            <button class="rank-tab active" onclick="showTab('ranking')">🏆 Ranking Global</button>
+            <button class="rank-tab" onclick="showTab('miperfil')">👤 Mi Perfil</button>
+            <button class="rank-tab" onclick="showTab('insignias')">🏅 Insignias</button>
+            <button class="rank-tab" onclick="showTab('progreso')">📊 Progreso</button>
+        </div>
+
+        <!-- =============================================
+             TAB: RANKING GLOBAL
+        ============================================= -->
+        <div class="rank-panel visible" id="tabRanking">
+
+            <!-- Podio top 3 -->
+            <div class="podio" id="podio">
+                <!-- Se genera con JS -->
+            </div>
+
+            <!-- Filtro -->
+            <div style="display:flex; gap:0.8rem; margin-bottom:1rem; flex-wrap:wrap;">
+                <select id="filtroRanking" onchange="renderRanking()" style="padding:0.5rem 0.8rem; background:var(--glass); border:1px solid var(--glass-border); border-radius:var(--radius-sm); color:var(--text); font-size:0.85rem; font-family:inherit;">
+                    <option value="todos">Todos los cursos</option>
+                    <option value="3ro">3ro Medio E</option>
+                    <option value="4to">4to Medio E</option>
+                </select>
+                <div style="font-size:0.82rem; color:var(--text-muted); align-self:center;" id="rankingInfo"></div>
+            </div>
+
+            <!-- Tabla -->
+            <div class="rank-table">
+                <div class="rank-row rank-header">
+                    <div class="rank-pos">#</div>
+                    <div>Estudiante</div>
+                    <div style="text-align:right">XP</div>
+                    <div style="text-align:right">Prom. Nota</div>
+                    <div class="rank-col-eval" style="text-align:center">Evals.</div>
+                </div>
+                <div id="rankingBody"></div>
+            </div>
+
+            <p style="font-size:0.75rem; color:var(--text-muted); margin-top:0.8rem; text-align:center;">
+                ⚡ El ranking se actualiza en tiempo real al completar evaluaciones
+            </p>
+        </div>
+
+        <!-- =============================================
+             TAB: MI PERFIL
+        ============================================= -->
+        <div class="rank-panel" id="tabMiperfil">
+
+            <!-- Nivel actual -->
+            <div class="nivel-card" id="miNivelCard">
+                <div class="nivel-icon-big" id="miNivelIcon">⚡</div>
+                <div class="nivel-info-block">
+                    <div class="nivel-nombre-big" id="miNivelNombre">Aprendiz</div>
+                    <div class="nivel-desc" id="miNivelDesc">Estas comenzando tu camino tecnico</div>
+                    <div class="nivel-barra-wrap">
+                        <div class="nivel-barra" id="miNivelBarra" style="width:0%"></div>
+                    </div>
+                    <div class="nivel-barra-label" id="miNivelBarraLabel"></div>
+                </div>
+            </div>
+
+            <!-- Stats personales -->
+            <div class="mi-stats">
+                <div class="mi-stat">
+                    <div class="val" id="miXP" style="color:var(--secondary)">0</div>
+                    <div class="lbl">Puntos XP</div>
+                </div>
+                <div class="mi-stat">
+                    <div class="val" id="miEvals" style="color:var(--primary-light)">0</div>
+                    <div class="lbl">Evaluaciones</div>
+                </div>
+                <div class="mi-stat">
+                    <div class="val" id="miNota" style="color:#22c55e">--</div>
+                    <div class="lbl">Promedio nota</div>
+                </div>
+                <div class="mi-stat">
+                    <div class="val" id="miInsignias" style="color:#fbbf24">0</div>
+                    <div class="lbl">Insignias</div>
+                </div>
+            </div>
+
+            <!-- Posicion en ranking -->
+            <div style="background:var(--glass);border:1px solid var(--glass-border);border-radius:var(--radius-sm);padding:1rem 1.2rem;margin-bottom:1.5rem; display:flex; align-items:center; gap:1rem;">
+                <div style="font-size:2rem;">🏅</div>
+                <div>
+                    <div style="font-size:0.85rem;font-weight:600;">Tu posicion en el ranking</div>
+                    <div style="font-family:'Space Grotesk';font-size:1.4rem;font-weight:800;" id="miPosicion">--</div>
+                </div>
+            </div>
+
+            <!-- Historial de evaluaciones -->
+            <h3 style="font-size:1rem; margin-bottom:1rem; font-family:'Space Grotesk'">📋 Historial de Evaluaciones</h3>
+            <div id="historialEvals">
+                <p style="color:var(--text-muted);font-size:0.88rem;">Aun no has completado evaluaciones.</p>
+            </div>
+        </div>
+
+        <!-- =============================================
+             TAB: INSIGNIAS
+        ============================================= -->
+        <div class="rank-panel" id="tabInsignias">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.2rem; flex-wrap:wrap; gap:0.5rem;">
+                <div>
+                    <h3 style="font-size:1rem; font-family:'Space Grotesk'">🏅 Vitrina de Insignias</h3>
+                    <p style="font-size:0.8rem; color:var(--text-muted);">Completa evaluaciones para desbloquear logros</p>
+                </div>
+                <div id="insProgreso" style="font-size:0.85rem; font-weight:700; color:var(--secondary);">0 / 12 desbloqueadas</div>
+            </div>
+            <div class="insignias-grid" id="insigniasGrid"></div>
+        </div>
+
+        <!-- =============================================
+             TAB: PROGRESO POR MODULO
+        ============================================= -->
+        <div class="rank-panel" id="tabProgreso">
+            <div style="margin-bottom:1.5rem;">
+                <h3 style="font-size:1rem; margin-bottom:0.3rem; font-family:'Space Grotesk'">📊 Progreso por Modulo</h3>
+                <p style="font-size:0.82rem; color:var(--text-muted);">Avance basado en las evaluaciones completadas. Modulos con barra verde = evaluado al menos una vez.</p>
+            </div>
+
+            <div style="margin-bottom:1rem;">
+                <div style="font-size:0.82rem; margin-bottom:0.5rem; color:var(--text-muted);">Filtrar por:</div>
+                <div style="display:flex; gap:0.5rem;">
+                    <button class="dif-btn active" style="flex:0; padding:0.4rem 1rem;" onclick="filtrarNivel(this,'todos')">Todos</button>
+                    <button class="dif-btn" style="flex:0; padding:0.4rem 1rem;" onclick="filtrarNivel(this,'3ro')">3ro Medio</button>
+                    <button class="dif-btn" style="flex:0; padding:0.4rem 1rem;" onclick="filtrarNivel(this,'4to')">4to Medio</button>
+                </div>
+            </div>
+
+            <div class="modulos-progreso" id="modulosProgreso"></div>
+
+            <div style="margin-top:2rem;">
+                <h3 style="font-size:1rem; margin-bottom:1rem; font-family:'Space Grotesk'">💡 Sugerencias para mejorar</h3>
+                <div id="sugerencias"></div>
+            </div>
+        </div>
+
+    </main>
+
+    <script src="js/auth.js"></script>
+    <script src="js/datos-curriculares.js"></script>
+    <script src="js/gamification.js"></script>
+    <script>
+    /* ============================================
+       RANKING — Logica
+       ============================================ */
+
+    var currentUser = null;
+    var nivelFiltroProgreso = 'todos';
+
+    // Estilos
+    var coloresDif = {
+        'dif-btn': 'background:var(--glass);border:1px solid var(--glass-border);border-radius:4px;color:var(--text-muted);font-size:0.82rem;font-weight:600;cursor:pointer;padding:0.3rem 0.8rem;font-family:inherit'
+    };
+
+    document.addEventListener('DOMContentLoaded', function() {
+        currentUser = getCurrentUser();
+        if (!currentUser) { window.location.href = 'index.html'; return; }
+        if (currentUser.role === 'profesor') document.getElementById('navMaterial').style.display = 'inline';
+
+        renderRanking();
+        renderMiPerfil();
+        renderInsignias();
+        renderProgreso('todos');
+    });
+
+    // =============================================
+    // TABS
+    // =============================================
+    function showTab(id) {
+        document.querySelectorAll('.rank-panel').forEach(function(p) { p.classList.remove('visible'); });
+        document.querySelectorAll('.rank-tab').forEach(function(t) { t.classList.remove('active'); });
+        document.getElementById('tab' + id.charAt(0).toUpperCase() + id.slice(1)).classList.add('visible');
+        event.target.classList.add('active');
+    }
+
+    // =============================================
+    // RANKING GLOBAL
+    // =============================================
+    function renderRanking() {
+        var filtro = document.getElementById('filtroRanking').value;
+        var todos = getTodosUsuarios();
+
+        var filtrados = todos.filter(function(u) {
+            if (filtro === 'todos') return true;
+            var c = (u.curso || '').toLowerCase();
+            return c.indexOf(filtro) >= 0;
+        });
+
+        // Podio top 3
+        renderPodio(filtrados.slice(0, 3));
+
+        // Tabla
+        var html = '';
+        filtrados.forEach(function(u, i) {
+            var esYo = u.email === currentUser.email;
+            var clsRow = esYo ? 'yo' : (i === 0 ? 'top1' : i === 1 ? 'top2' : i === 2 ? 'top3' : '');
+            var posEmoji = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i + 1);
+            var quizzes = u.completedQuizzes || [];
+            var notaProm = quizzes.length > 0
+                ? (quizzes.reduce(function(s, q) { return s + (q.nota || 1.0); }, 0) / quizzes.length).toFixed(1)
+                : '--';
+            var nivel = calcularNivel(u.xp || 0);
+            var notaColor = notaProm >= 6 ? '#22c55e' : notaProm >= 4 ? '#f59e0b' : '#ef4444';
+
+            html += '<div class="rank-row ' + clsRow + '">' +
+                '<div class="rank-pos">' + posEmoji + '</div>' +
+                '<div class="rank-user">' +
+                    '<div class="rank-avatar">' + u.name.charAt(0).toUpperCase() + '</div>' +
+                    '<div>' +
+                        '<div class="rank-nombre">' + u.name + (esYo ? ' <span style="font-size:0.7rem;color:var(--primary-light)">(Tú)</span>' : '') + '</div>' +
+                        '<div class="rank-curso">' + (u.curso || '') + ' &bull; ' +
+                            '<span class="rank-nivel-badge" style="background:' + nivel.color + '20;color:' + nivel.color + '">' + nivel.icon + ' ' + nivel.nombre + '</span>' +
+                        '</div>' +
+                    '</div>' +
+                '</div>' +
+                '<div class="rank-xp-cell" style="color:var(--secondary)">' + (u.xp || 0) + ' XP</div>' +
+                '<div class="rank-nota-cell" style="color:' + (notaProm !== '--' ? notaColor : 'var(--text-muted)') + ';font-weight:700">' + notaProm + '</div>' +
+                '<div class="rank-eval-cell rank-col-eval">' + quizzes.length + '</div>' +
+            '</div>';
+        });
+
+        document.getElementById('rankingBody').innerHTML = html || '<div style="padding:2rem;text-align:center;color:var(--text-muted)">No hay estudiantes registrados aun.</div>';
+        document.getElementById('rankingInfo').textContent = filtrados.length + ' estudiante' + (filtrados.length !== 1 ? 's' : '');
+    }
+
+    function renderPodio(top) {
+        var orden = [1, 0, 2]; // 2do, 1ro, 3ro (visualización)
+        var clases = ['lugar-2', 'lugar-1', 'lugar-3'];
+        var nums = ['2', '1', '3'];
+        var html = '';
+
+        orden.forEach(function(idx, visualIdx) {
+            if (!top[idx]) return;
+            var u = top[idx];
+            var nivel = calcularNivel(u.xp || 0);
+            html += '<div class="podio-lugar ' + clases[visualIdx] + '">' +
+                '<div class="podio-avatar" style="color:' + nivel.color + '">' + u.name.charAt(0).toUpperCase() + '</div>' +
+                '<div class="podio-nombre">' + u.name.split(' ')[0] + '</div>' +
+                '<div class="podio-xp">' + (u.xp || 0) + ' XP</div>' +
+                '<div class="podio-base">' + (idx === 0 ? '🥇' : idx === 1 ? '🥈' : '🥉') + '</div>' +
+            '</div>';
+        });
+
+        document.getElementById('podio').innerHTML = html || '<p style="color:var(--text-muted);font-size:0.9rem;text-align:center;padding:2rem">Completa evaluaciones para aparecer en el podio</p>';
+    }
+
+    // =============================================
+    // MI PERFIL
+    // =============================================
+    function renderMiPerfil() {
+        var u = currentUser;
+        var xp = u.xp || 0;
+        var quizzes = u.completedQuizzes || [];
+        var nivelInfo = calcularNivel(xp);
+        var pct = porcentajeNivel(xp);
+        var proxInfo = xpParaSiguienteNivel(xp);
+
+        // Nivel
+        document.getElementById('miNivelIcon').textContent = nivelInfo.icon;
+        document.getElementById('miNivelNombre').textContent = nivelInfo.nombre;
+        document.getElementById('miNivelDesc').textContent = nivelInfo.desc;
+        document.getElementById('miNivelBarra').style.width = pct + '%';
+        document.getElementById('miNivelBarra').style.background = 'linear-gradient(90deg,' + nivelInfo.color + ',var(--secondary))';
+        document.getElementById('miNivelBarraLabel').textContent = proxInfo.siguiente
+            ? (proxInfo.xpFalta + ' XP para alcanzar ' + proxInfo.siguiente.nombre)
+            : '¡Has alcanzado el nivel maximo!';
+
+        // Stats
+        document.getElementById('miXP').textContent = xp;
+        document.getElementById('miEvals').textContent = quizzes.length;
+        var notaProm = quizzes.length > 0
+            ? (quizzes.reduce(function(s, q) { return s + (q.nota || 1.0); }, 0) / quizzes.length).toFixed(1)
+            : '--';
+        document.getElementById('miNota').textContent = notaProm;
+        document.getElementById('miInsignias').textContent = (u.badges || []).length;
+
+        // Posicion
+        var todos = getTodosUsuarios();
+        var pos = todos.findIndex(function(tu) { return tu.email === u.email; });
+        document.getElementById('miPosicion').innerHTML = pos >= 0
+            ? (pos === 0 ? '🥇 1er lugar' : pos === 1 ? '🥈 2do lugar' : pos === 2 ? '🥉 3er lugar' : '# ' + (pos + 1))
+            : 'Sin clasificar';
+
+        // Historial
+        if (quizzes.length === 0) return;
+        var hHtml = '';
+        var recientes = quizzes.slice().reverse().slice(0, 10);
+        recientes.forEach(function(q) {
+            var fecha = new Date(q.fecha).toLocaleDateString('es-CL', { day: '2-digit', month: '2-digit', year: '2-digit' });
+            var notaColor = q.nota >= 6 ? '#22c55e' : q.nota >= 4 ? '#f59e0b' : '#ef4444';
+            var xpGanado = calcularXPQuiz(q.score, q.total, q.tiempoSegundos);
+            hHtml += '<div class="historial-item">' +
+                '<div class="hist-nota" style="color:' + notaColor + '">' + (q.nota || '--') + '</div>' +
+                '<div class="hist-info">' +
+                    '<div class="hist-modulo">' + (q.moduloNombre || q.modulo || 'Evaluacion') + ' &mdash; AE ' + (q.aeNum || '') + '</div>' +
+                    '<div class="hist-fecha">' + fecha + ' &bull; ' + q.correctas + '/' + q.total + ' correctas (' + q.score + '%)' + '</div>' +
+                '</div>' +
+                '<div class="hist-xp">+' + xpGanado.total + ' XP</div>' +
+            '</div>';
+        });
+        document.getElementById('historialEvals').innerHTML = hHtml;
+    }
+
+    // =============================================
+    // INSIGNIAS
+    // =============================================
+    function renderInsignias() {
+        var desbloqueadas = currentUser.badges || [];
+        var html = '';
+        var count = 0;
+
+        INSIGNIAS.forEach(function(ins) {
+            var tiene = desbloqueadas.indexOf(ins.id) >= 0;
+            if (tiene) count++;
+            html += '<div class="insignia-card ' + (tiene ? 'desbloqueada' : 'bloqueada') + '">' +
+                '<div class="insignia-icon">' + ins.icon + '</div>' +
+                '<div class="insignia-nombre">' + ins.nombre + '</div>' +
+                '<div class="insignia-desc">' + ins.desc + '</div>' +
+                (tiene ? '<div class="insignia-desbloqueada-label">✅ Desbloqueada</div>' : '<div class="insignia-desc" style="margin-top:4px;color:var(--text-muted)">🔒 Bloqueada</div>') +
+            '</div>';
+        });
+
+        document.getElementById('insigniasGrid').innerHTML = html;
+        document.getElementById('insProgreso').textContent = count + ' / ' + INSIGNIAS.length + ' desbloqueadas';
+    }
+
+    // =============================================
+    // PROGRESO POR MODULO
+    // =============================================
+    function filtrarNivel(btn, nivel) {
+        document.querySelectorAll('#tabProgreso .dif-btn').forEach(function(b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+        renderProgreso(nivel);
+    }
+
+    function renderProgreso(nivel) {
+        var html = '';
+        var modsSinEval = [];
+        var u = currentUser;
+
+        Object.keys(MODULOS).forEach(function(modId) {
+            var mod = MODULOS[modId];
+            if (nivel !== 'todos' && mod.nivel !== nivel) return;
+
+            var prog = getProgresoModulo(u, modId);
+            var pct = Math.min(100, prog.evaluaciones * 20); // 5+ evals = 100%
+            var barColor = pct === 0 ? '#374151' : pct < 40 ? '#f59e0b' : '#22c55e';
+
+            html += '<div class="mod-prog-card">' +
+                '<div class="mod-prog-header">' +
+                    '<div>' +
+                        '<div class="mod-prog-nombre">' + mod.nombre + '</div>' +
+                        '<div style="font-size:0.7rem;color:var(--text-muted);">' + mod.horas + 'h &bull; ' + (mod.nivel === '3ro' ? '3ro Medio' : '4to Medio') + '</div>' +
+                    '</div>' +
+                    '<div class="mod-prog-num">' + mod.num + '</div>' +
+                '</div>' +
+                '<div class="mod-prog-barra-wrap">' +
+                    '<div class="mod-prog-barra" style="width:' + pct + '%;background:' + barColor + '"></div>' +
+                '</div>' +
+                '<div class="mod-prog-stats">' +
+                    '<span>' + prog.evaluaciones + ' evaluacion' + (prog.evaluaciones !== 1 ? 'es' : '') + '</span>' +
+                    (prog.evaluaciones > 0 ? '<span>Mejor: ' + prog.mejor + '%</span>' : '') +
+                    (prog.evaluaciones > 0 ? '<span>Nota prom: ' + prog.promedioNota + '</span>' : '<span style="color:#6b7280">Sin evaluar</span>') +
+                '</div>' +
+            '</div>';
+
+            if (prog.evaluaciones === 0) modsSinEval.push(mod.nombre);
+        });
+
+        document.getElementById('modulosProgreso').innerHTML = html;
+
+        // Sugerencias
+        var sugHtml = '';
+        if (modsSinEval.length > 0) {
+            sugHtml += '<div style="background:rgba(99,102,241,0.08);border:1px solid rgba(99,102,241,0.2);border-radius:var(--radius-sm);padding:1rem;margin-bottom:0.8rem;">' +
+                '<strong style="font-size:0.88rem;">📚 Modulos sin evaluar:</strong>' +
+                '<p style="font-size:0.82rem;color:var(--text-muted);margin-top:0.4rem;">' + modsSinEval.slice(0, 4).join(', ') + (modsSinEval.length > 4 ? ' y ' + (modsSinEval.length - 4) + ' mas' : '') + '</p>' +
+                '<a href="evaluaciones.html" style="font-size:0.82rem;color:var(--primary-light);">➡️ Ir a evaluaciones</a>' +
+            '</div>';
+        }
+
+        var allQuizzes = (u.completedQuizzes || []);
+        if (allQuizzes.length > 0) {
+            var ultimaNota = allQuizzes[allQuizzes.length - 1].nota;
+            if (ultimaNota < 4.0) {
+                sugHtml += '<div style="background:rgba(239,68,68,0.07);border:1px solid rgba(239,68,68,0.2);border-radius:var(--radius-sm);padding:1rem;margin-bottom:0.8rem;">' +
+                    '<strong style="font-size:0.88rem;">💪 Oportunidad de mejora</strong>' +
+                    '<p style="font-size:0.82rem;color:var(--text-muted);margin-top:0.4rem;">Tu ultima evaluacion tuvo nota ' + ultimaNota + '. Puedes repetirla tantas veces como quieras para mejorar y ganar mas XP.</p>' +
+                    '<a href="evaluaciones.html" style="font-size:0.82rem;color:var(--primary-light);">➡️ Volver a evaluar</a>' +
+                '</div>';
+            }
+        }
+
+        var xpFalta = xpParaSiguienteNivel(u.xp || 0);
+        if (xpFalta.siguiente) {
+            sugHtml += '<div style="background:rgba(0,206,201,0.07);border:1px solid rgba(0,206,201,0.2);border-radius:var(--radius-sm);padding:1rem;">' +
+                '<strong style="font-size:0.88rem;">⚡ Proximo nivel: ' + xpFalta.siguiente.icon + ' ' + xpFalta.siguiente.nombre + '</strong>' +
+                '<p style="font-size:0.82rem;color:var(--text-muted);margin-top:0.4rem;">Te faltan <strong>' + xpFalta.xpFalta + ' XP</strong>. Completa ' + Math.ceil(xpFalta.xpFalta / 50) + ' evaluacion' + (Math.ceil(xpFalta.xpFalta / 50) !== 1 ? 'es' : '') + ' con buena nota para alcanzarlo.</p>' +
+            '</div>';
+        }
+
+        document.getElementById('sugerencias').innerHTML = sugHtml || '<p style="color:var(--text-muted);font-size:0.88rem;">¡Excelente! Sigue completando evaluaciones para ver sugerencias personalizadas.</p>';
+    }
+    </script>
+</body>
+</html>

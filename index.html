@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ElectroLearn — Iniciar Sesión</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+
+<!-- Firebase SDK v9 compat -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="js/firebase-config.js"></script>
+<script src="js/firebase-auth.js"></script>
+<script src="js/firebase-db.js"></script>
+
+<style>
+/* ── Estilos extra para la pantalla de login ── */
+.login-container{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px;position:relative;z-index:1}
+.login-card{background:rgba(30,41,59,.85);backdrop-filter:blur(20px);border:1px solid rgba(99,102,241,.25);border-radius:24px;padding:40px;width:100%;max-width:420px;box-shadow:0 25px 50px rgba(0,0,0,.5)}
+.login-header{text-align:center;margin-bottom:32px}
+.login-icon{font-size:3rem;display:block;margin-bottom:12px}
+.login-logo{font-family:'Space Grotesk',sans-serif;font-size:2rem;font-weight:700;background:linear-gradient(135deg,#6366f1,#8b5cf6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:6px}
+.login-subtitle{color:#94a3b8;font-size:.875rem}
+.input-group{position:relative;margin-bottom:16px;display:flex;align-items:center;background:rgba(15,23,42,.6);border:1px solid rgba(99,102,241,.25);border-radius:12px;overflow:hidden;transition:border-color .2s}
+.input-group:focus-within{border-color:#6366f1}
+.input-icon{padding:0 14px;font-size:1.1rem;flex-shrink:0}
+.input-group input,.input-group select{flex:1;background:transparent;border:none;outline:none;padding:14px 14px 14px 0;color:#e2e8f0;font-size:.95rem;font-family:inherit}
+.input-group select option{background:#1e293b}
+.error-message{color:#ef4444;font-size:.8rem;margin-bottom:12px;min-height:20px;display:block;text-align:center}
+.btn-full{width:100%;padding:14px;border-radius:12px;border:none;cursor:pointer;font-size:1rem;font-weight:700;font-family:inherit;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-full:hover{opacity:.9;transform:translateY(-1px)}
+.btn-full:disabled{opacity:.6;cursor:not-allowed;transform:none}
+.divider{display:flex;align-items:center;gap:12px;margin:20px 0;color:#94a3b8;font-size:.875rem}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:rgba(99,102,241,.2)}
+.login-footer{text-align:center;color:#94a3b8;font-size:.875rem}
+.login-footer a{color:#6366f1;text-decoration:none;font-weight:600}
+.login-footer a:hover{color:#8b5cf6}
+.platform-badge{text-align:center;margin-top:20px;font-size:.75rem;color:#475569}
+.platform-badge span{display:inline-block;background:rgba(99,102,241,.1);border:1px solid rgba(99,102,241,.2);border-radius:20px;padding:4px 12px;margin:2px}
+.spinner{display:inline-block;width:18px;height:18px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+
+<!-- Fondo animado -->
+<div class="bg-animation">
+  <div class="orb"></div>
+  <div class="orb"></div>
+  <div class="orb"></div>
+</div>
+
+<div class="login-container">
+
+  <!-- ── TARJETA LOGIN ─────────────────── -->
+  <div class="login-card" id="loginCard">
+    <div class="login-header">
+      <span class="login-icon">⚡</span>
+      <h1 class="login-logo">ElectroLearn</h1>
+      <p class="login-subtitle">Plataforma Educativa · Chile</p>
+    </div>
+
+    <form id="loginForm" onsubmit="doLogin(event)">
+      <div class="input-group">
+        <span class="input-icon">📧</span>
+        <input type="email" id="loginEmail" placeholder="Correo electrónico" required autocomplete="email">
+      </div>
+      <div class="input-group">
+        <span class="input-icon">🔒</span>
+        <input type="password" id="loginPassword" placeholder="Contraseña" required autocomplete="current-password">
+      </div>
+      <p class="error-message" id="loginError"></p>
+      <button type="submit" class="btn-full" id="btnLogin">Iniciar Sesión</button>
+    </form>
+
+    <div class="divider"><span>o</span></div>
+    <p class="login-footer">¿No tienes cuenta? <a href="#" onclick="showCard('register')">Regístrate aquí</a></p>
+
+    <div class="platform-badge">
+      <span>📚 Básica</span>
+      <span>🎓 Plan Común C-H</span>
+      <span>⚙️ EMTP</span>
+    </div>
+  </div>
+
+  <!-- ── TARJETA REGISTRO ──────────────── -->
+  <div class="login-card" id="registerCard" style="display:none">
+    <div class="login-header">
+      <span class="login-icon">📝</span>
+      <h1 class="login-logo">Crear Cuenta</h1>
+      <p class="login-subtitle">Ingresa tus datos para registrarte</p>
+    </div>
+
+    <form id="registerForm" onsubmit="doRegister(event)">
+      <div class="input-group">
+        <span class="input-icon">👤</span>
+        <input type="text" id="regName" placeholder="Nombre completo" required>
+      </div>
+      <div class="input-group">
+        <span class="input-icon">📧</span>
+        <input type="email" id="regEmail" placeholder="Correo electrónico" required>
+      </div>
+      <div class="input-group">
+        <span class="input-icon">🔒</span>
+        <input type="password" id="regPassword" placeholder="Contraseña (mínimo 6 caracteres)" required minlength="6">
+      </div>
+      <div class="input-group">
+        <span class="input-icon">🔑</span>
+        <input type="text" id="regCode" placeholder="Código de acceso (pídelo a tu profesor)">
+      </div>
+      <p class="error-message" id="registerError"></p>
+      <button type="submit" class="btn-full" id="btnRegister">Crear Cuenta</button>
+    </form>
+
+    <div class="divider"><span>o</span></div>
+    <p class="login-footer">¿Ya tienes cuenta? <a href="#" onclick="showCard('login')">Inicia sesión</a></p>
+  </div>
+
+</div>
+
+<script>
+// ── Redirigir si ya hay sesión ─────────────────────────────────
+ELAuth.onUserReady(function(user) {
+  if (user) window.location.href = 'dashboard.html';
+});
+
+// ── Cambiar entre login y registro ───────────────────────────
+function showCard(which) {
+  document.getElementById('loginCard').style.display    = which === 'login'    ? 'block' : 'none';
+  document.getElementById('registerCard').style.display = which === 'register' ? 'block' : 'none';
+  document.getElementById('loginError').textContent    = '';
+  document.getElementById('registerError').textContent = '';
+  return false;
+}
+
+// ── Login ─────────────────────────────────────────────────────
+function doLogin(e) {
+  e.preventDefault();
+  var email = document.getElementById('loginEmail').value.trim();
+  var pass  = document.getElementById('loginPassword').value;
+  var btn   = document.getElementById('btnLogin');
+  var err   = document.getElementById('loginError');
+
+  err.textContent = '';
+  btn.disabled    = true;
+  btn.innerHTML   = '<span class="spinner"></span> Iniciando sesión…';
+
+  ELAuth.login(email, pass)
+    .then(function() {
+      window.location.href = 'dashboard.html';
+    })
+    .catch(function(error) {
+      btn.disabled  = false;
+      btn.innerHTML = 'Iniciar Sesión';
+      var msg = error.message || 'Error al iniciar sesión';
+      if (msg.includes('INVALID_LOGIN_CREDENTIALS') || msg.includes('INVALID_PASSWORD') || msg.includes('EMAIL_NOT_FOUND')) {
+        msg = 'Correo o contraseña incorrectos.';
+      } else if (msg.includes('TOO_MANY_ATTEMPTS')) {
+        msg = 'Demasiados intentos. Intenta más tarde.';
+      } else if (msg.includes('USER_DISABLED')) {
+        msg = 'Tu cuenta ha sido desactivada. Contacta al administrador.';
+      }
+      err.textContent = '❌ ' + msg;
+    });
+}
+
+// ── Registro ──────────────────────────────────────────────────
+function doRegister(e) {
+  e.preventDefault();
+  var nombre = document.getElementById('regName').value.trim();
+  var email  = document.getElementById('regEmail').value.trim();
+  var pass   = document.getElementById('regPassword').value;
+  var codigo = document.getElementById('regCode').value.trim();
+  var btn    = document.getElementById('btnRegister');
+  var err    = document.getElementById('registerError');
+
+  if (!nombre || !email || !pass) { err.textContent = '❌ Completa todos los campos obligatorios.'; return; }
+  if (pass.length < 6) { err.textContent = '❌ La contraseña debe tener al menos 6 caracteres.'; return; }
+
+  err.textContent = '';
+  btn.disabled    = true;
+  btn.innerHTML   = '<span class="spinner"></span> Creando cuenta…';
+
+  // 1. Validar código si se ingresó
+  var validarCodigo = codigo
+    ? ELDB.codigos.validar(codigo)
+    : Promise.resolve(null);
+
+  validarCodigo
+    .then(function(codigoDoc) {
+      // 2. Crear usuario en Firebase Auth
+      var role = codigoDoc ? codigoDoc.role : 'estudiante';
+      return EL_AUTH.createUserWithEmailAndPassword(email, pass)
+        .then(function(cred) {
+          var uid = cred.user.uid;
+          var perfil = {
+            uid:         uid,
+            nombre:      nombre,
+            email:       email,
+            role:        role,
+            xp:          0,
+            nivel:       1,
+            badges:      [],
+            evaluaciones:[],
+            activo:      true,
+            creadoEn:    new Date().toISOString(),
+            cursor:      codigoDoc ? codigoDoc.curso : ''
+          };
+          // 3. Guardar perfil en Firestore
+          return EL_DB.collection(EL_COLLECTIONS.USERS).doc(uid).set(perfil)
+            .then(function() {
+              // 4. Marcar código como usado
+              if (codigoDoc) return ELDB.codigos.marcarUsado(codigoDoc.id, uid);
+            });
+        });
+    })
+    .then(function() {
+      window.location.href = 'dashboard.html';
+    })
+    .catch(function(error) {
+      btn.disabled  = false;
+      btn.innerHTML = 'Crear Cuenta';
+      var msg = error.message || 'Error al crear la cuenta';
+      if (msg.includes('EMAIL_EXISTS') || msg.includes('email-already-in-use')) {
+        msg = 'Ya existe una cuenta con ese correo.';
+      } else if (msg.includes('Código inválido')) {
+        msg = 'El código de acceso es inválido o ya fue usado.';
+      } else if (msg.includes('WEAK_PASSWORD')) {
+        msg = 'La contraseña debe tener al menos 6 caracteres.';
+      }
+      err.textContent = '❌ ' + msg;
+    });
+}
+</script>
+</body>
+</html>

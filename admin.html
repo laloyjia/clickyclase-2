@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin — ElectroLearn</title>
+
+<!-- Firebase SDK v9 compat -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="js/firebase-config.js"></script>
+<script src="js/firebase-auth.js"></script>
+<script src="js/firebase-db.js"></script>
+<script src="js/curricula-chile.js"></script>
+
+<style>
+:root{--bg:#0f172a;--surface:#1e293b;--surface2:#273549;--border:rgba(99,102,241,.25);--accent:#6366f1;--accent2:#8b5cf6;--gold:#f59e0b;--green:#10b981;--red:#ef4444;--text:#e2e8f0;--muted:#94a3b8}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.orb{position:fixed;border-radius:50%;filter:blur(80px);opacity:.12;pointer-events:none;z-index:0}
+.orb1{width:500px;height:500px;background:radial-gradient(var(--accent),transparent);top:-100px;left:-100px}
+.orb2{width:400px;height:400px;background:radial-gradient(var(--gold),transparent);bottom:-80px;right:-80px}
+.layout{display:grid;grid-template-columns:260px 1fr;min-height:100vh;position:relative;z-index:1}
+.sidebar{background:rgba(30,41,59,.95);border-right:1px solid var(--border);padding:24px 0;display:flex;flex-direction:column;gap:4px}
+.sidebar-logo{padding:0 20px 20px;border-bottom:1px solid var(--border);margin-bottom:8px}
+.sidebar-logo h2{font-size:1.2rem;color:var(--accent);font-weight:700}
+.sidebar-logo p{font-size:.75rem;color:var(--muted)}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 20px;cursor:pointer;transition:all .2s;color:var(--muted);font-size:.875rem;border-left:3px solid transparent}
+.nav-item:hover{background:rgba(99,102,241,.1);color:var(--text)}
+.nav-item.active{background:rgba(99,102,241,.15);color:var(--accent);border-left-color:var(--accent)}
+.nav-section{padding:16px 20px 6px;font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.main{padding:28px;overflow-y:auto}
+.page-header{margin-bottom:24px}
+.page-header h1{font-size:1.6rem;font-weight:700}
+.page-header p{color:var(--muted);font-size:.875rem;margin-top:4px}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:16px;margin-bottom:28px}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center}
+.stat-num{font-size:2rem;font-weight:700;color:var(--accent)}
+.stat-label{font-size:.75rem;color:var(--muted);margin-top:4px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:24px;margin-bottom:20px}
+.card h3{font-size:1rem;font-weight:600;margin-bottom:16px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.form-group{display:flex;flex-direction:column;gap:6px}
+.form-group label{font-size:.8rem;color:var(--muted);font-weight:500}
+.form-group input,.form-group select,.form-group textarea{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--text);font-size:.875rem;outline:none;transition:border-color .2s}
+.form-group input:focus,.form-group select:focus{border-color:var(--accent)}
+.form-group select option{background:var(--surface)}
+.full-width{grid-column:1/-1}
+.multi-select-box{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;max-height:200px;overflow-y:auto}
+.multi-select-box label{display:flex;align-items:center;gap:8px;padding:4px 0;cursor:pointer;font-size:.85rem}
+.multi-select-box input[type=checkbox]{accent-color:var(--accent);width:16px;height:16px}
+.btn{padding:10px 20px;border-radius:8px;border:none;cursor:pointer;font-size:.875rem;font-weight:600;transition:all .2s;display:inline-flex;align-items:center;gap:8px}
+.btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff}
+.btn-primary:hover{opacity:.9;transform:translateY(-1px)}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--text)}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent)}
+.btn-danger{background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.4);color:var(--red)}
+.btn-danger:hover{background:rgba(239,68,68,.25)}
+.btn-sm{padding:6px 14px;font-size:.8rem}
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.85rem}
+th{background:var(--surface2);padding:10px 14px;text-align:left;color:var(--muted);font-weight:600;font-size:.75rem;text-transform:uppercase;letter-spacing:.05em}
+td{padding:10px 14px;border-bottom:1px solid rgba(99,102,241,.1);vertical-align:middle}
+tr:hover td{background:rgba(99,102,241,.05)}
+.badge{display:inline-block;padding:3px 10px;border-radius:12px;font-size:.75rem;font-weight:600}
+.badge-admin{background:rgba(245,158,11,.15);color:var(--gold);border:1px solid rgba(245,158,11,.3)}
+.badge-prof{background:rgba(99,102,241,.15);color:var(--accent);border:1px solid rgba(99,102,241,.3)}
+.badge-est{background:rgba(16,185,129,.15);color:var(--green);border:1px solid rgba(16,185,129,.3)}
+.badge-inact{background:rgba(148,163,184,.1);color:var(--muted);border:1px solid rgba(148,163,184,.2)}
+.search-row{display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap}
+.search-input{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 14px;color:var(--text);font-size:.875rem;outline:none;flex:1;min-width:200px}
+.search-input:focus{border-color:var(--accent)}
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100;align-items:center;justify-content:center}
+.modal-bg.open{display:flex}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:28px;width:min(700px,95vw);max-height:90vh;overflow-y:auto;position:relative}
+.modal h2{font-size:1.2rem;margin-bottom:20px}
+.modal-close{position:absolute;top:16px;right:16px;background:var(--surface2);border:none;color:var(--muted);cursor:pointer;border-radius:8px;width:32px;height:32px;font-size:1.1rem;display:flex;align-items:center;justify-content:center}
+.modal-close:hover{color:var(--text)}
+.wizard-steps{display:flex;gap:0;margin-bottom:24px;position:relative}
+.wizard-steps::before{content:'';position:absolute;top:15px;left:15px;right:15px;height:2px;background:var(--border);z-index:0}
+.wstep{flex:1;text-align:center;position:relative;z-index:1}
+.wstep-dot{width:30px;height:30px;border-radius:50%;background:var(--surface2);border:2px solid var(--border);margin:0 auto 6px;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700;color:var(--muted);transition:all .3s}
+.wstep.active .wstep-dot{background:var(--accent);border-color:var(--accent);color:#fff}
+.wstep.done .wstep-dot{background:var(--green);border-color:var(--green);color:#fff}
+.wstep-label{font-size:.7rem;color:var(--muted)}
+.wstep.active .wstep-label{color:var(--accent)}
+.step-panel{display:none}
+.step-panel.active{display:block}
+.tipo-card{background:var(--surface2);border:2px solid var(--border);border-radius:12px;padding:20px;cursor:pointer;transition:all .2s}
+.tipo-card:hover{border-color:var(--accent);background:rgba(99,102,241,.1)}
+.tipo-card.selected{border-color:var(--accent);background:rgba(99,102,241,.15)}
+.notif{padding:12px 16px;border-radius:10px;font-size:.85rem;margin-bottom:16px;display:none}
+.notif.ok{background:rgba(16,185,129,.15);border:1px solid rgba(16,185,129,.3);color:var(--green)}
+.notif.err{background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.3);color:var(--red)}
+.notif.show{display:block}
+.spinner{display:inline-block;width:18px;height:18px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.cdot{width:10px;height:10px;border-radius:50%;display:inline-block;margin-right:6px;vertical-align:middle}
+.tab-section{animation:fadeIn .3s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:768px){.layout{grid-template-columns:1fr}.sidebar{display:none}.form-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <h2>⚡ ElectroLearn</h2>
+      <p id="adminEmail">Panel de Administración</p>
+    </div>
+    <div class="nav-section">Gestión</div>
+    <div class="nav-item active" data-sec="usuarios" onclick="showSec(this,'usuarios')">👥 Usuarios</div>
+    <div class="nav-item" data-sec="profesores" onclick="showSec(this,'profesores')">🎓 Profesores</div>
+    <div class="nav-item" data-sec="codigos" onclick="showSec(this,'codigos')">🔑 Códigos de Acceso</div>
+    <div class="nav-section">Contenido</div>
+    <div class="nav-item" data-sec="materiales" onclick="showSec(this,'materiales')">📚 Materiales</div>
+    <div class="nav-item" data-sec="planificaciones" onclick="showSec(this,'planificaciones')">📅 Planificaciones</div>
+    <div class="nav-section">Sistema</div>
+    <div class="nav-item" onclick="window.location.href='dashboard.html'">🏠 Dashboard</div>
+    <div class="nav-item" onclick="ELAuth.logout()">🚪 Cerrar Sesión</div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- Stats -->
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-num" id="sTotalUsers">–</div><div class="stat-label">Usuarios totales</div></div>
+      <div class="stat-card"><div class="stat-num" id="sProfs">–</div><div class="stat-label">Profesores</div></div>
+      <div class="stat-card"><div class="stat-num" id="sEsts">–</div><div class="stat-label">Estudiantes</div></div>
+      <div class="stat-card"><div class="stat-num" id="sMats">–</div><div class="stat-label">Materiales</div></div>
+      <div class="stat-card"><div class="stat-num" id="sPlans">–</div><div class="stat-label">Planificaciones</div></div>
+    </div>
+
+    <!-- USUARIOS -->
+    <section id="sec-usuarios" class="tab-section">
+      <div class="page-header"><h1>👥 Todos los Usuarios</h1><p>Gestiona todos los usuarios de la plataforma</p></div>
+      <div class="card">
+        <div class="search-row">
+          <input class="search-input" id="userSearch" placeholder="Buscar por nombre o correo…" oninput="filtrarUsuarios()">
+          <select id="userRoleFilter" class="search-input" style="flex:0;min-width:150px" onchange="filtrarUsuarios()">
+            <option value="">Todos los roles</option>
+            <option value="admin">Admin</option>
+            <option value="profesor">Profesor</option>
+            <option value="estudiante">Estudiante</option>
+          </select>
+          <button class="btn btn-primary btn-sm" onclick="abrirModalUsuario()">➕ Nuevo Usuario</button>
+        </div>
+        <div class="tbl-wrap">
+          <table><thead><tr><th>Nombre</th><th>Correo</th><th>Rol</th><th>Especialidad/Asignatura</th><th>Estado</th><th>Acciones</th></tr></thead>
+          <tbody id="usersTbody"><tr><td colspan="6" style="text-align:center;color:var(--muted)">Cargando…</td></tr></tbody></table>
+        </div>
+      </div>
+    </section>
+
+    <!-- PROFESORES -->
+    <section id="sec-profesores" class="tab-section" style="display:none">
+      <div class="page-header"><h1>🎓 Gestionar Profesores</h1><p>Crea y administra cuentas de profesores con sus asignaturas</p></div>
+      <div class="card">
+        <h3>Crear nuevo profesor</h3>
+        <button class="btn btn-primary" onclick="abrirWizard()">🧙 Asistente de creación</button>
+      </div>
+      <div class="card">
+        <h3>📋 Profesores registrados</h3>
+        <div class="tbl-wrap">
+          <table><thead><tr><th>Nombre</th><th>Correo</th><th>Tipo</th><th>Asignaturas/Especialidad</th><th>Niveles</th><th>Acciones</th></tr></thead>
+          <tbody id="profsTbody"><tr><td colspan="6" style="text-align:center;color:var(--muted)">Cargando…</td></tr></tbody></table>
+        </div>
+      </div>
+    </section>
+
+    <!-- CÓDIGOS -->
+    <section id="sec-codigos" class="tab-section" style="display:none">
+      <div class="page-header"><h1>🔑 Códigos de Acceso</h1><p>Genera códigos para que los usuarios puedan registrarse</p></div>
+      <div class="card">
+        <h3>Crear código</h3>
+        <div class="form-grid">
+          <div class="form-group"><label>Rol</label>
+            <select id="codigoRol"><option value="estudiante">Estudiante</option><option value="profesor">Profesor</option></select></div>
+          <div class="form-group"><label>Curso (opcional)</label><input id="codigoCurso" placeholder="ej: 3M-A"></div>
+          <div class="form-group"><label>Asignatura (opcional)</label><input id="codigoAsig" placeholder="ej: Electrónica"></div>
+          <div class="form-group" style="align-self:end"><button class="btn btn-primary" onclick="crearCodigo()">Generar código</button></div>
+        </div>
+        <div id="codigoNotif" class="notif"></div>
+      </div>
+      <div class="card">
+        <h3>📋 Códigos generados</h3>
+        <div class="tbl-wrap">
+          <table><thead><tr><th>Código</th><th>Rol</th><th>Curso</th><th>Estado</th><th>Fecha</th><th></th></tr></thead>
+          <tbody id="codigosTbody"><tr><td colspan="6" style="text-align:center;color:var(--muted)">Cargando…</td></tr></tbody></table>
+        </div>
+      </div>
+    </section>
+
+    <!-- MATERIALES -->
+    <section id="sec-materiales" class="tab-section" style="display:none">
+      <div class="page-header"><h1>📚 Materiales Publicados</h1><p>Todo el contenido subido por los profesores</p></div>
+      <div class="card">
+        <div class="search-row">
+          <input class="search-input" id="matSearch" placeholder="Buscar…" oninput="filtrarMats()">
+          <select id="matTipo" class="search-input" style="flex:0;min-width:140px" onchange="filtrarMats()">
+            <option value="">Todos los tipos</option>
+            <option value="guia">Guía</option><option value="apunte">Apunte</option>
+            <option value="evaluacion">Evaluación</option><option value="planificacion">Planificación</option>
+          </select>
+          <button class="btn btn-outline btn-sm" onclick="exportarCSV()">⬇️ CSV</button>
+        </div>
+        <div class="tbl-wrap">
+          <table><thead><tr><th>Título</th><th>Tipo</th><th>Profesor</th><th>Módulo/Asig.</th><th>Fecha</th><th>Vistas</th><th></th></tr></thead>
+          <tbody id="matsTbody"><tr><td colspan="7" style="text-align:center;color:var(--muted)">Cargando…</td></tr></tbody></table>
+        </div>
+      </div>
+    </section>
+
+    <!-- PLANIFICACIONES -->
+    <section id="sec-planificaciones" class="tab-section" style="display:none">
+      <div class="page-header"><h1>📅 Planificaciones</h1><p>Todas las planificaciones de clases</p></div>
+      <div class="card">
+        <div class="tbl-wrap">
+          <table><thead><tr><th>Título</th><th>Profesor</th><th>Módulo/Asig.</th><th>Fecha clase</th><th>Horas</th><th></th></tr></thead>
+          <tbody id="plansTbody"><tr><td colspan="6" style="text-align:center;color:var(--muted)">Cargando…</td></tr></tbody></table>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- MODAL WIZARD PROFESOR -->
+<div class="modal-bg" id="modalWizard">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modalWizard')">✕</button>
+    <h2>🧙 Crear Nuevo Profesor</h2>
+    <div id="wNotif" class="notif"></div>
+    <div class="wizard-steps">
+      <div class="wstep active" id="ws1"><div class="wstep-dot">1</div><div class="wstep-label">Datos</div></div>
+      <div class="wstep" id="ws2"><div class="wstep-dot">2</div><div class="wstep-label">Tipo</div></div>
+      <div class="wstep" id="ws3"><div class="wstep-dot">3</div><div class="wstep-label">Asignar</div></div>
+      <div class="wstep" id="ws4"><div class="wstep-dot">4</div><div class="wstep-label">Confirmar</div></div>
+    </div>
+    <!-- Step 1 -->
+    <div class="step-panel active" id="sp1">
+      <div class="form-grid">
+        <div class="form-group full-width"><label>Nombre completo *</label><input id="pNombre" placeholder="Juan Pérez González"></div>
+        <div class="form-group"><label>Correo electrónico *</label><input id="pEmail" type="email" placeholder="juan@colegio.cl"></div>
+        <div class="form-group"><label>Contraseña inicial * (mín. 6 chars)</label><input id="pPass" type="password" placeholder="••••••••"></div>
+      </div>
+      <div style="text-align:right;margin-top:16px"><button class="btn btn-primary" onclick="wNext(1)">Siguiente →</button></div>
+    </div>
+    <!-- Step 2 -->
+    <div class="step-panel" id="sp2">
+      <p style="color:var(--muted);margin-bottom:16px;font-size:.875rem">¿Qué tipo de docente es?</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
+        <div class="tipo-card" id="tc-basica" onclick="selTipo('basica')">
+          <div style="font-size:2rem;text-align:center">📚</div>
+          <div style="text-align:center;font-weight:600;margin-top:8px">Educación Básica</div>
+          <div style="text-align:center;font-size:.75rem;color:var(--muted);margin-top:4px">1° a 8° Básico</div>
+        </div>
+        <div class="tipo-card" id="tc-media" onclick="selTipo('media')">
+          <div style="font-size:2rem;text-align:center">🎓</div>
+          <div style="text-align:center;font-weight:600;margin-top:8px">Plan Común</div>
+          <div style="text-align:center;font-size:.75rem;color:var(--muted);margin-top:4px">1° a 4° Medio C-H</div>
+        </div>
+        <div class="tipo-card" id="tc-tecnico" onclick="selTipo('tecnico')">
+          <div style="font-size:2rem;text-align:center">⚙️</div>
+          <div style="text-align:center;font-weight:600;margin-top:8px">Técnico-Profesional</div>
+          <div style="text-align:center;font-size:.75rem;color:var(--muted);margin-top:4px">EMTP — Especialidad</div>
+        </div>
+      </div>
+      <div style="text-align:right;margin-top:16px;display:flex;gap:8px;justify-content:flex-end">
+        <button class="btn btn-outline" onclick="wPrev(2)">← Atrás</button>
+        <button class="btn btn-primary" onclick="wNext(2)">Siguiente →</button>
+      </div>
+    </div>
+    <!-- Step 3 -->
+    <div class="step-panel" id="sp3">
+      <div id="sp3Content"></div>
+      <div style="text-align:right;margin-top:16px;display:flex;gap:8px;justify-content:flex-end">
+        <button class="btn btn-outline" onclick="wPrev(3)">← Atrás</button>
+        <button class="btn btn-primary" onclick="wNext(3)">Siguiente →</button>
+      </div>
+    </div>
+    <!-- Step 4 -->
+    <div class="step-panel" id="sp4">
+      <div id="sp4Preview" style="background:var(--surface2);border-radius:12px;padding:20px;margin-bottom:16px"></div>
+      <div style="text-align:right;display:flex;gap:8px;justify-content:flex-end">
+        <button class="btn btn-outline" onclick="wPrev(4)">← Atrás</button>
+        <button class="btn btn-primary" id="btnCrear" onclick="crearProfesor()">✅ Crear Profesor</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL USUARIO GENÉRICO -->
+<div class="modal-bg" id="modalUser">
+  <div class="modal" style="max-width:480px">
+    <button class="modal-close" onclick="closeModal('modalUser')">✕</button>
+    <h2 id="mUserTitle">👤 Nuevo Usuario</h2>
+    <div id="uNotif" class="notif"></div>
+    <div class="form-grid">
+      <div class="form-group full-width"><label>Nombre</label><input id="uNombre" placeholder="Nombre completo"></div>
+      <div class="form-group"><label>Correo</label><input id="uEmail" type="email"></div>
+      <div class="form-group"><label>Contraseña (solo nueva cuenta)</label><input id="uPass" type="password"></div>
+      <div class="form-group"><label>Rol</label>
+        <select id="uRol"><option value="estudiante">Estudiante</option><option value="profesor">Profesor</option><option value="admin">Admin</option></select></div>
+      <div class="form-group"><label>Curso</label><input id="uCurso" placeholder="ej: 3M-A"></div>
+    </div>
+    <div style="text-align:right;margin-top:16px">
+      <button class="btn btn-primary" onclick="guardarUsuario()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+var allUsers=[], allMats=[], allPlans=[];
+var wData={tipo:null,asignaturas:[],niveles:[],especialidad:'',modulos:[]};
+var editingUid=null;
+
+ELAuth.requireAuth(['admin','profesor']);
+ELAuth.onUserReady(function(user){
+  if(!user){return;}
+  if(user.role!=='admin'&&user.email!==EL_ADMIN_EMAIL){
+    alert('Acceso solo para administradores.');window.location.href='dashboard.html';return;
+  }
+  document.getElementById('adminEmail').textContent=user.nombre||user.email;
+  loadData();
+});
+
+function loadData(){
+  ELDB.usuarios.listarTodos().then(function(u){
+    allUsers=u;
+    document.getElementById('sTotalUsers').textContent=u.length;
+    document.getElementById('sProfs').textContent=u.filter(function(x){return x.role==='profesor';}).length;
+    document.getElementById('sEsts').textContent=u.filter(function(x){return x.role==='estudiante';}).length;
+    renderUsers(u);
+    renderProfs(u.filter(function(x){return x.role==='profesor'||x.role==='admin';}));
+  }).catch(console.error);
+  ELDB.materiales.listar().then(function(m){
+    allMats=m;document.getElementById('sMats').textContent=m.length;renderMats(m);
+  }).catch(console.error);
+  ELDB.planificaciones.listar().then(function(p){
+    allPlans=p;document.getElementById('sPlans').textContent=p.length;renderPlans(p);
+  }).catch(console.error);
+  ELDB.codigos.listar().then(renderCodigos).catch(console.error);
+}
+
+function showSec(el,id){
+  document.querySelectorAll('.tab-section').forEach(function(s){s.style.display='none';});
+  document.querySelectorAll('.nav-item[data-sec]').forEach(function(n){n.classList.remove('active');});
+  document.getElementById('sec-'+id).style.display='block';
+  el.classList.add('active');
+}
+
+function renderUsers(list){
+  var tb=document.getElementById('usersTbody');
+  if(!list.length){tb.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--muted)">Sin usuarios</td></tr>';return;}
+  tb.innerHTML=list.map(function(u){
+    var bc=u.role==='admin'?'badge-admin':u.role==='profesor'?'badge-prof':'badge-est';
+    var est=u.activo!==false?'<span class="badge" style="background:rgba(16,185,129,.1);color:#10b981">Activo</span>':'<span class="badge badge-inact">Inactivo</span>';
+    var sp=(u.especialidad||(u.asignaturas&&u.asignaturas.join(', '))||'—');
+    return '<tr><td><strong>'+(u.nombre||'—')+'</strong></td><td style="color:var(--muted)">'+u.email+'</td><td><span class="badge '+bc+'">'+(u.role||'—')+'</span></td><td style="font-size:.8rem">'+sp+'</td><td>'+est+'</td><td><button class="btn btn-outline btn-sm" onclick="editUser(\''+u.uid+'\')">✏️</button> <button class="btn btn-danger btn-sm" onclick="desactivar(\''+u.uid+'\')">🚫</button></td></tr>';
+  }).join('');
+}
+
+function filtrarUsuarios(){
+  var q=document.getElementById('userSearch').value.toLowerCase();
+  var r=document.getElementById('userRoleFilter').value;
+  renderUsers(allUsers.filter(function(u){
+    return(!q||(u.nombre||'').toLowerCase().includes(q)||u.email.toLowerCase().includes(q))&&(!r||u.role===r);
+  }));
+}
+
+function renderProfs(list){
+  var tb=document.getElementById('profsTbody');
+  if(!list.length){tb.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--muted)">Sin profesores</td></tr>';return;}
+  tb.innerHTML=list.map(function(p){
+    var tipo=p.tipoProfesor==='basica'?'📚 Básica':p.tipoProfesor==='media'?'🎓 Plan Común':p.tipoProfesor==='tecnico'?'⚙️ EMTP':'—';
+    var asig=p.asignaturas&&p.asignaturas.length?p.asignaturas.join(', '):(p.especialidad||'—');
+    return '<tr><td><strong>'+(p.nombre||'—')+'</strong></td><td style="color:var(--muted)">'+p.email+'</td><td>'+tipo+'</td><td style="font-size:.8rem">'+asig+'</td><td style="font-size:.8rem">'+(p.niveles&&p.niveles.join(', ')||'—')+'</td><td><button class="btn btn-outline btn-sm" onclick="editUser(\''+p.uid+'\')">✏️</button></td></tr>';
+  }).join('');
+}
+
+var TC={'guia':'#34d399','apunte':'#60a5fa','ficha':'#f59e0b','evaluacion':'#f43f5e','planificacion':'#818cf8'};
+function renderMats(list){
+  var tb=document.getElementById('matsTbody');
+  if(!list.length){tb.innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--muted)">Sin materiales</td></tr>';return;}
+  tb.innerHTML=list.map(function(m){
+    var c=TC[m.tipo]||'#94a3b8';
+    var f=m.fechaISO?new Date(m.fechaISO).toLocaleDateString('es-CL'):'—';
+    return '<tr><td><strong>'+(m.titulo||'Sin título')+'</strong></td><td><span class="badge" style="background:'+c+'22;color:'+c+';border:1px solid '+c+'44">'+(m.tipo||'?')+'</span></td><td style="font-size:.8rem">'+(m.profesor||m.email||'—')+'</td><td style="font-size:.8rem">'+(m.modulo||m.asignatura||'—')+'</td><td style="font-size:.8rem;color:var(--muted)">'+f+'</td><td>'+(m.vistas||0)+'</td><td><button class="btn btn-danger btn-sm" onclick="delMat(\''+m.id+'\')">🗑</button></td></tr>';
+  }).join('');
+}
+function filtrarMats(){
+  var q=document.getElementById('matSearch').value.toLowerCase();
+  var t=document.getElementById('matTipo').value;
+  renderMats(allMats.filter(function(m){return(!q||(m.titulo||'').toLowerCase().includes(q))&&(!t||m.tipo===t);}));
+}
+function delMat(id){if(!confirm('¿Eliminar?'))return;ELDB.materiales.eliminar(id).then(function(){allMats=allMats.filter(function(m){return m.id!==id;});renderMats(allMats);});}
+function exportarCSV(){
+  var csv='Título,Tipo,Profesor,Módulo,Fecha\n';
+  allMats.forEach(function(m){csv+='"'+(m.titulo||'')+'",'+( m.tipo||'')+','+(m.profesor||'')+','+(m.modulo||'')+','+(m.fechaISO||'')+'\n';});
+  var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='materiales.csv';a.click();
+}
+
+function renderPlans(list){
+  var tb=document.getElementById('plansTbody');
+  if(!list.length){tb.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--muted)">Sin planificaciones</td></tr>';return;}
+  tb.innerHTML=list.map(function(p){
+    var f=p.fechaClase?new Date(p.fechaClase).toLocaleDateString('es-CL'):(p.fechaISO?new Date(p.fechaISO).toLocaleDateString('es-CL'):'—');
+    return '<tr><td><strong>'+(p.titulo||'Sin título')+'</strong></td><td style="font-size:.8rem">'+(p.profesor||p.email||'—')+'</td><td style="font-size:.8rem">'+(p.modulo||p.asignatura||'—')+'</td><td style="font-size:.8rem;color:var(--muted)">'+f+'</td><td style="font-size:.8rem">'+(p.horas||'—')+'h</td><td><button class="btn btn-danger btn-sm" onclick="delPlan(\''+p.id+'\')">🗑</button></td></tr>';
+  }).join('');
+}
+function delPlan(id){if(!confirm('¿Eliminar?'))return;ELDB.planificaciones.eliminar(id).then(function(){allPlans=allPlans.filter(function(p){return p.id!==id;});renderPlans(allPlans);});}
+
+function renderCodigos(list){
+  var tb=document.getElementById('codigosTbody');
+  if(!list.length){tb.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--muted)">Sin códigos</td></tr>';return;}
+  tb.innerHTML=list.map(function(c){
+    var est=c.usado?'<span class="badge badge-inact">Usado</span>':'<span class="badge badge-est">Disponible</span>';
+    var f=c.creadoEn?new Date(c.creadoEn).toLocaleDateString('es-CL'):'—';
+    return '<tr><td><code style="font-size:1rem;color:var(--gold);font-weight:700;letter-spacing:.1em">'+c.codigo+'</code></td><td><span class="badge '+(c.role==='profesor'?'badge-prof':'badge-est')+'">'+(c.role||'?')+'</span></td><td style="font-size:.8rem">'+(c.curso||'—')+'</td><td>'+est+'</td><td style="font-size:.8rem;color:var(--muted)">'+f+'</td><td><button class="btn btn-outline btn-sm" onclick="copiar(\''+c.codigo+'\')">📋</button></td></tr>';
+  }).join('');
+}
+
+function crearCodigo(){
+  ELDB.codigos.crear({role:document.getElementById('codigoRol').value,curso:document.getElementById('codigoCurso').value,asignatura:document.getElementById('codigoAsig').value})
+  .then(function(c){notif('codigoNotif','✅ Código creado: '+c.codigo,'ok');ELDB.codigos.listar().then(renderCodigos);})
+  .catch(function(e){notif('codigoNotif','❌ '+e.message,'err');});
+}
+function copiar(c){navigator.clipboard.writeText(c).then(function(){alert('Copiado: '+c);}).catch(function(){prompt('Código:',c);});}
+
+function abrirModalUsuario(uid){
+  editingUid=uid||null;
+  document.getElementById('mUserTitle').textContent=uid?'✏️ Editar Usuario':'👤 Nuevo Usuario';
+  ['uNombre','uEmail','uPass','uCurso'].forEach(function(id){document.getElementById(id).value='';});
+  document.getElementById('uRol').value='estudiante';
+  if(uid){var u=allUsers.find(function(x){return x.uid===uid;});if(u){document.getElementById('uNombre').value=u.nombre||'';document.getElementById('uEmail').value=u.email||'';document.getElementById('uRol').value=u.role||'estudiante';document.getElementById('uCurso').value=u.curso||'';}}
+  document.getElementById('modalUser').classList.add('open');
+}
+function editUser(uid){abrirModalUsuario(uid);}
+function guardarUsuario(){
+  var d={nombre:document.getElementById('uNombre').value.trim(),email:document.getElementById('uEmail').value.trim(),role:document.getElementById('uRol').value,curso:document.getElementById('uCurso').value.trim()};
+  if(!d.nombre||!d.email){notif('uNotif','❌ Nombre y correo son obligatorios','err');return;}
+  if(editingUid){
+    ELDB.usuarios.actualizar(editingUid,d).then(function(){notif('uNotif','✅ Actualizado','ok');loadData();setTimeout(function(){closeModal('modalUser');},1500);}).catch(function(e){notif('uNotif','❌ '+e.message,'err');});
+  }else{
+    var p=document.getElementById('uPass').value;
+    if(!p||p.length<6){notif('uNotif','❌ Contraseña mín. 6 caracteres','err');return;}
+    ELAuth.adminCrearEstudiante(Object.assign(d,{password:p})).then(function(){notif('uNotif','✅ Usuario creado','ok');loadData();setTimeout(function(){closeModal('modalUser');},1500);}).catch(function(e){notif('uNotif','❌ '+e.message,'err');});
+  }
+}
+function desactivar(uid){if(!confirm('¿Desactivar usuario?'))return;ELAuth.adminDesactivarUsuario(uid).then(loadData).catch(function(e){alert(e.message);});}
+
+// WIZARD
+function abrirWizard(){
+  wData={tipo:null,asignaturas:[],niveles:[],especialidad:'',modulos:[]};
+  ['pNombre','pEmail','pPass'].forEach(function(id){document.getElementById(id).value='';});
+  document.querySelectorAll('.tipo-card').forEach(function(c){c.classList.remove('selected');});
+  document.querySelectorAll('.wstep').forEach(function(s){s.className='wstep';});
+  document.querySelectorAll('.step-panel').forEach(function(p){p.classList.remove('active');});
+  document.getElementById('ws1').classList.add('active');
+  document.getElementById('sp1').classList.add('active');
+  document.getElementById('wNotif').classList.remove('show');
+  document.getElementById('modalWizard').classList.add('open');
+}
+
+function selTipo(t){wData.tipo=t;document.querySelectorAll('.tipo-card').forEach(function(c){c.classList.remove('selected');});document.getElementById('tc-'+t).classList.add('selected');}
+
+function wNext(step){
+  if(step===1){
+    var n=document.getElementById('pNombre').value.trim(),e=document.getElementById('pEmail').value.trim(),p=document.getElementById('pPass').value;
+    if(!n||!e||!p){notif('wNotif','❌ Completa todos los campos','err');return;}
+    if(p.length<6){notif('wNotif','❌ Contraseña mín. 6 caracteres','err');return;}
+    if(!e.includes('@')){notif('wNotif','❌ Correo no válido','err');return;}
+  }
+  if(step===2){if(!wData.tipo){notif('wNotif','❌ Selecciona el tipo de docente','err');return;}buildStep3();}
+  if(step===3){
+    if(wData.tipo!=='tecnico'&&wData.asignaturas.length===0){notif('wNotif','❌ Selecciona al menos una asignatura','err');return;}
+    if(wData.niveles.length===0){notif('wNotif','❌ Selecciona al menos un nivel','err');return;}
+    buildStep4();
+  }
+  document.getElementById('wNotif').classList.remove('show');
+  var nx=step+1;
+  document.getElementById('sp'+step).classList.remove('active');document.getElementById('sp'+nx).classList.add('active');
+  document.getElementById('ws'+step).className='wstep done';document.getElementById('ws'+nx).classList.add('active');
+}
+function wPrev(step){
+  var pv=step-1;
+  document.getElementById('sp'+step).classList.remove('active');document.getElementById('sp'+pv).classList.add('active');
+  document.getElementById('ws'+step).classList.remove('active');document.getElementById('ws'+pv).className='wstep active';
+}
+
+function buildStep3(){
+  var t=wData.tipo,html='';
+  if(t==='basica'){
+    html+='<h3 style="margin-bottom:12px">📚 Asignaturas — Educación Básica</h3><div class="multi-select-box" id="asigBox">';
+    CURRICULA_CHILE.basica.asignaturas.forEach(function(a){html+='<label><input type="checkbox" value="'+a.nombre+'" onchange="tgAsig(this)"><span class="cdot" style="background:'+a.color+'"></span>'+a.nombre+'</label>';});
+    html+='</div><h3 style="margin:16px 0 12px">Niveles asignados</h3><div class="multi-select-box" id="nivBox">';
+    ['1B','2B','3B','4B','5B','6B','7B','8B'].forEach(function(n){html+='<label><input type="checkbox" value="'+n+'" onchange="tgNiv(this)">'+n+'</label>';});
+    html+='</div>';
+  }else if(t==='media'){
+    html+='<h3 style="margin-bottom:12px">🎓 Asignaturas — Plan Común</h3><div class="multi-select-box" id="asigBox">';
+    CURRICULA_CHILE.planComun.asignaturas.forEach(function(a){html+='<label><input type="checkbox" value="'+a.nombre+'" onchange="tgAsig(this)"><span class="cdot" style="background:'+a.color+'"></span>'+a.nombre+'</label>';});
+    html+='</div><h3 style="margin:16px 0 12px">Niveles asignados</h3><div class="multi-select-box" id="nivBox">';
+    ['1M','2M','3M','4M'].forEach(function(n){html+='<label><input type="checkbox" value="'+n+'" onchange="tgNiv(this)">'+n+' Medio</label>';});
+    html+='</div>';
+  }else{
+    html+='<h3 style="margin-bottom:12px">⚙️ Especialidad EMTP</h3><div class="form-group"><label>Especialidad</label><select id="espSel" onchange="loadMods()"><option value="">-- Selecciona --</option>';
+    CURRICULA_CHILE.getEspecialidades().forEach(function(e){html+='<option value="'+e.key+'">'+e.nombre+' ('+e.sector+')</option>';});
+    html+='</select></div><div id="modsBox" style="margin-top:12px"></div><h3 style="margin:16px 0 12px">Niveles</h3><div class="multi-select-box" id="nivBox">';
+    ['3M','4M'].forEach(function(n){html+='<label><input type="checkbox" value="'+n+'" onchange="tgNiv(this)">'+n+' Medio</label>';});
+    html+='</div>';
+  }
+  document.getElementById('sp3Content').innerHTML=html;
+  wData.asignaturas.forEach(function(a){var cb=document.querySelector('#asigBox input[value="'+a+'"]');if(cb)cb.checked=true;});
+  wData.niveles.forEach(function(n){var cb=document.querySelector('#nivBox input[value="'+n+'"]');if(cb)cb.checked=true;});
+}
+
+function loadMods(){
+  var key=document.getElementById('espSel').value;wData.especialidad=key;wData.modulos=[];
+  var box=document.getElementById('modsBox');if(!key){box.innerHTML='';return;}
+  var mods=CURRICULA_CHILE.getModulos(key);
+  var html='<h3 style="margin-bottom:8px">Módulos asignados</h3><div class="multi-select-box">';
+  mods.forEach(function(m){html+='<label><input type="checkbox" value="'+m.num+'" onchange="tgMod(this)">'+m.num+' – '+m.nombre+'</label>';});
+  html+='</div>';box.innerHTML=html;
+}
+function tgAsig(cb){if(cb.checked){if(wData.asignaturas.indexOf(cb.value)===-1)wData.asignaturas.push(cb.value);}else{wData.asignaturas=wData.asignaturas.filter(function(a){return a!==cb.value;});}}
+function tgNiv(cb){if(cb.checked){if(wData.niveles.indexOf(cb.value)===-1)wData.niveles.push(cb.value);}else{wData.niveles=wData.niveles.filter(function(n){return n!==cb.value;});}}
+function tgMod(cb){if(cb.checked){if(wData.modulos.indexOf(cb.value)===-1)wData.modulos.push(cb.value);}else{wData.modulos=wData.modulos.filter(function(m){return m!==cb.value;});}}
+
+function buildStep4(){
+  var n=document.getElementById('pNombre').value.trim(),e=document.getElementById('pEmail').value.trim();
+  var tipo=wData.tipo==='basica'?'📚 Educación Básica':wData.tipo==='media'?'🎓 Plan Común':'⚙️ Técnico-Profesional';
+  var html='<div style="display:grid;gap:10px">';
+  html+='<div style="display:flex;gap:16px"><span style="color:var(--muted);min-width:120px">Nombre:</span><strong>'+n+'</strong></div>';
+  html+='<div style="display:flex;gap:16px"><span style="color:var(--muted);min-width:120px">Correo:</span><strong>'+e+'</strong></div>';
+  html+='<div style="display:flex;gap:16px"><span style="color:var(--muted);min-width:120px">Tipo:</span><strong>'+tipo+'</strong></div>';
+  if(wData.asignaturas.length)html+='<div style="display:flex;gap:16px"><span style="color:var(--muted);min-width:120px">Asignaturas:</span><span>'+wData.asignaturas.join(', ')+'</span></div>';
+  if(wData.especialidad)html+='<div style="display:flex;gap:16px"><span style="color:var(--muted);min-width:120px">Especialidad:</span><strong>'+wData.especialidad+'</strong></div>';
+  if(wData.modulos.length)html+='<div style="display:flex;gap:16px"><span style="color:var(--muted);min-width:120px">Módulos:</span><span>'+wData.modulos.join(', ')+'</span></div>';
+  html+='<div style="display:flex;gap:16px"><span style="color:var(--muted);min-width:120px">Niveles:</span><span>'+wData.niveles.join(', ')+'</span></div>';
+  html+='</div>';
+  document.getElementById('sp4Preview').innerHTML=html;
+}
+
+function crearProfesor(){
+  var btn=document.getElementById('btnCrear');
+  btn.disabled=true;btn.innerHTML='<span class="spinner"></span> Creando…';
+  ELAuth.adminCrearProfesor({nombre:document.getElementById('pNombre').value.trim(),email:document.getElementById('pEmail').value.trim(),password:document.getElementById('pPass').value,tipoProfesor:wData.tipo,asignaturas:wData.asignaturas,especialidad:wData.especialidad,modulos:wData.modulos,niveles:wData.niveles})
+  .then(function(){
+    notif('wNotif','✅ Profesor creado. Puede ingresar con su correo y contraseña desde cualquier dispositivo.','ok');
+    loadData();btn.disabled=false;btn.innerHTML='✅ Crear Profesor';
+    setTimeout(function(){closeModal('modalWizard');},2500);
+  }).catch(function(e){notif('wNotif','❌ '+e.message,'err');btn.disabled=false;btn.innerHTML='✅ Crear Profesor';});
+}
+
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+function notif(id,msg,tipo){var el=document.getElementById(id);el.textContent=msg;el.className='notif '+tipo+' show';setTimeout(function(){el.classList.remove('show');},5000);}
+</script>
+</body>
+</html>

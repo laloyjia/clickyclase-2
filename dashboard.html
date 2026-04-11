@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ElectroLearn - Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        /* =============================================
+           ESTILOS EXTRA – Dashboard Gamificado
+        ============================================= */
+
+        /* ---- Barra XP ---- */
+        .xp-card {
+            background: linear-gradient(135deg, rgba(99,102,241,0.15) 0%, rgba(20,184,166,0.08) 100%);
+            border: 1px solid rgba(99,102,241,0.3);
+            padding: 24px 28px;
+            border-radius: 16px;
+            margin-bottom: 40px;
+        }
+        .xp-card-inner {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .xp-nivel-badge {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            flex-shrink: 0;
+        }
+        .xp-nivel-info { flex: 1; min-width: 180px; }
+        .xp-nivel-nombre {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 2px;
+        }
+        .xp-nivel-desc {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+        }
+        .xp-right { text-align: right; min-width: 140px; }
+        .xp-number {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 800;
+        }
+        .xp-meta {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+        .xp-bar-wrap {
+            width: 100%;
+            margin-top: 16px;
+        }
+        .xp-bar-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+        .xp-bar-track {
+            width: 100%;
+            height: 12px;
+            background: rgba(255,255,255,0.08);
+            border-radius: 99px;
+            overflow: hidden;
+        }
+        .xp-bar-fill {
+            height: 100%;
+            border-radius: 99px;
+            transition: width 1.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        .xp-bar-fill::after {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 60%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
+            animation: shimmer 2.5s infinite;
+        }
+        @keyframes shimmer {
+            0%   { left: -100%; }
+            100% { left: 200%; }
+        }
+        .xp-nivel-max {
+            text-align: center;
+            padding: 6px 0 0;
+            font-size: 0.85rem;
+            color: var(--accent2);
+            font-weight: 600;
+        }
+
+        /* ---- Últimas Evaluaciones ---- */
+        .eval-table { width: 100%; border-collapse: collapse; }
+        .eval-table th {
+            text-align: left;
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-muted);
+            padding: 0 12px 10px 0;
+            border-bottom: 1px solid var(--glass-border);
+        }
+        .eval-table td {
+            padding: 10px 12px 10px 0;
+            font-size: 0.86rem;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+            vertical-align: middle;
+        }
+        .eval-table tr:last-child td { border-bottom: none; }
+        .nota-badge {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 99px;
+            font-weight: 700;
+            font-size: 0.82rem;
+        }
+        .nota-aprobado  { background: rgba(52,211,153,0.15); color: #34d399; }
+        .nota-reprobado { background: rgba(244, 63,94,0.15);  color: #f43f5e; }
+        .nota-excelente { background: rgba(251,191, 36,0.15); color: #fbbf24; }
+        .eval-empty {
+            text-align: center;
+            color: var(--text-muted);
+            padding: 28px 0;
+            font-size: 0.9rem;
+        }
+
+        /* ---- Progreso por módulo en tarjetas ---- */
+        .mod-progress-bar-wrap {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid var(--glass-border);
+        }
+        .mod-progress-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.74rem;
+            color: var(--text-muted);
+            margin-bottom: 5px;
+        }
+        .mod-progress-track {
+            height: 6px;
+            background: rgba(255,255,255,0.07);
+            border-radius: 99px;
+            overflow: hidden;
+        }
+        .mod-progress-fill {
+            height: 100%;
+            border-radius: 99px;
+            transition: width 1s ease;
+        }
+
+        /* ---- Stat cards mejoradas ---- */
+        .stat-card-icon {
+            font-size: 1.6rem;
+            margin-bottom: 6px;
+        }
+        .stat-card-value {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin: 2px 0;
+        }
+        .stat-card-label {
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-muted);
+        }
+
+        /* ---- Insignias recientes (row de íconos) ---- */
+        .badge-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 14px;
+        }
+        .badge-chip {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid var(--glass-border);
+            border-radius: 99px;
+            padding: 4px 10px 4px 6px;
+            font-size: 0.78rem;
+        }
+        .badge-chip-icon { font-size: 1rem; }
+
+        /* ---- Responsive ---- */
+        @media (max-width: 700px) {
+            .xp-right { text-align: left; }
+            .xp-card-inner { flex-direction: column; align-items: flex-start; }
+        }
+
+        /* ---- Animación entrada secciones ---- */
+        .slide-up {
+            opacity: 0;
+            transform: translateY(18px);
+            animation: slideUpIn 0.5s ease forwards;
+        }
+        @keyframes slideUpIn {
+            to { opacity: 1; transform: none; }
+        }
+        .delay-1 { animation-delay: 0.08s; }
+        .delay-2 { animation-delay: 0.16s; }
+        .delay-3 { animation-delay: 0.24s; }
+        .delay-4 { animation-delay: 0.32s; }
+
+        /* ---- Posición ranking ---- */
+        .rank-pos {
+            display: inline-block;
+            width: 32px; height: 32px;
+            line-height: 32px;
+            text-align: center;
+            border-radius: 50%;
+            font-weight: 700;
+            font-size: 0.88rem;
+            background: rgba(99,102,241,0.18);
+            color: var(--primary-light);
+        }
+        .rank-pos.top1 { background: rgba(251,191,36,0.2); color: #fbbf24; }
+        .rank-pos.top3 { background: rgba(148,163,184,0.2); color: #94a3b8; }
+    </style>
+</head>
+<body>
+
+    <!-- Fondo animado -->
+    <div class="bg-animation">
+        <div class="orb"></div>
+        <div class="orb"></div>
+        <div class="orb"></div>
+    </div>
+
+    <!-- ==============================
+         BARRA DE NAVEGACION
+    ============================== -->
+    <nav class="navbar">
+        <div class="nav-brand">
+            <span class="nav-brand-icon">⚡</span>
+            <span class="nav-brand-text">ElectroLearn</span>
+        </div>
+
+        <ul class="nav-links" id="navLinks">
+            <li><a href="dashboard.html" class="active">Inicio</a></li>
+            <li><a href="biblioteca.html">Biblioteca</a></li>
+            <li><a href="material.html" id="navMaterial" style="display:none;">Material</a></li>
+            <li><a href="evaluaciones.html">Evaluaciones</a></li>
+            <li><a href="ranking.html">Ranking</a></li>
+            <li><a href="admin.html" id="navAdmin" style="display:none;">⚙️ Admin</a></li>
+        </ul>
+
+        <div class="nav-user">
+            <div class="user-avatar" id="userAvatar">?</div>
+            <span id="userName" style="font-size:0.9rem; font-weight:500;">Cargando...</span>
+            <button class="btn btn-danger btn-sm" onclick="logout()">Salir</button>
+        </div>
+    </nav>
+
+    <!-- ==============================
+         CONTENIDO PRINCIPAL
+    ============================== -->
+    <main style="padding: 90px 24px 40px; max-width: 1100px; margin: 0 auto; position: relative; z-index: 1;">
+
+        <!-- Saludo personalizado -->
+        <div class="slide-up" style="margin-bottom: 32px;">
+            <h1 style="font-family: 'Space Grotesk', sans-serif; font-size: 2rem; font-weight: 700;">
+                Hola, <span id="welcomeName">Estudiante</span> 👋
+            </h1>
+            <p class="text-muted" style="font-size: 1rem; margin-top: 4px;" id="welcomeSub">
+                Bienvenido a tu portal de Electrónica. Aquí va tu progreso.
+            </p>
+        </div>
+
+        <!-- ==============================
+             STATS RÁPIDOS (4 tarjetas)
+        ============================== -->
+        <div class="grid grid-4 slide-up delay-1" style="margin-bottom: 24px;">
+
+            <!-- Nivel -->
+            <div class="card text-center" style="border-top: 3px solid var(--primary);">
+                <div class="stat-card-icon" id="statLevelIcon">⚡</div>
+                <div class="stat-card-value" id="statLevel" style="color: var(--primary-light);">Aprendiz</div>
+                <div class="stat-card-label">Tu nivel</div>
+            </div>
+
+            <!-- XP -->
+            <div class="card text-center" style="border-top: 3px solid var(--secondary);">
+                <div class="stat-card-icon">✨</div>
+                <div class="stat-card-value" id="statXP" style="color: var(--secondary);">0</div>
+                <div class="stat-card-label">Puntos XP</div>
+            </div>
+
+            <!-- Evaluaciones -->
+            <div class="card text-center" style="border-top: 3px solid var(--accent);">
+                <div class="stat-card-icon">✍️</div>
+                <div class="stat-card-value" id="statQuizzes" style="color: var(--accent);">0</div>
+                <div class="stat-card-label">Evaluaciones</div>
+            </div>
+
+            <!-- Medallas -->
+            <div class="card text-center" style="border-top: 3px solid var(--accent2);">
+                <div class="stat-card-icon">🏅</div>
+                <div class="stat-card-value" id="statBadges" style="color: var(--accent2);">0</div>
+                <div class="stat-card-label">Medallas</div>
+            </div>
+        </div>
+
+        <!-- ==============================
+             BARRA DE PROGRESO XP
+        ============================== -->
+        <div class="xp-card slide-up delay-2" id="xpProgressCard">
+            <div class="xp-card-inner">
+                <div class="xp-nivel-badge" id="xpNivelBadge" style="background: rgba(99,102,241,0.15);">⚡</div>
+                <div class="xp-nivel-info">
+                    <div class="xp-nivel-nombre" id="xpNivelNombre">Aprendiz</div>
+                    <div class="xp-nivel-desc" id="xpNivelDesc">Estás comenzando tu camino técnico</div>
+                </div>
+                <div class="xp-right">
+                    <div class="xp-number" id="xpTotal" style="color: var(--secondary);">0 XP</div>
+                    <div class="xp-meta" id="xpMeta">Faltan 150 XP para Técnico</div>
+                </div>
+            </div>
+            <div class="xp-bar-wrap">
+                <div class="xp-bar-labels">
+                    <span id="xpBarLabel">Progreso al siguiente nivel</span>
+                    <span id="xpBarPct">0%</span>
+                </div>
+                <div class="xp-bar-track">
+                    <div class="xp-bar-fill" id="xpBarFill" style="width: 0%; background: linear-gradient(90deg, var(--primary), var(--secondary));"></div>
+                </div>
+            </div>
+            <!-- Insignias desbloqueadas -->
+            <div id="badgeRowSection" style="display:none;">
+                <p style="font-size: 0.78rem; color: var(--text-muted); margin-top: 14px; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.07em;">Mis insignias</p>
+                <div class="badge-row" id="badgeRow"></div>
+            </div>
+        </div>
+
+        <!-- ==============================
+             POSICIÓN EN RANKING
+        ============================== -->
+        <div class="card slide-up delay-2" id="rankingPreview" style="margin-bottom: 40px; display: none;">
+            <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+                <div style="display: flex; align-items: center; gap: 14px;">
+                    <span class="rank-pos" id="rankPos">-</span>
+                    <div>
+                        <p style="font-weight: 600; margin-bottom: 2px;">Tu posición en el ranking</p>
+                        <p class="text-muted" style="font-size: 0.82rem;" id="rankDesc">Completa evaluaciones para aparecer en el ranking</p>
+                    </div>
+                </div>
+                <a href="ranking.html" class="btn btn-sm" style="background: rgba(99,102,241,0.15); color: var(--primary-light); border: 1px solid rgba(99,102,241,0.3);">Ver ranking completo 🏆</a>
+            </div>
+        </div>
+
+        <!-- ==============================
+             ACCESOS RÁPIDOS
+        ============================== -->
+        <h2 style="font-family: 'Space Grotesk'; font-size: 1.3rem; margin-bottom: 20px;">
+            Acceso Rápido
+        </h2>
+
+        <div class="grid grid-3 slide-up delay-3">
+
+            <!-- Card: Material Educativo (solo profesores) -->
+            <a href="material.html" class="card" id="materialCard" style="display: none; cursor: pointer; border: 1px solid rgba(0,206,201,0.3); text-decoration:none;">
+                <div style="font-size: 2.5rem; margin-bottom: 12px;">📚</div>
+                <h3>Generador de Material</h3>
+                <p class="mt-1">Crea guías, apuntes, fichas prácticas y ejercicios alineados al currículo Mineduc.</p>
+                <span class="badge badge-success mt-2">✨ Solo profesores</span>
+            </a>
+
+            <!-- Card: Evaluaciones -->
+            <a href="evaluaciones.html" class="card" style="text-decoration: none; cursor: pointer; border: 1px solid rgba(52,211,153,0.2);">
+                <div style="font-size: 2.5rem; margin-bottom: 12px;">✍️</div>
+                <h3>Evaluaciones</h3>
+                <p class="mt-1">Quizzes interactivos con nota automática y retroalimentación por criterio.</p>
+                <span class="badge badge-success mt-2">Iniciar quiz</span>
+            </a>
+
+            <!-- Card: Ranking -->
+            <a href="ranking.html" class="card" style="text-decoration: none; cursor: pointer; border: 1px solid rgba(251,191,36,0.2);">
+                <div style="font-size: 2.5rem; margin-bottom: 12px;">🏆</div>
+                <h3>Ranking</h3>
+                <p class="mt-1">Compite con tus compañeros. Gana puntos XP y desbloquea medallas.</p>
+                <span class="badge badge-warning mt-2">Ver ranking</span>
+            </a>
+
+            <!-- Card: Biblioteca -->
+            <a href="biblioteca.html" class="card" style="text-decoration:none;cursor:pointer;border:1px solid rgba(167,139,250,0.2);">
+                <div style="font-size: 2.5rem; margin-bottom: 12px;">📚</div>
+                <h3>Biblioteca</h3>
+                <p class="mt-1">Guías, apuntes, fichas prácticas y planificaciones organizados por módulo y calendario.</p>
+                <span class="badge badge-primary mt-2">Ver materiales</span>
+            </a>
+
+            <!-- Card: Plan de Estudio -->
+            <div class="card" style="cursor: default;">
+                <div style="font-size: 2.5rem; margin-bottom: 12px;">📋</div>
+                <h3>Plan de Estudio</h3>
+                <p class="mt-1">10 módulos, 1.672 horas. Basado en las Bases Curriculares del Mineduc.</p>
+                <span class="badge badge-primary mt-2">3ro y 4to Medio</span>
+            </div>
+
+            <!-- Card: Admin (solo admin) -->
+            <a href="admin.html" class="card" id="adminCard" style="display:none;cursor:pointer;border:1px solid rgba(251,191,36,0.3);text-decoration:none;">
+                <div style="font-size:2.5rem;margin-bottom:12px;">🛡️</div>
+                <h3>Administración</h3>
+                <p class="mt-1">Gestiona usuarios, profesores, códigos de acceso y contenido publicado.</p>
+                <span class="badge badge-warning mt-2">✨ Solo admin</span>
+            </a>
+
+            <!-- Card: Planificador (solo profesor) -->
+            <a href="planificacion.html" class="card" id="profCard" style="display: none; cursor: pointer; border: 1px solid rgba(253,203,110,0.3); text-decoration:none;">
+                <div style="font-size: 2.5rem; margin-bottom: 12px;">📋</div>
+                <h3>Planificador de Clases</h3>
+                <p class="mt-1">Crea planificaciones con los módulos reales del Mineduc. Exporta a PDF.</p>
+                <span class="badge badge-warning mt-2">✨ Solo profesores</span>
+            </a>
+
+            <!-- Card: Mi Perfil en Ranking -->
+            <a href="ranking.html#perfil" class="card" style="text-decoration: none; cursor: pointer; border: 1px solid rgba(167,139,250,0.2);">
+                <div style="font-size: 2.5rem; margin-bottom: 12px;">👤</div>
+                <h3>Mi Perfil</h3>
+                <p class="mt-1">Tu historial de evaluaciones, logros y progreso en la especialidad.</p>
+                <span class="badge badge-primary mt-2">Ver perfil</span>
+            </a>
+        </div>
+
+        <!-- ==============================
+             ÚLTIMAS EVALUACIONES
+        ============================== -->
+        <h2 style="font-family: 'Space Grotesk'; font-size: 1.3rem; margin-top: 48px; margin-bottom: 16px;">
+            Últimas Evaluaciones
+        </h2>
+        <div class="card slide-up delay-3" style="overflow-x: auto;" id="recentEvalsCard">
+            <div id="recentEvalsContent">
+                <!-- cargado por JS -->
+            </div>
+        </div>
+
+        <!-- ==============================
+             MÓDULOS DEL CURSO (con progreso)
+        ============================== -->
+        <h2 style="font-family: 'Space Grotesk'; font-size: 1.3rem; margin-top: 48px; margin-bottom: 8px;">
+            Módulos de la Especialidad
+        </h2>
+        <p class="text-muted mb-3" style="font-size: 0.88rem;">Bases Curriculares Mineduc — Sector Electricidad, Especialidad Electrónica</p>
+
+        <div class="grid grid-2 slide-up delay-4" id="modulesGrid">
+            <!-- cargado por JS -->
+        </div>
+
+    </main>
+
+    <!-- ==============================
+         FOOTER
+    ============================== -->
+    <footer style="text-align: center; padding: 40px 24px; border-top: 1px solid var(--glass-border); color: var(--text-muted); font-size: 0.85rem; position: relative; z-index: 1;">
+        <p>ElectroLearn &mdash; Especialidad Electrónica &bull; Salesianos Talca &bull; 2026</p>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="js/gamification.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+    // =============================================
+    // DASHBOARD PRINCIPAL — Lógica e integración
+    // =============================================
+
+    (function() {
+        // ---- 1. Verificar sesión ----
+        var user = getCurrentUser();
+        if (!user) {
+            window.location.href = 'index.html';
+            return;
+        }
+
+        // ---- 2. Sincronizar datos más recientes desde localStorage ----
+        // (el quiz puede haber actualizado XP sin refrescar dashboard)
+        var users = JSON.parse(localStorage.getItem('electrolearn_users') || '[]');
+        var fresh = users.find(function(u) { return u.email === user.email; });
+        if (fresh) user = fresh;
+
+        // ---- 3. Datos base ----
+        var xp       = user.xp || 0;
+        var nivel    = calcularNivel(xp);
+        var progInfo = xpParaSiguienteNivel(xp);
+        var pct      = porcentajeNivel(xp);
+        var quizzes  = user.completedQuizzes || [];
+        var badges   = user.badges || [];
+
+        // ---- 4. Cabecera ----
+        document.getElementById('welcomeName').textContent = user.name.split(' ')[0];
+        document.getElementById('userName').textContent    = user.name;
+        document.getElementById('userAvatar').textContent  = user.name.charAt(0).toUpperCase();
+
+        if (user.role === 'profesor' || user.role === 'admin') {
+            document.getElementById('welcomeSub').textContent =
+                'Bienvenido, profesor. Aquí tienes el resumen del portal.';
+            document.getElementById('profCard').style.display    = 'block';
+            document.getElementById('materialCard').style.display = 'block';
+            document.getElementById('navMaterial').style.display = 'block';
+        }
+        if (user.role === 'admin' || user.email === 'profesor@electrolearn.cl') {
+            document.getElementById('navAdmin').style.display = 'block';
+            if (document.getElementById('adminCard')) document.getElementById('adminCard').style.display = 'block';
+        }
+
+        // ---- 5. Stat cards ----
+        document.getElementById('statLevel').textContent   = nivel.nombre;
+        document.getElementById('statLevelIcon').textContent = nivel.icon;
+        document.getElementById('statLevel').style.color   = nivel.color;
+        document.getElementById('statXP').textContent      = xp.toLocaleString('es-CL');
+        document.getElementById('statQuizzes').textContent = quizzes.length;
+        document.getElementById('statBadges').textContent  = badges.length;
+
+        // ---- 6. Barra XP ----
+        document.getElementById('xpNivelBadge').textContent   = nivel.icon;
+        document.getElementById('xpNivelBadge').style.background = nivel.color + '22';
+        document.getElementById('xpNivelNombre').textContent  = nivel.nombre;
+        document.getElementById('xpNivelNombre').style.color  = nivel.color;
+        document.getElementById('xpNivelDesc').textContent    = nivel.desc;
+        document.getElementById('xpTotal').textContent        = xp.toLocaleString('es-CL') + ' XP';
+
+        if (progInfo.siguiente) {
+            document.getElementById('xpMeta').textContent = 'Faltan ' + progInfo.xpFalta + ' XP para ' + progInfo.siguiente.nombre;
+            document.getElementById('xpBarLabel').textContent =
+                nivel.nombre + ' → ' + progInfo.siguiente.nombre;
+            document.getElementById('xpBarPct').textContent = pct + '%';
+        } else {
+            document.getElementById('xpMeta').textContent = '¡Nivel máximo alcanzado!';
+            document.getElementById('xpBarLabel').textContent = 'Nivel máximo: Maestro';
+            document.getElementById('xpBarPct').textContent = '100%';
+        }
+
+        // Barra animada (diferimos para que CSS transition funcione)
+        setTimeout(function() {
+            var fill = document.getElementById('xpBarFill');
+            fill.style.width = pct + '%';
+            fill.style.background = 'linear-gradient(90deg, ' + nivel.color + ', ' + (progInfo.siguiente ? progInfo.siguiente.color : nivel.color) + ')';
+        }, 200);
+
+        // ---- 7. Insignias desbloqueadas ----
+        var insigniasFull = badges
+            .map(function(id) { return getInsigniaById(id); })
+            .filter(Boolean);
+
+        if (insigniasFull.length > 0) {
+            var rowEl = document.getElementById('badgeRow');
+            document.getElementById('badgeRowSection').style.display = 'block';
+            rowEl.innerHTML = insigniasFull.slice(0, 8).map(function(ins) {
+                return '<span class="badge-chip" title="' + ins.desc + '">' +
+                    '<span class="badge-chip-icon">' + ins.icon + '</span>' +
+                    ins.nombre + '</span>';
+            }).join('');
+            if (insigniasFull.length > 8) {
+                rowEl.innerHTML += '<a href="ranking.html" class="badge-chip" style="color:var(--text-muted);">+' + (insigniasFull.length - 8) + ' más →</a>';
+            }
+        }
+
+        // ---- 8. Posición en ranking (solo estudiantes) ----
+        if (user.role !== 'profesor' && quizzes.length > 0) {
+            var todos = getTodosUsuarios();
+            var pos   = todos.findIndex(function(u) { return u.email === user.email; });
+            if (pos >= 0) {
+                var posEl = document.getElementById('rankPos');
+                posEl.textContent = '#' + (pos + 1);
+                if (pos === 0)      posEl.classList.add('top1');
+                else if (pos <= 2)  posEl.classList.add('top3');
+                document.getElementById('rankDesc').textContent =
+                    'Estás en el puesto ' + (pos + 1) + ' de ' + todos.length + ' estudiantes con ' + xp.toLocaleString('es-CL') + ' XP.';
+                document.getElementById('rankingPreview').style.display = 'block';
+            }
+        }
+
+        // ---- 9. Últimas evaluaciones ----
+        var recentEl = document.getElementById('recentEvalsContent');
+        if (quizzes.length === 0) {
+            recentEl.innerHTML = '<div class="eval-empty">Aún no has completado ninguna evaluación.<br>' +
+                '<a href="evaluaciones.html" class="btn btn-sm mt-2" style="background:rgba(52,211,153,0.15);color:#34d399;border:1px solid rgba(52,211,153,0.3);">Comenzar ahora ✍️</a></div>';
+        } else {
+            var ultimas = quizzes.slice(-6).reverse();
+            var rows = ultimas.map(function(q) {
+                var nota = q.nota || 1.0;
+                var claseNota = nota >= 5.5 ? 'nota-excelente' : nota >= 4.0 ? 'nota-aprobado' : 'nota-reprobado';
+                var fecha = q.fecha ? new Date(q.fecha).toLocaleDateString('es-CL', { day:'2-digit', month:'2-digit' }) : '—';
+                var mod   = q.modulo || '—';
+                var oaStr = q.oaId   ? ' · ' + q.oaId   : '';
+                var aeStr = q.aeNum  ? ' · AE' + q.aeNum : '';
+                var xpQ   = q.xpGanado || 0;
+                return '<tr>' +
+                    '<td style="min-width:160px;"><span style="font-weight:600;">' + mod + '</span><span class="text-muted">' + oaStr + aeStr + '</span></td>' +
+                    '<td><span style="font-family:\'Space Grotesk\';font-weight:700;">' + q.score + '%</span></td>' +
+                    '<td><span class="nota-badge ' + claseNota + '">' + nota.toFixed(1) + '</span></td>' +
+                    '<td style="color:var(--secondary);font-weight:600;">+' + xpQ + ' XP</td>' +
+                    '<td class="text-muted" style="font-size:0.78rem;">' + fecha + '</td>' +
+                    '</tr>';
+            }).join('');
+
+            recentEl.innerHTML = '<table class="eval-table">' +
+                '<thead><tr>' +
+                '<th>Módulo</th><th>Puntaje</th><th>Nota</th><th>XP</th><th>Fecha</th>' +
+                '</tr></thead>' +
+                '<tbody>' + rows + '</tbody>' +
+                '</table>' +
+                '<div style="text-align:right;margin-top:12px;">' +
+                '<a href="evaluaciones.html" style="font-size:0.8rem;color:var(--primary-light);">Nueva evaluación →</a>' +
+                '</div>';
+        }
+
+        // ---- 10. Módulos con progreso ----
+        var modulos = [
+            { num: 'EN1', name: 'Proyectos Electrónicos', level: '3ro Medio', hours: 190, icon: '🔌',
+              oa: 'OA1: Leer información técnica en manuales, planos y croquis. OA4: Instalar y montar equipos electrónicos industriales.',
+              aprendizajes: ['Análisis técnico para instalación de equipos', 'Instalación según requerimientos y manuales', 'Mantención de equipos electrónicos', 'Diagnóstico de fallas según manuales', 'Reemplazo de componentes pasivos y activos'] },
+
+            { num: 'EN2', name: 'Armado y Reparación de Circuitos Electrónicos', level: '3ro Medio', hours: 228, icon: '🔧',
+              oa: 'OA3: Armar y ensamblar circuitos electrónicos básicos, analógicos y digitales, y repararlos.',
+              aprendizajes: ['Elaboración de circuitos impresos', 'Armado de circuitos analógicos', 'Reparación y mantención de equipos', 'Ensamblaje de circuitos analógicos y digitales'] },
+
+            { num: 'EN3', name: 'Ensamblaje y Mantención de Sistemas y Equipos Digitales', level: '3ro Medio', hours: 228, icon: '💻',
+              oa: 'OA3: Armar y ensamblar circuitos electrónicos básicos, analógicos y digitales.',
+              aprendizajes: ['Circuitos electrónicos digitales', 'Armado y configuración de computadores', 'Reparación de equipos electrónicos básicos', 'Análisis técnico para instalación'] },
+
+            { num: 'EN4', name: 'Sistemas de Control Domótico', level: '3ro Medio', hours: 190, icon: '🏠',
+              oa: 'OA6: Configurar funcionamiento automático de sistemas electrónicos simples (domótica, portones, riego, iluminación).',
+              aprendizajes: ['Equipos de domótica para control electrónico', 'Mantención de sistemas automáticos', 'Instalaciones de alumbrado eléctrico', 'Instalación de equipos electrónicos'] },
+
+            { num: 'EN11', name: 'Sistemas Mecatrónicos y Robóticos', level: '3ro Medio', hours: 114, icon: '🤖',
+              oa: 'OA1: Leer información técnica. OA8: Aplicar principios de mecatrónica y robótica en sistemas automatizados.',
+              aprendizajes: ['Análisis de sistemas mecatrónicos', 'Diseño y fabricación con CAD 3D e impresión 3D', 'Programación de dispositivos electrónicos', 'Integración de sistemas robóticos', 'Proyecto mecatrónico funcional'] },
+
+            { num: 'EN5', name: 'Mantención y Operación de Equipos de Control Electrónico de Potencia', level: '4to Medio', hours: 152, icon: '⚡',
+              oa: 'OA1: Leer información técnica. OA5: Mantener preventiva y correctivamente equipos electrónicos.',
+              aprendizajes: ['Planes de mantenimiento preventivo y correctivo', 'Mantención preventiva de sistemas', 'Mantención correctiva de sistemas', 'Servomecanismos con control electrónico'] },
+
+            { num: 'EN6', name: 'Detección de Fallas Industriales', level: '4to Medio', hours: 152, icon: '🔍',
+              oa: 'OA2: Inspeccionar y diagnosticar fallas en circuitos y sistemas electrónicos industriales.',
+              aprendizajes: ['Inspección de equipos industriales', 'Diagnóstico de fallas en sistemas', 'Mantención de equipos con control automático', 'Análisis de funcionamiento y fallas'] },
+
+            { num: 'EN7', name: 'Operación y Programación de Equipos de Control Eléctrico Industrial', level: '4to Medio', hours: 152, icon: '🎛️',
+              oa: 'OA7: Modificar programas y parámetros en equipos de control de procesos.',
+              aprendizajes: ['Sistemas de control semiautomático', 'Circuitos de control eléctrico automático', 'Equipos de arranque y protección', 'Tableros de control y fuerza'] },
+
+            { num: 'EN8', name: 'Montaje de Equipos Industriales', level: '4to Medio', hours: 152, icon: '🏗️',
+              oa: 'OA4: Instalar y montar equipos y sistemas electrónicos industriales.',
+              aprendizajes: ['Instalación de equipos industriales', 'Montaje de sistemas electrónicos', 'Operación de equipos en la industria', 'Proyectos de instalación industrial'] },
+
+            { num: 'EN9', name: 'Automatización Industrial', level: '4to Medio', hours: 152, icon: '⚙️',
+              oa: 'OA7: Modificar programas y parámetros en equipos de control de procesos.',
+              aprendizajes: ['Relés programables', 'Equipos de control lógico', 'Software de controladores (PLC)', 'Programación de PLCs y pantallas HMI', 'Mantención de equipos automatizados'] },
+        ];
+
+        var grid = document.getElementById('modulesGrid');
+        grid.innerHTML = modulos.map(function(m) {
+            var prog = getProgresoModulo(user, m.num);
+            var es3ro  = m.level.includes('3ro');
+            var gradiente = es3ro
+                ? 'var(--primary), var(--secondary)'
+                : 'var(--accent), var(--accent2)';
+
+            // Color de la barra de progreso según nota promedio
+            var barColor = '#94a3b8'; // sin actividad
+            var barWidth = 0;
+            var progText = 'Sin evaluaciones aún';
+            if (prog.evaluaciones > 0) {
+                barWidth = prog.promedioScore;
+                progText = prog.evaluaciones + ' eval · Nota prom. ' + prog.promedioNota.toFixed(1) + ' · Mejor: ' + prog.mejor + '%';
+                barColor = prog.promedioNota >= 5.5 ? '#fbbf24'
+                         : prog.promedioNota >= 4.0 ? '#34d399'
+                         : '#f43f5e';
+            }
+
+            var badgeClass = es3ro ? 'badge-primary' : 'badge-warning';
+            var aprendizajesHtml = m.aprendizajes.map(function(a) {
+                return '<li style="font-size:0.82rem;color:var(--text-muted);padding:3px 0;padding-left:16px;position:relative;">' +
+                    '<span style="position:absolute;left:0;">●</span> ' + a + '</li>';
+            }).join('');
+
+            return '<div class="card" style="position:relative;overflow:hidden;cursor:pointer;" ' +
+                'onclick="this.querySelector(\'.module-detail\').classList.toggle(\'hidden\')">' +
+                '<div style="position:absolute;top:0;left:0;width:100%;height:3px;background:linear-gradient(90deg,' + gradiente + ');"></div>' +
+                '<div style="display:flex;align-items:center;gap:16px;">' +
+                    '<span style="font-size:2rem;">' + m.icon + '</span>' +
+                    '<div style="flex:1;">' +
+                        '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">' +
+                            '<span class="badge ' + badgeClass + ' mb-1">Módulo ' + m.num + '</span>' +
+                            '<span class="badge badge-success mb-1">' + m.hours + ' hrs</span>' +
+                            (prog.evaluaciones > 0 ? '<span class="badge mb-1" style="background:rgba(255,255,255,0.06);color:var(--text-muted);">' + prog.evaluaciones + ' eval ✓</span>' : '') +
+                        '</div>' +
+                        '<h3 style="margin-top:4px;">' + m.name + '</h3>' +
+                        '<p class="text-muted" style="font-size:0.82rem;margin-top:4px;">' + m.level + ' · Click para ver detalle</p>' +
+                    '</div>' +
+                '</div>' +
+
+                // Barra de progreso mini
+                '<div class="mod-progress-bar-wrap">' +
+                    '<div class="mod-progress-label">' +
+                        '<span>' + progText + '</span>' +
+                        (prog.evaluaciones > 0 ? '<span style="color:' + barColor + ';font-weight:600;">' + barWidth + '%</span>' : '') +
+                    '</div>' +
+                    '<div class="mod-progress-track">' +
+                        '<div class="mod-progress-fill" style="width:' + barWidth + '%;background:' + barColor + ';"></div>' +
+                    '</div>' +
+                '</div>' +
+
+                // Detalle plegable
+                '<div class="module-detail hidden" style="margin-top:16px;padding-top:16px;border-top:1px solid var(--glass-border);">' +
+                    '<p class="text-muted" style="font-size:0.8rem;margin-bottom:8px;font-style:italic;">' + m.oa + '</p>' +
+                    '<p style="font-size:0.82rem;font-weight:600;margin-bottom:6px;color:var(--secondary);">Aprendizajes Esperados:</p>' +
+                    '<ul style="list-style:none;padding:0;">' + aprendizajesHtml + '</ul>' +
+                    '<div style="margin-top:12px;">' +
+                        '<a href="evaluaciones.html" onclick="event.stopPropagation();" ' +
+                        'style="font-size:0.8rem;color:var(--primary-light);background:rgba(99,102,241,0.12);' +
+                        'padding:5px 12px;border-radius:99px;text-decoration:none;">Evaluar este módulo →</a>' +
+                    '</div>' +
+                '</div>' +
+            '</div>';
+        }).join('');
+
+    })();
+    </script>
+
+</body>
+</html>

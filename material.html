@@ -1,0 +1,1766 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Material Educativo - ElectroLearn</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        /* ============================================
+           ESTILOS DEL GENERADOR DE MATERIAL
+           ============================================ */
+        .material-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        .material-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .material-header h1 {
+            font-size: 2rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+
+        .material-header p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        /* --- Secciones --- */
+        .seccion-mat {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .seccion-mat h2 {
+            font-size: 1.1rem;
+            color: var(--secondary);
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--glass-border);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* --- Campos --- */
+        .campo {
+            margin-bottom: 1rem;
+        }
+        .campo label {
+            display: block;
+            color: var(--text);
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 0.4rem;
+        }
+        .campo select,
+        .campo textarea,
+        .campo input[type="text"],
+        .campo input[type="number"] {
+            width: 100%;
+            padding: 0.7rem 1rem;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-sm);
+            color: var(--text);
+            font-size: 0.9rem;
+            font-family: inherit;
+            transition: border-color 0.3s;
+            box-sizing: border-box;
+        }
+        .campo select:focus,
+        .campo textarea:focus,
+        .campo input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(108,92,231,0.2);
+        }
+        .campo select option {
+            background: #1a1a3e;
+            color: var(--text);
+        }
+        .campo textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+        .campo-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        /* --- Tipo de documento cards --- */
+        .tipo-docs {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 0.5rem;
+        }
+        .tipo-doc-card {
+            background: rgba(255,255,255,0.03);
+            border: 2px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            padding: 1.2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .tipo-doc-card:hover {
+            border-color: var(--primary-light);
+            background: rgba(108,92,231,0.08);
+        }
+        .tipo-doc-card.selected {
+            border-color: var(--primary);
+            background: rgba(108,92,231,0.15);
+            box-shadow: 0 0 15px rgba(108,92,231,0.2);
+        }
+        .tipo-doc-card .icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+        .tipo-doc-card h3 {
+            font-size: 0.95rem;
+            color: var(--text);
+            margin-bottom: 0.3rem;
+        }
+        .tipo-doc-card p {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        /* --- Checkbox items --- */
+        .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 0.3rem;
+        }
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-sm);
+            padding: 0.4rem 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+        .checkbox-item:hover {
+            border-color: var(--primary-light);
+            color: var(--text);
+        }
+        .checkbox-item input[type="checkbox"] {
+            accent-color: var(--primary);
+            cursor: pointer;
+        }
+        .checkbox-item.checked {
+            background: rgba(108,92,231,0.15);
+            border-color: var(--primary);
+            color: var(--text);
+        }
+        .ce-item { width: 100%; }
+
+        .info-box {
+            background: rgba(108,92,231,0.1);
+            border: 1px solid rgba(108,92,231,0.3);
+            border-radius: var(--radius-sm);
+            padding: 0.8rem 1rem;
+            margin-top: 0.5rem;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        .oag-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.4rem;
+            margin-top: 0.5rem;
+        }
+        .oag-tag {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            font-size: 0.8rem;
+            font-weight: 700;
+            background: rgba(0,206,201,0.15);
+            border: 1px solid var(--secondary);
+            color: var(--secondary);
+        }
+
+        /* --- Boton generar --- */
+        .btn-generar {
+            display: block;
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            border-radius: var(--radius-md);
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 0.5rem;
+        }
+        .btn-generar:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(108,92,231,0.4);
+        }
+
+        /* --- Documento generado --- */
+        .doc-generado {
+            display: none;
+            margin-top: 2rem;
+        }
+        .doc-generado.visible {
+            display: block;
+        }
+
+        .doc-preview {
+            background: rgba(255,255,255,0.95);
+            color: #1a1a2e;
+            border-radius: var(--radius-lg);
+            padding: 2.5rem;
+            font-family: 'Segoe UI', 'Arial', sans-serif;
+            line-height: 1.7;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .doc-preview h1 {
+            color: #2d3436;
+            font-size: 1.5rem;
+            text-align: center;
+            margin-bottom: 0.3rem;
+            border-bottom: 3px solid #6C5CE7;
+            padding-bottom: 0.8rem;
+        }
+        .doc-preview .doc-subtitulo {
+            text-align: center;
+            color: #636e72;
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+        }
+        .doc-preview h2 {
+            color: #6C5CE7;
+            font-size: 1.15rem;
+            margin-top: 1.5rem;
+            margin-bottom: 0.5rem;
+            border-left: 4px solid #6C5CE7;
+            padding-left: 0.8rem;
+        }
+        .doc-preview h3 {
+            color: #00CEC9;
+            font-size: 1rem;
+            margin-top: 1rem;
+            margin-bottom: 0.3rem;
+        }
+        .doc-preview p {
+            margin-bottom: 0.8rem;
+            font-size: 0.92rem;
+            color: #2d3436;
+        }
+        .doc-preview ul, .doc-preview ol {
+            margin-left: 1.5rem;
+            margin-bottom: 0.8rem;
+        }
+        .doc-preview li {
+            margin-bottom: 0.4rem;
+            font-size: 0.92rem;
+            color: #2d3436;
+        }
+        .doc-preview .recuadro {
+            background: #f8f9fa;
+            border: 1px solid #dfe6e9;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+        .doc-preview .recuadro-importante {
+            background: #fff3e0;
+            border-left: 4px solid #ff9800;
+            padding: 0.8rem 1rem;
+            margin: 1rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .doc-preview .recuadro-seguridad {
+            background: #fce4ec;
+            border-left: 4px solid #e53935;
+            padding: 0.8rem 1rem;
+            margin: 1rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .doc-preview table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+        .doc-preview th {
+            background: #6C5CE7;
+            color: white;
+            padding: 0.6rem;
+            font-size: 0.85rem;
+            text-align: left;
+        }
+        .doc-preview td {
+            border: 1px solid #dfe6e9;
+            padding: 0.5rem 0.6rem;
+            font-size: 0.85rem;
+        }
+        .doc-preview tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+        .doc-preview .linea-escribir {
+            border-bottom: 1px solid #b2bec3;
+            min-height: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+        .doc-preview .espacio-dibujo {
+            border: 2px dashed #b2bec3;
+            min-height: 120px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #b2bec3;
+            font-style: italic;
+            margin: 1rem 0;
+        }
+        .doc-preview .pie-pagina {
+            margin-top: 2rem;
+            padding-top: 1rem;
+            border-top: 1px solid #dfe6e9;
+            text-align: center;
+            font-size: 0.8rem;
+            color: #b2bec3;
+        }
+
+        /* --- Botones de accion --- */
+        .doc-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+        .btn-accion {
+            flex: 1;
+            min-width: 180px;
+            padding: 0.8rem 1.2rem;
+            border-radius: var(--radius-md);
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+        .btn-imprimir {
+            background: rgba(0,206,201,0.15);
+            border: 2px solid var(--secondary);
+            color: var(--secondary);
+        }
+        .btn-imprimir:hover {
+            background: rgba(0,206,201,0.3);
+        }
+        .btn-copiar-doc {
+            background: rgba(108,92,231,0.15);
+            border: 2px solid var(--primary);
+            color: var(--primary-light);
+        }
+        .btn-copiar-doc:hover {
+            background: rgba(108,92,231,0.3);
+        }
+        .btn-nuevo {
+            background: rgba(253,121,168,0.15);
+            border: 2px solid var(--accent);
+            color: var(--accent);
+        }
+        .btn-nuevo:hover {
+            background: rgba(253,121,168,0.3);
+        }
+
+        .btn-volver {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+            transition: color 0.3s;
+        }
+        .btn-volver:hover {
+            color: var(--primary-light);
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            padding: 0.8rem 1.5rem;
+            background: var(--success);
+            color: white;
+            border-radius: var(--radius-sm);
+            font-size: 0.9rem;
+            font-weight: 600;
+            z-index: 1000;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s;
+        }
+        .toast.visible {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        @media (max-width: 600px) {
+            .campo-row { grid-template-columns: 1fr; }
+            .tipo-docs { grid-template-columns: 1fr 1fr; }
+            .material-container { padding: 1rem 0.5rem; }
+            .doc-preview { padding: 1.5rem; }
+        }
+
+        @media print {
+            body * { visibility: hidden; }
+            .doc-preview, .doc-preview * { visibility: visible; }
+            .doc-preview {
+                position: absolute;
+                left: 0; top: 0;
+                width: 100%;
+                max-height: none;
+                overflow: visible;
+                border-radius: 0;
+                padding: 2cm;
+            }
+        }
+
+        /* ============================================
+           SECCION DE REFERENCIA (Guia de Ejercicios)
+           ============================================ */
+        .seccion-referencia {
+            display: none;
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            backdrop-filter: blur(10px);
+        }
+        .seccion-referencia.visible { display: block; }
+
+        .upload-zone {
+            border: 2px dashed var(--glass-border);
+            border-radius: var(--radius-sm);
+            padding: 1.2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 0.8rem;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+        .upload-zone:hover { border-color: var(--primary); background: rgba(99,102,241,0.05); }
+        .upload-zone.cargado { border-color: var(--success); background: rgba(16,185,129,0.05); }
+        .upload-zone input[type="file"] { display: none; }
+
+        /* ============================================
+           BLOOM TAXONOMY BADGES (dentro del documento)
+           ============================================ */
+        .doc-preview .bloom-n {
+            display: inline-block; padding: 0.2rem 0.7rem; border-radius: 20px;
+            font-size: 0.78rem; font-weight: 700; margin-right: 0.4rem;
+            letter-spacing: 0.03em; vertical-align: middle;
+        }
+        .doc-preview .bloom-1 { background:#e3f2fd; color:#1565c0; }
+        .doc-preview .bloom-2 { background:#e8f5e9; color:#2e7d32; }
+        .doc-preview .bloom-3 { background:#fff3e0; color:#e65100; }
+        .doc-preview .bloom-4 { background:#fce4ec; color:#880e4f; }
+        .doc-preview .bloom-5 { background:#ede7f6; color:#4527a0; }
+        .doc-preview .bloom-6 { background:#fff8e1; color:#f57f17; }
+
+        .doc-preview .bloom-header {
+            background: #f8f9fa; border-left: 4px solid #6366f1;
+            padding: 0.5rem 0.8rem; margin: 1.2rem 0 0.5rem 0; border-radius: 0 4px 4px 0;
+        }
+
+        /* Tabla de verificacion con checkboxes */
+        .doc-preview .check-item { margin: 0.3rem 0; display: flex; align-items: flex-start; gap: 0.4rem; }
+        .doc-preview .check-item input { margin-top: 0.15rem; }
+    </style>
+</head>
+<body>
+
+    <!-- FONDO ANIMADO -->
+    <div class="orbs">
+        <div class="orb orb1"></div>
+        <div class="orb orb2"></div>
+        <div class="orb orb3"></div>
+    </div>
+
+    <!-- NAVBAR -->
+    <nav class="navbar">
+        <div class="nav-brand">
+            <span class="nav-icon">⚡</span>
+            <span>ElectroLearn</span>
+        </div>
+        <div class="nav-links">
+            <a href="dashboard.html">Dashboard</a>
+            <a href="#" onclick="logout()" class="nav-btn">Cerrar Sesion</a>
+        </div>
+    </nav>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <main class="material-container">
+
+        <a href="dashboard.html" class="btn-volver">&#8592; Volver al Dashboard</a>
+
+        <div class="material-header">
+            <h1>Generador de Material Educativo</h1>
+            <p>Crea guias, apuntes y fichas practicas alineadas al curriculum Mineduc - Colegio Salesianos Talca</p>
+        </div>
+
+        <!-- SECCION 1: TIPO DE DOCUMENTO -->
+        <div class="seccion-mat">
+            <h2><span>&#128218;</span> Tipo de Documento</h2>
+            <div class="tipo-docs" id="tipoDocs">
+                <div class="tipo-doc-card" onclick="seleccionarTipo(this, 'guia')" data-tipo="guia">
+                    <div class="icon">&#128214;</div>
+                    <h3>Guia de Aprendizaje</h3>
+                    <p>Con objetivos, contenido, actividades y evaluacion</p>
+                </div>
+                <div class="tipo-doc-card" onclick="seleccionarTipo(this, 'apunte')" data-tipo="apunte">
+                    <div class="icon">&#128221;</div>
+                    <h3>Apunte de Clase</h3>
+                    <p>Resumen teorico con conceptos clave y ejemplos</p>
+                </div>
+                <div class="tipo-doc-card" onclick="seleccionarTipo(this, 'ficha')" data-tipo="ficha">
+                    <div class="icon">&#128295;</div>
+                    <h3>Ficha Practica</h3>
+                    <p>Paso a paso para actividad de taller/laboratorio</p>
+                </div>
+                <div class="tipo-doc-card" onclick="seleccionarTipo(this, 'evaluacion')" data-tipo="evaluacion">
+                    <div class="icon">&#9997;</div>
+                    <h3>Guia de Ejercicios</h3>
+                    <p>Ejercicios y problemas con espacio para responder</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECCION 2: OBJETIVOS CURRICULARES -->
+        <div class="seccion-mat">
+            <h2><span>&#127919;</span> Objetivos Curriculares</h2>
+            <div class="campo-row">
+                <div class="campo">
+                    <label>Curso</label>
+                    <select id="selectCurso" onchange="filtrarModulos()">
+                        <option value="">-- Seleccionar curso --</option>
+                        <option value="3ro">3ro Medio E</option>
+                        <option value="4to">4to Medio E</option>
+                    </select>
+                </div>
+                <div class="campo">
+                    <label>Modulo</label>
+                    <select id="selectModulo" onchange="cargarOA()">
+                        <option value="">-- Primero selecciona un curso --</option>
+                    </select>
+                </div>
+            </div>
+            <div class="campo">
+                <label>Objetivo de Aprendizaje (OA)</label>
+                <select id="selectOA" onchange="cargarAE()">
+                    <option value="">-- Primero selecciona un modulo --</option>
+                </select>
+                <div id="infoOA" class="info-box" style="display:none;"></div>
+            </div>
+            <div class="campo">
+                <label>Aprendizaje Esperado (AE)</label>
+                <select id="selectAE" onchange="cargarCE()">
+                    <option value="">-- Primero selecciona un OA --</option>
+                </select>
+            </div>
+            <div class="campo">
+                <label>Criterios de Evaluacion (CE)</label>
+                <div id="listaCE" class="checkbox-group">
+                    <span style="color: var(--text-muted); font-size:0.85rem;">Selecciona un AE para ver los criterios</span>
+                </div>
+            </div>
+            <div class="campo">
+                <label>OAG asociados</label>
+                <div id="listaOAG" class="oag-tags">
+                    <span style="color: var(--text-muted); font-size:0.85rem;">Se muestran automaticamente</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══ PANEL DE RECOMENDACIONES CURRICULARES ═══ -->
+        <div id="recsPanel"></div>
+
+        <!-- SECCION 3: VALORES SALESIANOS -->
+        <div class="seccion-mat">
+            <h2><span>&#128155;</span> Valores Salesianos</h2>
+            <div class="checkbox-group" id="valoresSalesianos"></div>
+        </div>
+
+        <!-- SECCION 4: CONTENIDO -->
+        <div class="seccion-mat">
+            <h2><span>&#128221;</span> Contenido y Personalizacion</h2>
+            <div class="campo">
+                <label>Contenido especifico del documento</label>
+                <textarea id="inputContenido" placeholder="Describe el tema principal. Ej: Conexion de reles programables tipo Zelio con sensores de temperatura NTC para control on/off de ventilacion en tableros industriales..."></textarea>
+            </div>
+            <div class="campo-row">
+                <div class="campo">
+                    <label>Nivel de dificultad</label>
+                    <select id="selectDificultad">
+                        <option value="basico">Basico - Introduccion al tema</option>
+                        <option value="intermedio" selected>Intermedio - Aplicacion practica</option>
+                        <option value="avanzado">Avanzado - Analisis y resolucion</option>
+                    </select>
+                </div>
+                <div class="campo">
+                    <label>Nombre del profesor</label>
+                    <input type="text" id="inputProfesor" placeholder="Ej: Eduardo Yanez">
+                </div>
+            </div>
+        </div>
+
+        <!-- SECCION 5: MATERIAL DE REFERENCIA (solo para Guia de Ejercicios) -->
+        <div class="seccion-referencia" id="seccionReferencia">
+            <h2><span>&#128247;</span> Material de Referencia para Ejercicios</h2>
+            <p style="color:var(--text-muted);font-size:0.88rem;margin-bottom:1rem;">
+                Sube un archivo <strong>.txt</strong> con ejercicios, enunciados o contenido de referencia, o pega el texto directamente.
+                La plataforma usara este material para generar preguntas mas especificas y contextualizadas al contenido real.
+            </p>
+            <div class="campo">
+                <label>Cargar archivo de texto (.txt)</label>
+                <div class="upload-zone" id="uploadZone" onclick="document.getElementById('archivoReferencia').click()">
+                    <input type="file" id="archivoReferencia" accept=".txt,.md,.csv" onchange="leerArchivo(this)">
+                    <span id="uploadZoneText">&#128194; Haz clic para seleccionar un archivo .txt con ejercicios o contenido</span><br>
+                    <small>Acepta .txt y .md &mdash; O pega el contenido directamente en el area de abajo</small>
+                </div>
+            </div>
+            <div class="campo">
+                <label>Contenido de referencia (pega texto, ejercicios o enunciados de libros u otras fuentes)</label>
+                <textarea id="materialReferencia" rows="7"
+                    placeholder="Pega aqui el contenido de referencia: ejercicios de libros, enunciados, problemas resueltos, tablas de datos tecnicos, etc.&#10;&#10;Ejemplo:&#10;1. Calcula la corriente que circula por una resistencia de 220&#937; conectada a 12V.&#10;2. Dibuja el diagrama de un circuito RC en serie...&#10;&#10;La plataforma generara preguntas basadas en este material."></textarea>
+            </div>
+        </div>
+
+        <!-- BOTON GENERAR -->
+        <button class="btn-generar" onclick="generarMaterial()">
+            Generar Material Educativo
+        </button>
+
+        <!-- RESULTADO: DOCUMENTO GENERADO -->
+        <div class="doc-generado" id="docGenerado">
+            <div class="seccion-mat">
+                <h2><span>&#128196;</span> Documento Generado</h2>
+                <div class="doc-actions">
+                    <button class="btn-accion btn-imprimir" onclick="window.print()">Imprimir / Guardar PDF</button>
+                    <button class="btn-accion btn-copiar-doc" onclick="copiarDocumento()">Copiar texto completo</button>
+                    <button class="btn-accion btn-nuevo" onclick="nuevoDocumento()">Crear otro documento</button>
+                    <button class="btn-accion" onclick="guardarEnBiblioteca()" style="background:linear-gradient(135deg,rgba(129,140,248,.3),rgba(52,211,153,.2));border-color:rgba(129,140,248,.5);color:#a5b4fc;" title="Publicar en la Biblioteca para que los estudiantes puedan verlo">📚 Publicar en Biblioteca</button>
+                </div>
+                <div id="saveMsg" style="display:none;margin-top:8px;font-size:.82rem;padding:8px 14px;border-radius:8px;"></div>
+            </div>
+            <div class="doc-preview" id="docPreview">
+                <!-- Contenido generado por JS -->
+            </div>
+        </div>
+    </main>
+
+    <!-- TOAST -->
+    <div class="toast" id="toast"></div>
+
+    <!-- Firebase SDK v9 compat -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <script src="js/firebase-config.js"></script>
+    <script src="js/firebase-auth.js"></script>
+    <script src="js/firebase-db.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+    // =============================================
+    // MISMA BASE DE DATOS CURRICULAR de planificacion.html
+    // (Se copia la estructura completa de MODULOS)
+    // =============================================
+
+    // Variable para tipo de documento seleccionado
+    var tipoDocSeleccionado = '';
+
+    // --- MODULOS (misma data que planificacion.html) ---
+    // Para no duplicar 1000+ lineas, cargamos desde un script compartido
+    // Por ahora incluimos la referencia completa inline
+
+    var MODULOS = {};
+    var OAG_DEFINICIONES = {};
+
+    // Cargar datos desde planificacion.html via fetch del mismo archivo
+    // Mejor solucion: extraer a js/datos-curriculares.js
+    // Por ahora usamos la data completa inline
+
+    </script>
+    <!-- Cargar datos curriculares (extraidos a archivo compartido) -->
+    <script src="js/datos-curriculares.js"></script>
+    <script>
+
+    var VALORES_SALESIANOS = [
+        'Honestidad', 'Responsabilidad', 'Solidaridad', 'Respeto',
+        'Alegria', 'Fe', 'Amabilidad', 'Trabajo'
+    ];
+
+    // =============================================
+    // INICIALIZACION
+    // =============================================
+    document.addEventListener('DOMContentLoaded', function() {
+        var user = getCurrentUser();
+        if (!user || user.role !== 'profesor') {
+            window.location.href = 'index.html';
+            return;
+        }
+        document.getElementById('inputProfesor').value = user.name || '';
+
+        var contValores = document.getElementById('valoresSalesianos');
+        VALORES_SALESIANOS.forEach(function(v) {
+            var item = document.createElement('label');
+            item.className = 'checkbox-item';
+            item.innerHTML = '<input type="checkbox" value="' + v + '" onchange="toggleCheckItem(this)"> ' + v;
+            contValores.appendChild(item);
+        });
+    });
+
+    // =============================================
+    // FUNCIONES DE INTERFAZ (mismas cascadas)
+    // =============================================
+
+    function toggleCheckItem(checkbox) {
+        var parent = checkbox.closest('.checkbox-item');
+        if (checkbox.checked) parent.classList.add('checked');
+        else parent.classList.remove('checked');
+    }
+
+    function seleccionarTipo(card, tipo) {
+        var cards = document.querySelectorAll('.tipo-doc-card');
+        for (var i = 0; i < cards.length; i++) cards[i].classList.remove('selected');
+        card.classList.add('selected');
+        tipoDocSeleccionado = tipo;
+        var secRef = document.getElementById('seccionReferencia');
+        if (tipo === 'evaluacion') secRef.classList.add('visible');
+        else secRef.classList.remove('visible');
+    }
+
+    function filtrarModulos() {
+        var nivel = document.getElementById('selectCurso').value;
+        var sel = document.getElementById('selectModulo');
+        sel.innerHTML = '<option value="">-- Seleccionar modulo --</option>';
+        if (!nivel) return;
+        var keys = Object.keys(MODULOS);
+        for (var i = 0; i < keys.length; i++) {
+            var m = MODULOS[keys[i]];
+            if (m.nivel === nivel) {
+                var opt = document.createElement('option');
+                opt.value = m.num;
+                opt.textContent = m.num + ' - ' + m.nombre + ' (' + m.horas + 'h)';
+                sel.appendChild(opt);
+            }
+        }
+        document.getElementById('selectOA').innerHTML = '<option value="">-- Selecciona un modulo --</option>';
+        document.getElementById('infoOA').style.display = 'none';
+        document.getElementById('selectAE').innerHTML = '<option value="">-- Selecciona un OA --</option>';
+        document.getElementById('listaCE').innerHTML = '<span style="color:var(--text-muted);font-size:0.85rem;">Selecciona un AE</span>';
+        document.getElementById('listaOAG').innerHTML = '<span style="color:var(--text-muted);font-size:0.85rem;">Se muestran automaticamente</span>';
+    }
+
+    function cargarOA() {
+        var modId = document.getElementById('selectModulo').value;
+        var sel = document.getElementById('selectOA');
+        sel.innerHTML = '<option value="">-- Seleccionar OA --</option>';
+        document.getElementById('infoOA').style.display = 'none';
+        if (!modId || !MODULOS[modId]) return;
+        var mod = MODULOS[modId];
+        var oaKeys = Object.keys(mod.oas);
+        for (var i = 0; i < oaKeys.length; i++) {
+            var opt = document.createElement('option');
+            opt.value = oaKeys[i];
+            opt.textContent = oaKeys[i];
+            sel.appendChild(opt);
+        }
+        document.getElementById('selectAE').innerHTML = '<option value="">-- Selecciona un OA --</option>';
+        document.getElementById('listaCE').innerHTML = '<span style="color:var(--text-muted);font-size:0.85rem;">Selecciona un AE</span>';
+        document.getElementById('listaOAG').innerHTML = '';
+    }
+
+    function cargarAE() {
+        var modId = document.getElementById('selectModulo').value;
+        var oaId = document.getElementById('selectOA').value;
+        var sel = document.getElementById('selectAE');
+        sel.innerHTML = '<option value="">-- Seleccionar AE --</option>';
+        if (!modId || !oaId || !MODULOS[modId]) return;
+        var mod = MODULOS[modId];
+        document.getElementById('infoOA').textContent = oaId + ': ' + mod.oas[oaId];
+        document.getElementById('infoOA').style.display = 'block';
+        var aeKeys = Object.keys(mod.aes);
+        for (var i = 0; i < aeKeys.length; i++) {
+            var ae = mod.aes[aeKeys[i]];
+            var opt = document.createElement('option');
+            opt.value = aeKeys[i];
+            var t = ae.texto.length > 100 ? ae.texto.substring(0,100) + '...' : ae.texto;
+            opt.textContent = 'AE ' + aeKeys[i] + ': ' + t;
+            sel.appendChild(opt);
+        }
+        document.getElementById('listaCE').innerHTML = '<span style="color:var(--text-muted);font-size:0.85rem;">Selecciona un AE</span>';
+        document.getElementById('listaOAG').innerHTML = '';
+    }
+
+    function cargarCE() {
+        var modId = document.getElementById('selectModulo').value;
+        var aeNum = document.getElementById('selectAE').value;
+        var listaCE = document.getElementById('listaCE');
+        listaCE.innerHTML = '';
+        if (!modId || !aeNum || !MODULOS[modId] || !MODULOS[modId].aes[aeNum]) return;
+        var ae = MODULOS[modId].aes[aeNum];
+        var ceKeys = Object.keys(ae.ces);
+        for (var i = 0; i < ceKeys.length; i++) {
+            var key = ceKeys[i];
+            var ce = ae.ces[key];
+            var item = document.createElement('label');
+            item.className = 'checkbox-item ce-item checked';
+            item.innerHTML = '<input type="checkbox" value="' + key + '" data-oag="' + ce.oag.join(',') + '" checked onchange="toggleCheckItem(this);actualizarOAG()"> <strong>' + key + '</strong> - ' + ce.texto;
+            listaCE.appendChild(item);
+        }
+        actualizarOAG();
+        // Mostrar recomendaciones curriculares
+        if (typeof renderRecomendaciones === 'function') {
+            var oaId = document.getElementById('selectOA').value;
+            renderRecomendaciones(modId, aeNum, oaId);
+        }
+    }
+
+    function actualizarOAG() {
+        var listaOAG = document.getElementById('listaOAG');
+        listaOAG.innerHTML = '';
+        var checks = document.querySelectorAll('#listaCE input[type="checkbox"]:checked');
+        var oagObj = {};
+        for (var i = 0; i < checks.length; i++) {
+            var oags = checks[i].getAttribute('data-oag');
+            if (oags) { var arr = oags.split(','); for (var j = 0; j < arr.length; j++) oagObj[arr[j].trim()] = true; }
+        }
+        var oagOrd = Object.keys(oagObj).sort();
+        if (oagOrd.length === 0) { listaOAG.innerHTML = '<span style="color:var(--text-muted);font-size:0.85rem;">Selecciona al menos un CE</span>'; return; }
+        for (var i = 0; i < oagOrd.length; i++) {
+            var tag = document.createElement('div');
+            tag.className = 'oag-tag';
+            tag.title = OAG_DEFINICIONES[oagOrd[i]] || '';
+            tag.textContent = oagOrd[i];
+            listaOAG.appendChild(tag);
+        }
+    }
+
+    // =============================================
+    // GENERADOR INTELIGENTE DE MATERIAL EDUCATIVO
+    // =============================================
+
+    function generarMaterial() {
+        if (!tipoDocSeleccionado) { alert('Selecciona un tipo de documento.'); return; }
+        var curso = document.getElementById('selectCurso').value;
+        var modId = document.getElementById('selectModulo').value;
+        var oaId = document.getElementById('selectOA').value;
+        var aeNum = document.getElementById('selectAE').value;
+        var contenido = document.getElementById('inputContenido').value;
+        var dificultad = document.getElementById('selectDificultad').value;
+        var profesor = document.getElementById('inputProfesor').value;
+
+        if (!curso || !modId || !oaId || !aeNum) { alert('Completa al menos: Curso, Modulo, OA y AE.'); return; }
+
+        var mod = MODULOS[modId];
+        var ae = mod.aes[aeNum];
+        var cursoTexto = curso === '3ro' ? '3ro Medio E' : '4to Medio E';
+        var cont = contenido || ae.texto;
+
+        // CE seleccionados
+        var ceChecks = document.querySelectorAll('#listaCE input[type="checkbox"]:checked');
+        var cesTexto = [];
+        for (var i = 0; i < ceChecks.length; i++) {
+            var k = ceChecks[i].value;
+            if (ae.ces[k]) cesTexto.push(k + ': ' + ae.ces[k].texto);
+        }
+
+        // Valores seleccionados
+        var valChecks = document.querySelectorAll('#valoresSalesianos input[type="checkbox"]:checked');
+        var valoresArr = [];
+        for (var i = 0; i < valChecks.length; i++) valoresArr.push(valChecks[i].value);
+
+        var html = '';
+
+        // ======= GENERAR SEGUN TIPO =======
+        if (tipoDocSeleccionado === 'guia') {
+            html = generarGuiaAprendizaje(mod, ae, aeNum, oaId, cursoTexto, cont, cesTexto, dificultad, profesor, valoresArr);
+        } else if (tipoDocSeleccionado === 'apunte') {
+            html = generarApunteClase(mod, ae, aeNum, oaId, cursoTexto, cont, cesTexto, dificultad, profesor, valoresArr);
+        } else if (tipoDocSeleccionado === 'ficha') {
+            html = generarFichaPractica(mod, ae, aeNum, oaId, cursoTexto, cont, cesTexto, dificultad, profesor, valoresArr);
+        } else if (tipoDocSeleccionado === 'evaluacion') {
+            html = generarGuiaEjercicios(mod, ae, aeNum, oaId, cursoTexto, cont, cesTexto, dificultad, profesor, valoresArr);
+        }
+
+        document.getElementById('docPreview').innerHTML = html;
+        document.getElementById('docGenerado').classList.add('visible');
+        document.getElementById('docGenerado').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // =============================================
+    // HELPERS COMUNES
+    // =============================================
+    function lineas(n) {
+        var h = '';
+        for (var i = 0; i < n; i++) h += '<div class="linea-escribir"></div>';
+        return h;
+    }
+    function cesLi(ces) {
+        return ces.map(function(c) {
+            var parts = c.split(': ');
+            return '<li style="margin-bottom:0.4rem;"><strong>' + parts[0] + ':</strong> ' + (parts[1] || c) + '</li>';
+        }).join('');
+    }
+    function pieDoc() {
+        return '<div class="pie-pagina">Colegio Salesianos Talca &bull; Especialidad Electronica EMTP &bull; ElectroLearn &bull; Material generado automaticamente &bull; Alineado al curriculum Mineduc</div>';
+    }
+
+    // =============================================
+    // GENERADOR: GUIA DE APRENDIZAJE (version extensa)
+    // =============================================
+    function generarGuiaAprendizaje(mod, ae, aeNum, oaId, curso, cont, ces, dif, prof, valores) {
+        var difTexto = dif === 'basico' ? 'Basico' : dif === 'intermedio' ? 'Intermedio - Aplicacion Practica' : 'Avanzado - Analisis y Resolucion';
+        var val1 = valores.length > 0 ? valores[0] : 'Responsabilidad';
+        var val2 = valores.length > 1 ? valores[1] : 'Trabajo';
+        var valTexto = valores.length > 0 ? valores.join(', ') : 'Responsabilidad, Trabajo';
+        var contCorto = cont.length > 70 ? cont.substring(0, 67) + '...' : cont;
+
+        var autoEvalCes = ces.map(function(c) {
+            var t = (c.split(': ')[1] || c).substring(0, 75);
+            return '<tr><td style="font-size:0.82rem;">' + t + '</td><td style="text-align:center;">&#9633;</td><td style="text-align:center;">&#9633;</td><td style="text-align:center;">&#9633;</td></tr>';
+        }).join('');
+
+        return '<h1>GUIA DE APRENDIZAJE</h1>' +
+        '<div class="doc-subtitulo">Colegio Salesianos Talca &bull; Especialidad Electronica &bull; Formacion Diferenciada TP<br>' +
+        'Modulo: ' + mod.num + ' &ndash; ' + mod.nombre + ' &nbsp;|&nbsp; Curso: ' + curso + ' &nbsp;|&nbsp; Nivel: ' + difTexto + '<br>Profesor: ' + prof + '</div>' +
+
+        '<table>' +
+        '<tr><th style="width:30%">Nombre del estudiante</th><td colspan="3">' + lineas(1) + '</td></tr>' +
+        '<tr><th>Fecha inicio</th><td>' + lineas(1) + '</td><th>Fecha entrega</th><td>' + lineas(1) + '</td></tr>' +
+        '<tr><th>OA (' + oaId + ')</th><td colspan="3" style="font-size:0.83rem;">' + mod.oas[oaId] + '</td></tr>' +
+        '<tr><th>AE ' + aeNum + '</th><td colspan="3" style="font-size:0.83rem;">' + ae.texto + '</td></tr>' +
+        '<tr><th>Valores Salesianos</th><td colspan="3">' + valTexto + '</td></tr>' +
+        '</table>' +
+
+        '<div class="recuadro-importante"><strong>&#127919; Proposito de esta guia:</strong> Esta guia te acompanara paso a paso en el estudio y comprension de <em>' + cont + '</em>. ' +
+        'Trabaja cada seccion con orden y dedicacion. El valor de <strong>' + val1 + '</strong> debe guiar tu esfuerzo: hazlo bien desde el principio.</div>' +
+
+        '<h2>1. &#128269; Evaluacion diagnostica: &#191;Que se sobre este tema?</h2>' +
+        '<p style="color:#555;font-size:0.9rem;font-style:italic;">Antes de comenzar, responde con honestidad. No hay respuestas incorrectas; este paso nos ayuda a identificar tu punto de partida.</p>' +
+        '<p><strong>1.1</strong> &#191;Has escuchado o trabajado antes con algo relacionado a <em>' + contCorto + '</em>? Describe brevemente lo que recuerdas:</p>' + lineas(2) +
+        '<p><strong>1.2</strong> &#191;En que situaciones de la vida cotidiana o laboral crees que se usa este tipo de tecnologia? Menciona al menos dos:</p>' + lineas(2) +
+        '<p><strong>1.3</strong> &#191;Que esperas aprender con esta guia? Escribe al menos dos aprendizajes concretos que quieres lograr:</p>' + lineas(2) +
+
+        '<h2>2. &#128218; Marco Teorico</h2>' +
+
+        '<h3>2.1 Contexto y relevancia del tema</h3>' +
+        '<p>El contenido de esta guia &mdash; <strong>' + cont + '</strong> &mdash; forma parte del modulo <em>' + mod.nombre + '</em> ' +
+        'de la especialidad de Electronica (carga horaria total: <strong>' + mod.horas + ' horas</strong>). ' +
+        'Este modulo tiene relevancia directa en el desempeno profesional en sectores como la industria manufacturera, ' +
+        'la automatizacion, el mantenimiento de equipos electronicos y la construccion de instalaciones tecnologicas.</p>' +
+        '<p>Empresas de los sectores de mineria, manufactura, energia y servicios requieren tecnicos capaces de trabajar con ' +
+        'precision, seguridad y fundamentacion tecnica en estas areas. Tu formacion en el Colegio Salesianos te prepara ' +
+        'exactamente para eso: ser un profesional tecnico integral, competente y con valores.</p>' +
+
+        '<div class="recuadro"><strong>&#128161; Conexion curricular:</strong> El <strong>' + oaId + '</strong> del curriculum oficial Mineduc establece que:<br>' +
+        '<em style="font-size:0.88rem;">&ldquo;' + mod.oas[oaId] + '&rdquo;</em><br><br>' +
+        'Para lograr este objetivo, el <strong>AE ' + aeNum + '</strong> define que deberas ser capaz de:<br>' +
+        '<em style="font-size:0.88rem;">&ldquo;' + ae.texto + '&rdquo;</em></div>' +
+
+        '<h3>2.2 Conceptos y definiciones clave</h3>' +
+        '<p>Para comprender correctamente este tema, es fundamental manejar los siguientes conceptos tecnicos. Lee cada uno con atencion y subraya lo que te parezca mas importante:</p>' +
+        '<table>' +
+        '<tr style="background:rgba(99,102,241,0.08)"><th style="width:28%">Concepto</th><th>Descripcion tecnica y aplicacion</th></tr>' +
+        '<tr><td><strong>Fundamento del AE</strong></td><td>' + ae.texto.substring(0, 160) + (ae.texto.length > 160 ? '...' : '') + '</td></tr>' +
+        '<tr><td><strong>Contexto en ' + mod.nombre.substring(0, 20) + '</strong></td><td>En este modulo, el concepto se aplica en situaciones practicas de taller y laboratorio, siguiendo normas tecnicas y protocolos de seguridad. El dominio de estas competencias es exigido en el campo laboral.</td></tr>' +
+        '<tr><td><strong>Instrumentos asociados</strong></td><td>Para verificar y medir en este tipo de trabajo se utilizan instrumentos de medicion calibrados y en buen estado (multimetro, osciloscopio, pinza amperimetrica, analizadores, etc.), seleccionados segun la magnitud a medir.</td></tr>' +
+        '<tr><td><strong>Normativa tecnica</strong></td><td>Todo trabajo en electronica debe cumplir normativa vigente: Reglamento Electrico Chileno, normas IEC, IEEE y NCh aplicables, ademas de los protocolos de seguridad del establecimiento educacional.</td></tr>' +
+        '<tr><td><strong>Documentacion tecnica</strong></td><td>Incluye planos electricos, diagramas de bloques, esquemas de conexion, manuales de fabricante y hojas de datos (datasheets). Saber leer e interpretar esta documentacion es una competencia tecnica fundamental.</td></tr>' +
+        '</table>' +
+
+        '<h3>2.3 Criterios de evaluacion que debes dominar</h3>' +
+        '<p>Al finalizar esta guia, deberas poder demostrar el siguiente nivel de competencia en cada criterio:</p>' +
+        '<ol style="line-height:2.1;">' + cesLi(ces) + '</ol>' +
+        '<p style="font-size:0.85rem;color:#666;font-style:italic;">&#128270; Tip: Cada criterio describe una competencia concreta. Asegurate de poder demostrarlo con evidencia: mediciones, diagramas, procedimientos escritos.</p>' +
+
+        '<h3>2.4 Principios tecnicos fundamentales</h3>' +
+        '<p>Los sistemas electronicos del ambito de <strong>' + mod.nombre + '</strong> operan basandose en principios fisicos y electronicos bien definidos. Conocerlos te permite no solo ejecutar procedimientos, sino entender el <em>por que</em> de cada accion tecnica:</p>' +
+        '<ul style="line-height:2;">' +
+        '<li><strong>Principios de funcionamiento:</strong> Los sistemas involucrados convierten, transmiten y controlan energia electrica siguiendo relaciones matematicas definidas (Ley de Ohm, Kirchhoff, principios de semiconductores, etc.).</li>' +
+        '<li><strong>Interaccion de componentes:</strong> Los dispositivos activos (transistores, tiristores, CIs, PLCs) y pasivos (resistencias, capacitores, bobinas) interactuan de forma predecible cuando se conectan correctamente segun esquemas tecnicos normalizados.</li>' +
+        '<li><strong>Diagnostico tecnico sistematico:</strong> La identificacion de fallas requiere metodologia: observacion visual → medicion sistematica → comparacion con valores nominales → aislacion del componente defectuoso → solucion → verificacion.</li>' +
+        '<li><strong>Seguridad como prioridad:</strong> Ningun procedimiento tecnico justifica saltarse las normas de seguridad. EPP correcto, verificacion de ausencia de tension, y autorizacion del profesor son condiciones no negociables.</li>' +
+        '</ul>' +
+
+        '<div class="recuadro-seguridad"><strong>&#9888; NORMAS DE SEGURIDAD OBLIGATORIAS PARA ESTA GUIA:</strong><br>' +
+        '1. Usar EPP completo: lentes de seguridad, guantes dielectricos, delantal, calzado de seguridad.<br>' +
+        '2. Verificar ausencia de tension antes de conectar o desconectar cualquier elemento.<br>' +
+        '3. Solicitar autorizacion del profesor antes de energizar cualquier circuito o sistema.<br>' +
+        '4. En caso de incidente: desconectar alimentacion y avisar inmediatamente al profesor.<br>' +
+        '5. Mantener el puesto de trabajo ordenado, limpio y sin elementos ajenos a la actividad.</div>' +
+
+        '<h2>3. &#9997; Actividades de Aprendizaje</h2>' +
+        '<p style="color:#555;font-size:0.9rem;">Las actividades estan disenadas en orden de complejidad creciente, desde la comprension de conceptos hasta el analisis critico y la creacion. Trabaja cada una con cuidado y, si tienes dudas, consulta al profesor.</p>' +
+
+        '<h3>Actividad 1 &mdash; Comprension conceptual <em style="font-size:0.82rem;color:#888;">(Niveles: Recordar y Comprender)</em></h3>' +
+        '<p><strong>1.1</strong> Define con tus propias palabras en que consiste <em>' + contCorto + '</em>. Incluye: que es, como funciona y para que sirve:</p>' + lineas(4) +
+        '<p><strong>1.2</strong> Identifica y describe los 3 componentes o elementos mas importantes involucrados en este tipo de trabajo tecnico. Indica la funcion especifica de cada uno:</p>' +
+        '<p style="margin-left:1.2rem"><strong>Componente / elemento 1:</strong></p>' + lineas(2) +
+        '<p style="margin-left:1.2rem"><strong>Componente / elemento 2:</strong></p>' + lineas(2) +
+        '<p style="margin-left:1.2rem"><strong>Componente / elemento 3:</strong></p>' + lineas(2) +
+        '<p><strong>1.3</strong> Explica con tus palabras el AE ' + aeNum + ' de esta guia. &#191;Que significa lograrlo en la practica del taller?</p>' + lineas(3) +
+
+        '<h3>Actividad 2 &mdash; Aplicacion practica <em style="font-size:0.82rem;color:#888;">(Niveles: Aplicar)</em></h3>' +
+        '<p><strong>2.1</strong> Dibuja en el espacio siguiente un esquema, diagrama de bloques o mapa conceptual del tema. Incluye nombres de componentes, flechas de relacion y valores si corresponde:</p>' +
+        '<div class="espacio-dibujo">Espacio para esquema, diagrama de bloques o mapa conceptual &mdash; Rotula todos los elementos</div>' +
+        '<p><strong>2.2</strong> Describe el procedimiento completo que seguirias para implementar o verificar el correcto funcionamiento de un sistema relacionado con <em>' + contCorto + '</em>. Escribe al menos 7 pasos en orden:</p>' +
+        '<ol>' +
+        '<li style="margin-bottom:0.5rem;">' + lineas(1) + '</li>' +
+        '<li style="margin-bottom:0.5rem;">' + lineas(1) + '</li>' +
+        '<li style="margin-bottom:0.5rem;">' + lineas(1) + '</li>' +
+        '<li style="margin-bottom:0.5rem;">' + lineas(1) + '</li>' +
+        '<li style="margin-bottom:0.5rem;">' + lineas(1) + '</li>' +
+        '<li style="margin-bottom:0.5rem;">' + lineas(1) + '</li>' +
+        '<li style="margin-bottom:0.5rem;">' + lineas(1) + '</li>' +
+        '</ol>' +
+        '<p><strong>2.3</strong> &#191;Que instrumentos de medicion utilizarias? Completa la siguiente tabla:</p>' +
+        '<table><tr><th>Instrumento</th><th>Magnitud que mide</th><th>Como se conecta (serie / paralelo)</th><th>Escala o rango</th></tr>' +
+        '<tr><td>' + lineas(1) + '</td><td>' + lineas(1) + '</td><td>' + lineas(1) + '</td><td>' + lineas(1) + '</td></tr>' +
+        '<tr><td>' + lineas(1) + '</td><td>' + lineas(1) + '</td><td>' + lineas(1) + '</td><td>' + lineas(1) + '</td></tr>' +
+        '<tr><td>' + lineas(1) + '</td><td>' + lineas(1) + '</td><td>' + lineas(1) + '</td><td>' + lineas(1) + '</td></tr>' +
+        '</table>' +
+
+        '<h3>Actividad 3 &mdash; Analisis critico <em style="font-size:0.82rem;color:#888;">(Niveles: Analizar y Evaluar)</em></h3>' +
+        '<p><strong>3.1</strong> Situacion problematica: <em>"Un tecnico detecta que el sistema no responde correctamente a pesar de que la alimentacion electrica es normal. Los sintomas observados sugieren una falla relacionada con ' + contCorto + '."</em></p>' +
+        '<p>Aplica el metodo sistematico de diagnostico (<strong>observar &rarr; medir &rarr; comparar &rarr; diagnosticar &rarr; corregir &rarr; verificar</strong>) y describe cada etapa:</p>' + lineas(6) +
+        '<p><strong>3.2</strong> Compara dos alternativas tecnicas o metodos para abordar el trabajo con ' + mod.nombre.toLowerCase() + '. Completa la tabla comparativa:</p>' +
+        '<table><tr><th>Aspecto</th><th>Alternativa A</th><th>Alternativa B</th></tr>' +
+        '<tr><td>Ventajas</td><td>' + lineas(2) + '</td><td>' + lineas(2) + '</td></tr>' +
+        '<tr><td>Desventajas</td><td>' + lineas(2) + '</td><td>' + lineas(2) + '</td></tr>' +
+        '<tr><td>&#191;Cuando la usarias?</td><td>' + lineas(1) + '</td><td>' + lineas(1) + '</td></tr>' +
+        '</table>' +
+
+        '<h3>Actividad 4 &mdash; Creacion y sintesis <em style="font-size:0.82rem;color:#888;">(Nivel: Crear)</em></h3>' +
+        '<div class="recuadro-importante"><strong>Requerimiento tecnico:</strong> <em>"Una empresa del sector industrial necesita implementar un sistema de ' + mod.nombre.toLowerCase() +
+        ' que incluya ' + contCorto + ', garantizando eficiencia operativa, seguridad electrica y cumplimiento de normativas tecnicas vigentes."</em></div>' +
+        '<p><strong>4.1</strong> Disena una propuesta tecnica para este requerimiento. Incluye: descripcion del sistema, componentes principales, consideraciones de seguridad y beneficios esperados:</p>' + lineas(5) +
+        '<div class="espacio-dibujo">Bosquejo o esquema de la propuesta tecnica &mdash; Diagrama, plano o representacion grafica</div>' +
+        '<p><strong>4.2</strong> &#191;Que conocimientos de este modulo son indispensables para llevar a cabo esta propuesta? Lista al menos 4:</p>' + lineas(3) +
+
+        '<h3>Actividad 5 &mdash; Reflexion salesiana</h3>' +
+        '<p>Don Bosco ensenaba que la formacion tecnica y los valores van de la mano. Reflexiona:</p>' +
+        '<p><em>"Un tecnico que trabaja con <strong>' + val1 + '</strong> no solo realiza bien su trabajo, sino que genera confianza, cuida a sus companeros y contribuye al bien comun."</em></p>' +
+        '<p>&#191;Como manifiestas el valor de <strong>' + val1 + '</strong> en tu dia a dia en el taller y en tu vida escolar? &#191;Y como lo harias en tu futuro trabajo profesional?</p>' + lineas(4) +
+
+        '<h2>4. &#128202; Autoevaluacion</h2>' +
+        '<p>Se honesto contigo mismo. Marca con una X segun tu nivel de logro real:</p>' +
+        '<table>' +
+        '<tr><th>Criterio de autoevaluacion</th><th style="text-align:center;width:12%">&#128994;<br>Logrado</th><th style="text-align:center;width:12%">&#128993;<br>En proceso</th><th style="text-align:center;width:12%">&#128308;<br>Por lograr</th></tr>' +
+        '<tr><td>Comprendo los conceptos fundamentales del tema</td><td style="text-align:center;">&#9633;</td><td style="text-align:center;">&#9633;</td><td style="text-align:center;">&#9633;</td></tr>' +
+        '<tr><td>Puedo explicar el AE ' + aeNum + ' con mis propias palabras</td><td style="text-align:center;">&#9633;</td><td style="text-align:center;">&#9633;</td><td style="text-align:center;">&#9633;</td></tr>' +
+        '<tr><td>Identifico los CE y se como demostrar cada uno</td><td style="text-align:center;">&#9633;</td><td style="text-align:center;">&#9633;</td><td style="text-align:center;">&#9633;</td></tr>' +
+        '<tr><td>Puedo aplicar los conocimientos en una situacion practica del taller</td><td style="text-align:center;">&#9633;</td><td style="text-align:center;">&#9633;</td><td style="text-align:center;">&#9633;</td></tr>' +
+        '<tr><td>Conozco y cumplo las normas de seguridad de esta unidad</td><td style="text-align:center;">&#9633;</td><td style="text-align:center;">&#9633;</td><td style="text-align:center;">&#9633;</td></tr>' +
+        '<tr><td>Trabajo con orden, prolijidad y ' + val1 + '</td><td style="text-align:center;">&#9633;</td><td style="text-align:center;">&#9633;</td><td style="text-align:center;">&#9633;</td></tr>' +
+        autoEvalCes +
+        '</table>' +
+
+        '<h2>5. &#129309; Coevaluacion</h2>' +
+        '<p>Intercambia la guia con un companero y evalua su trabajo con objetividad y respeto:</p>' +
+        '<p><strong>Nombre del companero evaluado:</strong>' + lineas(1) + '</p>' +
+        '<table><tr><th>Criterio</th><th style="text-align:center;width:12%">Logrado</th><th style="text-align:center;width:12%">En proceso</th><th>Observacion constructiva</th></tr>' +
+        '<tr><td>Completo todas las actividades</td><td style="text-align:center;">&#9633;</td><td style="text-align:center;">&#9633;</td><td>' + lineas(1) + '</td></tr>' +
+        '<tr><td>Respuestas fundamentadas y tecnicas</td><td style="text-align:center;">&#9633;</td><td style="text-align:center;">&#9633;</td><td>' + lineas(1) + '</td></tr>' +
+        '<tr><td>Presenta orden y prolijidad</td><td style="text-align:center;">&#9633;</td><td style="text-align:center;">&#9633;</td><td>' + lineas(1) + '</td></tr>' +
+        '<tr><td>Diagrama / esquema claro y rotulado</td><td style="text-align:center;">&#9633;</td><td style="text-align:center;">&#9633;</td><td>' + lineas(1) + '</td></tr>' +
+        '</table>' +
+        '<p><strong>Mensaje constructivo para tu companero:</strong></p>' + lineas(2) +
+
+        pieDoc();
+    }
+
+    // =============================================
+    // GENERADOR: APUNTE DE CLASE (con preguntas Bloom)
+    // =============================================
+    function generarApunteClase(mod, ae, aeNum, oaId, curso, cont, ces, dif, prof, valores) {
+        var val1 = valores.length > 0 ? valores[0] : 'Responsabilidad';
+        var valTexto = valores.length > 0 ? valores.join(', ') : 'Responsabilidad';
+        var contCorto = cont.length > 70 ? cont.substring(0, 67) + '...' : cont;
+
+        return '<h1>APUNTE DE CLASE</h1>' +
+        '<div class="doc-subtitulo">Colegio Salesianos Talca &bull; Especialidad Electronica &bull; Formacion Diferenciada TP<br>' +
+        'Modulo: ' + mod.num + ' &ndash; ' + mod.nombre + ' &nbsp;|&nbsp; Curso: ' + curso + '<br>Profesor: ' + prof + '</div>' +
+
+        '<div class="recuadro">' +
+        '<strong>&#127919; ' + oaId + ':</strong> ' + mod.oas[oaId] + '<br><br>' +
+        '<strong>&#128205; AE ' + aeNum + ':</strong> ' + ae.texto + '<br><br>' +
+        '<strong>&#128196; Tema:</strong> ' + cont +
+        '</div>' +
+
+        '<div class="recuadro-importante"><strong>&#128161; Como usar este apunte:</strong> Lee cada seccion completamente antes de pasar a la siguiente. ' +
+        'Subraya los conceptos que te parecen mas importantes. Anota en el margen tus preguntas para consultarlas al profesor. ' +
+        'Las secciones marcadas con &#9888; son de seguridad: <u>son obligatorias de conocer y cumplir</u>.</div>' +
+
+        '<h2>1. Introduccion: &#191;De que se trata este apunte?</h2>' +
+        '<p>Este apunte desarrolla el contenido tecnico de <strong>' + cont + '</strong>, ' +
+        'perteneciente al modulo <strong>' + mod.nombre + '</strong> de la especialidad de Electronica. ' +
+        'Su proposito es entregarte informacion detallada, organizada y comprensible para que puedas estudiar, ' +
+        'repasar y profundizar los conceptos abordados en clases.</p>' +
+        '<p>Al completar el estudio de este apunte, deberas ser capaz de: <em>' + ae.texto + '</em> ' +
+        'Para lograrlo, te pedimos leer con atencion y conectar cada concepto con lo que ya sabes de clases anteriores.</p>' +
+        '<p>Recuerda que en el Colegio Salesianos formamos tecnicos con valores: <strong>' + valTexto + '</strong> ' +
+        'son parte de tu identidad profesional.</p>' +
+
+        '<h2>2. Conceptos y definiciones clave</h2>' +
+        '<p>Antes de profundizar en el tema, asegurate de comprender los siguientes conceptos fundamentales:</p>' +
+        '<table>' +
+        '<tr style="background:rgba(99,102,241,0.08)"><th style="width:24%">Concepto / Termino</th><th>Definicion tecnica</th><th style="width:26%">Aplicacion practica</th></tr>' +
+        '<tr><td><strong>Aprendizaje Esperado principal</strong></td><td style="font-size:0.85rem;">' + ae.texto.substring(0, 140) + (ae.texto.length > 140 ? '...' : '') + '</td><td>Base de todas las competencias practicas de esta unidad.</td></tr>' +
+        '<tr><td><strong>Componentes activos</strong></td><td>Dispositivos electronicos que controlan o amplifican senales electricas: transistores, tiristores, circuitos integrados, microcontroladores, PLCs.</td><td>Control de motores, sistemas de mando, automatizacion industrial.</td></tr>' +
+        '<tr><td><strong>Componentes pasivos</strong></td><td>Dispositivos que no amplifican: resistencias, capacitores, inductores, transformadores. Limitan, almacenan o transforman la energia electrica.</td><td>Filtros, divisores de tension, protecciones de circuitos.</td></tr>' +
+        '<tr><td><strong>Instrumentos de medicion</strong></td><td>Equipos para medir magnitudes electricas (tension, corriente, resistencia, frecuencia): multimetro, osciloscopio, pinza amperimetrica, analizador de redes.</td><td>Diagnostico, verificacion y calibracion de sistemas electronicos.</td></tr>' +
+        '<tr><td><strong>Normativa tecnica</strong></td><td>Conjunto de normas que regulan el diseno, instalacion y mantenimiento de sistemas electronicos: NCh Elec., IEC 60364, IEC 61131, IEEE, normas de seguridad electrica.</td><td>Cumplimiento legal y tecnico en proyectos industriales y comerciales.</td></tr>' +
+        '<tr><td><strong>Documentacion tecnica</strong></td><td>Planos electricos, diagramas de bloques, esquemas de conexion, manuales de fabricante, hojas de datos (datasheets), bitacoras de mantenimiento.</td><td>Indispensable para interpretar, ejecutar y documentar cualquier trabajo tecnico.</td></tr>' +
+        '</table>' +
+
+        '<h2>3. Desarrollo tecnico del tema</h2>' +
+
+        '<h3>3.1 Principios teoricos</h3>' +
+        '<p>El estudio de <strong>' + cont + '</strong> se fundamenta en principios bien establecidos de la ciencia electronica. ' +
+        'Comprender estos principios te permite ir mas alla de la ejecucion de procedimientos: te permite <em>entender por que funcionan</em>:</p>' +
+        '<ul style="line-height:2;">' +
+        '<li><strong>Principios electricos base:</strong> La Ley de Ohm (V = I &times; R), las leyes de Kirchhoff (voltajes y corrientes), y los principios de funcionamiento de semiconductores son la base matematica de todos los calculos tecnicos en electronica.</li>' +
+        '<li><strong>Funcionamiento de sistemas electronicos:</strong> Los sistemas de ' + mod.nombre.toLowerCase() + ' integran componentes activos y pasivos interconectados segun esquemas normalizados. Cada componente cumple una funcion especifica dentro del circuito o sistema.</li>' +
+        '<li><strong>Control y automatizacion:</strong> Los sistemas modernos incorporan elementos de control automatico (PLCs, microcontroladores, variadores de frecuencia, HMIs) que permiten regular con precision parametros como velocidad, temperatura, presion y nivel.</li>' +
+        '<li><strong>Diagnostico tecnico:</strong> La deteccion y correccion de fallas requiere metodologia sistematica: observacion visual, medicion de parametros clave, comparacion con valores nominales, aislacion del componente defectuoso y verificacion post-reparacion.</li>' +
+        '<li><strong>Eficiencia y calidad:</strong> Un tecnico competente no solo repara o instala: optimiza el funcionamiento, reduce perdidas energeticas, documenta correctamente y entrega el trabajo con calidad certificable.</li>' +
+        '</ul>' +
+
+        '<h3>3.2 Criterios de evaluacion del AE ' + aeNum + '</h3>' +
+        '<p>Tu aprendizaje en esta unidad sera evaluado con base en los siguientes criterios oficiales del curriculum Mineduc. Lee cada uno como una meta concreta a lograr:</p>' +
+        '<ol style="line-height:2.1;">' + cesLi(ces) + '</ol>' +
+
+        '<h3>3.3 Componentes, dispositivos e instrumentos relevantes</h3>' +
+        '<table>' +
+        '<tr style="background:rgba(99,102,241,0.08)"><th>Categoria</th><th>Elementos principales</th><th>Funcion / Uso en el taller</th><th>Parametros a conocer</th></tr>' +
+        '<tr><td><strong>Componentes activos</strong></td><td>Transistores BJT/FET, tiristores (SCR, TRIAC), circuitos integrados, optoaisladores</td><td>Amplificacion, conmutacion, control de potencia</td><td>Vce, Ic max, ganancia hFE, temperatura maxima</td></tr>' +
+        '<tr><td><strong>Componentes pasivos</strong></td><td>Resistencias (fijas/variables), capacitores (electroliticos/ceramica), inductores, transformadores</td><td>Limitacion de corriente, filtrado, almacenamiento de energia</td><td>Valor nominal, tolerancia, tension maxima</td></tr>' +
+        '<tr><td><strong>Dispositivos de control</strong></td><td>Reles, contactores, PLC, microcontroladores, variadores VFD</td><td>Mando de circuitos de potencia, automatizacion de procesos</td><td>Tension de bobina, capacidad de conmutacion</td></tr>' +
+        '<tr><td><strong>Instrumentos</strong></td><td>Multimetro, osciloscopio, pinza amperimetrica, generador de senales</td><td>Medicion, diagnostico y verificacion de parametros</td><td>Categoria CAT, resolucion, precision</td></tr>' +
+        '<tr><td><strong>Protecciones</strong></td><td>Fusibles, disyuntores, diferenciales, limitadores de sobretension</td><td>Proteccion de personas y equipos ante fallas electricas</td><td>In nominal, poder de corte, curva de disparo</td></tr>' +
+        '</table>' +
+
+        '<h3>3.4 Procedimiento tecnico estandarizado</h3>' +
+        '<p>Todo trabajo tecnico en electronica debe seguir una metodologia ordenada. Memoriza y aplica siempre este procedimiento:</p>' +
+        '<ol style="line-height:2.1;">' +
+        '<li><strong>Planificacion:</strong> Revisar planos, esquemas y manuales. Identificar puntos de medicion y valores esperados antes de tocar cualquier equipo.</li>' +
+        '<li><strong>Verificacion inicial:</strong> Comprobar el estado visual de todos los componentes. Verificar ausencia de tension antes de conectar o desconectar elementos.</li>' +
+        '<li><strong>Preparacion del puesto:</strong> Disponer herramientas, instrumentos y materiales de forma ordenada. Colocarse el EPP completo.</li>' +
+        '<li><strong>Ejecucion ordenada:</strong> Seguir el procedimiento paso a paso, sin saltarse etapas. Cada conexion debe verificarse antes de energizar.</li>' +
+        '<li><strong>Medicion y registro:</strong> Registrar cada medicion en el formato correspondiente. Anotar fecha, condiciones de medicion y observaciones relevantes.</li>' +
+        '<li><strong>Verificacion de resultados:</strong> Comparar valores obtenidos con nominales. Si hay diferencias significativas, investigar la causa antes de continuar.</li>' +
+        '<li><strong>Documentacion:</strong> Completar la bitacora de taller, informe de trabajo o ficha tecnica correspondiente.</li>' +
+        '<li><strong>Orden y cierre:</strong> Desconectar instrumentos, ordenar puesto de trabajo, guardar herramientas y reportar al profesor el estado final.</li>' +
+        '</ol>' +
+
+        '<h3>3.5 Aplicaciones industriales del modulo ' + mod.nombre.substring(0, 30) + '</h3>' +
+        '<table>' +
+        '<tr style="background:rgba(99,102,241,0.08)"><th>Sector productivo</th><th>Aplicacion concreta</th><th>Tecnologias involucradas</th></tr>' +
+        '<tr><td><strong>Industria manufacturera</strong></td><td>Control de lineas de produccion, robotica industrial, gestion de calidad automatizada</td><td>PLCs, robots, sensores industriales, redes de campo</td></tr>' +
+        '<tr><td><strong>Mineria y gran industria</strong></td><td>Control de equipos pesados, telemetria, sistemas SCADA, monitoreo remoto de instalaciones</td><td>Electronica de potencia, comunicaciones industriales, SCADA</td></tr>' +
+        '<tr><td><strong>Construccion / Domotica</strong></td><td>Iluminacion inteligente, climatizacion automatica, sistemas de seguridad y acceso</td><td>IoT, protocolos KNX/BACnet, sensores ambientales</td></tr>' +
+        '<tr><td><strong>Energia</strong></td><td>Generacion renovable (solar, eolica), gestion de redes electricas, equipos de respaldo UPS</td><td>Inversores, convertidores DC/AC, baterias, smart grid</td></tr>' +
+        '<tr><td><strong>Telecomunicaciones</strong></td><td>Redes de datos, sistemas de transmision, repetidoras, centrales telefonicas</td><td>Electronica digital, fibra optica, protocolos de comunicacion</td></tr>' +
+        '</table>' +
+
+        '<div class="recuadro-seguridad"><strong>&#9888; REGLAS CRITICAS DE SEGURIDAD &mdash; Siempre presentes:</strong><br>' +
+        '&#8226; Nunca trabajes con circuitos energizados sin supervision y sin EPP completo.<br>' +
+        '&#8226; Verifica la categoria de medicion CAT de tu multimetro antes de usarlo en circuitos de potencia.<br>' +
+        '&#8226; Los condensadores de alta capacidad pueden retener carga peligrosa con el equipo apagado: siempre descargalos antes de intervenir.<br>' +
+        '&#8226; Usa solo herramientas con aislacion certificada al trabajar cerca de conductores energizados.<br>' +
+        '&#8226; Ante cualquier falla o situacion de riesgo: desconecta alimentacion y avisa al profesor de inmediato.</div>' +
+
+        '<h2>4. Sintesis visual del tema</h2>' +
+        '<p>Elabora en el espacio siguiente un mapa conceptual, diagrama de flujo o esquema de bloques que conecte los conceptos mas importantes de este apunte. Este es tu &ldquo;mapa mental&rdquo; del tema:</p>' +
+        '<div class="espacio-dibujo" style="min-height:180px;">Elabora aqui tu mapa conceptual o diagrama de sintesis &mdash; Conecta los conceptos con flechas y rotula cada relacion</div>' +
+
+        '<h2>5. &#128300; Preguntas por Niveles Taxonomicos (Bloom)</h2>' +
+        '<p>Las siguientes 10 preguntas evaluan tu comprension en distintos niveles cognitivos, de menor a mayor complejidad. Respondalas en tu cuaderno o en las lineas proporcionadas:</p>' +
+        '<div class="recuadro" style="padding:0.7rem 1rem;margin-bottom:1rem;">' +
+        '<strong>Escala taxonomica aplicada:</strong> <span style="font-size:0.82rem;">' +
+        '<span class="bloom-n bloom-1">N1&nbsp;Recordar</span> ' +
+        '<span class="bloom-n bloom-2">N2&nbsp;Comprender</span> ' +
+        '<span class="bloom-n bloom-3">N3&nbsp;Aplicar</span> ' +
+        '<span class="bloom-n bloom-4">N4&nbsp;Analizar</span> ' +
+        '<span class="bloom-n bloom-5">N5&nbsp;Evaluar</span> ' +
+        '<span class="bloom-n bloom-6">N6&nbsp;Crear</span></span></div>' +
+
+        '<div class="bloom-header"><span class="bloom-n bloom-1">N1 &mdash; RECORDAR</span> Conocimiento factual</div>' +
+        '<p><strong>P1.</strong> Nombra los 4 elementos de proteccion personal (EPP) obligatorios para trabajar en el taller de electronica y explica para que sirve cada uno:</p>' + lineas(3) +
+        '<p><strong>P2.</strong> Lista los criterios de evaluacion del AE ' + aeNum + ' que se trabajan en esta clase (puedes apoyarte en la seccion 3.2):</p>' + lineas(3) +
+
+        '<div class="bloom-header"><span class="bloom-n bloom-2">N2 &mdash; COMPRENDER</span> Comprension conceptual</div>' +
+        '<p><strong>P3.</strong> Explica con tus propias palabras que significa: <em>&ldquo;' + ae.texto.substring(0, 90) + (ae.texto.length > 90 ? '...' : '') + '&rdquo;</em> &#191;Por que es importante para un tecnico en electronica?</p>' + lineas(4) +
+        '<p><strong>P4.</strong> &#191;Cual es la diferencia entre un componente activo y uno pasivo? Da un ejemplo de cada uno y describe su funcion en un circuito de ' + mod.nombre.toLowerCase() + ':</p>' + lineas(4) +
+
+        '<div class="bloom-header"><span class="bloom-n bloom-3">N3 &mdash; APLICAR</span> Aplicacion practica</div>' +
+        '<p><strong>P5.</strong> Describe paso a paso como utilizarias un multimetro para medir una magnitud electrica relevante en el contexto de <em>' + contCorto + '</em>. Indica la configuracion del instrumento, la conexion y como interpretas el resultado:</p>' + lineas(5) +
+        '<p><strong>P6.</strong> Aplica el procedimiento de trabajo estandarizado (seccion 3.4) a una actividad concreta del taller de ' + mod.nombre.toLowerCase() + '. Describe cada uno de los 8 pasos adaptado a ese contexto especifico:</p>' + lineas(5) +
+
+        '<div class="bloom-header"><span class="bloom-n bloom-4">N4 &mdash; ANALIZAR</span> Analisis critico</div>' +
+        '<p><strong>P7.</strong> Un sistema electronico de ' + mod.nombre.toLowerCase() + ' presenta falla: la salida no responde aunque la alimentacion es correcta. Analiza las posibles causas (minimo 4) y propone un plan de diagnostico sistematico paso a paso:</p>' + lineas(6) +
+        '<p><strong>P8.</strong> Compara el desempeno de un tecnico que siempre sigue protocolos de seguridad con uno que no lo hace. &#191;Que diferencias concretas se producen en calidad, seguridad, eficiencia y confianza del cliente?</p>' + lineas(4) +
+
+        '<div class="bloom-header"><span class="bloom-n bloom-5">N5 &mdash; EVALUAR</span> Juicio critico y evaluacion</div>' +
+        '<p><strong>P9.</strong> Evalua esta afirmacion: <em>&ldquo;En el trabajo tecnico de electronica, la experiencia practica es mas importante que el conocimiento teorico.&rdquo;</em> &#191;Estas de acuerdo o en desacuerdo? Argumenta tu posicion con al menos 3 razones tecnicas y concretas:</p>' + lineas(6) +
+
+        '<div class="bloom-header"><span class="bloom-n bloom-6">N6 &mdash; CREAR</span> Sintesis y creacion</div>' +
+        '<p><strong>P10.</strong> Disena una propuesta tecnica para un contexto industrial real, relacionada con <em>' + cont + '</em>. Tu propuesta debe incluir: <strong>(a)</strong> objetivo del sistema, <strong>(b)</strong> descripcion tecnica, <strong>(c)</strong> componentes y instrumentos principales, <strong>(d)</strong> beneficios esperados, <strong>(e)</strong> riesgos a considerar. Agrega un esquema o diagrama:</p>' + lineas(5) +
+        '<div class="espacio-dibujo">Esquema o diagrama de la propuesta</div>' +
+
+        '<h2>6. Glosario tecnico</h2>' +
+        '<table>' +
+        '<tr style="background:rgba(99,102,241,0.08)"><th style="width:20%">Termino</th><th>Definicion</th></tr>' +
+        '<tr><td><strong>EPP</strong></td><td>Elementos de Proteccion Personal: equipamiento obligatorio para proteger al trabajador de riesgos fisicos, electricos y quimicos en el taller.</td></tr>' +
+        '<tr><td><strong>AE</strong></td><td>Aprendizaje Esperado: descripcion de lo que el estudiante debe demostrar al finalizar una unidad, segun el curriculum oficial Mineduc.</td></tr>' +
+        '<tr><td><strong>CE</strong></td><td>Criterio de Evaluacion: enunciado que especifica el nivel de desempeno minimo para demostrar el logro de un AE.</td></tr>' +
+        '<tr><td><strong>PLC</strong></td><td>Controlador Logico Programable: dispositivo industrial que automatiza procesos mediante logica programada.</td></tr>' +
+        '<tr><td><strong>Multimetro</strong></td><td>Instrumento que mide tension, corriente y resistencia. Categoria CAT indica su nivel de proteccion en circuitos de potencia.</td></tr>' +
+        '<tr><td><strong>Datasheet</strong></td><td>Hoja de datos tecnicos del fabricante: especifica parametros maximos y de operacion de un componente electronico.</td></tr>' +
+        '<tr><td><strong>SCADA</strong></td><td>Sistema de supervision y adquisicion de datos (Supervisory Control and Data Acquisition): plataforma de control industrial remoto.</td></tr>' +
+        '</table>' +
+
+        '<h2>7. Recursos y bibliografía recomendada</h2>' +
+        '<ul style="line-height:2;">' +
+        '<li>Plan y Programa de la Especialidad de Electronica &mdash; Mineduc Chile.</li>' +
+        '<li>Manuales tecnicos de fabricantes: Siemens, Schneider Electric, ABB, Allen-Bradley, Phoenix Contact.</li>' +
+        '<li>Norma Electrica Chilena NCh Elec. 4/2003 y actualizaciones vigentes.</li>' +
+        '<li>IEC 60364: Instalaciones Electricas en Edificios. IEC 61131: Controladores Programables.</li>' +
+        '<li>Plataforma ElectroLearn &mdash; Colegio Salesianos Talca: recursos digitales del modulo.</li>' +
+        '</ul>' +
+
+        '<div class="recuadro"><strong>&#128155; Reflexion Salesiana:</strong> El valor de <strong>' + val1 + '</strong> nos recuerda que la excelencia tecnica no es solo saber hacer, ' +
+        'sino hacerlo bien, con integridad y compromiso con los demas. ' +
+        '<em>&ldquo;La tecnica sin valores es solo una herramienta; con valores, es un instrumento de transformacion.&rdquo;</em></div>' +
+
+        pieDoc();
+    }
+
+    // =============================================
+    // GENERADOR: FICHA PRACTICA (version mejorada)
+    // =============================================
+    function generarFichaPractica(mod, ae, aeNum, oaId, curso, cont, ces, dif, prof, valores) {
+        var val1 = valores.length > 0 ? valores[0] : 'Responsabilidad';
+        var contCorto = cont.length > 60 ? cont.substring(0, 57) + '...' : cont;
+        var difTexto = dif === 'basico' ? '45 min' : dif === 'intermedio' ? '90 min' : '135 min (2 bloques)';
+
+        var cesRubrica = ces.map(function(c) {
+            var t = (c.split(': ')[1] || c).substring(0, 65);
+            return '<tr><td style="font-size:0.82rem;">' + t + '</td><td style="text-align:center;">20</td><td>' + lineas(1) + '</td></tr>';
+        }).join('');
+
+        return '<h1>FICHA DE TRABAJO PRACTICO</h1>' +
+        '<div class="doc-subtitulo">Colegio Salesianos Talca &bull; Taller de Electronica &bull; Formacion Diferenciada TP<br>' +
+        'Modulo: ' + mod.num + ' &ndash; ' + mod.nombre + ' &nbsp;|&nbsp; Curso: ' + curso + '<br>Profesor: ' + prof + '</div>' +
+
+        '<table>' +
+        '<tr><th style="width:28%">Nombre(s) del estudiante</th><td colspan="3">' + lineas(1) + '</td></tr>' +
+        '<tr><th>Fecha</th><td>' + lineas(1) + '</td><th>Grupo N&deg;</th><td>' + lineas(1) + '</td></tr>' +
+        '<tr><th>Modulo / Actividad</th><td colspan="3" style="font-size:0.83rem;">' + mod.num + ' &ndash; ' + cont + '</td></tr>' +
+        '<tr><th>Tiempo estimado</th><td>' + difTexto + '</td><th>Firma profesor</th><td>' + lineas(1) + '</td></tr>' +
+        '</table>' +
+
+        '<div class="recuadro-seguridad">' +
+        '<strong>&#9888; PROTOCOLO DE SEGURIDAD OBLIGATORIO &mdash; Firma antes de comenzar</strong><br>' +
+        '<table style="margin-top:0.5rem;font-size:0.85rem;"><tr><th style="width:5%">&#9633;</th><th style="text-align:left;">Norma de seguridad a cumplir</th></tr>' +
+        '<tr><td style="text-align:center;">&#9633;</td><td>Tengo puesto el EPP completo: lentes de seguridad, guantes dielectricos y delantal de laboratorio.</td></tr>' +
+        '<tr><td style="text-align:center;">&#9633;</td><td>Verifique visualmente que todos los equipos e instrumentos estan en buen estado.</td></tr>' +
+        '<tr><td style="text-align:center;">&#9633;</td><td>Confirme con el multimetro la ausencia de tension en los puntos de intervencion.</td></tr>' +
+        '<tr><td style="text-align:center;">&#9633;</td><td>Conozco la ubicacion del extintor, botiquin y llave de corte de energia del taller.</td></tr>' +
+        '<tr><td style="text-align:center;">&#9633;</td><td>Lei el procedimiento completo antes de iniciar y anoté mis dudas para consultar al profesor.</td></tr>' +
+        '<tr><td style="text-align:center;">&#9633;</td><td>No conectare nada a la alimentacion sin autorizacion expresa del profesor.</td></tr>' +
+        '</table>' +
+        '<p style="margin-top:0.5rem;font-size:0.82rem;"><strong>Firma del estudiante (acepto cumplir estas normas):</strong>' + lineas(1) + '</p>' +
+        '</div>' +
+
+        '<h2>1. Marco curricular de la actividad</h2>' +
+        '<table>' +
+        '<tr><th style="width:25%">Objetivo (' + oaId + ')</th><td style="font-size:0.84rem;">' + mod.oas[oaId] + '</td></tr>' +
+        '<tr><th>Aprendizaje Esperado</th><td style="font-size:0.84rem;">AE ' + aeNum + ': ' + ae.texto + '</td></tr>' +
+        '<tr><th>Actividad practica</th><td><strong>' + cont + '</strong></td></tr>' +
+        '</table>' +
+
+        '<h2>2. Competencias a demostrar en esta actividad</h2>' +
+        '<p>Al finalizar esta ficha practica, deberas haber demostrado las siguientes competencias:</p>' +
+        '<ol style="line-height:2.1;">' + cesLi(ces) + '</ol>' +
+
+        '<h2>3. Materiales, herramientas e instrumentos</h2>' +
+        '<div class="recuadro-importante"><strong>Instruccion:</strong> Verifica la disponibilidad y estado de cada item antes de comenzar. Marca &#9633; cuando lo hayas revisado y registra el estado.</div>' +
+        '<table>' +
+        '<tr style="background:rgba(99,102,241,0.08)"><th style="width:5%;text-align:center;">&#9633;</th><th>Elemento</th><th style="width:12%">Cantidad</th><th style="width:18%">Estado (B/R/M)</th><th style="width:20%">Observacion</th></tr>' +
+        '<tr><td style="text-align:center;">&#9633;</td><td>Multimetro digital calibrado (CAT III o superior)</td><td style="text-align:center;">1</td><td>' + lineas(1) + '</td><td>' + lineas(1) + '</td></tr>' +
+        '<tr><td style="text-align:center;">&#9633;</td><td>Fuente de alimentacion regulable</td><td style="text-align:center;">1</td><td>' + lineas(1) + '</td><td>' + lineas(1) + '</td></tr>' +
+        '<tr><td style="text-align:center;">&#9633;</td><td>Protoboard / placa experimental</td><td style="text-align:center;">1</td><td>' + lineas(1) + '</td><td>' + lineas(1) + '</td></tr>' +
+        '<tr><td style="text-align:center;">&#9633;</td><td>Cables de conexion (set colores)</td><td style="text-align:center;">Set</td><td>' + lineas(1) + '</td><td>' + lineas(1) + '</td></tr>' +
+        '<tr><td style="text-align:center;">&#9633;</td><td>Componentes electronicos segun lista tecnica</td><td style="text-align:center;">Segun lista</td><td>' + lineas(1) + '</td><td>' + lineas(1) + '</td></tr>' +
+        '<tr><td style="text-align:center;">&#9633;</td><td>Herramientas manuales: alicate, destornillador, pinza, cortatubo</td><td style="text-align:center;">Set</td><td>' + lineas(1) + '</td><td>' + lineas(1) + '</td></tr>' +
+        '<tr><td style="text-align:center;">&#9633;</td><td>Plano o esquema tecnico de la actividad</td><td style="text-align:center;">1</td><td>' + lineas(1) + '</td><td>' + lineas(1) + '</td></tr>' +
+        '<tr><td style="text-align:center;">&#9633;</td><td>EPP completo: lentes, guantes dielectricos, delantal</td><td style="text-align:center;">1 set</td><td>' + lineas(1) + '</td><td>' + lineas(1) + '</td></tr>' +
+        '<tr><td style="text-align:center;">&#9633;</td><td>Otros (especificar):</td><td>' + lineas(1) + '</td><td>' + lineas(1) + '</td><td>' + lineas(1) + '</td></tr>' +
+        '</table>' +
+
+        '<h2>4. Evaluacion de riesgos</h2>' +
+        '<p style="font-size:0.87rem;color:#555;">Identifica los riesgos presentes en esta actividad y la medida preventiva correspondiente:</p>' +
+        '<table>' +
+        '<tr style="background:rgba(99,102,241,0.08)"><th>Riesgo identificado</th><th style="width:15%;text-align:center;">Nivel<br><small>(A/M/B)</small></th><th>Medida preventiva</th><th style="width:12%;text-align:center;">EPP requerido</th></tr>' +
+        '<tr><td>Descarga electrica por contacto con partes energizadas</td><td style="text-align:center;color:#c00;font-weight:700;">A</td><td>Verificar ausencia de tension antes de intervenir. Usar herramientas aisladas.</td><td style="text-align:center;">Guantes, lentes</td></tr>' +
+        '<tr><td>Cortocircuito por conexion erronea</td><td style="text-align:center;color:#e65100;font-weight:700;">M</td><td>Revisar el esquema antes de conectar. Solicitar revision del profesor.</td><td style="text-align:center;">Lentes</td></tr>' +
+        '<tr><td>Explosion de componente (capacitor, bateria)</td><td style="text-align:center;color:#e65100;font-weight:700;">M</td><td>Verificar polaridad y tension maxima de componentes. No superar valores nominales.</td><td style="text-align:center;">Lentes, delantal</td></tr>' +
+        '<tr><td>Quemadura por soldadura o componente caliente</td><td style="text-align:center;color:#2e7d32;font-weight:700;">B</td><td>Usar soporte para cautin. No tocar componentes recien soldados.</td><td style="text-align:center;">Guantes</td></tr>' +
+        '<tr><td>Otro riesgo identificado (especificar):</td><td>' + lineas(1) + '</td><td>' + lineas(1) + '</td><td>' + lineas(1) + '</td></tr>' +
+        '</table>' +
+
+        '<h2>5. Procedimiento paso a paso</h2>' +
+        '<div class="recuadro-importante"><strong>&#128270; Lee el procedimiento completo antes de comenzar. Marca cada paso completado con una &#9989;. Ante cualquier duda, DETENTE y consulta al profesor.</strong></div>' +
+
+        '<h3>Fase 1: Preparacion y verificacion previa (&#9633; completada)</h3>' +
+        '<ol>' +
+        '<li>Coloca el EPP completo y verifica que este en buen estado.</li>' +
+        '<li>Revisa el esquema electrico o diagrama de la actividad. Identifica cada componente y su conexion.</li>' +
+        '<li>Con el multimetro, verifica el valor nominal de las resistencias, estado de capacitores y continuidad de cables.</li>' +
+        '<li>Comprueba que la fuente de alimentacion este apagada y configurada en el voltaje correcto para esta actividad.</li>' +
+        '</ol>' +
+        '<p><strong>Observaciones fase 1:</strong></p>' + lineas(2) +
+
+        '<h3>Fase 2: Analisis del circuito o sistema (&#9633; completada)</h3>' +
+        '<ol>' +
+        '<li>Dibuja en el espacio siguiente el circuito o sistema a montar, segun el esquema entregado por el profesor. Rotula todos los componentes.</li>' +
+        '</ol>' +
+        '<div class="espacio-dibujo">Copia o reconstruye el diagrama esquematico de la actividad. Indica: componentes, valores, polaridad, puntos de medicion</div>' +
+        '<ol start="2">' +
+        '<li>Identifica los puntos de medicion: &#191;donde mediras tension? &#191;Corriente? &#191;Resistencia? Marcalos en el diagrama con las letras A, B, C...</li>' +
+        '<li>Calcula o consulta los valores teoricos esperados para cada medicion. Registralos en la tabla de la fase 4.</li>' +
+        '</ol>' +
+        '<p><strong>Observaciones fase 2:</strong></p>' + lineas(2) +
+
+        '<h3>Fase 3: Montaje y ejecucion (&#9633; completada)</h3>' +
+        '<ol>' +
+        '<li>Con la fuente de alimentacion apagada, realiza las conexiones segun el diagrama. Trabaja de forma ordenada, cable a cable.</li>' +
+        '<li>Verifica visualmente cada conexion antes de continuar. Revisa polaridad de diodos, condensadores y transistores.</li>' +
+        '<li><strong style="color:#c00;">ANTES DE ENERGIZAR:</strong> Solicita revision del montaje al profesor y espera su autorizacion. _____ Firma: ' + lineas(1) + '</li>' +
+        '<li>Con autorizacion del profesor, energiza el circuito/sistema. Observa: &#191;hay calor inusual? &#191;olor a quemado? &#191;humo? Si es asi: apaga inmediatamente y avisa.</li>' +
+        '<li>Observa el comportamiento del sistema durante los primeros 30 segundos sin tocarlo. Anota lo observado:</li>' +
+        '</ol>' + lineas(2) +
+
+        '<h3>Fase 4: Mediciones y registro de datos (&#9633; completada)</h3>' +
+        '<p>Realiza las mediciones indicadas. Registra los valores con unidades y la configuracion del multimetro utilizada:</p>' +
+        '<table>' +
+        '<tr style="background:rgba(99,102,241,0.08)"><th>Punto / Parametro</th><th>Magnitud</th><th>Config. multimetro</th><th>Valor teorico</th><th>Valor medido</th><th>&#916; Error</th><th>&#191;Aceptable?</th></tr>' +
+        '<tr><td>Punto A</td><td>' + lineas(1) + '</td><td>' + lineas(1) + '</td><td>' + lineas(1) + '</td><td>' + lineas(1) + '</td><td>' + lineas(1) + '</td><td style="text-align:center;">&#9633; S&iacute; &nbsp;&#9633; No</td></tr>' +
+        '<tr><td>Punto B</td><td>' + lineas(1) + '</td><td>' + lineas(1) + '</td><td>' + lineas(1) + '</td><td>' + lineas(1) + '</td><td>' + lineas(1) + '</td><td style="text-align:center;">&#9633; S&iacute; &nbsp;&#9633; No</td></tr>' +
+        '<tr><td>Punto C</td><td>' + lineas(1) + '</td><td>' + lineas(1) + '</td><td>' + lineas(1) + '</td><td>' + lineas(1) + '</td><td>' + lineas(1) + '</td><td style="text-align:center;">&#9633; S&iacute; &nbsp;&#9633; No</td></tr>' +
+        '<tr><td>Punto D</td><td>' + lineas(1) + '</td><td>' + lineas(1) + '</td><td>' + lineas(1) + '</td><td>' + lineas(1) + '</td><td>' + lineas(1) + '</td><td style="text-align:center;">&#9633; S&iacute; &nbsp;&#9633; No</td></tr>' +
+        '<tr><td>Punto E</td><td>' + lineas(1) + '</td><td>' + lineas(1) + '</td><td>' + lineas(1) + '</td><td>' + lineas(1) + '</td><td>' + lineas(1) + '</td><td style="text-align:center;">&#9633; S&iacute; &nbsp;&#9633; No</td></tr>' +
+        '</table>' +
+
+        '<h3>Fase 5: Verificacion de funcionamiento (&#9633; completada)</h3>' +
+        '<ol>' +
+        '<li>Confirma que el sistema opera correctamente segun los criterios del AE ' + aeNum + '. Marca cada criterio verificado:</li>' +
+        '</ol>' +
+        '<div style="margin-left:1.2rem;">' +
+        ces.map(function(c) {
+            return '<div class="check-item"><input type="checkbox"> <span style="font-size:0.84rem;">' + (c.split(': ')[1] || c) + '</span></div>';
+        }).join('') +
+        '</div>' +
+        '<ol start="2">' +
+        '<li>&#191;El sistema funciona dentro de los rangos esperados? Si no, describe la falla observada:</li>' +
+        '</ol>' + lineas(2) +
+        '<ol start="3">' +
+        '<li>Apaga la alimentacion al finalizar. Desmonta segun indicaciones del profesor.</li>' +
+        '</ol>' +
+
+        '<h3>Fase 6: Orden y cierre (&#9633; completada)</h3>' +
+        '<ol>' +
+        '<li>Desconecta todos los instrumentos y cables. Apaga la fuente de alimentacion.</li>' +
+        '<li>Guarda herramientas y componentes en su lugar. Deja el puesto de trabajo limpio y ordenado.</li>' +
+        '<li>Reporta al profesor el estado final de la actividad y los materiales utilizados.</li>' +
+        '</ol>' +
+
+        '<h2>6. Informe tecnico de la actividad</h2>' +
+
+        '<h3>6.1 Análisis de resultados</h3>' +
+        '<p><strong>a)</strong> &#191;Los valores medidos coinciden con los valores teoricos esperados? Analiza las diferencias encontradas y propone una explicacion tecnica:</p>' + lineas(4) +
+        '<p><strong>b)</strong> &#191;El sistema funciono correctamente desde el primer intento? Si hubo fallas o ajustes, describe que ocurrio y como lo solucionaste:</p>' + lineas(4) +
+        '<p><strong>c)</strong> &#191;Que dificultades tecnicas o practicas encontraste durante la actividad y como las superaste?</p>' + lineas(3) +
+
+        '<h3>6.2 Conclusiones</h3>' +
+        '<p>Escribe tus conclusiones tecnicas considerando: objetivo logrado, aprendizajes obtenidos, criterios demostrados y aspectos a mejorar:</p>' + lineas(5) +
+
+        '<h3>6.3 Reflexion salesiana</h3>' +
+        '<p>&#191;Como manifesto el valor de <strong>' + val1 + '</strong> durante esta actividad practica? Da ejemplos concretos:</p>' + lineas(3) +
+
+        '<h2>7. Rubrica de evaluacion del profesor</h2>' +
+        '<table>' +
+        '<tr style="background:rgba(99,102,241,0.08)"><th>Criterio de evaluacion</th><th style="text-align:center;width:12%">Ponderacion</th><th style="text-align:center;width:15%">Puntaje (0-100)</th></tr>' +
+        '<tr><td>Cumplimiento del protocolo de seguridad (EPP, normas)</td><td style="text-align:center;">15%</td><td>' + lineas(1) + '</td></tr>' +
+        '<tr><td>Preparacion y verificacion previa correcta</td><td style="text-align:center;">10%</td><td>' + lineas(1) + '</td></tr>' +
+        '<tr><td>Precision y calidad en el montaje / ejecucion</td><td style="text-align:center;">20%</td><td>' + lineas(1) + '</td></tr>' +
+        '<tr><td>Exactitud en las mediciones y registro de datos</td><td style="text-align:center;">20%</td><td>' + lineas(1) + '</td></tr>' +
+        cesRubrica +
+        '<tr><td>Calidad del informe tecnico y conclusiones</td><td style="text-align:center;">15%</td><td>' + lineas(1) + '</td></tr>' +
+        '<tr><td>Orden, prolijidad y ' + val1 + ' durante la actividad</td><td style="text-align:center;">10%</td><td>' + lineas(1) + '</td></tr>' +
+        '<tr style="background:rgba(99,102,241,0.05)"><td><strong>NOTA FINAL (promedio ponderado)</strong></td><td style="text-align:center;"><strong>100%</strong></td><td style="font-size:1.1rem;font-weight:700;text-align:center;">' + lineas(1) + '</td></tr>' +
+        '</table>' +
+        '<p style="font-size:0.83rem;color:#555;"><strong>Observaciones del profesor:</strong></p>' + lineas(3) +
+
+        pieDoc();
+    }
+
+    // =============================================
+    // GENERADOR: GUIA DE EJERCICIOS (con material de referencia)
+    // =============================================
+    function generarGuiaEjercicios(mod, ae, aeNum, oaId, curso, cont, ces, dif, prof, valores) {
+        var difTexto = dif === 'basico' ? 'Basico' : dif === 'intermedio' ? 'Intermedio' : 'Avanzado';
+        var val1 = valores.length > 0 ? valores[0] : 'Responsabilidad';
+        var contCorto = cont.length > 60 ? cont.substring(0, 57) + '...' : cont;
+
+        // Leer material de referencia si fue proporcionado
+        var matRef = (document.getElementById('materialReferencia') ? document.getElementById('materialReferencia').value.trim() : '');
+        var tieneRef = matRef.length > 30;
+
+        // Generar preguntas de seleccion multiple contextualizadas
+        var altLetras = ['A', 'B', 'C', 'D'];
+        function smItem(num, pts, enunciado, alts, correcta) {
+            var html = '<p><strong>' + num + '.</strong> (' + pts + ' pts) ' + enunciado + '</p>';
+            for (var i = 0; i < alts.length; i++) {
+                html += '<p style="margin-left:1.5rem;">&#9633; <strong>' + altLetras[i] + ')</strong> ' + alts[i] + '</p>';
+            }
+            return html;
+        }
+
+        // Seleccion multiple basada en el AE y CEs
+        var ce1txt = ces.length > 0 ? (ces[0].split(': ')[1] || ces[0]) : 'aplicar correctamente el proceso tecnico';
+        var ce2txt = ces.length > 1 ? (ces[1].split(': ')[1] || ces[1]) : 'utilizar los instrumentos de medicion adecuados';
+
+        // Bloque de ejercicios de referencia (si el profesor subio material)
+        var bloqueRef = '';
+        if (tieneRef) {
+            var lineasRef = matRef.split('\n').filter(function(l) { return l.trim().length > 3; });
+            bloqueRef = '<h2>Seccion especial: Ejercicios basados en material del profesor</h2>' +
+            '<div class="recuadro-importante"><strong>&#128196; Esta seccion fue generada a partir del material de referencia proporcionado por el profesor.</strong> ' +
+            'Lee cada ejercicio con atencion y responde con fundamento tecnico.</div>';
+
+            for (var i = 0; i < Math.min(lineasRef.length, 5); i++) {
+                var lineaRef = lineasRef[i].replace(/^[\d\.\-\*]+\s*/, '');
+                if (lineaRef.length < 10) continue;
+                bloqueRef += '<p><strong>REF-' + (i + 1) + '.</strong> Responde o desarrolla el siguiente ejercicio de referencia:</p>' +
+                '<div class="recuadro" style="font-style:italic;font-size:0.88rem;">' + lineaRef + '</div>' + lineas(4);
+            }
+
+            // Preguntas derivadas del material
+            bloqueRef += '<p><strong>REF-S.</strong> Basandote en el material de referencia proporcionado, elabora un resumen tecnico de los conceptos o procedimientos que contiene. &#191;Como se relacionan con el AE ' + aeNum + '?</p>' + lineas(5);
+        }
+
+        return '<h1>GUIA DE EJERCICIOS</h1>' +
+        '<div class="doc-subtitulo">Colegio Salesianos Talca &bull; Especialidad Electronica &bull; Formacion Diferenciada TP<br>' +
+        'Modulo: ' + mod.num + ' &ndash; ' + mod.nombre + ' &nbsp;|&nbsp; Curso: ' + curso + '<br>' +
+        'Profesor: ' + prof + ' &nbsp;|&nbsp; Nivel: ' + difTexto + '</div>' +
+
+        '<table>' +
+        '<tr><th style="width:30%">Nombre del estudiante</th><td colspan="3">' + lineas(1) + '</td></tr>' +
+        '<tr><th>Fecha</th><td>' + lineas(1) + '</td><th>Puntaje obtenido</th><td>_____ / 100 pts</td></tr>' +
+        '<tr><th>OA (' + oaId + ')</th><td colspan="3" style="font-size:0.83rem;">' + mod.oas[oaId] + '</td></tr>' +
+        '<tr><th>Tema</th><td colspan="3">' + cont + '</td></tr>' +
+        '</table>' +
+
+        '<div class="recuadro-importante"><strong>&#128221; Instrucciones generales:</strong> Lee cada pregunta completa antes de responder. Responde con fundamentacion tecnica: evita respuestas de una sola palabra. ' +
+        'El uso correcto de terminologia tecnica suma puntos. Puedes usar diagramas o esquemas en las respuestas que lo requieran.</div>' +
+
+        '<h2>Seccion I: Seleccion multiple <em style="font-size:0.82rem;font-weight:400;">(24 pts &mdash; 4 pts c/u)</em></h2>' +
+        '<p style="font-size:0.87rem;color:#555;">Marca con una X la alternativa correcta. Solo una respuesta es correcta.</p>' +
+
+        smItem(1, 4,
+            '&#191;Cual de los siguientes describe mejor el proposito principal del AE ' + aeNum + ' en el modulo de ' + mod.nombre + '?',
+            [ae.texto.substring(0, 70) + (ae.texto.length > 70 ? '...' : ''),
+             'Identificar las partes de un circuito de corriente continua sin aplicar normas de seguridad.',
+             'Realizar actividades administrativas del area de electronica sin aplicar conocimientos practicos.',
+             'Memorizar definiciones tecnicas sin vincularlas con el trabajo en taller.'],
+            'A'
+        ) +
+        smItem(2, 4,
+            'Al trabajar en el taller de electronica, el EPP minimo obligatorio incluye:',
+            ['Lentes de seguridad, guantes dielectricos y delantal de laboratorio.',
+             'Solo guantes de latex estandar y ropa comun de calle.',
+             'Casco de obra, botas de punta de acero y chaleco reflectante.',
+             'Protector auditivo y mascarilla de polvo unicamente.'],
+            'A'
+        ) +
+        smItem(3, 4,
+            'Para verificar la tension de alimentacion en un circuito electronico, el multimetro debe configurarse en:',
+            ['Voltimetro en paralelo, selector en la escala de tension correcta (VDC o VAC segun corresponda).',
+             'Amperimetro en serie, selector en la escala de corriente mas alta disponible.',
+             'Ohmetro en paralelo, con el circuito energizado para mayor precision.',
+             'Modo de continuidad, con el circuito apagado y descargado.'],
+            'A'
+        ) +
+        smItem(4, 4,
+            '&#191;Cual es la secuencia correcta para el diagnostico tecnico de una falla en un sistema electronico?',
+            ['Observar &rarr; Medir &rarr; Comparar con nominal &rarr; Aislar falla &rarr; Corregir &rarr; Verificar.',
+             'Reemplazar todos los componentes &rarr; Probar &rarr; Si funciona, terminar.',
+             'Encender el equipo repetidamente hasta que se repare solo.',
+             'Medir corriente primero &rarr; luego temperatura &rarr; luego reemplazar fusible.'],
+            'A'
+        ) +
+        smItem(5, 4,
+            'La normativa IEC 60364 regula principalmente:',
+            ['Las instalaciones electricas en edificios: diseno, ejecucion y verificacion.',
+             'El diseno de microchips y circuitos integrados de alta densidad.',
+             'Los protocolos de comunicacion industrial en redes Ethernet.',
+             'La fabricacion de baterias de litio para aplicaciones moviles.'],
+            'A'
+        ) +
+        smItem(6, 4,
+            'Un criterio de evaluacion del AE ' + aeNum + ' establece: <em>&ldquo;' + ce1txt.substring(0, 80) + (ce1txt.length > 80 ? '...' : '') + '&rdquo;</em> Esto implica que el estudiante debe:',
+            ['Demostrar practica y tecnica esta competencia en el taller con evidencia observable.',
+             'Memorizar la definicion del criterio y repetirla en una prueba escrita.',
+             'Observar al profesor realizarlo sin participar activamente.',
+             'Investigar el concepto en internet y hacer una presentacion PowerPoint.'],
+            'A'
+        ) +
+
+        '<h2>Seccion II: Verdadero o Falso con justificacion <em style="font-size:0.82rem;font-weight:400;">(20 pts &mdash; 4 pts c/u)</em></h2>' +
+        '<p style="font-size:0.87rem;color:#555;">Indica si la afirmacion es Verdadera (V) o Falsa (F) y justifica tu respuesta con fundamento tecnico en 2-3 lineas. Sin justificacion el item no tiene puntaje.</p>' +
+
+        '<p><strong>7.</strong> &ldquo;Un tecnico puede trabajar con circuitos energizados siempre que use guantes de latex estandar.&rdquo; &nbsp;&nbsp; &#9633; V &nbsp;&nbsp; &#9633; F</p>' +
+        '<p><em>Justificacion:</em></p>' + lineas(2) +
+
+        '<p><strong>8.</strong> &ldquo;El valor de las resistencias puede verificarse con el multimetro en modo ohmetro, con el circuito desconectado de la alimentacion.&rdquo; &nbsp;&nbsp; &#9633; V &nbsp;&nbsp; &#9633; F</p>' +
+        '<p><em>Justificacion:</em></p>' + lineas(2) +
+
+        '<p><strong>9.</strong> &ldquo;' + ce1txt.substring(0, 100) + (ce1txt.length > 100 ? '...' : '') + ' es un requerimiento opcional del curriculum.&rdquo; &nbsp;&nbsp; &#9633; V &nbsp;&nbsp; &#9633; F</p>' +
+        '<p><em>Justificacion:</em></p>' + lineas(2) +
+
+        '<p><strong>10.</strong> &ldquo;La documentacion tecnica (planos, manuales, datasheets) es innecesaria para un tecnico con experiencia practica.&rdquo; &nbsp;&nbsp; &#9633; V &nbsp;&nbsp; &#9633; F</p>' +
+        '<p><em>Justificacion:</em></p>' + lineas(2) +
+
+        '<p><strong>11.</strong> &ldquo;El modulo ' + mod.nombre + ' tiene relacion directa con aplicaciones industriales en sectores como manufactura, mineria y energia.&rdquo; &nbsp;&nbsp; &#9633; V &nbsp;&nbsp; &#9633; F</p>' +
+        '<p><em>Justificacion:</em></p>' + lineas(2) +
+
+        '<h2>Seccion III: Completar y relacionar <em style="font-size:0.82rem;font-weight:400;">(16 pts)</em></h2>' +
+
+        '<p><strong>12.</strong> (6 pts) Completa la tabla de procedimiento tecnico estandarizado para una intervencion en ' + mod.nombre.toLowerCase() + ':</p>' +
+        '<table>' +
+        '<tr style="background:rgba(99,102,241,0.08)"><th>N&deg;</th><th>Fase del procedimiento</th><th>Accion concreta a realizar</th><th>Instrumento / Herramienta</th></tr>' +
+        '<tr><td>1</td><td>Planificacion</td><td>' + lineas(1) + '</td><td>' + lineas(1) + '</td></tr>' +
+        '<tr><td>2</td><td>Verificacion inicial</td><td>' + lineas(1) + '</td><td>' + lineas(1) + '</td></tr>' +
+        '<tr><td>3</td><td>Ejecucion</td><td>' + lineas(1) + '</td><td>' + lineas(1) + '</td></tr>' +
+        '<tr><td>4</td><td>Medicion y registro</td><td>' + lineas(1) + '</td><td>' + lineas(1) + '</td></tr>' +
+        '<tr><td>5</td><td>Verificacion de resultados</td><td>' + lineas(1) + '</td><td>' + lineas(1) + '</td></tr>' +
+        '<tr><td>6</td><td>Documentacion y cierre</td><td>' + lineas(1) + '</td><td>' + lineas(1) + '</td></tr>' +
+        '</table>' +
+
+        '<p><strong>13.</strong> (5 pts) Relaciona cada CE con la competencia practica que representa, escribiendo una descripcion de como demostrarla en el taller:</p>' +
+        ces.map(function(c, i) {
+            return '<p style="margin-left:0.5rem;"><strong>' + c.split(':')[0] + ':</strong> ' + (c.split(': ')[1] || c).substring(0, 70) + '</p><p style="margin-left:1.5rem;"><em>Como demostrarlo en taller:</em></p>' + lineas(2);
+        }).join('') +
+
+        '<p><strong>14.</strong> (5 pts) &#191;Como se aplica el conocimiento de <em>' + contCorto + '</em> en el sector industrial? Menciona 3 contextos reales de aplicacion y describe el rol del tecnico electronico en cada uno:</p>' + lineas(5) +
+
+        '<h2>Seccion IV: Problema tecnico y analisis de caso <em style="font-size:0.82rem;font-weight:400;">(40 pts)</em></h2>' +
+
+        '<p><strong>15.</strong> (10 pts) <strong>Problema practico:</strong></p>' +
+        '<div class="recuadro"><em>"En el taller de electronica se solicita implementar y verificar un sistema relacionado con ' + cont + '. ' +
+        'El sistema debe cumplir con los criterios de evaluacion del AE ' + aeNum + ' y con las normas de seguridad del establecimiento."</em></div>' +
+        '<p><strong>a)</strong> Dibuja el diagrama esquematico o de bloques del sistema:</p>' +
+        '<div class="espacio-dibujo">Diagrama del sistema &mdash; Incluye componentes, conexiones y puntos de medicion rotulados</div>' +
+        '<p><strong>b)</strong> Lista los materiales, componentes e instrumentos necesarios con sus especificaciones tecnicas:</p>' + lineas(4) +
+        '<p><strong>c)</strong> Describe el procedimiento de verificacion y los valores esperados en cada punto de medicion:</p>' + lineas(4) +
+
+        '<p><strong>16.</strong> (15 pts) <strong>Analisis de falla:</strong></p>' +
+        '<div class="recuadro"><em>"Durante la prueba de funcionamiento, el sistema no responde como se esperaba. ' +
+        'Los sintomas observados son: la salida no corresponde a la entrada configurada, ' +
+        'y al medir con el multimetro se obtienen valores fuera del rango nominal en el bloque central del circuito."</em></div>' +
+        '<p><strong>a)</strong> Identifica al menos 4 posibles causas de la falla descrita:</p>' + lineas(4) +
+        '<p><strong>b)</strong> Propone un plan de diagnostico sistematico (minimo 6 pasos), indicando para cada paso: accion, instrumento a usar y criterio de aceptacion/rechazo:</p>' + lineas(6) +
+        '<p><strong>c)</strong> &#191;Que medidas preventivas habrian reducido la probabilidad de esta falla?</p>' + lineas(3) +
+
+        '<p><strong>17.</strong> (15 pts) <strong>Informe tecnico breve:</strong> Redacta un informe tecnico completo sobre la actividad con ' + mod.nombre.toLowerCase() + '. ' +
+        'Debe incluir: objetivo, materiales, procedimiento resumido, resultados, analisis y conclusiones. Minimo 12 lineas:</p>' + lineas(12) +
+
+        bloqueRef +
+
+        '<div class="recuadro"><strong>&#128155; Reflexion final:</strong> &#191;Como el valor de <strong>' + val1 + '</strong> influye en la calidad y la seguridad del trabajo de un tecnico electronico? ' +
+        'Argumenta en 3-4 lineas:</div>' + lineas(4) +
+
+        '<div style="margin-top:2rem;padding:1rem;border:2px solid rgba(99,102,241,0.3);border-radius:8px;">' +
+        '<p style="font-size:0.85rem;font-weight:700;color:#6366f1;">&#128196; RESUMEN DE PUNTAJE</p>' +
+        '<table style="font-size:0.85rem;"><tr><th>Seccion</th><th>Puntaje maximo</th><th>Puntaje obtenido</th></tr>' +
+        '<tr><td>I: Seleccion multiple (6 items)</td><td style="text-align:center;">24 pts</td><td>' + lineas(1) + '</td></tr>' +
+        '<tr><td>II: Verdadero/Falso con justif. (5 items)</td><td style="text-align:center;">20 pts</td><td>' + lineas(1) + '</td></tr>' +
+        '<tr><td>III: Completar y relacionar (3 items)</td><td style="text-align:center;">16 pts</td><td>' + lineas(1) + '</td></tr>' +
+        '<tr><td>IV: Problema tecnico y analisis (3 items)</td><td style="text-align:center;">40 pts</td><td>' + lineas(1) + '</td></tr>' +
+        '<tr style="font-weight:700;"><td>TOTAL</td><td style="text-align:center;">100 pts</td><td style="font-size:1.1rem;">' + lineas(1) + '</td></tr>' +
+        '</table></div>' +
+
+        pieDoc();
+    }
+
+    // =============================================
+    // LECTURA DE ARCHIVO DE REFERENCIA
+    // =============================================
+    function leerArchivo(input) {
+        if (!input.files || !input.files[0]) return;
+        var file = input.files[0];
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('materialReferencia').value = e.target.result;
+            var zona = document.getElementById('uploadZone');
+            zona.classList.add('cargado');
+            document.getElementById('uploadZoneText').innerHTML = '&#9989; Archivo cargado: <strong>' + file.name + '</strong> (' + Math.round(file.size / 1024) + ' KB)';
+        };
+        reader.onerror = function() {
+            alert('No se pudo leer el archivo. Asegurate de que sea un archivo .txt o .md.');
+        };
+        reader.readAsText(file, 'UTF-8');
+    }
+
+    // =============================================
+    // FUNCIONES AUXILIARES
+    // =============================================
+
+    function copiarDocumento() {
+        var preview = document.getElementById('docPreview');
+        var texto = preview.innerText || preview.textContent;
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(texto).then(function() { mostrarToast('Documento copiado al portapapeles'); });
+        } else {
+            var ta = document.createElement('textarea');
+            ta.value = texto;
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand('copy');
+            document.body.removeChild(ta);
+            mostrarToast('Documento copiado al portapapeles');
+        }
+    }
+
+    function nuevoDocumento() {
+        document.getElementById('docGenerado').classList.remove('visible');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function mostrarToast(msg) {
+        var toast = document.getElementById('toast');
+        toast.textContent = msg;
+        toast.classList.add('visible');
+        setTimeout(function() { toast.classList.remove('visible'); }, 2500);
+    }
+
+    // =============================================
+    // GUARDAR EN BIBLIOTECA
+    // =============================================
+    function guardarEnBiblioteca() {
+        var preview = document.getElementById('docPreview');
+        if (!preview || !preview.innerHTML.trim()) {
+            mostrarSaveMsg('⚠️ Primero genera un documento.', '#f59e0b'); return;
+        }
+        var modId   = document.getElementById('selectModulo').value;
+        var aeNum   = document.getElementById('selectAE').value;
+        var oaId    = document.getElementById('selectOA').value;
+        var curso   = document.getElementById('selectCurso').value;
+        var prof    = document.getElementById('inputProfesor').value || (getCurrentUser()||{}).name || '—';
+        var tipo    = tipoDocSeleccionado || 'guia';
+        var tipos   = {guia:'Guía de Aprendizaje',apunte:'Apunte de Clase',ficha:'Ficha Práctica',evaluacion:'Guía de Ejercicios'};
+        var modNom  = modId && MODULOS[modId] ? MODULOS[modId].nombre : modId;
+        var titulo  = (tipos[tipo]||tipo) + ' — ' + (modNom||modId) + (aeNum ? ' · AE' + aeNum : '');
+
+        var entrada = {
+            id:          'mat_' + Date.now(),
+            tipo:        tipo,
+            titulo:      titulo,
+            modulo:      modId,
+            ae:          aeNum,
+            oa:          oaId,
+            curso:       (curso === '3ro' ? '3ro Medio E' : '4to Medio E'),
+            profesor:    prof,
+            fecha:       new Date().toISOString(),
+            contenido:   preview.innerHTML,
+            descripcion: (modNom||modId) + (aeNum ? ' · AE' + aeNum : '') + (oaId ? ' · ' + oaId : '')
+        };
+
+        // Enriquecer con datos del usuario actual
+        var currentUserData = ELAuth.user || {};
+        Object.assign(entrada, {
+            email:       currentUserData.email || '',
+            asignatura:  currentUserData.asignaturas ? currentUserData.asignaturas[0] : (currentUserData.especialidad || 'Electrónica'),
+            especialidad:currentUserData.especialidad || '',
+            tipoProfesor:currentUserData.tipoProfesor || 'tecnico'
+        });
+
+        // Guardar en Firebase Firestore (con fallback a localStorage)
+        var guardarPromesa;
+        if (window.ELDB && typeof ELDB.materiales !== 'undefined') {
+            guardarPromesa = ELDB.materiales.guardar(entrada);
+        } else {
+            var mats = JSON.parse(localStorage.getItem('electrolearn_materiales') || '[]');
+            mats.push(entrada);
+            localStorage.setItem('electrolearn_materiales', JSON.stringify(mats));
+            guardarPromesa = Promise.resolve(entrada);
+        }
+
+        guardarPromesa
+            .then(function() {
+                mostrarSaveMsg('✅ Publicado en la Biblioteca. Los estudiantes ya pueden verlo. <a href="biblioteca.html" style="color:#a5b4fc;margin-left:6px;">Ver biblioteca →</a>', '#34d399');
+            })
+            .catch(function(err) {
+                console.warn('[ElectroLearn] Firebase no disponible, guardando localmente:', err);
+                var mats = JSON.parse(localStorage.getItem('electrolearn_materiales') || '[]');
+                mats.push(entrada);
+                localStorage.setItem('electrolearn_materiales', JSON.stringify(mats));
+                mostrarSaveMsg('✅ Publicado localmente. <a href="biblioteca.html" style="color:#a5b4fc;margin-left:6px;">Ver biblioteca →</a>', '#34d399');
+            });
+    }
+
+    function mostrarSaveMsg(html, color) {
+        var el = document.getElementById('saveMsg');
+        el.innerHTML = html;
+        el.style.display = 'block';
+        el.style.background = color + '18';
+        el.style.border = '1px solid ' + color + '44';
+        el.style.color = color;
+        setTimeout(function(){ el.style.display = 'none'; }, 8000);
+    }
+    </script>
+    <script src="js/recommendations.js"></script>
+</body>
+</html>

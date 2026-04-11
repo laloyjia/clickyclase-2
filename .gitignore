@@ -1,0 +1,33 @@
+# Archivos sensibles — NUNCA subir al repositorio
+.env
+.env.local
+.env.production
+service-account*.json
+firebase-adminsdk*.json
+
+# Sistemas operativos
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editores
+.vscode/
+.idea/
+*.suo
+*.user
+
+# Node (si se usa en el futuro)
+node_modules/
+npm-debug.log*
+yarn-error.log
+
+# Vercel
+.vercel/
+
+# Logs
+*.log
+
+# Archivos de respaldo
+*.bak
+*.backup
+*.orig

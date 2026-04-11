@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Biblioteca - ElectroLearn</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        .bib-container { max-width: 1100px; margin: 0 auto; padding: 90px 24px 60px; position: relative; z-index: 1; }
+
+        /* ── Tabs ── */
+        .bib-tabs { display:flex; gap:6px; margin-bottom:28px; flex-wrap:wrap; }
+        .bib-tab { background:rgba(255,255,255,0.05); border:1px solid var(--glass-border); border-radius:10px; padding:9px 20px; font-size:.88rem; cursor:pointer; color:var(--text-muted); transition:all .2s; }
+        .bib-tab:hover { background:rgba(255,255,255,0.1); color:var(--text); }
+        .bib-tab.active { background:rgba(99,102,241,0.2); border-color:rgba(99,102,241,0.5); color:#818cf8; font-weight:600; }
+
+        /* ── Filtros ── */
+        .bib-filters { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:20px; }
+        .bib-search { flex:1; min-width:200px; background:rgba(255,255,255,0.05); border:1px solid var(--glass-border); border-radius:8px; color:var(--text); padding:8px 14px; font-size:.88rem; }
+        .bib-search::placeholder { color:var(--text-muted); }
+        .bib-select { background:rgba(255,255,255,0.05); border:1px solid var(--glass-border); border-radius:8px; color:var(--text); padding:8px 12px; font-size:.85rem; cursor:pointer; }
+        .bib-select option { background:#1a1a3e; }
+
+        /* ── Tarjetas de material ── */
+        .mat-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:16px; }
+        .mat-card {
+            background:var(--glass); border:1px solid var(--glass-border); border-radius:14px; padding:18px;
+            cursor:pointer; transition:all .25s; display:flex; flex-direction:column; gap:10px;
+            position:relative; overflow:hidden;
+        }
+        .mat-card:hover { border-color:rgba(99,102,241,0.4); transform:translateY(-3px); box-shadow:0 8px 24px rgba(0,0,0,0.3); }
+        .mat-card-top { display:flex; align-items:center; justify-content:space-between; }
+        .mat-tipo-badge { padding:3px 10px; border-radius:99px; font-size:.72rem; font-weight:700; }
+        .mat-mod-badge { font-size:.72rem; background:rgba(255,255,255,0.07); color:var(--text-muted); border-radius:99px; padding:2px 8px; }
+        .mat-titulo { font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:.95rem; line-height:1.3; }
+        .mat-desc { font-size:.78rem; color:var(--text-muted); line-height:1.4; flex:1; }
+        .mat-footer { display:flex; align-items:center; justify-content:space-between; padding-top:8px; border-top:1px solid rgba(255,255,255,0.06); }
+        .mat-profesor { font-size:.74rem; color:var(--text-muted); }
+        .mat-fecha { font-size:.72rem; color:var(--text-muted); }
+        .mat-card-accent { position:absolute; top:0; left:0; width:100%; height:3px; }
+
+        /* ── Visor de material ── */
+        .mat-viewer-overlay { position:fixed; inset:0; background:rgba(0,0,0,.75); z-index:100; display:none; align-items:flex-start; justify-content:center; overflow-y:auto; padding:40px 16px; backdrop-filter:blur(6px); }
+        .mat-viewer-overlay.active { display:flex; }
+        .mat-viewer-box {
+            background:#12122a; border:1px solid var(--glass-border); border-radius:18px;
+            max-width:860px; width:100%; max-height:90vh; overflow-y:auto;
+            padding:28px; animation:viewerIn .3s ease;
+        }
+        @keyframes viewerIn { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:none} }
+        .mat-viewer-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; gap:12px; }
+        .mat-viewer-title { font-family:'Space Grotesk',sans-serif; font-size:1.1rem; font-weight:700; }
+        .mat-viewer-close { background:rgba(255,255,255,0.07); border:1px solid var(--glass-border); color:var(--text-muted); border-radius:8px; padding:6px 14px; cursor:pointer; font-size:.85rem; transition:.2s; }
+        .mat-viewer-close:hover { background:rgba(244,63,94,.15); color:#f43f5e; border-color:rgba(244,63,94,.3); }
+        .mat-viewer-content { font-size:.88rem; line-height:1.6; color:var(--text); }
+        .mat-viewer-content h1,h2,h3 { color:var(--secondary); margin-bottom:.5rem; }
+        .mat-viewer-actions { display:flex; gap:10px; margin-top:20px; flex-wrap:wrap; }
+
+        /* ── Calendario ── */
+        .cal-nav { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; }
+        .cal-mes { font-family:'Space Grotesk',sans-serif; font-size:1.2rem; font-weight:700; }
+        .cal-btn { background:rgba(255,255,255,.07); border:1px solid var(--glass-border); color:var(--text); border-radius:8px; padding:6px 14px; cursor:pointer; transition:.2s; }
+        .cal-btn:hover { background:rgba(255,255,255,.14); }
+        .cal-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:4px; }
+        .cal-header { text-align:center; font-size:.72rem; text-transform:uppercase; letter-spacing:.07em; color:var(--text-muted); padding:6px 0; }
+        .cal-cell {
+            min-height:80px; background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.05);
+            border-radius:8px; padding:6px; position:relative;
+        }
+        .cal-cell.hoy { border-color:rgba(99,102,241,.5); background:rgba(99,102,241,.07); }
+        .cal-cell.otro-mes { opacity:.3; }
+        .cal-day-num { font-size:.72rem; font-weight:600; color:var(--text-muted); margin-bottom:4px; }
+        .cal-cell.hoy .cal-day-num { color:#818cf8; }
+        .cal-event { font-size:.64rem; padding:2px 5px; border-radius:4px; margin-bottom:2px; cursor:pointer; line-height:1.3; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; transition:.15s; }
+        .cal-event:hover { opacity:.8; transform:scale(1.03); }
+        .cal-more { font-size:.62rem; color:var(--text-muted); cursor:pointer; }
+        .cal-leyenda { display:flex; flex-wrap:wrap; gap:10px; margin-top:14px; }
+        .cal-ley-item { display:flex; align-items:center; gap:5px; font-size:.74rem; color:var(--text-muted); }
+        .cal-ley-dot { width:10px; height:10px; border-radius:3px; }
+
+        /* ── Empty state ── */
+        .bib-empty { text-align:center; padding:60px 20px; color:var(--text-muted); }
+        .bib-empty .big-emoji { font-size:3rem; margin-bottom:12px; }
+
+        /* ── Módulo header pills ── */
+        .mod-pill { display:inline-flex; align-items:center; gap:6px; background:rgba(255,255,255,.05); border:1px solid var(--glass-border); border-radius:99px; padding:4px 12px 4px 8px; font-size:.78rem; cursor:pointer; margin:3px; transition:.2s; }
+        .mod-pill:hover, .mod-pill.active { background:rgba(99,102,241,.15); border-color:rgba(99,102,241,.4); color:#818cf8; }
+
+        /* ── Stats mini ── */
+        .bib-mini-stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin-bottom:24px; }
+        .bib-mini-stat { background:var(--glass); border:1px solid var(--glass-border); border-radius:12px; padding:14px 16px; }
+        .bib-mini-num { font-family:'Space Grotesk',sans-serif; font-size:1.6rem; font-weight:800; }
+        .bib-mini-label { font-size:.72rem; text-transform:uppercase; letter-spacing:.07em; color:var(--text-muted); }
+    </style>
+</head>
+<body>
+<div class="bg-animation">
+    <div class="orb"></div><div class="orb"></div><div class="orb"></div>
+</div>
+
+<nav class="navbar">
+    <div class="nav-brand">
+        <span class="nav-brand-icon">⚡</span>
+        <span class="nav-brand-text">ElectroLearn</span>
+    </div>
+    <ul class="nav-links" id="navLinks">
+        <li><a href="dashboard.html">Inicio</a></li>
+        <li><a href="material.html">Material</a></li>
+        <li><a href="biblioteca.html" class="active">Biblioteca</a></li>
+        <li><a href="evaluaciones.html">Evaluaciones</a></li>
+        <li><a href="ranking.html">Ranking</a></li>
+    </ul>
+    <div class="nav-user">
+        <div class="user-avatar" id="userAvatar">?</div>
+        <span id="userName" style="font-size:.9rem;font-weight:500;">Cargando...</span>
+        <button class="btn btn-danger btn-sm" onclick="logout()">Salir</button>
+    </div>
+</nav>
+
+<div class="bib-container">
+
+    <div style="margin-bottom:28px;">
+        <h1 style="font-family:'Space Grotesk';font-size:1.8rem;font-weight:800;">
+            📚 Biblioteca de Contenidos
+        </h1>
+        <p class="text-muted" style="margin-top:4px;">Materiales educativos, guías prácticas y planificaciones organizados por módulo.</p>
+    </div>
+
+    <!-- MINI STATS -->
+    <div class="bib-mini-stats" id="bibStats">
+        <div class="bib-mini-stat" style="border-top:3px solid var(--primary);">
+            <div class="bib-mini-num" id="bsTotal" style="color:var(--primary-light);">0</div>
+            <div class="bib-mini-label">Materiales</div>
+        </div>
+        <div class="bib-mini-stat" style="border-top:3px solid var(--secondary);">
+            <div class="bib-mini-num" id="bsGuias" style="color:var(--secondary);">0</div>
+            <div class="bib-mini-label">Guías</div>
+        </div>
+        <div class="bib-mini-stat" style="border-top:3px solid var(--accent);">
+            <div class="bib-mini-num" id="bsFichas" style="color:var(--accent);">0</div>
+            <div class="bib-mini-label">Fichas Prácticas</div>
+        </div>
+        <div class="bib-mini-stat" style="border-top:3px solid var(--accent2);">
+            <div class="bib-mini-num" id="bsPlans" style="color:var(--accent2);">0</div>
+            <div class="bib-mini-label">Planificaciones</div>
+        </div>
+    </div>
+
+    <!-- TABS -->
+    <div class="bib-tabs">
+        <button class="bib-tab active" onclick="bibTab(this,'materiales')">📄 Materiales</button>
+        <button class="bib-tab" onclick="bibTab(this,'calendario')">📅 Calendario</button>
+        <button class="bib-tab" onclick="bibTab(this,'modulos')">📋 Por Módulo</button>
+    </div>
+
+    <!-- ═══ TAB: MATERIALES ═══ -->
+    <div id="tab-materiales">
+        <div class="bib-filters">
+            <input class="bib-search" id="bibSearch" placeholder="🔍 Buscar por título, módulo o profesor..." oninput="renderMateriales()">
+            <select class="bib-select" id="bibFiltroTipo" onchange="renderMateriales()">
+                <option value="">Todos los tipos</option>
+                <option value="guia">📖 Guía de Aprendizaje</option>
+                <option value="apunte">📝 Apunte de Clase</option>
+                <option value="ficha">🔧 Ficha Práctica</option>
+                <option value="evaluacion">✍️ Guía de Ejercicios</option>
+            </select>
+            <select class="bib-select" id="bibFiltroMod" onchange="renderMateriales()">
+                <option value="">Todos los módulos</option>
+                <option>EN1</option><option>EN2</option><option>EN3</option><option>EN4</option>
+                <option>EN5</option><option>EN6</option><option>EN7</option><option>EN8</option>
+                <option>EN9</option><option>EN11</option>
+            </select>
+            <select class="bib-select" id="bibOrden" onchange="renderMateriales()">
+                <option value="reciente">Más recientes</option>
+                <option value="antiguo">Más antiguos</option>
+                <option value="modulo">Por módulo</option>
+            </select>
+        </div>
+        <div class="mat-grid" id="materialesGrid"></div>
+    </div>
+
+    <!-- ═══ TAB: CALENDARIO ═══ -->
+    <div id="tab-calendario" style="display:none;">
+        <div class="card">
+            <div class="cal-nav">
+                <button class="cal-btn" onclick="calPrev()">← Anterior</button>
+                <div class="cal-mes" id="calMes"></div>
+                <button class="cal-btn" onclick="calNext()">Siguiente →</button>
+            </div>
+            <div class="cal-grid" id="calGrid"></div>
+            <div class="cal-leyenda">
+                <div class="cal-ley-item"><div class="cal-ley-dot" style="background:#818cf8;"></div> Planificación</div>
+                <div class="cal-ley-item"><div class="cal-ley-dot" style="background:#34d399;"></div> Guía / Apunte</div>
+                <div class="cal-ley-item"><div class="cal-ley-dot" style="background:#f59e0b;"></div> Ficha Práctica</div>
+                <div class="cal-ley-item"><div class="cal-ley-dot" style="background:#f43f5e;"></div> G. Ejercicios</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ TAB: POR MÓDULO ═══ -->
+    <div id="tab-modulos" style="display:none;">
+        <div id="modulosContenido"></div>
+    </div>
+
+</div>
+
+<!-- ── Visor de material ── -->
+<div class="mat-viewer-overlay" id="viewerOverlay">
+    <div class="mat-viewer-box">
+        <div class="mat-viewer-header">
+            <div class="mat-viewer-title" id="viewerTitle">Material</div>
+            <button class="mat-viewer-close" onclick="cerrarViewer()">✕ Cerrar</button>
+        </div>
+        <div id="viewerMeta" style="font-size:.78rem;color:var(--text-muted);margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--glass-border);"></div>
+        <div class="mat-viewer-content" id="viewerContent"></div>
+        <div class="mat-viewer-actions">
+            <button class="btn btn-sm" onclick="imprimirViewer()" style="background:rgba(99,102,241,.15);color:#818cf8;border:1px solid rgba(99,102,241,.3);">🖨️ Imprimir</button>
+            <button class="btn btn-sm" onclick="cerrarViewer()" style="background:rgba(255,255,255,.06);color:var(--text-muted);">Cerrar</button>
+        </div>
+    </div>
+</div>
+
+<footer style="text-align:center;padding:40px 24px;border-top:1px solid var(--glass-border);color:var(--text-muted);font-size:.85rem;position:relative;z-index:1;">
+    <p>ElectroLearn &mdash; Biblioteca &bull; Salesianos Talca &bull; 2026</p>
+</footer>
+
+<script src="js/auth.js"></script>
+<script>
+// ============================================================
+// BIBLIOTECA DE CONTENIDOS
+// ============================================================
+
+var currentUser = null;
+var calYear, calMonth;
+
+var TIPO_COLORES = {
+    'guia': '#34d399', 'apunte': '#60a5fa',
+    'ficha': '#f59e0b', 'evaluacion': '#f43f5e',
+    'planificacion': '#818cf8'
+};
+var TIPO_LABELS = {
+    'guia': '📖 Guía', 'apunte': '📝 Apunte',
+    'ficha': '🔧 Ficha', 'evaluacion': '✍️ Ejercicios',
+    'planificacion': '📋 Planificación'
+};
+var MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+var DIAS  = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+
+// ── Inicialización ────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', function() {
+    currentUser = getCurrentUser();
+    if (!currentUser) { window.location.href = 'index.html'; return; }
+    document.getElementById('userName').textContent    = currentUser.name;
+    document.getElementById('userAvatar').textContent  = currentUser.name.charAt(0).toUpperCase();
+
+    var hoy = new Date();
+    calYear  = hoy.getFullYear();
+    calMonth = hoy.getMonth();
+
+    cargarStats();
+    renderMateriales();
+    renderCalendario();
+    renderPorModulo();
+
+    // Si viene con hash #calendario, ir directo a esa tab
+    if (window.location.hash === '#calendario') {
+        document.querySelectorAll('.bib-tab')[1].click();
+    }
+});
+
+// ── Obtener todos los materiales ──────────────────────────
+function getAllMateriales() {
+    var mats  = JSON.parse(localStorage.getItem('electrolearn_materiales') || '[]');
+    var plans = JSON.parse(localStorage.getItem('electrolearn_planificaciones') || '[]');
+    return mats.concat(plans);
+}
+
+// ── Stats ─────────────────────────────────────────────────
+function cargarStats() {
+    var todos = getAllMateriales();
+    document.getElementById('bsTotal').textContent  = todos.length;
+    document.getElementById('bsGuias').textContent  = todos.filter(function(m){ return m.tipo==='guia'||m.tipo==='apunte'; }).length;
+    document.getElementById('bsFichas').textContent = todos.filter(function(m){ return m.tipo==='ficha'; }).length;
+    document.getElementById('bsPlans').textContent  = todos.filter(function(m){ return m.tipo==='planificacion'; }).length;
+}
+
+// ── Renderizar tarjetas ───────────────────────────────────
+function renderMateriales() {
+    var todos  = getAllMateriales();
+    var buscar = (document.getElementById('bibSearch').value||'').toLowerCase();
+    var tipo   = document.getElementById('bibFiltroTipo').value;
+    var mod    = document.getElementById('bibFiltroMod').value;
+    var orden  = document.getElementById('bibOrden').value;
+
+    var filtrados = todos.filter(function(m) {
+        var matchTxt = !buscar ||
+            (m.titulo||'').toLowerCase().includes(buscar) ||
+            (m.modulo||'').toLowerCase().includes(buscar) ||
+            (m.profesor||'').toLowerCase().includes(buscar);
+        var matchTipo = !tipo || m.tipo === tipo;
+        var matchMod  = !mod  || m.modulo === mod;
+        return matchTxt && matchTipo && matchMod;
+    });
+
+    filtrados.sort(function(a,b) {
+        if (orden === 'reciente') return new Date(b.fecha||0) - new Date(a.fecha||0);
+        if (orden === 'antiguo')  return new Date(a.fecha||0) - new Date(b.fecha||0);
+        if (orden === 'modulo')   return (a.modulo||'').localeCompare(b.modulo||'');
+        return 0;
+    });
+
+    var grid = document.getElementById('materialesGrid');
+    if (filtrados.length === 0) {
+        grid.innerHTML = '<div class="bib-empty" style="grid-column:1/-1;"><div class="big-emoji">📂</div>' +
+            '<p>No hay materiales publicados aún.<br>' +
+            (currentUser.role === 'profesor' || currentUser.role === 'admin'
+                ? '<a href="material.html" style="color:var(--primary-light);">Generar y publicar material →</a>'
+                : 'Tu profesor aún no ha publicado materiales.') +
+            '</p></div>';
+        return;
+    }
+
+    grid.innerHTML = filtrados.map(function(m) {
+        var color = TIPO_COLORES[m.tipo] || '#94a3b8';
+        var label = TIPO_LABELS[m.tipo] || m.tipo;
+        var fecha = m.fecha ? new Date(m.fecha).toLocaleDateString('es-CL',{day:'2-digit',month:'short',year:'numeric'}) : '—';
+        var desc  = m.descripcion || (m.modulo + (m.ae ? ' · AE' + m.ae : '') + (m.oa ? ' · ' + m.oa : ''));
+        return '<div class="mat-card" onclick="abrirViewer(\'' + m.id + '\')">' +
+            '<div class="mat-card-accent" style="background:linear-gradient(90deg,' + color + '88,transparent);"></div>' +
+            '<div class="mat-card-top">' +
+                '<span class="mat-tipo-badge" style="background:' + color + '22;color:' + color + ';">' + label + '</span>' +
+                '<span class="mat-mod-badge">' + (m.modulo||'—') + '</span>' +
+            '</div>' +
+            '<div class="mat-titulo">' + (m.titulo || desc) + '</div>' +
+            '<div class="mat-desc">' + desc + '</div>' +
+            '<div class="mat-footer">' +
+                '<span class="mat-profesor">👤 ' + (m.profesor||'—') + '</span>' +
+                '<span class="mat-fecha">📅 ' + fecha + '</span>' +
+            '</div>' +
+        '</div>';
+    }).join('');
+}
+
+// ── Visor de material ─────────────────────────────────────
+function abrirViewer(id) {
+    var todos = getAllMateriales();
+    var m = todos.find(function(x){ return x.id === id; });
+    if (!m) return;
+
+    var color = TIPO_COLORES[m.tipo] || '#94a3b8';
+    var label = TIPO_LABELS[m.tipo] || m.tipo;
+    var fecha = m.fecha ? new Date(m.fecha).toLocaleDateString('es-CL',{day:'2-digit',month:'long',year:'numeric'}) : '—';
+
+    document.getElementById('viewerTitle').innerHTML =
+        '<span style="background:' + color + '22;color:' + color + ';border-radius:99px;padding:2px 10px;font-size:.78rem;margin-right:8px;">' + label + '</span>' +
+        (m.titulo || m.modulo);
+
+    document.getElementById('viewerMeta').innerHTML =
+        '📦 Módulo: <strong>' + (m.modulo||'—') + '</strong>' +
+        (m.ae  ? ' &nbsp;·&nbsp; AE ' + m.ae : '') +
+        (m.oa  ? ' &nbsp;·&nbsp; ' + m.oa : '') +
+        ' &nbsp;|&nbsp; 👤 ' + (m.profesor||'—') +
+        (m.curso ? ' &nbsp;|&nbsp; 🎓 ' + m.curso : '') +
+        ' &nbsp;|&nbsp; 📅 ' + fecha;
+
+    document.getElementById('viewerContent').innerHTML = m.contenido || '<p class="text-muted">Este material no tiene contenido HTML guardado.</p>';
+    document.getElementById('viewerOverlay').classList.add('active');
+}
+
+function cerrarViewer() { document.getElementById('viewerOverlay').classList.remove('active'); }
+
+function imprimirViewer() {
+    var contenido = document.getElementById('viewerContent').innerHTML;
+    var win = window.open('', '_blank');
+    win.document.write('<html><head><title>Material ElectroLearn</title><style>body{font-family:Arial,sans-serif;padding:20px;color:#111;} table{border-collapse:collapse;width:100%;} td,th{border:1px solid #ccc;padding:6px;} h1,h2,h3{color:#3d3d3d;}</style></head><body>' + contenido + '</body></html>');
+    win.document.close();
+    setTimeout(function(){ win.print(); }, 400);
+}
+
+// ── Calendario ────────────────────────────────────────────
+function renderCalendario() {
+    var hoy   = new Date();
+    var year  = calYear;
+    var month = calMonth;
+    document.getElementById('calMes').textContent = MESES[month] + ' ' + year;
+
+    var primero   = new Date(year, month, 1);
+    var ultimo    = new Date(year, month + 1, 0);
+    var inicioSem = primero.getDay();
+    var totalCeld = Math.ceil((inicioSem + ultimo.getDate()) / 7) * 7;
+
+    // Recolectar eventos del mes
+    var todos  = getAllMateriales();
+    var planes = JSON.parse(localStorage.getItem('electrolearn_planificaciones') || '[]');
+    var allEvs = todos.concat(planes.filter(function(p){ var f=new Date(p.fecha||''); return f.getFullYear()===year && f.getMonth()===month; }));
+
+    var eventsByDay = {};
+    todos.forEach(function(m) {
+        if (!m.fecha) return;
+        var f = new Date(m.fecha);
+        if (f.getFullYear() !== year || f.getMonth() !== month) return;
+        var d = f.getDate();
+        if (!eventsByDay[d]) eventsByDay[d] = [];
+        eventsByDay[d].push(m);
+    });
+
+    var html = DIAS.map(function(d){ return '<div class="cal-header">' + d + '</div>'; }).join('');
+
+    for (var i = 0; i < totalCeld; i++) {
+        var dia = i - inicioSem + 1;
+        var esHoy = (dia === hoy.getDate() && month === hoy.getMonth() && year === hoy.getFullYear());
+        var esValid = dia >= 1 && dia <= ultimo.getDate();
+        var cls = 'cal-cell' + (esHoy ? ' hoy' : '') + (!esValid ? ' otro-mes' : '');
+        var evs = esValid ? (eventsByDay[dia] || []) : [];
+        var evHtml = '';
+        evs.slice(0,3).forEach(function(ev) {
+            var c = TIPO_COLORES[ev.tipo] || '#94a3b8';
+            var short = (ev.titulo||ev.modulo||'Material').substring(0,22);
+            evHtml += '<div class="cal-event" style="background:' + c + '22;color:' + c + ';border-left:2px solid ' + c + ';" onclick="event.stopPropagation();abrirViewer(\'' + ev.id + '\')" title="' + (ev.titulo||ev.modulo) + '">' + short + '</div>';
+        });
+        if (evs.length > 3) evHtml += '<div class="cal-more">+' + (evs.length - 3) + ' más</div>';
+        html += '<div class="' + cls + '">' +
+            (esValid ? '<div class="cal-day-num">' + dia + '</div>' : '') +
+            evHtml + '</div>';
+    }
+
+    document.getElementById('calGrid').innerHTML = html;
+}
+
+function calPrev() { calMonth--; if(calMonth<0){calMonth=11;calYear--;} renderCalendario(); }
+function calNext() { calMonth++; if(calMonth>11){calMonth=0;calYear++;} renderCalendario(); }
+
+// ── Por módulo ────────────────────────────────────────────
+var MODULOS_LISTA = [
+    {num:'EN1',nombre:'Proyectos Electrónicos',level:'3ro'},
+    {num:'EN2',nombre:'Armado y Reparación de Circuitos',level:'3ro'},
+    {num:'EN3',nombre:'Ensamblaje de Sistemas Digitales',level:'3ro'},
+    {num:'EN4',nombre:'Sistemas de Control Domótico',level:'3ro'},
+    {num:'EN11',nombre:'Sistemas Mecatrónicos y Robóticos',level:'3ro'},
+    {num:'EN5',nombre:'Control Electrónico de Potencia',level:'4to'},
+    {num:'EN6',nombre:'Detección de Fallas Industriales',level:'4to'},
+    {num:'EN7',nombre:'Control Eléctrico Industrial',level:'4to'},
+    {num:'EN8',nombre:'Montaje de Equipos Industriales',level:'4to'},
+    {num:'EN9',nombre:'Automatización Industrial',level:'4to'},
+];
+
+function renderPorModulo() {
+    var todos = getAllMateriales();
+    var cont  = document.getElementById('modulosContenido');
+
+    var html = '';
+    var niveles = ['3ro','4to'];
+    niveles.forEach(function(niv) {
+        html += '<h3 style="font-family:\'Space Grotesk\';font-size:1rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.07em;margin:24px 0 12px;">' +
+            (niv === '3ro' ? '3ro Medio — Formación Diferenciada TP' : '4to Medio — Formación Diferenciada TP') + '</h3>';
+
+        MODULOS_LISTA.filter(function(m){ return m.level===niv; }).forEach(function(mod) {
+            var evs = todos.filter(function(m){ return m.modulo === mod.num; });
+            var accent = niv==='3ro' ? 'var(--primary)' : 'var(--accent)';
+            html += '<div class="card" style="margin-bottom:12px;overflow:hidden;position:relative;">' +
+                '<div style="position:absolute;top:0;left:0;width:3px;height:100%;background:' + accent + ';border-radius:99px;"></div>' +
+                '<div style="padding-left:12px;">' +
+                    '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:8px;">' +
+                        '<div>' +
+                            '<span class="badge ' + (niv==='3ro'?'badge-primary':'badge-warning') + '" style="margin-right:6px;">' + mod.num + '</span>' +
+                            '<strong>' + mod.nombre + '</strong>' +
+                        '</div>' +
+                        '<span style="font-size:.75rem;color:var(--text-muted);">' + evs.length + ' material' + (evs.length!==1?'es':'') + '</span>' +
+                    '</div>' +
+                    (evs.length === 0
+                        ? '<p style="font-size:.8rem;color:var(--text-muted);">Sin materiales publicados aún.</p>'
+                        : '<div style="display:flex;flex-wrap:wrap;gap:8px;">' +
+                            evs.slice(0,8).map(function(m) {
+                                var c = TIPO_COLORES[m.tipo]||'#94a3b8';
+                                var label = TIPO_LABELS[m.tipo]||m.tipo;
+                                return '<button onclick="abrirViewer(\'' + m.id + '\')" style="background:' + c + '11;border:1px solid ' + c + '44;color:' + c + ';border-radius:8px;padding:4px 10px;font-size:.74rem;cursor:pointer;transition:.2s;" onmouseover="this.style.background=\'' + c + '33\'" onmouseout="this.style.background=\'' + c + '11\'">' +
+                                    label + ' · ' + (m.titulo||'AE'+(m.ae||'')) + '</button>';
+                            }).join('') +
+                            (evs.length > 8 ? '<span style="font-size:.74rem;color:var(--text-muted);padding:4px;">+' + (evs.length-8) + ' más</span>' : '') +
+                          '</div>'
+                    ) +
+                '</div>' +
+            '</div>';
+        });
+    });
+
+    cont.innerHTML = html || '<div class="bib-empty"><div class="big-emoji">📂</div><p>Sin materiales publicados.</p></div>';
+}
+
+// ── Tabs ──────────────────────────────────────────────────
+function bibTab(btn, tab) {
+    document.querySelectorAll('.bib-tab').forEach(function(b){ b.classList.remove('active'); });
+    btn.classList.add('active');
+    ['materiales','calendario','modulos'].forEach(function(t){
+        document.getElementById('tab-'+t).style.display = t===tab ? 'block' : 'none';
+    });
+    if (tab === 'calendario') renderCalendario();
+    if (tab === 'modulos')    renderPorModulo();
+}
+</script>
+</body>
+</html>

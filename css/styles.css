@@ -1,0 +1,617 @@
+/* ============================================
+   ElectroLearn - Estilos Globales
+   ============================================
+   PASO 1: Estilos base del proyecto
+
+   COMO FUNCIONAN LOS COLORES:
+   Usamos "variables CSS" para definir colores una sola vez
+   y reutilizarlos en todo el proyecto. Si quieres cambiar
+   un color, solo lo cambias aqui arriba.
+   ============================================ */
+
+/* --- VARIABLES DE COLORES --- */
+:root {
+    /* Colores principales */
+    --primary: #6C5CE7;          /* Violeta principal */
+    --primary-light: #A29BFE;    /* Violeta claro */
+    --secondary: #00CEC9;        /* Turquesa */
+    --accent: #FD79A8;           /* Rosa */
+    --accent2: #FDCB6E;          /* Amarillo */
+
+    /* Colores de fondo */
+    --dark: #0a0a1a;             /* Fondo principal (casi negro) */
+    --dark2: #12122a;            /* Fondo secundario */
+    --dark3: #1a1a3e;            /* Fondo de tarjetas */
+
+    /* Colores de texto */
+    --text: #E8E8F0;             /* Texto principal (blanco suave) */
+    --text-muted: #9090B0;       /* Texto secundario (gris) */
+
+    /* Colores de estado */
+    --success: #00B894;          /* Verde exito */
+    --danger: #FF6B6B;           /* Rojo error */
+    --warning: #FDCB6E;          /* Amarillo advertencia */
+
+    /* Efectos de vidrio (glassmorphism) */
+    --glass: rgba(255, 255, 255, 0.05);
+    --glass-border: rgba(255, 255, 255, 0.1);
+
+    /* Bordes redondeados */
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-xl: 24px;
+}
+
+
+/* ============================================
+   RESET - Quita estilos por defecto del navegador
+   ============================================ */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background-color: var(--dark);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;   /* Evita scroll horizontal */
+    line-height: 1.6;
+}
+
+a {
+    color: var(--primary-light);
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+a:hover {
+    color: var(--secondary);
+}
+
+
+/* ============================================
+   FONDO ANIMADO
+   Son 3 circulos borrosos que flotan lentamente
+   ============================================ */
+.bg-animation {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;           /* Detras de todo */
+    overflow: hidden;
+    pointer-events: none;  /* No interfiere con clicks */
+}
+
+.bg-animation .orb {
+    position: absolute;
+    border-radius: 50%;      /* Circulo */
+    filter: blur(80px);      /* Muy borroso */
+    opacity: 0.3;
+    animation: floatOrb 20s infinite ease-in-out;
+}
+
+/* Orbe 1: Violeta arriba-izquierda */
+.bg-animation .orb:nth-child(1) {
+    width: 400px;
+    height: 400px;
+    background: var(--primary);
+    top: -100px;
+    left: -100px;
+    animation-delay: 0s;
+}
+
+/* Orbe 2: Turquesa centro-derecha */
+.bg-animation .orb:nth-child(2) {
+    width: 350px;
+    height: 350px;
+    background: var(--secondary);
+    top: 50%;
+    right: -100px;
+    animation-delay: -7s;
+}
+
+/* Orbe 3: Rosa abajo-centro */
+.bg-animation .orb:nth-child(3) {
+    width: 300px;
+    height: 300px;
+    background: var(--accent);
+    bottom: -100px;
+    left: 30%;
+    animation-delay: -14s;
+}
+
+/* Animacion: los orbes flotan suavemente */
+@keyframes floatOrb {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    25%      { transform: translate(50px, -80px) scale(1.1); }
+    50%      { transform: translate(-30px, 50px) scale(0.9); }
+    75%      { transform: translate(80px, 30px) scale(1.05); }
+}
+
+
+/* ============================================
+   PANTALLA DE LOGIN
+   ============================================ */
+.login-container {
+    position: relative;
+    z-index: 1;           /* Encima del fondo */
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+}
+
+.login-card {
+    background: var(--glass);
+    backdrop-filter: blur(20px);           /* Efecto vidrio */
+    -webkit-backdrop-filter: blur(20px);   /* Para Safari */
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-xl);
+    padding: 48px;
+    width: 100%;
+    max-width: 440px;
+    animation: slideUp 0.6s ease;
+}
+
+/* Animacion: la tarjeta sube al aparecer */
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(40px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.login-header {
+    text-align: center;
+    margin-bottom: 32px;
+}
+
+.login-icon {
+    font-size: 3.5rem;
+    display: block;
+    margin-bottom: 12px;
+}
+
+.login-logo {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 2rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--primary-light), var(--secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.login-subtitle {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    margin-top: 4px;
+}
+
+
+/* ============================================
+   INPUTS (campos de texto)
+   ============================================ */
+.input-group {
+    position: relative;
+    margin-bottom: 16px;
+}
+
+.input-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1.1rem;
+    pointer-events: none;   /* El icono no interfiere con el click */
+}
+
+.input-group input,
+.input-group select {
+    width: 100%;
+    padding: 14px 16px 14px 46px;   /* Espacio a la izquierda para el icono */
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    color: var(--text);
+    font-size: 0.95rem;
+    font-family: 'Inter', sans-serif;
+    outline: none;
+    transition: all 0.3s;
+}
+
+.input-group select {
+    cursor: pointer;
+    appearance: none;   /* Quita la flecha por defecto */
+}
+
+.input-group select option {
+    background: var(--dark2);
+    color: var(--text);
+}
+
+/* Cuando el input esta enfocado (seleccionado) */
+.input-group input:focus,
+.input-group select:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.2);
+}
+
+/* Placeholder (texto gris dentro del input) */
+.input-group input::placeholder {
+    color: var(--text-muted);
+    opacity: 0.7;
+}
+
+
+/* ============================================
+   BOTONES
+   ============================================ */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 24px;
+    border: none;
+    border-radius: var(--radius-md);
+    font-family: 'Inter', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-decoration: none;
+}
+
+/* Boton principal (violeta) */
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+    color: white;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(108, 92, 231, 0.4);
+}
+
+/* Boton secundario (turquesa, con borde) */
+.btn-secondary {
+    background: rgba(0, 206, 201, 0.1);
+    border: 1px solid rgba(0, 206, 201, 0.3);
+    color: var(--secondary);
+}
+
+.btn-secondary:hover {
+    background: rgba(0, 206, 201, 0.2);
+}
+
+/* Boton peligroso (rojo) */
+.btn-danger {
+    background: rgba(255, 107, 107, 0.15);
+    border: 1px solid rgba(255, 107, 107, 0.3);
+    color: var(--danger);
+}
+
+.btn-danger:hover {
+    background: rgba(255, 107, 107, 0.25);
+}
+
+/* Ancho completo */
+.btn-full {
+    width: 100%;
+}
+
+/* Boton pequeno */
+.btn-sm {
+    padding: 8px 16px;
+    font-size: 0.85rem;
+}
+
+
+/* ============================================
+   MENSAJES DE ERROR
+   ============================================ */
+.error-message {
+    color: var(--danger);
+    font-size: 0.85rem;
+    text-align: center;
+    margin-bottom: 12px;
+    min-height: 20px;       /* Reserva espacio para evitar saltos */
+    display: none;          /* Oculto por defecto */
+}
+
+.error-message.visible {
+    display: block;
+    animation: shake 0.4s ease;
+}
+
+/* Animacion: sacude el mensaje de error */
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25%      { transform: translateX(-8px); }
+    50%      { transform: translateX(8px); }
+    75%      { transform: translateX(-4px); }
+}
+
+
+/* ============================================
+   SEPARADOR (la linea con "o")
+   ============================================ */
+.divider {
+    display: flex;
+    align-items: center;
+    margin: 24px 0;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}
+
+.divider::before,
+.divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--glass-border);
+}
+
+.divider span {
+    padding: 0 16px;
+}
+
+
+/* ============================================
+   FOOTER DEL LOGIN
+   ============================================ */
+.login-footer {
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+
+/* ============================================
+   NAVBAR (barra de navegacion)
+   Se usara desde el Paso 2
+   ============================================ */
+.navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 100;
+    padding: 12px 24px;
+    background: rgba(10, 10, 26, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--glass-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.nav-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.nav-brand-icon {
+    font-size: 1.6rem;
+}
+
+.nav-brand-text {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 1.15rem;
+    background: linear-gradient(135deg, var(--primary-light), var(--secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.nav-links {
+    display: flex;
+    gap: 4px;
+    list-style: none;
+}
+
+.nav-links a {
+    display: block;
+    padding: 8px 16px;
+    border-radius: var(--radius-sm);
+    color: var(--text-muted);
+    font-size: 0.88rem;
+    font-weight: 500;
+    transition: all 0.3s;
+    cursor: pointer;
+}
+
+.nav-links a:hover,
+.nav-links a.active {
+    color: var(--text);
+    background: var(--glass);
+}
+
+.nav-user {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.user-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.85rem;
+}
+
+
+/* ============================================
+   TARJETAS (cards) - Uso general
+   ============================================ */
+.card {
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    transition: all 0.3s;
+}
+
+.card:hover {
+    border-color: var(--primary);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(108, 92, 231, 0.1);
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.card h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.card p {
+    color: var(--text-muted);
+    font-size: 0.88rem;
+    line-height: 1.6;
+}
+
+
+/* ============================================
+   BADGES (etiquetas)
+   ============================================ */
+.badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.badge-primary {
+    background: rgba(108, 92, 231, 0.15);
+    color: var(--primary-light);
+}
+
+.badge-success {
+    background: rgba(0, 184, 148, 0.15);
+    color: var(--success);
+}
+
+.badge-warning {
+    background: rgba(253, 203, 110, 0.15);
+    color: var(--warning);
+}
+
+.badge-danger {
+    background: rgba(255, 107, 107, 0.15);
+    color: var(--danger);
+}
+
+
+/* ============================================
+   GRID RESPONSIVE
+   ============================================ */
+.grid {
+    display: grid;
+    gap: 20px;
+}
+
+.grid-2 {
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+}
+
+.grid-3 {
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+}
+
+.grid-4 {
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+}
+
+
+/* ============================================
+   UTILIDADES
+   ============================================ */
+.text-center { text-align: center; }
+.text-muted { color: var(--text-muted); }
+.mt-1 { margin-top: 8px; }
+.mt-2 { margin-top: 16px; }
+.mt-3 { margin-top: 24px; }
+.mt-4 { margin-top: 32px; }
+.mb-1 { margin-bottom: 8px; }
+.mb-2 { margin-bottom: 16px; }
+.mb-3 { margin-bottom: 24px; }
+.p-2 { padding: 16px; }
+.p-3 { padding: 24px; }
+.hidden { display: none !important; }
+
+/* Animacion de aparecer */
+.fade-in {
+    animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+
+/* ============================================
+   RESPONSIVE - Ajustes para celulares
+   ============================================ */
+@media (max-width: 768px) {
+    .login-card {
+        padding: 32px 24px;
+    }
+
+    .login-logo {
+        font-size: 1.6rem;
+    }
+
+    .navbar {
+        padding: 10px 16px;
+    }
+
+    /* En celulares, esconder los links y mostrar menu hamburguesa */
+    .nav-links {
+        display: none;
+    }
+
+    .nav-links.mobile-open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        width: 100%;
+        background: rgba(10, 10, 26, 0.95);
+        backdrop-filter: blur(20px);
+        padding: 16px;
+        border-bottom: 1px solid var(--glass-border);
+    }
+
+    .grid-2, .grid-3, .grid-4 {
+        grid-template-columns: 1fr;
+    }
+}
