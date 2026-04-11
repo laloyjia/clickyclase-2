@@ -40,18 +40,27 @@ var ELAuth = (function() {
               _currentUser = Object.assign({ uid: fbUser.uid, email: fbUser.email }, doc.data());
             } else {
               // Usuario en Auth pero no en Firestore → crear documento básico
+              var adminEmailsList = window.EL_ADMIN_EMAILS || [window.EL_ADMIN_EMAIL];
+              var esAdminEmail = adminEmailsList.indexOf(fbUser.email) !== -1;
               _currentUser = {
                 uid: fbUser.uid,
                 email: fbUser.email,
                 nombre: fbUser.displayName || fbUser.email.split('@')[0],
-                role: EL_ROLES.ESTUDIANTE,
+                role: esAdminEmail ? EL_ROLES.ADMIN : EL_ROLES.ESTUDIANTE,
                 xp: 0,
                 nivel: 1,
                 badges: [],
                 evaluaciones: [],
+                activo: true,
                 creadoEn: new Date().toISOString()
               };
-              EL_DB.collection(EL_COLLECTIONS.USERS).doc(fbUser.uid).set(_currentUser);
+              EL_DB.collection(EL_COLLECTIONS.USERS).doc(fbUser.uid).set(_currentUser)
+                .then(function() {
+                  console.log('[ELAuth] ✅ Documento creado automáticamente para:', fbUser.email, '| rol:', _currentUser.role);
+                })
+                .catch(function(err) {
+                  console.warn('[ELAuth] No se pudo guardar perfil en Firestore:', err.message);
+                });
             }
             _authReady = true;
             _readyCallbacks.forEach(function(cb) { cb(_currentUser); });
@@ -97,9 +106,22 @@ var ELAuth = (function() {
       .then(function(doc) {
         if (doc && doc.exists) {
           _currentUser = Object.assign({ uid: _firebaseUser.uid, email: _firebaseUser.email }, doc.data());
+        } else if (doc && !doc.exists) {
+          // Doc no existe → crear con rol correcto
+          var adminEmailsLogin = window.EL_ADMIN_EMAILS || [window.EL_ADMIN_EMAIL];
+          var esAdminLogin = adminEmailsLogin.indexOf(_firebaseUser.email) !== -1;
+          _currentUser = {
+            uid: _firebaseUser.uid, email: _firebaseUser.email,
+            nombre: _firebaseUser.displayName || _firebaseUser.email.split('@')[0],
+            role: esAdminLogin ? EL_ROLES.ADMIN : EL_ROLES.ESTUDIANTE,
+            xp: 0, nivel: 1, badges: [], evaluaciones: [], activo: true,
+            creadoEn: new Date().toISOString()
+          };
+          EL_DB.collection(EL_COLLECTIONS.USERS).doc(_firebaseUser.uid).set(_currentUser)
+            .catch(function(err) { console.warn('[ELAuth] No se pudo crear perfil:', err.message); });
         } else if (!_currentUser) {
           // Perfil de respaldo si Firestore no responde
-          var adminEmails = window.EL_ADMIN_EMAILS || [EL_ADMIN_EMAIL];
+          var adminEmails = window.EL_ADMIN_EMAILS || [window.EL_ADMIN_EMAIL];
           var esAdmin = adminEmails.indexOf(_firebaseUser.email) !== -1;
           _currentUser = {
             uid: _firebaseUser.uid, email: _firebaseUser.email,
