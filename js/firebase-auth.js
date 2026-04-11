@@ -186,7 +186,7 @@ var ELAuth = (function() {
         email: data.email,
         password: data.password,
         displayName: data.nombre,
-        returnSecureToken: false
+        returnSecureToken: true
       })
     })
     .then(function(res) { return res.json(); })
@@ -194,34 +194,44 @@ var ELAuth = (function() {
       if (result.error) {
         var msg = result.error.message;
         if (msg === 'EMAIL_EXISTS') throw new Error('Ya existe una cuenta con ese correo.');
-        if (msg === 'WEAK_PASSWORD : Password should be at least 6 characters') throw new Error('La contraseña debe tener al menos 6 caracteres.');
+        if (msg.includes('WEAK_PASSWORD')) throw new Error('La contraseña debe tener al menos 6 caracteres.');
         throw new Error(msg);
       }
 
       var uid = result.localId;
+      if (!uid) throw new Error('No se obtuvo UID del usuario creado.');
 
-      // Crear documento en Firestore
+      // Crear documento en Firestore (como admin autenticado)
       var perfil = {
-        uid:          uid,
-        nombre:       data.nombre,
-        email:        data.email,
-        role:         data.role || EL_ROLES.PROFESOR,
-        especialidad: data.especialidad || '',
-        asignaturas:  data.asignaturas  || [],
-        niveles:      data.niveles      || [],
-        modulos:      data.modulos      || [],
-        seccion:      data.seccion      || '',
-        xp:           0,
-        nivel:        1,
-        badges:       [],
-        evaluaciones: [],
-        activo:       true,
-        creadoEn:     new Date().toISOString(),
-        creadoPor:    _currentUser ? _currentUser.email : 'admin'
+        uid:           uid,
+        nombre:        data.nombre,
+        email:         data.email,
+        role:          data.role || EL_ROLES.PROFESOR,
+        tipoProfesor:  data.tipoProfesor || '',
+        especialidad:  data.especialidad || '',
+        asignaturas:   data.asignaturas  || [],
+        niveles:       data.niveles      || [],
+        modulos:       data.modulos      || [],
+        seccion:       data.seccion      || '',
+        xp:            0,
+        nivel:         1,
+        badges:        [],
+        evaluaciones:  [],
+        activo:        true,
+        creadoEn:      new Date().toISOString(),
+        creadoPor:     _currentUser ? _currentUser.email : 'admin'
       };
 
+      console.log('[ELAuth] Creando doc Firestore para uid:', uid);
       return EL_DB.collection(EL_COLLECTIONS.USERS).doc(uid).set(perfil)
-        .then(function() { return perfil; });
+        .then(function() {
+          console.log('[ELAuth] ✅ Perfil creado en Firestore:', perfil.email);
+          return perfil;
+        })
+        .catch(function(err) {
+          console.error('[ELAuth] ❌ Error escribiendo Firestore:', err.code, err.message);
+          throw new Error('Usuario creado en Auth pero falló Firestore: ' + err.message + '. Verifica las Reglas de Firestore.');
+        });
     });
   }
 

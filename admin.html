@@ -118,10 +118,10 @@ tr:hover td{background:rgba(99,102,241,.05)}
     <div class="nav-item" data-sec="profesores" onclick="showSec(this,'profesores')">🎓 Profesores</div>
     <div class="nav-item" data-sec="codigos" onclick="showSec(this,'codigos')">🔑 Códigos de Acceso</div>
     <div class="nav-section">Contenido</div>
+    <div class="nav-item" data-sec="recursos" onclick="showSec(this,'recursos')">📖 Recursos Curriculares</div>
     <div class="nav-item" data-sec="materiales" onclick="showSec(this,'materiales')">📚 Materiales</div>
     <div class="nav-item" data-sec="planificaciones" onclick="showSec(this,'planificaciones')">📅 Planificaciones</div>
     <div class="nav-section">Sistema</div>
-    <div class="nav-item" onclick="window.location.href='dashboard.html'">🏠 Dashboard</div>
     <div class="nav-item" onclick="ELAuth.logout()">🚪 Cerrar Sesión</div>
   </aside>
 
@@ -228,6 +228,44 @@ tr:hover td{background:rgba(99,102,241,.05)}
       </div>
     </section>
 
+    <!-- RECURSOS CURRICULARES -->
+    <section id="sec-recursos" class="tab-section" style="display:none">
+      <div class="page-header"><h1>📖 Recursos Curriculares</h1><p>Planes y programas organizados por tipo de enseñanza</p></div>
+
+      <!-- Tabs principales -->
+      <div style="display:flex;gap:4px;margin-bottom:24px;background:var(--surface);padding:4px;border-radius:10px;width:fit-content">
+        <button id="rTab-tp" class="btn btn-primary btn-sm" onclick="switchRTab('tp')">⚙️ Módulos TP / EMTP</button>
+        <button id="rTab-comun" class="btn btn-outline btn-sm" onclick="switchRTab('comun')">🎓 Plan Común</button>
+        <button id="rTab-basica" class="btn btn-outline btn-sm" onclick="switchRTab('basica')">📚 Educación Básica</button>
+      </div>
+
+      <!-- TAB: MÓDULOS TP -->
+      <div id="rtab-tp">
+        <div class="card" style="margin-bottom:16px">
+          <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+            <div class="form-group" style="flex:1;min-width:200px;margin:0">
+              <label style="font-size:.75rem;color:var(--muted)">Especialidad</label>
+              <select id="rEspSel" onchange="loadRModulos()" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-size:.875rem;outline:none;width:100%">
+                <option value="">— Selecciona especialidad —</option>
+              </select>
+            </div>
+            <button class="btn btn-primary" style="align-self:flex-end;margin-top:4px" onclick="openAddRecurso()">➕ Agregar Recurso</button>
+          </div>
+        </div>
+        <div id="rModulosGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px"></div>
+      </div>
+
+      <!-- TAB: PLAN COMÚN -->
+      <div id="rtab-comun" style="display:none">
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px" id="rComunGrid"></div>
+      </div>
+
+      <!-- TAB: BÁSICA -->
+      <div id="rtab-basica" style="display:none">
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px" id="rBasicaGrid"></div>
+      </div>
+    </section>
+
   </main>
 </div>
 
@@ -316,10 +354,47 @@ tr:hover td{background:rgba(99,102,241,.05)}
   </div>
 </div>
 
+<!-- MODAL RECURSO CURRICULAR -->
+<div class="modal-bg" id="modalRecurso">
+  <div class="modal" style="max-width:520px">
+    <button class="modal-close" onclick="closeModal('modalRecurso')">✕</button>
+    <h2>📎 Agregar Recurso Curricular</h2>
+    <div id="rNotif" class="notif"></div>
+    <div class="form-grid">
+      <div class="form-group full-width"><label>Título del recurso *</label><input id="rTitulo" placeholder="ej: Programa Oficial Módulo EN1 2024"></div>
+      <div class="form-group"><label>Tipo de recurso</label>
+        <select id="rTipoRec">
+          <option value="programa">📋 Programa Oficial Mineduc</option>
+          <option value="planificacion">📅 Planificación Anual</option>
+          <option value="guia">📄 Guía Didáctica</option>
+          <option value="evaluacion">📊 Instrumento Evaluación</option>
+          <option value="material">📦 Material de Apoyo</option>
+          <option value="enlace">🔗 Enlace Externo</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Módulo / Asignatura asociada</label><input id="rModulo" placeholder="ej: EN1, Matemática, etc."></div>
+      <div class="form-group full-width"><label>URL del documento (Google Drive, Dropbox, etc.)</label><input id="rUrl" type="url" placeholder="https://drive.google.com/..."></div>
+      <div class="form-group full-width"><label>Descripción (opcional)</label><textarea id="rDesc" rows="3" placeholder="Descripción breve del recurso..." style="resize:vertical"></textarea></div>
+      <div class="form-group"><label>Tipo de enseñanza</label>
+        <select id="rTipoEns">
+          <option value="tp">⚙️ Técnico-Profesional (EMTP)</option>
+          <option value="comun">🎓 Plan Común</option>
+          <option value="basica">📚 Educación Básica</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Especialidad / Nivel (opcional)</label><input id="rEsp" placeholder="ej: electronica, 3M, 5B"></div>
+    </div>
+    <div style="text-align:right;margin-top:16px">
+      <button class="btn btn-primary" onclick="guardarRecurso()">💾 Guardar Recurso</button>
+    </div>
+  </div>
+</div>
+
 <script>
-var allUsers=[], allMats=[], allPlans=[];
+var allUsers=[], allMats=[], allPlans=[], allRecursos=[];
 var wData={tipo:null,asignaturas:[],niveles:[],especialidad:'',modulos:[]};
 var editingUid=null;
+var _rCurrentTab='tp';
 
 ELAuth.requireAuth(['admin','profesor']);
 ELAuth.onUserReady(function(user){
@@ -561,6 +636,172 @@ function crearProfesor(){
 
 function closeModal(id){document.getElementById(id).classList.remove('open');}
 function notif(id,msg,tipo){var el=document.getElementById(id);el.textContent=msg;el.className='notif '+tipo+' show';setTimeout(function(){el.classList.remove('show');},5000);}
+
+// ══════════════════════════════════════════════════════════════
+//  RECURSOS CURRICULARES
+// ══════════════════════════════════════════════════════════════
+function initRecursos(){
+  // Poblar selector de especialidades
+  var sel=document.getElementById('rEspSel');
+  CURRICULA_CHILE.getEspecialidades().forEach(function(e){
+    var opt=document.createElement('option');opt.value=e.key;opt.textContent=e.nombre+' ('+e.sector+')';sel.appendChild(opt);
+  });
+  // Cargar recursos desde Firestore
+  loadAllRecursos();
+  // Renderizar Plan Común y Básica
+  renderComunGrid();
+  renderBasicaGrid();
+}
+
+function loadAllRecursos(){
+  EL_DB.collection(EL_COLLECTIONS.RECURSOS).orderBy('creadoEn','desc').get()
+    .then(function(snap){
+      allRecursos=[];
+      snap.forEach(function(doc){allRecursos.push(Object.assign({id:doc.id},doc.data()));});
+    }).catch(function(){allRecursos=[];});
+}
+
+function switchRTab(tab){
+  _rCurrentTab=tab;
+  ['tp','comun','basica'].forEach(function(t){
+    document.getElementById('rtab-'+t).style.display=t===tab?'block':'none';
+    var btn=document.getElementById('rTab-'+t);
+    btn.className=t===tab?'btn btn-primary btn-sm':'btn btn-outline btn-sm';
+  });
+  if(tab==='tp'&&document.getElementById('rEspSel').value) loadRModulos();
+}
+
+function loadRModulos(){
+  var key=document.getElementById('rEspSel').value;
+  var grid=document.getElementById('rModulosGrid');
+  if(!key){grid.innerHTML='';return;}
+  var mods=CURRICULA_CHILE.getModulos(key);
+  var espData=CURRICULA_CHILE.getEspecialidades().find(function(e){return e.key===key;});
+  grid.innerHTML=mods.map(function(m){
+    var recsMod=allRecursos.filter(function(r){return r.modulo===m.num||r.especialidad===key;});
+    return '<div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden">'+
+      '<div style="background:linear-gradient(135deg,rgba(99,102,241,.2),rgba(139,92,246,.1));padding:16px;border-bottom:1px solid var(--border)">'+
+        '<div style="font-size:.7rem;color:var(--accent);font-weight:700;margin-bottom:4px">'+m.num+(m.horas?' · '+m.horas+' hrs':'')+'</div>'+
+        '<div style="font-size:.9rem;font-weight:700">'+m.nombre+'</div>'+
+        (espData?'<div style="font-size:.72rem;color:var(--muted);margin-top:2px">'+espData.sector+'</div>':'')+
+      '</div>'+
+      '<div style="padding:14px">'+
+        (m.aes&&m.aes.length?
+          '<details style="margin-bottom:12px"><summary style="font-size:.78rem;color:var(--muted);cursor:pointer">'+m.aes.length+' Aprendizajes Esperados</summary>'+
+          '<div style="margin-top:8px;display:flex;flex-direction:column;gap:4px">'+
+          m.aes.slice(0,3).map(function(ae){return '<div style="font-size:.78rem;padding:5px 8px;background:var(--surface2);border-radius:6px"><span style="color:var(--accent);font-weight:700">AE'+ae.num+'</span> '+ae.nombre+'</div>';}).join('')+
+          (m.aes.length>3?'<div style="font-size:.72rem;color:var(--muted);padding:4px">+'+( m.aes.length-3)+' más…</div>':'')+
+          '</div></details>':'')  +
+        '<div style="margin-bottom:8px">'+
+          (recsMod.length?
+            recsMod.map(function(r){return renderRecursoChip(r);}).join(''):
+            '<div style="font-size:.78rem;color:var(--muted)">Sin recursos cargados</div>')+
+        '</div>'+
+        '<button class="btn btn-outline btn-sm" onclick="openAddRecursoMod(\''+m.num+'\',\''+key+'\')">➕ Recurso</button>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+}
+
+function renderComunGrid(){
+  var grid=document.getElementById('rComunGrid');
+  var asigs=CURRICULA_CHILE.planComun.asignaturas;
+  grid.innerHTML=asigs.map(function(a){
+    return '<div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden">'+
+      '<div style="background:rgba(99,102,241,.12);padding:16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px">'+
+        '<div style="width:12px;height:12px;border-radius:50%;background:'+a.color+';flex-shrink:0"></div>'+
+        '<div><div style="font-size:.9rem;font-weight:700">'+a.nombre+'</div>'+
+        '<div style="font-size:.72rem;color:var(--muted)">' + a.sigla + ' · Niveles: '+a.niveles.join(', ')+'</div></div>'+
+      '</div>'+
+      '<div style="padding:14px">'+
+        '<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:10px">'+
+        a.niveles.map(function(n){
+          var us=a.unidades&&a.unidades[n]?a.unidades[n]:[];
+          return '<span style="font-size:.72rem;padding:3px 8px;background:rgba(99,102,241,.1);border:1px solid rgba(99,102,241,.2);border-radius:6px;color:#818cf8">'+n+' ('+us.length+' U)</span>';
+        }).join('')+
+        '</div>'+
+        '<button class="btn btn-outline btn-sm" onclick="openAddRecursoMod(\''+a.sigla+'\',\'comun\')">➕ Recurso</button>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+}
+
+function renderBasicaGrid(){
+  var grid=document.getElementById('rBasicaGrid');
+  var asigs=CURRICULA_CHILE.basica.asignaturas;
+  grid.innerHTML=asigs.map(function(a){
+    return '<div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden">'+
+      '<div style="background:rgba(16,185,129,.08);padding:16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px">'+
+        '<div style="width:12px;height:12px;border-radius:50%;background:'+a.color+';flex-shrink:0"></div>'+
+        '<div><div style="font-size:.9rem;font-weight:700">'+a.nombre+'</div>'+
+        '<div style="font-size:.72rem;color:var(--muted)">'+a.sigla+' · 1° a 8° Básico</div></div>'+
+      '</div>'+
+      '<div style="padding:14px">'+
+        '<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:10px">'+
+        a.niveles.map(function(n){return '<span style="font-size:.72rem;padding:3px 8px;background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2);border-radius:6px;color:#34d399">'+n.replace(\'B\',\'°B\')+'</span>';}).join('')+
+        '</div>'+
+        '<button class="btn btn-outline btn-sm" onclick="openAddRecursoMod(\''+a.sigla+'\',\'basica\')">➕ Recurso</button>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+}
+
+function renderRecursoChip(r){
+  var iconos={programa:'📋',planificacion:'📅',guia:'📄',evaluacion:'📊',material:'📦',enlace:'🔗'};
+  var ic=iconos[r.tipoRec]||'📎';
+  return r.url?
+    '<a href="'+r.url+'" target="_blank" style="display:inline-flex;align-items:center;gap:4px;padding:3px 9px;background:rgba(99,102,241,.12);border:1px solid rgba(99,102,241,.25);border-radius:20px;font-size:.73rem;color:#818cf8;text-decoration:none;margin:2px">'+ic+' '+r.titulo+'</a>':
+    '<span style="display:inline-flex;align-items:center;gap:4px;padding:3px 9px;background:rgba(99,102,241,.12);border:1px solid rgba(99,102,241,.25);border-radius:20px;font-size:.73rem;color:#818cf8;margin:2px">'+ic+' '+r.titulo+'</span>';
+}
+
+function openAddRecurso(){
+  document.getElementById('rModulo').value='';
+  document.getElementById('rEsp').value=document.getElementById('rEspSel').value||'';
+  document.getElementById('rTipoEns').value=_rCurrentTab==='comun'?'comun':_rCurrentTab==='basica'?'basica':'tp';
+  ['rTitulo','rUrl','rDesc'].forEach(function(id){document.getElementById(id).value='';});
+  document.getElementById('modalRecurso').classList.add('open');
+}
+function openAddRecursoMod(modulo,esp){
+  document.getElementById('rModulo').value=modulo;
+  document.getElementById('rEsp').value=esp;
+  document.getElementById('rTipoEns').value=esp==='comun'?'comun':esp==='basica'?'basica':'tp';
+  ['rTitulo','rUrl','rDesc'].forEach(function(id){document.getElementById(id).value='';});
+  document.getElementById('modalRecurso').classList.add('open');
+}
+
+function guardarRecurso(){
+  var titulo=document.getElementById('rTitulo').value.trim();
+  if(!titulo){notif('rNotif','❌ El título es obligatorio','err');return;}
+  var recurso={
+    titulo:     titulo,
+    tipoRec:    document.getElementById('rTipoRec').value,
+    modulo:     document.getElementById('rModulo').value.trim(),
+    url:        document.getElementById('rUrl').value.trim(),
+    descripcion:document.getElementById('rDesc').value.trim(),
+    tipoEns:    document.getElementById('rTipoEns').value,
+    especialidad:document.getElementById('rEsp').value.trim(),
+    creadoEn:   new Date().toISOString(),
+    creadoPor:  ELAuth.user?ELAuth.user.email:'admin',
+    activo:     true
+  };
+  EL_DB.collection(EL_COLLECTIONS.RECURSOS).add(recurso)
+    .then(function(ref){
+      recurso.id=ref.id;allRecursos.push(recurso);
+      notif('rNotif','✅ Recurso guardado correctamente','ok');
+      setTimeout(function(){
+        closeModal('modalRecurso');
+        if(_rCurrentTab==='tp') loadRModulos();
+      },1200);
+    }).catch(function(e){notif('rNotif','❌ '+e.message,'err');});
+}
+
+// Inicializar recursos cuando se carga esa sección
+var _recursosInit=false;
+var _origShowSec=showSec;
+function showSec(el,id){
+  _origShowSec(el,id);
+  if(id==='recursos'&&!_recursosInit){_recursosInit=true;initRecursos();}
+}
 </script>
 </body>
 </html>

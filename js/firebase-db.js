@@ -359,12 +359,45 @@ var ELDB = (function() {
     }
   };
 
+  // ────────────────────────────────────────────────────────────
+  //  RECURSOS CURRICULARES
+  // ────────────────────────────────────────────────────────────
+  var recursos = {
+    guardar: function(data) {
+      var entrada = Object.assign({}, data, {
+        creadoEn: new Date().toISOString(),
+        activo:   true
+      });
+      return EL_DB.collection(EL_COLLECTIONS.RECURSOS).add(entrada)
+        .then(function(ref) { return Object.assign({ id: ref.id }, entrada); });
+    },
+
+    listar: function(filtros) {
+      filtros = filtros || {};
+      var query = EL_DB.collection(EL_COLLECTIONS.RECURSOS).where('activo', '==', true);
+      if (filtros.tipoEns)    query = query.where('tipoEns',     '==', filtros.tipoEns);
+      if (filtros.modulo)     query = query.where('modulo',      '==', filtros.modulo);
+      if (filtros.especialidad) query = query.where('especialidad', '==', filtros.especialidad);
+      return query.orderBy('creadoEn', 'desc').get()
+        .then(function(snap) {
+          var items = [];
+          snap.forEach(function(doc) { items.push(Object.assign({ id: doc.id }, doc.data())); });
+          return items;
+        });
+    },
+
+    eliminar: function(id) {
+      return EL_DB.collection(EL_COLLECTIONS.RECURSOS).doc(id).update({ activo: false });
+    }
+  };
+
   return {
     materiales:      materiales,
     planificaciones: planificaciones,
     evaluaciones:    evaluaciones,
     usuarios:        usuarios,
     codigos:         codigos,
-    migracion:       migracion
+    migracion:       migracion,
+    recursos:        recursos
   };
 })();

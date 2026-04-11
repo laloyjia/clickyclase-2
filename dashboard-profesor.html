@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel Docente — ElectroLearn</title>
+
+<!-- Firebase SDK v9 compat -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="js/firebase-config.js"></script>
+<script src="js/firebase-auth.js"></script>
+<script src="js/firebase-db.js"></script>
+<script src="js/curricula-chile.js"></script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root{--bg:#0f172a;--surface:#1e293b;--surface2:#273549;--border:rgba(99,102,241,.25);--accent:#6366f1;--accent2:#8b5cf6;--gold:#f59e0b;--green:#10b981;--red:#ef4444;--text:#e2e8f0;--muted:#94a3b8}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.orb{position:fixed;border-radius:50%;filter:blur(80px);opacity:.1;pointer-events:none;z-index:0}
+.orb1{width:500px;height:500px;background:radial-gradient(#6366f1,transparent);top:-100px;left:-100px}
+.orb2{width:400px;height:400px;background:radial-gradient(#10b981,transparent);bottom:-80px;right:-80px}
+.layout{display:grid;grid-template-columns:250px 1fr;min-height:100vh;position:relative;z-index:1}
+.sidebar{background:rgba(15,23,42,.97);border-right:1px solid var(--border);padding:0;display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto}
+.sidebar-top{padding:24px 20px 20px;border-bottom:1px solid var(--border)}
+.sidebar-logo{font-family:'Space Grotesk',sans-serif;font-size:1.1rem;font-weight:700;color:var(--accent);display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.sidebar-user{display:flex;align-items:center;gap:10px}
+.sidebar-avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.9rem;flex-shrink:0}
+.sidebar-name{font-size:.875rem;font-weight:600;line-height:1.2}
+.sidebar-role{font-size:.72rem;color:var(--muted)}
+.sidebar-nav{flex:1;padding:12px 0}
+.nav-section{padding:16px 20px 6px;font-size:.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;font-weight:600}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 20px;cursor:pointer;transition:all .2s;color:var(--muted);font-size:.85rem;border-left:3px solid transparent;text-decoration:none}
+.nav-item:hover{background:rgba(99,102,241,.08);color:var(--text)}
+.nav-item.active{background:rgba(99,102,241,.13);color:var(--accent);border-left-color:var(--accent);font-weight:600}
+.nav-item.danger:hover{background:rgba(239,68,68,.08);color:var(--red)}
+.sidebar-bottom{padding:16px 20px;border-top:1px solid var(--border)}
+.tipo-tag{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:20px;font-size:.72rem;font-weight:600}
+.main{padding:28px;overflow-y:auto;max-height:100vh}
+.page-header{margin-bottom:28px}
+.page-header h1{font-family:'Space Grotesk',sans-serif;font-size:1.7rem;font-weight:700;background:linear-gradient(135deg,var(--accent),var(--green));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.page-header p{color:var(--muted);font-size:.875rem;margin-top:4px}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:16px;margin-bottom:28px}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px;transition:transform .2s}
+.stat-card:hover{transform:translateY(-2px)}
+.stat-icon{font-size:1.5rem;margin-bottom:8px}
+.stat-num{font-family:'Space Grotesk',sans-serif;font-size:1.8rem;font-weight:800;color:var(--accent)}
+.stat-label{font-size:.75rem;color:var(--muted);margin-top:2px}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:24px;margin-bottom:20px}
+.card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.card-title{font-size:1rem;font-weight:700;display:flex;align-items:center;gap:8px}
+.btn{padding:9px 18px;border-radius:8px;border:none;cursor:pointer;font-size:.85rem;font-weight:600;transition:all .2s;display:inline-flex;align-items:center;gap:7px;text-decoration:none}
+.btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff}
+.btn-primary:hover{opacity:.9;transform:translateY(-1px)}
+.btn-success{background:rgba(16,185,129,.15);border:1px solid rgba(16,185,129,.3);color:var(--green)}
+.btn-success:hover{background:rgba(16,185,129,.25)}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--text)}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent)}
+.btn-danger{background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.3);color:var(--red)}
+.btn-sm{padding:5px 12px;font-size:.78rem}
+.badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:12px;font-size:.72rem;font-weight:600}
+.badge-green{background:rgba(16,185,129,.12);color:var(--green);border:1px solid rgba(16,185,129,.25)}
+.badge-blue{background:rgba(99,102,241,.12);color:#818cf8;border:1px solid rgba(99,102,241,.25)}
+.badge-gold{background:rgba(245,158,11,.12);color:var(--gold);border:1px solid rgba(245,158,11,.25)}
+.modulo-card{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:16px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
+.modulo-card::before{content:'';position:absolute;top:0;left:0;width:100%;height:3px;background:linear-gradient(90deg,var(--accent),var(--accent2))}
+.modulo-card:hover{border-color:var(--accent);transform:translateY(-1px)}
+.modulo-code{font-family:'Space Grotesk',sans-serif;font-size:.8rem;font-weight:700;color:var(--accent);margin-bottom:6px}
+.modulo-name{font-size:.9rem;font-weight:600;margin-bottom:4px;line-height:1.3}
+.modulo-meta{font-size:.75rem;color:var(--muted)}
+.asig-card{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;display:flex;align-items:center;gap:12px;transition:all .2s}
+.asig-card:hover{border-color:rgba(99,102,241,.5)}
+.asig-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.asig-name{font-size:.88rem;font-weight:600}
+.asig-niveles{font-size:.73rem;color:var(--muted);margin-top:2px}
+.list-item{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid rgba(99,102,241,.08);gap:12px}
+.list-item:last-child{border-bottom:none}
+.list-icon{font-size:1.2rem;flex-shrink:0}
+.list-info{flex:1;min-width:0}
+.list-title{font-size:.88rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.list-meta{font-size:.75rem;color:var(--muted);margin-top:2px}
+.empty-state{text-align:center;padding:32px 20px;color:var(--muted)}
+.empty-state .emoji{font-size:2.5rem;display:block;margin-bottom:12px}
+.empty-state p{font-size:.875rem}
+.quick-actions{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px}
+.qa-btn{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px;cursor:pointer;text-align:center;transition:all .2s;text-decoration:none;display:block}
+.qa-btn:hover{border-color:var(--accent);background:rgba(99,102,241,.06);transform:translateY(-2px)}
+.qa-icon{font-size:1.8rem;display:block;margin-bottom:8px}
+.qa-label{font-size:.85rem;font-weight:600;color:var(--text)}
+.qa-sub{font-size:.72rem;color:var(--muted);margin-top:3px}
+.tab-bar{display:flex;gap:4px;margin-bottom:20px;background:var(--surface2);padding:4px;border-radius:10px}
+.tab-btn{flex:1;padding:8px;border-radius:8px;border:none;background:transparent;color:var(--muted);cursor:pointer;font-size:.82rem;font-weight:600;transition:all .2s}
+.tab-btn.active{background:var(--surface);color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,.3)}
+.tab-content{display:none}
+.tab-content.active{display:block}
+.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.section-title{font-size:1rem;font-weight:700}
+.spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media(max-width:768px){.layout{grid-template-columns:1fr}.sidebar{display:none}.grid-2{grid-template-columns:1fr}.grid-3{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+
+<div class="layout">
+
+  <!-- ── SIDEBAR ──────────────────────────────── -->
+  <aside class="sidebar">
+    <div class="sidebar-top">
+      <div class="sidebar-logo">⚡ ElectroLearn</div>
+      <div class="sidebar-user">
+        <div class="sidebar-avatar" id="sAvatar">P</div>
+        <div>
+          <div class="sidebar-name" id="sNombre">Cargando…</div>
+          <div class="sidebar-role" id="sTipo">Docente</div>
+        </div>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section">Panel</div>
+      <a class="nav-item active" onclick="showSec('inicio')">🏠 Inicio</a>
+      <a class="nav-item" onclick="showSec('modulos')">📦 Mis Módulos/Asignaturas</a>
+      <a class="nav-item" onclick="showSec('materiales')">📚 Mis Materiales</a>
+      <a class="nav-item" onclick="showSec('planificaciones')">📅 Mis Planificaciones</a>
+
+      <div class="nav-section">Recursos</div>
+      <a class="nav-item" onclick="showSec('biblioteca')">📖 Biblioteca</a>
+
+      <div class="nav-section">Sistema</div>
+      <a class="nav-item danger" onclick="ELAuth.logout()">🚪 Cerrar Sesión</a>
+    </nav>
+
+    <div class="sidebar-bottom">
+      <div style="font-size:.72rem;color:var(--muted)">ElectroLearn v2.0 · Salesianos Talca</div>
+    </div>
+  </aside>
+
+  <!-- ── MAIN ─────────────────────────────────── -->
+  <main class="main">
+
+    <!-- INICIO -->
+    <section id="sec-inicio">
+      <div class="page-header">
+        <h1 id="welcomeTitle">¡Bienvenido, Docente!</h1>
+        <p id="welcomeSub">Panel de gestión pedagógica · ElectroLearn</p>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon">📚</div>
+          <div class="stat-num" id="statMats">0</div>
+          <div class="stat-label">Materiales creados</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">📅</div>
+          <div class="stat-num" id="statPlans">0</div>
+          <div class="stat-label">Planificaciones</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">📦</div>
+          <div class="stat-num" id="statModulos">0</div>
+          <div class="stat-label">Módulos asignados</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">👥</div>
+          <div class="stat-num" id="statNiveles">0</div>
+          <div class="stat-label">Niveles a cargo</div>
+        </div>
+      </div>
+
+      <!-- Acceso rápido -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">⚡ Acceso Rápido</div>
+        </div>
+        <div class="quick-actions">
+          <a class="qa-btn" href="material.html">
+            <span class="qa-icon">📝</span>
+            <span class="qa-label">Subir Material</span>
+            <div class="qa-sub">Guías, apuntes, fichas</div>
+          </a>
+          <a class="qa-btn" href="planificacion.html">
+            <span class="qa-icon">📅</span>
+            <span class="qa-label">Nueva Planificación</span>
+            <div class="qa-sub">Planificar clases</div>
+          </a>
+          <a class="qa-btn" href="biblioteca.html">
+            <span class="qa-icon">📚</span>
+            <span class="qa-label">Biblioteca</span>
+            <div class="qa-sub">Ver todos los recursos</div>
+          </a>
+          <a class="qa-btn" onclick="showSec('modulos')">
+            <span class="qa-icon">🗂️</span>
+            <span class="qa-label">Mis Módulos</span>
+            <div class="qa-sub">Ver asignaciones</div>
+          </a>
+        </div>
+      </div>
+
+      <!-- Asignación curricular -->
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">🗂️ Mi Asignación Curricular</div>
+          </div>
+          <div id="asignacionResumen">
+            <div class="empty-state"><span class="emoji">⏳</span><p>Cargando asignación…</p></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">📋 Últimos Materiales</div>
+            <a class="btn btn-outline btn-sm" onclick="showSec('materiales')">Ver todos</a>
+          </div>
+          <div id="ultimosMats">
+            <div class="empty-state"><span class="emoji">📂</span><p>Sin materiales aún</p></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MÓDULOS / ASIGNATURAS -->
+    <section id="sec-modulos" style="display:none">
+      <div class="page-header">
+        <h1>📦 Mis Módulos y Asignaturas</h1>
+        <p>Contenido curricular asignado por el administrador</p>
+      </div>
+      <div id="modulosContent">
+        <div class="empty-state"><span class="emoji">⏳</span><p>Cargando…</p></div>
+      </div>
+    </section>
+
+    <!-- MATERIALES -->
+    <section id="sec-materiales" style="display:none">
+      <div class="page-header">
+        <h1>📚 Mis Materiales</h1>
+        <p>Recursos didácticos que has publicado</p>
+      </div>
+      <div class="card">
+        <div class="section-header">
+          <div class="section-title">Materiales publicados</div>
+          <a class="btn btn-primary btn-sm" href="material.html">➕ Nuevo material</a>
+        </div>
+        <div id="matsList">
+          <div class="empty-state"><span class="emoji">📂</span><p>No has subido materiales aún.<br>¡Crea tu primer recurso!</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PLANIFICACIONES -->
+    <section id="sec-planificaciones" style="display:none">
+      <div class="page-header">
+        <h1>📅 Mis Planificaciones</h1>
+        <p>Planificaciones de clases registradas</p>
+      </div>
+      <div class="card">
+        <div class="section-header">
+          <div class="section-title">Planificaciones</div>
+          <a class="btn btn-primary btn-sm" href="planificacion.html">➕ Nueva planificación</a>
+        </div>
+        <div id="plansList">
+          <div class="empty-state"><span class="emoji">📋</span><p>No has creado planificaciones aún.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- BIBLIOTECA -->
+    <section id="sec-biblioteca" style="display:none">
+      <div class="page-header">
+        <h1>📖 Biblioteca de Recursos</h1>
+        <p>Todos los materiales disponibles en la plataforma</p>
+      </div>
+      <div class="card">
+        <div class="section-header">
+          <div class="section-title">Recursos disponibles</div>
+        </div>
+        <div id="bibliotecaList">
+          <div class="empty-state"><span class="emoji">📚</span><p>Cargando biblioteca…</p></div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+//  PANEL DOCENTE — Lógica principal
+// ═══════════════════════════════════════════════════════════════
+
+var _profeUser = null;
+
+// ── Secciones ─────────────────────────────────────────────────
+function showSec(id) {
+  document.querySelectorAll('main > section').forEach(function(s) { s.style.display = 'none'; });
+  document.querySelectorAll('.nav-item').forEach(function(n) { n.classList.remove('active'); });
+  document.getElementById('sec-' + id).style.display = 'block';
+  document.querySelector('.nav-item[onclick="showSec(\'' + id + '\')"]').classList.add('active');
+
+  // Lazy load
+  if (id === 'materiales')     loadMisMateriales();
+  if (id === 'planificaciones') loadMisPlanificaciones();
+  if (id === 'biblioteca')     loadBiblioteca();
+  if (id === 'modulos')        renderModulosDetalle();
+}
+
+// ── Verificar sesión y cargar datos ──────────────────────────
+ELAuth.onUserReady(function(user) {
+  if (!user) { window.location.href = 'index.html'; return; }
+
+  // Solo profesores y admins llegan aquí
+  var adminEmails = window.EL_ADMIN_EMAILS || [window.EL_ADMIN_EMAIL];
+  var esAdmin = user.role === 'admin' || adminEmails.indexOf(user.email) !== -1;
+  if (user.role !== 'profesor' && !esAdmin) {
+    window.location.href = 'dashboard.html';
+    return;
+  }
+
+  _profeUser = user;
+  initDashboard(user);
+});
+
+function initDashboard(user) {
+  // ── Sidebar ──
+  var inicial = (user.nombre || user.email || 'P').charAt(0).toUpperCase();
+  document.getElementById('sAvatar').textContent = inicial;
+  document.getElementById('sNombre').textContent = user.nombre || user.email.split('@')[0];
+
+  var tipoLabels = { basica: '📚 Educación Básica', media: '🎓 Plan Común', tecnico: '⚙️ Técnico-Profesional' };
+  var tipoLabel  = tipoLabels[user.tipoProfesor] || '🎓 Docente';
+  document.getElementById('sTipo').textContent = tipoLabel;
+
+  // ── Header ──
+  var nombre = user.nombre ? user.nombre.split(' ')[0] : 'Docente';
+  document.getElementById('welcomeTitle').textContent = '¡Bienvenido, ' + nombre + '!';
+  document.getElementById('welcomeSub').textContent = tipoLabel + ' · ElectroLearn';
+
+  // ── Stats ──
+  var mods  = (user.modulos && user.modulos.length) || (user.asignaturas && user.asignaturas.length) || 0;
+  var nivs  = (user.niveles && user.niveles.length) || 0;
+  document.getElementById('statModulos').textContent = mods;
+  document.getElementById('statNiveles').textContent = nivs;
+
+  // ── Asignación curricular ──
+  renderAsignacionResumen(user);
+
+  // ── Últimos materiales (preview) ──
+  loadUltimosMats(user.email);
+
+  // ── Cargar stats de materiales y planificaciones ──
+  ELDB.materiales.listar({ profesor: user.email }).then(function(mats) {
+    document.getElementById('statMats').textContent = mats.length;
+  }).catch(function() {});
+  ELDB.planificaciones.listar({ profesor: user.email }).then(function(plans) {
+    document.getElementById('statPlans').textContent = plans.length;
+  }).catch(function() {});
+}
+
+// ── Asignación curricular ────────────────────────────────────
+function renderAsignacionResumen(user) {
+  var el = document.getElementById('asignacionResumen');
+  var html = '';
+
+  if (user.tipoProfesor === 'tecnico') {
+    // EMTP
+    if (user.especialidad) {
+      var espData = CURRICULA_CHILE.getEspecialidades().find(function(e) { return e.key === user.especialidad; });
+      html += '<div style="margin-bottom:12px">';
+      html += '<div class="modulo-code">⚙️ Especialidad EMTP</div>';
+      html += '<div class="modulo-name">' + (espData ? espData.nombre : user.especialidad) + '</div>';
+      if (espData) html += '<div class="modulo-meta">' + espData.sector + '</div>';
+      html += '</div>';
+    }
+    if (user.modulos && user.modulos.length) {
+      html += '<div class="modulo-code" style="margin-bottom:6px">Módulos asignados (' + user.modulos.length + ')</div>';
+      html += '<div style="display:flex;flex-wrap:wrap;gap:6px">';
+      user.modulos.forEach(function(m) { html += '<span class="badge badge-blue">' + m + '</span>'; });
+      html += '</div>';
+    }
+  } else if (user.tipoProfesor === 'media') {
+    if (user.asignaturas && user.asignaturas.length) {
+      html += '<div class="modulo-code" style="margin-bottom:8px">🎓 Plan Común — Asignaturas</div>';
+      user.asignaturas.forEach(function(a) {
+        html += '<div style="padding:6px 0;border-bottom:1px solid rgba(99,102,241,.08);font-size:.85rem">' + a + '</div>';
+      });
+    }
+  } else if (user.tipoProfesor === 'basica') {
+    if (user.asignaturas && user.asignaturas.length) {
+      html += '<div class="modulo-code" style="margin-bottom:8px">📚 Básica — Asignaturas</div>';
+      user.asignaturas.forEach(function(a) {
+        html += '<div style="padding:6px 0;border-bottom:1px solid rgba(99,102,241,.08);font-size:.85rem">' + a + '</div>';
+      });
+    }
+  }
+
+  if (user.niveles && user.niveles.length) {
+    html += '<div style="margin-top:12px"><div class="modulo-code" style="margin-bottom:6px">Niveles a cargo</div>';
+    html += '<div style="display:flex;flex-wrap:wrap;gap:6px">';
+    user.niveles.forEach(function(n) { html += '<span class="badge badge-green">' + n + '</span>'; });
+    html += '</div></div>';
+  }
+
+  if (!html) {
+    html = '<div class="empty-state"><span class="emoji">⚠️</span><p>El administrador aún no ha asignado módulos o asignaturas a tu cuenta.<br>Contacta al administrador del sistema.</p></div>';
+  }
+
+  el.innerHTML = html;
+}
+
+// ── Últimos materiales (preview en inicio) ───────────────────
+function loadUltimosMats(email) {
+  ELDB.materiales.listar({ profesor: email }).then(function(mats) {
+    var el = document.getElementById('ultimosMats');
+    if (!mats.length) {
+      el.innerHTML = '<div class="empty-state"><span class="emoji">📂</span><p>Sin materiales aún.<br><a href="material.html" style="color:var(--accent)">Sube tu primer recurso →</a></p></div>';
+      return;
+    }
+    el.innerHTML = mats.slice(0, 4).map(function(m) {
+      var iconos = { guia: '📄', apunte: '📝', evaluacion: '📊', planificacion: '📅', ficha: '🗒️' };
+      var f = m.fechaISO ? new Date(m.fechaISO).toLocaleDateString('es-CL') : '—';
+      return '<div class="list-item">' +
+        '<span class="list-icon">' + (iconos[m.tipo] || '📎') + '</span>' +
+        '<div class="list-info"><div class="list-title">' + (m.titulo || 'Sin título') + '</div>' +
+        '<div class="list-meta">' + (m.modulo || m.asignatura || '—') + ' · ' + f + '</div></div>' +
+        '<span class="badge badge-blue" style="font-size:.7rem">' + (m.tipo || '?') + '</span>' +
+        '</div>';
+    }).join('');
+  }).catch(function() {});
+}
+
+// ── Módulos detalle ──────────────────────────────────────────
+function renderModulosDetalle() {
+  var user = _profeUser;
+  if (!user) return;
+  var el = document.getElementById('modulosContent');
+
+  if (user.tipoProfesor === 'tecnico' && user.especialidad) {
+    var mods = CURRICULA_CHILE.getModulos(user.especialidad);
+    var asignados = user.modulos || [];
+    var filtrados = asignados.length ? mods.filter(function(m) { return asignados.indexOf(m.num) !== -1; }) : mods;
+
+    var espData = CURRICULA_CHILE.getEspecialidades().find(function(e) { return e.key === user.especialidad; });
+    var html = '<div class="card"><div class="card-header"><div class="card-title">⚙️ ' + (espData ? espData.nombre : user.especialidad) + '</div>';
+    html += '<span class="badge badge-gold">' + filtrados.length + ' módulos</span></div>';
+    html += '<div class="grid-3">';
+    filtrados.forEach(function(m) {
+      html += '<div class="modulo-card">' +
+        '<div class="modulo-code">' + m.num + '</div>' +
+        '<div class="modulo-name">' + m.nombre + '</div>' +
+        '<div class="modulo-meta" style="margin-top:6px">';
+      if (m.horas) html += m.horas + ' hrs';
+      html += '</div></div>';
+    });
+    html += '</div></div>';
+    el.innerHTML = html;
+
+  } else if (user.tipoProfesor === 'media') {
+    var asigs = user.asignaturas || [];
+    var niveles = user.niveles || ['1M','2M','3M','4M'];
+    var html = '';
+
+    asigs.forEach(function(asig) {
+      html += '<div class="card"><div class="card-header"><div class="card-title">🎓 ' + asig + '</div>';
+      html += '<div style="display:flex;gap:6px">';
+      niveles.forEach(function(n) { html += '<span class="badge badge-green">' + n + '</span>'; });
+      html += '</div></div>';
+
+      // Mostrar unidades por nivel
+      html += '<div class="tab-bar">';
+      niveles.forEach(function(n, i) {
+        html += '<button class="tab-btn' + (i === 0 ? ' active' : '') + '" onclick="switchTab(this,\'asig-' + asig.replace(/[^a-zA-Z0-9]/g,'') + '\',\'' + n + '\')">' + n + '</button>';
+      });
+      html += '</div>';
+
+      niveles.forEach(function(n, i) {
+        var asigObj = CURRICULA_CHILE.planComun.asignaturas.find(function(a) { return a.nombre === asig; });
+        var unidades = (asigObj && asigObj.unidades && asigObj.unidades[n]) || [];
+        html += '<div id="asig-' + asig.replace(/[^a-zA-Z0-9]/g,'') + '-' + n + '" class="tab-content' + (i === 0 ? ' active' : '') + '">';
+        if (unidades.length) {
+          html += '<div style="display:flex;flex-direction:column;gap:6px">';
+          unidades.forEach(function(u, ui) {
+            html += '<div style="padding:8px 12px;background:var(--surface2);border-radius:8px;font-size:.85rem"><span style="color:var(--accent);font-weight:700;margin-right:8px">U' + (ui+1) + '</span>' + u + '</div>';
+          });
+          html += '</div>';
+        } else {
+          html += '<div class="empty-state"><span class="emoji">📋</span><p>Sin unidades definidas para este nivel</p></div>';
+        }
+        html += '</div>';
+      });
+
+      html += '</div>';
+    });
+
+    el.innerHTML = html || '<div class="empty-state"><span class="emoji">⚠️</span><p>Sin asignaturas asignadas.</p></div>';
+
+  } else if (user.tipoProfesor === 'basica') {
+    var asigs = user.asignaturas || [];
+    var niveles = user.niveles || ['1B','2B','3B','4B','5B','6B','7B','8B'];
+    var html = '';
+
+    asigs.forEach(function(asig) {
+      html += '<div class="card"><div class="card-header"><div class="card-title">📚 ' + asig + '</div>';
+      html += '<div style="display:flex;gap:6px">';
+      niveles.forEach(function(n) { html += '<span class="badge badge-green">' + n.replace('B','° B') + '</span>'; });
+      html += '</div></div>';
+
+      html += '<div class="tab-bar">';
+      niveles.forEach(function(n, i) {
+        html += '<button class="tab-btn' + (i === 0 ? ' active' : '') + '" onclick="switchTab(this,\'basig-' + asig.replace(/[^a-zA-Z0-9]/g,'') + '\',\'' + n + '\')">' + n.replace('B','°B') + '</button>';
+      });
+      html += '</div>';
+
+      niveles.forEach(function(n, i) {
+        var asigObj = CURRICULA_CHILE.basica.asignaturas.find(function(a) { return a.nombre === asig; });
+        var unidades = (asigObj && asigObj.unidades && asigObj.unidades[n]) || [];
+        html += '<div id="basig-' + asig.replace(/[^a-zA-Z0-9]/g,'') + '-' + n + '" class="tab-content' + (i === 0 ? ' active' : '') + '">';
+        if (unidades.length) {
+          html += '<div style="display:flex;flex-direction:column;gap:6px">';
+          unidades.forEach(function(u, ui) {
+            html += '<div style="padding:8px 12px;background:var(--surface2);border-radius:8px;font-size:.85rem"><span style="color:var(--accent);font-weight:700;margin-right:8px">U' + (ui+1) + '</span>' + u + '</div>';
+          });
+          html += '</div>';
+        }
+        html += '</div>';
+      });
+
+      html += '</div>';
+    });
+
+    el.innerHTML = html || '<div class="empty-state"><span class="emoji">⚠️</span><p>Sin asignaturas asignadas.</p></div>';
+
+  } else {
+    el.innerHTML = '<div class="empty-state"><span class="emoji">⚠️</span><p>No hay asignación curricular configurada.<br>Contacta al administrador.</p></div>';
+  }
+}
+
+function switchTab(btn, prefix, nivel) {
+  var parent = btn.closest('.card');
+  parent.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
+  parent.querySelectorAll('.tab-content').forEach(function(c) { c.classList.remove('active'); });
+  btn.classList.add('active');
+  var tc = document.getElementById(prefix + '-' + nivel);
+  if (tc) tc.classList.add('active');
+}
+
+// ── Mis materiales ───────────────────────────────────────────
+function loadMisMateriales() {
+  if (!_profeUser) return;
+  var el = document.getElementById('matsList');
+  el.innerHTML = '<div class="empty-state"><span class="emoji">⏳</span><p>Cargando…</p></div>';
+
+  ELDB.materiales.listar({ profesor: _profeUser.email }).then(function(mats) {
+    if (!mats.length) {
+      el.innerHTML = '<div class="empty-state"><span class="emoji">📂</span><p>No has subido materiales.<br><a href="material.html" style="color:var(--accent)">Sube tu primer recurso →</a></p></div>';
+      return;
+    }
+    var iconos = { guia: '📄', apunte: '📝', evaluacion: '📊', planificacion: '📅', ficha: '🗒️' };
+    el.innerHTML = mats.map(function(m) {
+      var f = m.fechaISO ? new Date(m.fechaISO).toLocaleDateString('es-CL') : '—';
+      var c = { guia:'#34d399', apunte:'#60a5fa', evaluacion:'#f43f5e', planificacion:'#818cf8', ficha:'#f59e0b' };
+      var clr = c[m.tipo] || '#94a3b8';
+      return '<div class="list-item">' +
+        '<span class="list-icon">' + (iconos[m.tipo] || '📎') + '</span>' +
+        '<div class="list-info">' +
+          '<div class="list-title">' + (m.titulo || 'Sin título') + '</div>' +
+          '<div class="list-meta">' + (m.modulo || m.asignatura || '—') + ' · ' + f + ' · ' + (m.vistas || 0) + ' vistas</div>' +
+        '</div>' +
+        '<span class="badge" style="background:' + clr + '18;color:' + clr + ';border:1px solid ' + clr + '33">' + (m.tipo || '?') + '</span>' +
+        '</div>';
+    }).join('');
+  }).catch(function(err) {
+    el.innerHTML = '<div class="empty-state"><span class="emoji">❌</span><p>Error al cargar: ' + err.message + '</p></div>';
+  });
+}
+
+// ── Mis planificaciones ─────────────────────────────────────
+function loadMisPlanificaciones() {
+  if (!_profeUser) return;
+  var el = document.getElementById('plansList');
+  el.innerHTML = '<div class="empty-state"><span class="emoji">⏳</span><p>Cargando…</p></div>';
+
+  ELDB.planificaciones.listar({ profesor: _profeUser.email }).then(function(plans) {
+    if (!plans.length) {
+      el.innerHTML = '<div class="empty-state"><span class="emoji">📋</span><p>Sin planificaciones.<br><a href="planificacion.html" style="color:var(--accent)">Crear primera →</a></p></div>';
+      return;
+    }
+    el.innerHTML = plans.map(function(p) {
+      var f = p.fechaClase ? new Date(p.fechaClase).toLocaleDateString('es-CL') : '—';
+      return '<div class="list-item">' +
+        '<span class="list-icon">📅</span>' +
+        '<div class="list-info">' +
+          '<div class="list-title">' + (p.titulo || 'Sin título') + '</div>' +
+          '<div class="list-meta">' + (p.modulo || p.asignatura || '—') + ' · Clase: ' + f + (p.horas ? ' · ' + p.horas + 'h' : '') + '</div>' +
+        '</div>' +
+        '</div>';
+    }).join('');
+  }).catch(function(err) {
+    el.innerHTML = '<div class="empty-state"><span class="emoji">❌</span><p>Error: ' + err.message + '</p></div>';
+  });
+}
+
+// ── Biblioteca ─────────────────────────────────────────────
+function loadBiblioteca() {
+  var el = document.getElementById('bibliotecaList');
+  el.innerHTML = '<div class="empty-state"><span class="emoji">⏳</span><p>Cargando biblioteca…</p></div>';
+
+  ELDB.materiales.listar().then(function(mats) {
+    if (!mats.length) {
+      el.innerHTML = '<div class="empty-state"><span class="emoji">📚</span><p>La biblioteca está vacía.</p></div>';
+      return;
+    }
+    var iconos = { guia: '📄', apunte: '📝', evaluacion: '📊', planificacion: '📅', ficha: '🗒️' };
+    el.innerHTML = '<table style="width:100%;border-collapse:collapse;font-size:.85rem">' +
+      '<thead><tr style="text-align:left">' +
+      '<th style="padding:8px 12px;color:var(--muted);font-size:.72rem;text-transform:uppercase">Título</th>' +
+      '<th style="padding:8px 12px;color:var(--muted);font-size:.72rem;text-transform:uppercase">Tipo</th>' +
+      '<th style="padding:8px 12px;color:var(--muted);font-size:.72rem;text-transform:uppercase">Módulo/Asig.</th>' +
+      '<th style="padding:8px 12px;color:var(--muted);font-size:.72rem;text-transform:uppercase">Profesor</th>' +
+      '<th style="padding:8px 12px;color:var(--muted);font-size:.72rem;text-transform:uppercase">Fecha</th>' +
+      '</tr></thead><tbody>' +
+      mats.map(function(m) {
+        var f = m.fechaISO ? new Date(m.fechaISO).toLocaleDateString('es-CL') : '—';
+        return '<tr style="border-bottom:1px solid rgba(99,102,241,.08)">' +
+          '<td style="padding:10px 12px"><strong>' + (m.titulo || 'Sin título') + '</strong></td>' +
+          '<td style="padding:10px 12px">' + (iconos[m.tipo] || '📎') + ' ' + (m.tipo || '—') + '</td>' +
+          '<td style="padding:10px 12px;color:var(--muted)">' + (m.modulo || m.asignatura || '—') + '</td>' +
+          '<td style="padding:10px 12px;color:var(--muted);font-size:.8rem">' + (m.profesor || m.email || '—') + '</td>' +
+          '<td style="padding:10px 12px;color:var(--muted);font-size:.8rem">' + f + '</td>' +
+          '</tr>';
+      }).join('') +
+      '</tbody></table>';
+  }).catch(function(err) {
+    el.innerHTML = '<div class="empty-state"><span class="emoji">❌</span><p>Error al cargar: ' + err.message + '</p></div>';
+  });
+}
+</script>
+</body>
+</html>
