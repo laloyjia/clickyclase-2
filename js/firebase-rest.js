@@ -338,8 +338,12 @@ var EL_DB = (function () {
       body:   JSON.stringify({ structuredQuery: sq })
     }).then(function (results) {
       if (!Array.isArray(results)) {
-        if (results && results.error)
+        if (results && results.error) {
+          // 400 = index requerido o colección vacía — devolver vacío silenciosamente
+          var code = results.error.code || 0;
+          if (code === 400 || code === 9) return _makeSnap([]);
           throw new Error(results.error.message || JSON.stringify(results.error));
+        }
         return _makeSnap([]);
       }
       var docs = results
