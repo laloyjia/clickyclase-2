@@ -1110,12 +1110,11 @@
     // INICIALIZACION
     // =============================================
     document.addEventListener('DOMContentLoaded', function() {
-        // Verificar autenticacion
-        const user = getCurrentUser();
-        if (!user || user.role !== 'profesor') {
-            window.location.href = 'index.html';
-            return;
-        }
+        // Verificar autenticacion (admin y profesor pueden acceder)
+        ELAuth.requireAuth(['profesor', 'admin']);
+
+        ELAuth.onUserReady(function(user) {
+            if (!user) return;
 
         // Llenar nombre del profesor
         document.getElementById('inputProfesor').value = user.name || '';
@@ -1140,7 +1139,8 @@
             item.innerHTML = '<input type="checkbox" value="' + n.id + '" data-nombre="' + n.nombre + '" data-desc="' + n.desc + '" onchange="toggleCheckItem(this)"> ' + n.nombre;
             contNEE.appendChild(item);
         });
-    });
+        }); // cierra onUserReady
+    }); // cierra DOMContentLoaded
 
     // =============================================
     // FUNCIONES DE INTERFAZ

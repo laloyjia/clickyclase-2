@@ -732,21 +732,23 @@
     // INICIALIZACION
     // =============================================
     document.addEventListener('DOMContentLoaded', function() {
-        var user = getCurrentUser();
-        if (!user || user.role !== 'profesor') {
-            window.location.href = 'index.html';
-            return;
-        }
-        document.getElementById('inputProfesor').value = user.name || '';
+        // Verificar autenticacion (admin y profesor pueden acceder)
+        ELAuth.requireAuth(['profesor', 'admin']);
 
-        var contValores = document.getElementById('valoresSalesianos');
-        VALORES_SALESIANOS.forEach(function(v) {
-            var item = document.createElement('label');
-            item.className = 'checkbox-item';
-            item.innerHTML = '<input type="checkbox" value="' + v + '" onchange="toggleCheckItem(this)"> ' + v;
-            contValores.appendChild(item);
-        });
-    });
+        ELAuth.onUserReady(function(user) {
+            if (!user) return;
+
+            document.getElementById('inputProfesor').value = user.name || '';
+
+            var contValores = document.getElementById('valoresSalesianos');
+            VALORES_SALESIANOS.forEach(function(v) {
+                var item = document.createElement('label');
+                item.className = 'checkbox-item';
+                item.innerHTML = '<input type="checkbox" value="' + v + '" onchange="toggleCheckItem(this)"> ' + v;
+                contValores.appendChild(item);
+            });
+        }); // cierra onUserReady
+    }); // cierra DOMContentLoaded
 
     // =============================================
     // FUNCIONES DE INTERFAZ (mismas cascadas)

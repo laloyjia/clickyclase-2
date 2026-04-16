@@ -1248,6 +1248,14 @@ var CURRICULA_CHILE = (function() {
         '1M':'1° Medio','2M':'2° Medio','3M':'3° Medio','4M':'4° Medio'
       };
       return map[nivel] || nivel;
+    },
+
+    // Retorna array [{key, nombre, sector}] para poblar selectores TP
+    getEspecialidades: function() {
+      var esp = this.especialidades;
+      return Object.keys(esp).map(function(key) {
+        return { key: key, nombre: esp[key].nombre, sector: esp[key].sector };
+      });
     }
   };
 })();
