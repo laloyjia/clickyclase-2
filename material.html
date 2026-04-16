@@ -567,45 +567,75 @@
         <!-- SECCION 2: OBJETIVOS CURRICULARES -->
         <div class="seccion-mat">
             <h2><span>&#127919;</span> Objetivos Curriculares</h2>
-            <div class="campo-row">
-                <div class="campo">
-                    <label>Curso</label>
-                    <select id="selectCurso" onchange="filtrarModulos()">
-                        <option value="">-- Seleccionar curso --</option>
-                        <option value="3ro">3ro Medio E</option>
-                        <option value="4to">4to Medio E</option>
+
+            <!-- Asignatura: visible sólo para básica/media -->
+            <div class="campo-row" id="campoAsignatura" style="display:none">
+                <div class="campo" style="grid-column:1/-1">
+                    <label>Asignatura</label>
+                    <select id="selectAsignatura" onchange="onCambioAsigNivelMat()">
+                        <option value="">-- Seleccionar asignatura --</option>
                     </select>
                 </div>
+            </div>
+
+            <div class="campo-row">
                 <div class="campo">
+                    <label>Curso / Nivel</label>
+                    <select id="selectCurso" onchange="onCambioAsigNivelMat()">
+                        <option value="">-- Seleccionar curso --</option>
+                    </select>
+                </div>
+
+                <!-- TP: Módulo -->
+                <div class="campo" id="campoModulo">
                     <label>Modulo</label>
                     <select id="selectModulo" onchange="cargarOA()">
                         <option value="">-- Primero selecciona un curso --</option>
                     </select>
                 </div>
             </div>
-            <div class="campo">
-                <label>Objetivo de Aprendizaje (OA)</label>
-                <select id="selectOA" onchange="cargarAE()">
-                    <option value="">-- Primero selecciona un modulo --</option>
-                </select>
-                <div id="infoOA" class="info-box" style="display:none;"></div>
-            </div>
-            <div class="campo">
-                <label>Aprendizaje Esperado (AE)</label>
-                <select id="selectAE" onchange="cargarCE()">
-                    <option value="">-- Primero selecciona un OA --</option>
-                </select>
-            </div>
-            <div class="campo">
-                <label>Criterios de Evaluacion (CE)</label>
-                <div id="listaCE" class="checkbox-group">
-                    <span style="color: var(--text-muted); font-size:0.85rem;">Selecciona un AE para ver los criterios</span>
+
+            <!-- ── Flujo TP: OA → AE → CE ── -->
+            <div id="sec-tp-mat">
+                <div class="campo">
+                    <label>Objetivo de Aprendizaje (OA)</label>
+                    <select id="selectOA" onchange="cargarAE()">
+                        <option value="">-- Primero selecciona un modulo --</option>
+                    </select>
+                    <div id="infoOA" class="info-box" style="display:none;"></div>
+                </div>
+                <div class="campo">
+                    <label>Aprendizaje Esperado (AE)</label>
+                    <select id="selectAE" onchange="cargarCE()">
+                        <option value="">-- Primero selecciona un OA --</option>
+                    </select>
+                </div>
+                <div class="campo">
+                    <label>Criterios de Evaluacion (CE)</label>
+                    <div id="listaCE" class="checkbox-group">
+                        <span style="color: var(--text-muted); font-size:0.85rem;">Selecciona un AE para ver los criterios</span>
+                    </div>
+                </div>
+                <div class="campo">
+                    <label>OAG asociados</label>
+                    <div id="listaOAG" class="oag-tags">
+                        <span style="color: var(--text-muted); font-size:0.85rem;">Se muestran automaticamente</span>
+                    </div>
                 </div>
             </div>
-            <div class="campo">
-                <label>OAG asociados</label>
-                <div id="listaOAG" class="oag-tags">
-                    <span style="color: var(--text-muted); font-size:0.85rem;">Se muestran automaticamente</span>
+
+            <!-- ── Flujo Regular (Básica/Media): OA Mineduc ── -->
+            <div id="sec-regular-mat" style="display:none">
+                <div class="campo">
+                    <label>Objetivos de Aprendizaje Mineduc</label>
+                    <p style="font-size:0.82rem;color:var(--text-muted);margin-bottom:0.5rem">Selecciona los OA para este material.</p>
+                    <div id="listaOAMineduc" class="checkbox-group">
+                        <span style="color:var(--text-muted);font-size:0.85rem">Selecciona asignatura y nivel para ver los OA.</span>
+                    </div>
+                </div>
+                <div class="campo">
+                    <label>Unidad / Período</label>
+                    <input type="text" id="inputUnidadReg" placeholder="Ej: Unidad 1 — Números naturales">
                 </div>
             </div>
         </div>
@@ -737,8 +767,9 @@
 
         ELAuth.onUserReady(function(user) {
             if (!user) return;
+            _matUser = user;
 
-            document.getElementById('inputProfesor').value = user.name || '';
+            document.getElementById('inputProfesor').value = user.nombre || user.name || '';
 
             var contValores = document.getElementById('valoresSalesianos');
             VALORES_SALESIANOS.forEach(function(v) {
@@ -747,6 +778,9 @@
                 item.innerHTML = '<input type="checkbox" value="' + v + '" onchange="toggleCheckItem(this)"> ' + v;
                 contValores.appendChild(item);
             });
+
+            // Inicializar curriculo según perfil del profesor
+            initCurriculoMat(user);
         }); // cierra onUserReady
     }); // cierra DOMContentLoaded
 
@@ -770,21 +804,157 @@
         else secRef.classList.remove('visible');
     }
 
-    function filtrarModulos() {
-        var nivel = document.getElementById('selectCurso').value;
-        var sel = document.getElementById('selectModulo');
-        sel.innerHTML = '<option value="">-- Seleccionar modulo --</option>';
-        if (!nivel) return;
-        var keys = Object.keys(MODULOS);
-        for (var i = 0; i < keys.length; i++) {
-            var m = MODULOS[keys[i]];
-            if (m.nivel === nivel) {
-                var opt = document.createElement('option');
-                opt.value = m.num;
-                opt.textContent = m.num + ' - ' + m.nombre + ' (' + m.horas + 'h)';
-                sel.appendChild(opt);
+    // =============================================
+    // CURRÍCULO ADAPTIVO POR TIPO DE PROFESOR
+    // =============================================
+    var _matUser = null;
+
+    var _SIGLA_MAP_MAT = {
+        'lenguaje y comunicación':'LEN','lenguaje':'LEN','lengua y literatura':'LEN',
+        'matemática':'MAT','matematica':'MAT',
+        'ciencias naturales':'CN',
+        'historia, geografía y cs':'HCS','historia':'HCS',
+        'inglés':'ING','ingles':'ING',
+        'biología':'BIO','biologia':'BIO',
+        'física':'FIS','fisica':'FIS',
+        'química':'QUI','quimica':'QUI',
+        'educación física':'EFI','educacion fisica':'EFI',
+        'artes visuales':'ART',
+        'música':'MUS','musica':'MUS'
+    };
+
+    function _resolveAsigSiglaMat(nombre) {
+        if (!nombre) return null;
+        var k = nombre.trim().toLowerCase()
+            .replace(/[áéíóúñ]/g, function(c){return {á:'a',é:'e',í:'i',ó:'o',ú:'u',ñ:'n'}[c]||c;});
+        if (_SIGLA_MAP_MAT[k]) return _SIGLA_MAP_MAT[k];
+        for (var key in _SIGLA_MAP_MAT) {
+            if (k.indexOf(key) !== -1 || key.indexOf(k) !== -1) return _SIGLA_MAP_MAT[key];
+        }
+        return null;
+    }
+
+    function initCurriculoMat(user) {
+        var isTP = user.tipoProfesor === 'tecnico';
+
+        // Poblar selectCurso
+        var selCurso = document.getElementById('selectCurso');
+        selCurso.innerHTML = '<option value="">-- Seleccionar curso --</option>';
+        (user.niveles || []).forEach(function(n) {
+            var opt = document.createElement('option');
+            opt.value = n;
+            opt.textContent = (typeof CURRICULA_CHILE !== 'undefined') ? CURRICULA_CHILE.getNivelLabel(n) : n;
+            selCurso.appendChild(opt);
+        });
+        if ((user.niveles || []).length === 1) selCurso.value = user.niveles[0];
+
+        var campoAsig  = document.getElementById('campoAsignatura');
+        var campoMod   = document.getElementById('campoModulo');
+        var secTP      = document.getElementById('sec-tp-mat');
+        var secReg     = document.getElementById('sec-regular-mat');
+
+        if (isTP) {
+            if (campoAsig)  campoAsig.style.display  = 'none';
+            if (campoMod)   campoMod.style.display   = '';
+            if (secTP)      secTP.style.display       = '';
+            if (secReg)     secReg.style.display      = 'none';
+            if ((user.niveles || []).length === 1) filtrarModulos();
+        } else {
+            if (campoAsig) campoAsig.style.display = '';
+            if (campoMod)  campoMod.style.display  = 'none';
+            if (secTP)     secTP.style.display      = 'none';
+            if (secReg)    secReg.style.display     = '';
+
+            var selAsig = document.getElementById('selectAsignatura');
+            if (selAsig) {
+                selAsig.innerHTML = '<option value="">-- Seleccionar asignatura --</option>';
+                (user.asignaturas || []).forEach(function(a) {
+                    var opt = document.createElement('option');
+                    opt.value = a; opt.textContent = a;
+                    selAsig.appendChild(opt);
+                });
+                if ((user.asignaturas || []).length === 1) selAsig.value = user.asignaturas[0];
+            }
+            if ((user.asignaturas || []).length === 1 && (user.niveles || []).length === 1) {
+                cargarOAsRegularMat();
             }
         }
+    }
+
+    function onCambioAsigNivelMat() {
+        var user = _matUser || {};
+        if (user.tipoProfesor === 'tecnico') {
+            filtrarModulos();
+        } else {
+            cargarOAsRegularMat();
+        }
+    }
+
+    function cargarOAsRegularMat() {
+        var container  = document.getElementById('listaOAMineduc');
+        if (!container) return;
+        var asigNombre = document.getElementById('selectAsignatura') ? document.getElementById('selectAsignatura').value : '';
+        var nivel      = document.getElementById('selectCurso') ? document.getElementById('selectCurso').value : '';
+        var sigla      = _resolveAsigSiglaMat(asigNombre);
+
+        if (!sigla || !nivel || typeof CURRICULA_CHILE === 'undefined') {
+            container.innerHTML = '<span style="color:var(--text-muted);font-size:0.85rem">Selecciona asignatura y nivel.</span>';
+            return;
+        }
+        var oas = CURRICULA_CHILE.getOAs(sigla, nivel);
+        if (!oas || !oas.length) {
+            container.innerHTML = '<span style="color:var(--text-muted);font-size:0.85rem">Sin OA para esta combinación.</span>';
+            return;
+        }
+        var byEje = {};
+        oas.forEach(function(o) { var e = o.eje || 'General'; if (!byEje[e]) byEje[e] = []; byEje[e].push(o); });
+        var html = '';
+        Object.keys(byEje).forEach(function(eje) {
+            html += '<div style="font-size:.78rem;color:var(--muted,#888);font-weight:700;margin:8px 0 4px;text-transform:uppercase">' + eje + '</div>';
+            byEje[eje].forEach(function(o) {
+                var desc = o.desc || o.descripcion || '';
+                var tip  = desc.replace(/"/g,'&quot;');
+                html += '<label class="checkbox-item" title="' + tip + '" style="align-items:flex-start;gap:8px">' +
+                    '<input type="checkbox" class="oaRegCheck" value="' + o.codigo + '" data-desc="' + tip + '" onchange="toggleCheckItem(this)">' +
+                    '<span><strong>' + o.codigo + '</strong> — ' + (desc.slice(0,110) || '…') + (desc.length > 110 ? '…' : '') + '</span></label>';
+            });
+        });
+        container.innerHTML = html;
+    }
+
+    function filtrarModulos() {
+        var nivel = document.getElementById('selectCurso').value;
+        var user  = _matUser || {};
+        var sel   = document.getElementById('selectModulo');
+        if (!sel) return;
+        sel.innerHTML = '<option value="">-- Seleccionar modulo --</option>';
+        if (!nivel) return;
+
+        var asignadosMods = user.modulos || [];
+        var espKey = user.especialidad || '';
+
+        if (typeof CURRICULA_CHILE !== 'undefined' && espKey) {
+            CURRICULA_CHILE.getModulos(espKey).forEach(function(m) {
+                if (asignadosMods.length === 0 || asignadosMods.indexOf(m.num) !== -1) {
+                    var opt = document.createElement('option');
+                    opt.value = m.num;
+                    opt.textContent = m.num + ' - ' + m.nombre + ' (' + m.horas + 'h)';
+                    sel.appendChild(opt);
+                }
+            });
+        } else {
+            var keys = Object.keys(MODULOS);
+            for (var i = 0; i < keys.length; i++) {
+                var m = MODULOS[keys[i]];
+                if (asignadosMods.length === 0 || asignadosMods.indexOf(m.num) !== -1) {
+                    var opt = document.createElement('option');
+                    opt.value = m.num;
+                    opt.textContent = m.num + ' - ' + m.nombre + ' (' + m.horas + 'h)';
+                    sel.appendChild(opt);
+                }
+            }
+        }
+
         document.getElementById('selectOA').innerHTML = '<option value="">-- Selecciona un modulo --</option>';
         document.getElementById('infoOA').style.display = 'none';
         document.getElementById('selectAE').innerHTML = '<option value="">-- Selecciona un OA --</option>';
@@ -883,19 +1053,69 @@
 
     function generarMaterial() {
         if (!tipoDocSeleccionado) { alert('Selecciona un tipo de documento.'); return; }
-        var curso = document.getElementById('selectCurso').value;
-        var modId = document.getElementById('selectModulo').value;
-        var oaId = document.getElementById('selectOA').value;
-        var aeNum = document.getElementById('selectAE').value;
+        var user      = _matUser || {};
+        var isTP      = user.tipoProfesor === 'tecnico';
+        var curso     = document.getElementById('selectCurso').value;
         var contenido = document.getElementById('inputContenido').value;
-        var dificultad = document.getElementById('selectDificultad').value;
-        var profesor = document.getElementById('inputProfesor').value;
+        var dificultad= document.getElementById('selectDificultad').value;
+        var profesor  = document.getElementById('inputProfesor').value;
 
-        if (!curso || !modId || !oaId || !aeNum) { alert('Completa al menos: Curso, Modulo, OA y AE.'); return; }
+        if (!curso) { alert('Selecciona el curso/nivel.'); return; }
+
+        var cursoTexto = typeof CURRICULA_CHILE !== 'undefined' ? CURRICULA_CHILE.getNivelLabel(curso) : curso;
+
+        // ── Modo regular: básica/media ────────────────────────────
+        if (!isTP) {
+            var asig = document.getElementById('selectAsignatura') ? document.getElementById('selectAsignatura').value : '';
+            var oasReg = [];
+            document.querySelectorAll('#listaOAMineduc .oaRegCheck:checked').forEach(function(cb) {
+                oasReg.push({ codigo: cb.value, descripcion: cb.getAttribute('data-desc') });
+            });
+            if (!asig) { alert('Selecciona la asignatura.'); return; }
+            if (!oasReg.length) { alert('Selecciona al menos un OA Mineduc.'); return; }
+            var oaTextoReg = oasReg.map(function(o){ return o.codigo + ': ' + o.descripcion; }).join('\n');
+            // Construir objeto mod/ae genérico para los generadores
+            var modFake = {
+                num: asig, nombre: asig, horas: 0,
+                oas: {}, aes: {1: { texto: oaTextoReg, ces: {} }}
+            };
+            modFake.oas[oasReg[0] ? oasReg[0].codigo : 'OA'] = oaTextoReg;
+            var aeFake = modFake.aes[1];
+            var cont = contenido || oaTextoReg;
+            var valoresArr = [];
+            document.querySelectorAll('#valoresSalesianos input:checked').forEach(function(cb){ valoresArr.push(cb.value); });
+            var html = '';
+            if (tipoDocSeleccionado === 'guia') html = generarGuiaAprendizaje(modFake, aeFake, 1, oasReg[0].codigo, cursoTexto, cont, [], dificultad, profesor, valoresArr);
+            else if (tipoDocSeleccionado === 'apunte') html = generarApunteClase(modFake, aeFake, 1, oasReg[0].codigo, cursoTexto, cont, [], dificultad, profesor, valoresArr);
+            else if (tipoDocSeleccionado === 'ficha')  html = generarFichaPractica(modFake, aeFake, 1, oasReg[0].codigo, cursoTexto, cont, [], dificultad, profesor, valoresArr);
+            else if (tipoDocSeleccionado === 'evaluacion') html = generarGuiaEjercicios(modFake, aeFake, 1, oasReg[0].codigo, cursoTexto, cont, [], dificultad, profesor, valoresArr);
+            document.getElementById('docPreview').innerHTML = html;
+            document.getElementById('docGenerado').classList.add('visible');
+            document.getElementById('docGenerado').scrollIntoView({ behavior: 'smooth' });
+            return;
+        }
+
+        // ── Modo TP ───────────────────────────────────────────────
+        var modId = document.getElementById('selectModulo').value;
+        var oaId  = document.getElementById('selectOA').value;
+        var aeNum = document.getElementById('selectAE').value;
+
+        if (!modId || !oaId || !aeNum) { alert('Completa al menos: Módulo, OA y AE.'); return; }
 
         var mod = MODULOS[modId];
-        var ae = mod.aes[aeNum];
-        var cursoTexto = curso === '3ro' ? '3ro Medio E' : '4to Medio E';
+        var ae = (mod && mod.aes) ? mod.aes[aeNum] : null;
+
+        // Si es especialidad sin datos detallados, crear objeto genérico
+        if (!mod) {
+            var allMods = typeof CURRICULA_CHILE !== 'undefined' ? CURRICULA_CHILE.getModulos(user.especialidad || '') : [];
+            var modCI = allMods.find(function(m){ return m.num === modId; }) || {num:modId, nombre:modId, horas:0};
+            mod = { num: modCI.num, nombre: modCI.nombre, horas: modCI.horas, oas: {}, aes: {1:{texto:contenido||modCI.nombre, ces:{}}} };
+            mod.oas[oaId || 'OA'] = contenido || modCI.nombre;
+            ae = mod.aes[1];
+            aeNum = 1;
+        }
+        if (!ae) { alert('Selecciona un AE.'); return; }
+
         var cont = contenido || ae.texto;
 
         // CE seleccionados
@@ -1713,7 +1933,8 @@
             modulo:      modId,
             ae:          aeNum,
             oa:          oaId,
-            curso:       (curso === '3ro' ? '3ro Medio E' : '4to Medio E'),
+            curso:       typeof CURRICULA_CHILE !== 'undefined' ? CURRICULA_CHILE.getNivelLabel(curso) : curso,
+            nivel:       curso,
             profesor:    prof,
             fecha:       new Date().toISOString(),
             contenido:   preview.innerHTML,
@@ -1721,12 +1942,16 @@
         };
 
         // Enriquecer con datos del usuario actual
-        var currentUserData = ELAuth.user || {};
+        var currentUserData = _matUser || ELAuth.user || {};
+        var isTPGuardar = currentUserData.tipoProfesor === 'tecnico';
+        var asigGuardar = isTPGuardar
+            ? (currentUserData.especialidad || '')
+            : (document.getElementById('selectAsignatura') ? document.getElementById('selectAsignatura').value : (currentUserData.asignaturas && currentUserData.asignaturas[0]) || '');
         Object.assign(entrada, {
             email:       currentUserData.email || '',
-            asignatura:  currentUserData.asignaturas ? currentUserData.asignaturas[0] : (currentUserData.especialidad || 'Electrónica'),
+            asignatura:  asigGuardar,
             especialidad:currentUserData.especialidad || '',
-            tipoProfesor:currentUserData.tipoProfesor || 'tecnico'
+            tipoProfesor:currentUserData.tipoProfesor || ''
         });
 
         // Guardar en Firebase Firestore (con fallback a localStorage)
