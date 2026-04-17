@@ -639,10 +639,14 @@
     <script src="js/firebase-db.js"></script>
     <script src="js/auth.js"></script>
     <script src="js/curricula-chile.js"></script>
+    <!-- Currículum por especialidad (CURRICULA_FULL + retrocompat MODULOS/OAG_DEFINICIONES) -->
     <script src="js/datos-curriculares.js"></script>
+    <script src="js/curricula/datos-electronica.js"></script>
+    <script src="js/curricula/datos-construccion.js"></script>
+    <!-- Agregar aquí nuevas especialidades: datos-informatica.js, datos-administracion.js, etc. -->
     <script>
-    // MODULOS y OAG_DEFINICIONES ya cargados desde datos-curriculares.js
-    // MODULOS contiene EN1-EN9, EN11 con datos completos de los PDFs Mineduc
+    // MODULOS y OAG_DEFINICIONES ya disponibles vía CURRICULA_FULL['electronica']
+    // Para otras especialidades usar getCurriculaModulos(user.especialidad)
 
 
 
@@ -894,12 +898,15 @@
 
         var added = 0;
 
-        if (typeof MODULOS !== 'undefined' && Object.keys(MODULOS).length > 0) {
-            // Prioridad 1: datos-curriculares.js (datos completos EN1–EN11)
-            Object.keys(MODULOS).forEach(function(key) {
-                var m = MODULOS[key];
+        // Prioridad 1: CURRICULA_FULL[especialidad] (datos completos por especialidad)
+        var modulosFull = (typeof getCurriculaModulos === 'function')
+            ? getCurriculaModulos(espKey)
+            : (typeof MODULOS !== 'undefined' ? MODULOS : {});
+
+        if (modulosFull && Object.keys(modulosFull).length > 0) {
+            Object.keys(modulosFull).forEach(function(key) {
+                var m = modulosFull[key];
                 if (asignadosMods.length === 0 || asignadosMods.indexOf(m.num) !== -1) {
-                    // Si hay nivel seleccionado, dar preferencia visual pero NO filtrar
                     addOpt(m.num, m.nombre, m.horas, m.nivel);
                     added++;
                 }
