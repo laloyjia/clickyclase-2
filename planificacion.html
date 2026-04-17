@@ -1376,83 +1376,89 @@
         var selectOA = document.getElementById('selectOA');
         selectOA.innerHTML = '<option value="">-- Seleccionar OA --</option>';
         document.getElementById('infoOA').style.display = 'none';
+        if (!modId) return;
 
-        if (!modId || !MODULOS[modId]) return;
+        // Try datos-curriculares.js first (Electrónica full data)
+        var mod = MODULOS[modId] || null;
 
-        var mod = MODULOS[modId];
-        var oaKeys = Object.keys(mod.oas);
-        for (var i = 0; i < oaKeys.length; i++) {
-            var opt = document.createElement('option');
-            opt.value = oaKeys[i];
-            opt.textContent = oaKeys[i];
-            selectOA.appendChild(opt);
+        // Fallback: CURRICULA_CHILE compat
+        if (!mod && _planifUser && _planifUser.especialidad && typeof CURRICULA_CHILE !== 'undefined') {
+            mod = CURRICULA_CHILE.getModuloCompat(_planifUser.especialidad, modId);
         }
 
+        if (!mod || !mod.oas) return;
+
+        Object.keys(mod.oas).forEach(function(key) {
+            var opt = document.createElement('option');
+            opt.value = key;
+            var textoOA = mod.oas[key] || key;
+            opt.textContent = key + ': ' + (textoOA.length > 80 ? textoOA.slice(0, 80) + '...' : textoOA);
+            selectOA.appendChild(opt);
+        });
+
         document.getElementById('selectAE').innerHTML = '<option value="">-- Selecciona un OA --</option>';
-        document.getElementById('listaCE').innerHTML = '<span style="color: var(--text-muted); font-size:0.85rem;">Selecciona un AE para ver los criterios</span>';
-        document.getElementById('listaOAG').innerHTML = '<span style="color: var(--text-muted); font-size:0.85rem;">Los OAG se muestran automaticamente</span>';
+        document.getElementById('listaCE').innerHTML = '<span style="color:var(--text-muted);font-size:.85rem">Selecciona un AE</span>';
+        document.getElementById('listaOAG').innerHTML = '<span style="color:var(--text-muted);font-size:.85rem">Los OAG se muestran automáticamente</span>';
     }
 
     function cargarAE() {
         var modId = document.getElementById('selectModulo').value;
-        var oaId = document.getElementById('selectOA').value;
+        var oaId  = document.getElementById('selectOA').value;
         var selectAE = document.getElementById('selectAE');
-        var infoOA = document.getElementById('infoOA');
+        var infoOA   = document.getElementById('infoOA');
         selectAE.innerHTML = '<option value="">-- Seleccionar AE --</option>';
+        if (!modId || !oaId) return;
 
-        if (!modId || !oaId || !MODULOS[modId]) return;
+        var mod = MODULOS[modId] || null;
+        if (!mod && _planifUser && _planifUser.especialidad && typeof CURRICULA_CHILE !== 'undefined') {
+            mod = CURRICULA_CHILE.getModuloCompat(_planifUser.especialidad, modId);
+        }
+        if (!mod || !mod.oas) return;
 
-        var mod = MODULOS[modId];
-
-        // Mostrar texto del OA
-        infoOA.textContent = oaId + ': ' + mod.oas[oaId];
+        infoOA.textContent = oaId + ': ' + (mod.oas[oaId] || '');
         infoOA.style.display = 'block';
 
-        // Llenar AE
         var aeKeys = Object.keys(mod.aes);
-        for (var i = 0; i < aeKeys.length; i++) {
-            var num = aeKeys[i];
+        aeKeys.forEach(function(num) {
             var ae = mod.aes[num];
             var opt = document.createElement('option');
             opt.value = num;
-            var textoCorto = ae.texto.length > 100 ? ae.texto.substring(0, 100) + '...' : ae.texto;
-            opt.textContent = 'AE ' + num + ': ' + textoCorto;
+            var txt = ae.texto || '';
+            opt.textContent = 'AE ' + num + ': ' + (txt.length > 100 ? txt.slice(0, 100) + '...' : txt);
             selectAE.appendChild(opt);
-        }
+        });
 
-        document.getElementById('listaCE').innerHTML = '<span style="color: var(--text-muted); font-size:0.85rem;">Selecciona un AE para ver los criterios</span>';
-        document.getElementById('listaOAG').innerHTML = '<span style="color: var(--text-muted); font-size:0.85rem;">Los OAG se muestran automaticamente</span>';
+        document.getElementById('listaCE').innerHTML = '<span style="color:var(--text-muted);font-size:.85rem">Selecciona un AE</span>';
+        document.getElementById('listaOAG').innerHTML = '<span style="color:var(--text-muted);font-size:.85rem">Los OAG se muestran automáticamente</span>';
     }
 
     function cargarCE() {
-        var modId = document.getElementById('selectModulo').value;
-        var aeNum = document.getElementById('selectAE').value;
-        var listaCE = document.getElementById('listaCE');
+        var modId  = document.getElementById('selectModulo').value;
+        var aeNum  = document.getElementById('selectAE').value;
+        var listaCE  = document.getElementById('listaCE');
         var listaOAG = document.getElementById('listaOAG');
-        listaCE.innerHTML = '';
+        listaCE.innerHTML  = '';
         listaOAG.innerHTML = '';
+        if (!modId || !aeNum) return;
 
-        if (!modId || !aeNum || !MODULOS[modId] || !MODULOS[modId].aes[aeNum]) return;
+        var mod = MODULOS[modId] || null;
+        if (!mod && _planifUser && _planifUser.especialidad && typeof CURRICULA_CHILE !== 'undefined') {
+            mod = CURRICULA_CHILE.getModuloCompat(_planifUser.especialidad, modId);
+        }
+        if (!mod || !mod.aes || !mod.aes[aeNum]) return;
 
-        var ae = MODULOS[modId].aes[aeNum];
-
-        var ceKeys = Object.keys(ae.ces);
-        for (var i = 0; i < ceKeys.length; i++) {
-            var key = ceKeys[i];
+        var ae = mod.aes[aeNum];
+        Object.keys(ae.ces).forEach(function(key) {
             var ce = ae.ces[key];
             var item = document.createElement('label');
             item.className = 'checkbox-item ce-item checked';
-            item.innerHTML = '<input type="checkbox" value="' + key + '" data-oag="' + ce.oag.join(',') + '" checked onchange="toggleCheckItem(this); actualizarOAG()"> <strong>' + key + '</strong> - ' + ce.texto;
+            item.innerHTML = '<input type="checkbox" value="' + key + '" data-oag="' + ce.oag.join(',') + '" checked onchange="toggleCheckItem(this); actualizarOAG()"> <strong>' + key + '</strong> — ' + ce.texto;
             listaCE.appendChild(item);
-        }
+        });
 
         actualizarOAG();
-        // Mostrar recomendaciones curriculares
         if (typeof renderRecomendaciones === 'function') {
-            var modId  = document.getElementById('selectModulo').value;
-            var aeNum  = document.getElementById('selectAE').value;
-            var oaId   = document.getElementById('selectOA').value;
-            renderRecomendaciones(modId, aeNum, oaId);
+            renderRecomendaciones(modId, aeNum, document.getElementById('selectOA').value);
         }
     }
 
@@ -1830,6 +1836,9 @@
 
         // Intentar usar CURRICULA_CHILE para este módulo
         var mod = MODULOS[modId] || null;
+        if (!mod && _planifUser && _planifUser.especialidad && typeof CURRICULA_CHILE !== 'undefined') {
+            mod = CURRICULA_CHILE.getModuloCompat(_planifUser.especialidad, modId);
+        }
         var ae  = (mod && mod.aes) ? mod.aes[aeNum] : null;
         var cursoTexto = typeof CURRICULA_CHILE !== 'undefined'
             ? CURRICULA_CHILE.getNivelLabel(curso)

@@ -372,6 +372,22 @@ tr:hover td{background:rgba(99,102,241,.05)}
       </select>
     </div>
     <div id="ppAsigSection"></div>
+    <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border)">
+      <div class="form-group" style="margin-bottom:12px">
+        <label>📋 Clase(s) asignada(s)</label>
+        <input id="ppCursos" placeholder="ej: 3° Medio A, 4° Medio B"
+               style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-size:.875rem;width:100%;outline:none">
+      </div>
+      <label style="font-size:.85rem;font-weight:600;margin-bottom:8px;display:block">🔐 Permisos</label>
+      <div style="display:flex;gap:16px;flex-wrap:wrap">
+        <label style="display:flex;align-items:center;gap:6px;font-size:.85rem;cursor:pointer">
+          <input type="checkbox" id="ppPermPlan"> 📅 Puede planificar
+        </label>
+        <label style="display:flex;align-items:center;gap:6px;font-size:.85rem;cursor:pointer">
+          <input type="checkbox" id="ppPermMat"> 📚 Puede crear material
+        </label>
+      </div>
+    </div>
     <div style="text-align:right;margin-top:20px;display:flex;gap:8px;justify-content:flex-end">
       <button class="btn btn-outline" onclick="closeModal('modalPermProf')">Cancelar</button>
       <button class="btn btn-primary" id="btnGuardarPermisos" onclick="guardarPermisos()">💾 Guardar Permisos</button>
@@ -417,7 +433,7 @@ tr:hover td{background:rgba(99,102,241,.05)}
 
 <script>
 var allUsers=[], allMats=[], allPlans=[], allRecursos=[];
-var wData={tipo:null,asignaturas:[],niveles:[],especialidad:'',modulos:[]};
+var wData={tipo:null,asignaturas:[],niveles:[],especialidad:'',modulos:[],cursos:[],permisos:{planificar:true,crearMaterial:true}};
 var editingUid=null;
 var _rCurrentTab='tp';
 
@@ -566,7 +582,7 @@ function desactivar(uid){if(!confirm('¿Desactivar usuario?'))return;ELAuth.admi
 
 // WIZARD
 function abrirWizard(){
-  wData={tipo:null,asignaturas:[],niveles:[],especialidad:'',modulos:[]};
+  wData={tipo:null,asignaturas:[],niveles:[],especialidad:'',modulos:[],cursos:[],permisos:{planificar:true,crearMaterial:true}};
   ['pNombre','pEmail','pPass'].forEach(function(id){document.getElementById(id).value='';});
   document.querySelectorAll('.tipo-card').forEach(function(c){c.classList.remove('selected');});
   document.querySelectorAll('.wstep').forEach(function(s){s.className='wstep';});
@@ -605,24 +621,44 @@ function wPrev(step){
 
 function buildStep3(){
   var t=wData.tipo,html='';
+  var permHtml='<div style="margin-top:18px;padding-top:14px;border-top:1px solid var(--border)">'+
+    '<h3 style="margin-bottom:10px;font-size:.9rem">📋 Clase asignada</h3>'+
+    '<div class="form-group" style="margin-bottom:12px">'+
+      '<label style="font-size:.8rem;color:var(--muted)">Ej: 3° Medio A, 2° Básico B</label>'+
+      '<input id="wCursos" placeholder="Ingresa el o los cursos, separados por coma" '+
+             'style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-size:.875rem;width:100%;outline:none" '+
+             'onchange="wData.cursos=this.value.split(\',\').map(function(s){return s.trim();}).filter(Boolean)">'+
+    '</div>'+
+    '<h3 style="margin-bottom:10px;font-size:.9rem">🔐 Permisos del docente</h3>'+
+    '<div style="display:flex;gap:16px;flex-wrap:wrap">'+
+      '<label style="display:flex;align-items:center;gap:6px;font-size:.85rem;cursor:pointer">'+
+        '<input type="checkbox" id="wPermPlan" checked onchange="wData.permisos.planificar=this.checked">'+
+        '📅 Puede crear planificaciones'+
+      '</label>'+
+      '<label style="display:flex;align-items:center;gap:6px;font-size:.85rem;cursor:pointer">'+
+        '<input type="checkbox" id="wPermMat" checked onchange="wData.permisos.crearMaterial=this.checked">'+
+        '📚 Puede crear material'+
+      '</label>'+
+    '</div>'+
+  '</div>';
   if(t==='basica'){
     html+='<h3 style="margin-bottom:12px">📚 Asignaturas — Educación Básica</h3><div class="multi-select-box" id="asigBox">';
     CURRICULA_CHILE.basica.asignaturas.forEach(function(a){html+='<label><input type="checkbox" value="'+a.nombre+'" onchange="tgAsig(this)"><span class="cdot" style="background:'+a.color+'"></span>'+a.nombre+'</label>';});
     html+='</div><h3 style="margin:16px 0 12px">Niveles asignados</h3><div class="multi-select-box" id="nivBox">';
     ['1B','2B','3B','4B','5B','6B','7B','8B'].forEach(function(n){html+='<label><input type="checkbox" value="'+n+'" onchange="tgNiv(this)">'+n+'</label>';});
-    html+='</div>';
+    html+='</div>'+permHtml;
   }else if(t==='media'){
     html+='<h3 style="margin-bottom:12px">🎓 Asignaturas — Plan Común</h3><div class="multi-select-box" id="asigBox">';
     CURRICULA_CHILE.planComun.asignaturas.forEach(function(a){html+='<label><input type="checkbox" value="'+a.nombre+'" onchange="tgAsig(this)"><span class="cdot" style="background:'+a.color+'"></span>'+a.nombre+'</label>';});
     html+='</div><h3 style="margin:16px 0 12px">Niveles asignados</h3><div class="multi-select-box" id="nivBox">';
     ['1M','2M','3M','4M'].forEach(function(n){html+='<label><input type="checkbox" value="'+n+'" onchange="tgNiv(this)">'+n+' Medio</label>';});
-    html+='</div>';
+    html+='</div>'+permHtml;
   }else{
     html+='<h3 style="margin-bottom:12px">⚙️ Especialidad EMTP</h3><div class="form-group"><label>Especialidad</label><select id="espSel" onchange="loadMods()"><option value="">-- Selecciona --</option>';
     CURRICULA_CHILE.getEspecialidades().forEach(function(e){html+='<option value="'+e.key+'">'+e.nombre+' ('+e.sector+')</option>';});
     html+='</select></div><div id="modsBox" style="margin-top:12px"></div><h3 style="margin:16px 0 12px">Niveles</h3><div class="multi-select-box" id="nivBox">';
     ['3M','4M'].forEach(function(n){html+='<label><input type="checkbox" value="'+n+'" onchange="tgNiv(this)">'+n+' Medio</label>';});
-    html+='</div>';
+    html+='</div>'+permHtml;
   }
   document.getElementById('sp3Content').innerHTML=html;
   wData.asignaturas.forEach(function(a){var cb=document.querySelector('#asigBox input[value="'+a+'"]');if(cb)cb.checked=true;});
@@ -652,6 +688,8 @@ function buildStep4(){
   if(wData.especialidad)html+='<div style="display:flex;gap:16px"><span style="color:var(--muted);min-width:120px">Especialidad:</span><strong>'+wData.especialidad+'</strong></div>';
   if(wData.modulos.length)html+='<div style="display:flex;gap:16px"><span style="color:var(--muted);min-width:120px">Módulos:</span><span>'+wData.modulos.join(', ')+'</span></div>';
   html+='<div style="display:flex;gap:16px"><span style="color:var(--muted);min-width:120px">Niveles:</span><span>'+wData.niveles.join(', ')+'</span></div>';
+  if(wData.cursos&&wData.cursos.length)html+='<div style="display:flex;gap:16px"><span style="color:var(--muted);min-width:120px">Clase(s):</span><span>'+wData.cursos.join(', ')+'</span></div>';
+  html+='<div style="display:flex;gap:16px"><span style="color:var(--muted);min-width:120px">Permisos:</span><span>'+(wData.permisos.planificar?'📅 Planificar ':'')+(wData.permisos.crearMaterial?'📚 Material':'')+'</span></div>';
   html+='</div>';
   document.getElementById('sp4Preview').innerHTML=html;
 }
@@ -659,7 +697,7 @@ function buildStep4(){
 function crearProfesor(){
   var btn=document.getElementById('btnCrear');
   btn.disabled=true;btn.innerHTML='<span class="spinner"></span> Creando…';
-  ELAuth.adminCrearProfesor({nombre:document.getElementById('pNombre').value.trim(),email:document.getElementById('pEmail').value.trim(),password:document.getElementById('pPass').value,tipoProfesor:wData.tipo,asignaturas:wData.asignaturas,especialidad:wData.especialidad,modulos:wData.modulos,niveles:wData.niveles})
+  ELAuth.adminCrearProfesor({nombre:document.getElementById('pNombre').value.trim(),email:document.getElementById('pEmail').value.trim(),password:document.getElementById('pPass').value,tipoProfesor:wData.tipo,asignaturas:wData.asignaturas,especialidad:wData.especialidad,modulos:wData.modulos,niveles:wData.niveles,cursos:wData.cursos,permisos:wData.permisos})
   .then(function(){
     notif('wNotif','✅ Profesor creado. Puede ingresar con su correo y contraseña desde cualquier dispositivo.','ok');
     loadData();btn.disabled=false;btn.innerHTML='✅ Crear Profesor';
@@ -848,6 +886,9 @@ function editarPermisos(uid) {
   };
   document.getElementById('ppTipo').value = _ppData.tipo;
   ppBuildAsig();
+  document.getElementById('ppCursos').value = (prof.cursos || []).join(', ');
+  document.getElementById('ppPermPlan').checked = prof.permisos ? prof.permisos.planificar !== false : true;
+  document.getElementById('ppPermMat').checked  = prof.permisos ? prof.permisos.crearMaterial !== false : true;
   document.getElementById('modalPermProf').classList.add('open');
 }
 
@@ -938,7 +979,12 @@ function guardarPermisos() {
     asignaturas:  _ppData.asignaturas,
     niveles:      _ppData.niveles,
     especialidad: _ppData.especialidad,
-    modulos:      _ppData.modulos
+    modulos:      _ppData.modulos,
+    cursos:       document.getElementById('ppCursos').value.split(',').map(function(s){return s.trim();}).filter(Boolean),
+    permisos: {
+      planificar:    document.getElementById('ppPermPlan').checked,
+      crearMaterial: document.getElementById('ppPermMat').checked
+    }
   };
   ELDB.usuarios.actualizar(uid, datos)
     .then(function() {

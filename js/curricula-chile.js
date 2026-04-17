@@ -953,40 +953,39 @@ var CURRICULA_CHILE = (function() {
         sigla:  'EL',
         modulos: [
           { num:"E1", nombre:"Instalación De Motores Eléctricos", horas:152, aes:[
-          {num:1, nombre:"instala motores"},
-          {num:2, nombre:"instala equipos de"}
+          {num:1, nombre:"Instala motores eléctricos", texto:"Instala motores eléctricos monofásicos y trifásicos según normativa vigente NCh Elec 4/2003, seleccionando correctamente los elementos de protección y control, verificando el sentido de giro y usando instrumentos de medición."},
+          {num:2, nombre:"Instala equipos de protección y maniobra", texto:"Instala equipos de protección y maniobra para motores eléctricos (contactores, relés térmicos, guardamotores), verificando su correcto funcionamiento según especificaciones técnicas del fabricante."}
           ]},
           { num:"E2", nombre:"Instalaciones Eléctricas Domiciliarias", horas:228, aes:[
-          {num:1, nombre:"Monta ductos y"},
-          {num:2, nombre:"realiza cableado"},
-          {num:3, nombre:"instala tablero"}
+          {num:1, nombre:"Monta ductos y canaletas", texto:"Monta ductos, canaletas y accesorios para instalaciones eléctricas domiciliarias según planos de proyecto y normativa vigente, respetando las dimensiones y trayectorias establecidas."},
+          {num:2, nombre:"Realiza cableado de circuitos", texto:"Realiza cableado de circuitos eléctricos domiciliarios (iluminación, enchufes, fuerza) según especificaciones técnicas y normativa NCh Elec 4/2003, verificando continuidad y aislación."},
+          {num:3, nombre:"Instala tablero eléctrico domiciliario", texto:"Instala tablero eléctrico domiciliario con todos sus componentes (interruptores termomagnéticos, diferencial, puesta a tierra) según normativa vigente."}
           ]},
           { num:"E3", nombre:"Elaboración De Proyectos Eléctricos", horas:228, aes:[
-          {num:1, nombre:"Utiliza sistemas"},
-          {num:2, nombre:"Dibuja circuitos"},
-          {num:3, nombre:"Dimensiona cantidad"}
+          {num:1, nombre:"Utiliza sistemas de diseño asistido", texto:"Utiliza sistemas de diseño asistido por computador (AutoCAD Electrical u similar) para elaborar planos eléctricos, aplicando simbología normalizada."},
+          {num:2, nombre:"Dibuja circuitos eléctricos", texto:"Dibuja circuitos eléctricos de control, mando y fuerza según normativa, calculando cargas y caídas de tensión."},
+          {num:3, nombre:"Dimensiona materiales y calcula presupuestos", texto:"Dimensiona cantidad de materiales y calcula presupuestos de instalaciones eléctricas a partir de planos de proyecto."}
           ]},
           { num:"E4", nombre:"Mantenimiento De Máquinas", horas:228, aes:[
-          {num:4, nombre:"restablecer o mejorar"}
+          {num:4, nombre:"Restablecer condiciones operacionales", texto:"Restablecer o mejorar las condiciones operacionales de máquinas y equipos eléctricos, aplicando procedimientos de mantenimiento preventivo y correctivo según plan establecido y normativa vigente."}
           ]},
           { num:"E5", nombre:"Instalación De Sistemas", horas:228, aes:[
-          {num:1, nombre:"instala circuitos"},
-          {num:1, nombre:"instala circuitos"},
-          {num:2, nombre:"instala circuitos"},
-          {num:3, nombre:"instala tablero"},
-          {num:4, nombre:"instala cuadros"}
+          {num:1, nombre:"Instala circuitos de control", texto:"Instala circuitos de control y señalización para sistemas eléctricos industriales, siguiendo planos y normativa vigente."},
+          {num:2, nombre:"Instala circuitos de automatización", texto:"Instala circuitos de automatización (PLC, sensores, actuadores) para sistemas eléctricos industriales según especificaciones técnicas."},
+          {num:3, nombre:"Instala tablero de distribución industrial", texto:"Instala tablero de distribución industrial con todos sus elementos de protección y control, verificando el correcto funcionamiento."},
+          {num:4, nombre:"Instala cuadros eléctricos de fuerza", texto:"Instala cuadros eléctricos de fuerza y control, verificando tensiones, corrientes y aislaciones según normativa."}
           ]},
           { num:"E6", nombre:"Instalaciones Eléctricas Industriales", horas:228, aes:[
-          {num:1, nombre:"Ejecuta instalación"},
-          {num:2, nombre:"realiza instalación"},
-          {num:3, nombre:"instala tablero"}
+          {num:1, nombre:"Ejecuta instalación de iluminación industrial", texto:"Ejecuta instalación de sistemas de iluminación industrial (luminarias, reflectores, emergencia) según planos y normativa, verificando niveles de iluminancia."},
+          {num:2, nombre:"Realiza instalación de distribución eléctrica", texto:"Realiza instalación de sistemas de distribución eléctrica industrial (bandejas, ductos, conductores) según especificaciones técnicas y normativa vigente."},
+          {num:3, nombre:"Instala tablero eléctrico industrial", texto:"Instala tablero eléctrico industrial con bus de barras, interruptores de poder y elementos de protección, verificando coordinación de protecciones."}
           ]},
           { num:"E7", nombre:"Instalación De Equipos Electrónicos", horas:152, aes:[
-          {num:1, nombre:"instala dispositivos"},
-          {num:2, nombre:"instala circuitos de"}
+          {num:1, nombre:"Instala dispositivos electrónicos de control", texto:"Instala dispositivos electrónicos de control (variadores de frecuencia, arrancadores suaves, UPS) para equipos industriales, configurando parámetros según requerimientos del proceso."},
+          {num:2, nombre:"Instala circuitos de control electrónico", texto:"Instala circuitos de control electrónico (PLC básico, HMI, sensores de proximidad) verificando el correcto funcionamiento del sistema automatizado."}
           ]},
           { num:"E8", nombre:"Automatización De Sistemas Eléctricos", horas:152, aes:[
-          {num:1, nombre:"Maneja y ajusta"}
+          {num:1, nombre:"Maneja y ajusta controladores lógicos", texto:"Maneja y ajusta controladores lógicos programables (PLC), programando secuencias de control para automatizar procesos eléctricos industriales según especificaciones técnicas."}
           ]}
         ]
       }
@@ -1005,49 +1004,48 @@ var CURRICULA_CHILE = (function() {
         sigla:  'MA',
         modulos: [
           { num:"A1", nombre:"Ajuste De Motores", horas:228, aes:[
-          {num:1, nombre:"Diagnostica el estado"},
-          {num:2, nombre:"Verifica y reemplaza"},
-          {num:3, nombre:"Verifica el estado"},
-          {num:4, nombre:"Reemplaza y prueba"}
+          {num:1, nombre:"Diagnostica el estado técnico del motor", texto:"Diagnostica el estado técnico del motor de combustión interna usando instrumentos de medición (manómetro de compresión, vacuómetro, osciloscopio automotriz), identificando fallas y determinando necesidad de ajuste."},
+          {num:2, nombre:"Verifica y reemplaza sistema de distribución", texto:"Verifica y reemplaza componentes del sistema de distribución (correa, cadena, árbol de levas, válvulas) según especificaciones del fabricante, ajustando holguras y sincronización."},
+          {num:3, nombre:"Verifica estado de pistones y cilindros", texto:"Verifica el estado de pistones, aros, cilindros y cigüeñal mediante mediciones con micrómetro y calibres, determinando desgastes y necesidad de rectificación."},
+          {num:4, nombre:"Reemplaza sistema de lubricación y enfriamiento", texto:"Reemplaza y prueba el sistema de lubricación y enfriamiento del motor, verificando presiones, caudales y temperaturas de operación según especificaciones."}
           ]},
           { num:"A13", nombre:"Electromovilidad", horas:76, aes:[
-          {num:5, nombre:"componentes de"}
+          {num:5, nombre:"Componentes de vehículos eléctricos e híbridos", texto:"Identifica y describe los componentes principales de vehículos eléctricos e híbridos (batería de alta tensión, motor eléctrico, inversor, BMS), reconociendo principios de funcionamiento y protocolos de seguridad para trabajo en alta tensión."}
           ]},
           { num:"A2", nombre:"Lectura De Planos Y Manuales Técnicos", horas:152, aes:[
-          {num:1, nombre:"lee e interpreta"},
-          {num:2, nombre:"lee e interpreta"},
-          {num:3, nombre:"Diagnostica y"}
+          {num:1, nombre:"Lee e interpreta planos mecánicos y eléctricos", texto:"Lee e interpreta planos mecánicos y eléctricos de vehículos (diagramas de cableado, planos hidráulicos, esquemas de transmisión) identificando componentes y trayectorias de circuitos."},
+          {num:2, nombre:"Lee e interpreta manuales técnicos de taller", texto:"Lee e interpreta manuales técnicos de taller y fichas técnicas de vehículos, extrayendo información de especificaciones, procedimientos de diagnóstico y valores de ajuste."},
+          {num:3, nombre:"Diagnostica y localiza fallas con manuales", texto:"Diagnostica y localiza fallas usando información de manuales técnicos y planos, aplicando métodos sistemáticos de diagnóstico."}
           ]},
           { num:"A3", nombre:"Manejo De Residuos Y Desechos Automotrices", horas:76, aes:[
-          {num:1, nombre:"Reconoce los"}
+          {num:1, nombre:"Reconoce tipos de residuos del taller", texto:"Reconoce los diferentes tipos de residuos y desechos generados en el taller automotriz (aceites usados, filtros, baterías, neumáticos) y aplica procedimientos de gestión según normativa medioambiental vigente."}
           ]},
           { num:"A4", nombre:"Mantenimiento De Sistemas De Seguridad", horas:152, aes:[
-          {num:1, nombre:"lee e interpreta"},
-          {num:3, nombre:"lee e interpreta"},
-          {num:4, nombre:"de vehículos"}
+          {num:1, nombre:"Lee e interpreta planos de sistemas de seguridad", texto:"Lee e interpreta planos y manuales de sistemas de seguridad activa y pasiva del vehículo (ABS, airbag, cinturones)."},
+          {num:3, nombre:"Lee e interpreta diagramas eléctricos de seguridad", texto:"Lee e interpreta diagramas eléctricos de sistemas de seguridad para diagnóstico de fallas."},
+          {num:4, nombre:"Diagnostica y mantiene sistemas de seguridad", texto:"Diagnostica y mantiene sistemas de seguridad de vehículos (frenos ABS, control de tracción, airbag) según especificaciones del fabricante."}
           ]},
           { num:"A5", nombre:"Mantenimiento De Sistemas Eléctricos", horas:228, aes:[
-          {num:1, nombre:"Diagnostica y"},
-          {num:2, nombre:"Reemplaza y prueba"},
-          {num:3, nombre:"Reemplaza y prueba"},
-          {num:4, nombre:"aplica procedimientos"}
+          {num:1, nombre:"Diagnostica fallas en sistema eléctrico", texto:"Diagnostica y localiza fallas en el sistema eléctrico del vehículo (batería, alternador, motor de arranque) usando multímetro y scanner automotriz."},
+          {num:2, nombre:"Reemplaza componentes de encendido electrónico", texto:"Reemplaza y prueba componentes del sistema de encendido electrónico (bobinas, sensores, módulo ECU), verificando sincronización y parámetros de funcionamiento."},
+          {num:3, nombre:"Reemplaza componentes del sistema de carga", texto:"Reemplaza y prueba componentes del sistema de carga (alternador, regulador de tensión), verificando corriente y tensión de carga."},
+          {num:4, nombre:"Aplica diagnóstico electrónico OBD2", texto:"Aplica procedimientos de diagnóstico de sistemas electrónicos del vehículo usando scanner automotriz, interpretando códigos de falla (DTC)."}
           ]},
           { num:"A6", nombre:"Mantenimiento De Motores", horas:190, aes:[
-          {num:1, nombre:"Controla el"}
+          {num:1, nombre:"Controla estado técnico mediante diagnóstico avanzado", texto:"Controla el estado técnico del motor mediante diagnóstico electrónico avanzado (diagnóstico OBD2, análisis de gases, prueba de cilindros) y realiza ajustes de parámetros de inyección y encendido."}
           ]},
           { num:"A7", nombre:"Mantenimiento De Sistemas Hidráulicos", horas:190, aes:[
-          {num:1, nombre:"Prueba los diferentes"},
-          {num:7, nombre:"fabricante y a"},
-          {num:7, nombre:"apropiados, de las especificaciones técnicas establecidas en el manual I K"}
+          {num:1, nombre:"Prueba circuitos hidráulicos del vehículo", texto:"Prueba los diferentes circuitos hidráulicos del vehículo (dirección hidráulica, frenos hidráulicos, transmisión automática) verificando presiones y caudales según especificaciones del fabricante."},
+          {num:7, nombre:"Mantiene y repara componentes hidráulicos", texto:"Mantiene y repara componentes hidráulicos de acuerdo a las especificaciones técnicas del fabricante, aplicando procedimientos apropiados."}
           ]},
           { num:"A8", nombre:"Mantenimiento De Los Sistemas De Transmisión", horas:190, aes:[
-          {num:8, nombre:"acuerdo a las pautas de mantenimiento del fabricante, de inspección y diagnóstico de fallas."}
+          {num:8, nombre:"Mantiene y repara transmisión manual y automática", texto:"Mantiene y repara la transmisión manual y automática del vehículo, caja de cambios, diferencial y semiejes, de acuerdo a las pautas de mantenimiento del fabricante y protocolos de inspección y diagnóstico de fallas."}
           ]},
           { num:"A9", nombre:"Mantenimiento De Sistemas De Dirección", horas:190, aes:[
-          {num:1, nombre:"inspecciona"},
-          {num:2, nombre:"aplica mantenimiento"},
-          {num:3, nombre:"inspecciona"},
-          {num:5, nombre:"Realiza diagnóstico"}
+          {num:1, nombre:"Inspecciona y diagnostica sistema de dirección", texto:"Inspecciona y diagnostica el estado del sistema de dirección (mecánica, hidráulica, electrónica) identificando desgastes y fallas."},
+          {num:2, nombre:"Aplica mantenimiento correctivo al sistema de dirección", texto:"Aplica mantenimiento correctivo al sistema de dirección (ajuste de convergencia, cambio de terminales, relleno de fluido) según especificaciones del fabricante."},
+          {num:3, nombre:"Inspecciona y diagnostica sistema de suspensión", texto:"Inspecciona y diagnostica el sistema de suspensión (amortiguadores, resortes, rótulas, bujes) determinando desgastes y necesidad de reemplazo."},
+          {num:5, nombre:"Realiza diagnóstico y alineación del tren delantero", texto:"Realiza diagnóstico y alineación del tren delantero y trasero usando banco de alineación computarizado, verificando ángulos de caída, avance y convergencia."}
           ]}
         ]
       }
@@ -1256,6 +1254,42 @@ var CURRICULA_CHILE = (function() {
       return Object.keys(esp).map(function(key) {
         return { key: key, nombre: esp[key].nombre, sector: esp[key].sector };
       });
+    },
+
+    // Retorna un objeto compatible con MODULOS[] para un módulo TP por espKey y num
+    getModuloCompat: function(espKey, modNum) {
+      var ceEstandar = {
+        'C1': { texto: 'Aplica procedimientos técnicos según normativa vigente y especificaciones del fabricante.', oag: ['A'] },
+        'C2': { texto: 'Usa correctamente herramientas e instrumentos de medición adecuados para el trabajo técnico.', oag: ['C'] },
+        'C3': { texto: 'Cumple estrictamente con las normas de seguridad laboral y prevención de riesgos en el área de trabajo.', oag: ['K'] },
+        'C4': { texto: 'Documenta y registra con precisión los trabajos realizados, completando informes técnicos.', oag: ['B'] },
+        'C5': { texto: 'Trabaja con responsabilidad, orden, limpieza y respeto en el puesto de trabajo y con sus compañeros.', oag: ['D'] }
+      };
+
+      var mods = this.getModulos(espKey);
+      var m = null;
+      for (var i = 0; i < mods.length; i++) {
+        if (mods[i].num === modNum) { m = mods[i]; break; }
+      }
+      if (!m) return null;
+
+      var oas = {};
+      var aes = {};
+      (m.aes || []).forEach(function(ae) {
+        var key = 'OA' + ae.num;
+        var textoCompleto = ae.texto || ae.nombre;
+        oas[key] = textoCompleto;
+        aes[key] = { texto: textoCompleto, ces: ceEstandar };
+      });
+
+      return {
+        num:    m.num,
+        nombre: m.nombre,
+        horas:  m.horas,
+        oas:    oas,
+        aes:    aes,
+        _fromCurricula: true
+      };
     }
   };
 })();

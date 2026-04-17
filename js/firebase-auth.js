@@ -252,6 +252,8 @@ var ELAuth = (function() {
         niveles:       data.niveles      || [],
         modulos:       data.modulos      || [],
         seccion:       data.seccion      || '',
+        cursos:        data.cursos       || [],
+        permisos:      data.permisos     || { planificar: true, crearMaterial: true },
         xp:            0,
         nivel:         1,
         badges:        [],

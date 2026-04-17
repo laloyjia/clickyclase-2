@@ -138,8 +138,8 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
       <a class="nav-item" onclick="showSec('biblioteca')">📖 Biblioteca</a>
       <div class="nav-section">✨ Herramientas IA</div>
       <a class="nav-item" onclick="showSec('herramientas')">🛠️ Crear materiales</a>
-      <a class="nav-item" href="planificacion.html">📅 Nueva planificación</a>
-      <a class="nav-item" href="material.html">📚 Nuevo material</a>
+      <a class="nav-item" href="planificacion.html" data-perm="planificar">📅 Nueva planificación</a>
+      <a class="nav-item" href="material.html" data-perm="material">📚 Nuevo material</a>
 
       <div class="nav-section">Sistema</div>
       <a class="nav-item danger" onclick="ELAuth.logout()">🚪 Cerrar Sesión</a>
@@ -190,12 +190,12 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
           <div class="card-title">⚡ Acceso Rápido</div>
         </div>
         <div class="quick-actions">
-          <a class="qa-btn" href="material.html">
+          <a class="qa-btn" href="material.html" data-perm="material">
             <span class="qa-icon">📝</span>
             <span class="qa-label">Subir Material</span>
             <div class="qa-sub">Guías, apuntes, fichas</div>
           </a>
-          <a class="qa-btn" href="planificacion.html">
+          <a class="qa-btn" href="planificacion.html" data-perm="planificar">
             <span class="qa-icon">📅</span>
             <span class="qa-label">Nueva Planificación</span>
             <div class="qa-sub">Planificar clases</div>
@@ -256,7 +256,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
       <div class="card">
         <div class="section-header">
           <div class="section-title">Materiales publicados</div>
-          <a class="btn btn-primary btn-sm" href="material.html">➕ Nuevo material</a>
+          <a class="btn btn-primary btn-sm" href="material.html" data-perm="material">➕ Nuevo material</a>
         </div>
         <div id="matsList">
           <div class="empty-state"><span class="emoji">📂</span><p>No has subido materiales aún.<br>¡Crea tu primer recurso!</p></div>
@@ -273,7 +273,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
       <div class="card">
         <div class="section-header">
           <div class="section-title">Planificaciones</div>
-          <a class="btn btn-primary btn-sm" href="planificacion.html">➕ Nueva planificación</a>
+          <a class="btn btn-primary btn-sm" href="planificacion.html" data-perm="planificar">➕ Nueva planificación</a>
         </div>
         <div id="plansList">
           <div class="empty-state"><span class="emoji">📋</span><p>No has creado planificaciones aún.</p></div>
@@ -449,6 +449,16 @@ function initDashboard(user) {
   document.getElementById('statModulos').textContent = mods;
   document.getElementById('statNiveles').textContent = nivs;
 
+  // ── Permisos ──
+  var canPlan = !user.permisos || user.permisos.planificar !== false;
+  var canMat  = !user.permisos || user.permisos.crearMaterial !== false;
+  document.querySelectorAll('[data-perm="planificar"]').forEach(function(el) {
+    el.style.display = canPlan ? '' : 'none';
+  });
+  document.querySelectorAll('[data-perm="material"]').forEach(function(el) {
+    el.style.display = canMat ? '' : 'none';
+  });
+
   // ── Asignación curricular ──
   renderAsignacionResumen(user);
 
@@ -511,6 +521,23 @@ function renderAsignacionResumen(user) {
   if (!html) {
     html = '<div class="empty-state"><span class="emoji">⚠️</span><p>El administrador aún no ha asignado módulos o asignaturas a tu cuenta.<br>Contacta al administrador del sistema.</p></div>';
   }
+
+  // ── Clase(s) asignada(s) ──
+  if (user.cursos && user.cursos.length) {
+    html += '<div style="margin-top:12px"><div class="modulo-code" style="margin-bottom:6px">📋 Clase(s) asignada(s)</div>';
+    html += '<div style="display:flex;flex-wrap:wrap;gap:6px">';
+    user.cursos.forEach(function(c) { html += '<span class="badge badge-blue">' + c + '</span>'; });
+    html += '</div></div>';
+  }
+
+  // ── Permisos ──
+  var canPlan = !user.permisos || user.permisos.planificar !== false;
+  var canMat  = !user.permisos || user.permisos.crearMaterial !== false;
+  html += '<div style="margin-top:12px"><div class="modulo-code" style="margin-bottom:6px">🔐 Permisos</div>';
+  html += '<div style="display:flex;flex-wrap:wrap;gap:6px">';
+  html += '<span class="badge ' + (canPlan ? 'badge-green' : 'badge-red') + '">📅 ' + (canPlan ? 'Puede planificar' : 'Sin permiso planificar') + '</span>';
+  html += '<span class="badge ' + (canMat  ? 'badge-green' : 'badge-red') + '">📚 ' + (canMat  ? 'Puede crear material' : 'Sin permiso material') + '</span>';
+  html += '</div></div>';
 
   el.innerHTML = html;
 }
