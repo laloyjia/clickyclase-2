@@ -1288,8 +1288,39 @@ var CURRICULA_CHILE = (function() {
         horas:  m.horas,
         oas:    oas,
         aes:    aes,
-        _fromCurricula: true
+        _fromCurricula: true,
+        _espKey: espKey
       };
+    },
+
+    // Busca un módulo en TODAS las especialidades por su número (num).
+    // Útil cuando user.especialidad está vacío pero se conoce el número de módulo.
+    // Retorna objeto compatible con MODULOS[] o null.
+    getModuloCompatByNum: function(modNum) {
+      var esps = this.getEspecialidades();
+      for (var i = 0; i < esps.length; i++) {
+        var result = this.getModuloCompat(esps[i].key, modNum);
+        if (result) return result;
+      }
+      return null;
+    },
+
+    // Retorna todos los módulos de todas las especialidades (para listado general TP)
+    getAllModulos: function() {
+      var all = [];
+      var seen = {};
+      var esps = this.getEspecialidades();
+      for (var i = 0; i < esps.length; i++) {
+        var mods = this.getModulos(esps[i].key);
+        for (var j = 0; j < mods.length; j++) {
+          var key = esps[i].key + '_' + mods[j].num;
+          if (!seen[key]) {
+            seen[key] = true;
+            all.push({ espKey: esps[i].key, espNombre: esps[i].nombre, mod: mods[j] });
+          }
+        }
+      }
+      return all;
     }
   };
 })();

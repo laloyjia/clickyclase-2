@@ -933,26 +933,45 @@
         var asignadosMods = user.modulos || [];
         var espKey = user.especialidad || '';
 
+        function addOpt(num, nombre, horas) {
+            var opt = document.createElement('option');
+            opt.value = num;
+            opt.textContent = num + ' - ' + nombre + (horas ? ' (' + horas + 'h)' : '');
+            sel.appendChild(opt);
+        }
+
         if (typeof CURRICULA_CHILE !== 'undefined' && espKey) {
+            // Caso normal: especialidad conocida
             CURRICULA_CHILE.getModulos(espKey).forEach(function(m) {
                 if (asignadosMods.length === 0 || asignadosMods.indexOf(m.num) !== -1) {
-                    var opt = document.createElement('option');
-                    opt.value = m.num;
-                    opt.textContent = m.num + ' - ' + m.nombre + ' (' + m.horas + 'h)';
-                    sel.appendChild(opt);
+                    addOpt(m.num, m.nombre, m.horas);
                 }
             });
-        } else {
-            var keys = Object.keys(MODULOS);
-            for (var i = 0; i < keys.length; i++) {
-                var m = MODULOS[keys[i]];
-                if (asignadosMods.length === 0 || asignadosMods.indexOf(m.num) !== -1) {
-                    var opt = document.createElement('option');
-                    opt.value = m.num;
-                    opt.textContent = m.num + ' - ' + m.nombre + ' (' + m.horas + 'h)';
-                    sel.appendChild(opt);
+        } else if (typeof CURRICULA_CHILE !== 'undefined' && asignadosMods.length > 0) {
+            // Especialidad no registrada, pero tiene módulos asignados → buscar en todas las especialidades
+            asignadosMods.forEach(function(modNum) {
+                var found = CURRICULA_CHILE.getModuloCompatByNum(modNum);
+                if (found) {
+                    addOpt(found.num, found.nombre, found.horas);
+                } else if (MODULOS && MODULOS[modNum]) {
+                    var m = MODULOS[modNum];
+                    addOpt(m.num, m.nombre, m.horas);
                 }
-            }
+            });
+        } else if (typeof CURRICULA_CHILE !== 'undefined') {
+            // Sin especialidad y sin módulos asignados → mostrar todos los módulos de todas las especialidades
+            var allMods = CURRICULA_CHILE.getAllModulos();
+            allMods.forEach(function(entry) {
+                addOpt(entry.mod.num, entry.espNombre + ' › ' + entry.mod.nombre, entry.mod.horas);
+            });
+        } else if (typeof MODULOS !== 'undefined') {
+            // Fallback final: objeto MODULOS local
+            Object.keys(MODULOS).forEach(function(key) {
+                var m = MODULOS[key];
+                if (asignadosMods.length === 0 || asignadosMods.indexOf(m.num) !== -1) {
+                    addOpt(m.num, m.nombre, m.horas);
+                }
+            });
         }
 
         document.getElementById('selectOA').innerHTML = '<option value="">-- Selecciona un modulo --</option>';
@@ -969,9 +988,12 @@
         document.getElementById('infoOA').style.display = 'none';
         if (!modId) return;
 
-        var mod = MODULOS[modId] || null;
-        if (!mod && _matUser && _matUser.especialidad && typeof CURRICULA_CHILE !== 'undefined') {
-            mod = CURRICULA_CHILE.getModuloCompat(_matUser.especialidad, modId);
+        var mod = (typeof MODULOS !== 'undefined' && MODULOS[modId]) ? MODULOS[modId] : null;
+        if (!mod && typeof CURRICULA_CHILE !== 'undefined') {
+            var espKey = (_matUser && _matUser.especialidad) ? _matUser.especialidad : '';
+            mod = espKey
+                ? CURRICULA_CHILE.getModuloCompat(espKey, modId)
+                : CURRICULA_CHILE.getModuloCompatByNum(modId);
         }
         if (!mod || !mod.oas) return;
 
@@ -994,9 +1016,12 @@
         sel.innerHTML = '<option value="">-- Seleccionar AE --</option>';
         if (!modId || !oaId) return;
 
-        var mod = MODULOS[modId] || null;
-        if (!mod && _matUser && _matUser.especialidad && typeof CURRICULA_CHILE !== 'undefined') {
-            mod = CURRICULA_CHILE.getModuloCompat(_matUser.especialidad, modId);
+        var mod = (typeof MODULOS !== 'undefined' && MODULOS[modId]) ? MODULOS[modId] : null;
+        if (!mod && typeof CURRICULA_CHILE !== 'undefined') {
+            var espKey = (_matUser && _matUser.especialidad) ? _matUser.especialidad : '';
+            mod = espKey
+                ? CURRICULA_CHILE.getModuloCompat(espKey, modId)
+                : CURRICULA_CHILE.getModuloCompatByNum(modId);
         }
         if (!mod || !mod.oas) return;
 
@@ -1022,9 +1047,12 @@
         listaCE.innerHTML = '';
         if (!modId || !aeNum) return;
 
-        var mod = MODULOS[modId] || null;
-        if (!mod && _matUser && _matUser.especialidad && typeof CURRICULA_CHILE !== 'undefined') {
-            mod = CURRICULA_CHILE.getModuloCompat(_matUser.especialidad, modId);
+        var mod = (typeof MODULOS !== 'undefined' && MODULOS[modId]) ? MODULOS[modId] : null;
+        if (!mod && typeof CURRICULA_CHILE !== 'undefined') {
+            var espKey = (_matUser && _matUser.especialidad) ? _matUser.especialidad : '';
+            mod = espKey
+                ? CURRICULA_CHILE.getModuloCompat(espKey, modId)
+                : CURRICULA_CHILE.getModuloCompatByNum(modId);
         }
         if (!mod || !mod.aes || !mod.aes[aeNum]) return;
 

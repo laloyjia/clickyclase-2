@@ -1337,30 +1337,45 @@
         var asignadosMods = user.modulos || [];
         var espKey = user.especialidad || '';
 
-        // Preferir datos de CURRICULA_CHILE para el especialista asignado
+        function addOpt(num, nombre, horas) {
+            var opt = document.createElement('option');
+            opt.value = num;
+            opt.textContent = num + ' - ' + nombre + (horas ? ' (' + horas + 'h)' : '');
+            selectModulo.appendChild(opt);
+        }
+
         if (typeof CURRICULA_CHILE !== 'undefined' && espKey) {
-            var todosLosMods = CURRICULA_CHILE.getModulos(espKey);
-            todosLosMods.forEach(function(m) {
-                // Si el profesor tiene módulos asignados, filtrar; si no, mostrar todos
+            // Caso normal: especialidad conocida
+            CURRICULA_CHILE.getModulos(espKey).forEach(function(m) {
                 if (asignadosMods.length === 0 || asignadosMods.indexOf(m.num) !== -1) {
-                    var opt = document.createElement('option');
-                    opt.value = m.num;
-                    opt.textContent = m.num + ' - ' + m.nombre + ' (' + m.horas + 'h)';
-                    selectModulo.appendChild(opt);
+                    addOpt(m.num, m.nombre, m.horas);
                 }
             });
-        } else {
-            // Fallback: datos-curriculares.js (Electrónica hardcoded)
-            var keys = Object.keys(MODULOS);
-            for (var i = 0; i < keys.length; i++) {
-                var m = MODULOS[keys[i]];
-                if (asignadosMods.length === 0 || asignadosMods.indexOf(m.num) !== -1) {
-                    var opt = document.createElement('option');
-                    opt.value = m.num;
-                    opt.textContent = m.num + ' - ' + m.nombre + ' (' + m.horas + 'h)';
-                    selectModulo.appendChild(opt);
+        } else if (typeof CURRICULA_CHILE !== 'undefined' && asignadosMods.length > 0) {
+            // Especialidad no registrada, pero tiene módulos asignados → buscar en todas las especialidades
+            asignadosMods.forEach(function(modNum) {
+                var found = CURRICULA_CHILE.getModuloCompatByNum(modNum);
+                if (found) {
+                    addOpt(found.num, found.nombre, found.horas);
+                } else if (typeof MODULOS !== 'undefined' && MODULOS[modNum]) {
+                    var m = MODULOS[modNum];
+                    addOpt(m.num, m.nombre, m.horas);
                 }
-            }
+            });
+        } else if (typeof CURRICULA_CHILE !== 'undefined') {
+            // Sin especialidad y sin módulos asignados → mostrar todos los módulos de todas las especialidades
+            var allMods = CURRICULA_CHILE.getAllModulos();
+            allMods.forEach(function(entry) {
+                addOpt(entry.mod.num, entry.espNombre + ' › ' + entry.mod.nombre, entry.mod.horas);
+            });
+        } else if (typeof MODULOS !== 'undefined') {
+            // Fallback final: datos-curriculares.js
+            Object.keys(MODULOS).forEach(function(key) {
+                var m = MODULOS[key];
+                if (asignadosMods.length === 0 || asignadosMods.indexOf(m.num) !== -1) {
+                    addOpt(m.num, m.nombre, m.horas);
+                }
+            });
         }
 
         // Limpiar selecciones dependientes
@@ -1379,11 +1394,14 @@
         if (!modId) return;
 
         // Try datos-curriculares.js first (Electrónica full data)
-        var mod = MODULOS[modId] || null;
+        var mod = (typeof MODULOS !== 'undefined' && MODULOS[modId]) ? MODULOS[modId] : null;
 
-        // Fallback: CURRICULA_CHILE compat
-        if (!mod && _planifUser && _planifUser.especialidad && typeof CURRICULA_CHILE !== 'undefined') {
-            mod = CURRICULA_CHILE.getModuloCompat(_planifUser.especialidad, modId);
+        // Fallback: CURRICULA_CHILE compat (con o sin especialidad)
+        if (!mod && typeof CURRICULA_CHILE !== 'undefined') {
+            var espKey = (_planifUser && _planifUser.especialidad) ? _planifUser.especialidad : '';
+            mod = espKey
+                ? CURRICULA_CHILE.getModuloCompat(espKey, modId)
+                : CURRICULA_CHILE.getModuloCompatByNum(modId);
         }
 
         if (!mod || !mod.oas) return;
@@ -1409,9 +1427,12 @@
         selectAE.innerHTML = '<option value="">-- Seleccionar AE --</option>';
         if (!modId || !oaId) return;
 
-        var mod = MODULOS[modId] || null;
-        if (!mod && _planifUser && _planifUser.especialidad && typeof CURRICULA_CHILE !== 'undefined') {
-            mod = CURRICULA_CHILE.getModuloCompat(_planifUser.especialidad, modId);
+        var mod = (typeof MODULOS !== 'undefined' && MODULOS[modId]) ? MODULOS[modId] : null;
+        if (!mod && typeof CURRICULA_CHILE !== 'undefined') {
+            var espKey = (_planifUser && _planifUser.especialidad) ? _planifUser.especialidad : '';
+            mod = espKey
+                ? CURRICULA_CHILE.getModuloCompat(espKey, modId)
+                : CURRICULA_CHILE.getModuloCompatByNum(modId);
         }
         if (!mod || !mod.oas) return;
 
@@ -1441,9 +1462,12 @@
         listaOAG.innerHTML = '';
         if (!modId || !aeNum) return;
 
-        var mod = MODULOS[modId] || null;
-        if (!mod && _planifUser && _planifUser.especialidad && typeof CURRICULA_CHILE !== 'undefined') {
-            mod = CURRICULA_CHILE.getModuloCompat(_planifUser.especialidad, modId);
+        var mod = (typeof MODULOS !== 'undefined' && MODULOS[modId]) ? MODULOS[modId] : null;
+        if (!mod && typeof CURRICULA_CHILE !== 'undefined') {
+            var espKey = (_planifUser && _planifUser.especialidad) ? _planifUser.especialidad : '';
+            mod = espKey
+                ? CURRICULA_CHILE.getModuloCompat(espKey, modId)
+                : CURRICULA_CHILE.getModuloCompatByNum(modId);
         }
         if (!mod || !mod.aes || !mod.aes[aeNum]) return;
 
@@ -1835,9 +1859,12 @@
         if (!modId) { alert('Por favor selecciona un módulo.'); return; }
 
         // Intentar usar CURRICULA_CHILE para este módulo
-        var mod = MODULOS[modId] || null;
-        if (!mod && _planifUser && _planifUser.especialidad && typeof CURRICULA_CHILE !== 'undefined') {
-            mod = CURRICULA_CHILE.getModuloCompat(_planifUser.especialidad, modId);
+        var mod = (typeof MODULOS !== 'undefined' && MODULOS[modId]) ? MODULOS[modId] : null;
+        if (!mod && typeof CURRICULA_CHILE !== 'undefined') {
+            var espKeyGen = (_planifUser && _planifUser.especialidad) ? _planifUser.especialidad : '';
+            mod = espKeyGen
+                ? CURRICULA_CHILE.getModuloCompat(espKeyGen, modId)
+                : CURRICULA_CHILE.getModuloCompatByNum(modId);
         }
         var ae  = (mod && mod.aes) ? mod.aes[aeNum] : null;
         var cursoTexto = typeof CURRICULA_CHILE !== 'undefined'
