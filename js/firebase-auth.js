@@ -259,6 +259,7 @@ var ELAuth = (function() {
         badges:        [],
         evaluaciones:  [],
         activo:        true,
+        primerIngreso: true,           // obliga cambio de contraseña al primer ingreso
         creadoEn:      new Date().toISOString(),
         creadoPor:     _currentUser ? _currentUser.email : 'admin'
       };
