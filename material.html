@@ -1127,6 +1127,13 @@
         }
     }
 
+    // ── Helper: OAG de la especialidad activa ──────────────────
+    function _getOAGDefs() {
+        var espKey = (_matUser && _matUser.especialidad) ? _matUser.especialidad : '';
+        if (typeof getCurriculaOAG === 'function') return getCurriculaOAG(espKey);
+        return (typeof OAG_DEFINICIONES !== 'undefined') ? OAG_DEFINICIONES : {};
+    }
+
     function actualizarOAG() {
         var listaOAG = document.getElementById('listaOAG');
         listaOAG.innerHTML = '';
@@ -1141,7 +1148,7 @@
         for (var i = 0; i < oagOrd.length; i++) {
             var tag = document.createElement('div');
             tag.className = 'oag-tag';
-            tag.title = OAG_DEFINICIONES[oagOrd[i]] || '';
+            tag.title = _getOAGDefs()[oagOrd[i]] || '';
             tag.textContent = oagOrd[i];
             listaOAG.appendChild(tag);
         }

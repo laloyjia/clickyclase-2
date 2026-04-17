@@ -1064,6 +1064,13 @@
         }
     }
 
+    // ── Helper: OAG de la especialidad activa ──────────────────
+    function _getOAGDefs() {
+        var espKey = (_planifUser && _planifUser.especialidad) ? _planifUser.especialidad : '';
+        if (typeof getCurriculaOAG === 'function') return getCurriculaOAG(espKey);
+        return (typeof OAG_DEFINICIONES !== 'undefined') ? OAG_DEFINICIONES : {};
+    }
+
     function actualizarOAG() {
         var listaOAG = document.getElementById('listaOAG');
         listaOAG.innerHTML = '';
@@ -1092,7 +1099,7 @@
             var letra = oagOrdenados[i];
             var tag = document.createElement('div');
             tag.className = 'oag-tag';
-            tag.title = OAG_DEFINICIONES[letra] || '';
+            tag.title = _getOAGDefs()[letra] || '';
             tag.textContent = letra;
             listaOAG.appendChild(tag);
         }
@@ -1106,7 +1113,7 @@
         for (var i = 0; i < oagOrdenados.length; i++) {
             var l = oagOrdenados[i];
             if (i > 0) htmlDesc += '<br><br>';
-            htmlDesc += '<strong>OAG ' + l + ':</strong> ' + (OAG_DEFINICIONES[l] || 'Sin descripcion');
+            htmlDesc += '<strong>OAG ' + l + ':</strong> ' + (_getOAGDefs()[l] || 'Sin descripción');
         }
         desc.innerHTML = htmlDesc;
         listaOAG.appendChild(desc);
@@ -1526,7 +1533,7 @@
         // 5. OAG
         var oagTextos = [];
         for (var i = 0; i < oagOrdenados.length; i++) {
-            oagTextos.push('OAG ' + oagOrdenados[i] + ': ' + OAG_DEFINICIONES[oagOrdenados[i]]);
+            oagTextos.push('OAG ' + oagOrdenados[i] + ': ' + (_getOAGDefs()[oagOrdenados[i]] || ''));
         }
         campos.push({
             titulo: 'Objetivos de Aprendizaje Genericos (OAG)',
