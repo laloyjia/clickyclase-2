@@ -142,6 +142,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
       <a class="nav-item" href="material.html" data-perm="material">📚 Nuevo material</a>
 
       <div class="nav-section">Sistema</div>
+      <a class="nav-item" id="linkAdmin" href="admin.html" style="display:none">🏫 Panel Admin</a>
       <a class="nav-item danger" onclick="ELAuth.logout()">🚪 Cerrar Sesión</a>
     </nav>
 
@@ -189,21 +190,31 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
         <div class="card-header">
           <div class="card-title">⚡ Acceso Rápido</div>
         </div>
-        <div class="quick-actions">
+        <div class="quick-actions" style="grid-template-columns:repeat(auto-fill,minmax(150px,1fr))">
           <a class="qa-btn" href="material.html" data-perm="material">
             <span class="qa-icon">📝</span>
-            <span class="qa-label">Subir Material</span>
+            <span class="qa-label">Crear Material</span>
             <div class="qa-sub">Guías, apuntes, fichas</div>
           </a>
           <a class="qa-btn" href="planificacion.html" data-perm="planificar">
             <span class="qa-icon">📅</span>
-            <span class="qa-label">Nueva Planificación</span>
-            <div class="qa-sub">Planificar clases</div>
+            <span class="qa-label">Planificación</span>
+            <div class="qa-sub">Planificar clases LIRMI</div>
+          </a>
+          <a class="qa-btn" onclick="showSec('herramientas')">
+            <span class="qa-icon">✨</span>
+            <span class="qa-label">Herramientas IA</span>
+            <div class="qa-sub">Generar con IA</div>
+          </a>
+          <a class="qa-btn" onclick="showSec('calendario')">
+            <span class="qa-icon">📆</span>
+            <span class="qa-label">Calendario</span>
+            <div class="qa-sub">Clases del mes</div>
           </a>
           <a class="qa-btn" href="biblioteca.html">
             <span class="qa-icon">📚</span>
             <span class="qa-label">Biblioteca</span>
-            <div class="qa-sub">Ver todos los recursos</div>
+            <div class="qa-sub">Recursos del colegio</div>
           </a>
           <a class="qa-btn" onclick="showSec('modulos')">
             <span class="qa-icon">🗂️</span>
@@ -422,6 +433,12 @@ ELAuth.onUserReady(function(user) {
   if (user.role !== 'profesor' && !esAdmin) {
     window.location.href = 'dashboard.html';
     return;
+  }
+
+  // Mostrar enlace admin si corresponde
+  if (esAdmin) {
+    var la = document.getElementById('linkAdmin');
+    if (la) la.style.display = '';
   }
 
   _profeUser = user;

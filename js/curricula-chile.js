@@ -1055,33 +1055,73 @@ var CURRICULA_CHILE = (function() {
   // ── Sector: Electrónica ─────────────────────────────────────
   var electronica = {
     nombre: 'Electrónica',
-    sigla:  'ELEC2',
+    sigla:  'EN',
     sector: 'Electricidad',
     color:  '#3b82f6',
     especialidades: [
       {
         nombre: 'Electrónica',
-        sigla:  'EE',
+        sigla:  'EN',
         modulos: [
-          { num:'EE1', nombre:'Fundamentos de Electrónica', horas:152, aes:[
-            {num:1, nombre:'Componentes electrónicos pasivos y activos'},
-            {num:2, nombre:'Circuitos RC, RL y RLC básicos'},
-            {num:3, nombre:'Instrumentación electrónica básica'}
+          { num:'EN1',  nombre:'Proyectos Electrónicos',                                       horas:190, nivel:'3M', aes:[
+            {num:1, texto:'Realiza análisis técnico para la instalación de equipos electrónicos según manual de uso y especificaciones técnicas, respetando normas de seguridad y tiempos establecidos.'},
+            {num:2, texto:'Instala equipos electrónicos, según requerimientos del usuario, e instrucciones consignadas en manuales.'},
+            {num:3, texto:'Mantiene equipos electrónicos conforme al tipo de sistema, considerando procedimientos establecidos y especificaciones técnicas del fabricante.'},
+            {num:4, texto:'Analiza funcionamiento de equipos electrónicos y diagnostica fallas según manuales, considerando las normas de seguridad establecidas.'},
+            {num:5, texto:'Reemplaza componentes y dispositivos electrónicos pasivos y activos de acuerdo a especificaciones técnicas de cada uno.'}
           ]},
-          { num:'EE2', nombre:'Electrónica Digital', horas:152, aes:[
-            {num:1, nombre:'Sistemas de numeración y álgebra booleana'},
-            {num:2, nombre:'Circuitos combinacionales y secuenciales'},
-            {num:3, nombre:'Microcontroladores básicos (Arduino)'}
+          { num:'EN2',  nombre:'Armado y Reparación de Circuitos Electrónicos',                horas:228, nivel:'3M', aes:[
+            {num:1, texto:'Elabora circuitos electrónicos de ensayo, aplicando diversas técnicas de diseño, previendo situaciones de riesgo en la manipulación de químicos y herramientas.'},
+            {num:2, texto:'Arma circuitos electrónicos analógicos básicos de acuerdo a manuales de procedimiento, cumpliendo plazos establecidos y estándares de calidad.'},
+            {num:3, texto:'Repara y mantiene equipos electrónicos básicos, según requerimientos y especificaciones técnicas.'},
+            {num:4, texto:'Ensambla circuitos electrónicos, analógicos y digitales, de acuerdo a manuales de procedimiento.'}
           ]},
-          { num:'EE3', nombre:'Instalación de Sistemas Electrónicos', horas:228, aes:[
-            {num:1, nombre:'Sistemas de alarma y seguridad'},
-            {num:2, nombre:'CCTV e intercomunicadores'},
-            {num:3, nombre:'Redes de datos básicas'}
+          { num:'EN3',  nombre:'Ensamblaje y Mantención de Sistemas y Equipos Digitales',      horas:228, nivel:'3M', aes:[
+            {num:1, texto:'Ensambla circuitos electrónicos digitales para equipos básicos, comprobando su lógica de funcionamiento.'},
+            {num:2, texto:'Arma y configura en forma prolija un computador, de acuerdo a manuales de procedimiento.'},
+            {num:3, texto:'Repara y mantiene equipos electrónicos básicos, según requerimientos y especificaciones técnicas.'},
+            {num:4, texto:'Realiza análisis técnico para la instalación de equipos electrónicos según manual de uso y especificaciones técnicas.'}
           ]},
-          { num:'EE4', nombre:'Automatización y PLC', horas:228, aes:[
-            {num:1, nombre:'Lógica de control programable (PLC)'},
-            {num:2, nombre:'Sensores y actuadores industriales'},
-            {num:3, nombre:'Sistemas SCADA básicos'}
+          { num:'EN4',  nombre:'Sistemas de Control Domótico',                                 horas:190, nivel:'3M', aes:[
+            {num:1, texto:'Utiliza equipos de domótica para el control de sistemas electrónicos, de acuerdo a requerimientos y especificaciones técnicas.'},
+            {num:2, texto:'Mantiene sistemas y equipos electrónicos automáticos, de acuerdo a instrucciones y procedimientos establecidos.'},
+            {num:3, texto:'Implementa los distintos tipos de instalaciones de alumbrado eléctrico en baja tensión, de acuerdo a las indicaciones del proyecto.'},
+            {num:4, texto:'Instala equipos electrónicos, según requerimientos del usuario, e instrucciones consignadas en manuales.'}
+          ]},
+          { num:'EN5',  nombre:'Mantención y Operación de Equipos de Control Electrónico de Potencia', horas:152, nivel:'4M', aes:[
+            {num:1, texto:'Elabora planes de mantenimientos preventivos y correctivos para sistemas electrónicos, de acuerdo a normativas y especificaciones técnicas.'},
+            {num:2, texto:'Mantiene preventivamente sistemas con dispositivos y componentes electrónicos, de acuerdo a especificaciones técnicas y planes de mantenimiento.'},
+            {num:3, texto:'Realiza mantención correctiva a sistemas con dispositivos y componentes electrónicos y electroneumáticos.'},
+            {num:4, texto:'Realiza la mantención de servomecanismos con control electrónico industrial, de acuerdo a especificaciones técnicas y plan de mantenimiento.'}
+          ]},
+          { num:'EN6',  nombre:'Detección de Fallas Industriales',                             horas:152, nivel:'4M', aes:[
+            {num:1, texto:'Inspecciona equipos y circuitos electrónicos industriales respetando protocolos y normas de seguridad.'},
+            {num:2, texto:'Diagnostica fallas en sistemas electrónicos industriales, respetando protocolos, normas de seguridad y especificaciones técnicas.'},
+            {num:3, texto:'Mantiene equipos y sistemas electrónicos industriales, con y sin control automático.'},
+            {num:4, texto:'Analiza funcionamiento de equipos electrónicos y diagnostica fallas según manuales, considerando las normas de seguridad establecidas.'}
+          ]},
+          { num:'EN7',  nombre:'Programación de Sistemas de Automatización con PLC',           horas:152, nivel:'4M', aes:[
+            {num:1, texto:'Configura y programa un PLC para el control de procesos industriales básicos, de acuerdo a requerimientos y especificaciones técnicas.'},
+            {num:2, texto:'Conecta y configura sensores y actuadores a sistemas de control con PLC, según proyecto y especificaciones técnicas.'},
+            {num:3, texto:'Opera y diagnostica fallas en sistemas de automatización industrial con PLC, de acuerdo a especificaciones técnicas y protocolos establecidos.'}
+          ]},
+          { num:'EN8',  nombre:'Montaje de Equipos Industriales',                              horas:152, nivel:'4M', aes:[
+            {num:1, texto:'Instala equipos electrónicos Industriales, según requerimientos, respetando la normativa eléctrica, ambiental y de seguridad.'},
+            {num:2, texto:'Monta sistemas electrónicos industriales, según requerimientos de la industria respetando la normativa eléctrica, ambiental y de seguridad.'},
+            {num:3, texto:'Opera equipos y sistemas eléctricos y electrónicos utilizados en la industria, según protocolos de manejo.'},
+            {num:4, texto:'Ejecuta proyectos de Instalación de sistemas electrónicos industriales de acuerdo al diseño y características técnicas del proyecto.'}
+          ]},
+          { num:'EN9',  nombre:'Proyecto de Especialidad: Sistemas Electrónicos',              horas:114, nivel:'4M', aes:[
+            {num:1, texto:'Planifica y diseña el proyecto de especialidad electrónica, definiendo alcance, recursos, cronograma y criterios de calidad.'},
+            {num:2, texto:'Construye, prueba y valida el prototipo del proyecto de especialidad electrónica, de acuerdo al diseño y especificaciones técnicas.'},
+            {num:3, texto:'Documenta y presenta el proyecto de especialidad electrónica, comunicando el proceso, resultados y conclusiones de forma técnica y ordenada.'}
+          ]},
+          { num:'EN11', nombre:'Sistemas Mecatrónicos y Robóticos',                            horas:114, nivel:'3M', aes:[
+            {num:1, texto:'Realiza análisis técnico de sistemas mecatrónicos aplicados, identificando sus componentes mecánicos, electrónicos y de control.'},
+            {num:2, texto:'Diseña, fabrica y ensambla piezas y prototipos mecánicos utilizando software CAD 3D y técnicas de manufactura digital.'},
+            {num:3, texto:'Programa dispositivos electrónicos programables para el control de sistemas mecatrónicos.'},
+            {num:4, texto:'Integra sistemas robóticos básicos, configurando sensores, actuadores y controladores programables.'},
+            {num:5, texto:'Diseña y construye un proyecto mecatrónico funcional que combine diseño, fabricación, programación y control.'}
           ]}
         ]
       }

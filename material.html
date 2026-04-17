@@ -504,6 +504,21 @@
         /* Tabla de verificacion con checkboxes */
         .doc-preview .check-item { margin: 0.3rem 0; display: flex; align-items: flex-start; gap: 0.4rem; }
         .doc-preview .check-item input { margin-top: 0.15rem; }
+
+        /* --- MEJORAS VISUALES --- */
+        .seccion-mat { transition: box-shadow .2s; }
+        .seccion-mat:hover { box-shadow: 0 4px 24px rgba(108,92,231,.1); }
+        .seccion-mat h2 {
+            background: linear-gradient(90deg, rgba(108,92,231,.12) 0%, transparent 100%);
+            margin: -1.5rem -1.5rem 1rem;
+            padding: 0.8rem 1.5rem;
+            border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+        }
+        @keyframes fadeSlideIn {
+            from { opacity:0; transform: translateY(6px); }
+            to   { opacity:1; transform: translateY(0); }
+        }
+        .animate-in { animation: fadeSlideIn .3s ease forwards; }
     </style>
 </head>
 <body>
@@ -521,20 +536,35 @@
             <span class="nav-icon">⚡</span>
             <span>ElectroLearn</span>
         </div>
-        <div class="nav-links">
-            <a href="dashboard.html">Dashboard</a>
-            <a href="#" onclick="logout()" class="nav-btn">Cerrar Sesion</a>
+        <div class="nav-links" style="display:flex;align-items:center;gap:12px">
+            <span id="navProfesorInfo" style="font-size:.82rem;opacity:.7"></span>
+            <a href="planificacion.html" style="font-size:.85rem">📅 Planificaciones</a>
+            <a href="dashboard-profesor.html">Mi Panel</a>
+            <a href="#" onclick="ELAuth.logout()" class="nav-btn">Cerrar Sesión</a>
         </div>
     </nav>
+
+    <!-- BARRA DE CONTEXTO PROFESOR -->
+    <div id="contextoBar" style="display:none;background:rgba(108,92,231,.08);border-bottom:1px solid rgba(108,92,231,.15);padding:8px 20px;font-size:.8rem;color:#a29bfe;display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+        <span>👤 <strong id="ctxNombre">—</strong></span>
+        <span id="ctxTipo" style="background:rgba(108,92,231,.2);border:1px solid rgba(108,92,231,.3);padding:2px 10px;border-radius:12px"></span>
+        <span id="ctxEsp" style="color:#94a3b8"></span>
+        <span id="ctxNiveles" style="color:#94a3b8"></span>
+    </div>
 
     <!-- CONTENIDO PRINCIPAL -->
     <main class="material-container">
 
-        <a href="dashboard.html" class="btn-volver">&#8592; Volver al Dashboard</a>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:8px">
+            <a href="dashboard-profesor.html" class="btn-volver">&#8592; Volver al Panel Docente</a>
+            <a href="planificacion.html" style="font-size:.85rem;color:var(--secondary);text-decoration:none;display:flex;align-items:center;gap:6px;padding:6px 14px;background:rgba(0,206,201,.08);border:1px solid rgba(0,206,201,.2);border-radius:8px">
+                📅 Crear Planificación &#8594;
+            </a>
+        </div>
 
         <div class="material-header">
-            <h1>Generador de Material Educativo</h1>
-            <p>Crea guias, apuntes y fichas practicas alineadas al curriculum Mineduc - Colegio Salesianos Talca</p>
+            <h1>📚 Generador de Material Educativo</h1>
+            <p>Crea guías, apuntes y fichas prácticas alineadas al currículo Mineduc · Salesianos Talca</p>
         </div>
 
         <!-- SECCION 1: TIPO DE DOCUMENTO -->
@@ -729,30 +759,12 @@
     <script src="js/firebase-db.js"></script>
     <script src="js/auth.js"></script>
     <script src="js/curricula-chile.js"></script>
-    <script>
-    // =============================================
-    // MISMA BASE DE DATOS CURRICULAR de planificacion.html
-    // (Se copia la estructura completa de MODULOS)
-    // =============================================
-
-    // Variable para tipo de documento seleccionado
-    var tipoDocSeleccionado = '';
-
-    // --- MODULOS (misma data que planificacion.html) ---
-    // Para no duplicar 1000+ lineas, cargamos desde un script compartido
-    // Por ahora incluimos la referencia completa inline
-
-    var MODULOS = {};
-    var OAG_DEFINICIONES = {};
-
-    // Cargar datos desde planificacion.html via fetch del mismo archivo
-    // Mejor solucion: extraer a js/datos-curriculares.js
-    // Por ahora usamos la data completa inline
-
-    </script>
-    <!-- Cargar datos curriculares (extraidos a archivo compartido) -->
+    <!-- MODULOS y OAG_DEFINICIONES se cargan desde datos-curriculares.js -->
+    <!-- Cargar datos curriculares completos (EN1-EN9, EN11) desde PDFs Mineduc -->
     <script src="js/datos-curriculares.js"></script>
     <script>
+    // Variable para tipo de documento seleccionado
+    var tipoDocSeleccionado = '';
 
     var VALORES_SALESIANOS = [
         'Honestidad', 'Responsabilidad', 'Solidaridad', 'Respeto',
@@ -836,6 +848,20 @@
     }
 
     function initCurriculoMat(user) {
+        // Mostrar barra de contexto del profesor
+        var tipos = { basica: '📚 Educación Básica', media: '🎓 Plan Común', tecnico: '⚙️ Técnico-Profesional' };
+        var ctxBar = document.getElementById('contextoBar');
+        if (ctxBar) {
+            ctxBar.style.display = 'flex';
+            document.getElementById('ctxNombre').textContent = user.nombre || user.email || '—';
+            document.getElementById('ctxTipo').textContent = tipos[user.tipoProfesor] || '—';
+            if (user.especialidad) document.getElementById('ctxEsp').textContent = '⚙️ ' + user.especialidad;
+            if (user.asignaturas && user.asignaturas.length) document.getElementById('ctxEsp').textContent = user.asignaturas.join(', ');
+            if (user.niveles && user.niveles.length) document.getElementById('ctxNiveles').textContent = 'Niveles: ' + user.niveles.join(', ');
+        }
+        var navInfo = document.getElementById('navProfesorInfo');
+        if (navInfo) navInfo.textContent = user.nombre || '';
+
         var isTP = user.tipoProfesor === 'tecnico';
 
         // Poblar selectCurso
@@ -859,7 +885,7 @@
             if (campoMod)   campoMod.style.display   = '';
             if (secTP)      secTP.style.display       = '';
             if (secReg)     secReg.style.display      = 'none';
-            if ((user.niveles || []).length === 1) filtrarModulos();
+            filtrarModulos(); // siempre cargar módulos para TP (nivel es orientativo)
         } else {
             if (campoAsig) campoAsig.style.display = '';
             if (campoMod)  campoMod.style.display  = 'none';
@@ -924,62 +950,75 @@
     }
 
     function filtrarModulos() {
-        var nivel = document.getElementById('selectCurso').value;
-        var user  = _matUser || {};
-        var sel   = document.getElementById('selectModulo');
+        var user = _matUser || {};
+        var sel  = document.getElementById('selectModulo');
         if (!sel) return;
-        sel.innerHTML = '<option value="">-- Seleccionar modulo --</option>';
-        if (!nivel) return;
+        sel.innerHTML = '<option value="">-- Seleccionar módulo --</option>';
+
+        // NOTA: Para profesores TP no bloqueamos por nivel.
+        // El nivel se usa para la planificación pero NO para filtrar módulos.
+        // Mostramos todos los módulos asignados/disponibles siempre.
 
         var asignadosMods = user.modulos || [];
         var espKey = user.especialidad || '';
 
-        function addOpt(num, nombre, horas) {
+        function addOpt(num, nombre, horas, nivelMod) {
             var opt = document.createElement('option');
             opt.value = num;
-            opt.textContent = num + ' - ' + nombre + (horas ? ' (' + horas + 'h)' : '');
+            var nivelTag = nivelMod ? ' [' + nivelMod + ']' : '';
+            opt.textContent = num + nivelTag + ' — ' + nombre + (horas ? '  (' + horas + 'h)' : '');
             sel.appendChild(opt);
         }
 
-        if (typeof CURRICULA_CHILE !== 'undefined' && espKey) {
-            // Caso normal: especialidad conocida
-            CURRICULA_CHILE.getModulos(espKey).forEach(function(m) {
-                if (asignadosMods.length === 0 || asignadosMods.indexOf(m.num) !== -1) {
-                    addOpt(m.num, m.nombre, m.horas);
-                }
-            });
-        } else if (typeof CURRICULA_CHILE !== 'undefined' && asignadosMods.length > 0) {
-            // Especialidad no registrada, pero tiene módulos asignados → buscar en todas las especialidades
-            asignadosMods.forEach(function(modNum) {
-                var found = CURRICULA_CHILE.getModuloCompatByNum(modNum);
-                if (found) {
-                    addOpt(found.num, found.nombre, found.horas);
-                } else if (MODULOS && MODULOS[modNum]) {
-                    var m = MODULOS[modNum];
-                    addOpt(m.num, m.nombre, m.horas);
-                }
-            });
-        } else if (typeof CURRICULA_CHILE !== 'undefined') {
-            // Sin especialidad y sin módulos asignados → mostrar todos los módulos de todas las especialidades
-            var allMods = CURRICULA_CHILE.getAllModulos();
-            allMods.forEach(function(entry) {
-                addOpt(entry.mod.num, entry.espNombre + ' › ' + entry.mod.nombre, entry.mod.horas);
-            });
-        } else if (typeof MODULOS !== 'undefined') {
-            // Fallback final: objeto MODULOS local
+        var added = 0;
+
+        if (typeof MODULOS !== 'undefined' && Object.keys(MODULOS).length > 0) {
+            // Prioridad 1: datos-curriculares.js (datos completos EN1–EN11)
             Object.keys(MODULOS).forEach(function(key) {
                 var m = MODULOS[key];
                 if (asignadosMods.length === 0 || asignadosMods.indexOf(m.num) !== -1) {
-                    addOpt(m.num, m.nombre, m.horas);
+                    addOpt(m.num, m.nombre, m.horas, m.nivel);
+                    added++;
                 }
             });
         }
 
-        document.getElementById('selectOA').innerHTML = '<option value="">-- Selecciona un modulo --</option>';
+        if (added === 0 && typeof CURRICULA_CHILE !== 'undefined') {
+            if (espKey) {
+                // Caso 2: especialidad conocida en CURRICULA_CHILE
+                CURRICULA_CHILE.getModulos(espKey).forEach(function(m) {
+                    if (asignadosMods.length === 0 || asignadosMods.indexOf(m.num) !== -1) {
+                        addOpt(m.num, m.nombre, m.horas, m.nivel);
+                        added++;
+                    }
+                });
+            } else if (asignadosMods.length > 0) {
+                // Caso 3: módulos asignados pero sin especialidad
+                asignadosMods.forEach(function(modNum) {
+                    var found = CURRICULA_CHILE.getModuloCompatByNum(modNum);
+                    if (found) { addOpt(found.num, found.nombre, found.horas); added++; }
+                });
+            } else {
+                // Caso 4: sin datos → mostrar todos los módulos de todas las especialidades
+                CURRICULA_CHILE.getAllModulos().forEach(function(entry) {
+                    addOpt(entry.mod.num, entry.espNombre + ' › ' + entry.mod.nombre, entry.mod.horas, entry.mod.nivel);
+                    added++;
+                });
+            }
+        }
+
+        if (added === 0) {
+            var opt = document.createElement('option');
+            opt.disabled = true;
+            opt.textContent = '⚠ Sin módulos disponibles — contacta al administrador';
+            sel.appendChild(opt);
+        }
+
+        document.getElementById('selectOA').innerHTML = '<option value="">-- Selecciona un módulo primero --</option>';
         document.getElementById('infoOA').style.display = 'none';
         document.getElementById('selectAE').innerHTML = '<option value="">-- Selecciona un OA --</option>';
         document.getElementById('listaCE').innerHTML = '<span style="color:var(--text-muted);font-size:0.85rem;">Selecciona un AE</span>';
-        document.getElementById('listaOAG').innerHTML = '<span style="color:var(--text-muted);font-size:0.85rem;">Se muestran automaticamente</span>';
+        document.getElementById('listaOAG').innerHTML = '<span style="color:var(--text-muted);font-size:0.85rem;">Se muestran automáticamente</span>';
     }
 
     function cargarOA() {
@@ -1034,7 +1073,9 @@
             var opt = document.createElement('option');
             opt.value = num;
             var txt = ae.texto || '';
-            opt.textContent = 'AE ' + num + ': ' + (txt.length > 100 ? txt.slice(0, 100) + '...' : txt);
+            // Limpiar prefijo 'OA' de la clave (p.ej. 'OA1' → '1')
+            var aeNum = (typeof num === 'string' && num.indexOf('OA') === 0) ? num.replace('OA', '') : num;
+            opt.textContent = 'AE ' + aeNum + ': ' + (txt.length > 100 ? txt.slice(0, 100) + '...' : txt);
             sel.appendChild(opt);
         });
         document.getElementById('listaCE').innerHTML = '<span style="color:var(--text-muted);font-size:0.85rem;">Selecciona un AE</span>';
