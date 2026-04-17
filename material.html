@@ -1202,7 +1202,10 @@
 
         if (!modId || !oaId || !aeNum) { alert('Completa al menos: Módulo, OA y AE.'); return; }
 
-        var mod = MODULOS[modId];
+        var _modsTP = (typeof getCurriculaModulos === 'function')
+            ? getCurriculaModulos(user.especialidad || '')
+            : (typeof MODULOS !== 'undefined' ? MODULOS : {});
+        var mod = _modsTP[modId];
         var ae = (mod && mod.aes) ? mod.aes[aeNum] : null;
 
         // Si es especialidad sin datos detallados, crear objeto genérico
@@ -2023,7 +2026,10 @@
         var prof    = document.getElementById('inputProfesor').value || (getCurrentUser()||{}).name || '—';
         var tipo    = tipoDocSeleccionado || 'guia';
         var tipos   = {guia:'Guía de Aprendizaje',apunte:'Apunte de Clase',ficha:'Ficha Práctica',evaluacion:'Guía de Ejercicios'};
-        var modNom  = modId && MODULOS[modId] ? MODULOS[modId].nombre : modId;
+        var _modsRef = (typeof getCurriculaModulos === 'function')
+            ? getCurriculaModulos((document.getElementById('selectEspecialidad') ? document.getElementById('selectEspecialidad').value : '') || '')
+            : (typeof MODULOS !== 'undefined' ? MODULOS : {});
+        var modNom  = modId && _modsRef[modId] ? _modsRef[modId].nombre : modId;
         var titulo  = (tipos[tipo]||tipo) + ' — ' + (modNom||modId) + (aeNum ? ' · AE' + aeNum : '');
 
         var entrada = {
