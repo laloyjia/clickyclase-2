@@ -334,11 +334,11 @@ CURRICULA_FULL['electronica'] = {
 
   'EN7': {
     num: 'EN7',
-    nombre: 'Programación de Sistemas de Automatización con PLC',
+    nombre: 'OPERACIÓN Y PROGRAMACIÓN DE EQUIPOS DE CONTROL ELECTRICO INDUSTRIAL',
     nivel: '4M',
     horas: 152,
     oas: {
-      'OA7': 'Programar, ajustar y operar controladores lógicos programables (PLC) y sistemas de automatización industrial, utilizando lenguajes de programación normalizados, de acuerdo a requerimientos del proceso y especificaciones técnicas.'
+      'OA7': 'Modificar programas y parámetros, en equipos y sistemas eléctricos y electrónicos utilizados en control de procesos, según requerimientos operacionales del equipo o planta y la normativa eléctrica vigente.'
     },
     aes: {
       'OA1': {
@@ -551,3 +551,4 @@ CURRICULA_FULL['electronica'] = {
 // (planificacion.html y material.html aún los usan directamente)
 var MODULOS = CURRICULA_FULL['electronica'].modulos;
 var OAG_DEFINICIONES = CURRICULA_FULL['electronica'].oag;
+      
