@@ -548,9 +548,10 @@
         <!-- ═══ PANEL DE RECOMENDACIONES CURRICULARES ═══ -->
         <div id="recsPanel"></div>
 
-        <!-- ========== SECCION 3: VALORES Y NEE ========== -->
+        <!-- ========== SECCION 3: VALORES (MBE) Y NEE ========== -->
         <div class="seccion-plan">
-            <h2><span class="icono">&#128155;</span> Valores Salesianos</h2>
+            <h2><span class="icono">&#128155;</span> Valores <span style="font-size:.7em;font-weight:500;color:var(--text-muted)">· Marco para la Buena Enseñanza</span></h2>
+            <p style="color: var(--text-muted); font-size:0.85rem; margin-bottom:0.8rem;">Actitudes transversales alineadas al MBE (Dominios A/B/C/D) y a los Objetivos de Aprendizaje Transversales (OAT) Mineduc. La IA las integrará de forma natural en la planificación.</p>
             <div class="checkbox-group" id="valoresSalesianos">
             </div>
         </div>
@@ -661,11 +662,17 @@
 
 
     // =============================================
-    // VALORES SALESIANOS
+    // VALORES / ACTITUDES TRANSVERSALES (MBE + OAT Mineduc)
     // =============================================
     const VALORES_SALESIANOS = [
-        'Honestidad', 'Responsabilidad', 'Solidaridad', 'Respeto',
-        'Alegria', 'Fe', 'Amabilidad', 'Trabajo'
+        'Responsabilidad y cumplimiento',
+        'Respeto y empatía',
+        'Honestidad e integridad',
+        'Solidaridad y bien común',
+        'Perseverancia y esfuerzo',
+        'Trabajo colaborativo',
+        'Autocuidado y vida saludable',
+        'Pensamiento crítico y autonomía'
     ];
 
     // =============================================
@@ -695,7 +702,7 @@
             // Fecha de hoy
             document.getElementById('inputFecha').value = new Date().toISOString().split('T')[0];
 
-            // Generar checkboxes de valores salesianos
+            // Generar checkboxes de valores / actitudes transversales MBE
             const contValores = document.getElementById('valoresSalesianos');
             VALORES_SALESIANOS.forEach(function(v) {
                 const item = document.createElement('label');
@@ -1228,7 +1235,7 @@
                 '2. Explica la dinamica de trabajo colaborativo: roles del equipo (lider, relator, encargado de materiales, expositor), tiempos y criterios de evaluacion.\n' +
                 '3. Plantea la pregunta activadora para todo el curso: ' + preguntaActivadora + '\n' +
                 '4. Forma los grupos (3-4 integrantes), los ubica en sus puestos y distribuye la guia de trabajo.\n' +
-                '5. Recuerda los valores salesianos de ' + val1 + ' y ' + val2 + ' como ejes del trabajo colaborativo.' +
+                '5. Recuerda las actitudes de ' + val1 + ' y ' + val2 + ' (MBE) como ejes del trabajo colaborativo.' +
                 neeTexto;
             inicioA =
                 '(Duracion: ' + minInicio + ' min)\n' +
@@ -1482,7 +1489,7 @@
             }
         }
 
-        // Obtener valores salesianos seleccionados
+        // Obtener actitudes / valores transversales seleccionados
         var valoresChecks = document.querySelectorAll('#valoresSalesianos input[type="checkbox"]:checked');
         var valoresSeleccionados = [];
         for (var i = 0; i < valoresChecks.length; i++) {
@@ -1540,12 +1547,12 @@
             texto: oagTextos.join('\n')
         });
 
-        // 6. Valores Salesianos
+        // 6. Valores / Actitudes transversales (MBE)
         campos.push({
-            titulo: 'Valores Salesianos',
+            titulo: 'Valores (Marco para la Buena Enseñanza)',
             texto: valoresSeleccionados.length > 0
-                ? 'Valores trabajados en esta clase: ' + valoresSeleccionados.join(', ') + '.'
-                : 'No se seleccionaron valores para esta clase.'
+                ? 'Actitudes transversales trabajadas en esta clase: ' + valoresSeleccionados.join(', ') + '.'
+                : 'No se seleccionaron actitudes transversales para esta clase.'
         });
 
         // 7. Contenido especifico
@@ -1663,7 +1670,7 @@
                    '\nAsignatura: ' + asigNombre + (unidad ? '\nUnidad: ' + unidad : '') });
         campos.push({ titulo: 'Objetivos de Aprendizaje (OA Mineduc)', texto: oaTexto });
         if (contenido) campos.push({ titulo: 'Contenido Específico', texto: contenido });
-        if (valoresSeleccionados.length) campos.push({ titulo: 'Valores Salesianos', texto: valoresSeleccionados.join(', ') });
+        if (valoresSeleccionados.length) campos.push({ titulo: 'Valores (MBE)', texto: valoresSeleccionados.join(', ') });
         if (neeSeleccionados.length) {
             var neeT = neeSeleccionados.map(function(n){ return '- ' + n.nombre + ': ' + n.desc; }).join('\n');
             campos.push({ titulo: 'Adecuaciones NEE/PIE', texto: neeT });
@@ -1717,7 +1724,7 @@
             { titulo: 'DESARROLLO (' + Math.round(minTot*0.65) + ' min)', texto: contenido || 'Desarrollo del contenido del módulo ' + modId + '.' },
             { titulo: 'CIERRE (' + (minTot - Math.round(minTot*0.15) - Math.round(minTot*0.65)) + ' min)', texto: 'Síntesis. Evaluación formativa. Próxima clase.' }
         ];
-        if (valoresSeleccionados.length) campos.splice(4, 0, { titulo: 'Valores Salesianos', texto: valoresSeleccionados.join(', ') });
+        if (valoresSeleccionados.length) campos.splice(4, 0, { titulo: 'Valores (MBE)', texto: valoresSeleccionados.join(', ') });
         if (neeSeleccionados.length) campos.splice(4, 0, { titulo: 'Adecuaciones NEE/PIE', texto: neeSeleccionados.map(function(n){ return '- ' + n.nombre + ': ' + n.desc; }).join('\n') });
 
         var container = document.getElementById('camposLIRMI');

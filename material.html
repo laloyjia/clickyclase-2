@@ -693,7 +693,7 @@
             <div style="display:flex;gap:.5rem;flex-wrap:wrap;justify-content:center;margin-top:.9rem">
                 <span class="stat-pro" style="display:inline-flex;align-items:center;gap:.35rem;padding:.3rem .7rem;border-radius:999px;font-size:.78rem;background:rgba(124,58,237,.14);border:1px solid rgba(124,58,237,.3);color:#c4b5fd">🧠 IA Gemini</span>
                 <span class="stat-pro" style="display:inline-flex;align-items:center;gap:.35rem;padding:.3rem .7rem;border-radius:999px;font-size:.78rem;background:rgba(34,211,238,.12);border:1px solid rgba(34,211,238,.3);color:#67e8f9">🎯 Bloom</span>
-                <span class="stat-pro" style="display:inline-flex;align-items:center;gap:.35rem;padding:.3rem .7rem;border-radius:999px;font-size:.78rem;background:rgba(52,211,153,.12);border:1px solid rgba(52,211,153,.3);color:#6ee7b7">💛 Valores Salesianos</span>
+                <span class="stat-pro" style="display:inline-flex;align-items:center;gap:.35rem;padding:.3rem .7rem;border-radius:999px;font-size:.78rem;background:rgba(52,211,153,.12);border:1px solid rgba(52,211,153,.3);color:#6ee7b7">💛 Valores (MBE)</span>
                 <span class="stat-pro" style="display:inline-flex;align-items:center;gap:.35rem;padding:.3rem .7rem;border-radius:999px;font-size:.78rem;background:rgba(244,114,182,.12);border:1px solid rgba(244,114,182,.3);color:#f9a8d4">📚 Publica a Biblioteca</span>
             </div>
         </div>
@@ -814,9 +814,10 @@
         <!-- ═══ PANEL DE RECOMENDACIONES CURRICULARES ═══ -->
         <div id="recsPanel"></div>
 
-        <!-- SECCION 3: VALORES SALESIANOS -->
+        <!-- SECCION 3: VALORES Y ACTITUDES (MBE) -->
         <div class="seccion-mat">
-            <h2><span>&#128155;</span> Valores Salesianos</h2>
+            <h2><span>&#128155;</span> Valores <span style="font-size:.7em;font-weight:500;color:var(--muted)">· Marco para la Buena Enseñanza</span></h2>
+            <p style="margin:4px 0 10px;color:var(--muted);font-size:.85rem">Selecciona las actitudes transversales que la IA integrará en el material, alineadas a los Dominios del MBE y a los Objetivos de Aprendizaje Transversales (OAT).</p>
             <div class="checkbox-group" id="valoresSalesianos"></div>
         </div>
 
@@ -918,7 +919,7 @@
             <h2>&#129302; Crear con Inteligencia Artificial</h2>
             <p class="ia-desc">
                 Usa Google Gemini para generar material educativo de alta calidad, 100% adaptado a tus OA, nivel y contenido.
-                La IA construye preguntas en los niveles cognitivos de Bloom que elijas, integra los valores salesianos y
+                La IA construye preguntas en los niveles cognitivos de Bloom que elijas, integra las actitudes transversales del Marco para la Buena Enseñanza y
                 usa la terminología correcta para la asignatura o módulo. Requiere una API key gratuita de Google AI Studio.
             </p>
             <div class="campo-row">
@@ -964,7 +965,7 @@
                     <li>Contenido alineado al OA y criterios seleccionados</li>
                     <li>Preguntas en los niveles cognitivos de Bloom elegidos</li>
                     <li>Lenguaje adaptado al nivel del curso y dificultad</li>
-                    <li>Valores Salesianos integrados de forma natural</li>
+                    <li>Actitudes transversales MBE integradas de forma natural</li>
                     <li>Formato listo para imprimir con portada y rúbrica</li>
                 </ul>
             </div>
@@ -1033,9 +1034,18 @@
     // Variable para tipo de documento seleccionado
     var tipoDocSeleccionado = '';
 
+    // Actitudes / valores transversales alineadas al Marco para la Buena Enseñanza
+    // (MBE — Dominios A, B, C, D) y a los Objetivos de Aprendizaje Transversales
+    // (OAT) de las Bases Curriculares Mineduc.
     var VALORES_SALESIANOS = [
-        'Honestidad', 'Responsabilidad', 'Solidaridad', 'Respeto',
-        'Alegria', 'Fe', 'Amabilidad', 'Trabajo'
+        'Responsabilidad y cumplimiento',
+        'Respeto y empatía',
+        'Honestidad e integridad',
+        'Solidaridad y bien común',
+        'Perseverancia y esfuerzo',
+        'Trabajo colaborativo',
+        'Autocuidado y vida saludable',
+        'Pensamiento crítico y autonomía'
     ];
 
     // =============================================
@@ -1701,7 +1711,7 @@
         '<tr><th>Fecha inicio</th><td>' + lineas(1) + '</td><th>Fecha entrega</th><td>' + lineas(1) + '</td></tr>' +
         '<tr><th>OA (' + oaId + ')</th><td colspan="3" style="font-size:0.83rem;">' + mod.oas[oaId] + '</td></tr>' +
         '<tr><th>AE ' + aeNum + '</th><td colspan="3" style="font-size:0.83rem;">' + ae.texto + '</td></tr>' +
-        '<tr><th>Valores Salesianos</th><td colspan="3">' + valTexto + '</td></tr>' +
+        '<tr><th>Valores (MBE)</th><td colspan="3">' + valTexto + '</td></tr>' +
         '</table>' +
 
         '<div class="recuadro-importante"><strong>&#127919; Proposito de esta guia:</strong> Esta guia te acompanara paso a paso en el estudio y comprension de <em>' + cont + '</em>. ' +
@@ -2742,7 +2752,7 @@
         'Curso / Nivel: ' + cursoTexto + '\n' +
         'Dificultad: ' + difTexto + '\n' +
         'Profesor(a): ' + (profesor || 'Docente') + '\n' +
-        'Valores Salesianos a integrar: ' + (valoresArr.length ? valoresArr.join(', ') : 'Responsabilidad, Trabajo') + '\n\n' +
+        'Actitudes transversales (Marco para la Buena Enseñanza · OAT Mineduc) a integrar: ' + (valoresArr.length ? valoresArr.join(', ') : 'Responsabilidad y cumplimiento, Trabajo colaborativo') + '\n\n' +
 
         '== OBJETIVOS DE APRENDIZAJE (OA MINEDUC) ==\n' + oaTexto + '\n\n' +
 
@@ -2775,7 +2785,7 @@
         '- Las preguntas de evaluación deben estar redactadas completas (no decir "[pregunta aquí]"), con texto real alineado al OA.\n' +
         '- Para selección múltiple: incluye las 4 alternativas con texto real, una correcta.\n' +
         '- Para verdadero/falso: escribe la afirmación completa.\n' +
-        '- Integra los valores salesianos (' + (valoresArr.length ? valoresArr.join(', ') : 'Responsabilidad') + ') de forma natural en reflexiones o actividades.\n' +
+        '- Integra las actitudes transversales MBE/OAT seleccionadas (' + (valoresArr.length ? valoresArr.join(', ') : 'Responsabilidad y cumplimiento') + ') de forma natural en reflexiones, contextos o actividades del documento, sin forzar el tema.\n' +
         '- Idioma: español, formal, adecuado para el nivel ' + cursoTexto + '.\n' +
         'Genera el documento ahora:';
 
