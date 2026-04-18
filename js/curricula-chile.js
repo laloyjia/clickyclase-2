@@ -7,8 +7,6 @@
  * MATEMÁTICA BÁSICA: 184 OAs (1°-8° básico)
  * LENGUAJE MEDIA   : 50 OAs (1°-4° medio)
  * MATEMÁTICA MEDIA : 36 OAs (1°-4° medio)
- * ELECTRICIDAD     : 8 módulos con AEs reales
- * MECÁNICA AUTOMOTRIZ: 10 módulos con AEs reales
  */
 
 var CURRICULA_CHILE = (function() {
@@ -938,179 +936,107 @@ var CURRICULA_CHILE = (function() {
   };
 
   // ════════════════════════════════════════════════════════════
-  //  ESPECIALIDADES TÉCNICO-PROFESIONALES (EMTP)
+  //  CATÁLOGO TP — metadatos por especialidad
+  //  Los datos curriculares reales viven en window.CURRICULA_FULL
+  //  (cargados desde js/curricula/tp/datos-*.js).  Este catálogo
+  //  define display metadata y el mapeo legacyKey → fullKey para
+  //  mantener compatibilidad con usuarios que tengan guardada la
+  //  especialidad con el nombre antiguo (ej: "automotriz").
   // ════════════════════════════════════════════════════════════
-
-  // ── Sector: Electricidad ────────────────────────────────────
-  var electricidad = {
-    nombre: 'Electricidad',
-    sigla:  'ELEC',
-    sector: 'Electricidad',
-    color:  '#f59e0b',
-    especialidades: [
-      {
-        nombre: 'Electricidad',
-        sigla:  'EL',
-        modulos: [
-          { num:"E1", nombre:"Instalación De Motores Eléctricos", horas:152, aes:[
-          {num:1, nombre:"Instala motores eléctricos", texto:"Instala motores eléctricos monofásicos y trifásicos según normativa vigente NCh Elec 4/2003, seleccionando correctamente los elementos de protección y control, verificando el sentido de giro y usando instrumentos de medición."},
-          {num:2, nombre:"Instala equipos de protección y maniobra", texto:"Instala equipos de protección y maniobra para motores eléctricos (contactores, relés térmicos, guardamotores), verificando su correcto funcionamiento según especificaciones técnicas del fabricante."}
-          ]},
-          { num:"E2", nombre:"Instalaciones Eléctricas Domiciliarias", horas:228, aes:[
-          {num:1, nombre:"Monta ductos y canaletas", texto:"Monta ductos, canaletas y accesorios para instalaciones eléctricas domiciliarias según planos de proyecto y normativa vigente, respetando las dimensiones y trayectorias establecidas."},
-          {num:2, nombre:"Realiza cableado de circuitos", texto:"Realiza cableado de circuitos eléctricos domiciliarios (iluminación, enchufes, fuerza) según especificaciones técnicas y normativa NCh Elec 4/2003, verificando continuidad y aislación."},
-          {num:3, nombre:"Instala tablero eléctrico domiciliario", texto:"Instala tablero eléctrico domiciliario con todos sus componentes (interruptores termomagnéticos, diferencial, puesta a tierra) según normativa vigente."}
-          ]},
-          { num:"E3", nombre:"Elaboración De Proyectos Eléctricos", horas:228, aes:[
-          {num:1, nombre:"Utiliza sistemas de diseño asistido", texto:"Utiliza sistemas de diseño asistido por computador (AutoCAD Electrical u similar) para elaborar planos eléctricos, aplicando simbología normalizada."},
-          {num:2, nombre:"Dibuja circuitos eléctricos", texto:"Dibuja circuitos eléctricos de control, mando y fuerza según normativa, calculando cargas y caídas de tensión."},
-          {num:3, nombre:"Dimensiona materiales y calcula presupuestos", texto:"Dimensiona cantidad de materiales y calcula presupuestos de instalaciones eléctricas a partir de planos de proyecto."}
-          ]},
-          { num:"E4", nombre:"Mantenimiento De Máquinas", horas:228, aes:[
-          {num:4, nombre:"Restablecer condiciones operacionales", texto:"Restablecer o mejorar las condiciones operacionales de máquinas y equipos eléctricos, aplicando procedimientos de mantenimiento preventivo y correctivo según plan establecido y normativa vigente."}
-          ]},
-          { num:"E5", nombre:"Instalación De Sistemas", horas:228, aes:[
-          {num:1, nombre:"Instala circuitos de control", texto:"Instala circuitos de control y señalización para sistemas eléctricos industriales, siguiendo planos y normativa vigente."},
-          {num:2, nombre:"Instala circuitos de automatización", texto:"Instala circuitos de automatización (PLC, sensores, actuadores) para sistemas eléctricos industriales según especificaciones técnicas."},
-          {num:3, nombre:"Instala tablero de distribución industrial", texto:"Instala tablero de distribución industrial con todos sus elementos de protección y control, verificando el correcto funcionamiento."},
-          {num:4, nombre:"Instala cuadros eléctricos de fuerza", texto:"Instala cuadros eléctricos de fuerza y control, verificando tensiones, corrientes y aislaciones según normativa."}
-          ]},
-          { num:"E6", nombre:"Instalaciones Eléctricas Industriales", horas:228, aes:[
-          {num:1, nombre:"Ejecuta instalación de iluminación industrial", texto:"Ejecuta instalación de sistemas de iluminación industrial (luminarias, reflectores, emergencia) según planos y normativa, verificando niveles de iluminancia."},
-          {num:2, nombre:"Realiza instalación de distribución eléctrica", texto:"Realiza instalación de sistemas de distribución eléctrica industrial (bandejas, ductos, conductores) según especificaciones técnicas y normativa vigente."},
-          {num:3, nombre:"Instala tablero eléctrico industrial", texto:"Instala tablero eléctrico industrial con bus de barras, interruptores de poder y elementos de protección, verificando coordinación de protecciones."}
-          ]},
-          { num:"E7", nombre:"Instalación De Equipos Electrónicos", horas:152, aes:[
-          {num:1, nombre:"Instala dispositivos electrónicos de control", texto:"Instala dispositivos electrónicos de control (variadores de frecuencia, arrancadores suaves, UPS) para equipos industriales, configurando parámetros según requerimientos del proceso."},
-          {num:2, nombre:"Instala circuitos de control electrónico", texto:"Instala circuitos de control electrónico (PLC básico, HMI, sensores de proximidad) verificando el correcto funcionamiento del sistema automatizado."}
-          ]},
-          { num:"E8", nombre:"Automatización De Sistemas Eléctricos", horas:152, aes:[
-          {num:1, nombre:"Maneja y ajusta controladores lógicos", texto:"Maneja y ajusta controladores lógicos programables (PLC), programando secuencias de control para automatizar procesos eléctricos industriales según especificaciones técnicas."}
-          ]}
-        ]
-      }
-    ]
+  var TP_CATALOG = {
+    'electricidad':        { nombre: 'Electricidad',           sigla: 'EL',  sector: 'Electricidad',             color: '#f59e0b', fullKey: 'electricidad' },
+    'mecanica-automotriz': { nombre: 'Mecánica Automotriz',    sigla: 'MA',  sector: 'Mecánica',                 color: '#ef4444', fullKey: 'mecanica-automotriz' },
+    'mecanica-industrial': { nombre: 'Mecánica Industrial',    sigla: 'MI',  sector: 'Mecánica',                 color: '#f97316', fullKey: 'mecanica-industrial' },
+    'electronica':         { nombre: 'Electrónica',            sigla: 'EN',  sector: 'Electricidad',             color: '#10b981', fullKey: 'electronica' },
+    'administracion':      { nombre: 'Administración',         sigla: 'ADM', sector: 'Administración y Comercio',color: '#3b82f6', fullKey: 'administracion' },
+    'contabilidad':        { nombre: 'Contabilidad',           sigla: 'CO',  sector: 'Administración y Comercio',color: '#8b5cf6', fullKey: 'contabilidad' },
+    'ventas':              { nombre: 'Ventas y Marketing',     sigla: 'VE',  sector: 'Administración y Comercio',color: '#14b8a6', fullKey: 'ventas' },
+    'grafica':             { nombre: 'Gráfica',                sigla: 'GR',  sector: 'Gráfica',                  color: '#ec4899', fullKey: 'grafica' },
+    'construccion':        { nombre: 'Construcción',           sigla: 'CONST',sector:'Construcción',             color: '#92400e', fullKey: 'construccion' }
   };
 
- 
-  // ── Sector: Informática y Comunicación ──────────────────────
-  var informatica = {
-    nombre: 'Informática',
-    sigla:  'INFO',
-    sector: 'Informática y Comunicación',
-    color:  '#6366f1',
-    especialidades: [
-      {
-        nombre: 'Técnico en Informática',
-        sigla:  'TI',
-        modulos: [
-          { num:'TI1', nombre:'Sistemas Operativos', horas:152, aes:[
-            {num:1, nombre:'Instalación y configuración de SO (Windows/Linux)'},
-            {num:2, nombre:'Administración de usuarios y permisos'},
-            {num:3, nombre:'Virtualización básica'}
-          ]},
-          { num:'TI2', nombre:'Redes y Conectividad', horas:152, aes:[
-            {num:1, nombre:'Modelo OSI y TCP/IP'},
-            {num:2, nombre:'Configuración de routers y switches'},
-            {num:3, nombre:'Seguridad en redes básica'}
-          ]},
-          { num:'TI3', nombre:'Programación Web', horas:228, aes:[
-            {num:1, nombre:'HTML5, CSS3 y JavaScript básico'},
-            {num:2, nombre:'Bases de datos relacionales (SQL)'},
-            {num:3, nombre:'Desarrollo de aplicaciones web básicas'}
-          ]},
-          { num:'TI4', nombre:'Soporte Técnico', horas:152, aes:[
-            {num:1, nombre:'Diagnóstico y reparación de hardware'},
-            {num:2, nombre:'Soporte a usuarios y documentación'},
-            {num:3, nombre:'Mantenimiento preventivo y correctivo'}
-          ]}
-        ]
-      }
-    ]
+  // Alias para retrocompatibilidad con valores ya guardados en Firestore
+  var TP_ALIASES = {
+    'automotriz': 'mecanica-automotriz',
+    'mecanica':   'mecanica-industrial',
+    'industrial': 'mecanica-industrial'
   };
 
-  // ── Sector: Administración y Comercio ───────────────────────
-  var administracion = {
-    nombre: 'Administración y Comercio',
-    sigla:  'ADM',
-    sector: 'Administración y Comercio',
-    color:  '#10b981',
-    especialidades: [
-      {
-        nombre: 'Técnico en Administración',
-        sigla:  'ADM',
-        modulos: [
-          { num:'ADM1', nombre:'Contabilidad Básica', horas:152, aes:[
-            {num:1, nombre:'Documentos mercantiles y libros contables'},
-            {num:2, nombre:'Balance y estado de resultados básico'},
-            {num:3, nombre:'Software contable (ERP básico)'}
-          ]},
-          { num:'ADM2', nombre:'Gestión Tributaria', horas:152, aes:[
-            {num:1, nombre:'IVA, boletas y facturas electrónicas'},
-            {num:2, nombre:'Declaraciones SII básicas'},
-            {num:3, nombre:'Régimen tributario PYME'}
-          ]},
-          { num:'ADM3', nombre:'Recursos Humanos', horas:152, aes:[
-            {num:1, nombre:'Contrato de trabajo y legislación laboral'},
-            {num:2, nombre:'Liquidación de sueldos y previsión'},
-            {num:3, nombre:'Gestión de personas básica'}
-          ]},
-          { num:'ADM4', nombre:'Emprendimiento y Gestión', horas:76, aes:[
-            {num:1, nombre:'Plan de negocios básico (Canvas)'},
-            {num:2, nombre:'Marketing digital básico'},
-            {num:3, nombre:'Gestión financiera de pequeñas empresas'}
-          ]}
-        ]
-      }
-    ]
-  };
+  function _resolveEspKey(key) {
+    if (!key) return null;
+    if (TP_CATALOG[key]) return key;
+    if (TP_ALIASES[key] && TP_CATALOG[TP_ALIASES[key]]) return TP_ALIASES[key];
+    return null;
+  }
 
-  // ── Sector: Construcción ────────────────────────────────────
-  var construccion = {
-    nombre: 'Construcción',
-    sigla:  'CONST',
-    sector: 'Construcción',
-    color:  '#92400e',
-    especialidades: [
-      {
-        nombre: 'Técnico en Construcción',
-        sigla:  'CO',
-        modulos: [
-          { num:'CO1', nombre:'Materiales de Construcción', horas:152, aes:[
-            {num:1, nombre:'Propiedades y uso de materiales constructivos'},
-            {num:2, nombre:'Áridos, cementos y concreto'},
-            {num:3, nombre:'Madera y acero en construcción'}
-          ]},
-          { num:'CO2', nombre:'Lectura de Planos', horas:152, aes:[
-            {num:1, nombre:'Simbología y normas de dibujo técnico'},
-            {num:2, nombre:'Plantas, cortes y elevaciones'},
-            {num:3, nombre:'Especificaciones técnicas y cubicaciones'}
-          ]},
-          { num:'CO3', nombre:'Instalaciones Sanitarias', horas:152, aes:[
-            {num:1, nombre:'Red de agua potable y alcantarillado'},
-            {num:2, nombre:'Gas domiciliario básico'},
-            {num:3, nombre:'Normativa sanitaria MINVU/SISS'}
-          ]}
-        ]
+  // Adapta un módulo del formato CURRICULA_FULL (aes como dict OAx→{texto,nombre})
+  // al formato esperado por el API legacy (aes como array [{num,nombre,texto}])
+  function _adaptModulo(m) {
+    var aesArr = [];
+    if (m && m.aes && typeof m.aes === 'object') {
+      Object.keys(m.aes).forEach(function(aeKey) {
+        var ae = m.aes[aeKey] || {};
+        var match = aeKey.match(/(\d+)/);
+        var num = match ? parseInt(match[1], 10) : (aesArr.length + 1);
+        aesArr.push({
+          num:    num,
+          nombre: ae.nombre || aeKey,
+          texto:  ae.texto || ae.descripcion || (m.oas && m.oas[aeKey]) || ''
+        });
+      });
+    }
+    return {
+      num:    m.num,
+      nombre: m.nombre,
+      nivel:  m.nivel,
+      horas:  m.horas,
+      aes:    aesArr
+    };
+  }
+
+  // Construye el bloque `especialidades` en formato legacy a partir de
+  // window.CURRICULA_FULL.  Se reconstruye en cada acceso para capturar
+  // cargas de datos diferidas (scripts con defer/async).
+  function _buildEspecialidades() {
+    var out = {};
+    var CF = (typeof window !== 'undefined' && window.CURRICULA_FULL) || {};
+    Object.keys(TP_CATALOG).forEach(function(key) {
+      var meta = TP_CATALOG[key];
+      var full = CF[meta.fullKey];
+      var modulos = [];
+      if (full && full.modulos) {
+        Object.keys(full.modulos).forEach(function(modKey) {
+          modulos.push(_adaptModulo(full.modulos[modKey]));
+        });
+        // Orden natural por num (EL1, EL2, …)
+        modulos.sort(function(a, b) {
+          var na = parseInt((String(a.num).match(/\d+/) || [0])[0], 10);
+          var nb = parseInt((String(b.num).match(/\d+/) || [0])[0], 10);
+          return na - nb;
+        });
       }
-    ]
-  };
+      out[key] = {
+        nombre: meta.nombre,
+        sigla:  meta.sigla,
+        sector: meta.sector,
+        color:  meta.color,
+        especialidades: [{
+          nombre:  meta.nombre,
+          sigla:   meta.sigla,
+          modulos: modulos
+        }]
+      };
+    });
+    return out;
+  }
 
   // ════════════════════════════════════════════════════════════
   //  API pública — CURRICULA_CHILE
   // ════════════════════════════════════════════════════════════
-  return {
+  var api = {
     basica:         basica,
     planComun:      planComun,
     electivosMedia: electivosMedia,
-    especialidades: {
-      electricidad:   electricidad,
-      automotriz:     automotriz,
-      electronica:    electronica,
-      informatica:    informatica,
-      administracion: administracion,
-      construccion:   construccion
-    },
 
     // ── Helpers ────────────────────────────────────────────────
     getAsignaturas: function(nivel) {
@@ -1131,7 +1057,9 @@ var CURRICULA_CHILE = (function() {
     },
 
     getModulos: function(sectorKey) {
-      var sec = this.especialidades[sectorKey];
+      var key = _resolveEspKey(sectorKey);
+      if (!key) return [];
+      var sec = this.especialidades[key];
       if (!sec) return [];
       var mods = [];
       (sec.especialidades || []).forEach(function(esp) {
@@ -1153,16 +1081,30 @@ var CURRICULA_CHILE = (function() {
       return map[nivel] || nivel;
     },
 
-    // Retorna array [{key, nombre, sector}] para poblar selectores TP
+    // Retorna array [{key, nombre, sector, color}] para poblar selectores TP.
+    // Solo incluye especialidades con datos cargados (CURRICULA_FULL presente);
+    // si CURRICULA_FULL no está cargado, retorna todo el catálogo igual (para
+    // que selectores de admin sigan funcionando aún sin datos reales).
     getEspecialidades: function() {
-      var esp = this.especialidades;
-      return Object.keys(esp).map(function(key) {
-        return { key: key, nombre: esp[key].nombre, sector: esp[key].sector };
+      var CF = (typeof window !== 'undefined' && window.CURRICULA_FULL) || null;
+      return Object.keys(TP_CATALOG).map(function(key) {
+        var meta = TP_CATALOG[key];
+        return {
+          key:       key,
+          nombre:    meta.nombre,
+          sector:    meta.sector,
+          color:     meta.color,
+          hasData:   !!(CF && CF[meta.fullKey])
+        };
       });
     },
 
+    // Normaliza una clave de especialidad (maneja alias legacy como "automotriz")
+    resolveEspKey: function(key) { return _resolveEspKey(key); },
+
     // Retorna un objeto compatible con MODULOS[] para un módulo TP por espKey y num
     getModuloCompat: function(espKey, modNum) {
+      espKey = _resolveEspKey(espKey) || espKey;
       var ceEstandar = {
         'C1': { texto: 'Aplica procedimientos técnicos según normativa vigente y especificaciones del fabricante.', oag: ['A'] },
         'C2': { texto: 'Usa correctamente herramientas e instrumentos de medición adecuados para el trabajo técnico.', oag: ['C'] },
@@ -1228,4 +1170,19 @@ var CURRICULA_CHILE = (function() {
       return all;
     }
   };
+
+  // `especialidades` se resuelve dinámicamente vía getter para capturar
+  // cargas diferidas de window.CURRICULA_FULL.  Fallback a objeto plano en
+  // entornos que no soporten defineProperty (muy improbable en targets).
+  try {
+    Object.defineProperty(api, 'especialidades', {
+      enumerable: true,
+      configurable: false,
+      get: function() { return _buildEspecialidades(); }
+    });
+  } catch (e) {
+    api.especialidades = _buildEspecialidades();
+  }
+
+  return api;
 })();

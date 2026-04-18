@@ -13,6 +13,16 @@
 <script src="js/firebase-config.js"></script>
 <script src="js/firebase-auth.js"></script>
 <script src="js/firebase-db.js"></script>
+<!-- Datos curriculares TP por especialidad — cargan ANTES de curricula-chile.js -->
+<script src="js/curricula/tp/datos-electricidad.js"></script>
+<script src="js/curricula/tp/datos-mecanica-automotriz.js"></script>
+<script src="js/curricula/tp/datos-mecanica-industrial.js"></script>
+<script src="js/curricula/tp/datos-electronica.js"></script>
+<script src="js/curricula/tp/datos-administracion.js"></script>
+<script src="js/curricula/tp/datos-contabilidad.js"></script>
+<script src="js/curricula/tp/datos-ventas.js"></script>
+<script src="js/curricula/tp/datos-grafica.js"></script>
+<script src="js/curricula/tp/datos-construccion.js"></script>
 <script src="js/curricula-chile.js"></script>
 <script src="js/ia-client.js"></script>
 
@@ -798,7 +808,7 @@
 
     if (user.tipoProfesor === 'tecnico') {
       if (user.especialidad && window.CURRICULA_CHILE) {
-        var espData = (CURRICULA_CHILE.getEspecialidades() || []).find(function(e) { return e.key === user.especialidad; });
+        var espData = (function(){ var k = (CURRICULA_CHILE.resolveEspKey && CURRICULA_CHILE.resolveEspKey(user.especialidad)) || user.especialidad; return (CURRICULA_CHILE.getEspecialidades() || []).find(function(e) { return e.key === k; }); })();
         bloques.push(
           '<div style="margin-bottom:14px">' +
             '<div style="font-family:Space Grotesk,sans-serif;font-weight:800;color:#a78bfa;font-size:.78rem">⚙️ Especialidad EMTP</div>' +
@@ -890,7 +900,7 @@
       var mods = CURRICULA_CHILE.getModulos(user.especialidad) || [];
       var asignados = user.modulos || [];
       var filtrados = asignados.length ? mods.filter(function(m) { return asignados.indexOf(m.num) !== -1; }) : mods;
-      var espData   = (CURRICULA_CHILE.getEspecialidades() || []).find(function(e) { return e.key === user.especialidad; });
+      var espData   = (function(){ var k = (CURRICULA_CHILE.resolveEspKey && CURRICULA_CHILE.resolveEspKey(user.especialidad)) || user.especialidad; return (CURRICULA_CHILE.getEspecialidades() || []).find(function(e) { return e.key === k; }); })();
 
       el.innerHTML =
         '<div class="card-pro">' +
