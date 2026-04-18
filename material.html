@@ -922,12 +922,29 @@
                 </div>
                 <div class="campo">
                     <label>Modelo de IA</label>
-                    <select id="selectModeloIA">
-                        <option value="gemini-2.0-flash">Gemini 2.0 Flash (recomendado)</option>
+                    <select id="selectModeloIA" onchange="onCambioModelo(this.value)">
+                        <option value="gemini-2.0-flash">Gemini 2.0 Flash &mdash; recomendado ✓</option>
+                        <option value="gemini-2.0-flash-lite">Gemini 2.0 Flash Lite &mdash; mas rapido</option>
+                        <option value="gemini-2.5-flash-preview-04-17">Gemini 2.5 Flash Preview &mdash; nuevo</option>
                         <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
-                        <option value="gemini-1.5-pro">Gemini 1.5 Pro (mayor calidad)</option>
+                        <option value="gemini-1.5-flash-8b">Gemini 1.5 Flash 8B &mdash; ligero</option>
+                        <option value="custom">✏️ Ingresar modelo manualmente...</option>
                     </select>
+                    <input type="text" id="inputModeloCustom" placeholder="Ej: gemini-2.0-flash"
+                        style="display:none;margin-top:6px;font-family:monospace;font-size:.85rem">
+                    <small style="color:var(--text-muted);font-size:.75rem;margin-top:3px;display:block">
+                        Modelos disponibles en
+                        <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color:var(--secondary)">AI Studio</a>
+                        o llama a
+                        <a href="https://generativelanguage.googleapis.com/v1beta/models?key=TU_KEY" target="_blank" style="color:var(--secondary)">ListModels</a>
+                    </small>
                 </div>
+            </div>
+            <div style="margin-top:.6rem">
+                <button onclick="verificarApiKey()" style="background:rgba(0,206,201,.1);border:1px solid rgba(0,206,201,.3);color:var(--secondary);padding:.45rem 1rem;border-radius:6px;font-size:.83rem;cursor:pointer;transition:all .2s">
+                    &#128272; Verificar API Key
+                </button>
+                <span id="keyStatus" style="margin-left:.7rem;font-size:.82rem"></span>
             </div>
             <div class="ia-instrucciones">
                 <strong>&#128161; La IA generara exactamente lo que necesitas:</strong>
@@ -1544,6 +1561,59 @@
     }
     function guardarApiKey(val) {
         localStorage.setItem('el_gemini_apikey', val);
+        document.getElementById('keyStatus').textContent = '';
+    }
+
+    function onCambioModelo(val) {
+        var custom = document.getElementById('inputModeloCustom');
+        if (val === 'custom') {
+            custom.style.display = '';
+            custom.focus();
+        } else {
+            custom.style.display = 'none';
+        }
+    }
+
+    function getModeloSeleccionado() {
+        var sel = document.getElementById('selectModeloIA');
+        if (!sel) return 'gemini-2.0-flash';
+        if (sel.value === 'custom') {
+            var custom = document.getElementById('inputModeloCustom');
+            return (custom && custom.value.trim()) ? custom.value.trim() : 'gemini-2.0-flash';
+        }
+        return sel.value || 'gemini-2.0-flash';
+    }
+
+    function verificarApiKey() {
+        var apiKey = document.getElementById('inputApiKey') ? document.getElementById('inputApiKey').value.trim() : '';
+        var statusEl = document.getElementById('keyStatus');
+        if (!apiKey) { statusEl.style.color = '#ff6b6b'; statusEl.textContent = '⚠ Ingresa tu API key primero'; return; }
+        statusEl.style.color = '#a29bfe'; statusEl.textContent = '⏳ Verificando...';
+        var modelo = getModeloSeleccionado();
+        var url = 'https://generativelanguage.googleapis.com/v1beta/models/' + modelo + ':generateContent?key=' + apiKey;
+        fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ contents: [{ parts: [{ text: 'Di hola en una palabra.' }] }], generationConfig: { maxOutputTokens: 10 } })
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(d) {
+            if (d.error) {
+                statusEl.style.color = '#ff6b6b';
+                var msg = d.error.message || '';
+                if (msg.indexOf('not found') !== -1 || msg.indexOf('not supported') !== -1) {
+                    statusEl.textContent = '❌ Modelo "' + modelo + '" no disponible. Prueba "Gemini 2.0 Flash".';
+                } else if (msg.indexOf('API_KEY_INVALID') !== -1 || msg.indexOf('invalid') !== -1) {
+                    statusEl.textContent = '❌ API key inválida. Verifica en aistudio.google.com';
+                } else {
+                    statusEl.textContent = '❌ ' + msg.substring(0, 80);
+                }
+            } else {
+                statusEl.style.color = '#34d399';
+                statusEl.textContent = '✅ API key y modelo OK — listo para generar';
+            }
+        })
+        .catch(function(e) { statusEl.style.color = '#ff6b6b'; statusEl.textContent = '❌ Sin conexión: ' + e.message; });
     }
 
     // =============================================
@@ -2648,7 +2718,7 @@
         '- Idioma: español, formal, adecuado para el nivel ' + cursoTexto + '.\n' +
         'Genera el documento ahora:';
 
-        var modelo = document.getElementById('selectModeloIA') ? document.getElementById('selectModeloIA').value : 'gemini-2.0-flash';
+        var modelo = getModeloSeleccionado();
         var url = 'https://generativelanguage.googleapis.com/v1beta/models/' + modelo + ':generateContent?key=' + apiKey;
 
         var body = JSON.stringify({
@@ -2656,7 +2726,7 @@
             generationConfig: { temperature: 0.7, maxOutputTokens: 8192 }
         });
 
-        setIAStatus('loading', '<span class="ia-spinner">&#9696;</span> Generando con ' + modelo + '... Esto puede tardar 15–30 segundos.');
+        setIAStatus('loading', '<span class="ia-spinner">&#9696;</span> Generando con <strong>' + modelo + '</strong>... Esto puede tardar 15–30 segundos.');
         document.getElementById('btnIA').disabled = true;
 
         fetch(url, {
@@ -2668,27 +2738,47 @@
         .then(function(data) {
             document.getElementById('btnIA').disabled = false;
             if (data.error) {
-                setIAStatus('error', '&#10007; Error de la API: ' + (data.error.message || JSON.stringify(data.error)) +
-                '<br><small>Verifica que tu API key sea correcta y tenga cuota disponible.</small>');
+                var msg = data.error.message || JSON.stringify(data.error);
+                var hint = '';
+                if (msg.indexOf('not found') !== -1 || msg.indexOf('not supported') !== -1) {
+                    hint = '<br><br>&#128161; <strong>Solución:</strong> El modelo <em>' + modelo + '</em> no está disponible. ' +
+                    'Selecciona <strong>"Gemini 2.0 Flash"</strong> en el selector de modelo (es el más estable y gratuito).';
+                } else if (msg.indexOf('API_KEY_INVALID') !== -1 || msg.indexOf('invalid') !== -1 || msg.indexOf('INVALID_ARGUMENT') !== -1) {
+                    hint = '<br><br>&#128161; <strong>Solución:</strong> Tu API key parece incorrecta. ' +
+                    'Obtén una nueva en <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color:#ff6b6b">aistudio.google.com/app/apikey</a> ' +
+                    '(es gratuita, sin tarjeta de crédito).';
+                } else if (msg.indexOf('RESOURCE_EXHAUSTED') !== -1 || msg.indexOf('quota') !== -1) {
+                    hint = '<br><br>&#128161; <strong>Solución:</strong> Cuota agotada. Espera unos minutos o prueba con otro modelo (Gemini 2.0 Flash Lite).';
+                } else if (msg.indexOf('PERMISSION_DENIED') !== -1) {
+                    hint = '<br><br>&#128161; <strong>Solución:</strong> La API key no tiene permiso para este modelo. Verifica en AI Studio que la key esté activa.';
+                }
+                setIAStatus('error', '&#10007; Error de la API: ' + msg + hint);
                 return;
             }
             var candidate = data.candidates && data.candidates[0];
+            if (candidate && candidate.finishReason === 'SAFETY') {
+                setIAStatus('error', '&#10007; El contenido fue bloqueado por filtros de seguridad de Google. Intenta reformular el contenido del documento.');
+                return;
+            }
             var text = candidate && candidate.content && candidate.content.parts && candidate.content.parts[0] && candidate.content.parts[0].text;
             if (!text) {
-                setIAStatus('error', '&#10007; La IA no devolvio contenido. Intenta de nuevo o revisa tu API key.');
+                setIAStatus('error', '&#10007; La IA no devolvio contenido. Intenta de nuevo. Si el error persiste, usa el boton "Verificar API Key".');
                 return;
             }
             // Limpiar bloques de código markdown si los hay
-            text = text.replace(/^```html\s*/i, '').replace(/^```\s*/i, '').replace(/\s*```\s*$/i, '');
+            text = text.replace(/^```html\s*/i, '').replace(/^```\s*/i, '').replace(/\s*```\s*$/i, '').trim();
             document.getElementById('docPreview').innerHTML = text;
             document.getElementById('docGenerado').classList.add('visible');
             document.getElementById('docGenerado').scrollIntoView({ behavior: 'smooth' });
-            setIAStatus('ok', '&#10003; Documento generado con IA exitosamente. Puedes imprimirlo o publicarlo en la Biblioteca.');
+            setIAStatus('ok', '&#10003; Documento generado con IA (' + modelo + ') exitosamente. Puedes imprimirlo o publicarlo en la Biblioteca.');
         })
         .catch(function(err) {
             document.getElementById('btnIA').disabled = false;
-            setIAStatus('error', '&#10007; Error de conexion: ' + err.message +
-            '<br><small>Verifica que tienes conexion a internet y que la API key es valida.</small>');
+            var hint = '';
+            if (err.message && err.message.indexOf('Failed to fetch') !== -1) {
+                hint = '<br><small>Verifica tu conexión a internet. Si el problema persiste, el servicio de Google puede estar temporalmente no disponible.</small>';
+            }
+            setIAStatus('error', '&#10007; Error de conexion: ' + err.message + hint);
         });
     }
 
