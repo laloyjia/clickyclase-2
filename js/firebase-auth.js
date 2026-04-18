@@ -55,6 +55,8 @@ var ELAuth = (function() {
           .then(function(doc) {
             if (doc.exists) {
               _currentUser = Object.assign({ uid: fbUser.uid, email: fbUser.email }, doc.data());
+              // Guardar rol en localStorage como caché de respaldo para modo offline
+              try { localStorage.setItem('el_user_role_' + fbUser.uid, _currentUser.role || EL_ROLES.ESTUDIANTE); } catch(e) {}
             } else {
               // Usuario en Auth pero no en Firestore → crear documento básico
               var adminEmailsList = window.EL_ADMIN_EMAILS || [window.EL_ADMIN_EMAIL];
@@ -84,18 +86,32 @@ var ELAuth = (function() {
             _readyCallbacks = [];
           })
           .catch(function(err) {
-            console.warn('[ELAuth] Firestore no disponible, usando perfil básico:', err.message);
-            // Si Firestore falla (no existe aún, offline, etc.) permitir el login
-            // con un perfil básico derivado de Firebase Auth
+            console.warn('[ELAuth] Firestore no disponible:', err.message);
+            // IMPORTANTE: Si _currentUser ya existe (sesión activa), NO degradar el rol.
+            // Solo asignar perfil básico si no hay ninguna sesión previa.
+            if (_currentUser && _currentUser.uid === fbUser.uid) {
+              // Ya tenemos datos del usuario — Firestore falló pero la sesión está intacta.
+              console.log('[ELAuth] Manteniendo sesión existente para:', fbUser.email, '| rol:', _currentUser.role);
+              _authReady = true;
+              _readyCallbacks.forEach(function(cb) { cb(_currentUser); });
+              _readyCallbacks = [];
+              return;
+            }
             var adminEmails = window.EL_ADMIN_EMAILS || [EL_ADMIN_EMAIL];
             var esAdmin = adminEmails.indexOf(fbUser.email) !== -1;
+            // Intentar recuperar rol desde localStorage como respaldo adicional
+            var rolCache = null;
+            try {
+              var cached = localStorage.getItem('el_user_role_' + fbUser.uid);
+              if (cached) rolCache = cached;
+            } catch(e) {}
             _currentUser = {
               uid:    fbUser.uid,
               email:  fbUser.email,
               nombre: fbUser.displayName || fbUser.email.split('@')[0],
-              role:   esAdmin ? EL_ROLES.ADMIN : EL_ROLES.ESTUDIANTE,
+              role:   esAdmin ? EL_ROLES.ADMIN : (rolCache || EL_ROLES.ESTUDIANTE),
               xp: 0, nivel: 1, badges: [], evaluaciones: [],
-              _offlineMode: true  // flag para saber que Firestore no estaba disponible
+              _offlineMode: true
             };
             _authReady = true;
             _readyCallbacks.forEach(function(cb) { cb(_currentUser); });
@@ -194,8 +210,10 @@ var ELAuth = (function() {
         var allowed = allowedRoles.indexOf(user.role) !== -1
           || adminEmails.indexOf(user.email) !== -1;
         if (!allowed) {
-          alert('No tienes permisos para acceder a esta sección.');
-          window.location.href = 'dashboard.html';
+          // Redirigir según rol: profesores/admins van a su dashboard, estudiantes al suyo
+          var esProfeOAdmin = user.role === 'profesor' || user.role === 'admin'
+            || adminEmails.indexOf(user.email) !== -1;
+          window.location.href = esProfeOAdmin ? 'dashboard-profesor.html' : 'dashboard.html';
         }
       }
     });

@@ -7,6 +7,14 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/styles.css">
+
+    <!-- Firebase SDK (necesario para autenticacion con ELAuth) -->
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+    <script src="js/firebase-rest.js"></script>
+    <script src="js/firebase-config.js"></script>
+    <script src="js/firebase-auth.js"></script>
+    <script src="js/firebase-db.js"></script>
     <style>
         /* ============================================
            EVALUACIONES — Estilos especificos
@@ -684,13 +692,54 @@
     };
 
     // =============================================
-    // INICIALIZACION
+    // BRIDGE DE GAMIFICACION PARA USUARIOS FIREBASE
+    // Almacena XP/badges en localStorage por UID,
+    // compatible con la logica de gamification.js
     // =============================================
-    document.addEventListener('DOMContentLoaded', function() {
-        currentUser = getCurrentUser();
-        if (!currentUser) { window.location.href = 'index.html'; return; }
+    var _evalUser     = null;   // usuario Firebase
+    var _evalLocalKey = null;   // clave localStorage personal
 
-        if (currentUser.role === 'profesor') {
+    function _loadGamUser(fbUser) {
+        var key = 'el_gam_' + fbUser.uid;
+        _evalLocalKey = key;
+        try {
+            var stored = localStorage.getItem(key);
+            if (stored) return JSON.parse(stored);
+        } catch(e) {}
+        return {
+            uid: fbUser.uid,
+            email: fbUser.email,
+            name: fbUser.nombre || fbUser.displayName || (fbUser.email ? fbUser.email.split('@')[0] : 'Estudiante'),
+            role: fbUser.role || 'estudiante',
+            xp: 0, level: 'Aprendiz',
+            badges: [], completedQuizzes: []
+        };
+    }
+
+    function _saveGamUser(u) {
+        try { if (_evalLocalKey) localStorage.setItem(_evalLocalKey, JSON.stringify(u)); } catch(e) {}
+    }
+
+    // Sobrescribir updateUser() de gamification.js para que guarde
+    // en la clave personal del usuario en vez del array compartido
+    window.updateUser = function(u) {
+        _saveGamUser(u);
+        currentUser = u;  // mantener referencia actualizada
+    };
+
+    // Logout: usar Firebase en vez de solo localStorage
+    function logout() { ELAuth.logout(); }
+
+    // =============================================
+    // INICIALIZACION CON FIREBASE AUTH
+    // =============================================
+    ELAuth.requireAuth(['estudiante', 'profesor', 'admin']);
+
+    ELAuth.onUserReady(function(user) {
+        _evalUser  = user;
+        currentUser = _loadGamUser(user);
+
+        if (user.role === 'profesor' || user.role === 'admin') {
             document.getElementById('navMaterial').style.display = 'inline';
         }
 
@@ -1005,7 +1054,7 @@
         };
 
         var gameResult = guardarResultadoQuiz(currentUser, resultado);
-        currentUser = getCurrentUser(); // Actualizar con nuevos XP
+        // currentUser ya fue actualizado por window.updateUser() dentro de guardarResultadoQuiz()
 
         // Mostrar resultados
         document.getElementById('quizArea').style.display = 'none';

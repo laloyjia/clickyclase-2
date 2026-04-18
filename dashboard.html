@@ -502,6 +502,15 @@
             return;
         }
 
+        // ---- 2. Profesores y admins van a su propio dashboard ----
+        var adminEmails = window.EL_ADMIN_EMAILS || [window.EL_ADMIN_EMAIL];
+        var esProfe = user.role === 'profesor' || user.role === 'admin'
+            || adminEmails.indexOf(user.email) !== -1;
+        if (esProfe) {
+            window.location.href = 'dashboard-profesor.html';
+            return;
+        }
+
         // Adaptar campos Firebase → campos legacy de gamification.js
         // Firebase usa: user.nombre, user.evaluaciones
         // gamification.js espera: user.name, user.completedQuizzes
