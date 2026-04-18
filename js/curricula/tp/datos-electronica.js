@@ -551,4 +551,3 @@ CURRICULA_FULL['electronica'] = {
 // (planificacion.html y material.html aún los usan directamente)
 var MODULOS = CURRICULA_FULL['electronica'].modulos;
 var OAG_DEFINICIONES = CURRICULA_FULL['electronica'].oag;
-      
