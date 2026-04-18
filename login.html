@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ElectroLearn — Acceso</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet">
+
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="js/firebase-rest.js"></script>
+<script src="js/firebase-config.js"></script>
+<script src="js/firebase-auth.js"></script>
+<script src="js/firebase-db.js"></script>
+
+<style>
+/* ── Reset ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* ── Variables ── */
+:root {
+  --purple: #7c3aed;
+  --purple-light: #a78bfa;
+  --purple-glow: rgba(124,58,237,.35);
+  --teal: #0d9488;
+  --pink: #ec4899;
+  --bg: #080b14;
+  --surface: #0f1623;
+  --surface2: #151e2d;
+  --border: rgba(255,255,255,.07);
+  --border-focus: rgba(139,92,246,.6);
+  --text: #f1f5f9;
+  --muted: #64748b;
+  --subtle: #1e293b;
+}
+
+/* ══════════════════════════════════
+   FONDO
+══════════════════════════════════ */
+html, body {
+  min-height: 100vh;
+  font-family: 'Inter', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  overflow-x: hidden;
+}
+
+.bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+}
+/* Gradiente de base */
+.bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 50% at 20% -10%, rgba(124,58,237,.18) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 40% at 80% 110%, rgba(13,148,136,.14) 0%, transparent 55%),
+    radial-gradient(ellipse 50% 60% at 50% 50%, rgba(236,72,153,.06) 0%, transparent 70%);
+}
+/* Grid sutil */
+.bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 40%, transparent 100%);
+}
+
+/* Orbes animados */
+.orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(100px);
+  animation: drift 18s infinite ease-in-out alternate;
+}
+.orb-1 { width: 500px; height: 500px; background: radial-gradient(circle, rgba(124,58,237,.25), transparent 70%); top: -150px; left: -150px; animation-duration: 20s; }
+.orb-2 { width: 400px; height: 400px; background: radial-gradient(circle, rgba(13,148,136,.2), transparent 70%); bottom: -100px; right: -100px; animation-duration: 25s; animation-delay: -8s; }
+.orb-3 { width: 300px; height: 300px; background: radial-gradient(circle, rgba(236,72,153,.15), transparent 70%); top: 50%; left: 60%; animation-duration: 15s; animation-delay: -4s; }
+@keyframes drift {
+  from { transform: translate(0,0) scale(1); }
+  to   { transform: translate(40px,60px) scale(1.15); }
+}
+
+/* ══════════════════════════════════
+   LAYOUT
+══════════════════════════════════ */
+.page {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px;
+}
+
+/* ══════════════════════════════════
+   TARJETA
+══════════════════════════════════ */
+.card {
+  width: 100%;
+  max-width: 400px;
+  background: linear-gradient(160deg, rgba(21,30,45,.95) 0%, rgba(15,22,35,.98) 100%);
+  border: 1px solid rgba(139,92,246,.15);
+  border-radius: 24px;
+  padding: 40px 36px 36px;
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,.04),
+    0 24px 48px rgba(0,0,0,.6),
+    0 0 120px rgba(124,58,237,.08);
+  animation: rise .5s cubic-bezier(.22,1,.36,1) both;
+  /* Línea superior decorativa */
+  position: relative;
+  overflow: hidden;
+}
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 10%; right: 10%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(139,92,246,.6), rgba(13,148,136,.4), transparent);
+}
+@keyframes rise {
+  from { opacity: 0; transform: translateY(28px) scale(.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ══════════════════════════════════
+   LOGO / HEADER
+══════════════════════════════════ */
+.logo-area {
+  text-align: center;
+  margin-bottom: 32px;
+}
+.logo-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 72px; height: 72px;
+  border-radius: 22px;
+  background: linear-gradient(145deg, #7c3aed, #5b21b6);
+  box-shadow:
+    0 8px 32px rgba(124,58,237,.45),
+    inset 0 1px 0 rgba(255,255,255,.15);
+  margin-bottom: 20px;
+  position: relative;
+}
+.logo-icon::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: 23px;
+  background: linear-gradient(145deg, rgba(167,139,250,.4), transparent 60%);
+  pointer-events: none;
+}
+.logo-icon svg {
+  width: 34px; height: 34px;
+  fill: #fff;
+  filter: drop-shadow(0 2px 8px rgba(255,255,255,.3));
+}
+.logo-title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: -.02em;
+  background: linear-gradient(135deg, #f1f5f9 30%, #c4b5fd 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1.1;
+  margin-bottom: 8px;
+}
+.logo-sub {
+  font-size: .82rem;
+  color: var(--muted);
+  letter-spacing: .04em;
+}
+
+/* ══════════════════════════════════
+   CAMPOS
+══════════════════════════════════ */
+.field { margin-bottom: 16px; }
+
+.field-label {
+  display: block;
+  font-size: .72rem;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: #94a3b8;
+  margin-bottom: 8px;
+}
+
+.input-box {
+  display: flex;
+  align-items: center;
+  background: rgba(255,255,255,.04);
+  border: 1.5px solid rgba(255,255,255,.08);
+  border-radius: 13px;
+  transition: border-color .2s, box-shadow .2s, background .2s;
+  position: relative;
+}
+.input-box:focus-within {
+  border-color: rgba(139,92,246,.7);
+  background: rgba(124,58,237,.06);
+  box-shadow: 0 0 0 3px rgba(124,58,237,.12), 0 1px 3px rgba(0,0,0,.3);
+}
+.input-box .ico {
+  display: flex;
+  align-items: center;
+  padding: 0 0 0 14px;
+  color: var(--muted);
+  flex-shrink: 0;
+}
+.input-box .ico svg {
+  width: 16px; height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.input-box input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  padding: 14px 12px;
+  color: var(--text);
+  font-size: .93rem;
+  font-family: inherit;
+  min-width: 0;
+}
+.input-box input::placeholder { color: #334155; }
+.input-box input:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0 100px rgba(15,22,35,.95) inset !important;
+  -webkit-text-fill-color: var(--text) !important;
+}
+.btn-eye {
+  background: none; border: none; cursor: pointer;
+  padding: 0 14px; color: #334155;
+  display: flex; align-items: center;
+  transition: color .2s; flex-shrink: 0;
+}
+.btn-eye:hover { color: #64748b; }
+.btn-eye svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+/* ── Fuerza contraseña ── */
+.strength-bar { display: flex; gap: 3px; margin-top: 6px; height: 2px; }
+.strength-bar span { flex: 1; border-radius: 99px; background: rgba(255,255,255,.06); transition: background .3s; }
+.s1 span:nth-child(1) { background: #ef4444; }
+.s2 span:nth-child(-n+2) { background: #f97316; }
+.s3 span:nth-child(-n+3) { background: #eab308; }
+.s4 span { background: #22c55e; }
+
+/* ── Requisitos ── */
+.reqs { margin: 10px 0 4px; padding: 0; }
+.reqs li {
+  list-style: none;
+  font-size: .76rem;
+  color: #475569;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 2px 0;
+  transition: color .2s;
+}
+.reqs li::before { content: '○'; font-size: .65rem; }
+.reqs li.ok { color: #4ade80; }
+.reqs li.ok::before { content: '✓'; }
+
+/* ── Forgot link ── */
+.link-forgot {
+  display: block;
+  text-align: right;
+  font-size: .8rem;
+  color: #475569;
+  text-decoration: none;
+  margin: -6px 0 18px;
+  transition: color .2s;
+}
+.link-forgot:hover { color: #a78bfa; }
+
+/* ══════════════════════════════════
+   BOTÓN PRINCIPAL
+══════════════════════════════════ */
+.btn-main {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 13px;
+  background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 50%, #5b21b6 100%);
+  color: #fff;
+  font-size: .95rem;
+  font-weight: 700;
+  font-family: inherit;
+  letter-spacing: .01em;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all .2s;
+  box-shadow: 0 4px 20px rgba(124,58,237,.4), inset 0 1px 0 rgba(255,255,255,.12);
+  position: relative;
+  overflow: hidden;
+  margin-top: 4px;
+}
+.btn-main::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,.1), transparent 50%);
+  opacity: 0;
+  transition: opacity .2s;
+}
+.btn-main:hover:not(:disabled)::before { opacity: 1; }
+.btn-main:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 8px 28px rgba(124,58,237,.5), inset 0 1px 0 rgba(255,255,255,.12); }
+.btn-main:active:not(:disabled) { transform: translateY(0); }
+.btn-main:disabled { opacity: .5; cursor: not-allowed; }
+
+/* ══════════════════════════════════
+   FOOTER / LINKS
+══════════════════════════════════ */
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 22px 0;
+  color: #1e293b;
+  font-size: .8rem;
+}
+.divider::before, .divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: rgba(255,255,255,.06);
+}
+.divider span { color: #334155; }
+
+.footer-text { text-align: center; font-size: .84rem; color: var(--muted); }
+.footer-text a { color: #a78bfa; font-weight: 600; text-decoration: none; transition: color .2s; }
+.footer-text a:hover { color: #c4b5fd; }
+
+/* ── Badges ── */
+.badges {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255,255,255,.05);
+}
+.badge {
+  font-size: .71rem;
+  font-weight: 600;
+  padding: 5px 12px;
+  border-radius: 20px;
+  letter-spacing: .02em;
+  border: 1px solid;
+}
+.b-green  { color: #34d399; border-color: rgba(52,211,153,.2); background: rgba(52,211,153,.06); }
+.b-blue   { color: #60a5fa; border-color: rgba(96,165,250,.2); background: rgba(96,165,250,.06); }
+.b-purple { color: #c4b5fd; border-color: rgba(196,181,253,.2); background: rgba(196,181,253,.06); }
+
+/* ══════════════════════════════════
+   MENSAJES
+══════════════════════════════════ */
+.msg { font-size: .82rem; min-height: 18px; margin-bottom: 10px; text-align: center; padding: 0 2px; }
+.msg-err { color: #f87171; }
+.msg-ok  { color: #4ade80; }
+
+/* ── Spinner ── */
+.spin {
+  display: inline-block; width: 16px; height: 16px;
+  border: 2px solid rgba(255,255,255,.25);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: rotate .6s linear infinite;
+}
+@keyframes rotate { to { transform: rotate(360deg); } }
+
+/* ══════════════════════════════════
+   ALERTA PRIMER INGRESO
+══════════════════════════════════ */
+.alert-warn {
+  display: flex;
+  gap: 12px;
+  background: rgba(245,158,11,.07);
+  border: 1px solid rgba(245,158,11,.2);
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-bottom: 24px;
+}
+.alert-warn svg { width: 18px; height: 18px; flex-shrink: 0; margin-top: 1px; fill: none; stroke: #f59e0b; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.alert-warn p { font-size: .82rem; color: #fcd34d; line-height: 1.6; margin: 0; }
+.alert-warn strong { color: #fbbf24; }
+
+/* ══════════════════════════════════
+   RESPONSIVE
+══════════════════════════════════ */
+@media (max-width: 440px) {
+  .card { padding: 32px 22px 28px; border-radius: 20px; }
+  .logo-icon { width: 62px; height: 62px; border-radius: 18px; }
+  .logo-title { font-size: 1.75rem; }
+}
+</style>
+</head>
+<body>
+
+<!-- Fondo -->
+<div class="bg">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+</div>
+
+<div class="page">
+
+  <!-- ═══════════════════════════════════
+       LOGIN
+  ════════════════════════════════════ -->
+  <div class="card" id="cardLogin">
+    <div class="logo-area">
+      <div class="logo-icon">
+        <svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+      </div>
+      <h1 class="logo-title">ElectroLearn</h1>
+      <p class="logo-sub">Plataforma Educativa · Chile</p>
+    </div>
+
+    <form id="formLogin" onsubmit="doLogin(event)" novalidate>
+      <div class="field">
+        <label class="field-label">Correo electrónico</label>
+        <div class="input-box">
+          <span class="ico"><svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 7 10-7"/></svg></span>
+          <input type="email" id="loginEmail" placeholder="tu@correo.cl" required autocomplete="email">
+        </div>
+      </div>
+      <div class="field">
+        <label class="field-label">Contraseña</label>
+        <div class="input-box">
+          <span class="ico"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
+          <input type="password" id="loginPass" placeholder="••••••••" required autocomplete="current-password">
+          <button type="button" class="btn-eye" onclick="togglePass('loginPass',this)">
+            <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+      </div>
+      <a href="#" class="link-forgot" onclick="showCard('forgot');return false">¿Olvidaste tu contraseña?</a>
+      <p class="msg msg-err" id="errLogin"></p>
+      <button type="submit" class="btn-main" id="btnLogin">Iniciar Sesión</button>
+    </form>
+
+    <div class="divider"><span>o</span></div>
+    <p class="footer-text">¿No tienes cuenta? <a href="#" onclick="showCard('register');return false">Regístrate aquí</a></p>
+
+    <div class="badges">
+      <span class="badge b-green">📚 Básica</span>
+      <span class="badge b-blue">🎓 Plan Común</span>
+      <span class="badge b-purple">⚙️ EMTP</span>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════
+       REGISTRO
+  ════════════════════════════════════ -->
+  <div class="card" id="cardRegister" style="display:none">
+    <div class="logo-area">
+      <div class="logo-icon" style="background:linear-gradient(145deg,#0d9488,#0f766e)">
+        <svg viewBox="0 0 24 24" style="fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6m3-3h-6"/></svg>
+      </div>
+      <h1 class="logo-title" style="background:linear-gradient(135deg,#f1f5f9 30%,#6ee7b7 100%);-webkit-background-clip:text;background-clip:text">Crear Cuenta</h1>
+      <p class="logo-sub">Ingresa tus datos para registrarte</p>
+    </div>
+
+    <form id="formRegister" onsubmit="doRegister(event)" novalidate>
+      <div class="field">
+        <label class="field-label">Nombre completo</label>
+        <div class="input-box">
+          <span class="ico"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
+          <input type="text" id="regName" placeholder="Tu nombre completo" required>
+        </div>
+      </div>
+      <div class="field">
+        <label class="field-label">Correo electrónico</label>
+        <div class="input-box">
+          <span class="ico"><svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 7 10-7"/></svg></span>
+          <input type="email" id="regEmail" placeholder="tu@correo.cl" required>
+        </div>
+      </div>
+      <div class="field">
+        <label class="field-label">Contraseña</label>
+        <div class="input-box">
+          <span class="ico"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
+          <input type="password" id="regPass" placeholder="Mínimo 6 caracteres" required minlength="6" oninput="checkStrength(this,'strReg')">
+          <button type="button" class="btn-eye" onclick="togglePass('regPass',this)">
+            <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+        <div class="strength-bar" id="strReg"><span></span><span></span><span></span><span></span></div>
+      </div>
+      <div class="field">
+        <label class="field-label">Código de acceso <span style="color:#334155;font-weight:400;text-transform:none;font-size:.78rem">(opcional)</span></label>
+        <div class="input-box">
+          <span class="ico"><svg viewBox="0 0 24 24"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg></span>
+          <input type="text" id="regCode" placeholder="Código entregado por tu profesor">
+        </div>
+      </div>
+      <p class="msg msg-err" id="errRegister"></p>
+      <button type="submit" class="btn-main" id="btnRegister">Crear Cuenta</button>
+    </form>
+
+    <div class="divider"><span>o</span></div>
+    <p class="footer-text">¿Ya tienes cuenta? <a href="#" onclick="showCard('login');return false">Inicia sesión</a></p>
+  </div>
+
+  <!-- ═══════════════════════════════════
+       OLVIDÉ CONTRASEÑA
+  ════════════════════════════════════ -->
+  <div class="card" id="cardForgot" style="display:none">
+    <div class="logo-area">
+      <div class="logo-icon" style="background:linear-gradient(145deg,#d97706,#b45309)">
+        <svg viewBox="0 0 24 24" style="fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4m0 4h.01"/></svg>
+      </div>
+      <h1 class="logo-title" style="background:linear-gradient(135deg,#f1f5f9 30%,#fcd34d 100%);-webkit-background-clip:text;background-clip:text">Recuperar Acceso</h1>
+      <p class="logo-sub">Te enviamos un enlace a tu correo</p>
+    </div>
+
+    <form id="formForgot" onsubmit="doForgot(event)" novalidate>
+      <div class="field">
+        <label class="field-label">Correo electrónico</label>
+        <div class="input-box">
+          <span class="ico"><svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 7 10-7"/></svg></span>
+          <input type="email" id="forgotEmail" placeholder="tu@correo.cl" required>
+        </div>
+      </div>
+      <p class="msg msg-err" id="errForgot"></p>
+      <p class="msg msg-ok"  id="okForgot"></p>
+      <button type="submit" class="btn-main" id="btnForgot">Enviar enlace</button>
+    </form>
+
+    <div class="divider"><span>o</span></div>
+    <p class="footer-text"><a href="#" onclick="showCard('login');return false">← Volver al inicio de sesión</a></p>
+  </div>
+
+  <!-- ═══════════════════════════════════
+       CAMBIO DE CONTRASEÑA (primer ingreso)
+  ════════════════════════════════════ -->
+  <div class="card" id="cardChangePass" style="display:none">
+    <div class="logo-area">
+      <div class="logo-icon" style="background:linear-gradient(145deg,#dc2626,#b91c1c)">
+        <svg viewBox="0 0 24 24" style="fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      </div>
+      <h1 class="logo-title" style="background:linear-gradient(135deg,#f1f5f9 30%,#fca5a5 100%);-webkit-background-clip:text;background-clip:text">Nueva Contraseña</h1>
+      <p class="logo-sub">Requerido en el primer ingreso</p>
+    </div>
+
+    <div class="alert-warn">
+      <svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      <p>Por seguridad debes <strong>crear una contraseña personal</strong> antes de continuar.</p>
+    </div>
+
+    <form id="formChangePass" onsubmit="doChangePass(event)" novalidate>
+      <div class="field">
+        <label class="field-label">Nueva contraseña</label>
+        <div class="input-box">
+          <span class="ico"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
+          <input type="password" id="newPass" placeholder="Mínimo 8 caracteres" required minlength="8"
+            oninput="checkStrength(this,'strNew');checkReqs(this.value)">
+          <button type="button" class="btn-eye" onclick="togglePass('newPass',this)">
+            <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+        <div class="strength-bar" id="strNew"><span></span><span></span><span></span><span></span></div>
+        <ul class="reqs" id="passReqs">
+          <li id="r-len">Al menos 8 caracteres</li>
+          <li id="r-upper">Una letra mayúscula</li>
+          <li id="r-num">Un número</li>
+          <li id="r-special">Un carácter especial (@, #, !, etc.)</li>
+        </ul>
+      </div>
+      <div class="field">
+        <label class="field-label">Confirmar contraseña</label>
+        <div class="input-box">
+          <span class="ico"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
+          <input type="password" id="confirmPass" placeholder="Repite la contraseña" required oninput="checkConfirm()">
+          <button type="button" class="btn-eye" onclick="togglePass('confirmPass',this)">
+            <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+      </div>
+      <p class="msg msg-err" id="errChangePass"></p>
+      <button type="submit" class="btn-main" id="btnChangePass">Guardar y continuar</button>
+    </form>
+  </div>
+
+</div><!-- /page -->
+
+<script>
+// ══════════════════════════════════
+//  UI HELPERS
+// ══════════════════════════════════
+function showCard(id) {
+  ['Login','Register','Forgot','ChangePass'].forEach(function(n) {
+    var el = document.getElementById('card' + n);
+    if (el) el.style.display = (n.toLowerCase().replace('changepass','changePass') === id || n === id.charAt(0).toUpperCase() + id.slice(1)) ? 'block' : 'none';
+  });
+  ['errLogin','errRegister','errForgot','okForgot','errChangePass'].forEach(function(id) {
+    var el = document.getElementById(id); if (el) el.textContent = '';
+  });
+}
+
+// Normaliza showCard para que acepte 'changePass' o 'ChangePass'
+(function patchShowCard() {
+  var orig = showCard;
+  window.showCard = function(id) {
+    var map = { login:'Login', register:'Register', forgot:'Forgot', changepass:'ChangePass', changePass:'ChangePass' };
+    var key = map[id] || map[id.toLowerCase()] || id;
+    ['Login','Register','Forgot','ChangePass'].forEach(function(n) {
+      var el = document.getElementById('card'+n);
+      if (el) el.style.display = (n === key) ? 'block' : 'none';
+    });
+    ['errLogin','errRegister','errForgot','okForgot','errChangePass'].forEach(function(eid) {
+      var el = document.getElementById(eid); if (el) el.textContent = '';
+    });
+  };
+})();
+
+function togglePass(id, btn) {
+  var inp = document.getElementById(id);
+  var show = inp.type === 'password';
+  inp.type = show ? 'text' : 'password';
+  var svg = btn.querySelector('svg');
+  svg.innerHTML = show
+    ? '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>'
+    : '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
+}
+
+function checkStrength(inp, barId) {
+  var v = inp.value, s = 0;
+  if (v.length >= 8) s++;
+  if (/[A-Z]/.test(v)) s++;
+  if (/[0-9]/.test(v)) s++;
+  if (/[^A-Za-z0-9]/.test(v)) s++;
+  var bar = document.getElementById(barId);
+  if (bar) bar.className = 'strength-bar' + (s ? ' s'+s : '');
+}
+
+function checkReqs(v) {
+  var m = { 'r-len': v.length>=8, 'r-upper': /[A-Z]/.test(v), 'r-num': /[0-9]/.test(v), 'r-special': /[^A-Za-z0-9]/.test(v) };
+  Object.keys(m).forEach(function(id) {
+    var el = document.getElementById(id); if (el) el.className = m[id] ? 'ok' : '';
+  });
+}
+
+function checkConfirm() {
+  var p1 = document.getElementById('newPass').value;
+  var p2 = document.getElementById('confirmPass').value;
+  var err = document.getElementById('errChangePass');
+  if (err) err.textContent = (p2 && p1 !== p2) ? 'Las contraseñas no coinciden.' : '';
+}
+
+function setBtn(id, html, dis) {
+  var b = document.getElementById(id);
+  if (b) { b.innerHTML = html; b.disabled = !!dis; }
+}
+
+// ══════════════════════════════════
+//  SESIÓN ACTIVA → REDIRIGIR
+// ══════════════════════════════════
+ELAuth.onUserReady(function(user) {
+  if (!user || user.primerIngreso) return;
+  redirectByRole(user);
+});
+
+function redirectByRole(user) {
+  var admins = window.EL_ADMIN_EMAILS || [window.EL_ADMIN_EMAIL];
+  if (user.role === 'admin' || admins.indexOf(user.email) !== -1) {
+    window.location.href = 'admin.html';
+  } else if (user.role === 'profesor') {
+    window.location.href = 'dashboard-profesor.html';
+  } else {
+    window.location.href = 'dashboard.html';
+  }
+}
+
+// ══════════════════════════════════
+//  LOGIN
+// ══════════════════════════════════
+function doLogin(e) {
+  e.preventDefault();
+  var email = document.getElementById('loginEmail').value.trim();
+  var pass  = document.getElementById('loginPass').value;
+  var err   = document.getElementById('errLogin');
+  err.textContent = '';
+  setBtn('btnLogin', '<span class="spin"></span> Verificando…', true);
+
+  ELAuth.login(email, pass)
+    .then(function(user) {
+      if (user && user.primerIngreso === true) {
+        window._pendingUser = user;
+        showCard('changePass');
+        setBtn('btnLogin', 'Iniciar Sesión', false);
+        return;
+      }
+      redirectByRole(user);
+    })
+    .catch(function(error) {
+      setBtn('btnLogin', 'Iniciar Sesión', false);
+      var m = error.message || '';
+      if (/INVALID_LOGIN_CREDENTIALS|INVALID_PASSWORD|EMAIL_NOT_FOUND|invalid-login-credentials/i.test(m))
+        m = 'Correo o contraseña incorrectos.';
+      else if (/TOO_MANY_ATTEMPTS|too-many-requests/i.test(m))
+        m = 'Demasiados intentos. Espera unos minutos.';
+      else if (/USER_DISABLED|user-disabled/i.test(m))
+        m = 'Cuenta desactivada. Contacta al administrador.';
+      else if (/offline|network/i.test(m))
+        m = 'Sin conexión. Verifica tu internet.';
+      else
+        m = 'Error al iniciar sesión. Intenta de nuevo.';
+      err.textContent = '⚠ ' + m;
+    });
+}
+
+// ══════════════════════════════════
+//  CAMBIO CONTRASEÑA (primer ingreso)
+// ══════════════════════════════════
+function doChangePass(e) {
+  e.preventDefault();
+  var newP = document.getElementById('newPass').value;
+  var conf = document.getElementById('confirmPass').value;
+  var err  = document.getElementById('errChangePass');
+
+  if (newP.length < 8)         { err.textContent = '⚠ Mínimo 8 caracteres.'; return; }
+  if (!/[A-Z]/.test(newP))     { err.textContent = '⚠ Incluye una mayúscula.'; return; }
+  if (!/[0-9]/.test(newP))     { err.textContent = '⚠ Incluye un número.'; return; }
+  if (!/[^A-Za-z0-9]/.test(newP)) { err.textContent = '⚠ Incluye un carácter especial.'; return; }
+  if (newP !== conf)            { err.textContent = '⚠ Las contraseñas no coinciden.'; return; }
+
+  err.textContent = '';
+  setBtn('btnChangePass', '<span class="spin"></span> Guardando…', true);
+
+  var cu = EL_AUTH.currentUser;
+  if (!cu) { showCard('login'); return; }
+
+  cu.updatePassword(newP)
+    .then(function() {
+      return EL_DB.collection(EL_COLLECTIONS.USERS).doc(cu.uid).update({
+        primerIngreso: false,
+        passwordCambiadoEn: new Date().toISOString()
+      });
+    })
+    .then(function() {
+      var u = window._pendingUser;
+      if (u) { u.primerIngreso = false; redirectByRole(u); }
+      else window.location.reload();
+    })
+    .catch(function(error) {
+      setBtn('btnChangePass', 'Guardar y continuar', false);
+      var m = error.message || 'Error al cambiar contraseña.';
+      if (/requires-recent-login/i.test(m)) { m = 'Sesión expirada. Vuelve a iniciar sesión.'; showCard('login'); }
+      err.textContent = '⚠ ' + m;
+    });
+}
+
+// ══════════════════════════════════
+//  REGISTRO
+// ══════════════════════════════════
+function doRegister(e) {
+  e.preventDefault();
+  var nombre = document.getElementById('regName').value.trim();
+  var email  = document.getElementById('regEmail').value.trim();
+  var pass   = document.getElementById('regPass').value;
+  var codigo = document.getElementById('regCode').value.trim();
+  var err    = document.getElementById('errRegister');
+
+  if (!nombre || !email || !pass) { err.textContent = '⚠ Completa los campos obligatorios.'; return; }
+  if (pass.length < 6)            { err.textContent = '⚠ Contraseña mínimo 6 caracteres.'; return; }
+
+  err.textContent = '';
+  setBtn('btnRegister', '<span class="spin"></span> Creando cuenta…', true);
+
+  var validar = codigo ? ELDB.codigos.validar(codigo) : Promise.resolve(null);
+  validar
+    .then(function(cod) {
+      return EL_AUTH.createUserWithEmailAndPassword(email, pass)
+        .then(function(cred) {
+          var perfil = {
+            uid: cred.user.uid, nombre: nombre, email: email,
+            role: cod ? cod.role : 'estudiante',
+            xp: 0, nivel: 1, badges: [], evaluaciones: [],
+            activo: true, primerIngreso: true,
+            creadoEn: new Date().toISOString(),
+            cursor: cod ? cod.curso : ''
+          };
+          return EL_DB.collection(EL_COLLECTIONS.USERS).doc(cred.user.uid).set(perfil)
+            .then(function() { if (cod) return ELDB.codigos.marcarUsado(cod.id, cred.user.uid); });
+        });
+    })
+    .then(function() {
+      window._pendingUser = { role: 'estudiante', primerIngreso: true };
+      showCard('changePass');
+      setBtn('btnRegister', 'Crear Cuenta', false);
+    })
+    .catch(function(error) {
+      setBtn('btnRegister', 'Crear Cuenta', false);
+      var m = error.message || '';
+      if (/EMAIL_EXISTS|email-already-in-use/i.test(m)) m = 'Ya existe una cuenta con ese correo.';
+      else if (/Código inválido/.test(m))               m = 'Código inválido o ya usado.';
+      else if (/WEAK_PASSWORD|weak-password/i.test(m))  m = 'Contraseña muy débil.';
+      err.textContent = '⚠ ' + m;
+    });
+}
+
+// ══════════════════════════════════
+//  RECUPERAR CONTRASEÑA
+// ══════════════════════════════════
+function doForgot(e) {
+  e.preventDefault();
+  var email = document.getElementById('forgotEmail').value.trim();
+  var err   = document.getElementById('errForgot');
+  var ok    = document.getElementById('okForgot');
+  err.textContent = ''; ok.textContent = '';
+  setBtn('btnForgot', '<span class="spin"></span> Enviando…', true);
+
+  EL_AUTH.sendPasswordResetEmail(email)
+    .then(function() {
+      ok.textContent = '✓ Enlace enviado. Revisa tu correo (incluye spam).';
+      setBtn('btnForgot', 'Enviar enlace', false);
+    })
+    .catch(function() {
+      // No revelar si el correo existe
+      ok.textContent = '✓ Si el correo está registrado recibirás el enlace.';
+      setBtn('btnForgot', 'Enviar enlace', false);
+    });
+}
+</script>
+</body>
+</html>

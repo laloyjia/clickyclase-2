@@ -1,1145 +1,1122 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Evaluaciones - ElectroLearn</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/styles.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Evaluaciones — ElectroLearn</title>
+<meta name="description" content="Evaluaciones interactivas de Electrónica TP con retroalimentación inmediata, gamificación e insignias.">
 
-    <!-- Firebase SDK (necesario para autenticacion con ELAuth) -->
-    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
-    <script src="js/firebase-rest.js"></script>
-    <script src="js/firebase-config.js"></script>
-    <script src="js/firebase-auth.js"></script>
-    <script src="js/firebase-db.js"></script>
-    <style>
-        /* ============================================
-           EVALUACIONES — Estilos especificos
-           ============================================ */
-        .eval-container {
-            max-width: 860px;
-            margin: 0 auto;
-            padding: 90px 20px 60px;
-            position: relative;
-            z-index: 1;
-        }
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
 
-        /* Pasos del wizard */
-        .wizard-steps {
-            display: flex;
-            justify-content: center;
-            gap: 0;
-            margin-bottom: 2.5rem;
-        }
-        .wstep {
-            display: flex;
-            align-items: center;
-            font-size: 0.82rem;
-            font-weight: 600;
-            color: var(--text-muted);
-        }
-        .wstep-circle {
-            width: 30px; height: 30px;
-            border-radius: 50%;
-            background: var(--glass);
-            border: 2px solid var(--glass-border);
-            display: flex; align-items: center; justify-content: center;
-            font-size: 0.8rem; font-weight: 700;
-            margin-right: 6px;
-            transition: all 0.3s;
-        }
-        .wstep.active .wstep-circle {
-            background: var(--primary);
-            border-color: var(--primary);
-            color: white;
-            box-shadow: 0 0 12px rgba(99,102,241,0.5);
-        }
-        .wstep.done .wstep-circle {
-            background: var(--success);
-            border-color: var(--success);
-            color: white;
-        }
-        .wstep-line {
-            width: 50px; height: 2px;
-            background: var(--glass-border);
-            margin: 0 6px;
-        }
-        .wstep.done ~ .wstep-line,
-        .wstep.active ~ .wstep-line { background: var(--primary); }
+<!-- Firebase SDK (auth) -->
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="js/firebase-rest.js"></script>
+<script src="js/firebase-config.js"></script>
+<script src="js/firebase-auth.js"></script>
+<script src="js/firebase-db.js"></script>
+<script src="js/el-ui.js" defer></script>
 
-        /* Seccion del configurador */
-        .config-section {
-            background: var(--glass);
-            border: 1px solid var(--glass-border);
-            border-radius: var(--radius-lg);
-            padding: 1.8rem;
-            margin-bottom: 1.5rem;
-            backdrop-filter: blur(10px);
-        }
-        .config-section h2 {
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 1.1rem;
-            color: var(--secondary);
-            margin-bottom: 1.2rem;
-            display: flex; align-items: center; gap: 0.5rem;
-        }
-        .config-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1rem;
-        }
-        @media (max-width: 600px) { .config-row { grid-template-columns: 1fr; } }
+<style>
+  /* ─────────── Layout específico de evaluaciones ─────────── */
+  body { background: var(--bg, #0b1020); color: var(--text, #e5e7ff); min-height: 100vh; }
 
-        .campo-ev { margin-bottom: 1rem; }
-        .campo-ev label {
-            display: block;
-            font-size: 0.88rem; font-weight: 600;
-            color: var(--text); margin-bottom: 0.4rem;
-        }
-        .campo-ev select, .campo-ev input {
-            width: 100%;
-            background: rgba(255,255,255,0.05);
-            border: 1px solid var(--glass-border);
-            border-radius: var(--radius-sm);
-            color: var(--text);
-            font-size: 0.9rem;
-            padding: 0.65rem 1rem;
-            font-family: inherit;
-            transition: border 0.2s;
-        }
-        .campo-ev select:focus, .campo-ev input:focus {
-            outline: none;
-            border-color: var(--primary);
-        }
-        .campo-ev select option { background: #1e1b4b; }
+  .bg-mesh {
+    position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden;
+  }
+  .bg-mesh::before, .bg-mesh::after {
+    content: ''; position: absolute; border-radius: 50%; filter: blur(110px); opacity: .35;
+  }
+  .bg-mesh::before { width: 540px; height: 540px; background: radial-gradient(circle,#7c3aed,transparent 65%); top: -180px; left: -120px; }
+  .bg-mesh::after  { width: 460px; height: 460px; background: radial-gradient(circle,#22d3ee,transparent 65%); bottom: -180px; right: -120px; }
 
-        /* Dificultad selector con iconos */
-        .dif-btns {
-            display: flex; gap: 0.7rem;
-        }
-        .dif-btn {
-            flex: 1; padding: 0.6rem 0.5rem;
-            background: var(--glass);
-            border: 1px solid var(--glass-border);
-            border-radius: var(--radius-sm);
-            color: var(--text-muted);
-            font-size: 0.82rem; font-weight: 600;
-            cursor: pointer; text-align: center;
-            transition: all 0.2s;
-        }
-        .dif-btn.active { border-color: var(--primary); color: var(--primary-light); background: rgba(99,102,241,0.1); }
-        .dif-btn:hover { border-color: var(--primary); }
+  .top-nav {
+    position: sticky; top: 0; z-index: 50;
+    backdrop-filter: blur(14px); background: rgba(11,16,32,.72);
+    border-bottom: 1px solid var(--border-soft, rgba(255,255,255,.08));
+    padding: 12px 22px;
+    display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  }
+  .top-nav .brand { display:flex; align-items:center; gap:10px; font-weight: 800; font-family: 'Space Grotesk', sans-serif; }
+  .top-nav .brand .b-ico { width:34px; height:34px; border-radius:10px; background: var(--grad-primary, linear-gradient(135deg,#7c3aed,#22d3ee)); display:grid; place-items:center; box-shadow:0 8px 18px rgba(124,58,237,.35); }
+  .top-nav .links { display:flex; gap: 4px; align-items:center; }
+  .top-nav .links a {
+    color: var(--text-muted, #94a3b8); text-decoration: none; font-weight: 600;
+    padding: 7px 14px; border-radius: 10px; font-size: .88rem; transition: all .2s;
+  }
+  .top-nav .links a:hover { color: #fff; background: rgba(255,255,255,.06); }
+  .top-nav .links a.active { color: #fff; background: rgba(124,58,237,.18); }
 
-        /* === QUIZ AREA === */
-        #quizArea { display: none; }
+  .eval-wrap { position: relative; z-index: 1; max-width: 920px; margin: 0 auto; padding: 26px 22px 60px; }
 
-        .quiz-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-        }
-        .quiz-titulo {
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 1.1rem;
-            font-weight: 700;
-        }
-        .quiz-meta {
-            display: flex; gap: 1rem; align-items: center;
-        }
-        .quiz-timer {
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 1.2rem;
-            font-weight: 700;
-            color: var(--secondary);
-            min-width: 60px;
-            text-align: center;
-        }
-        .quiz-timer.warning { color: #f59e0b; }
-        .quiz-timer.danger { color: #ef4444; animation: pulsar 1s infinite; }
-        @keyframes pulsar { 0%,100%{opacity:1} 50%{opacity:0.5} }
+  /* Nivel mini */
+  .nivel-mini-pro {
+    display:flex; align-items:center; gap:14px;
+    padding: 12px 16px; border-radius: 14px;
+    background: var(--glass-2, rgba(255,255,255,.04));
+    border: 1px solid var(--border-soft, rgba(255,255,255,.08));
+    margin-bottom: 22px;
+  }
+  .nivel-icon { font-size: 1.6rem; flex-shrink: 0; }
+  .nivel-info { flex: 1; min-width: 0; }
+  .nivel-nombre { font-weight: 800; font-size: .92rem; }
+  .nivel-xp     { font-size: .75rem; color: var(--text-muted, #94a3b8); margin-top: 2px; }
+  .nivel-bar-wrap { background: rgba(255,255,255,.08); border-radius: 999px; height: 8px; margin-top: 6px; overflow: hidden; }
+  .nivel-bar { height: 100%; border-radius: 999px; background: linear-gradient(90deg,#7c3aed,#22d3ee); transition: width .9s var(--ease-spring, cubic-bezier(.34,1.56,.64,1)); width: 0; }
 
-        /* Barra de progreso del quiz */
-        .quiz-progress-wrap {
-            background: rgba(255,255,255,0.08);
-            border-radius: 10px;
-            height: 8px;
-            margin-bottom: 1.5rem;
-            overflow: hidden;
-        }
-        .quiz-progress-bar {
-            height: 100%;
-            border-radius: 10px;
-            background: linear-gradient(90deg, var(--primary), var(--secondary));
-            transition: width 0.4s ease;
-        }
-        .quiz-progress-label {
-            font-size: 0.8rem;
-            color: var(--text-muted);
-            margin-bottom: 0.4rem;
-            text-align: right;
-        }
+  /* Wizard */
+  .wizard-pro {
+    display:flex; justify-content:center; align-items:center;
+    gap: 0; margin: 6px 0 26px; flex-wrap: wrap;
+  }
+  .wstep {
+    display:flex; align-items:center; gap:8px;
+    font-size: .82rem; font-weight: 700;
+    color: var(--text-muted, #94a3b8); transition: color .25s;
+  }
+  .wstep .num {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: var(--glass-2, rgba(255,255,255,.05));
+    border: 2px solid var(--border-soft, rgba(255,255,255,.1));
+    display: grid; place-items: center; font-size: .82rem;
+    transition: all .3s;
+  }
+  .wstep.active { color: #fff; }
+  .wstep.active .num { background: linear-gradient(135deg,#7c3aed,#22d3ee); border-color: transparent; box-shadow: 0 0 0 4px rgba(124,58,237,.18); color: #fff; }
+  .wstep.done { color: #6ee7b7; }
+  .wstep.done .num { background: #10b981; border-color: #10b981; color: #fff; }
+  .wstep-line { width: 50px; height: 2px; background: var(--border-soft, rgba(255,255,255,.1)); margin: 0 8px; transition: background .3s; }
+  .wstep-line.done { background: linear-gradient(90deg,#7c3aed,#22d3ee); }
 
-        /* Tarjeta de pregunta */
-        .pregunta-card {
-            background: var(--glass);
-            border: 1px solid var(--glass-border);
-            border-radius: var(--radius-lg);
-            padding: 2rem;
-            backdrop-filter: blur(10px);
-            animation: fadeInUp 0.35s ease;
-        }
-        @keyframes fadeInUp {
-            from { opacity:0; transform: translateY(20px); }
-            to { opacity:1; transform: translateY(0); }
-        }
+  /* Config sections */
+  .section-pro {
+    background: var(--glass-2, rgba(255,255,255,.04));
+    border: 1px solid var(--border-soft, rgba(255,255,255,.08));
+    border-radius: 18px; padding: 22px;
+    margin-bottom: 18px; backdrop-filter: blur(10px);
+  }
+  .section-pro h2 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1.05rem; font-weight: 800;
+    color: #c4b5fd; margin-bottom: 14px;
+    display:flex; align-items:center; gap:8px;
+  }
+  .config-row { display:grid; grid-template-columns:1fr 1fr; gap: 14px; }
+  @media (max-width: 600px) { .config-row { grid-template-columns: 1fr; } }
 
-        .pregunta-numero {
-            font-size: 0.78rem;
-            font-weight: 700;
-            color: var(--primary-light);
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            margin-bottom: 0.5rem;
-        }
-        .pregunta-texto {
-            font-size: 1.02rem;
-            line-height: 1.65;
-            margin-bottom: 0.5rem;
-            color: var(--text);
-        }
-        .afirmacion-texto {
-            font-size: 0.95rem;
-            font-style: italic;
-            line-height: 1.6;
-            color: var(--text-muted);
-            padding: 0.8rem 1rem;
-            border-left: 3px solid var(--primary);
-            background: rgba(99,102,241,0.06);
-            border-radius: 0 8px 8px 0;
-            margin: 0.8rem 0 1.2rem;
-        }
+  .field { margin-bottom: 14px; }
+  .field label { display: block; font-size: .8rem; font-weight: 700; color: var(--text-muted, #94a3b8); margin-bottom: 6px; }
+  .field select, .field input {
+    width: 100%; background: rgba(255,255,255,.04);
+    border: 1px solid rgba(255,255,255,.1); border-radius: 10px;
+    color: var(--text, #e5e7ff); font-size: .9rem; padding: 10px 12px;
+    font-family: inherit; transition: border-color .2s, box-shadow .2s;
+  }
+  .field select:focus, .field input:focus {
+    outline: none; border-color: #7c3aed;
+    box-shadow: 0 0 0 3px rgba(124,58,237,.2);
+  }
+  .field select option { background: #1e1b4b; }
 
-        /* Opciones MC */
-        .opciones-list { list-style: none; padding: 0; margin: 1.2rem 0 0; }
-        .opcion-btn {
-            width: 100%;
-            display: flex; align-items: flex-start; gap: 0.8rem;
-            padding: 0.9rem 1.2rem;
-            background: rgba(255,255,255,0.04);
-            border: 1.5px solid var(--glass-border);
-            border-radius: var(--radius-sm);
-            color: var(--text);
-            font-size: 0.92rem; line-height: 1.5;
-            cursor: pointer;
-            text-align: left;
-            font-family: inherit;
-            transition: all 0.2s;
-            margin-bottom: 0.6rem;
-        }
-        .opcion-btn:hover:not(:disabled) { border-color: var(--primary); background: rgba(99,102,241,0.08); }
-        .opcion-btn .opcion-letra {
-            min-width: 26px; height: 26px;
-            border-radius: 50%;
-            background: var(--glass-border);
-            display: flex; align-items: center; justify-content: center;
-            font-size: 0.75rem; font-weight: 700;
-            flex-shrink: 0;
-        }
-        .opcion-btn.correcta { border-color: #22c55e; background: rgba(34,197,94,0.12); }
-        .opcion-btn.incorrecta { border-color: #ef4444; background: rgba(239,68,68,0.1); }
-        .opcion-btn.correcta .opcion-letra { background: #22c55e; color: white; }
-        .opcion-btn.incorrecta .opcion-letra { background: #ef4444; color: white; }
+  .info-pill {
+    display: block; margin-top: 6px; padding: 10px 12px;
+    background: rgba(124,58,237,.1); border: 1px solid rgba(124,58,237,.25);
+    border-radius: 10px; font-size: .82rem; color: #cbd5e1; line-height: 1.45;
+  }
 
-        /* Botones V/F */
-        .vf-btns {
-            display: flex; gap: 1rem;
-            margin: 1.5rem 0 0;
-        }
-        .vf-btn {
-            flex: 1; padding: 1rem;
-            border-radius: var(--radius-sm);
-            border: 2px solid var(--glass-border);
-            background: var(--glass);
-            color: var(--text);
-            font-size: 1rem; font-weight: 700;
-            cursor: pointer; font-family: inherit;
-            transition: all 0.2s;
-        }
-        .vf-btn.verdadero:hover:not(:disabled) { border-color: #22c55e; background: rgba(34,197,94,0.1); }
-        .vf-btn.falso:hover:not(:disabled) { border-color: #ef4444; background: rgba(239,68,68,0.1); }
-        .vf-btn.sel-correcta { border-color: #22c55e; background: rgba(34,197,94,0.15); color: #22c55e; }
-        .vf-btn.sel-incorrecta { border-color: #ef4444; background: rgba(239,68,68,0.1); color: #ef4444; }
-        .vf-btn.reveal-correcta { border-color: #22c55e; background: rgba(34,197,94,0.08); }
+  /* Dificultad */
+  .dif-row { display:flex; gap: 8px; }
+  .dif-btn {
+    flex:1; padding: 12px 8px;
+    background: var(--glass-2, rgba(255,255,255,.04));
+    border: 1.5px solid var(--border-soft, rgba(255,255,255,.1));
+    border-radius: 12px; color: var(--text-muted, #94a3b8);
+    font-size: .85rem; font-weight: 700;
+    cursor: pointer; text-align: center;
+    transition: all .2s; font-family: inherit;
+  }
+  .dif-btn:hover  { border-color: #7c3aed; color: #fff; transform: translateY(-1px); }
+  .dif-btn.active { border-color: #7c3aed; color: #fff; background: rgba(124,58,237,.16); box-shadow: 0 8px 20px rgba(124,58,237,.25); }
 
-        /* Explicacion feedback */
-        .explicacion-box {
-            margin-top: 1rem;
-            padding: 1rem 1.2rem;
-            border-radius: var(--radius-sm);
-            font-size: 0.88rem; line-height: 1.6;
-            animation: fadeInUp 0.3s ease;
-        }
-        .explicacion-box.correcta { background: rgba(34,197,94,0.1); border-left: 3px solid #22c55e; }
-        .explicacion-box.incorrecta { background: rgba(239,68,68,0.08); border-left: 3px solid #ef4444; }
+  .xp-info {
+    background: linear-gradient(135deg, rgba(124,58,237,.12), rgba(34,211,238,.10));
+    border-color: rgba(124,58,237,.3);
+  }
+  .xp-info .xp-row {
+    display:flex; gap:14px; align-items:center; flex-wrap:wrap;
+    font-size: .86rem; color: var(--text-muted,#94a3b8);
+  }
+  .xp-info .xp-row span strong { color: #a78bfa; }
 
-        .btn-siguiente {
-            margin-top: 1.2rem;
-            width: 100%;
-            padding: 0.9rem;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            border: none; border-radius: var(--radius-sm);
-            color: white; font-size: 1rem; font-weight: 700;
-            font-family: inherit; cursor: pointer;
-            transition: opacity 0.2s;
-        }
-        .btn-siguiente:hover { opacity: 0.9; }
+  /* Botón principal */
+  .btn-iniciar {
+    width: 100%; padding: 14px;
+    background: linear-gradient(135deg,#7c3aed,#22d3ee);
+    color: #fff; font-weight: 800; font-size: 1rem;
+    border: 0; border-radius: 14px; cursor: pointer;
+    box-shadow: 0 12px 30px rgba(124,58,237,.45);
+    transition: transform .2s, box-shadow .2s;
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    font-family: inherit;
+  }
+  .btn-iniciar:hover { transform: translateY(-2px); box-shadow: 0 18px 40px rgba(124,58,237,.55); }
+  .btn-iniciar:disabled { opacity: .55; cursor: not-allowed; transform: none; }
 
-        /* === PANTALLA DE RESULTADOS === */
-        #resultadoArea { display: none; }
+  /* ─────────── QUIZ AREA ─────────── */
+  .quiz-head {
+    display:flex; align-items:center; justify-content:space-between;
+    margin-bottom: 14px; gap: 14px; flex-wrap: wrap;
+  }
+  .quiz-titulo { font-family:'Space Grotesk', sans-serif; font-weight: 800; font-size: 1.05rem; }
+  .quiz-sub    { font-size: .78rem; color: var(--text-muted,#94a3b8); margin-top: 2px; }
 
-        .resultado-hero {
-            text-align: center;
-            padding: 2.5rem 1rem;
-            background: var(--glass);
-            border: 1px solid var(--glass-border);
-            border-radius: var(--radius-lg);
-            backdrop-filter: blur(10px);
-            margin-bottom: 1.5rem;
-        }
-        .resultado-emoji { font-size: 4rem; margin-bottom: 0.5rem; }
-        .resultado-nota {
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 4rem; font-weight: 800;
-            background: linear-gradient(135deg, var(--primary-light), var(--secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            line-height: 1.1;
-        }
-        .resultado-sub { color: var(--text-muted); margin-top: 0.3rem; font-size: 0.95rem; }
+  /* Timer circular SVG */
+  .timer-wrap {
+    position: relative; width: 80px; height: 80px;
+    display: grid; place-items: center; flex-shrink: 0;
+  }
+  .timer-svg { transform: rotate(-90deg); }
+  .timer-svg circle.bg { stroke: rgba(255,255,255,.08); stroke-width: 6; fill: none; }
+  .timer-svg circle.fg { stroke: #7c3aed; stroke-width: 6; fill: none; stroke-linecap: round; transition: stroke-dashoffset .9s linear, stroke .3s; }
+  .timer-text {
+    position: absolute; inset: 0; display: grid; place-items: center;
+    font-family:'Space Grotesk', sans-serif; font-weight: 800; font-size: 1rem;
+  }
+  .timer-wrap.warning .timer-svg circle.fg { stroke: #f59e0b; }
+  .timer-wrap.warning .timer-text { color: #fcd34d; }
+  .timer-wrap.danger  .timer-svg circle.fg { stroke: #ef4444; }
+  .timer-wrap.danger  .timer-text { color: #fca5a5; animation: pulse-time 1s ease-in-out infinite; }
+  @keyframes pulse-time { 0%,100%{opacity:1} 50%{opacity:.55} }
 
-        .stats-resultado {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-        }
-        @media(max-width:600px) { .stats-resultado { grid-template-columns: repeat(2, 1fr); } }
-        .stat-res {
-            background: var(--glass);
-            border: 1px solid var(--glass-border);
-            border-radius: var(--radius-sm);
-            padding: 1rem;
-            text-align: center;
-        }
-        .stat-res .val {
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 1.6rem; font-weight: 700;
-        }
-        .stat-res .lbl { font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; }
+  .quiz-prog-label { font-size: .8rem; color: var(--text-muted,#94a3b8); margin-bottom: 6px; text-align: right; }
+  .quiz-prog-wrap  { background: rgba(255,255,255,.08); border-radius: 999px; height: 8px; margin-bottom: 22px; overflow: hidden; }
+  .quiz-prog-bar   { height: 100%; border-radius: 999px; background: linear-gradient(90deg,#7c3aed,#22d3ee); transition: width .5s var(--ease-spring, cubic-bezier(.34,1.56,.64,1)); width: 0%; }
 
-        /* XP ganado */
-        .xp-ganado-card {
-            background: linear-gradient(135deg, rgba(99,102,241,0.15), rgba(0,206,201,0.15));
-            border: 1px solid rgba(99,102,241,0.3);
-            border-radius: var(--radius-sm);
-            padding: 1.2rem;
-            margin-bottom: 1rem;
-        }
-        .xp-row {
-            display: flex; justify-content: space-between; align-items: center;
-            font-size: 0.9rem; padding: 0.3rem 0;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-        }
-        .xp-row:last-child { border: none; font-weight: 700; font-size: 1rem; color: var(--secondary); }
+  .pregunta-card {
+    background: var(--glass-2, rgba(255,255,255,.04));
+    border: 1px solid var(--border-soft, rgba(255,255,255,.08));
+    border-radius: 18px; padding: 26px;
+    backdrop-filter: blur(10px);
+    animation: slideInUp .35s ease;
+  }
+  @keyframes slideInUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:none} }
 
-        /* Insignias desbloqueadas */
-        .insignias-nuevas {
-            display: flex; flex-wrap: wrap; gap: 0.8rem;
-            justify-content: center;
-            margin: 1rem 0;
-        }
-        .insignia-nueva {
-            background: var(--glass);
-            border: 1px solid rgba(251,191,36,0.4);
-            border-radius: var(--radius-sm);
-            padding: 0.7rem 1rem;
-            display: flex; align-items: center; gap: 0.5rem;
-            animation: bounceIn 0.5s ease;
-        }
-        @keyframes bounceIn {
-            0% { transform: scale(0.5); opacity: 0; }
-            70% { transform: scale(1.1); }
-            100% { transform: scale(1); opacity: 1; }
-        }
-        .insignia-nueva .ins-icon { font-size: 1.5rem; }
-        .insignia-nueva .ins-nombre { font-size: 0.82rem; font-weight: 700; }
-        .insignia-nueva .ins-desc { font-size: 0.72rem; color: var(--text-muted); }
+  .pregunta-num { font-size: .76rem; font-weight: 800; color: #c4b5fd; letter-spacing: .08em; text-transform: uppercase; margin-bottom: 8px; }
+  .pregunta-texto { font-size: 1.05rem; line-height: 1.6; margin-bottom: 6px; color: #f1f5f9; }
+  .afirmacion-texto {
+    font-size: .95rem; font-style: italic; line-height: 1.55;
+    color: var(--text-muted,#94a3b8); padding: 12px 14px;
+    border-left: 3px solid #7c3aed;
+    background: rgba(124,58,237,.06);
+    border-radius: 0 10px 10px 0; margin: 12px 0 18px;
+  }
 
-        /* Revision de preguntas */
-        .revision-pregunta {
-            background: var(--glass);
-            border: 1px solid var(--glass-border);
-            border-radius: var(--radius-sm);
-            padding: 1rem 1.2rem;
-            margin-bottom: 0.7rem;
-            font-size: 0.88rem;
-        }
-        .revision-correcta { border-left: 3px solid #22c55e; }
-        .revision-incorrecta { border-left: 3px solid #ef4444; }
+  /* Opciones MC */
+  .opciones-list { list-style: none; padding: 0; margin: 18px 0 0; }
+  .opcion-btn {
+    width: 100%; display: flex; align-items: flex-start; gap: 12px;
+    padding: 14px 16px; background: rgba(255,255,255,.04);
+    border: 1.5px solid rgba(255,255,255,.1); border-radius: 12px;
+    color: #e5e7ff; font-size: .92rem; line-height: 1.45;
+    cursor: pointer; text-align: left; font-family: inherit;
+    transition: all .18s; margin-bottom: 8px;
+  }
+  .opcion-btn:hover:not(:disabled) { border-color: #7c3aed; background: rgba(124,58,237,.1); transform: translateX(2px); }
+  .opcion-btn .opcion-letra {
+    min-width: 28px; height: 28px; border-radius: 50%;
+    background: rgba(255,255,255,.08); display: grid; place-items: center;
+    font-size: .78rem; font-weight: 800; flex-shrink: 0;
+  }
+  .opcion-btn.correcta   { border-color: #22c55e; background: rgba(34,197,94,.12); }
+  .opcion-btn.incorrecta { border-color: #ef4444; background: rgba(239,68,68,.1); }
+  .opcion-btn.correcta   .opcion-letra { background: #22c55e; color: #fff; }
+  .opcion-btn.incorrecta .opcion-letra { background: #ef4444; color: #fff; }
 
-        /* === BARRA DE NIVEL (mini) === */
-        .nivel-mini {
-            display: flex; align-items: center; gap: 0.8rem;
-            background: var(--glass);
-            border: 1px solid var(--glass-border);
-            border-radius: var(--radius-sm);
-            padding: 0.7rem 1rem;
-            margin-bottom: 1.5rem;
-        }
-        .nivel-icon { font-size: 1.4rem; }
-        .nivel-info { flex: 1; }
-        .nivel-nombre { font-size: 0.85rem; font-weight: 700; }
-        .nivel-xp { font-size: 0.75rem; color: var(--text-muted); }
-        .nivel-barra-wrap {
-            background: rgba(255,255,255,0.08);
-            border-radius: 10px;
-            height: 6px;
-            margin-top: 4px;
-            overflow: hidden;
-        }
-        .nivel-barra {
-            height: 100%;
-            border-radius: 10px;
-            background: linear-gradient(90deg, var(--primary), var(--secondary));
-            transition: width 1s ease;
-        }
+  /* V/F */
+  .vf-btns { display: flex; gap: 12px; margin: 18px 0 0; }
+  .vf-btn {
+    flex: 1; padding: 16px;
+    background: var(--glass-2, rgba(255,255,255,.04));
+    border: 2px solid rgba(255,255,255,.1); border-radius: 12px;
+    color: #e5e7ff; font-size: 1rem; font-weight: 800;
+    cursor: pointer; font-family: inherit;
+    transition: all .2s;
+  }
+  .vf-btn.verdadero:hover:not(:disabled) { border-color: #22c55e; background: rgba(34,197,94,.12); }
+  .vf-btn.falso:hover:not(:disabled)     { border-color: #ef4444; background: rgba(239,68,68,.1); }
+  .vf-btn.sel-correcta   { border-color: #22c55e; background: rgba(34,197,94,.18); color: #6ee7b7; }
+  .vf-btn.sel-incorrecta { border-color: #ef4444; background: rgba(239,68,68,.12); color: #fca5a5; }
+  .vf-btn.reveal-correcta { border-color: #22c55e; background: rgba(34,197,94,.08); }
 
-        /* Botones de accion */
-        .eval-btns {
-            display: flex; gap: 0.8rem; flex-wrap: wrap;
-            margin-top: 1.5rem;
-        }
-        .eval-btn {
-            flex: 1; min-width: 160px;
-            padding: 0.85rem;
-            border-radius: var(--radius-sm);
-            font-size: 0.95rem; font-weight: 700;
-            font-family: inherit; cursor: pointer;
-            transition: all 0.2s; border: none;
-        }
-        .eval-btn-primary {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            color: white;
-        }
-        .eval-btn-secondary {
-            background: var(--glass);
-            border: 1px solid var(--glass-border);
-            color: var(--text);
-        }
-        .eval-btn:hover { opacity: 0.9; transform: translateY(-1px); }
-    </style>
+  /* Feedback */
+  .feedback-box {
+    margin-top: 16px; padding: 14px 16px; border-radius: 12px;
+    font-size: .88rem; line-height: 1.55;
+    animation: slideInUp .25s ease;
+  }
+  .feedback-box.correcta   { background: rgba(34,197,94,.1);  border-left: 3px solid #22c55e; }
+  .feedback-box.incorrecta { background: rgba(239,68,68,.08); border-left: 3px solid #ef4444; }
+
+  .btn-siguiente {
+    margin-top: 18px; width: 100%; padding: 14px;
+    background: linear-gradient(135deg,#7c3aed,#22d3ee);
+    border: 0; border-radius: 12px;
+    color: #fff; font-size: 1rem; font-weight: 800; font-family: inherit;
+    cursor: pointer; transition: all .2s;
+    box-shadow: 0 10px 26px rgba(124,58,237,.4);
+  }
+  .btn-siguiente:hover { transform: translateY(-2px); box-shadow: 0 14px 32px rgba(124,58,237,.5); }
+
+  /* ─────────── RESULTADOS ─────────── */
+  .result-hero {
+    position: relative; overflow: hidden;
+    text-align: center; padding: 38px 22px 32px;
+    background: linear-gradient(135deg, rgba(124,58,237,.15), rgba(34,211,238,.12));
+    border: 1px solid rgba(124,58,237,.3);
+    border-radius: 22px; margin-bottom: 20px;
+    backdrop-filter: blur(10px);
+  }
+  .result-hero::before {
+    content:''; position:absolute; inset:0; pointer-events:none;
+    background:
+      radial-gradient(420px circle at 20% 0%, rgba(124,58,237,.18), transparent 55%),
+      radial-gradient(420px circle at 80% 100%, rgba(34,211,238,.18), transparent 55%);
+  }
+  .result-hero > * { position: relative; z-index: 1; }
+  .result-emoji { font-size: 4.2rem; margin-bottom: 8px; display: inline-block; animation: bounceIn .6s var(--ease-spring, cubic-bezier(.34,1.56,.64,1)); }
+  @keyframes bounceIn { 0%{transform:scale(.4);opacity:0} 70%{transform:scale(1.15)} 100%{transform:scale(1);opacity:1} }
+  .result-nota {
+    font-family:'Space Grotesk', sans-serif; font-size: 4.5rem; font-weight: 800;
+    background: linear-gradient(135deg,#fff 30%, #a78bfa 90%);
+    -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+    line-height: 1;
+  }
+  .result-sub { color: var(--text-muted,#94a3b8); margin-top: 6px; font-size: .96rem; }
+
+  .stats-result { display:grid; grid-template-columns:repeat(4,1fr); gap: 12px; margin-bottom: 20px; }
+  @media (max-width: 600px) { .stats-result { grid-template-columns: repeat(2, 1fr); } }
+  .stat-res {
+    background: var(--glass-2, rgba(255,255,255,.04));
+    border: 1px solid var(--border-soft, rgba(255,255,255,.08));
+    border-radius: 14px; padding: 14px; text-align: center;
+    transition: transform .2s;
+  }
+  .stat-res:hover { transform: translateY(-2px); }
+  .stat-res .val { font-family:'Space Grotesk', sans-serif; font-size: 1.7rem; font-weight: 800; }
+  .stat-res .lbl { font-size: .74rem; color: var(--text-muted,#94a3b8); margin-top: 4px; text-transform: uppercase; letter-spacing: .06em; }
+
+  .xp-card {
+    background: linear-gradient(135deg, rgba(124,58,237,.15), rgba(34,211,238,.12));
+    border: 1px solid rgba(124,58,237,.3);
+    border-radius: 14px; padding: 18px; margin-bottom: 18px;
+  }
+  .xp-card h3 { font-size: .98rem; margin-bottom: 12px; color: #c4b5fd; font-weight: 800; }
+  .xp-row-r { display:flex; justify-content:space-between; align-items:center; font-size: .9rem; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,.06); }
+  .xp-row-r:last-child { border: 0; font-weight: 800; font-size: 1.02rem; color: #a78bfa; padding-top: 10px; }
+
+  .insignias-row {
+    display:flex; flex-wrap:wrap; gap: 12px; justify-content: center;
+    margin: 14px 0;
+  }
+  .insignia-card {
+    background: var(--glass-2, rgba(255,255,255,.04));
+    border: 1px solid rgba(251,191,36,.4);
+    border-radius: 12px; padding: 12px 14px;
+    display:flex; align-items:center; gap: 10px;
+    animation: bounceIn .55s var(--ease-spring, cubic-bezier(.34,1.56,.64,1));
+    box-shadow: 0 6px 18px rgba(251,191,36,.18);
+  }
+  .insignia-card .ic-icon  { font-size: 1.6rem; }
+  .insignia-card .ic-name  { font-size: .85rem; font-weight: 800; color: #fcd34d; }
+  .insignia-card .ic-desc  { font-size: .72rem; color: var(--text-muted,#94a3b8); }
+
+  /* Acordeón revisión */
+  .rev-item {
+    background: var(--glass-2, rgba(255,255,255,.04));
+    border: 1px solid var(--border-soft, rgba(255,255,255,.08));
+    border-radius: 12px; margin-bottom: 8px; overflow: hidden;
+    transition: border-color .2s;
+  }
+  .rev-item.correcta   { border-left: 3px solid #22c55e; }
+  .rev-item.incorrecta { border-left: 3px solid #ef4444; }
+  .rev-summary {
+    padding: 12px 14px; cursor: pointer;
+    display:flex; align-items:center; gap: 10px;
+    font-size: .88rem; transition: background .2s;
+  }
+  .rev-summary:hover { background: rgba(255,255,255,.03); }
+  .rev-summary .arrow { margin-left: auto; transition: transform .2s; opacity: .6; }
+  .rev-item[open] .rev-summary .arrow { transform: rotate(90deg); }
+  .rev-body {
+    padding: 4px 16px 14px;
+    font-size: .82rem; color: var(--text-muted,#94a3b8); line-height: 1.5;
+  }
+  .rev-body strong { color: #c4b5fd; }
+
+  .eval-btns { display:flex; gap: 12px; flex-wrap: wrap; margin-top: 22px; }
+  .eval-btn {
+    flex: 1; min-width: 160px;
+    padding: 13px; border-radius: 12px;
+    font-size: .95rem; font-weight: 800;
+    font-family: inherit; cursor: pointer; border: 0;
+    transition: all .2s;
+  }
+  .eval-btn-primary { background: linear-gradient(135deg,#7c3aed,#22d3ee); color: #fff; box-shadow: 0 10px 24px rgba(124,58,237,.4); }
+  .eval-btn-secondary {
+    background: var(--glass-2, rgba(255,255,255,.04));
+    border: 1px solid var(--border-soft, rgba(255,255,255,.1));
+    color: #e5e7ff;
+  }
+  .eval-btn:hover { transform: translateY(-2px); }
+
+  .text-muted-pro { color: var(--text-muted,#94a3b8); }
+</style>
 </head>
 <body>
+<div class="bg-mesh" aria-hidden="true"></div>
 
-    <!-- Fondo animado -->
-    <div class="orbs"><div class="orb orb1"></div><div class="orb orb2"></div><div class="orb orb3"></div></div>
+<!-- ─────────── NAVBAR ─────────── -->
+<nav class="top-nav">
+  <a class="brand" href="dashboard.html" style="text-decoration:none;color:inherit">
+    <div class="b-ico" aria-hidden="true">⚡</div>
+    <span>ElectroLearn</span>
+  </a>
+  <div class="links">
+    <a href="dashboard.html">Inicio</a>
+    <a href="material.html" id="navMaterial" style="display:none">Material</a>
+    <a href="evaluaciones.html" class="active">Evaluaciones</a>
+    <a href="biblioteca.html">Biblioteca</a>
+    <a href="ranking.html">Ranking</a>
+    <a href="#" id="btnLogout">Salir</a>
+  </div>
+</nav>
 
-    <!-- NAVBAR -->
-    <nav class="navbar">
-        <div class="nav-brand"><span class="nav-icon">⚡</span><span>ElectroLearn</span></div>
-        <div class="nav-links">
-            <a href="dashboard.html">Dashboard</a>
-            <a href="material.html" id="navMaterial" style="display:none">Material</a>
-            <a href="evaluaciones.html" class="active">Evaluaciones</a>
-            <a href="ranking.html">Ranking</a>
-            <a href="#" onclick="logout()" class="nav-btn">Salir</a>
+<main class="eval-wrap">
+
+  <!-- Nivel mini -->
+  <div class="nivel-mini-pro" id="nivelMini">
+    <div class="nivel-icon" id="nivelIcon">⚡</div>
+    <div class="nivel-info">
+      <div class="nivel-nombre" id="nivelNombre">Aprendiz — 0 XP</div>
+      <div class="nivel-bar-wrap"><div class="nivel-bar" id="nivelBarra"></div></div>
+      <div class="nivel-xp" id="nivelXPLabel"></div>
+    </div>
+  </div>
+
+  <!-- Wizard -->
+  <div class="wizard-pro" id="wizardSteps">
+    <div class="wstep active" id="wstep1"><div class="num">1</div><span>Seleccionar</span></div>
+    <div class="wstep-line" id="wline1"></div>
+    <div class="wstep" id="wstep2"><div class="num">2</div><span>Evaluación</span></div>
+    <div class="wstep-line" id="wline2"></div>
+    <div class="wstep" id="wstep3"><div class="num">3</div><span>Resultados</span></div>
+  </div>
+
+  <!-- ═════════ PASO 1: CONFIGURACIÓN ═════════ -->
+  <section id="configArea">
+    <div style="text-align:center;margin-bottom:24px">
+      <h1 class="hero-grad" style="font-family:'Space Grotesk',sans-serif;font-size:2rem;font-weight:800;line-height:1.15;background:linear-gradient(135deg,#fff 30%,#a78bfa 90%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent">
+        ✍️ Evaluaciones interactivas
+      </h1>
+      <p class="text-muted-pro" style="margin-top:6px;font-size:.92rem">
+        Selecciona el módulo y aprendizaje esperado. La plataforma genera el quiz automáticamente.
+      </p>
+    </div>
+
+    <div class="section-pro">
+      <h2>📚 Objetivos curriculares</h2>
+      <div class="config-row">
+        <div class="field">
+          <label for="evCurso">Curso</label>
+          <select id="evCurso">
+            <option value="">— Seleccionar curso —</option>
+            <option value="3ro">3° Medio E</option>
+            <option value="4to">4° Medio E</option>
+          </select>
         </div>
-    </nav>
-
-    <main class="eval-container">
-
-        <!-- Nivel mini -->
-        <div class="nivel-mini" id="nivelMini">
-            <div class="nivel-icon" id="nivelIcon">⚡</div>
-            <div class="nivel-info">
-                <div class="nivel-nombre" id="nivelNombre">Aprendiz &mdash; 0 XP</div>
-                <div class="nivel-barra-wrap">
-                    <div class="nivel-barra" id="nivelBarra" style="width:0%"></div>
-                </div>
-                <div class="nivel-xp" id="nivelXPLabel"></div>
-            </div>
+        <div class="field">
+          <label for="evModulo">Módulo</label>
+          <select id="evModulo"><option value="">— Selecciona un curso primero —</option></select>
         </div>
+      </div>
+      <div class="field">
+        <label for="evOA">Objetivo de aprendizaje (OA)</label>
+        <select id="evOA"><option value="">— Selecciona un módulo primero —</option></select>
+        <div id="evInfoOA" class="info-pill" style="display:none"></div>
+      </div>
+      <div class="field">
+        <label for="evAE">Aprendizaje esperado (AE)</label>
+        <select id="evAE"><option value="">— Selecciona un OA primero —</option></select>
+        <div id="evInfoAE" class="info-pill" style="display:none"></div>
+      </div>
+    </div>
 
-        <!-- WIZARD STEPS -->
-        <div class="wizard-steps" id="wizardSteps">
-            <div class="wstep active" id="wstep1"><div class="wstep-circle">1</div><span>Seleccionar</span></div>
-            <div class="wstep-line"></div>
-            <div class="wstep" id="wstep2"><div class="wstep-circle">2</div><span>Evaluacion</span></div>
-            <div class="wstep-line"></div>
-            <div class="wstep" id="wstep3"><div class="wstep-circle">3</div><span>Resultados</span></div>
+    <div class="section-pro">
+      <h2>⚙️ Configuración del quiz</h2>
+      <div class="config-row">
+        <div class="field">
+          <label for="evNumPregs">Número de preguntas</label>
+          <select id="evNumPregs">
+            <option value="5">5 preguntas (rápido)</option>
+            <option value="8" selected>8 preguntas (estándar)</option>
+            <option value="10">10 preguntas (completo)</option>
+          </select>
         </div>
-
-        <!-- =============================================
-             PASO 1: CONFIGURACION
-        ============================================= -->
-        <div id="configArea">
-            <div style="text-align:center; margin-bottom:2rem;">
-                <h1 style="font-family:'Space Grotesk';font-size:1.8rem;font-weight:800;">
-                    ✍️ Evaluaciones Interactivas
-                </h1>
-                <p class="text-muted" style="margin-top:0.4rem;">
-                    Selecciona el modulo y aprendizaje esperado. La plataforma genera el quiz automaticamente.
-                </p>
-            </div>
-
-            <div class="config-section">
-                <h2>📚 Objetivos Curriculares</h2>
-                <div class="config-row">
-                    <div class="campo-ev">
-                        <label>Curso</label>
-                        <select id="evCurso" onchange="evFiltrarModulos()">
-                            <option value="">-- Seleccionar curso --</option>
-                            <option value="3ro">3ro Medio E</option>
-                            <option value="4to">4to Medio E</option>
-                        </select>
-                    </div>
-                    <div class="campo-ev">
-                        <label>Modulo</label>
-                        <select id="evModulo" onchange="evCargarOA()">
-                            <option value="">-- Selecciona un curso primero --</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="campo-ev">
-                    <label>Objetivo de Aprendizaje (OA)</label>
-                    <select id="evOA" onchange="evCargarAE()">
-                        <option value="">-- Selecciona un modulo primero --</option>
-                    </select>
-                    <div id="evInfoOA" class="info-box" style="display:none; margin-top:0.4rem;"></div>
-                </div>
-                <div class="campo-ev">
-                    <label>Aprendizaje Esperado (AE)</label>
-                    <select id="evAE" onchange="evMostrarInfoAE()">
-                        <option value="">-- Selecciona un OA primero --</option>
-                    </select>
-                    <div id="evInfoAE" class="info-box" style="display:none; margin-top:0.4rem;"></div>
-                </div>
-            </div>
-
-            <div class="config-section">
-                <h2>⚙️ Configuracion del Quiz</h2>
-                <div class="config-row">
-                    <div class="campo-ev">
-                        <label>Numero de preguntas</label>
-                        <select id="evNumPregs">
-                            <option value="5">5 preguntas (rapido)</option>
-                            <option value="8" selected>8 preguntas (estandar)</option>
-                            <option value="10">10 preguntas (completo)</option>
-                        </select>
-                    </div>
-                    <div class="campo-ev">
-                        <label>Tiempo limite</label>
-                        <select id="evTiempo">
-                            <option value="0">Sin limite de tiempo</option>
-                            <option value="10" selected>10 minutos</option>
-                            <option value="15">15 minutos</option>
-                            <option value="20">20 minutos</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="campo-ev">
-                    <label>Dificultad</label>
-                    <div class="dif-btns">
-                        <button class="dif-btn active" onclick="setDif(this,'basico')">⭐ Basico</button>
-                        <button class="dif-btn" onclick="setDif(this,'intermedio')">⭐⭐ Intermedio</button>
-                        <button class="dif-btn" onclick="setDif(this,'avanzado')">⭐⭐⭐ Avanzado</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Info XP disponible -->
-            <div class="config-section" style="background:linear-gradient(135deg,rgba(99,102,241,0.1),rgba(0,206,201,0.1)); border-color:rgba(99,102,241,0.25);">
-                <h2>🏆 XP disponible en este quiz</h2>
-                <div style="display:flex; gap:1.5rem; flex-wrap:wrap; font-size:0.88rem; color:var(--text-muted);">
-                    <span>⚡ <strong>+12 XP</strong> por respuesta correcta</span>
-                    <span>🎯 <strong>+50 XP</strong> bonus por 80%+</span>
-                    <span>💯 <strong>+100 XP</strong> bonus por puntuacion perfecta</span>
-                    <span>⚡ <strong>+30 XP</strong> bonus por velocidad (&lt;5 min, 80%+)</span>
-                </div>
-            </div>
-
-            <button class="btn-generar" onclick="iniciarQuiz()" style="width:100%;margin:0;">
-                ⚡ Iniciar Evaluacion
-            </button>
+        <div class="field">
+          <label for="evTiempo">Tiempo límite</label>
+          <select id="evTiempo">
+            <option value="0">Sin límite de tiempo</option>
+            <option value="10" selected>10 minutos</option>
+            <option value="15">15 minutos</option>
+            <option value="20">20 minutos</option>
+          </select>
         </div>
-
-        <!-- =============================================
-             PASO 2: QUIZ
-        ============================================= -->
-        <div id="quizArea">
-            <div class="quiz-header">
-                <div>
-                    <div class="quiz-titulo" id="quizTitulo"></div>
-                    <div style="font-size:0.8rem;color:var(--text-muted)" id="quizSubtitulo"></div>
-                </div>
-                <div class="quiz-meta">
-                    <div class="quiz-timer" id="quizTimer">--:--</div>
-                </div>
-            </div>
-
-            <div class="quiz-progress-label" id="quizProgLabel">Pregunta 1 de 8</div>
-            <div class="quiz-progress-wrap">
-                <div class="quiz-progress-bar" id="quizProgBar" style="width:0%"></div>
-            </div>
-
-            <div id="preguntaContainer"></div>
+      </div>
+      <div class="field">
+        <label>Dificultad</label>
+        <div class="dif-row" id="difRow">
+          <button type="button" class="dif-btn active" data-dif="basico">⭐ Básico</button>
+          <button type="button" class="dif-btn"        data-dif="intermedio">⭐⭐ Intermedio</button>
+          <button type="button" class="dif-btn"        data-dif="avanzado">⭐⭐⭐ Avanzado</button>
         </div>
+      </div>
+    </div>
 
-        <!-- =============================================
-             PASO 3: RESULTADOS
-        ============================================= -->
-        <div id="resultadoArea">
+    <div class="section-pro xp-info">
+      <h2>🏆 XP disponible en este quiz</h2>
+      <div class="xp-row">
+        <span>⚡ <strong>+12 XP</strong> por respuesta correcta</span>
+        <span>🎯 <strong>+50 XP</strong> bonus por 80%+</span>
+        <span>💯 <strong>+100 XP</strong> bonus por puntuación perfecta</span>
+        <span>⏱️ <strong>+30 XP</strong> bonus por velocidad (&lt;5 min, 80%+)</span>
+      </div>
+    </div>
 
-            <div class="resultado-hero" id="resultadoHero">
-                <div class="resultado-emoji" id="resultEmoji">🎉</div>
-                <div class="resultado-nota" id="resultNota">7.0</div>
-                <div class="resultado-sub" id="resultSub">Evaluacion completada</div>
-            </div>
+    <button id="btnIniciar" class="btn-iniciar" type="button">⚡ Iniciar evaluación</button>
+  </section>
 
-            <div class="stats-resultado">
-                <div class="stat-res">
-                    <div class="val" id="statCorrectas" style="color:#22c55e">0</div>
-                    <div class="lbl">Correctas</div>
-                </div>
-                <div class="stat-res">
-                    <div class="val" id="statIncorrectas" style="color:#ef4444">0</div>
-                    <div class="lbl">Incorrectas</div>
-                </div>
-                <div class="stat-res">
-                    <div class="val" id="statPorcentaje" style="color:var(--secondary)">0%</div>
-                    <div class="lbl">Porcentaje</div>
-                </div>
-                <div class="stat-res">
-                    <div class="val" id="statTiempo" style="color:var(--primary-light)">0:00</div>
-                    <div class="lbl">Tiempo</div>
-                </div>
-            </div>
+  <!-- ═════════ PASO 2: QUIZ ═════════ -->
+  <section id="quizArea" hidden>
+    <div class="quiz-head">
+      <div style="min-width:0">
+        <div class="quiz-titulo" id="quizTitulo">—</div>
+        <div class="quiz-sub"     id="quizSubtitulo">—</div>
+      </div>
+      <div class="timer-wrap" id="timerWrap" hidden>
+        <svg class="timer-svg" width="80" height="80" viewBox="0 0 80 80" aria-hidden="true">
+          <circle class="bg" cx="40" cy="40" r="34"></circle>
+          <circle class="fg" id="timerCircle" cx="40" cy="40" r="34" stroke-dasharray="213.6" stroke-dashoffset="0"></circle>
+        </svg>
+        <div class="timer-text" id="timerText">--:--</div>
+      </div>
+    </div>
 
-            <!-- XP Ganado -->
-            <div class="xp-ganado-card" id="xpGanadoCard">
-                <h3 style="font-size:0.95rem; margin-bottom:0.7rem; color:var(--secondary);">⚡ Puntos XP ganados</h3>
-                <div id="xpDetalle"></div>
-                <div style="margin-top:0.7rem; font-size:0.82rem; color:var(--text-muted);">
-                    XP total: <span id="xpTotal" style="color:var(--secondary); font-weight:700;">0</span>
-                </div>
-            </div>
+    <div class="quiz-prog-label" id="quizProgLabel">Pregunta 1 de 8</div>
+    <div class="quiz-prog-wrap"><div class="quiz-prog-bar" id="quizProgBar"></div></div>
 
-            <!-- Nuevas insignias -->
-            <div id="nuevasInsignias" style="display:none; margin-bottom:1.5rem;">
-                <h3 style="font-size:0.95rem; margin-bottom:0.8rem; color:#fbbf24;">🏅 ¡Nuevas insignias desbloqueadas!</h3>
-                <div class="insignias-nuevas" id="insigniasList"></div>
-            </div>
+    <div id="preguntaContainer" aria-live="polite"></div>
+  </section>
 
-            <!-- Nivel actualizado -->
-            <div id="nivelActualizado" style="margin-bottom:1.5rem;"></div>
+  <!-- ═════════ PASO 3: RESULTADOS ═════════ -->
+  <section id="resultadoArea" hidden>
+    <div class="result-hero">
+      <div class="result-emoji" id="resultEmoji">🎉</div>
+      <div class="result-nota" id="resultNota">7,0</div>
+      <div class="result-sub"  id="resultSub">Evaluación completada</div>
+    </div>
 
-            <!-- Revision de preguntas -->
-            <div class="config-section">
-                <h2>📋 Revision de respuestas</h2>
-                <div id="revisionContainer"></div>
-            </div>
+    <div class="stats-result">
+      <div class="stat-res"><div class="val" id="statCorrectas"   style="color:#34d399">0</div><div class="lbl">Correctas</div></div>
+      <div class="stat-res"><div class="val" id="statIncorrectas" style="color:#fca5a5">0</div><div class="lbl">Incorrectas</div></div>
+      <div class="stat-res"><div class="val" id="statPorcentaje"  style="color:#a78bfa">0%</div><div class="lbl">Porcentaje</div></div>
+      <div class="stat-res"><div class="val" id="statTiempo"      style="color:#22d3ee">0:00</div><div class="lbl">Tiempo</div></div>
+    </div>
 
-            <div class="eval-btns">
-                <button class="eval-btn eval-btn-primary" onclick="nuevaEval()">🔄 Nueva evaluacion</button>
-                <button class="eval-btn eval-btn-secondary" onclick="window.location.href='ranking.html'">🏆 Ver Ranking</button>
-                <button class="eval-btn eval-btn-secondary" onclick="window.location.href='dashboard.html'">🏠 Dashboard</button>
-            </div>
-        </div>
+    <div class="xp-card">
+      <h3>⚡ Puntos XP ganados</h3>
+      <div id="xpDetalle"></div>
+      <div style="margin-top:10px;font-size:.84rem;color:#94a3b8">
+        XP totales: <span id="xpTotal" style="color:#a78bfa;font-weight:800">0</span>
+      </div>
+    </div>
 
-    </main>
+    <div id="nuevasInsignias" hidden style="margin-bottom:18px">
+      <h3 style="font-size:.98rem;margin-bottom:10px;color:#fcd34d;font-weight:800">🏅 ¡Nuevas insignias desbloqueadas!</h3>
+      <div class="insignias-row" id="insigniasList"></div>
+    </div>
 
-    <!-- Toast -->
-    <div class="toast" id="toast"></div>
+    <div id="nivelActualizado" style="margin-bottom:18px"></div>
 
-    <script src="js/auth.js"></script>
-    <script src="js/datos-curriculares.js"></script>
-    <script src="js/gamification.js"></script>
-    <script>
-    /* ============================================
-       EVALUACIONES — Logica principal
-       ============================================ */
+    <div class="section-pro">
+      <h2>📋 Revisión de respuestas</h2>
+      <div id="revisionContainer"></div>
+    </div>
 
-    var currentUser = null;
-    var dificultadSeleccionada = 'basico';
-    var quizState = {
-        preguntas: [],
-        actual: 0,
-        correctas: 0,
-        respuestas: [],
-        timerInterval: null,
-        tiempoSegundos: 0,
-        tiempoLimite: 0,
-        modulo: null,
-        aeNum: null,
-        oaId: null
+    <div class="eval-btns">
+      <button class="eval-btn eval-btn-primary"  id="btnNueva">🔄 Nueva evaluación</button>
+      <a       class="eval-btn eval-btn-secondary" href="ranking.html"   style="text-decoration:none;display:grid;place-items:center">🏆 Ver ranking</a>
+      <a       class="eval-btn eval-btn-secondary" href="dashboard.html" style="text-decoration:none;display:grid;place-items:center">🏠 Dashboard</a>
+    </div>
+  </section>
+
+</main>
+
+<script src="js/auth.js"></script>
+<script src="js/datos-curriculares.js"></script>
+<script src="js/gamification.js"></script>
+
+<script>
+(function() {
+  'use strict';
+
+  // ═══════════════════════════════════════════════════════════════
+  //  Helpers
+  // ═══════════════════════════════════════════════════════════════
+  function escTxt(s) {
+    if (s === null || s === undefined) return '';
+    return String(s)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  }
+  function escAttr(s) { return escTxt(s); }
+  function safeEmail(email, fb) {
+    return (window.ELUI && window.ELUI.safeEmailHandle)
+      ? window.ELUI.safeEmailHandle(email, fb || 'estudiante')
+      : (email && typeof email === 'string' && email.indexOf('@') > 0 ? email.split('@')[0] : (fb || 'estudiante'));
+  }
+  function toast(msg, type) {
+    if (window.ELUI && window.ELUI.toast) return window.ELUI.toast(msg, { type: type || 'info' });
+  }
+  function fmtTime(seg) { var m = Math.floor(seg/60), s = seg%60; return m + ':' + String(s).padStart(2,'0'); }
+
+  // ═══════════════════════════════════════════════════════════════
+  //  Estado
+  // ═══════════════════════════════════════════════════════════════
+  var currentUser = null;
+  var dificultad  = 'basico';
+
+  var quizState = null;
+  function nuevoState() {
+    return {
+      preguntas:[], actual:0, correctas:0, respuestas:[],
+      timerInterval:null, tiempoSegundos:0, tiempoLimite:0,
+      modulo:null, aeNum:null, oaId:null, mod:null, ae:null, curso:null,
+      paused:false, finalizado:false
     };
+  }
 
-    // =============================================
-    // BRIDGE DE GAMIFICACION PARA USUARIOS FIREBASE
-    // Almacena XP/badges en localStorage por UID,
-    // compatible con la logica de gamification.js
-    // =============================================
-    var _evalUser     = null;   // usuario Firebase
-    var _evalLocalKey = null;   // clave localStorage personal
-
-    function _loadGamUser(fbUser) {
-        var key = 'el_gam_' + fbUser.uid;
-        _evalLocalKey = key;
-        try {
-            var stored = localStorage.getItem(key);
-            if (stored) return JSON.parse(stored);
-        } catch(e) {}
-        return {
-            uid: fbUser.uid,
-            email: fbUser.email,
-            name: fbUser.nombre || fbUser.displayName || (fbUser.email ? fbUser.email.split('@')[0] : 'Estudiante'),
-            role: fbUser.role || 'estudiante',
-            xp: 0, level: 'Aprendiz',
-            badges: [], completedQuizzes: []
-        };
-    }
-
-    function _saveGamUser(u) {
-        try { if (_evalLocalKey) localStorage.setItem(_evalLocalKey, JSON.stringify(u)); } catch(e) {}
-    }
-
-    // Sobrescribir updateUser() de gamification.js para que guarde
-    // en la clave personal del usuario en vez del array compartido
-    window.updateUser = function(u) {
-        _saveGamUser(u);
-        currentUser = u;  // mantener referencia actualizada
+  // Bridge gamificación local-storage por UID
+  var _evalLocalKey = null;
+  function _loadGamUser(fbUser) {
+    if (!fbUser) return null;
+    var key = 'el_gam_' + fbUser.uid;
+    _evalLocalKey = key;
+    try {
+      var stored = localStorage.getItem(key);
+      if (stored) return JSON.parse(stored);
+    } catch(_) {}
+    return {
+      uid: fbUser.uid,
+      email: fbUser.email,
+      name: fbUser.nombre || fbUser.displayName || safeEmail(fbUser.email, 'Estudiante'),
+      role: fbUser.role || 'estudiante',
+      xp: 0, level: 'Aprendiz',
+      badges: [], completedQuizzes: []
     };
+  }
+  function _saveGamUser(u) {
+    try { if (_evalLocalKey && u) localStorage.setItem(_evalLocalKey, JSON.stringify(u)); } catch(_) {}
+  }
+  // Override gamification.js updateUser
+  window.updateUser = function(u) {
+    _saveGamUser(u);
+    currentUser = u;
+  };
 
-    // Logout: usar Firebase en vez de solo localStorage
-    function logout() { ELAuth.logout(); }
+  // Logout — usar Firebase
+  document.getElementById('btnLogout').addEventListener('click', function(e) {
+    e.preventDefault();
+    if (window.ELAuth && window.ELAuth.logout) ELAuth.logout();
+  });
 
-    // =============================================
-    // INICIALIZACION CON FIREBASE AUTH
-    // =============================================
-    ELAuth.requireAuth(['estudiante', 'profesor', 'admin']);
-
-    ELAuth.onUserReady(function(user) {
-        _evalUser  = user;
-        currentUser = _loadGamUser(user);
-
-        if (user.role === 'profesor' || user.role === 'admin') {
-            document.getElementById('navMaterial').style.display = 'inline';
-        }
-
-        actualizarNivelMini();
+  // ═══════════════════════════════════════════════════════════════
+  //  Auth — un solo gate, sin race
+  // ═══════════════════════════════════════════════════════════════
+  if (!window.ELAuth || !window.ELAuth.onUserReady) {
+    document.addEventListener('DOMContentLoaded', function() {
+      toast('No se pudo iniciar la sesión. Recarga la página.', 'error');
     });
+    return;
+  }
 
-    function actualizarNivelMini() {
-        var xp = currentUser.xp || 0;
-        var info = xpParaSiguienteNivel(xp);
-        var pct = porcentajeNivel(xp);
-        document.getElementById('nivelIcon').textContent = info.actual.icon;
-        document.getElementById('nivelNombre').textContent = info.actual.nombre + ' — ' + xp + ' XP';
-        document.getElementById('nivelBarra').style.width = pct + '%';
-        document.getElementById('nivelBarra').style.background = 'linear-gradient(90deg, ' + info.actual.color + ', var(--secondary))';
-        if (info.siguiente) {
-            document.getElementById('nivelXPLabel').textContent = info.xpFalta + ' XP para ' + info.siguiente.nombre;
-        } else {
-            document.getElementById('nivelXPLabel').textContent = '¡Nivel maximo alcanzado!';
-        }
+  ELAuth.onUserReady(function(user) {
+    if (!user) { window.location.href = 'index.html'; return; }
+    if (['estudiante','profesor','admin'].indexOf(user.role) === -1) {
+      window.location.href = 'index.html'; return;
+    }
+    currentUser = _loadGamUser(user);
+
+    if (user.role === 'profesor' || user.role === 'admin') {
+      var nm = document.getElementById('navMaterial');
+      if (nm) nm.style.display = '';
+    }
+    actualizarNivelMini();
+  });
+
+  function actualizarNivelMini() {
+    if (!currentUser || typeof xpParaSiguienteNivel !== 'function') return;
+    var xp = currentUser.xp || 0;
+    var info = xpParaSiguienteNivel(xp);
+    var pct  = (typeof porcentajeNivel === 'function') ? porcentajeNivel(xp) : 0;
+    var ic = document.getElementById('nivelIcon');
+    var nm = document.getElementById('nivelNombre');
+    var br = document.getElementById('nivelBarra');
+    var xl = document.getElementById('nivelXPLabel');
+    if (ic) ic.textContent = info.actual.icon;
+    if (nm) nm.textContent = info.actual.nombre + ' — ' + xp + ' XP';
+    if (br) {
+      br.style.width = pct + '%';
+      br.style.background = 'linear-gradient(90deg, ' + info.actual.color + ', #22d3ee)';
+    }
+    if (xl) xl.textContent = info.siguiente ? (info.xpFalta + ' XP para ' + info.siguiente.nombre) : '¡Nivel máximo alcanzado!';
+  }
+
+  // ═══════════════════════════════════════════════════════════════
+  //  Cascada de selects
+  // ═══════════════════════════════════════════════════════════════
+  var $cur = document.getElementById('evCurso');
+  var $mod = document.getElementById('evModulo');
+  var $oa  = document.getElementById('evOA');
+  var $ae  = document.getElementById('evAE');
+  var $infoOA = document.getElementById('evInfoOA');
+  var $infoAE = document.getElementById('evInfoAE');
+
+  $cur.addEventListener('change', function() {
+    var nivel = $cur.value;
+    $mod.innerHTML = '<option value="">— Seleccionar módulo —</option>';
+    $oa.innerHTML  = '<option value="">— Selecciona un módulo —</option>';
+    $ae.innerHTML  = '<option value="">— Selecciona un OA —</option>';
+    $infoOA.style.display = 'none'; $infoAE.style.display = 'none';
+    if (!nivel || typeof MODULOS === 'undefined') return;
+    Object.keys(MODULOS).forEach(function(k) {
+      var m = MODULOS[k];
+      if (m.nivel === nivel) {
+        var opt = document.createElement('option');
+        opt.value = m.num;
+        opt.textContent = m.num + ' — ' + m.nombre + ' (' + m.horas + 'h)';
+        $mod.appendChild(opt);
+      }
+    });
+  });
+
+  $mod.addEventListener('change', function() {
+    var modId = $mod.value;
+    $oa.innerHTML = '<option value="">— Seleccionar OA —</option>';
+    $ae.innerHTML = '<option value="">— Selecciona un OA —</option>';
+    $infoOA.style.display = 'none'; $infoAE.style.display = 'none';
+    if (!modId || !MODULOS[modId]) return;
+    var mod = MODULOS[modId];
+    Object.keys(mod.oas).forEach(function(k) {
+      var opt = document.createElement('option'); opt.value = k; opt.textContent = k;
+      $oa.appendChild(opt);
+    });
+  });
+
+  $oa.addEventListener('change', function() {
+    var modId = $mod.value, oaId = $oa.value;
+    $ae.innerHTML = '<option value="">— Seleccionar AE —</option>';
+    $infoOA.style.display = 'none'; $infoAE.style.display = 'none';
+    if (!modId || !oaId || !MODULOS[modId]) return;
+    var mod = MODULOS[modId];
+    $infoOA.textContent = oaId + ': ' + (mod.oas[oaId] || '');
+    $infoOA.style.display = 'block';
+    Object.keys(mod.aes).forEach(function(k) {
+      var ae = mod.aes[k];
+      var opt = document.createElement('option');
+      opt.value = k;
+      opt.textContent = 'AE ' + k + ': ' + (ae.texto.length > 90 ? ae.texto.substring(0, 90) + '…' : ae.texto);
+      $ae.appendChild(opt);
+    });
+  });
+
+  $ae.addEventListener('change', function() {
+    var modId = $mod.value, aeNum = $ae.value;
+    if (!modId || !aeNum || !MODULOS[modId] || !MODULOS[modId].aes[aeNum]) {
+      $infoAE.style.display = 'none'; return;
+    }
+    $infoAE.textContent = 'AE ' + aeNum + ': ' + MODULOS[modId].aes[aeNum].texto;
+    $infoAE.style.display = 'block';
+  });
+
+  // Dificultad
+  document.getElementById('difRow').addEventListener('click', function(e) {
+    var b = e.target.closest('.dif-btn'); if (!b) return;
+    document.querySelectorAll('.dif-btn').forEach(function(x) { x.classList.remove('active'); });
+    b.classList.add('active');
+    dificultad = b.getAttribute('data-dif');
+  });
+
+  // ═══════════════════════════════════════════════════════════════
+  //  Iniciar quiz
+  // ═══════════════════════════════════════════════════════════════
+  var btnIniciar = document.getElementById('btnIniciar');
+  btnIniciar.addEventListener('click', iniciarQuiz);
+
+  function iniciarQuiz() {
+    if (!currentUser) { toast('Esperando inicio de sesión…', 'warn'); return; }
+    if (typeof MODULOS === 'undefined' || typeof generarBancoPreguntas !== 'function') {
+      toast('Los datos curriculares no se cargaron.', 'error'); return;
     }
 
-    // =============================================
-    // CASCADA DE SELECTS
-    // =============================================
-    function evFiltrarModulos() {
-        var nivel = document.getElementById('evCurso').value;
-        var sel = document.getElementById('evModulo');
-        sel.innerHTML = '<option value="">-- Seleccionar modulo --</option>';
-        if (!nivel) return;
-        Object.keys(MODULOS).forEach(function(k) {
-            var m = MODULOS[k];
-            if (m.nivel === nivel) {
-                var opt = document.createElement('option');
-                opt.value = m.num;
-                opt.textContent = m.num + ' — ' + m.nombre + ' (' + m.horas + 'h)';
-                sel.appendChild(opt);
-            }
-        });
-        document.getElementById('evOA').innerHTML = '<option value="">-- Selecciona un modulo --</option>';
-        document.getElementById('evInfoOA').style.display = 'none';
-        document.getElementById('evAE').innerHTML = '<option value="">-- Selecciona un OA --</option>';
-        document.getElementById('evInfoAE').style.display = 'none';
+    var modId = $mod.value, oaId = $oa.value, aeNum = $ae.value;
+    if (!modId || !oaId || !aeNum) {
+      toast('Selecciona curso, módulo, OA y AE antes de iniciar.', 'warn');
+      return;
     }
 
-    function evCargarOA() {
-        var modId = document.getElementById('evModulo').value;
-        var sel = document.getElementById('evOA');
-        sel.innerHTML = '<option value="">-- Seleccionar OA --</option>';
-        if (!modId || !MODULOS[modId]) return;
-        var mod = MODULOS[modId];
-        Object.keys(mod.oas).forEach(function(k) {
-            var opt = document.createElement('option');
-            opt.value = k;
-            opt.textContent = k;
-            sel.appendChild(opt);
-        });
-        document.getElementById('evAE').innerHTML = '<option value="">-- Selecciona un OA --</option>';
-        document.getElementById('evInfoAE').style.display = 'none';
+    btnIniciar.disabled = true;
+    btnIniciar.textContent = 'Generando preguntas…';
+
+    var mod      = MODULOS[modId];
+    var ae       = mod.aes[aeNum];
+    var numPregs = parseInt(document.getElementById('evNumPregs').value, 10) || 8;
+    var tiempoMin = parseInt(document.getElementById('evTiempo').value, 10) || 0;
+
+    var banco;
+    try { banco = generarBancoPreguntas(mod, ae, aeNum, oaId); }
+    catch(e) { toast('Error generando preguntas: ' + (e && e.message), 'error'); btnIniciar.disabled=false; btnIniciar.textContent='⚡ Iniciar evaluación'; return; }
+    if (!banco || !banco.length) {
+      toast('No hay preguntas disponibles para ese AE.', 'warn');
+      btnIniciar.disabled = false; btnIniciar.textContent = '⚡ Iniciar evaluación';
+      return;
+    }
+    var preguntas = banco.slice(0, numPregs);
+
+    quizState = nuevoState();
+    quizState.preguntas    = preguntas;
+    quizState.tiempoLimite = tiempoMin * 60;
+    quizState.modulo       = modId;
+    quizState.aeNum        = aeNum;
+    quizState.oaId         = oaId;
+    quizState.mod          = mod;
+    quizState.ae           = ae;
+    quizState.curso        = $cur.value;
+
+    document.getElementById('configArea').hidden    = true;
+    document.getElementById('quizArea').hidden      = false;
+    document.getElementById('quizTitulo').innerHTML = '📚 ' + escTxt(mod.num) + ' — ' + escTxt(mod.nombre);
+    document.getElementById('quizSubtitulo').textContent = 'AE ' + aeNum + ' · ' + preguntas.length + ' preguntas · ' + dificultad;
+
+    // Wizard
+    var w1 = document.getElementById('wstep1'), w2 = document.getElementById('wstep2');
+    var l1 = document.getElementById('wline1');
+    w1.classList.remove('active'); w1.classList.add('done');
+    w2.classList.add('active');
+    if (l1) l1.classList.add('done');
+
+    // Timer
+    if (quizState.tiempoLimite > 0) {
+      document.getElementById('timerWrap').hidden = false;
+      iniciarTimer();
+    } else {
+      document.getElementById('timerWrap').hidden = true;
+    }
+    btnIniciar.disabled = false;
+    btnIniciar.textContent = '⚡ Iniciar evaluación';
+    mostrarPregunta();
+  }
+
+  // ═══════════════════════════════════════════════════════════════
+  //  Timer (con pausa en visibilidad oculta)
+  // ═══════════════════════════════════════════════════════════════
+  function iniciarTimer() {
+    if (quizState.timerInterval) { clearInterval(quizState.timerInterval); quizState.timerInterval = null; }
+    pintarTimer();
+    quizState.timerInterval = setInterval(function() {
+      if (quizState.paused || quizState.finalizado) return;
+      quizState.tiempoSegundos++;
+      pintarTimer();
+      if (quizState.tiempoLimite > 0 && quizState.tiempoSegundos >= quizState.tiempoLimite) {
+        clearInterval(quizState.timerInterval); quizState.timerInterval = null;
+        finalizarQuiz(true);
+      }
+    }, 1000);
+  }
+  function pintarTimer() {
+    var wrap   = document.getElementById('timerWrap'); if (!wrap || wrap.hidden) return;
+    var circle = document.getElementById('timerCircle');
+    var text   = document.getElementById('timerText');
+    var total  = quizState.tiempoLimite;
+    var rest   = Math.max(0, total - quizState.tiempoSegundos);
+    var radio  = 34;
+    var perim  = 2 * Math.PI * radio;
+    var pct    = total > 0 ? (rest / total) : 0;
+    if (circle) {
+      circle.setAttribute('stroke-dasharray', String(perim));
+      circle.setAttribute('stroke-dashoffset', String(perim * (1 - pct)));
+    }
+    if (text) text.textContent = fmtTime(rest);
+    wrap.classList.toggle('warning', rest <= 120 && rest > 60);
+    wrap.classList.toggle('danger',  rest <= 60);
+  }
+  document.addEventListener('visibilitychange', function() {
+    if (!quizState || quizState.finalizado) return;
+    quizState.paused = document.hidden;
+  });
+
+  // ═══════════════════════════════════════════════════════════════
+  //  Render pregunta
+  // ═══════════════════════════════════════════════════════════════
+  var letras = ['A','B','C','D','E','F'];
+
+  function mostrarPregunta() {
+    var idx = quizState.actual;
+    var total = quizState.preguntas.length;
+    var p = quizState.preguntas[idx];
+
+    var pct = Math.round((idx / total) * 100);
+    document.getElementById('quizProgBar').style.width = pct + '%';
+    document.getElementById('quizProgLabel').textContent = 'Pregunta ' + (idx + 1) + ' de ' + total;
+
+    var html = '<div class="pregunta-card">' +
+      '<div class="pregunta-num">Pregunta ' + (idx + 1) + ' de ' + total + ' &nbsp;•&nbsp; ' + escTxt(p.puntos) + ' pts</div>' +
+      '<div class="pregunta-texto">' + escTxt(p.pregunta) + '</div>';
+
+    if (p.tipo === 'mc') {
+      html += '<ul class="opciones-list">';
+      (p.opciones || []).forEach(function(op, i) {
+        html += '<li><button class="opcion-btn" type="button" data-mc="' + i + '">' +
+          '<span class="opcion-letra">' + letras[i] + '</span>' +
+          '<span>' + escTxt(op) + '</span></button></li>';
+      });
+      html += '</ul>';
+    } else if (p.tipo === 'vf') {
+      html += '<div class="afirmacion-texto">' + escTxt(p.afirmacion) + '</div>' +
+        '<div class="vf-btns">' +
+          '<button class="vf-btn verdadero" type="button" data-vf="true">✅ Verdadero</button>' +
+          '<button class="vf-btn falso"     type="button" data-vf="false">❌ Falso</button>' +
+        '</div>';
     }
 
-    function evCargarAE() {
-        var modId = document.getElementById('evModulo').value;
-        var oaId = document.getElementById('evOA').value;
-        var sel = document.getElementById('evAE');
-        sel.innerHTML = '<option value="">-- Seleccionar AE --</option>';
-        document.getElementById('evInfoOA').style.display = 'none';
-        if (!modId || !oaId) return;
-        var mod = MODULOS[modId];
-        var infoOA = document.getElementById('evInfoOA');
-        infoOA.textContent = oaId + ': ' + mod.oas[oaId];
-        infoOA.style.display = 'block';
-        Object.keys(mod.aes).forEach(function(k) {
-            var ae = mod.aes[k];
-            var opt = document.createElement('option');
-            opt.value = k;
-            opt.textContent = 'AE ' + k + ': ' + (ae.texto.length > 90 ? ae.texto.substring(0, 90) + '...' : ae.texto);
-            sel.appendChild(opt);
-        });
+    html += '<div id="feedbackBox" hidden></div>';
+    html += '<button class="btn-siguiente" id="btnSiguiente" type="button" hidden>' +
+      (idx < total - 1 ? '➡️ Siguiente pregunta' : '🏁 Ver resultados') +
+    '</button></div>';
+
+    var cont = document.getElementById('preguntaContainer');
+    cont.innerHTML = html;
+
+    // Bind
+    cont.querySelectorAll('[data-mc]').forEach(function(b) {
+      b.addEventListener('click', function() { responderMC(b, parseInt(b.getAttribute('data-mc'),10)); });
+    });
+    cont.querySelectorAll('[data-vf]').forEach(function(b) {
+      b.addEventListener('click', function() { responderVF(b, b.getAttribute('data-vf') === 'true'); });
+    });
+    var btnSig = document.getElementById('btnSiguiente');
+    if (btnSig) btnSig.addEventListener('click', siguiente);
+  }
+
+  function responderMC(btn, idx) {
+    var p = quizState.preguntas[quizState.actual];
+    var correcta = p.opciones[idx] === p.correcta;
+    document.querySelectorAll('.opcion-btn').forEach(function(b, i) {
+      b.disabled = true;
+      if (p.opciones[i] === p.correcta) b.classList.add('correcta');
+    });
+    if (!correcta) btn.classList.add('incorrecta');
+    mostrarFeedback(correcta, p.explicacion);
+    registrarRespuesta(correcta);
+  }
+  function responderVF(btn, esVerdadero) {
+    var p = quizState.preguntas[quizState.actual];
+    var correcta = esVerdadero === p.correcta;
+    document.querySelectorAll('.vf-btn').forEach(function(b) {
+      b.disabled = true;
+      if ((b.classList.contains('verdadero') && p.correcta) ||
+          (b.classList.contains('falso')     && !p.correcta)) {
+        b.classList.add('reveal-correcta');
+      }
+    });
+    btn.classList.add(correcta ? 'sel-correcta' : 'sel-incorrecta');
+    mostrarFeedback(correcta, p.explicacion);
+    registrarRespuesta(correcta);
+  }
+  function mostrarFeedback(correcta, explicacion) {
+    var fb = document.getElementById('feedbackBox');
+    fb.className = 'feedback-box ' + (correcta ? 'correcta' : 'incorrecta');
+    fb.innerHTML = (correcta ? '✅ <strong>¡Correcto!</strong> ' : '❌ <strong>Incorrecto.</strong> ') + escTxt(explicacion);
+    fb.hidden = false;
+    var bs = document.getElementById('btnSiguiente'); if (bs) bs.hidden = false;
+  }
+  function registrarRespuesta(correcta) {
+    if (correcta) quizState.correctas++;
+    quizState.respuestas.push({
+      pregunta: quizState.preguntas[quizState.actual],
+      correcta: correcta
+    });
+  }
+  function siguiente() {
+    quizState.actual++;
+    if (quizState.actual >= quizState.preguntas.length) finalizarQuiz(false);
+    else mostrarPregunta();
+  }
+
+  // ═══════════════════════════════════════════════════════════════
+  //  Finalizar
+  // ═══════════════════════════════════════════════════════════════
+  function finalizarQuiz(timeout) {
+    if (!quizState || quizState.finalizado) return;
+    quizState.finalizado = true;
+    if (quizState.timerInterval) { clearInterval(quizState.timerInterval); quizState.timerInterval = null; }
+
+    var total = quizState.preguntas.length;
+    var correctas = quizState.correctas;
+    var score = total ? Math.round((correctas / total) * 100) : 0;
+    var nota  = (typeof calcularNota === 'function') ? calcularNota(score) : (1 + 6 * score / 100);
+    var tiempoSeg = quizState.tiempoSegundos;
+
+    var resultado = {
+      fecha: new Date().toISOString(),
+      modulo: quizState.modulo,
+      moduloNombre: quizState.mod && quizState.mod.nombre,
+      aeNum: quizState.aeNum, oaId: quizState.oaId,
+      nivel: quizState.curso, total: total, correctas: correctas,
+      score: score, nota: nota, tiempoSegundos: tiempoSeg
+    };
+
+    var gameResult = (typeof guardarResultadoQuiz === 'function')
+      ? guardarResultadoQuiz(currentUser, resultado)
+      : { xpGanado: { total: 0, detalle: [] }, nuevasInsignias: [] };
+
+    document.getElementById('quizArea').hidden     = true;
+    document.getElementById('resultadoArea').hidden = false;
+
+    var w2 = document.getElementById('wstep2'), w3 = document.getElementById('wstep3');
+    var l2 = document.getElementById('wline2');
+    w2.classList.remove('active'); w2.classList.add('done');
+    w3.classList.add('active');
+    if (l2) l2.classList.add('done');
+
+    var emoji = nota >= 6.5 ? '🌟' : nota >= 5.5 ? '🎉' : nota >= 4.0 ? '✅' : nota >= 3.0 ? '😅' : '💪';
+    document.getElementById('resultEmoji').textContent = timeout ? '⏰' : emoji;
+    document.getElementById('resultSub').textContent =
+      (timeout ? 'Tiempo agotado. ' : '') +
+      correctas + ' de ' + total + ' correctas — ' + score + '% ' +
+      (nota >= 4.0 ? '· ¡Aprobado!' : '· Sigue estudiando');
+
+    // Count-up nota (con un decimal)
+    var notaEl = document.getElementById('resultNota');
+    if (window.ELUI && window.ELUI.countUp) {
+      window.ELUI.countUp(notaEl, nota, { duration: 1100, decimals: 1 });
+    } else {
+      notaEl.textContent = nota.toFixed(1);
     }
 
-    function evMostrarInfoAE() {
-        var modId = document.getElementById('evModulo').value;
-        var aeNum = document.getElementById('evAE').value;
-        var infoAE = document.getElementById('evInfoAE');
-        if (!modId || !aeNum || !MODULOS[modId] || !MODULOS[modId].aes[aeNum]) {
-            infoAE.style.display = 'none'; return;
-        }
-        infoAE.textContent = 'AE ' + aeNum + ': ' + MODULOS[modId].aes[aeNum].texto;
-        infoAE.style.display = 'block';
+    // Stats
+    cu(document.getElementById('statCorrectas'),   correctas);
+    cu(document.getElementById('statIncorrectas'), total - correctas);
+    cu(document.getElementById('statPorcentaje'),  score, { suffix: '%' });
+    document.getElementById('statTiempo').textContent = fmtTime(tiempoSeg);
+
+    // XP detalle
+    var xpInfo = gameResult.xpGanado || { total:0, detalle:[] };
+    var xpHtml = (xpInfo.detalle || []).map(function(d) {
+      return '<div class="xp-row-r"><span>' + escTxt(d.label) + '</span><span style="color:#a78bfa;font-weight:800">+' + d.xp + ' XP</span></div>';
+    }).join('');
+    xpHtml += '<div class="xp-row-r"><span>TOTAL GANADO</span><span>+' + (xpInfo.total || 0) + ' XP</span></div>';
+    document.getElementById('xpDetalle').innerHTML = xpHtml;
+    document.getElementById('xpTotal').textContent = (currentUser.xp || 0) + ' XP totales';
+
+    // Insignias nuevas
+    if (gameResult.nuevasInsignias && gameResult.nuevasInsignias.length) {
+      document.getElementById('insigniasList').innerHTML = gameResult.nuevasInsignias.map(function(ins) {
+        return '<div class="insignia-card">' +
+          '<span class="ic-icon">' + escTxt(ins.icon) + '</span>' +
+          '<div><div class="ic-name">' + escTxt(ins.nombre) + '</div>' +
+          '<div class="ic-desc">' + escTxt(ins.desc) + '</div></div>' +
+        '</div>';
+      }).join('');
+      document.getElementById('nuevasInsignias').hidden = false;
     }
 
-    function setDif(btn, dif) {
-        document.querySelectorAll('.dif-btn').forEach(function(b) { b.classList.remove('active'); });
-        btn.classList.add('active');
-        dificultadSeleccionada = dif;
+    // Nivel actualizado
+    if (typeof xpParaSiguienteNivel === 'function') {
+      var nivInfo = xpParaSiguienteNivel(currentUser.xp || 0);
+      var pct = (typeof porcentajeNivel === 'function') ? porcentajeNivel(currentUser.xp || 0) : 0;
+      document.getElementById('nivelActualizado').innerHTML =
+        '<div class="nivel-mini-pro">' +
+          '<div class="nivel-icon">' + escTxt(nivInfo.actual.icon) + '</div>' +
+          '<div class="nivel-info">' +
+            '<div class="nivel-nombre">' + escTxt(nivInfo.actual.nombre) + ' — ' + (currentUser.xp || 0) + ' XP</div>' +
+            '<div class="nivel-bar-wrap"><div class="nivel-bar" style="width:' + pct + '%;background:linear-gradient(90deg,' + escAttr(nivInfo.actual.color) + ',#22d3ee)"></div></div>' +
+            '<div class="nivel-xp">' + (nivInfo.siguiente ? (nivInfo.xpFalta + ' XP para ' + escTxt(nivInfo.siguiente.nombre)) : '¡Nivel máximo!') + '</div>' +
+          '</div>' +
+        '</div>';
+    }
+    actualizarNivelMini();
+
+    // Revisión — acordeón
+    var revHtml = quizState.respuestas.map(function(r, i) {
+      var pTxt = String(r.pregunta.pregunta || '').replace(/<[^>]*>/g, '').slice(0, 130);
+      var ex   = String(r.pregunta.explicacion || '').replace(/<[^>]*>/g, '');
+      return '<details class="rev-item ' + (r.correcta ? 'correcta' : 'incorrecta') + '">' +
+        '<summary class="rev-summary">' +
+          '<strong>' + (r.correcta ? '✅' : '❌') + ' P' + (i + 1) + '.</strong> ' +
+          '<span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + escTxt(pTxt) + '</span>' +
+          '<span class="arrow">›</span>' +
+        '</summary>' +
+        '<div class="rev-body"><strong>Explicación:</strong> ' + escTxt(ex) + '</div>' +
+      '</details>';
+    }).join('');
+    document.getElementById('revisionContainer').innerHTML = revHtml;
+
+    // Confetti si aprobado
+    if (nota >= 4.0 && window.ELUI && window.ELUI.confetti) {
+      setTimeout(function() { window.ELUI.confetti({ amount: nota >= 6.0 ? 130 : 80, duration: 2400 }); }, 250);
     }
 
-    // =============================================
-    // INICIAR QUIZ
-    // =============================================
-    function iniciarQuiz() {
-        var modId = document.getElementById('evModulo').value;
-        var oaId = document.getElementById('evOA').value;
-        var aeNum = document.getElementById('evAE').value;
+    // Scroll suave al inicio del resultado
+    var area = document.getElementById('resultadoArea');
+    if (area && area.scrollIntoView) area.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
 
-        if (!modId || !oaId || !aeNum) {
-            alert('Por favor selecciona: Curso, Modulo, OA y AE antes de iniciar.');
-            return;
-        }
+  function cu(el, target, opts) {
+    if (!el) return;
+    if (window.ELUI && window.ELUI.countUp) window.ELUI.countUp(el, target, opts || {});
+    else el.textContent = String(target) + ((opts && opts.suffix) || '');
+  }
 
-        var mod = MODULOS[modId];
-        var ae = mod.aes[aeNum];
-        var numPregs = parseInt(document.getElementById('evNumPregs').value);
-        var tiempoMin = parseInt(document.getElementById('evTiempo').value);
+  // ═══════════════════════════════════════════════════════════════
+  //  Reiniciar
+  // ═══════════════════════════════════════════════════════════════
+  document.getElementById('btnNueva').addEventListener('click', function() {
+    // Reset estado y wizard
+    quizState = null;
+    document.getElementById('resultadoArea').hidden = true;
+    document.getElementById('quizArea').hidden     = true;
+    document.getElementById('configArea').hidden    = false;
 
-        // Generar banco de preguntas
-        var banco = generarBancoPreguntas(mod, ae, aeNum, oaId);
-        var preguntas = banco.slice(0, numPregs);
+    // Wizard
+    document.getElementById('wstep1').classList.add('active');
+    document.getElementById('wstep1').classList.remove('done');
+    document.getElementById('wstep2').classList.remove('active','done');
+    document.getElementById('wstep3').classList.remove('active');
+    document.getElementById('wline1').classList.remove('done');
+    document.getElementById('wline2').classList.remove('done');
 
-        quizState = {
-            preguntas: preguntas,
-            actual: 0,
-            correctas: 0,
-            respuestas: [],
-            timerInterval: null,
-            tiempoSegundos: 0,
-            tiempoLimite: tiempoMin * 60,
-            modulo: modId,
-            aeNum: aeNum,
-            oaId: oaId,
-            mod: mod,
-            ae: ae,
-            curso: document.getElementById('evCurso').value
-        };
+    // Timer reset visual
+    document.getElementById('timerWrap').hidden = true;
+    document.getElementById('timerWrap').classList.remove('warning','danger');
 
-        // UI: pasar a quiz
-        document.getElementById('configArea').style.display = 'none';
-        document.getElementById('quizArea').style.display = 'block';
-        document.getElementById('quizTitulo').innerHTML = '📚 ' + mod.num + ' &mdash; ' + mod.nombre;
-        document.getElementById('quizSubtitulo').textContent = 'AE ' + aeNum + ' · ' + preguntas.length + ' preguntas';
+    if (window.scrollTo) window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
 
-        // Wizard
-        document.getElementById('wstep1').classList.remove('active');
-        document.getElementById('wstep1').classList.add('done');
-        document.getElementById('wstep2').classList.add('active');
+})();
+</script>
 
-        // Timer
-        if (tiempoMin > 0) {
-            quizState.timerInterval = setInterval(tickTimer, 1000);
-        } else {
-            document.getElementById('quizTimer').textContent = '';
-        }
-
-        mostrarPregunta();
-    }
-
-    // =============================================
-    // TIMER
-    // =============================================
-    function tickTimer() {
-        quizState.tiempoSegundos++;
-        var restante = quizState.tiempoLimite > 0 ? quizState.tiempoLimite - quizState.tiempoSegundos : quizState.tiempoSegundos;
-        var el = document.getElementById('quizTimer');
-
-        if (quizState.tiempoLimite > 0) {
-            // Cuenta regresiva
-            if (restante <= 0) {
-                clearInterval(quizState.timerInterval);
-                finalizarQuiz(true);
-                return;
-            }
-            el.textContent = Math.floor(restante / 60) + ':' + String(restante % 60).padStart(2, '0');
-            el.className = 'quiz-timer' + (restante < 60 ? ' danger' : restante < 120 ? ' warning' : '');
-        } else {
-            // Cuenta ascendente
-            el.textContent = Math.floor(quizState.tiempoSegundos / 60) + ':' + String(quizState.tiempoSegundos % 60).padStart(2, '0');
-        }
-    }
-
-    // =============================================
-    // MOSTRAR PREGUNTA
-    // =============================================
-    var letras = ['A', 'B', 'C', 'D'];
-
-    function mostrarPregunta() {
-        var idx = quizState.actual;
-        var total = quizState.preguntas.length;
-        var p = quizState.preguntas[idx];
-
-        // Progreso
-        var pct = Math.round((idx / total) * 100);
-        document.getElementById('quizProgBar').style.width = pct + '%';
-        document.getElementById('quizProgLabel').textContent = 'Pregunta ' + (idx + 1) + ' de ' + total;
-
-        var html = '<div class="pregunta-card">';
-        html += '<div class="pregunta-numero">Pregunta ' + (idx + 1) + ' de ' + total + ' &nbsp;&bull;&nbsp; ' + p.puntos + ' pts</div>';
-        html += '<div class="pregunta-texto">' + p.pregunta + '</div>';
-
-        if (p.tipo === 'mc') {
-            html += '<ul class="opciones-list">';
-            p.opciones.forEach(function(op, i) {
-                html += '<li><button class="opcion-btn" onclick="responderMC(this,' + i + ')" data-opcion="' + i + '">' +
-                    '<span class="opcion-letra">' + letras[i] + '</span>' +
-                    '<span>' + op + '</span></button></li>';
-            });
-            html += '</ul>';
-        } else if (p.tipo === 'vf') {
-            html += '<div class="afirmacion-texto">' + p.afirmacion + '</div>';
-            html += '<div class="vf-btns">' +
-                '<button class="vf-btn verdadero" onclick="responderVF(this,true)">✅ Verdadero</button>' +
-                '<button class="vf-btn falso" onclick="responderVF(this,false)">❌ Falso</button>' +
-                '</div>';
-        }
-
-        html += '<div id="feedbackBox" style="display:none;"></div>';
-        html += '<button class="btn-siguiente" id="btnSiguiente" style="display:none;" onclick="siguiente()">' +
-            (quizState.actual < quizState.preguntas.length - 1 ? '➡️ Siguiente pregunta' : '🏁 Ver resultados') +
-            '</button>';
-        html += '</div>';
-
-        document.getElementById('preguntaContainer').innerHTML = html;
-    }
-
-    function responderMC(btn, idx) {
-        var p = quizState.preguntas[quizState.actual];
-        var correcta = p.opciones[idx] === p.correcta;
-
-        // Deshabilitar todos los botones
-        document.querySelectorAll('.opcion-btn').forEach(function(b) { b.disabled = true; });
-
-        // Marcar respuestas
-        document.querySelectorAll('.opcion-btn').forEach(function(b, i) {
-            if (p.opciones[i] === p.correcta) b.classList.add('correcta');
-        });
-        if (!correcta) btn.classList.add('incorrecta');
-
-        mostrarFeedback(correcta, p.explicacion);
-        registrarRespuesta(correcta);
-    }
-
-    function responderVF(btn, esVerdadero) {
-        var p = quizState.preguntas[quizState.actual];
-        var correcta = esVerdadero === p.correcta;
-
-        // Deshabilitar
-        document.querySelectorAll('.vf-btn').forEach(function(b) { b.disabled = true; });
-
-        // Revelar respuesta correcta
-        document.querySelectorAll('.vf-btn').forEach(function(b) {
-            if ((b.classList.contains('verdadero') && p.correcta) ||
-                (b.classList.contains('falso') && !p.correcta)) {
-                b.classList.add('reveal-correcta');
-            }
-        });
-        if (!correcta) btn.classList.add('sel-incorrecta');
-        else btn.classList.add('sel-correcta');
-
-        mostrarFeedback(correcta, p.explicacion);
-        registrarRespuesta(correcta);
-    }
-
-    function mostrarFeedback(correcta, explicacion) {
-        var fb = document.getElementById('feedbackBox');
-        fb.className = 'explicacion-box ' + (correcta ? 'correcta' : 'incorrecta');
-        fb.innerHTML = (correcta ? '✅ <strong>¡Correcto!</strong> ' : '❌ <strong>Incorrecto.</strong> ') + explicacion;
-        fb.style.display = 'block';
-        document.getElementById('btnSiguiente').style.display = 'block';
-    }
-
-    function registrarRespuesta(correcta) {
-        if (correcta) quizState.correctas++;
-        quizState.respuestas.push({
-            pregunta: quizState.preguntas[quizState.actual],
-            correcta: correcta
-        });
-    }
-
-    function siguiente() {
-        quizState.actual++;
-        if (quizState.actual >= quizState.preguntas.length) {
-            finalizarQuiz(false);
-        } else {
-            mostrarPregunta();
-        }
-    }
-
-    // =============================================
-    // FINALIZAR QUIZ
-    // =============================================
-    function finalizarQuiz(timeout) {
-        if (quizState.timerInterval) clearInterval(quizState.timerInterval);
-
-        var total = quizState.preguntas.length;
-        var correctas = quizState.correctas;
-        var score = Math.round((correctas / total) * 100);
-        var nota = calcularNota(score);
-        var tiempoSeg = quizState.tiempoSegundos;
-
-        // Guardar resultado
-        var resultado = {
-            fecha: new Date().toISOString(),
-            modulo: quizState.modulo,
-            moduloNombre: quizState.mod.nombre,
-            aeNum: quizState.aeNum,
-            oaId: quizState.oaId,
-            nivel: quizState.curso,
-            total: total,
-            correctas: correctas,
-            score: score,
-            nota: nota,
-            tiempoSegundos: tiempoSeg
-        };
-
-        var gameResult = guardarResultadoQuiz(currentUser, resultado);
-        // currentUser ya fue actualizado por window.updateUser() dentro de guardarResultadoQuiz()
-
-        // Mostrar resultados
-        document.getElementById('quizArea').style.display = 'none';
-        document.getElementById('resultadoArea').style.display = 'block';
-
-        document.getElementById('wstep2').classList.remove('active');
-        document.getElementById('wstep2').classList.add('done');
-        document.getElementById('wstep3').classList.add('active');
-
-        // Emoji segun nota
-        var emoji = nota >= 6.5 ? '🌟' : nota >= 5.5 ? '🎉' : nota >= 4.0 ? '✅' : nota >= 3.0 ? '😅' : '💪';
-        document.getElementById('resultEmoji').textContent = timeout ? '⏰' : emoji;
-        document.getElementById('resultNota').textContent = nota.toFixed(1);
-        document.getElementById('resultSub').textContent =
-            (timeout ? 'Tiempo agotado. ' : '') +
-            correctas + ' de ' + total + ' correctas — ' + score + '%' +
-            (nota >= 4.0 ? ' — ¡Aprobado!' : ' — Sigue estudiando');
-
-        document.getElementById('statCorrectas').textContent = correctas;
-        document.getElementById('statIncorrectas').textContent = total - correctas;
-        document.getElementById('statPorcentaje').textContent = score + '%';
-        var min = Math.floor(tiempoSeg / 60), seg = tiempoSeg % 60;
-        document.getElementById('statTiempo').textContent = min + ':' + String(seg).padStart(2, '0');
-
-        // XP detalle
-        var xpInfo = gameResult.xpGanado;
-        var xpHtml = '';
-        xpInfo.detalle.forEach(function(d) {
-            xpHtml += '<div class="xp-row"><span>' + d.label + '</span><span style="color:var(--secondary);font-weight:700;">+' + d.xp + ' XP</span></div>';
-        });
-        xpHtml += '<div class="xp-row"><span>TOTAL GANADO</span><span>+' + xpInfo.total + ' XP</span></div>';
-        document.getElementById('xpDetalle').innerHTML = xpHtml;
-        document.getElementById('xpTotal').textContent = (currentUser.xp || 0) + ' XP totales';
-
-        // Insignias nuevas
-        if (gameResult.nuevasInsignias.length > 0) {
-            var insHtml = '';
-            gameResult.nuevasInsignias.forEach(function(ins) {
-                insHtml += '<div class="insignia-nueva">' +
-                    '<span class="ins-icon">' + ins.icon + '</span>' +
-                    '<div><div class="ins-nombre">' + ins.nombre + '</div>' +
-                    '<div class="ins-desc">' + ins.desc + '</div></div>' +
-                    '</div>';
-            });
-            document.getElementById('insigniasList').innerHTML = insHtml;
-            document.getElementById('nuevasInsignias').style.display = 'block';
-        }
-
-        // Nivel actualizado
-        var nivInfo = xpParaSiguienteNivel(currentUser.xp || 0);
-        var pct = porcentajeNivel(currentUser.xp || 0);
-        document.getElementById('nivelActualizado').innerHTML =
-            '<div class="nivel-mini">' +
-            '<div class="nivel-icon">' + nivInfo.actual.icon + '</div>' +
-            '<div class="nivel-info">' +
-            '<div class="nivel-nombre">' + nivInfo.actual.nombre + ' &mdash; ' + (currentUser.xp || 0) + ' XP</div>' +
-            '<div class="nivel-barra-wrap"><div class="nivel-barra" style="width:' + pct + '%;background:linear-gradient(90deg,' + nivInfo.actual.color + ',var(--secondary))"></div></div>' +
-            '<div class="nivel-xp">' + (nivInfo.siguiente ? (nivInfo.xpFalta + ' XP para ' + nivInfo.siguiente.nombre) : '¡Nivel maximo!') + '</div>' +
-            '</div></div>';
-
-        // Actualizar mini nivel
-        actualizarNivelMini();
-
-        // Revision de preguntas
-        var revHtml = '';
-        quizState.respuestas.forEach(function(r, i) {
-            revHtml += '<div class="revision-pregunta ' + (r.correcta ? 'revision-correcta' : 'revision-incorrecta') + '">' +
-                '<strong>' + (r.correcta ? '✅' : '❌') + ' P' + (i + 1) + '.</strong> ' +
-                r.pregunta.pregunta.replace(/<[^>]*>/g, '').substring(0, 100) + '...<br>' +
-                '<span style="font-size:0.8rem;color:var(--text-muted);">' + r.pregunta.explicacion.replace(/<[^>]*>/g, '') + '</span>' +
-                '</div>';
-        });
-        document.getElementById('revisionContainer').innerHTML = revHtml;
-    }
-
-    function nuevaEval() {
-        location.reload();
-    }
-
-    function mostrarToast(msg) {
-        var t = document.getElementById('toast');
-        t.textContent = msg;
-        t.classList.add('visible');
-        setTimeout(function() { t.classList.remove('visible'); }, 2500);
-    }
-    </script>
 </body>
 </html>

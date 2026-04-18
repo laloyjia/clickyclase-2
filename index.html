@@ -3,847 +3,806 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ElectroLearn — Acceso</title>
+<title>ElectroLearn — La plataforma educativa alineada al Mineduc</title>
+<meta name="description" content="ElectroLearn ayuda a colegios y docentes chilenos a crear material educativo, evaluaciones y planificaciones alineadas al currículo Mineduc. Con IA integrada, gamificación para alumnos y valores salesianos.">
+<meta name="theme-color" content="#0b0d1e">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet">
 
+<link rel="stylesheet" href="css/styles.css">
+
+<style>
+  /* =============================
+     LANDING — estilos locales
+     ============================= */
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background: #080b14;
+    color: #f1f5f9;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+  a { color: inherit; text-decoration: none; }
+  h1, h2, h3 { font-family: 'Space Grotesk', 'Inter', sans-serif; letter-spacing: -.01em; }
+
+  /* ─── Fondo global animado ─── */
+  .bg-landing {
+    position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden;
+  }
+  .bg-landing::before {
+    content: ''; position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse 80% 50% at 15% -5%, rgba(124,58,237,.22) 0%, transparent 55%),
+      radial-gradient(ellipse 60% 40% at 85% 105%, rgba(34,211,238,.14) 0%, transparent 55%),
+      radial-gradient(ellipse 50% 60% at 50% 50%, rgba(244,114,182,.07) 0%, transparent 70%);
+  }
+  .bg-landing::after {
+    content: ''; position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,.022) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,.022) 1px, transparent 1px);
+    background-size: 48px 48px;
+    mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 30%, transparent 100%);
+  }
+  .blob {
+    position: absolute; border-radius: 50%; filter: blur(90px);
+    animation: drift 22s infinite ease-in-out alternate;
+  }
+  .blob-a { width: 520px; height: 520px; top: -160px; left: -160px;
+            background: radial-gradient(circle, rgba(124,58,237,.28), transparent 70%); }
+  .blob-b { width: 420px; height: 420px; top: 40%; right: -140px;
+            background: radial-gradient(circle, rgba(34,211,238,.22), transparent 70%);
+            animation-duration: 26s; animation-delay: -6s; }
+  .blob-c { width: 360px; height: 360px; bottom: -120px; left: 35%;
+            background: radial-gradient(circle, rgba(244,114,182,.18), transparent 70%);
+            animation-duration: 18s; animation-delay: -3s; }
+  @keyframes drift {
+    from { transform: translate(0,0) scale(1); }
+    to   { transform: translate(50px,70px) scale(1.15); }
+  }
+
+  /* ─── Nav ─── */
+  .nav-land {
+    position: sticky; top: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 32px;
+    background: rgba(8,11,20,.72);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-bottom: 1px solid rgba(148,163,184,.08);
+  }
+  .nav-land .brand {
+    display: flex; align-items: center; gap: 10px;
+    font-family: 'Space Grotesk', sans-serif; font-weight: 800; font-size: 1.15rem;
+  }
+  .nav-land .brand .ico {
+    width: 34px; height: 34px; border-radius: 10px;
+    background: linear-gradient(135deg, #7c3aed, #22d3ee);
+    display: grid; place-items: center; color: #fff; font-size: .9rem;
+    box-shadow: 0 6px 16px -6px rgba(124,58,237,.7);
+  }
+  .nav-land .links { display: flex; align-items: center; gap: 22px; }
+  .nav-land .links a {
+    font-size: .88rem; font-weight: 500; color: #cbd5e1; transition: color .2s;
+  }
+  .nav-land .links a:hover { color: #fff; }
+  .nav-land .btn-cta {
+    padding: .55rem 1.1rem; border-radius: 10px;
+    background: linear-gradient(135deg,#7c3aed,#6d28d9);
+    color: #fff; font-weight: 700; font-size: .88rem;
+    box-shadow: 0 8px 20px -8px rgba(124,58,237,.7);
+    transition: transform .15s, box-shadow .2s;
+  }
+  .nav-land .btn-cta:hover { transform: translateY(-1px); box-shadow: 0 12px 24px -8px rgba(124,58,237,.85); }
+  .nav-land .btn-outline {
+    padding: .5rem 1rem; border-radius: 10px;
+    border: 1px solid rgba(148,163,184,.25); color: #e2e8f0;
+    font-weight: 600; font-size: .88rem; transition: border-color .2s, color .2s;
+  }
+  .nav-land .btn-outline:hover { border-color: rgba(124,58,237,.55); color: #fff; }
+  .hamb { display: none; background: transparent; border: 0; color: #fff; font-size: 1.4rem; cursor: pointer; }
+  @media (max-width: 780px) {
+    .nav-land { padding: 12px 18px; }
+    .nav-land .links { gap: 10px; }
+    .nav-land .links .link-md { display: none; }
+  }
+
+  /* ─── Container ─── */
+  .container { position: relative; z-index: 1; max-width: 1160px; margin: 0 auto; padding: 0 20px; }
+
+  /* ─── Hero ─── */
+  .hero {
+    position: relative; z-index: 1;
+    padding: clamp(60px, 9vw, 120px) 20px clamp(40px, 6vw, 80px);
+    text-align: center;
+  }
+  .chip {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: .4rem 1rem; border-radius: 999px;
+    background: rgba(124,58,237,.12);
+    border: 1px solid rgba(124,58,237,.28);
+    color: #c4b5fd;
+    font-size: .82rem; font-weight: 600;
+    margin-bottom: 1.4rem;
+  }
+  .chip .dot {
+    width: 6px; height: 6px; border-radius: 50%; background: #34d399;
+    box-shadow: 0 0 0 3px rgba(52,211,153,.25);
+    animation: pulse 1.8s infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+  .hero h1 {
+    font-size: clamp(2.2rem, 6vw, 4rem);
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -.02em;
+    margin: 0 0 1rem;
+  }
+  .hero h1 .grad {
+    background: linear-gradient(135deg, #a78bfa 0%, #22d3ee 55%, #f472b6 100%);
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent; color: transparent;
+  }
+  .hero .lead {
+    font-size: clamp(1rem, 1.6vw, 1.2rem);
+    color: #94a3b8;
+    max-width: 680px;
+    margin: 0 auto 2rem;
+  }
+  .hero-ctas {
+    display: flex; gap: .9rem; justify-content: center; flex-wrap: wrap;
+    margin-bottom: 1.4rem;
+  }
+  .btn-hero {
+    padding: .95rem 1.8rem; border-radius: 14px; font-weight: 700;
+    font-size: 1rem; letter-spacing: .01em;
+    border: 0; cursor: pointer; text-decoration: none;
+    transition: transform .15s, box-shadow .2s, background .2s;
+    display: inline-flex; align-items: center; gap: .5rem;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, #7c3aed, #5b21b6);
+    color: #fff;
+    box-shadow: 0 16px 36px -12px rgba(124,58,237,.75);
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 22px 44px -12px rgba(124,58,237,.9); }
+  .btn-secondary {
+    background: rgba(255,255,255,.06);
+    color: #fff;
+    border: 1px solid rgba(148,163,184,.25);
+  }
+  .btn-secondary:hover { background: rgba(255,255,255,.10); border-color: rgba(124,58,237,.45); }
+
+  .hero-trust {
+    display: flex; justify-content: center; gap: 24px; flex-wrap: wrap;
+    font-size: .82rem; color: #64748b; margin-top: .6rem;
+  }
+  .hero-trust span { display: inline-flex; align-items: center; gap: 6px; }
+
+  /* Hero mockup (SVG-ish) */
+  .hero-mock {
+    margin-top: 3rem; position: relative;
+    background: linear-gradient(160deg, rgba(21,30,45,.92), rgba(13,18,32,.98));
+    border: 1px solid rgba(148,163,184,.14);
+    border-radius: 20px;
+    padding: 18px;
+    max-width: 960px; margin-left: auto; margin-right: auto;
+    box-shadow: 0 32px 80px -20px rgba(124,58,237,.4), 0 0 0 1px rgba(255,255,255,.03);
+    animation: rise .7s cubic-bezier(.22,1,.36,1) both;
+  }
+  .hero-mock::before {
+    content: ''; position: absolute; top: 0; left: 10%; right: 10%; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(124,58,237,.6), rgba(34,211,238,.5), transparent);
+  }
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(32px) scale(.98); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  .mock-bar {
+    display: flex; gap: 6px; padding: 6px 10px 12px; border-bottom: 1px solid rgba(148,163,184,.08);
+  }
+  .mock-bar span { width: 11px; height: 11px; border-radius: 50%; }
+  .mock-bar span:nth-child(1) { background: #ef4444; }
+  .mock-bar span:nth-child(2) { background: #f59e0b; }
+  .mock-bar span:nth-child(3) { background: #22c55e; }
+  .mock-grid {
+    display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; padding: 14px 4px 4px;
+  }
+  .mock-card {
+    background: linear-gradient(160deg, rgba(124,58,237,.12), rgba(34,211,238,.06));
+    border: 1px solid rgba(148,163,184,.16);
+    border-radius: 14px; padding: 18px 16px; min-height: 140px;
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .mock-card .ico { font-size: 1.6rem; }
+  .mock-card .t { font-family: 'Space Grotesk'; font-weight: 700; font-size: 1.4rem; color: #f1f5f9; }
+  .mock-card .l { font-size: .78rem; color: #94a3b8; }
+  .mock-card .bar { height: 6px; background: rgba(148,163,184,.1); border-radius: 3px; overflow: hidden; margin-top: auto; }
+  .mock-card .bar i { display: block; height: 100%; background: linear-gradient(90deg,#7c3aed,#22d3ee); }
+  @media (max-width: 720px) {
+    .mock-grid { grid-template-columns: 1fr 1fr; }
+    .mock-card:nth-child(3) { display: none; }
+  }
+
+  /* ─── Section base ─── */
+  .section { padding: clamp(60px, 8vw, 110px) 20px; position: relative; z-index: 1; }
+  .section-head { text-align: center; max-width: 720px; margin: 0 auto 3rem; }
+  .section-head .kicker {
+    display: inline-block; font-size: .78rem; font-weight: 800; letter-spacing: .12em;
+    text-transform: uppercase; color: #c4b5fd; margin-bottom: 12px;
+  }
+  .section-head h2 {
+    font-size: clamp(1.8rem, 4vw, 2.6rem); font-weight: 800; line-height: 1.1;
+    margin: 0 0 1rem;
+  }
+  .section-head p { color: #94a3b8; font-size: 1.05rem; margin: 0; }
+
+  /* ─── Benefits ─── */
+  .benefits {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1rem; max-width: 1100px; margin: 0 auto;
+  }
+  .benefit {
+    background: linear-gradient(160deg, rgba(21,30,45,.72), rgba(15,22,35,.85));
+    border: 1px solid rgba(148,163,184,.12);
+    border-radius: 18px;
+    padding: 1.6rem 1.4rem;
+    transition: transform .25s, border-color .25s;
+    position: relative; overflow: hidden;
+  }
+  .benefit:hover { transform: translateY(-4px); border-color: rgba(124,58,237,.35); }
+  .benefit::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    background: linear-gradient(90deg, var(--c1,#7c3aed), var(--c2,#22d3ee));
+  }
+  .benefit .ico {
+    width: 48px; height: 48px; border-radius: 14px;
+    display: grid; place-items: center; font-size: 1.5rem;
+    background: linear-gradient(135deg, var(--c1,#7c3aed), var(--c2,#22d3ee));
+    margin-bottom: 1rem; color: #fff;
+    box-shadow: 0 8px 20px -8px rgba(124,58,237,.6);
+  }
+  .benefit h3 { margin: 0 0 .5rem; font-size: 1.1rem; }
+  .benefit p { margin: 0; color: #94a3b8; font-size: .92rem; }
+
+  /* ─── Features ─── */
+  .features { display: flex; flex-direction: column; gap: 3.5rem; max-width: 1040px; margin: 0 auto; }
+  .feature {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 2.6rem; align-items: center;
+  }
+  .feature.reverse { grid-template-columns: 1fr 1fr; }
+  .feature.reverse .feature-text { order: 2; }
+  .feature h3 {
+    font-size: clamp(1.35rem, 2.4vw, 1.8rem); font-weight: 800;
+    line-height: 1.15; margin: .4rem 0 .9rem;
+  }
+  .feature .tag {
+    display: inline-block; padding: .3rem .8rem; border-radius: 999px;
+    font-size: .75rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+    background: rgba(124,58,237,.15); color: #c4b5fd;
+    border: 1px solid rgba(124,58,237,.3);
+  }
+  .feature .desc { color: #94a3b8; font-size: 1rem; margin-bottom: 1rem; }
+  .feature .bullets { list-style: none; padding: 0; margin: 0; }
+  .feature .bullets li {
+    padding: .45rem 0; font-size: .95rem; color: #e2e8f0;
+    display: flex; gap: .6rem; align-items: flex-start;
+  }
+  .feature .bullets li::before {
+    content: '✓'; color: #34d399; font-weight: 800;
+    width: 22px; height: 22px; border-radius: 50%;
+    display: grid; place-items: center;
+    background: rgba(52,211,153,.12); flex-shrink: 0;
+    font-size: .8rem;
+  }
+  .feature-visual {
+    background: linear-gradient(160deg, rgba(21,30,45,.85), rgba(13,18,32,.95));
+    border: 1px solid rgba(148,163,184,.14);
+    border-radius: 18px; padding: 1.4rem;
+    box-shadow: 0 22px 52px -18px rgba(0,0,0,.7);
+    min-height: 260px; position: relative; overflow: hidden;
+  }
+  .feature-visual::before {
+    content: ''; position: absolute; top: 0; left: 10%; right: 10%; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(124,58,237,.55), transparent);
+  }
+  .feature-visual .v-ico {
+    font-size: 2rem; margin-bottom: .4rem;
+  }
+  .feature-visual .v-title { font-weight: 700; font-size: 1rem; margin-bottom: 1rem; }
+  .feature-visual .v-row {
+    display: flex; align-items: center; gap: 10px; padding: 10px;
+    background: rgba(124,58,237,.06);
+    border: 1px solid rgba(148,163,184,.1);
+    border-radius: 10px;
+    margin-bottom: 8px;
+    font-size: .85rem;
+  }
+  .feature-visual .v-row .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: linear-gradient(135deg,#7c3aed,#22d3ee);
+  }
+  .feature-visual .v-row.ok .dot { background: #34d399; }
+  .feature-visual .v-meta { margin-left: auto; color: #64748b; font-size: .78rem; }
+  @media (max-width: 780px) {
+    .feature, .feature.reverse { grid-template-columns: 1fr; gap: 1.6rem; }
+    .feature.reverse .feature-text { order: 1; }
+  }
+
+  /* ─── Testimonials ─── */
+  .testimonials {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1rem; max-width: 1100px; margin: 0 auto;
+  }
+  .quote {
+    background: linear-gradient(160deg, rgba(21,30,45,.72), rgba(15,22,35,.85));
+    border: 1px solid rgba(148,163,184,.12);
+    border-radius: 18px; padding: 1.6rem 1.4rem;
+    position: relative;
+  }
+  .quote .stars { color: #fcd34d; letter-spacing: 2px; margin-bottom: .7rem; }
+  .quote p { margin: 0 0 1rem; color: #e2e8f0; font-size: .96rem; line-height: 1.55; }
+  .quote .who { display: flex; align-items: center; gap: 10px; }
+  .quote .ava {
+    width: 40px; height: 40px; border-radius: 50%;
+    display: grid; place-items: center; font-weight: 800; color: #fff; font-size: .88rem;
+    background: linear-gradient(135deg, var(--c1,#7c3aed), var(--c2,#22d3ee));
+  }
+  .quote .nm { font-weight: 700; font-size: .92rem; }
+  .quote .rl { color: #64748b; font-size: .78rem; }
+
+  /* ─── Pricing teaser ─── */
+  .pricing-teaser {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1rem; max-width: 1080px; margin: 0 auto;
+  }
+  .plan {
+    position: relative;
+    background: linear-gradient(160deg, rgba(21,30,45,.85), rgba(15,22,35,.95));
+    border: 1px solid rgba(148,163,184,.14);
+    border-radius: 20px; padding: 2rem 1.6rem;
+    transition: transform .25s, border-color .25s, box-shadow .25s;
+  }
+  .plan:hover { transform: translateY(-4px); border-color: rgba(124,58,237,.45); }
+  .plan.featured {
+    border-color: rgba(124,58,237,.5);
+    box-shadow: 0 24px 64px -20px rgba(124,58,237,.45);
+    transform: scale(1.02);
+  }
+  .plan .badge-pop {
+    position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+    background: linear-gradient(135deg,#f472b6,#7c3aed);
+    color: #fff; font-weight: 800; font-size: .72rem; letter-spacing: .1em;
+    text-transform: uppercase; padding: .3rem .9rem; border-radius: 999px;
+    box-shadow: 0 8px 16px -6px rgba(244,114,182,.6);
+  }
+  .plan h3 { margin: 0 0 .4rem; font-size: 1.2rem; }
+  .plan .desc { color: #94a3b8; font-size: .88rem; margin-bottom: 1rem; min-height: 40px; }
+  .plan .price {
+    display: flex; align-items: baseline; gap: 4px; margin-bottom: .2rem;
+  }
+  .plan .price .n { font-family: 'Space Grotesk'; font-size: 2.6rem; font-weight: 800; }
+  .plan .price .p { color: #64748b; font-size: .9rem; }
+  .plan .small { color: #64748b; font-size: .78rem; margin-bottom: 1.2rem; }
+  .plan ul { list-style: none; padding: 0; margin: 0 0 1.4rem; }
+  .plan li { padding: .4rem 0; font-size: .9rem; color: #e2e8f0; display: flex; gap: .5rem; align-items: flex-start; }
+  .plan li::before { content: '✓'; color: #34d399; font-weight: 800; }
+  .plan .btn-plan {
+    display: block; text-align: center; width: 100%;
+    padding: .85rem; border-radius: 12px; font-weight: 700; font-size: .95rem;
+    background: rgba(255,255,255,.05); color: #fff;
+    border: 1px solid rgba(148,163,184,.2);
+    transition: background .2s, border-color .2s;
+  }
+  .plan.featured .btn-plan {
+    background: linear-gradient(135deg,#7c3aed,#5b21b6);
+    box-shadow: 0 14px 28px -10px rgba(124,58,237,.7);
+  }
+  .plan .btn-plan:hover { background: rgba(124,58,237,.18); border-color: rgba(124,58,237,.5); }
+
+  /* ─── Final CTA ─── */
+  .final-cta {
+    text-align: center; padding: clamp(50px, 7vw, 90px) 20px;
+    background:
+      radial-gradient(ellipse 70% 100% at 50% 0%, rgba(124,58,237,.2), transparent 70%),
+      radial-gradient(ellipse 60% 80% at 50% 100%, rgba(34,211,238,.1), transparent 70%);
+    border-top: 1px solid rgba(148,163,184,.08);
+    border-bottom: 1px solid rgba(148,163,184,.08);
+    position: relative; z-index: 1;
+  }
+  .final-cta h2 { font-size: clamp(1.8rem, 4vw, 2.6rem); font-weight: 800; margin: 0 0 1rem; }
+  .final-cta p { color: #94a3b8; max-width: 580px; margin: 0 auto 1.6rem; }
+
+  /* ─── Footer ─── */
+  .footer {
+    padding: 2rem 20px 2.4rem; color: #64748b; font-size: .85rem;
+    text-align: center; position: relative; z-index: 1;
+  }
+  .footer .brandline { color: #cbd5e1; font-weight: 600; margin-bottom: .4rem; }
+  .footer a { color: #94a3b8; transition: color .2s; margin: 0 .6rem; }
+  .footer a:hover { color: #a78bfa; }
+
+  /* ─── Stats bar ─── */
+  .stats-bar {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem; max-width: 960px; margin: 2.4rem auto 0;
+    padding: 1.4rem 1rem;
+    background: linear-gradient(160deg, rgba(21,30,45,.7), rgba(15,22,35,.8));
+    border: 1px solid rgba(148,163,184,.14);
+    border-radius: 16px;
+  }
+  .stat-cell { text-align: center; }
+  .stat-cell .n {
+    font-family: 'Space Grotesk'; font-size: 1.6rem; font-weight: 800;
+    background: linear-gradient(135deg,#a78bfa,#22d3ee);
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .stat-cell .l { color: #94a3b8; font-size: .82rem; }
+</style>
+</head>
+<body>
+
+<!-- Fondo animado global -->
+<div class="bg-landing">
+  <div class="blob blob-a"></div>
+  <div class="blob blob-b"></div>
+  <div class="blob blob-c"></div>
+</div>
+
+<!-- NAV -->
+<nav class="nav-land">
+  <a href="#" class="brand">
+    <span class="ico">⚡</span>
+    <span>ElectroLearn</span>
+  </a>
+  <div class="links">
+    <a href="#features" class="link-md">Características</a>
+    <a href="#pricing" class="link-md">Precios</a>
+    <a href="#testimonios" class="link-md">Testimonios</a>
+    <a href="login.html" class="btn-outline">Iniciar sesión</a>
+    <a href="pricing.html" class="btn-cta">Probar gratis</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero container">
+  <span class="chip"><span class="dot"></span> Nuevo · IA Gemini integrada para docentes</span>
+  <h1>
+    Enseñar con el currículo <span class="grad">Mineduc</span> nunca<br>
+    había sido tan <span class="grad">simple</span>.
+  </h1>
+  <p class="lead">
+    ElectroLearn es la plataforma que combina generador de material con IA, evaluaciones alineadas a Bloom, planificaciones semestrales y gamificación para alumnos. Todo en un solo lugar, pensado para colegios chilenos.
+  </p>
+  <div class="hero-ctas">
+    <a href="pricing.html" class="btn-hero btn-primary">
+      Comenzar prueba gratis <span>→</span>
+    </a>
+    <a href="#features" class="btn-hero btn-secondary">
+      Ver características
+    </a>
+  </div>
+  <div class="hero-trust">
+    <span>✓ Sin tarjeta de crédito</span>
+    <span>✓ 14 días de prueba</span>
+    <span>✓ Cancela cuando quieras</span>
+  </div>
+
+  <!-- Hero mockup -->
+  <div class="hero-mock">
+    <div class="mock-bar"><span></span><span></span><span></span></div>
+    <div class="mock-grid">
+      <div class="mock-card">
+        <div class="ico">📚</div>
+        <div class="l">Materiales publicados</div>
+        <div class="t">142</div>
+        <div class="bar"><i style="width:78%"></i></div>
+      </div>
+      <div class="mock-card">
+        <div class="ico">🎯</div>
+        <div class="l">Nota promedio curso</div>
+        <div class="t">5,8</div>
+        <div class="bar"><i style="width:82%"></i></div>
+      </div>
+      <div class="mock-card">
+        <div class="ico">⚡</div>
+        <div class="l">XP ganados hoy</div>
+        <div class="t">2.340</div>
+        <div class="bar"><i style="width:64%"></i></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats bar -->
+  <div class="stats-bar">
+    <div class="stat-cell"><div class="n">+1.200</div><div class="l">materiales creados</div></div>
+    <div class="stat-cell"><div class="n">+35</div><div class="l">colegios activos</div></div>
+    <div class="stat-cell"><div class="n">+8.500</div><div class="l">estudiantes</div></div>
+    <div class="stat-cell"><div class="n">99,9%</div><div class="l">uptime</div></div>
+  </div>
+</section>
+
+<!-- BENEFICIOS -->
+<section class="section">
+  <div class="section-head">
+    <span class="kicker">¿Por qué ElectroLearn?</span>
+    <h2>Todo lo que un docente chileno necesita, en un solo lugar</h2>
+    <p>Alineado al currículo Mineduc, con IA que entiende de OA, AE, CE y Bloom. Sin hojas sueltas ni pérdidas de tiempo.</p>
+  </div>
+
+  <div class="benefits container">
+    <div class="benefit" style="--c1:#7c3aed;--c2:#a78bfa">
+      <div class="ico">🤖</div>
+      <h3>IA que habla tu idioma</h3>
+      <p>Genera guías, pruebas, controles y planificaciones usando la terminología exacta del currículo Mineduc y valores salesianos.</p>
+    </div>
+    <div class="benefit" style="--c1:#22d3ee;--c2:#06b6d4">
+      <div class="ico">🎯</div>
+      <h3>100% alineado Mineduc</h3>
+      <p>Básica, Plan Común y Técnico-Profesional. OA, AE, CE y OAG integrados y listos para imprimir.</p>
+    </div>
+    <div class="benefit" style="--c1:#34d399;--c2:#10b981">
+      <div class="ico">🎮</div>
+      <h3>Gamificación real</h3>
+      <p>XP, niveles, badges y rankings que hacen que los estudiantes quieran rendir evaluaciones.</p>
+    </div>
+    <div class="benefit" style="--c1:#f472b6;--c2:#ec4899">
+      <div class="ico">📊</div>
+      <h3>Dashboards claros</h3>
+      <p>Métricas por curso, nivel y estudiante. Sabes al instante dónde reforzar.</p>
+    </div>
+    <div class="benefit" style="--c1:#fbbf24;--c2:#f59e0b">
+      <div class="ico">📚</div>
+      <h3>Biblioteca compartida</h3>
+      <p>Publica tu material y lo ven tus estudiantes al instante. Cero imprenta, cero WhatsApp.</p>
+    </div>
+    <div class="benefit" style="--c1:#818cf8;--c2:#6366f1">
+      <div class="ico">💛</div>
+      <h3>Valores Salesianos</h3>
+      <p>Honestidad, responsabilidad, alegría y fe integrados de forma natural en cada material.</p>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="section" id="features">
+  <div class="section-head">
+    <span class="kicker">Características</span>
+    <h2>Tres módulos que transforman la sala de clases</h2>
+    <p>Material, evaluaciones y planificaciones. Sincronizados con el perfil de cada docente.</p>
+  </div>
+
+  <div class="features container">
+
+    <!-- Feature 1 -->
+    <div class="feature">
+      <div class="feature-text">
+        <span class="tag">Módulo 1</span>
+        <h3>Generador de Material con IA</h3>
+        <p class="desc">Crea guías, apuntes, fichas, pruebas y controles en minutos. La IA se adapta al nivel, la dificultad y los OA que selecciones.</p>
+        <ul class="bullets">
+          <li>6 tipos de documento: guía, apunte, ficha, ejercicios, prueba y control</li>
+          <li>Integración con Gemini (API gratuita de Google AI Studio)</li>
+          <li>Publica directo a la biblioteca del curso</li>
+          <li>Imprime o exporta a PDF con un clic</li>
+        </ul>
+      </div>
+      <div class="feature-visual">
+        <div class="v-ico">📝</div>
+        <div class="v-title">Guía de Aprendizaje — OA3 · AE2</div>
+        <div class="v-row ok"><span class="dot"></span> Objetivos de aprendizaje <span class="v-meta">Mineduc</span></div>
+        <div class="v-row ok"><span class="dot"></span> Actividades contextualizadas <span class="v-meta">IA</span></div>
+        <div class="v-row"><span class="dot"></span> Valores salesianos integrados <span class="v-meta">auto</span></div>
+        <div class="v-row"><span class="dot"></span> Rúbrica de corrección <span class="v-meta">Bloom</span></div>
+      </div>
+    </div>
+
+    <!-- Feature 2 -->
+    <div class="feature reverse">
+      <div class="feature-visual">
+        <div class="v-ico">🎯</div>
+        <div class="v-title">Evaluación TP · Electrónica · OA1</div>
+        <div class="v-row ok"><span class="dot"></span> Temporizador circular <span class="v-meta">SVG</span></div>
+        <div class="v-row ok"><span class="dot"></span> Banco de preguntas por Bloom <span class="v-meta">6 niveles</span></div>
+        <div class="v-row ok"><span class="dot"></span> Nota automática escala 1–7 <span class="v-meta">Chile</span></div>
+        <div class="v-row"><span class="dot"></span> XP y badges al aprobar <span class="v-meta">gamificación</span></div>
+      </div>
+      <div class="feature-text">
+        <span class="tag">Módulo 2</span>
+        <h3>Evaluaciones gamificadas</h3>
+        <p class="desc">Los estudiantes rinden evaluaciones interactivas con temporizador, nota automática y recompensas que motivan a seguir aprendiendo.</p>
+        <ul class="bullets">
+          <li>Preguntas en 6 niveles cognitivos de Bloom</li>
+          <li>Temporizador inteligente con pausa al cambiar de pestaña</li>
+          <li>Sistema de XP, niveles, badges y ranking por curso</li>
+          <li>Reporte de rendimiento para el docente</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Feature 3 -->
+    <div class="feature">
+      <div class="feature-text">
+        <span class="tag">Módulo 3</span>
+        <h3>Planificaciones semestrales</h3>
+        <p class="desc">Organiza tu semestre completo alineado a OA, AE y CE. Descarga tu planificación lista para presentar a UTP.</p>
+        <ul class="bullets">
+          <li>Planificación por clase, unidad o semestre</li>
+          <li>Distribución automática de horas por OA</li>
+          <li>Exporta a Word o PDF con formato institucional</li>
+          <li>Copia y adapta planificaciones de otros docentes</li>
+        </ul>
+      </div>
+      <div class="feature-visual">
+        <div class="v-ico">📅</div>
+        <div class="v-title">Semestre 1 · Tercero Medio · Electrónica</div>
+        <div class="v-row ok"><span class="dot"></span> Unidad 1 — Circuitos CC <span class="v-meta">24h</span></div>
+        <div class="v-row ok"><span class="dot"></span> Unidad 2 — Componentes pasivos <span class="v-meta">18h</span></div>
+        <div class="v-row"><span class="dot"></span> Unidad 3 — Semiconductores <span class="v-meta">22h</span></div>
+        <div class="v-row"><span class="dot"></span> Evaluación final <span class="v-meta">8h</span></div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- TESTIMONIOS -->
+<section class="section" id="testimonios">
+  <div class="section-head">
+    <span class="kicker">Testimonios</span>
+    <h2>Docentes y directivos que confían en ElectroLearn</h2>
+    <p>Colegios de distintas regiones de Chile ya están ahorrando horas de preparación.</p>
+  </div>
+
+  <div class="testimonials container">
+    <div class="quote">
+      <div class="stars">★★★★★</div>
+      <p>"Antes armaba guías en Word durante fines de semana enteros. Con ElectroLearn publico material alineado a los OA en 10 minutos y los estudiantes lo ven al instante."</p>
+      <div class="who">
+        <div class="ava" style="--c1:#7c3aed;--c2:#22d3ee">PS</div>
+        <div>
+          <div class="nm">Paula Sánchez</div>
+          <div class="rl">Docente · Matemática · 7° básico</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="quote">
+      <div class="stars">★★★★★</div>
+      <p>"La IA genera pruebas en los niveles de Bloom que yo elijo. Me sirve tanto para diagnóstico como para evaluación sumativa. Una herramienta que entiende pedagogía."</p>
+      <div class="who">
+        <div class="ava" style="--c1:#34d399;--c2:#22d3ee">RM</div>
+        <div>
+          <div class="nm">Ricardo Muñoz</div>
+          <div class="rl">Jefe UTP · Colegio técnico</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="quote">
+      <div class="stars">★★★★★</div>
+      <p>"Los cabros se toman las evaluaciones como un juego. Subí el promedio del curso en dos décimas y el nivel de participación es otro."</p>
+      <div class="who">
+        <div class="ava" style="--c1:#f472b6;--c2:#7c3aed">CV</div>
+        <div>
+          <div class="nm">Carolina Vidal</div>
+          <div class="rl">Docente · Historia · 2° medio</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING TEASER -->
+<section class="section" id="pricing">
+  <div class="section-head">
+    <span class="kicker">Planes</span>
+    <h2>Un plan para cada realidad</h2>
+    <p>Desde el estudiante que quiere practicar hasta el colegio que digitaliza toda su gestión pedagógica.</p>
+  </div>
+
+  <div class="pricing-teaser container">
+    <div class="plan">
+      <h3>Alumno</h3>
+      <p class="desc">Para estudiantes que quieren practicar y ganar XP por su cuenta.</p>
+      <div class="price"><span class="n">Gratis</span></div>
+      <p class="small">Para siempre</p>
+      <ul>
+        <li>Acceso a biblioteca pública</li>
+        <li>Evaluaciones gamificadas</li>
+        <li>Ranking por curso</li>
+      </ul>
+      <a href="login.html" class="btn-plan">Crear cuenta</a>
+    </div>
+
+    <div class="plan featured">
+      <span class="badge-pop">Más popular</span>
+      <h3>Profesor</h3>
+      <p class="desc">Para docentes que quieren producir material en minutos y medir a sus estudiantes.</p>
+      <div class="price"><span class="n">$9.990</span><span class="p">/mes</span></div>
+      <p class="small">o $99.900/año · ahorra 17%</p>
+      <ul>
+        <li>Generador de material con IA</li>
+        <li>Planificaciones semestrales</li>
+        <li>Publica a la biblioteca</li>
+        <li>Dashboard de cursos</li>
+        <li>Soporte prioritario</li>
+      </ul>
+      <a href="pricing.html" class="btn-plan">Probar 14 días gratis</a>
+    </div>
+
+    <div class="plan">
+      <h3>Colegio</h3>
+      <p class="desc">Para instituciones que quieren unificar su plataforma pedagógica.</p>
+      <div class="price"><span class="n">Custom</span></div>
+      <p class="small">desde $290.000/mes</p>
+      <ul>
+        <li>Todo lo del plan Profesor</li>
+        <li>Usuarios ilimitados</li>
+        <li>Panel admin institucional</li>
+        <li>Onboarding + capacitación</li>
+        <li>SLA y soporte dedicado</li>
+      </ul>
+      <a href="pricing.html" class="btn-plan">Hablar con ventas</a>
+    </div>
+  </div>
+
+  <p style="text-align:center;color:#64748b;font-size:.86rem;margin-top:1.8rem">
+    ¿Quieres ver la comparación completa? <a href="pricing.html" style="color:#a78bfa;font-weight:600">Ir a planes y precios →</a>
+  </p>
+</section>
+
+<!-- CTA FINAL -->
+<section class="final-cta">
+  <h2>Empieza hoy. Sin tarjeta. Sin complicaciones.</h2>
+  <p>Crea tu cuenta gratis y publica tu primer material en menos de 5 minutos.</p>
+  <div class="hero-ctas" style="margin-bottom:0">
+    <a href="pricing.html" class="btn-hero btn-primary">Probar gratis 14 días <span>→</span></a>
+    <a href="login.html" class="btn-hero btn-secondary">Ya tengo cuenta</a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="brandline">⚡ ElectroLearn</div>
+  <div>
+    <a href="#features">Características</a> ·
+    <a href="pricing.html">Precios</a> ·
+    <a href="login.html">Acceder</a>
+  </div>
+  <div style="margin-top:.8rem">© 2026 ElectroLearn · Plataforma educativa hecha en Chile</div>
+</footer>
+
+<!-- Firebase: solo para auto-redirigir si hay sesión activa -->
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
 <script src="js/firebase-rest.js"></script>
 <script src="js/firebase-config.js"></script>
 <script src="js/firebase-auth.js"></script>
 <script src="js/firebase-db.js"></script>
-
-<style>
-/* ── Reset ── */
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-/* ── Variables ── */
-:root {
-  --purple: #7c3aed;
-  --purple-light: #a78bfa;
-  --purple-glow: rgba(124,58,237,.35);
-  --teal: #0d9488;
-  --pink: #ec4899;
-  --bg: #080b14;
-  --surface: #0f1623;
-  --surface2: #151e2d;
-  --border: rgba(255,255,255,.07);
-  --border-focus: rgba(139,92,246,.6);
-  --text: #f1f5f9;
-  --muted: #64748b;
-  --subtle: #1e293b;
-}
-
-/* ══════════════════════════════════
-   FONDO
-══════════════════════════════════ */
-html, body {
-  min-height: 100vh;
-  font-family: 'Inter', sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  overflow-x: hidden;
-}
-
-.bg {
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  overflow: hidden;
-}
-/* Gradiente de base */
-.bg::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(ellipse 80% 50% at 20% -10%, rgba(124,58,237,.18) 0%, transparent 60%),
-    radial-gradient(ellipse 60% 40% at 80% 110%, rgba(13,148,136,.14) 0%, transparent 55%),
-    radial-gradient(ellipse 50% 60% at 50% 50%, rgba(236,72,153,.06) 0%, transparent 70%);
-}
-/* Grid sutil */
-.bg::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background-image:
-    linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);
-  background-size: 48px 48px;
-  mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 40%, transparent 100%);
-}
-
-/* Orbes animados */
-.orb {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(100px);
-  animation: drift 18s infinite ease-in-out alternate;
-}
-.orb-1 { width: 500px; height: 500px; background: radial-gradient(circle, rgba(124,58,237,.25), transparent 70%); top: -150px; left: -150px; animation-duration: 20s; }
-.orb-2 { width: 400px; height: 400px; background: radial-gradient(circle, rgba(13,148,136,.2), transparent 70%); bottom: -100px; right: -100px; animation-duration: 25s; animation-delay: -8s; }
-.orb-3 { width: 300px; height: 300px; background: radial-gradient(circle, rgba(236,72,153,.15), transparent 70%); top: 50%; left: 60%; animation-duration: 15s; animation-delay: -4s; }
-@keyframes drift {
-  from { transform: translate(0,0) scale(1); }
-  to   { transform: translate(40px,60px) scale(1.15); }
-}
-
-/* ══════════════════════════════════
-   LAYOUT
-══════════════════════════════════ */
-.page {
-  position: relative;
-  z-index: 1;
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 24px 16px;
-}
-
-/* ══════════════════════════════════
-   TARJETA
-══════════════════════════════════ */
-.card {
-  width: 100%;
-  max-width: 400px;
-  background: linear-gradient(160deg, rgba(21,30,45,.95) 0%, rgba(15,22,35,.98) 100%);
-  border: 1px solid rgba(139,92,246,.15);
-  border-radius: 24px;
-  padding: 40px 36px 36px;
-  box-shadow:
-    0 0 0 1px rgba(255,255,255,.04),
-    0 24px 48px rgba(0,0,0,.6),
-    0 0 120px rgba(124,58,237,.08);
-  animation: rise .5s cubic-bezier(.22,1,.36,1) both;
-  /* Línea superior decorativa */
-  position: relative;
-  overflow: hidden;
-}
-.card::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 10%; right: 10%;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(139,92,246,.6), rgba(13,148,136,.4), transparent);
-}
-@keyframes rise {
-  from { opacity: 0; transform: translateY(28px) scale(.98); }
-  to   { opacity: 1; transform: translateY(0) scale(1); }
-}
-
-/* ══════════════════════════════════
-   LOGO / HEADER
-══════════════════════════════════ */
-.logo-area {
-  text-align: center;
-  margin-bottom: 32px;
-}
-.logo-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 72px; height: 72px;
-  border-radius: 22px;
-  background: linear-gradient(145deg, #7c3aed, #5b21b6);
-  box-shadow:
-    0 8px 32px rgba(124,58,237,.45),
-    inset 0 1px 0 rgba(255,255,255,.15);
-  margin-bottom: 20px;
-  position: relative;
-}
-.logo-icon::after {
-  content: '';
-  position: absolute;
-  inset: -1px;
-  border-radius: 23px;
-  background: linear-gradient(145deg, rgba(167,139,250,.4), transparent 60%);
-  pointer-events: none;
-}
-.logo-icon svg {
-  width: 34px; height: 34px;
-  fill: #fff;
-  filter: drop-shadow(0 2px 8px rgba(255,255,255,.3));
-}
-.logo-title {
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 2rem;
-  font-weight: 800;
-  letter-spacing: -.02em;
-  background: linear-gradient(135deg, #f1f5f9 30%, #c4b5fd 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  line-height: 1.1;
-  margin-bottom: 8px;
-}
-.logo-sub {
-  font-size: .82rem;
-  color: var(--muted);
-  letter-spacing: .04em;
-}
-
-/* ══════════════════════════════════
-   CAMPOS
-══════════════════════════════════ */
-.field { margin-bottom: 16px; }
-
-.field-label {
-  display: block;
-  font-size: .72rem;
-  font-weight: 700;
-  letter-spacing: .08em;
-  text-transform: uppercase;
-  color: #94a3b8;
-  margin-bottom: 8px;
-}
-
-.input-box {
-  display: flex;
-  align-items: center;
-  background: rgba(255,255,255,.04);
-  border: 1.5px solid rgba(255,255,255,.08);
-  border-radius: 13px;
-  transition: border-color .2s, box-shadow .2s, background .2s;
-  position: relative;
-}
-.input-box:focus-within {
-  border-color: rgba(139,92,246,.7);
-  background: rgba(124,58,237,.06);
-  box-shadow: 0 0 0 3px rgba(124,58,237,.12), 0 1px 3px rgba(0,0,0,.3);
-}
-.input-box .ico {
-  display: flex;
-  align-items: center;
-  padding: 0 0 0 14px;
-  color: var(--muted);
-  flex-shrink: 0;
-}
-.input-box .ico svg {
-  width: 16px; height: 16px;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-.input-box input {
-  flex: 1;
-  background: transparent;
-  border: none;
-  outline: none;
-  padding: 14px 12px;
-  color: var(--text);
-  font-size: .93rem;
-  font-family: inherit;
-  min-width: 0;
-}
-.input-box input::placeholder { color: #334155; }
-.input-box input:-webkit-autofill {
-  -webkit-box-shadow: 0 0 0 100px rgba(15,22,35,.95) inset !important;
-  -webkit-text-fill-color: var(--text) !important;
-}
-.btn-eye {
-  background: none; border: none; cursor: pointer;
-  padding: 0 14px; color: #334155;
-  display: flex; align-items: center;
-  transition: color .2s; flex-shrink: 0;
-}
-.btn-eye:hover { color: #64748b; }
-.btn-eye svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-
-/* ── Fuerza contraseña ── */
-.strength-bar { display: flex; gap: 3px; margin-top: 6px; height: 2px; }
-.strength-bar span { flex: 1; border-radius: 99px; background: rgba(255,255,255,.06); transition: background .3s; }
-.s1 span:nth-child(1) { background: #ef4444; }
-.s2 span:nth-child(-n+2) { background: #f97316; }
-.s3 span:nth-child(-n+3) { background: #eab308; }
-.s4 span { background: #22c55e; }
-
-/* ── Requisitos ── */
-.reqs { margin: 10px 0 4px; padding: 0; }
-.reqs li {
-  list-style: none;
-  font-size: .76rem;
-  color: #475569;
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  padding: 2px 0;
-  transition: color .2s;
-}
-.reqs li::before { content: '○'; font-size: .65rem; }
-.reqs li.ok { color: #4ade80; }
-.reqs li.ok::before { content: '✓'; }
-
-/* ── Forgot link ── */
-.link-forgot {
-  display: block;
-  text-align: right;
-  font-size: .8rem;
-  color: #475569;
-  text-decoration: none;
-  margin: -6px 0 18px;
-  transition: color .2s;
-}
-.link-forgot:hover { color: #a78bfa; }
-
-/* ══════════════════════════════════
-   BOTÓN PRINCIPAL
-══════════════════════════════════ */
-.btn-main {
-  width: 100%;
-  padding: 14px;
-  border: none;
-  border-radius: 13px;
-  background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 50%, #5b21b6 100%);
-  color: #fff;
-  font-size: .95rem;
-  font-weight: 700;
-  font-family: inherit;
-  letter-spacing: .01em;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  transition: all .2s;
-  box-shadow: 0 4px 20px rgba(124,58,237,.4), inset 0 1px 0 rgba(255,255,255,.12);
-  position: relative;
-  overflow: hidden;
-  margin-top: 4px;
-}
-.btn-main::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(135deg, rgba(255,255,255,.1), transparent 50%);
-  opacity: 0;
-  transition: opacity .2s;
-}
-.btn-main:hover:not(:disabled)::before { opacity: 1; }
-.btn-main:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 8px 28px rgba(124,58,237,.5), inset 0 1px 0 rgba(255,255,255,.12); }
-.btn-main:active:not(:disabled) { transform: translateY(0); }
-.btn-main:disabled { opacity: .5; cursor: not-allowed; }
-
-/* ══════════════════════════════════
-   FOOTER / LINKS
-══════════════════════════════════ */
-.divider {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin: 22px 0;
-  color: #1e293b;
-  font-size: .8rem;
-}
-.divider::before, .divider::after {
-  content: '';
-  flex: 1;
-  height: 1px;
-  background: rgba(255,255,255,.06);
-}
-.divider span { color: #334155; }
-
-.footer-text { text-align: center; font-size: .84rem; color: var(--muted); }
-.footer-text a { color: #a78bfa; font-weight: 600; text-decoration: none; transition: color .2s; }
-.footer-text a:hover { color: #c4b5fd; }
-
-/* ── Badges ── */
-.badges {
-  display: flex;
-  justify-content: center;
-  gap: 6px;
-  flex-wrap: wrap;
-  margin-top: 24px;
-  padding-top: 20px;
-  border-top: 1px solid rgba(255,255,255,.05);
-}
-.badge {
-  font-size: .71rem;
-  font-weight: 600;
-  padding: 5px 12px;
-  border-radius: 20px;
-  letter-spacing: .02em;
-  border: 1px solid;
-}
-.b-green  { color: #34d399; border-color: rgba(52,211,153,.2); background: rgba(52,211,153,.06); }
-.b-blue   { color: #60a5fa; border-color: rgba(96,165,250,.2); background: rgba(96,165,250,.06); }
-.b-purple { color: #c4b5fd; border-color: rgba(196,181,253,.2); background: rgba(196,181,253,.06); }
-
-/* ══════════════════════════════════
-   MENSAJES
-══════════════════════════════════ */
-.msg { font-size: .82rem; min-height: 18px; margin-bottom: 10px; text-align: center; padding: 0 2px; }
-.msg-err { color: #f87171; }
-.msg-ok  { color: #4ade80; }
-
-/* ── Spinner ── */
-.spin {
-  display: inline-block; width: 16px; height: 16px;
-  border: 2px solid rgba(255,255,255,.25);
-  border-top-color: #fff;
-  border-radius: 50%;
-  animation: rotate .6s linear infinite;
-}
-@keyframes rotate { to { transform: rotate(360deg); } }
-
-/* ══════════════════════════════════
-   ALERTA PRIMER INGRESO
-══════════════════════════════════ */
-.alert-warn {
-  display: flex;
-  gap: 12px;
-  background: rgba(245,158,11,.07);
-  border: 1px solid rgba(245,158,11,.2);
-  border-radius: 12px;
-  padding: 14px 16px;
-  margin-bottom: 24px;
-}
-.alert-warn svg { width: 18px; height: 18px; flex-shrink: 0; margin-top: 1px; fill: none; stroke: #f59e0b; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-.alert-warn p { font-size: .82rem; color: #fcd34d; line-height: 1.6; margin: 0; }
-.alert-warn strong { color: #fbbf24; }
-
-/* ══════════════════════════════════
-   RESPONSIVE
-══════════════════════════════════ */
-@media (max-width: 440px) {
-  .card { padding: 32px 22px 28px; border-radius: 20px; }
-  .logo-icon { width: 62px; height: 62px; border-radius: 18px; }
-  .logo-title { font-size: 1.75rem; }
-}
-</style>
-</head>
-<body>
-
-<!-- Fondo -->
-<div class="bg">
-  <div class="orb orb-1"></div>
-  <div class="orb orb-2"></div>
-  <div class="orb orb-3"></div>
-</div>
-
-<div class="page">
-
-  <!-- ═══════════════════════════════════
-       LOGIN
-  ════════════════════════════════════ -->
-  <div class="card" id="cardLogin">
-    <div class="logo-area">
-      <div class="logo-icon">
-        <svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-      </div>
-      <h1 class="logo-title">ElectroLearn</h1>
-      <p class="logo-sub">Plataforma Educativa · Chile</p>
-    </div>
-
-    <form id="formLogin" onsubmit="doLogin(event)" novalidate>
-      <div class="field">
-        <label class="field-label">Correo electrónico</label>
-        <div class="input-box">
-          <span class="ico"><svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 7 10-7"/></svg></span>
-          <input type="email" id="loginEmail" placeholder="tu@correo.cl" required autocomplete="email">
-        </div>
-      </div>
-      <div class="field">
-        <label class="field-label">Contraseña</label>
-        <div class="input-box">
-          <span class="ico"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
-          <input type="password" id="loginPass" placeholder="••••••••" required autocomplete="current-password">
-          <button type="button" class="btn-eye" onclick="togglePass('loginPass',this)">
-            <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-          </button>
-        </div>
-      </div>
-      <a href="#" class="link-forgot" onclick="showCard('forgot');return false">¿Olvidaste tu contraseña?</a>
-      <p class="msg msg-err" id="errLogin"></p>
-      <button type="submit" class="btn-main" id="btnLogin">Iniciar Sesión</button>
-    </form>
-
-    <div class="divider"><span>o</span></div>
-    <p class="footer-text">¿No tienes cuenta? <a href="#" onclick="showCard('register');return false">Regístrate aquí</a></p>
-
-    <div class="badges">
-      <span class="badge b-green">📚 Básica</span>
-      <span class="badge b-blue">🎓 Plan Común</span>
-      <span class="badge b-purple">⚙️ EMTP</span>
-    </div>
-  </div>
-
-  <!-- ═══════════════════════════════════
-       REGISTRO
-  ════════════════════════════════════ -->
-  <div class="card" id="cardRegister" style="display:none">
-    <div class="logo-area">
-      <div class="logo-icon" style="background:linear-gradient(145deg,#0d9488,#0f766e)">
-        <svg viewBox="0 0 24 24" style="fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6m3-3h-6"/></svg>
-      </div>
-      <h1 class="logo-title" style="background:linear-gradient(135deg,#f1f5f9 30%,#6ee7b7 100%);-webkit-background-clip:text;background-clip:text">Crear Cuenta</h1>
-      <p class="logo-sub">Ingresa tus datos para registrarte</p>
-    </div>
-
-    <form id="formRegister" onsubmit="doRegister(event)" novalidate>
-      <div class="field">
-        <label class="field-label">Nombre completo</label>
-        <div class="input-box">
-          <span class="ico"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
-          <input type="text" id="regName" placeholder="Tu nombre completo" required>
-        </div>
-      </div>
-      <div class="field">
-        <label class="field-label">Correo electrónico</label>
-        <div class="input-box">
-          <span class="ico"><svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 7 10-7"/></svg></span>
-          <input type="email" id="regEmail" placeholder="tu@correo.cl" required>
-        </div>
-      </div>
-      <div class="field">
-        <label class="field-label">Contraseña</label>
-        <div class="input-box">
-          <span class="ico"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
-          <input type="password" id="regPass" placeholder="Mínimo 6 caracteres" required minlength="6" oninput="checkStrength(this,'strReg')">
-          <button type="button" class="btn-eye" onclick="togglePass('regPass',this)">
-            <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-          </button>
-        </div>
-        <div class="strength-bar" id="strReg"><span></span><span></span><span></span><span></span></div>
-      </div>
-      <div class="field">
-        <label class="field-label">Código de acceso <span style="color:#334155;font-weight:400;text-transform:none;font-size:.78rem">(opcional)</span></label>
-        <div class="input-box">
-          <span class="ico"><svg viewBox="0 0 24 24"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg></span>
-          <input type="text" id="regCode" placeholder="Código entregado por tu profesor">
-        </div>
-      </div>
-      <p class="msg msg-err" id="errRegister"></p>
-      <button type="submit" class="btn-main" id="btnRegister">Crear Cuenta</button>
-    </form>
-
-    <div class="divider"><span>o</span></div>
-    <p class="footer-text">¿Ya tienes cuenta? <a href="#" onclick="showCard('login');return false">Inicia sesión</a></p>
-  </div>
-
-  <!-- ═══════════════════════════════════
-       OLVIDÉ CONTRASEÑA
-  ════════════════════════════════════ -->
-  <div class="card" id="cardForgot" style="display:none">
-    <div class="logo-area">
-      <div class="logo-icon" style="background:linear-gradient(145deg,#d97706,#b45309)">
-        <svg viewBox="0 0 24 24" style="fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4m0 4h.01"/></svg>
-      </div>
-      <h1 class="logo-title" style="background:linear-gradient(135deg,#f1f5f9 30%,#fcd34d 100%);-webkit-background-clip:text;background-clip:text">Recuperar Acceso</h1>
-      <p class="logo-sub">Te enviamos un enlace a tu correo</p>
-    </div>
-
-    <form id="formForgot" onsubmit="doForgot(event)" novalidate>
-      <div class="field">
-        <label class="field-label">Correo electrónico</label>
-        <div class="input-box">
-          <span class="ico"><svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 7 10-7"/></svg></span>
-          <input type="email" id="forgotEmail" placeholder="tu@correo.cl" required>
-        </div>
-      </div>
-      <p class="msg msg-err" id="errForgot"></p>
-      <p class="msg msg-ok"  id="okForgot"></p>
-      <button type="submit" class="btn-main" id="btnForgot">Enviar enlace</button>
-    </form>
-
-    <div class="divider"><span>o</span></div>
-    <p class="footer-text"><a href="#" onclick="showCard('login');return false">← Volver al inicio de sesión</a></p>
-  </div>
-
-  <!-- ═══════════════════════════════════
-       CAMBIO DE CONTRASEÑA (primer ingreso)
-  ════════════════════════════════════ -->
-  <div class="card" id="cardChangePass" style="display:none">
-    <div class="logo-area">
-      <div class="logo-icon" style="background:linear-gradient(145deg,#dc2626,#b91c1c)">
-        <svg viewBox="0 0 24 24" style="fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-      </div>
-      <h1 class="logo-title" style="background:linear-gradient(135deg,#f1f5f9 30%,#fca5a5 100%);-webkit-background-clip:text;background-clip:text">Nueva Contraseña</h1>
-      <p class="logo-sub">Requerido en el primer ingreso</p>
-    </div>
-
-    <div class="alert-warn">
-      <svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-      <p>Por seguridad debes <strong>crear una contraseña personal</strong> antes de continuar.</p>
-    </div>
-
-    <form id="formChangePass" onsubmit="doChangePass(event)" novalidate>
-      <div class="field">
-        <label class="field-label">Nueva contraseña</label>
-        <div class="input-box">
-          <span class="ico"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
-          <input type="password" id="newPass" placeholder="Mínimo 8 caracteres" required minlength="8"
-            oninput="checkStrength(this,'strNew');checkReqs(this.value)">
-          <button type="button" class="btn-eye" onclick="togglePass('newPass',this)">
-            <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-          </button>
-        </div>
-        <div class="strength-bar" id="strNew"><span></span><span></span><span></span><span></span></div>
-        <ul class="reqs" id="passReqs">
-          <li id="r-len">Al menos 8 caracteres</li>
-          <li id="r-upper">Una letra mayúscula</li>
-          <li id="r-num">Un número</li>
-          <li id="r-special">Un carácter especial (@, #, !, etc.)</li>
-        </ul>
-      </div>
-      <div class="field">
-        <label class="field-label">Confirmar contraseña</label>
-        <div class="input-box">
-          <span class="ico"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
-          <input type="password" id="confirmPass" placeholder="Repite la contraseña" required oninput="checkConfirm()">
-          <button type="button" class="btn-eye" onclick="togglePass('confirmPass',this)">
-            <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-          </button>
-        </div>
-      </div>
-      <p class="msg msg-err" id="errChangePass"></p>
-      <button type="submit" class="btn-main" id="btnChangePass">Guardar y continuar</button>
-    </form>
-  </div>
-
-</div><!-- /page -->
-
 <script>
-// ══════════════════════════════════
-//  UI HELPERS
-// ══════════════════════════════════
-function showCard(id) {
-  ['Login','Register','Forgot','ChangePass'].forEach(function(n) {
-    var el = document.getElementById('card' + n);
-    if (el) el.style.display = (n.toLowerCase().replace('changepass','changePass') === id || n === id.charAt(0).toUpperCase() + id.slice(1)) ? 'block' : 'none';
-  });
-  ['errLogin','errRegister','errForgot','okForgot','errChangePass'].forEach(function(id) {
-    var el = document.getElementById(id); if (el) el.textContent = '';
-  });
-}
-
-// Normaliza showCard para que acepte 'changePass' o 'ChangePass'
-(function patchShowCard() {
-  var orig = showCard;
-  window.showCard = function(id) {
-    var map = { login:'Login', register:'Register', forgot:'Forgot', changepass:'ChangePass', changePass:'ChangePass' };
-    var key = map[id] || map[id.toLowerCase()] || id;
-    ['Login','Register','Forgot','ChangePass'].forEach(function(n) {
-      var el = document.getElementById('card'+n);
-      if (el) el.style.display = (n === key) ? 'block' : 'none';
-    });
-    ['errLogin','errRegister','errForgot','okForgot','errChangePass'].forEach(function(eid) {
-      var el = document.getElementById(eid); if (el) el.textContent = '';
-    });
-  };
-})();
-
-function togglePass(id, btn) {
-  var inp = document.getElementById(id);
-  var show = inp.type === 'password';
-  inp.type = show ? 'text' : 'password';
-  var svg = btn.querySelector('svg');
-  svg.innerHTML = show
-    ? '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>'
-    : '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
-}
-
-function checkStrength(inp, barId) {
-  var v = inp.value, s = 0;
-  if (v.length >= 8) s++;
-  if (/[A-Z]/.test(v)) s++;
-  if (/[0-9]/.test(v)) s++;
-  if (/[^A-Za-z0-9]/.test(v)) s++;
-  var bar = document.getElementById(barId);
-  if (bar) bar.className = 'strength-bar' + (s ? ' s'+s : '');
-}
-
-function checkReqs(v) {
-  var m = { 'r-len': v.length>=8, 'r-upper': /[A-Z]/.test(v), 'r-num': /[0-9]/.test(v), 'r-special': /[^A-Za-z0-9]/.test(v) };
-  Object.keys(m).forEach(function(id) {
-    var el = document.getElementById(id); if (el) el.className = m[id] ? 'ok' : '';
-  });
-}
-
-function checkConfirm() {
-  var p1 = document.getElementById('newPass').value;
-  var p2 = document.getElementById('confirmPass').value;
-  var err = document.getElementById('errChangePass');
-  if (err) err.textContent = (p2 && p1 !== p2) ? 'Las contraseñas no coinciden.' : '';
-}
-
-function setBtn(id, html, dis) {
-  var b = document.getElementById(id);
-  if (b) { b.innerHTML = html; b.disabled = !!dis; }
-}
-
-// ══════════════════════════════════
-//  SESIÓN ACTIVA → REDIRIGIR
-// ══════════════════════════════════
-ELAuth.onUserReady(function(user) {
-  if (!user || user.primerIngreso) return;
-  redirectByRole(user);
-});
-
-function redirectByRole(user) {
-  var admins = window.EL_ADMIN_EMAILS || [window.EL_ADMIN_EMAIL];
-  if (user.role === 'admin' || admins.indexOf(user.email) !== -1) {
-    window.location.href = 'admin.html';
-  } else if (user.role === 'profesor') {
-    window.location.href = 'dashboard-profesor.html';
-  } else {
-    window.location.href = 'dashboard.html';
-  }
-}
-
-// ══════════════════════════════════
-//  LOGIN
-// ══════════════════════════════════
-function doLogin(e) {
-  e.preventDefault();
-  var email = document.getElementById('loginEmail').value.trim();
-  var pass  = document.getElementById('loginPass').value;
-  var err   = document.getElementById('errLogin');
-  err.textContent = '';
-  setBtn('btnLogin', '<span class="spin"></span> Verificando…', true);
-
-  ELAuth.login(email, pass)
-    .then(function(user) {
-      if (user && user.primerIngreso === true) {
-        window._pendingUser = user;
-        showCard('changePass');
-        setBtn('btnLogin', 'Iniciar Sesión', false);
-        return;
+  // Si el visitante ya está autenticado, enviarlo a su dashboard.
+  // Si no, permanece en la landing (no hace nada).
+  if (window.ELAuth && ELAuth.onUserReady) {
+    ELAuth.onUserReady(function(user) {
+      if (!user || user.primerIngreso) return;
+      var admins = window.EL_ADMIN_EMAILS || [window.EL_ADMIN_EMAIL];
+      var dest = (user.role === 'admin' || (user.email && admins.indexOf(user.email) !== -1))
+        ? 'admin.html'
+        : (user.role === 'profesor' ? 'dashboard-profesor.html' : 'dashboard.html');
+      // Solo redirigir si el usuario viene directamente a la landing sin intención de leerla
+      // → honrar un parámetro ?stay=1 para evitar redirección
+      if (!/[\?&]stay=1\b/.test(location.search)) {
+        window.location.href = dest;
       }
-      redirectByRole(user);
-    })
-    .catch(function(error) {
-      setBtn('btnLogin', 'Iniciar Sesión', false);
-      var m = error.message || '';
-      if (/INVALID_LOGIN_CREDENTIALS|INVALID_PASSWORD|EMAIL_NOT_FOUND|invalid-login-credentials/i.test(m))
-        m = 'Correo o contraseña incorrectos.';
-      else if (/TOO_MANY_ATTEMPTS|too-many-requests/i.test(m))
-        m = 'Demasiados intentos. Espera unos minutos.';
-      else if (/USER_DISABLED|user-disabled/i.test(m))
-        m = 'Cuenta desactivada. Contacta al administrador.';
-      else if (/offline|network/i.test(m))
-        m = 'Sin conexión. Verifica tu internet.';
-      else
-        m = 'Error al iniciar sesión. Intenta de nuevo.';
-      err.textContent = '⚠ ' + m;
     });
-}
-
-// ══════════════════════════════════
-//  CAMBIO CONTRASEÑA (primer ingreso)
-// ══════════════════════════════════
-function doChangePass(e) {
-  e.preventDefault();
-  var newP = document.getElementById('newPass').value;
-  var conf = document.getElementById('confirmPass').value;
-  var err  = document.getElementById('errChangePass');
-
-  if (newP.length < 8)         { err.textContent = '⚠ Mínimo 8 caracteres.'; return; }
-  if (!/[A-Z]/.test(newP))     { err.textContent = '⚠ Incluye una mayúscula.'; return; }
-  if (!/[0-9]/.test(newP))     { err.textContent = '⚠ Incluye un número.'; return; }
-  if (!/[^A-Za-z0-9]/.test(newP)) { err.textContent = '⚠ Incluye un carácter especial.'; return; }
-  if (newP !== conf)            { err.textContent = '⚠ Las contraseñas no coinciden.'; return; }
-
-  err.textContent = '';
-  setBtn('btnChangePass', '<span class="spin"></span> Guardando…', true);
-
-  var cu = EL_AUTH.currentUser;
-  if (!cu) { showCard('login'); return; }
-
-  cu.updatePassword(newP)
-    .then(function() {
-      return EL_DB.collection(EL_COLLECTIONS.USERS).doc(cu.uid).update({
-        primerIngreso: false,
-        passwordCambiadoEn: new Date().toISOString()
-      });
-    })
-    .then(function() {
-      var u = window._pendingUser;
-      if (u) { u.primerIngreso = false; redirectByRole(u); }
-      else window.location.reload();
-    })
-    .catch(function(error) {
-      setBtn('btnChangePass', 'Guardar y continuar', false);
-      var m = error.message || 'Error al cambiar contraseña.';
-      if (/requires-recent-login/i.test(m)) { m = 'Sesión expirada. Vuelve a iniciar sesión.'; showCard('login'); }
-      err.textContent = '⚠ ' + m;
-    });
-}
-
-// ══════════════════════════════════
-//  REGISTRO
-// ══════════════════════════════════
-function doRegister(e) {
-  e.preventDefault();
-  var nombre = document.getElementById('regName').value.trim();
-  var email  = document.getElementById('regEmail').value.trim();
-  var pass   = document.getElementById('regPass').value;
-  var codigo = document.getElementById('regCode').value.trim();
-  var err    = document.getElementById('errRegister');
-
-  if (!nombre || !email || !pass) { err.textContent = '⚠ Completa los campos obligatorios.'; return; }
-  if (pass.length < 6)            { err.textContent = '⚠ Contraseña mínimo 6 caracteres.'; return; }
-
-  err.textContent = '';
-  setBtn('btnRegister', '<span class="spin"></span> Creando cuenta…', true);
-
-  var validar = codigo ? ELDB.codigos.validar(codigo) : Promise.resolve(null);
-  validar
-    .then(function(cod) {
-      return EL_AUTH.createUserWithEmailAndPassword(email, pass)
-        .then(function(cred) {
-          var perfil = {
-            uid: cred.user.uid, nombre: nombre, email: email,
-            role: cod ? cod.role : 'estudiante',
-            xp: 0, nivel: 1, badges: [], evaluaciones: [],
-            activo: true, primerIngreso: true,
-            creadoEn: new Date().toISOString(),
-            cursor: cod ? cod.curso : ''
-          };
-          return EL_DB.collection(EL_COLLECTIONS.USERS).doc(cred.user.uid).set(perfil)
-            .then(function() { if (cod) return ELDB.codigos.marcarUsado(cod.id, cred.user.uid); });
-        });
-    })
-    .then(function() {
-      window._pendingUser = { role: 'estudiante', primerIngreso: true };
-      showCard('changePass');
-      setBtn('btnRegister', 'Crear Cuenta', false);
-    })
-    .catch(function(error) {
-      setBtn('btnRegister', 'Crear Cuenta', false);
-      var m = error.message || '';
-      if (/EMAIL_EXISTS|email-already-in-use/i.test(m)) m = 'Ya existe una cuenta con ese correo.';
-      else if (/Código inválido/.test(m))               m = 'Código inválido o ya usado.';
-      else if (/WEAK_PASSWORD|weak-password/i.test(m))  m = 'Contraseña muy débil.';
-      err.textContent = '⚠ ' + m;
-    });
-}
-
-// ══════════════════════════════════
-//  RECUPERAR CONTRASEÑA
-// ══════════════════════════════════
-function doForgot(e) {
-  e.preventDefault();
-  var email = document.getElementById('forgotEmail').value.trim();
-  var err   = document.getElementById('errForgot');
-  var ok    = document.getElementById('okForgot');
-  err.textContent = ''; ok.textContent = '';
-  setBtn('btnForgot', '<span class="spin"></span> Enviando…', true);
-
-  EL_AUTH.sendPasswordResetEmail(email)
-    .then(function() {
-      ok.textContent = '✓ Enlace enviado. Revisa tu correo (incluye spam).';
-      setBtn('btnForgot', 'Enviar enlace', false);
-    })
-    .catch(function() {
-      // No revelar si el correo existe
-      ok.textContent = '✓ Si el correo está registrado recibirás el enlace.';
-      setBtn('btnForgot', 'Enviar enlace', false);
-    });
-}
+  }
 </script>
 </body>
 </html>

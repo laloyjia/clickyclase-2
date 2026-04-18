@@ -3,759 +3,818 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ElectroLearn - Dashboard</title>
+    <title>Inicio · ElectroLearn</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/styles.css">
 
-    <!-- Firebase SDK v9 compat -->
+    <!-- Firebase + módulos del proyecto -->
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
     <script src="js/firebase-rest.js"></script>
     <script src="js/firebase-config.js"></script>
     <script src="js/firebase-auth.js"></script>
     <script src="js/firebase-db.js"></script>
+    <script src="js/el-ui.js"></script>
 
     <style>
-        /* =============================================
-           ESTILOS EXTRA – Dashboard Gamificado
-        ============================================= */
+        /* ==================================================
+           Dashboard estudiante — capa premium
+           ================================================== */
+        .dash-wrap { max-width: 1180px; margin: 0 auto; padding: 96px 24px 80px; position: relative; z-index: 1; }
 
-        /* ---- Barra XP ---- */
-        .xp-card {
-            background: linear-gradient(135deg, rgba(99,102,241,0.15) 0%, rgba(20,184,166,0.08) 100%);
-            border: 1px solid rgba(99,102,241,0.3);
-            padding: 24px 28px;
-            border-radius: 16px;
-            margin-bottom: 40px;
-        }
-        .xp-card-inner {
-            display: flex;
+        /* Hero */
+        .dash-hero {
+            display: grid;
+            grid-template-columns: 1.4fr 1fr;
+            gap: 28px;
             align-items: center;
-            gap: 20px;
-            flex-wrap: wrap;
+            padding: 32px 36px;
+            margin-bottom: 30px;
         }
+        .dash-hero h1 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: clamp(1.8rem, 3.2vw, 2.6rem);
+            font-weight: 800;
+            line-height: 1.1;
+            letter-spacing: -.02em;
+            margin-bottom: 8px;
+        }
+        .dash-hero .hero-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+        .dash-hero p { color: var(--text-muted); max-width: 520px; }
+        .hero-cta { display: flex; gap: 10px; margin-top: 18px; flex-wrap: wrap; }
+        .hero-avatar-big {
+            width: 120px; height: 120px;
+            border-radius: 28px;
+            background: var(--grad-primary);
+            display: grid; place-items: center;
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 800; font-size: 2.6rem; color: #fff;
+            box-shadow: var(--shadow-glow);
+            justify-self: center;
+            position: relative;
+        }
+        .hero-avatar-big::before {
+            content: '';
+            position: absolute; inset: -8px;
+            border-radius: 32px;
+            background: linear-gradient(135deg, rgba(124,58,237,.45), rgba(0,206,201,.4));
+            filter: blur(16px); z-index: -1; opacity: .6;
+            animation: avatarPulse 4s ease-in-out infinite;
+        }
+        @keyframes avatarPulse { 0%,100%{opacity:.5;transform:scale(1);} 50%{opacity:.85;transform:scale(1.05);} }
+        @media (max-width: 860px) {
+            .dash-hero { grid-template-columns: 1fr; padding: 26px 24px; }
+            .hero-avatar-big { width: 96px; height: 96px; font-size: 2.1rem; }
+        }
+
+        /* Stats grid */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 28px;
+        }
+        @media (max-width: 760px) { .stats-row { grid-template-columns: repeat(2, 1fr); } }
+
+        /* XP card */
+        .xp-card-pro {
+            position: relative;
+            background:
+                linear-gradient(135deg, rgba(124,58,237,.18), rgba(0,206,201,.08)),
+                rgba(15,22,35,.55);
+            backdrop-filter: blur(14px);
+            border: 1px solid rgba(124,58,237,.3);
+            border-radius: var(--radius-xl);
+            padding: 26px 30px;
+            margin-bottom: 32px;
+            overflow: hidden;
+        }
+        .xp-card-pro::before {
+            content: ''; position: absolute; inset: -1px;
+            background: linear-gradient(135deg, rgba(167,139,250,.25), transparent 60%);
+            pointer-events: none; z-index: 0;
+        }
+        .xp-card-pro > * { position: relative; z-index: 1; }
+        .xp-row { display: flex; align-items: center; gap: 22px; flex-wrap: wrap; }
         .xp-nivel-badge {
-            width: 64px;
-            height: 64px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.8rem;
+            width: 72px; height: 72px;
+            border-radius: 22px;
+            display: grid; place-items: center;
+            font-size: 2.1rem;
+            background: rgba(255,255,255,.08);
+            border: 1px solid rgba(255,255,255,.14);
+            box-shadow: 0 8px 22px rgba(124,58,237,.4);
+            position: relative;
             flex-shrink: 0;
         }
-        .xp-nivel-info { flex: 1; min-width: 180px; }
-        .xp-nivel-nombre {
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 1.25rem;
-            font-weight: 700;
-            margin-bottom: 2px;
-        }
-        .xp-nivel-desc {
-            font-size: 0.82rem;
-            color: var(--text-muted);
-        }
-        .xp-right { text-align: right; min-width: 140px; }
+        .xp-nivel-info { flex: 1; min-width: 200px; }
+        .xp-nivel-nombre { font-family: 'Space Grotesk', sans-serif; font-size: 1.4rem; font-weight: 800; }
+        .xp-nivel-desc { font-size: var(--fs-sm); color: var(--text-muted); margin-top: 2px; }
+        .xp-right { text-align: right; min-width: 160px; }
         .xp-number {
             font-family: 'Space Grotesk', sans-serif;
-            font-size: 1.5rem;
-            font-weight: 800;
+            font-size: 1.8rem; font-weight: 800;
+            background: linear-gradient(135deg, #fff, #c4b5fd);
+            -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
         }
-        .xp-meta {
-            font-size: 0.78rem;
-            color: var(--text-muted);
-            margin-top: 2px;
-        }
-        .xp-bar-wrap {
-            width: 100%;
-            margin-top: 16px;
-        }
+        .xp-meta { font-size: var(--fs-xs); color: var(--text-muted); margin-top: 4px; }
+
+        .xp-bar-wrap { width: 100%; margin-top: 18px; }
         .xp-bar-labels {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            margin-bottom: 6px;
+            display: flex; justify-content: space-between;
+            font-size: var(--fs-xs); color: var(--text-muted); margin-bottom: 8px;
         }
         .xp-bar-track {
-            width: 100%;
-            height: 12px;
-            background: rgba(255,255,255,0.08);
-            border-radius: 99px;
-            overflow: hidden;
+            width: 100%; height: 14px;
+            background: rgba(255,255,255,.06);
+            border: 1px solid var(--border-soft);
+            border-radius: 99px; overflow: hidden;
+            position: relative;
         }
         .xp-bar-fill {
-            height: 100%;
-            border-radius: 99px;
-            transition: width 1.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-            position: relative;
-            overflow: hidden;
+            height: 100%; border-radius: 99px;
+            transition: width 1.4s var(--ease-spring);
+            position: relative; overflow: hidden;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
         }
         .xp-bar-fill::after {
-            content: '';
-            position: absolute;
+            content: ''; position: absolute;
             top: 0; left: -100%;
-            width: 60%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
-            animation: shimmer 2.5s infinite;
+            width: 60%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,.35), transparent);
+            animation: shimmer 2.4s infinite;
         }
-        @keyframes shimmer {
-            0%   { left: -100%; }
-            100% { left: 200%; }
+        @keyframes shimmer { 0%{left:-100%;} 100%{left:200%;} }
+
+        .badge-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+        .badge-chip {
+            display: inline-flex; align-items: center; gap: 6px;
+            background: var(--glass-3); border: 1px solid var(--border-soft);
+            border-radius: 99px; padding: 5px 12px 5px 8px;
+            font-size: var(--fs-xs); font-weight: 600;
+            transition: .25s;
         }
-        .xp-nivel-max {
-            text-align: center;
-            padding: 6px 0 0;
-            font-size: 0.85rem;
-            color: var(--accent2);
+        .badge-chip:hover { border-color: rgba(124,58,237,.5); transform: translateY(-1px); }
+        .badge-chip-icon { font-size: 1.05rem; }
+
+        /* Ranking preview */
+        .rank-preview {
+            display: flex; align-items: center; justify-content: space-between;
+            flex-wrap: wrap; gap: 14px;
+            padding: 18px 22px;
+            margin-bottom: 36px;
+        }
+        .rank-pos {
+            display: inline-grid; place-items: center;
+            width: 48px; height: 48px;
+            border-radius: 14px;
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 800; font-size: 1rem;
+            background: rgba(124,58,237,.18);
+            color: #c4b5fd;
+            border: 1px solid rgba(124,58,237,.4);
+        }
+        .rank-pos.top1 {
+            background: linear-gradient(135deg, rgba(252,211,77,.25), rgba(245,158,11,.25));
+            color: #fcd34d;
+            border-color: rgba(252,211,77,.5);
+            box-shadow: 0 0 0 3px rgba(252,211,77,.15);
+        }
+        .rank-pos.top3 {
+            background: rgba(34,211,238,.18);
+            color: #5eead4;
+            border-color: rgba(34,211,238,.4);
+        }
+
+        /* Section headings */
+        .sec-h {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 18px;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .sec-h::after {
+            content: ''; flex: 1; height: 1px;
+            background: linear-gradient(90deg, var(--border-soft), transparent);
+        }
+
+        /* Quick action cards */
+        .quick-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 18px; }
+        .quick-card {
+            position: relative;
+            display: flex; flex-direction: column; gap: 10px;
+            padding: 22px;
+            background: linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.015)), rgba(15,22,35,.55);
+            backdrop-filter: blur(14px);
+            border: 1px solid var(--border-soft);
+            border-radius: var(--radius-lg);
+            text-decoration: none; color: inherit;
+            cursor: pointer;
+            overflow: hidden;
+            isolation: isolate;
+            transition: transform .35s var(--ease-out), box-shadow .35s, border-color .35s;
+        }
+        .quick-card:hover { transform: translateY(-4px); border-color: var(--border-mid); box-shadow: var(--shadow-md); }
+        .quick-card::before {
+            content: ''; position: absolute; inset: 0; z-index: -1;
+            background: radial-gradient(420px circle at var(--mx,50%) var(--my,0%), var(--qc-glow, rgba(124,58,237,.18)), transparent 50%);
+            opacity: 0; transition: opacity .35s;
+        }
+        .quick-card:hover::before { opacity: 1; }
+        .quick-card .qc-ico {
+            width: 52px; height: 52px;
+            border-radius: 14px;
+            display: grid; place-items: center;
+            font-size: 1.6rem;
+            background: var(--qc-bg, var(--grad-primary));
+            box-shadow: 0 8px 22px var(--qc-shadow, rgba(124,58,237,.35));
+            margin-bottom: 4px;
+        }
+        .quick-card h3 { font-family: 'Space Grotesk', sans-serif; font-size: 1.05rem; font-weight: 700; }
+        .quick-card p { color: var(--text-muted); font-size: var(--fs-sm); flex: 1; line-height: 1.5; }
+        .quick-card .qc-cta {
+            display: inline-flex; align-items: center; gap: 5px;
+            font-size: var(--fs-xs); color: var(--primary-light); font-weight: 600;
+            margin-top: auto;
+        }
+
+        /* Tabla evaluaciones */
+        .eval-table-pro { width: 100%; border-collapse: collapse; }
+        .eval-table-pro th {
+            text-align: left;
+            font-size: var(--fs-2xs);
+            text-transform: uppercase;
+            letter-spacing: .08em;
+            color: var(--text-muted);
+            padding: 0 12px 12px 0;
+            border-bottom: 1px solid var(--border-soft);
             font-weight: 600;
         }
-
-        /* ---- Últimas Evaluaciones ---- */
-        .eval-table { width: 100%; border-collapse: collapse; }
-        .eval-table th {
-            text-align: left;
-            font-size: 0.72rem;
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            color: var(--text-muted);
-            padding: 0 12px 10px 0;
-            border-bottom: 1px solid var(--glass-border);
-        }
-        .eval-table td {
-            padding: 10px 12px 10px 0;
-            font-size: 0.86rem;
-            border-bottom: 1px solid rgba(255,255,255,0.04);
+        .eval-table-pro td {
+            padding: 12px 12px 12px 0;
+            font-size: .9rem;
+            border-bottom: 1px solid var(--border-soft);
             vertical-align: middle;
         }
-        .eval-table tr:last-child td { border-bottom: none; }
+        .eval-table-pro tr:last-child td { border-bottom: none; }
         .nota-badge {
             display: inline-block;
-            padding: 2px 10px;
+            padding: 4px 12px;
             border-radius: 99px;
             font-weight: 700;
-            font-size: 0.82rem;
+            font-size: .85rem;
         }
-        .nota-aprobado  { background: rgba(52,211,153,0.15); color: #34d399; }
-        .nota-reprobado { background: rgba(244, 63,94,0.15);  color: #f43f5e; }
-        .nota-excelente { background: rgba(251,191, 36,0.15); color: #fbbf24; }
-        .eval-empty {
-            text-align: center;
-            color: var(--text-muted);
-            padding: 28px 0;
-            font-size: 0.9rem;
-        }
+        .nota-aprobado  { background: rgba(52,211,153,.15); color: #34d399; }
+        .nota-reprobado { background: rgba(244,63,94,.15);  color: #fda4af; }
+        .nota-excelente { background: linear-gradient(135deg, rgba(252,211,77,.18), rgba(245,158,11,.18)); color: #fcd34d; }
 
-        /* ---- Progreso por módulo en tarjetas ---- */
-        .mod-progress-bar-wrap {
-            margin-top: 10px;
-            padding-top: 10px;
-            border-top: 1px solid var(--glass-border);
-        }
-        .mod-progress-label {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.74rem;
-            color: var(--text-muted);
-            margin-bottom: 5px;
-        }
-        .mod-progress-track {
-            height: 6px;
-            background: rgba(255,255,255,0.07);
-            border-radius: 99px;
+        /* Módulos */
+        .mod-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 18px; }
+        .mod-card-pro {
+            position: relative;
+            background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.01)), rgba(15,22,35,.5);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border-soft);
+            border-radius: var(--radius-lg);
+            padding: 20px 20px 18px;
+            cursor: pointer;
+            transition: all .35s var(--ease-out);
             overflow: hidden;
         }
-        .mod-progress-fill {
-            height: 100%;
-            border-radius: 99px;
-            transition: width 1s ease;
+        .mod-card-pro:hover { transform: translateY(-3px); border-color: var(--border-mid); box-shadow: var(--shadow-md); }
+        .mod-card-pro::after {
+            content: ''; position: absolute; top: 0; left: 0; height: 3px; width: 100%;
+            background: var(--mod-grad, var(--grad-primary));
         }
-
-        /* ---- Stat cards mejoradas ---- */
-        .stat-card-icon {
-            font-size: 1.6rem;
-            margin-bottom: 6px;
-        }
-        .stat-card-value {
-            font-family: 'Space Grotesk', sans-serif;
+        .mod-card-head { display: flex; align-items: center; gap: 14px; }
+        .mod-icon {
+            width: 50px; height: 50px;
+            border-radius: 14px;
+            display: grid; place-items: center;
             font-size: 1.5rem;
-            font-weight: 800;
-            margin: 2px 0;
+            background: var(--mod-grad, var(--grad-primary));
+            box-shadow: 0 6px 18px rgba(124,58,237,.35);
+            flex-shrink: 0;
         }
-        .stat-card-label {
-            font-size: 0.72rem;
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            color: var(--text-muted);
-        }
+        .mod-meta { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 4px; }
+        .mod-progress-wrap { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border-soft); }
+        .mod-progress-label { display: flex; justify-content: space-between; font-size: var(--fs-xs); color: var(--text-muted); margin-bottom: 6px; }
+        .mod-progress-track { height: 6px; background: rgba(255,255,255,.06); border-radius: 99px; overflow: hidden; }
+        .mod-progress-fill { height: 100%; border-radius: 99px; transition: width 1s var(--ease-spring); }
+        .mod-detail { max-height: 0; overflow: hidden; transition: max-height .4s ease, opacity .25s; opacity: 0; }
+        .mod-detail.open { max-height: 800px; opacity: 1; padding-top: 14px; margin-top: 14px; border-top: 1px dashed var(--border-soft); }
+        .mod-chevron { transition: transform .3s; font-size: .8rem; opacity: .6; }
+        .mod-card-pro.is-open .mod-chevron { transform: rotate(180deg); }
 
-        /* ---- Insignias recientes (row de íconos) ---- */
-        .badge-row {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-top: 14px;
-        }
-        .badge-chip {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            background: rgba(255,255,255,0.06);
-            border: 1px solid var(--glass-border);
-            border-radius: 99px;
-            padding: 4px 10px 4px 6px;
-            font-size: 0.78rem;
-        }
-        .badge-chip-icon { font-size: 1rem; }
+        /* Badges Mineduc */
+        .b-pri { background: rgba(124,58,237,.18); color: #c4b5fd; padding: 3px 10px; border-radius: 99px; font-size: var(--fs-2xs); font-weight: 700; border: 1px solid rgba(124,58,237,.35); }
+        .b-warm { background: rgba(252,211,77,.18); color: #fcd34d; padding: 3px 10px; border-radius: 99px; font-size: var(--fs-2xs); font-weight: 700; border: 1px solid rgba(252,211,77,.35); }
+        .b-ok  { background: rgba(52,211,153,.18); color: #6ee7b7; padding: 3px 10px; border-radius: 99px; font-size: var(--fs-2xs); font-weight: 700; border: 1px solid rgba(52,211,153,.35); }
+        .b-mute{ background: rgba(255,255,255,.06); color: var(--text-muted); padding: 3px 10px; border-radius: 99px; font-size: var(--fs-2xs); font-weight: 600; }
 
-        /* ---- Responsive ---- */
-        @media (max-width: 700px) {
+        /* Footer */
+        footer { text-align: center; padding: 40px 24px; border-top: 1px solid var(--border-soft); color: var(--text-muted); font-size: .85rem; position: relative; z-index: 1; margin-top: 60px; }
+        footer .foot-grid { display: flex; justify-content: center; gap: 22px; flex-wrap: wrap; margin-bottom: 12px; font-size: .85rem; }
+        footer a { color: var(--text-muted); }
+        footer a:hover { color: var(--primary-light); }
+
+        /* Skeleton state */
+        .stat-pro.is-loading .stat-num { display: inline-block; min-width: 40px; }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .nav-user span#userName { display: none; }
             .xp-right { text-align: left; }
-            .xp-card-inner { flex-direction: column; align-items: flex-start; }
+            .xp-row { flex-direction: column; align-items: flex-start; }
+            .stats-row { gap: 10px; }
+            .quick-grid { grid-template-columns: 1fr; }
         }
-
-        /* ---- Animación entrada secciones ---- */
-        .slide-up {
-            opacity: 0;
-            transform: translateY(18px);
-            animation: slideUpIn 0.5s ease forwards;
-        }
-        @keyframes slideUpIn {
-            to { opacity: 1; transform: none; }
-        }
-        .delay-1 { animation-delay: 0.08s; }
-        .delay-2 { animation-delay: 0.16s; }
-        .delay-3 { animation-delay: 0.24s; }
-        .delay-4 { animation-delay: 0.32s; }
-
-        /* ---- Posición ranking ---- */
-        .rank-pos {
-            display: inline-block;
-            width: 32px; height: 32px;
-            line-height: 32px;
-            text-align: center;
-            border-radius: 50%;
-            font-weight: 700;
-            font-size: 0.88rem;
-            background: rgba(99,102,241,0.18);
-            color: var(--primary-light);
-        }
-        .rank-pos.top1 { background: rgba(251,191,36,0.2); color: #fbbf24; }
-        .rank-pos.top3 { background: rgba(148,163,184,0.2); color: #94a3b8; }
     </style>
 </head>
 <body>
 
-    <!-- Fondo animado -->
-    <div class="bg-animation">
-        <div class="orb"></div>
-        <div class="orb"></div>
-        <div class="orb"></div>
+<div class="bg-animation">
+    <div class="orb"></div>
+    <div class="orb"></div>
+    <div class="orb"></div>
+</div>
+
+<nav class="navbar">
+    <div class="nav-brand">
+        <span class="nav-brand-icon">⚡</span>
+        <span class="nav-brand-text">ElectroLearn</span>
+    </div>
+    <ul class="nav-links" id="navLinks">
+        <li><a href="dashboard.html" class="active">Inicio</a></li>
+        <li><a href="biblioteca.html">Biblioteca</a></li>
+        <li><a href="material.html" id="navMaterial" style="display:none;">Material</a></li>
+        <li><a href="evaluaciones.html">Evaluaciones</a></li>
+        <li><a href="ranking.html">Ranking</a></li>
+        <li><a href="admin.html" id="navAdmin" style="display:none;">⚙️ Admin</a></li>
+    </ul>
+    <div class="nav-user">
+        <div class="user-avatar" id="userAvatar">·</div>
+        <span id="userName" style="font-size:.9rem;font-weight:500;">Cargando…</span>
+        <button class="btn btn-danger btn-sm" onclick="logout()">Salir</button>
+    </div>
+</nav>
+
+<main class="dash-wrap">
+
+    <!-- ========================
+         HERO
+    ======================== -->
+    <section class="hero-pro dash-hero">
+        <div>
+            <div class="hero-meta">
+                <span class="badge-pro gold" id="planChip">★ Plan ElectroLearn</span>
+                <span class="chip" id="streakChip" style="display:none;">🔥 <span id="streakNum">0</span> días seguidos</span>
+            </div>
+            <h1>Hola, <span id="welcomeName" class="hero-grad">Estudiante</span> 👋</h1>
+            <p id="welcomeSub">Bienvenido a tu portal de Electrónica. Aquí va tu progreso de hoy.</p>
+            <div class="hero-cta">
+                <a href="evaluaciones.html" class="btn-pro primary">▶ Comenzar evaluación</a>
+                <a href="biblioteca.html" class="btn-pro ghost">📚 Ver biblioteca</a>
+            </div>
+        </div>
+        <div class="hero-avatar-big" id="heroAvatar">·</div>
+    </section>
+
+    <!-- ========================
+         STATS
+    ======================== -->
+    <div class="stats-row">
+        <div class="stat-pro is-loading">
+            <div class="stat-ico" id="statLevelIcon">⚡</div>
+            <div class="stat-num" id="statLevel">—</div>
+            <div class="stat-lbl">Tu nivel</div>
+        </div>
+        <div class="stat-pro s-teal is-loading">
+            <div class="stat-ico">✨</div>
+            <div class="stat-num" id="statXP">0</div>
+            <div class="stat-lbl">Puntos XP</div>
+        </div>
+        <div class="stat-pro s-pink is-loading">
+            <div class="stat-ico">✍️</div>
+            <div class="stat-num" id="statQuizzes">0</div>
+            <div class="stat-lbl">Evaluaciones</div>
+        </div>
+        <div class="stat-pro s-amber is-loading">
+            <div class="stat-ico">🏅</div>
+            <div class="stat-num" id="statBadges">0</div>
+            <div class="stat-lbl">Medallas</div>
+        </div>
     </div>
 
-    <!-- ==============================
-         BARRA DE NAVEGACION
-    ============================== -->
-    <nav class="navbar">
-        <div class="nav-brand">
-            <span class="nav-brand-icon">⚡</span>
-            <span class="nav-brand-text">ElectroLearn</span>
-        </div>
-
-        <ul class="nav-links" id="navLinks">
-            <li><a href="dashboard.html" class="active">Inicio</a></li>
-            <li><a href="biblioteca.html">Biblioteca</a></li>
-            <li><a href="material.html" id="navMaterial" style="display:none;">Material</a></li>
-            <li><a href="evaluaciones.html">Evaluaciones</a></li>
-            <li><a href="ranking.html">Ranking</a></li>
-            <li><a href="admin.html" id="navAdmin" style="display:none;">⚙️ Admin</a></li>
-        </ul>
-
-        <div class="nav-user">
-            <div class="user-avatar" id="userAvatar">?</div>
-            <span id="userName" style="font-size:0.9rem; font-weight:500;">Cargando...</span>
-            <button class="btn btn-danger btn-sm" onclick="logout()">Salir</button>
-        </div>
-    </nav>
-
-    <!-- ==============================
-         CONTENIDO PRINCIPAL
-    ============================== -->
-    <main style="padding: 90px 24px 40px; max-width: 1100px; margin: 0 auto; position: relative; z-index: 1;">
-
-        <!-- Saludo personalizado -->
-        <div class="slide-up" style="margin-bottom: 32px;">
-            <h1 style="font-family: 'Space Grotesk', sans-serif; font-size: 2rem; font-weight: 700;">
-                Hola, <span id="welcomeName">Estudiante</span> 👋
-            </h1>
-            <p class="text-muted" style="font-size: 1rem; margin-top: 4px;" id="welcomeSub">
-                Bienvenido a tu portal de Electrónica. Aquí va tu progreso.
-            </p>
-        </div>
-
-        <!-- ==============================
-             STATS RÁPIDOS (4 tarjetas)
-        ============================== -->
-        <div class="grid grid-4 slide-up delay-1" style="margin-bottom: 24px;">
-
-            <!-- Nivel -->
-            <div class="card text-center" style="border-top: 3px solid var(--primary);">
-                <div class="stat-card-icon" id="statLevelIcon">⚡</div>
-                <div class="stat-card-value" id="statLevel" style="color: var(--primary-light);">Aprendiz</div>
-                <div class="stat-card-label">Tu nivel</div>
+    <!-- ========================
+         XP CARD
+    ======================== -->
+    <section class="xp-card-pro" id="xpProgressCard">
+        <div class="xp-row">
+            <div class="xp-nivel-badge pulse-ring" id="xpNivelBadge">⚡</div>
+            <div class="xp-nivel-info">
+                <div class="xp-nivel-nombre" id="xpNivelNombre">Aprendiz</div>
+                <div class="xp-nivel-desc" id="xpNivelDesc">Estás comenzando tu camino técnico.</div>
             </div>
-
-            <!-- XP -->
-            <div class="card text-center" style="border-top: 3px solid var(--secondary);">
-                <div class="stat-card-icon">✨</div>
-                <div class="stat-card-value" id="statXP" style="color: var(--secondary);">0</div>
-                <div class="stat-card-label">Puntos XP</div>
-            </div>
-
-            <!-- Evaluaciones -->
-            <div class="card text-center" style="border-top: 3px solid var(--accent);">
-                <div class="stat-card-icon">✍️</div>
-                <div class="stat-card-value" id="statQuizzes" style="color: var(--accent);">0</div>
-                <div class="stat-card-label">Evaluaciones</div>
-            </div>
-
-            <!-- Medallas -->
-            <div class="card text-center" style="border-top: 3px solid var(--accent2);">
-                <div class="stat-card-icon">🏅</div>
-                <div class="stat-card-value" id="statBadges" style="color: var(--accent2);">0</div>
-                <div class="stat-card-label">Medallas</div>
+            <div class="xp-right">
+                <div class="xp-number" id="xpTotal">0 XP</div>
+                <div class="xp-meta" id="xpMeta">Faltan 150 XP para Técnico</div>
             </div>
         </div>
-
-        <!-- ==============================
-             BARRA DE PROGRESO XP
-        ============================== -->
-        <div class="xp-card slide-up delay-2" id="xpProgressCard">
-            <div class="xp-card-inner">
-                <div class="xp-nivel-badge" id="xpNivelBadge" style="background: rgba(99,102,241,0.15);">⚡</div>
-                <div class="xp-nivel-info">
-                    <div class="xp-nivel-nombre" id="xpNivelNombre">Aprendiz</div>
-                    <div class="xp-nivel-desc" id="xpNivelDesc">Estás comenzando tu camino técnico</div>
-                </div>
-                <div class="xp-right">
-                    <div class="xp-number" id="xpTotal" style="color: var(--secondary);">0 XP</div>
-                    <div class="xp-meta" id="xpMeta">Faltan 150 XP para Técnico</div>
-                </div>
+        <div class="xp-bar-wrap">
+            <div class="xp-bar-labels">
+                <span id="xpBarLabel">Progreso al siguiente nivel</span>
+                <span id="xpBarPct">0%</span>
             </div>
-            <div class="xp-bar-wrap">
-                <div class="xp-bar-labels">
-                    <span id="xpBarLabel">Progreso al siguiente nivel</span>
-                    <span id="xpBarPct">0%</span>
-                </div>
-                <div class="xp-bar-track">
-                    <div class="xp-bar-fill" id="xpBarFill" style="width: 0%; background: linear-gradient(90deg, var(--primary), var(--secondary));"></div>
-                </div>
-            </div>
-            <!-- Insignias desbloqueadas -->
-            <div id="badgeRowSection" style="display:none;">
-                <p style="font-size: 0.78rem; color: var(--text-muted); margin-top: 14px; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.07em;">Mis insignias</p>
-                <div class="badge-row" id="badgeRow"></div>
+            <div class="xp-bar-track">
+                <div class="xp-bar-fill" id="xpBarFill" style="width:0%"></div>
             </div>
         </div>
+        <div id="badgeRowSection" style="display:none;">
+            <p style="font-size: var(--fs-xs); color: var(--text-muted); margin-top: 16px; margin-bottom: 6px; text-transform: uppercase; letter-spacing: .07em;">Mis insignias</p>
+            <div class="badge-row" id="badgeRow"></div>
+        </div>
+    </section>
 
-        <!-- ==============================
-             POSICIÓN EN RANKING
-        ============================== -->
-        <div class="card slide-up delay-2" id="rankingPreview" style="margin-bottom: 40px; display: none;">
-            <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
-                <div style="display: flex; align-items: center; gap: 14px;">
-                    <span class="rank-pos" id="rankPos">-</span>
-                    <div>
-                        <p style="font-weight: 600; margin-bottom: 2px;">Tu posición en el ranking</p>
-                        <p class="text-muted" style="font-size: 0.82rem;" id="rankDesc">Completa evaluaciones para aparecer en el ranking</p>
-                    </div>
-                </div>
-                <a href="ranking.html" class="btn btn-sm" style="background: rgba(99,102,241,0.15); color: var(--primary-light); border: 1px solid rgba(99,102,241,0.3);">Ver ranking completo 🏆</a>
+    <!-- ========================
+         RANKING PREVIEW
+    ======================== -->
+    <section class="card-pro rank-preview" id="rankingPreview" style="display:none;">
+        <div style="display:flex;align-items:center;gap:16px;">
+            <span class="rank-pos" id="rankPos">·</span>
+            <div>
+                <p style="font-weight:700;font-size:1rem;margin-bottom:2px;">Tu posición en el ranking</p>
+                <p class="muted" style="font-size: var(--fs-sm);" id="rankDesc">Completa evaluaciones para aparecer.</p>
             </div>
         </div>
+        <a href="ranking.html" class="btn-pro">🏆 Ver ranking completo</a>
+    </section>
 
-        <!-- ==============================
-             ACCESOS RÁPIDOS
-        ============================== -->
-        <h2 style="font-family: 'Space Grotesk'; font-size: 1.3rem; margin-bottom: 20px;">
-            Acceso Rápido
-        </h2>
+    <!-- ========================
+         ACCESO RÁPIDO
+    ======================== -->
+    <h2 class="sec-h">Acceso rápido</h2>
+    <div class="quick-grid">
+        <a href="evaluaciones.html" class="quick-card" style="--qc-bg: linear-gradient(135deg, #34d399, #10b981); --qc-shadow: rgba(16,185,129,.4); --qc-glow: rgba(52,211,153,.18);">
+            <div class="qc-ico">✍️</div>
+            <h3>Evaluaciones</h3>
+            <p>Quizzes interactivos por OA y AE con nota, feedback y XP.</p>
+            <span class="qc-cta">Iniciar quiz →</span>
+        </a>
 
-        <div class="grid grid-3 slide-up delay-3">
+        <a href="ranking.html" class="quick-card" style="--qc-bg: linear-gradient(135deg, #fbbf24, #f59e0b); --qc-shadow: rgba(245,158,11,.4); --qc-glow: rgba(251,191,36,.2);">
+            <div class="qc-ico">🏆</div>
+            <h3>Ranking</h3>
+            <p>Compite con tu curso, sube de nivel y desbloquea medallas.</p>
+            <span class="qc-cta">Ver ranking →</span>
+        </a>
 
-            <!-- Card: Material Educativo (solo profesores) -->
-            <a href="material.html" class="card" id="materialCard" style="display: none; cursor: pointer; border: 1px solid rgba(0,206,201,0.3); text-decoration:none;">
-                <div style="font-size: 2.5rem; margin-bottom: 12px;">📚</div>
-                <h3>Generador de Material</h3>
-                <p class="mt-1">Crea guías, apuntes, fichas prácticas y ejercicios alineados al currículo Mineduc.</p>
-                <span class="badge badge-success mt-2">✨ Solo profesores</span>
-            </a>
+        <a href="biblioteca.html" class="quick-card" style="--qc-bg: linear-gradient(135deg, #a78bfa, #7c3aed); --qc-shadow: rgba(124,58,237,.4); --qc-glow: rgba(167,139,250,.2);">
+            <div class="qc-ico">📚</div>
+            <h3>Biblioteca</h3>
+            <p>Guías, apuntes y fichas prácticas alineados al currículo Mineduc.</p>
+            <span class="qc-cta">Ver materiales →</span>
+        </a>
 
-            <!-- Card: Evaluaciones -->
-            <a href="evaluaciones.html" class="card" style="text-decoration: none; cursor: pointer; border: 1px solid rgba(52,211,153,0.2);">
-                <div style="font-size: 2.5rem; margin-bottom: 12px;">✍️</div>
-                <h3>Evaluaciones</h3>
-                <p class="mt-1">Quizzes interactivos con nota automática y retroalimentación por criterio.</p>
-                <span class="badge badge-success mt-2">Iniciar quiz</span>
-            </a>
+        <a href="material.html" class="quick-card" id="materialCard" style="display:none; --qc-bg: linear-gradient(135deg, #22d3ee, #0d9488); --qc-shadow: rgba(13,148,136,.4); --qc-glow: rgba(34,211,238,.2);">
+            <div class="qc-ico">📚</div>
+            <h3>Generador de Material</h3>
+            <p>Crea guías, apuntes, pruebas y controles con IA Gemini integrada.</p>
+            <span class="qc-cta">Generar material →</span>
+        </a>
 
-            <!-- Card: Ranking -->
-            <a href="ranking.html" class="card" style="text-decoration: none; cursor: pointer; border: 1px solid rgba(251,191,36,0.2);">
-                <div style="font-size: 2.5rem; margin-bottom: 12px;">🏆</div>
-                <h3>Ranking</h3>
-                <p class="mt-1">Compite con tus compañeros. Gana puntos XP y desbloquea medallas.</p>
-                <span class="badge badge-warning mt-2">Ver ranking</span>
-            </a>
+        <a href="planificacion.html" class="quick-card" id="profCard" style="display:none; --qc-bg: linear-gradient(135deg, #f472b6, #ec4899); --qc-shadow: rgba(236,72,153,.4); --qc-glow: rgba(244,114,182,.2);">
+            <div class="qc-ico">📋</div>
+            <h3>Planificador</h3>
+            <p>Crea planificaciones de clase con módulos Mineduc reales. Exporta PDF.</p>
+            <span class="qc-cta">Planificar →</span>
+        </a>
 
-            <!-- Card: Biblioteca -->
-            <a href="biblioteca.html" class="card" style="text-decoration:none;cursor:pointer;border:1px solid rgba(167,139,250,0.2);">
-                <div style="font-size: 2.5rem; margin-bottom: 12px;">📚</div>
-                <h3>Biblioteca</h3>
-                <p class="mt-1">Guías, apuntes, fichas prácticas y planificaciones organizados por módulo y calendario.</p>
-                <span class="badge badge-primary mt-2">Ver materiales</span>
-            </a>
+        <a href="admin.html" class="quick-card" id="adminCard" style="display:none; --qc-bg: linear-gradient(135deg, #fcd34d, #f59e0b); --qc-shadow: rgba(251,191,36,.4); --qc-glow: rgba(252,211,77,.2);">
+            <div class="qc-ico">🛡️</div>
+            <h3>Administración</h3>
+            <p>Gestiona usuarios, profesores, códigos y contenido publicado.</p>
+            <span class="qc-cta">Abrir admin →</span>
+        </a>
 
-            <!-- Card: Plan de Estudio -->
-            <div class="card" style="cursor: default;">
-                <div style="font-size: 2.5rem; margin-bottom: 12px;">📋</div>
-                <h3>Plan de Estudio</h3>
-                <p class="mt-1">10 módulos, 1.672 horas. Basado en las Bases Curriculares del Mineduc.</p>
-                <span class="badge badge-primary mt-2">3ro y 4to Medio</span>
-            </div>
+        <a href="ranking.html#perfil" class="quick-card" style="--qc-bg: linear-gradient(135deg, #c4b5fd, #8b5cf6); --qc-shadow: rgba(139,92,246,.4); --qc-glow: rgba(196,181,253,.2);">
+            <div class="qc-ico">👤</div>
+            <h3>Mi perfil</h3>
+            <p>Tu historial completo de evaluaciones y logros desbloqueados.</p>
+            <span class="qc-cta">Ver perfil →</span>
+        </a>
+    </div>
 
-            <!-- Card: Admin (solo admin) -->
-            <a href="admin.html" class="card" id="adminCard" style="display:none;cursor:pointer;border:1px solid rgba(251,191,36,0.3);text-decoration:none;">
-                <div style="font-size:2.5rem;margin-bottom:12px;">🛡️</div>
-                <h3>Administración</h3>
-                <p class="mt-1">Gestiona usuarios, profesores, códigos de acceso y contenido publicado.</p>
-                <span class="badge badge-warning mt-2">✨ Solo admin</span>
-            </a>
-
-            <!-- Card: Planificador (solo profesor) -->
-            <a href="planificacion.html" class="card" id="profCard" style="display: none; cursor: pointer; border: 1px solid rgba(253,203,110,0.3); text-decoration:none;">
-                <div style="font-size: 2.5rem; margin-bottom: 12px;">📋</div>
-                <h3>Planificador de Clases</h3>
-                <p class="mt-1">Crea planificaciones con los módulos reales del Mineduc. Exporta a PDF.</p>
-                <span class="badge badge-warning mt-2">✨ Solo profesores</span>
-            </a>
-
-            <!-- Card: Mi Perfil en Ranking -->
-            <a href="ranking.html#perfil" class="card" style="text-decoration: none; cursor: pointer; border: 1px solid rgba(167,139,250,0.2);">
-                <div style="font-size: 2.5rem; margin-bottom: 12px;">👤</div>
-                <h3>Mi Perfil</h3>
-                <p class="mt-1">Tu historial de evaluaciones, logros y progreso en la especialidad.</p>
-                <span class="badge badge-primary mt-2">Ver perfil</span>
-            </a>
-        </div>
-
-        <!-- ==============================
-             ÚLTIMAS EVALUACIONES
-        ============================== -->
-        <h2 style="font-family: 'Space Grotesk'; font-size: 1.3rem; margin-top: 48px; margin-bottom: 16px;">
-            Últimas Evaluaciones
-        </h2>
-        <div class="card slide-up delay-3" style="overflow-x: auto;" id="recentEvalsCard">
-            <div id="recentEvalsContent">
-                <!-- cargado por JS -->
+    <!-- ========================
+         ÚLTIMAS EVALUACIONES
+    ======================== -->
+    <h2 class="sec-h" style="margin-top: 44px;">Últimas evaluaciones</h2>
+    <div class="card-pro" style="overflow-x:auto;" id="recentEvalsCard">
+        <div id="recentEvalsContent">
+            <div class="state">
+                <div class="state-icon">⏳</div>
+                <h4>Cargando tu historial…</h4>
             </div>
         </div>
+    </div>
 
-        <!-- ==============================
-             MÓDULOS DEL CURSO (con progreso)
-        ============================== -->
-        <h2 style="font-family: 'Space Grotesk'; font-size: 1.3rem; margin-top: 48px; margin-bottom: 8px;">
-            Módulos de la Especialidad
-        </h2>
-        <p class="text-muted mb-3" style="font-size: 0.88rem;">Bases Curriculares Mineduc — Sector Electricidad, Especialidad Electrónica</p>
+    <!-- ========================
+         MÓDULOS DE LA ESPECIALIDAD
+    ======================== -->
+    <h2 class="sec-h" style="margin-top: 44px;">Módulos de la especialidad</h2>
+    <p class="muted" style="font-size: var(--fs-sm); margin-top:-12px; margin-bottom: 18px;">Bases Curriculares Mineduc · Sector Electricidad · Especialidad Electrónica</p>
 
-        <div class="grid grid-2 slide-up delay-4" id="modulesGrid">
-            <!-- cargado por JS -->
-        </div>
+    <div class="mod-grid" id="modulesGrid">
+        <!-- Skeletons hasta que cargue -->
+        <div class="skeleton skeleton-card" style="height:180px;"></div>
+        <div class="skeleton skeleton-card" style="height:180px;"></div>
+        <div class="skeleton skeleton-card" style="height:180px;"></div>
+        <div class="skeleton skeleton-card" style="height:180px;"></div>
+    </div>
 
-    </main>
+</main>
 
-    <!-- ==============================
-         FOOTER
-    ============================== -->
-    <footer style="text-align: center; padding: 40px 24px; border-top: 1px solid var(--glass-border); color: var(--text-muted); font-size: 0.85rem; position: relative; z-index: 1;">
-        <p>ElectroLearn &mdash; Especialidad Electrónica &bull; Salesianos Talca &bull; 2026</p>
-    </footer>
+<footer>
+    <div class="foot-grid">
+        <a href="biblioteca.html">Biblioteca</a>
+        <a href="evaluaciones.html">Evaluaciones</a>
+        <a href="ranking.html">Ranking</a>
+    </div>
+    <p>ElectroLearn © 2026 · Especialidad Electrónica · Salesianos Talca</p>
+</footer>
 
-    <!-- Scripts -->
-    <script src="js/gamification.js"></script>
-    <script>
-    // =============================================
-    // DASHBOARD PRINCIPAL — Lógica e integración
-    // =============================================
+<!-- gamification se carga después porque depende del DOM -->
+<script src="js/gamification.js"></script>
+<script>
+'use strict';
 
-    // Función de cerrar sesión (usa Firebase)
-    function logout() {
-        ELAuth.logout();
+// Logout global
+function logout() {
+    if (window.ELAuth && typeof ELAuth.logout === 'function') ELAuth.logout();
+    else window.location.href = 'index.html';
+}
+
+ELAuth.onUserReady(function (user) {
+    if (!user) { window.location.href = 'index.html'; return; }
+
+    // Profesor / admin → otra página
+    var adminEmails = window.EL_ADMIN_EMAILS || [];
+    var esProfe = user.role === 'profesor' || user.role === 'admin' || adminEmails.indexOf(user.email) !== -1;
+    if (esProfe) { window.location.href = 'dashboard-profesor.html'; return; }
+
+    // Adapta a campos legacy de gamification.js — null safe
+    var safeName = user.nombre || ELUI.safeEmailHandle(user.email, 'Estudiante');
+    user.name = safeName;
+    user.completedQuizzes = user.evaluaciones || [];
+
+    // ── Datos base ──
+    var xp       = user.xp || 0;
+    var nivel    = (typeof calcularNivel === 'function')        ? calcularNivel(xp) : { nombre:'Aprendiz', icon:'⚡', color:'#7c3aed', desc:'' };
+    var progInfo = (typeof xpParaSiguienteNivel === 'function') ? xpParaSiguienteNivel(xp) : { siguiente:null, xpFalta:0 };
+    var pct      = (typeof porcentajeNivel === 'function')      ? porcentajeNivel(xp) : 0;
+    var quizzes  = user.completedQuizzes || [];
+    var badges   = user.badges || [];
+
+    // ── Header ──
+    var firstName = String(safeName).split(' ')[0] || safeName;
+    document.getElementById('welcomeName').textContent = firstName;
+    document.getElementById('userName').textContent    = safeName;
+    document.getElementById('userAvatar').textContent  = ELUI.initials(safeName);
+    document.getElementById('heroAvatar').textContent  = ELUI.initials(safeName);
+
+    // Streak (solo si hay alguna eval reciente)
+    if (quizzes.length > 0) {
+        document.getElementById('streakChip').style.display = 'inline-flex';
+        document.getElementById('streakNum').textContent = Math.min(quizzes.length, 30);
     }
 
-    ELAuth.onUserReady(function(user) {
-        // ---- 1. Verificar sesión ----
-        if (!user) {
-            window.location.href = 'index.html';
-            return;
-        }
+    // ── Stats con countUp ──
+    var statLvl = document.getElementById('statLevel');
+    statLvl.textContent = nivel.nombre;
+    statLvl.parentElement.classList.remove('is-loading');
+    document.getElementById('statLevelIcon').textContent = nivel.icon;
 
-        // ---- 2. Profesores y admins van a su propio dashboard ----
-        var adminEmails = window.EL_ADMIN_EMAILS || [window.EL_ADMIN_EMAIL];
-        var esProfe = user.role === 'profesor' || user.role === 'admin'
-            || adminEmails.indexOf(user.email) !== -1;
-        if (esProfe) {
-            window.location.href = 'dashboard-profesor.html';
-            return;
-        }
+    document.querySelectorAll('.stat-pro').forEach(function(c){ c.classList.remove('is-loading'); });
+    ELUI.countUp(document.getElementById('statXP'),      xp);
+    ELUI.countUp(document.getElementById('statQuizzes'), quizzes.length);
+    ELUI.countUp(document.getElementById('statBadges'),  badges.length);
 
-        // Adaptar campos Firebase → campos legacy de gamification.js
-        // Firebase usa: user.nombre, user.evaluaciones
-        // gamification.js espera: user.name, user.completedQuizzes
-        user.name = user.nombre || user.email.split('@')[0];
-        user.completedQuizzes = user.evaluaciones || [];
+    // ── XP card ──
+    var xpBadge = document.getElementById('xpNivelBadge');
+    xpBadge.textContent = nivel.icon;
+    xpBadge.style.background = nivel.color + '22';
+    xpBadge.style.boxShadow  = '0 8px 22px ' + nivel.color + '66';
+    document.getElementById('xpNivelNombre').textContent = nivel.nombre;
+    document.getElementById('xpNivelNombre').style.color = nivel.color;
+    document.getElementById('xpNivelDesc').textContent   = nivel.desc || '';
+    ELUI.countUp(document.getElementById('xpTotal'), xp, { suffix: ' XP' });
 
-        // ---- 3. Datos base ----
-        var xp       = user.xp || 0;
-        var nivel    = calcularNivel(xp);
-        var progInfo = xpParaSiguienteNivel(xp);
-        var pct      = porcentajeNivel(xp);
-        var quizzes  = user.completedQuizzes || [];
-        var badges   = user.badges || [];
+    if (progInfo.siguiente) {
+        document.getElementById('xpMeta').textContent     = 'Faltan ' + progInfo.xpFalta.toLocaleString('es-CL') + ' XP para ' + progInfo.siguiente.nombre;
+        document.getElementById('xpBarLabel').textContent = nivel.nombre + ' → ' + progInfo.siguiente.nombre;
+        document.getElementById('xpBarPct').textContent   = pct + '%';
+    } else {
+        document.getElementById('xpMeta').textContent     = '¡Nivel máximo alcanzado! 🎉';
+        document.getElementById('xpBarLabel').textContent = 'Nivel máximo: Maestro';
+        document.getElementById('xpBarPct').textContent   = '100%';
+    }
+    setTimeout(function () {
+        var fill = document.getElementById('xpBarFill');
+        fill.style.width = (progInfo.siguiente ? pct : 100) + '%';
+        fill.style.background = 'linear-gradient(90deg, ' + nivel.color + ', ' + (progInfo.siguiente ? progInfo.siguiente.color : nivel.color) + ')';
+    }, 250);
 
-        // ---- 4. Cabecera ----
-        document.getElementById('welcomeName').textContent = user.name.split(' ')[0];
-        document.getElementById('userName').textContent    = user.name;
-        document.getElementById('userAvatar').textContent  = user.name.charAt(0).toUpperCase();
+    // ── Insignias ──
+    var insigniasFull = (typeof getInsigniaById === 'function')
+        ? badges.map(getInsigniaById).filter(Boolean)
+        : [];
+    if (insigniasFull.length > 0) {
+        document.getElementById('badgeRowSection').style.display = 'block';
+        document.getElementById('badgeRow').innerHTML = insigniasFull.slice(0, 8).map(function (ins) {
+            return '<span class="badge-chip" title="' + escAttr(ins.desc) + '">' +
+                   '<span class="badge-chip-icon">' + ins.icon + '</span>' + escTxt(ins.nombre) + '</span>';
+        }).join('') + (insigniasFull.length > 8
+            ? '<a href="ranking.html" class="badge-chip" style="color:var(--text-muted);">+' + (insigniasFull.length - 8) + ' más →</a>'
+            : '');
+    }
 
-        if (user.role === 'profesor' || user.role === 'admin') {
-            document.getElementById('welcomeSub').textContent =
-                'Bienvenido, profesor. Aquí tienes el resumen del portal.';
-            document.getElementById('profCard').style.display    = 'block';
-            document.getElementById('materialCard').style.display = 'block';
-            document.getElementById('navMaterial').style.display = 'block';
-        }
-        if (user.role === 'admin' || user.email === 'profesor@electrolearn.cl') {
-            document.getElementById('navAdmin').style.display = 'block';
-            if (document.getElementById('adminCard')) document.getElementById('adminCard').style.display = 'block';
-        }
-
-        // ---- 5. Stat cards ----
-        document.getElementById('statLevel').textContent   = nivel.nombre;
-        document.getElementById('statLevelIcon').textContent = nivel.icon;
-        document.getElementById('statLevel').style.color   = nivel.color;
-        document.getElementById('statXP').textContent      = xp.toLocaleString('es-CL');
-        document.getElementById('statQuizzes').textContent = quizzes.length;
-        document.getElementById('statBadges').textContent  = badges.length;
-
-        // ---- 6. Barra XP ----
-        document.getElementById('xpNivelBadge').textContent   = nivel.icon;
-        document.getElementById('xpNivelBadge').style.background = nivel.color + '22';
-        document.getElementById('xpNivelNombre').textContent  = nivel.nombre;
-        document.getElementById('xpNivelNombre').style.color  = nivel.color;
-        document.getElementById('xpNivelDesc').textContent    = nivel.desc;
-        document.getElementById('xpTotal').textContent        = xp.toLocaleString('es-CL') + ' XP';
-
-        if (progInfo.siguiente) {
-            document.getElementById('xpMeta').textContent = 'Faltan ' + progInfo.xpFalta + ' XP para ' + progInfo.siguiente.nombre;
-            document.getElementById('xpBarLabel').textContent =
-                nivel.nombre + ' → ' + progInfo.siguiente.nombre;
-            document.getElementById('xpBarPct').textContent = pct + '%';
-        } else {
-            document.getElementById('xpMeta').textContent = '¡Nivel máximo alcanzado!';
-            document.getElementById('xpBarLabel').textContent = 'Nivel máximo: Maestro';
-            document.getElementById('xpBarPct').textContent = '100%';
-        }
-
-        // Barra animada (diferimos para que CSS transition funcione)
-        setTimeout(function() {
-            var fill = document.getElementById('xpBarFill');
-            fill.style.width = pct + '%';
-            fill.style.background = 'linear-gradient(90deg, ' + nivel.color + ', ' + (progInfo.siguiente ? progInfo.siguiente.color : nivel.color) + ')';
-        }, 200);
-
-        // ---- 7. Insignias desbloqueadas ----
-        var insigniasFull = badges
-            .map(function(id) { return getInsigniaById(id); })
-            .filter(Boolean);
-
-        if (insigniasFull.length > 0) {
-            var rowEl = document.getElementById('badgeRow');
-            document.getElementById('badgeRowSection').style.display = 'block';
-            rowEl.innerHTML = insigniasFull.slice(0, 8).map(function(ins) {
-                return '<span class="badge-chip" title="' + ins.desc + '">' +
-                    '<span class="badge-chip-icon">' + ins.icon + '</span>' +
-                    ins.nombre + '</span>';
-            }).join('');
-            if (insigniasFull.length > 8) {
-                rowEl.innerHTML += '<a href="ranking.html" class="badge-chip" style="color:var(--text-muted);">+' + (insigniasFull.length - 8) + ' más →</a>';
-            }
-        }
-
-        // ---- 8. Posición en ranking (solo estudiantes) ----
-        if (user.role !== 'profesor' && quizzes.length > 0) {
+    // ── Ranking preview ──
+    if (quizzes.length > 0 && typeof getTodosUsuarios === 'function') {
+        try {
             var todos = getTodosUsuarios();
-            var pos   = todos.findIndex(function(u) { return u.email === user.email; });
+            var pos   = todos.findIndex(function(u){ return u.email === user.email; });
             if (pos >= 0) {
                 var posEl = document.getElementById('rankPos');
                 posEl.textContent = '#' + (pos + 1);
-                if (pos === 0)      posEl.classList.add('top1');
-                else if (pos <= 2)  posEl.classList.add('top3');
+                if (pos === 0)     posEl.classList.add('top1');
+                else if (pos <= 2) posEl.classList.add('top3');
                 document.getElementById('rankDesc').textContent =
                     'Estás en el puesto ' + (pos + 1) + ' de ' + todos.length + ' estudiantes con ' + xp.toLocaleString('es-CL') + ' XP.';
-                document.getElementById('rankingPreview').style.display = 'block';
+                document.getElementById('rankingPreview').style.display = 'flex';
             }
-        }
+        } catch (e) { /* silencioso */ }
+    }
 
-        // ---- 9. Últimas evaluaciones ----
-        var recentEl = document.getElementById('recentEvalsContent');
-        if (quizzes.length === 0) {
-            recentEl.innerHTML = '<div class="eval-empty">Aún no has completado ninguna evaluación.<br>' +
-                '<a href="evaluaciones.html" class="btn btn-sm mt-2" style="background:rgba(52,211,153,0.15);color:#34d399;border:1px solid rgba(52,211,153,0.3);">Comenzar ahora ✍️</a></div>';
-        } else {
-            var ultimas = quizzes.slice(-6).reverse();
-            var rows = ultimas.map(function(q) {
-                var nota = q.nota || 1.0;
-                var claseNota = nota >= 5.5 ? 'nota-excelente' : nota >= 4.0 ? 'nota-aprobado' : 'nota-reprobado';
-                var fecha = q.fecha ? new Date(q.fecha).toLocaleDateString('es-CL', { day:'2-digit', month:'2-digit' }) : '—';
-                var mod   = q.modulo || '—';
-                var oaStr = q.oaId   ? ' · ' + q.oaId   : '';
-                var aeStr = q.aeNum  ? ' · AE' + q.aeNum : '';
-                var xpQ   = q.xpGanado || 0;
-                return '<tr>' +
-                    '<td style="min-width:160px;"><span style="font-weight:600;">' + mod + '</span><span class="text-muted">' + oaStr + aeStr + '</span></td>' +
-                    '<td><span style="font-family:\'Space Grotesk\';font-weight:700;">' + q.score + '%</span></td>' +
-                    '<td><span class="nota-badge ' + claseNota + '">' + nota.toFixed(1) + '</span></td>' +
-                    '<td style="color:var(--secondary);font-weight:600;">+' + xpQ + ' XP</td>' +
-                    '<td class="text-muted" style="font-size:0.78rem;">' + fecha + '</td>' +
-                    '</tr>';
-            }).join('');
-
-            recentEl.innerHTML = '<table class="eval-table">' +
-                '<thead><tr>' +
-                '<th>Módulo</th><th>Puntaje</th><th>Nota</th><th>XP</th><th>Fecha</th>' +
-                '</tr></thead>' +
-                '<tbody>' + rows + '</tbody>' +
-                '</table>' +
-                '<div style="text-align:right;margin-top:12px;">' +
-                '<a href="evaluaciones.html" style="font-size:0.8rem;color:var(--primary-light);">Nueva evaluación →</a>' +
-                '</div>';
-        }
-
-        // ---- 10. Módulos con progreso ----
-        var modulos = [
-            { num: 'EN1', name: 'Proyectos Electrónicos', level: '3ro Medio', hours: 190, icon: '🔌',
-              oa: 'OA1: Leer información técnica en manuales, planos y croquis. OA4: Instalar y montar equipos electrónicos industriales.',
-              aprendizajes: ['Análisis técnico para instalación de equipos', 'Instalación según requerimientos y manuales', 'Mantención de equipos electrónicos', 'Diagnóstico de fallas según manuales', 'Reemplazo de componentes pasivos y activos'] },
-
-            { num: 'EN2', name: 'Armado y Reparación de Circuitos Electrónicos', level: '3ro Medio', hours: 228, icon: '🔧',
-              oa: 'OA3: Armar y ensamblar circuitos electrónicos básicos, analógicos y digitales, y repararlos.',
-              aprendizajes: ['Elaboración de circuitos impresos', 'Armado de circuitos analógicos', 'Reparación y mantención de equipos', 'Ensamblaje de circuitos analógicos y digitales'] },
-
-            { num: 'EN3', name: 'Ensamblaje y Mantención de Sistemas y Equipos Digitales', level: '3ro Medio', hours: 228, icon: '💻',
-              oa: 'OA3: Armar y ensamblar circuitos electrónicos básicos, analógicos y digitales.',
-              aprendizajes: ['Circuitos electrónicos digitales', 'Armado y configuración de computadores', 'Reparación de equipos electrónicos básicos', 'Análisis técnico para instalación'] },
-
-            { num: 'EN4', name: 'Sistemas de Control Domótico', level: '3ro Medio', hours: 190, icon: '🏠',
-              oa: 'OA6: Configurar funcionamiento automático de sistemas electrónicos simples (domótica, portones, riego, iluminación).',
-              aprendizajes: ['Equipos de domótica para control electrónico', 'Mantención de sistemas automáticos', 'Instalaciones de alumbrado eléctrico', 'Instalación de equipos electrónicos'] },
-
-            { num: 'EN11', name: 'Sistemas Mecatrónicos y Robóticos', level: '3ro Medio', hours: 114, icon: '🤖',
-              oa: 'OA1: Leer información técnica. OA8: Aplicar principios de mecatrónica y robótica en sistemas automatizados.',
-              aprendizajes: ['Análisis de sistemas mecatrónicos', 'Diseño y fabricación con CAD 3D e impresión 3D', 'Programación de dispositivos electrónicos', 'Integración de sistemas robóticos', 'Proyecto mecatrónico funcional'] },
-
-            { num: 'EN5', name: 'Mantención y Operación de Equipos de Control Electrónico de Potencia', level: '4to Medio', hours: 152, icon: '⚡',
-              oa: 'OA1: Leer información técnica. OA5: Mantener preventiva y correctivamente equipos electrónicos.',
-              aprendizajes: ['Planes de mantenimiento preventivo y correctivo', 'Mantención preventiva de sistemas', 'Mantención correctiva de sistemas', 'Servomecanismos con control electrónico'] },
-
-            { num: 'EN6', name: 'Detección de Fallas Industriales', level: '4to Medio', hours: 152, icon: '🔍',
-              oa: 'OA2: Inspeccionar y diagnosticar fallas en circuitos y sistemas electrónicos industriales.',
-              aprendizajes: ['Inspección de equipos industriales', 'Diagnóstico de fallas en sistemas', 'Mantención de equipos con control automático', 'Análisis de funcionamiento y fallas'] },
-
-            { num: 'EN7', name: 'Operación y Programación de Equipos de Control Eléctrico Industrial', level: '4to Medio', hours: 152, icon: '🎛️',
-              oa: 'OA7: Modificar programas y parámetros en equipos de control de procesos.',
-              aprendizajes: ['Sistemas de control semiautomático', 'Circuitos de control eléctrico automático', 'Equipos de arranque y protección', 'Tableros de control y fuerza'] },
-
-            { num: 'EN8', name: 'Montaje de Equipos Industriales', level: '4to Medio', hours: 152, icon: '🏗️',
-              oa: 'OA4: Instalar y montar equipos y sistemas electrónicos industriales.',
-              aprendizajes: ['Instalación de equipos industriales', 'Montaje de sistemas electrónicos', 'Operación de equipos en la industria', 'Proyectos de instalación industrial'] },
-
-            { num: 'EN9', name: 'Automatización Industrial', level: '4to Medio', hours: 152, icon: '⚙️',
-              oa: 'OA7: Modificar programas y parámetros en equipos de control de procesos.',
-              aprendizajes: ['Relés programables', 'Equipos de control lógico', 'Software de controladores (PLC)', 'Programación de PLCs y pantallas HMI', 'Mantención de equipos automatizados'] },
-        ];
-
-        var grid = document.getElementById('modulesGrid');
-        grid.innerHTML = modulos.map(function(m) {
-            var prog = getProgresoModulo(user, m.num);
-            var es3ro  = m.level.includes('3ro');
-            var gradiente = es3ro
-                ? 'var(--primary), var(--secondary)'
-                : 'var(--accent), var(--accent2)';
-
-            // Color de la barra de progreso según nota promedio
-            var barColor = '#94a3b8'; // sin actividad
-            var barWidth = 0;
-            var progText = 'Sin evaluaciones aún';
-            if (prog.evaluaciones > 0) {
-                barWidth = prog.promedioScore;
-                progText = prog.evaluaciones + ' eval · Nota prom. ' + prog.promedioNota.toFixed(1) + ' · Mejor: ' + prog.mejor + '%';
-                barColor = prog.promedioNota >= 5.5 ? '#fbbf24'
-                         : prog.promedioNota >= 4.0 ? '#34d399'
-                         : '#f43f5e';
-            }
-
-            var badgeClass = es3ro ? 'badge-primary' : 'badge-warning';
-            var aprendizajesHtml = m.aprendizajes.map(function(a) {
-                return '<li style="font-size:0.82rem;color:var(--text-muted);padding:3px 0;padding-left:16px;position:relative;">' +
-                    '<span style="position:absolute;left:0;">●</span> ' + a + '</li>';
-            }).join('');
-
-            return '<div class="card" style="position:relative;overflow:hidden;cursor:pointer;" ' +
-                'onclick="this.querySelector(\'.module-detail\').classList.toggle(\'hidden\')">' +
-                '<div style="position:absolute;top:0;left:0;width:100%;height:3px;background:linear-gradient(90deg,' + gradiente + ');"></div>' +
-                '<div style="display:flex;align-items:center;gap:16px;">' +
-                    '<span style="font-size:2rem;">' + m.icon + '</span>' +
-                    '<div style="flex:1;">' +
-                        '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">' +
-                            '<span class="badge ' + badgeClass + ' mb-1">Módulo ' + m.num + '</span>' +
-                            '<span class="badge badge-success mb-1">' + m.hours + ' hrs</span>' +
-                            (prog.evaluaciones > 0 ? '<span class="badge mb-1" style="background:rgba(255,255,255,0.06);color:var(--text-muted);">' + prog.evaluaciones + ' eval ✓</span>' : '') +
-                        '</div>' +
-                        '<h3 style="margin-top:4px;">' + m.name + '</h3>' +
-                        '<p class="text-muted" style="font-size:0.82rem;margin-top:4px;">' + m.level + ' · Click para ver detalle</p>' +
-                    '</div>' +
-                '</div>' +
-
-                // Barra de progreso mini
-                '<div class="mod-progress-bar-wrap">' +
-                    '<div class="mod-progress-label">' +
-                        '<span>' + progText + '</span>' +
-                        (prog.evaluaciones > 0 ? '<span style="color:' + barColor + ';font-weight:600;">' + barWidth + '%</span>' : '') +
-                    '</div>' +
-                    '<div class="mod-progress-track">' +
-                        '<div class="mod-progress-fill" style="width:' + barWidth + '%;background:' + barColor + ';"></div>' +
-                    '</div>' +
-                '</div>' +
-
-                // Detalle plegable
-                '<div class="module-detail hidden" style="margin-top:16px;padding-top:16px;border-top:1px solid var(--glass-border);">' +
-                    '<p class="text-muted" style="font-size:0.8rem;margin-bottom:8px;font-style:italic;">' + m.oa + '</p>' +
-                    '<p style="font-size:0.82rem;font-weight:600;margin-bottom:6px;color:var(--secondary);">Aprendizajes Esperados:</p>' +
-                    '<ul style="list-style:none;padding:0;">' + aprendizajesHtml + '</ul>' +
-                    '<div style="margin-top:12px;">' +
-                        '<a href="evaluaciones.html" onclick="event.stopPropagation();" ' +
-                        'style="font-size:0.8rem;color:var(--primary-light);background:rgba(99,102,241,0.12);' +
-                        'padding:5px 12px;border-radius:99px;text-decoration:none;">Evaluar este módulo →</a>' +
-                    '</div>' +
-                '</div>' +
+    // ── Últimas evaluaciones ──
+    var recentEl = document.getElementById('recentEvalsContent');
+    if (quizzes.length === 0) {
+        recentEl.innerHTML =
+            '<div class="state">' +
+                '<div class="state-icon">📝</div>' +
+                '<h4>Aún no has rendido ninguna evaluación</h4>' +
+                '<p>Empieza ahora un quiz corto y comienza a sumar XP, medallas y subir de nivel.</p>' +
+                '<a href="evaluaciones.html" class="btn-pro primary">▶ Comenzar evaluación</a>' +
             '</div>';
+    } else {
+        var ultimas = quizzes.slice(-6).reverse();
+        var rows = ultimas.map(function (q) {
+            var nota = q.nota || 1.0;
+            var claseNota = nota >= 5.5 ? 'nota-excelente' : nota >= 4.0 ? 'nota-aprobado' : 'nota-reprobado';
+            var fecha = q.fecha ? new Date(q.fecha).toLocaleDateString('es-CL', { day: '2-digit', month: '2-digit' }) : '—';
+            var mod = q.modulo || '—';
+            var oa  = q.oaId   ? ' · ' + q.oaId   : '';
+            var ae  = q.aeNum  ? ' · AE' + q.aeNum : '';
+            var xpQ = q.xpGanado || 0;
+            return '<tr>' +
+                '<td style="min-width:160px;"><span style="font-weight:600;">' + escTxt(mod) + '</span><span class="muted">' + escTxt(oa + ae) + '</span></td>' +
+                '<td><span style="font-family:\'Space Grotesk\';font-weight:700;">' + (q.score || 0) + '%</span></td>' +
+                '<td><span class="nota-badge ' + claseNota + '">' + nota.toFixed(1) + '</span></td>' +
+                '<td style="color:#5eead4;font-weight:700;">+' + xpQ + ' XP</td>' +
+                '<td class="muted" style="font-size: var(--fs-xs);">' + fecha + '</td>' +
+            '</tr>';
         }).join('');
 
-    }); // fin ELAuth.onUserReady
-    </script>
+        recentEl.innerHTML =
+            '<table class="eval-table-pro">' +
+                '<thead><tr><th>Módulo</th><th>Puntaje</th><th>Nota</th><th>XP</th><th>Fecha</th></tr></thead>' +
+                '<tbody>' + rows + '</tbody>' +
+            '</table>' +
+            '<div style="text-align:right;margin-top:14px;">' +
+                '<a href="evaluaciones.html" class="btn-pro" style="font-size:var(--fs-xs);">+ Nueva evaluación</a>' +
+            '</div>';
+    }
+
+    // ── Módulos de la especialidad ──
+    var modulos = MODULOS_DATA;
+    var grid = document.getElementById('modulesGrid');
+    grid.innerHTML = modulos.map(function (m, idx) {
+        var prog = (typeof getProgresoModulo === 'function')
+            ? getProgresoModulo(user, m.num)
+            : { evaluaciones: 0, promedioScore: 0, promedioNota: 0, mejor: 0 };
+        var es3ro = m.level.indexOf('3ro') !== -1;
+        var grad  = es3ro
+            ? 'linear-gradient(135deg, #7c3aed, #22d3ee)'
+            : 'linear-gradient(135deg, #ec4899, #fcd34d)';
+
+        var barColor = '#94a3b8', barWidth = 0, progText = 'Sin evaluaciones aún';
+        if (prog.evaluaciones > 0) {
+            barWidth = prog.promedioScore;
+            progText = prog.evaluaciones + ' eval · Nota prom. ' + prog.promedioNota.toFixed(1) + ' · Mejor ' + prog.mejor + '%';
+            barColor = prog.promedioNota >= 5.5 ? '#fcd34d'
+                     : prog.promedioNota >= 4.0 ? '#34d399'
+                     : '#fb7185';
+        }
+        var aprendizajesHtml = (m.aprendizajes || []).map(function (a) {
+            return '<li style="font-size:.85rem;color:var(--text-muted);padding:4px 0 4px 18px;position:relative;line-height:1.45;">' +
+                   '<span style="position:absolute;left:0;color:#a78bfa;">▸</span>' + escTxt(a) + '</li>';
+        }).join('');
+        var pillCls = es3ro ? 'b-pri' : 'b-warm';
+        return '<article class="mod-card-pro" style="--mod-grad: ' + grad + ';" onclick="toggleMod(this)" tabindex="0" role="button" onkeypress="if(event.key===\'Enter\')toggleMod(this)" aria-expanded="false" aria-label="Módulo ' + m.num + ': ' + escAttr(m.name) + '">' +
+            '<div class="mod-card-head">' +
+                '<div class="mod-icon">' + m.icon + '</div>' +
+                '<div style="flex:1;">' +
+                    '<div class="mod-meta">' +
+                        '<span class="' + pillCls + '">' + m.num + '</span>' +
+                        '<span class="b-ok">' + m.hours + ' hrs</span>' +
+                        (prog.evaluaciones > 0 ? '<span class="b-mute">' + prog.evaluaciones + ' eval ✓</span>' : '') +
+                    '</div>' +
+                    '<h3 style="font-family:\'Space Grotesk\';font-weight:700;font-size:1rem;line-height:1.3;margin:2px 0 4px;">' + escTxt(m.name) + '</h3>' +
+                    '<p class="muted" style="font-size:var(--fs-xs);">' + m.level + ' <span class="mod-chevron">▼</span></p>' +
+                '</div>' +
+            '</div>' +
+            '<div class="mod-progress-wrap">' +
+                '<div class="mod-progress-label"><span>' + progText + '</span>' +
+                    (prog.evaluaciones > 0 ? '<span style="color:' + barColor + ';font-weight:700;">' + barWidth + '%</span>' : '') + '</div>' +
+                '<div class="mod-progress-track">' +
+                    '<div class="mod-progress-fill" style="width:0%;background:' + barColor + ';" data-w="' + barWidth + '"></div>' +
+                '</div>' +
+            '</div>' +
+            '<div class="mod-detail">' +
+                '<p class="muted" style="font-size:var(--fs-xs);font-style:italic;margin-bottom:8px;">' + escTxt(m.oa) + '</p>' +
+                '<p style="font-size:var(--fs-sm);font-weight:700;color:#5eead4;margin-bottom:6px;">Aprendizajes esperados</p>' +
+                '<ul style="list-style:none;padding:0;margin:0;">' + aprendizajesHtml + '</ul>' +
+                '<div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap;">' +
+                    '<a href="evaluaciones.html" class="btn-pro primary" onclick="event.stopPropagation();" style="padding:8px 14px;font-size:var(--fs-xs);">▶ Evaluar este módulo</a>' +
+                    '<a href="biblioteca.html#modulos" class="btn-pro" onclick="event.stopPropagation();" style="padding:8px 14px;font-size:var(--fs-xs);">📚 Ver materiales</a>' +
+                '</div>' +
+            '</div>' +
+        '</article>';
+    }).join('');
+
+    // Anima barras de progreso
+    setTimeout(function(){
+        document.querySelectorAll('.mod-progress-fill').forEach(function(f){
+            var w = f.dataset.w; if (w) f.style.width = w + '%';
+        });
+    }, 300);
+
+    ELUI.bindCardGlow();
+
+    // Mostrar enlaces específicos por rol (si llegara como profesor por error de redirect)
+    if (user.role === 'admin' || (adminEmails.indexOf(user.email) !== -1)) {
+        document.getElementById('navAdmin').style.display = '';
+        document.getElementById('adminCard').style.display = '';
+    }
+});
+
+// Helpers HTML escape
+function escTxt(s){ if(s==null) return ''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escAttr(s){ return escTxt(s).replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+
+// Toggle módulo (con aria-expanded)
+function toggleMod(card){
+    var detail = card.querySelector('.mod-detail');
+    var open = detail.classList.toggle('open');
+    card.classList.toggle('is-open', open);
+    card.setAttribute('aria-expanded', open ? 'true' : 'false');
+}
+
+// Datos de módulos (Mineduc Electrónica)
+var MODULOS_DATA = [
+    { num:'EN1', name:'Proyectos Electrónicos', level:'3° Medio', hours:190, icon:'🔌',
+      oa:'OA1: Leer información técnica en manuales, planos y croquis. OA4: Instalar y montar equipos electrónicos industriales.',
+      aprendizajes:['Análisis técnico para instalación de equipos','Instalación según requerimientos y manuales','Mantención de equipos electrónicos','Diagnóstico de fallas según manuales','Reemplazo de componentes pasivos y activos'] },
+    { num:'EN2', name:'Armado y Reparación de Circuitos Electrónicos', level:'3° Medio', hours:228, icon:'🔧',
+      oa:'OA3: Armar y ensamblar circuitos electrónicos básicos, analógicos y digitales, y repararlos.',
+      aprendizajes:['Elaboración de circuitos impresos','Armado de circuitos analógicos','Reparación y mantención de equipos','Ensamblaje de circuitos analógicos y digitales'] },
+    { num:'EN3', name:'Ensamblaje y Mantención de Sistemas Digitales', level:'3° Medio', hours:228, icon:'💻',
+      oa:'OA3: Armar y ensamblar circuitos electrónicos básicos, analógicos y digitales.',
+      aprendizajes:['Circuitos electrónicos digitales','Armado y configuración de computadores','Reparación de equipos electrónicos básicos','Análisis técnico para instalación'] },
+    { num:'EN4', name:'Sistemas de Control Domótico', level:'3° Medio', hours:190, icon:'🏠',
+      oa:'OA6: Configurar funcionamiento automático de sistemas electrónicos simples.',
+      aprendizajes:['Equipos de domótica para control electrónico','Mantención de sistemas automáticos','Instalaciones de alumbrado eléctrico','Instalación de equipos electrónicos'] },
+    { num:'EN11', name:'Sistemas Mecatrónicos y Robóticos', level:'3° Medio', hours:114, icon:'🤖',
+      oa:'OA1 + OA8: Aplicar principios de mecatrónica y robótica en sistemas automatizados.',
+      aprendizajes:['Análisis de sistemas mecatrónicos','Diseño y fabricación con CAD 3D e impresión 3D','Programación de dispositivos electrónicos','Integración de sistemas robóticos','Proyecto mecatrónico funcional'] },
+    { num:'EN5', name:'Mantención y Operación de Equipos de Control Electrónico de Potencia', level:'4° Medio', hours:152, icon:'⚡',
+      oa:'OA1 + OA5: Mantener preventiva y correctivamente equipos electrónicos.',
+      aprendizajes:['Planes de mantenimiento preventivo y correctivo','Mantención preventiva y correctiva de sistemas','Servomecanismos con control electrónico'] },
+    { num:'EN6', name:'Detección de Fallas Industriales', level:'4° Medio', hours:152, icon:'🔍',
+      oa:'OA2: Inspeccionar y diagnosticar fallas en circuitos y sistemas industriales.',
+      aprendizajes:['Inspección de equipos industriales','Diagnóstico de fallas en sistemas','Mantención de equipos con control automático','Análisis de funcionamiento y fallas'] },
+    { num:'EN7', name:'Operación y Programación de Equipos de Control Eléctrico Industrial', level:'4° Medio', hours:152, icon:'🎛️',
+      oa:'OA7: Modificar programas y parámetros en equipos de control de procesos.',
+      aprendizajes:['Sistemas de control semiautomático','Circuitos de control eléctrico automático','Equipos de arranque y protección','Tableros de control y fuerza'] },
+    { num:'EN8', name:'Montaje de Equipos Industriales', level:'4° Medio', hours:152, icon:'🏗️',
+      oa:'OA4: Instalar y montar equipos y sistemas electrónicos industriales.',
+      aprendizajes:['Instalación de equipos industriales','Montaje de sistemas electrónicos','Operación de equipos en la industria','Proyectos de instalación industrial'] },
+    { num:'EN9', name:'Automatización Industrial', level:'4° Medio', hours:152, icon:'⚙️',
+      oa:'OA7: Modificar programas y parámetros en equipos de control de procesos.',
+      aprendizajes:['Relés programables','Equipos de control lógico','Software de controladores (PLC)','Programación de PLCs y pantallas HMI','Mantención de equipos automatizados'] }
+];
+</script>
 
 </body>
 </html>

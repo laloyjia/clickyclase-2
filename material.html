@@ -411,7 +411,8 @@
             color: var(--primary-light);
         }
 
-        .toast {
+        /* Legacy toast (fallback si ELUI no está disponible) — scoped a #toast */
+        #toast.legacy-toast {
             position: fixed;
             bottom: 2rem;
             right: 2rem;
@@ -426,7 +427,7 @@
             opacity: 0;
             transition: all 0.3s;
         }
-        .toast.visible {
+        #toast.legacy-toast.visible {
             transform: translateY(0);
             opacity: 1;
         }
@@ -681,9 +682,20 @@
             </a>
         </div>
 
-        <div class="material-header">
-            <h1>📚 Generador de Material Educativo</h1>
-            <p>Crea guías, apuntes y fichas prácticas alineadas al currículo Mineduc · Salesianos Talca</p>
+        <div class="material-header hero-pro" style="position:relative;overflow:hidden;border-radius:var(--radius-lg,20px);padding:1.6rem 1.4rem;margin-bottom:1.6rem;background:linear-gradient(135deg, rgba(124,58,237,.14), rgba(34,211,238,.09) 55%, rgba(244,114,182,.10));border:1px solid rgba(148,163,184,.18);box-shadow:0 18px 40px -22px rgba(124,58,237,.5)">
+            <div style="display:flex;align-items:center;gap:.9rem;flex-wrap:wrap;justify-content:center">
+                <div style="width:56px;height:56px;border-radius:16px;display:grid;place-items:center;font-size:1.6rem;background:linear-gradient(135deg,#7c3aed,#22d3ee);box-shadow:0 10px 24px -10px rgba(124,58,237,.8)">📚</div>
+                <div style="text-align:left">
+                    <h1 style="margin:0;font-size:1.6rem;line-height:1.15">Generador de Material Educativo</h1>
+                    <p style="margin:.2rem 0 0;color:var(--text-muted,#94a3b8);font-size:.92rem">Crea guías, apuntes, fichas, pruebas y controles alineados al currículo Mineduc · Salesianos Talca.</p>
+                </div>
+            </div>
+            <div style="display:flex;gap:.5rem;flex-wrap:wrap;justify-content:center;margin-top:.9rem">
+                <span class="stat-pro" style="display:inline-flex;align-items:center;gap:.35rem;padding:.3rem .7rem;border-radius:999px;font-size:.78rem;background:rgba(124,58,237,.14);border:1px solid rgba(124,58,237,.3);color:#c4b5fd">🧠 IA Gemini</span>
+                <span class="stat-pro" style="display:inline-flex;align-items:center;gap:.35rem;padding:.3rem .7rem;border-radius:999px;font-size:.78rem;background:rgba(34,211,238,.12);border:1px solid rgba(34,211,238,.3);color:#67e8f9">🎯 Bloom</span>
+                <span class="stat-pro" style="display:inline-flex;align-items:center;gap:.35rem;padding:.3rem .7rem;border-radius:999px;font-size:.78rem;background:rgba(52,211,153,.12);border:1px solid rgba(52,211,153,.3);color:#6ee7b7">💛 Valores Salesianos</span>
+                <span class="stat-pro" style="display:inline-flex;align-items:center;gap:.35rem;padding:.3rem .7rem;border-radius:999px;font-size:.78rem;background:rgba(244,114,182,.12);border:1px solid rgba(244,114,182,.3);color:#f9a8d4">📚 Publica a Biblioteca</span>
+            </div>
         </div>
 
         <!-- SECCION 1: TIPO DE DOCUMENTO -->
@@ -692,33 +704,33 @@
             <div class="tipo-docs" id="tipoDocs">
                 <div class="tipo-doc-card" onclick="seleccionarTipo(this, 'guia')" data-tipo="guia">
                     <div class="icon">&#128214;</div>
-                    <h3>Guia de Aprendizaje</h3>
-                    <p>Con objetivos, contenido, actividades y evaluacion</p>
+                    <h3>Guía de Aprendizaje</h3>
+                    <p>Con objetivos, contenido, actividades y evaluación</p>
                 </div>
                 <div class="tipo-doc-card" onclick="seleccionarTipo(this, 'apunte')" data-tipo="apunte">
                     <div class="icon">&#128221;</div>
                     <h3>Apunte de Clase</h3>
-                    <p>Resumen teorico con conceptos clave y ejemplos</p>
+                    <p>Resumen teórico con conceptos clave y ejemplos</p>
                 </div>
                 <div class="tipo-doc-card" onclick="seleccionarTipo(this, 'ficha')" data-tipo="ficha">
                     <div class="icon">&#128295;</div>
-                    <h3>Ficha Practica</h3>
-                    <p>Paso a paso para actividad de taller/laboratorio</p>
+                    <h3>Ficha Práctica</h3>
+                    <p>Paso a paso para actividad de taller o laboratorio</p>
                 </div>
                 <div class="tipo-doc-card" onclick="seleccionarTipo(this, 'evaluacion')" data-tipo="evaluacion">
                     <div class="icon">&#9997;</div>
-                    <h3>Guia de Ejercicios</h3>
+                    <h3>Guía de Ejercicios</h3>
                     <p>Ejercicios y problemas con espacio para responder</p>
                 </div>
                 <div class="tipo-doc-card" onclick="seleccionarTipo(this, 'prueba')" data-tipo="prueba">
                     <div class="icon">&#128221;</div>
                     <h3>Prueba Formal</h3>
-                    <p>Evaluacion sumativa con portada, instrucciones y rubrica de correccion</p>
+                    <p>Evaluación sumativa con portada, instrucciones y rúbrica de corrección</p>
                 </div>
                 <div class="tipo-doc-card" onclick="seleccionarTipo(this, 'control')" data-tipo="control">
                     <div class="icon">&#9200;</div>
-                    <h3>Control Rapido</h3>
-                    <p>Quiz de 10–15 min para evaluacion formativa de la clase</p>
+                    <h3>Control Rápido</h3>
+                    <p>Quiz de 10–15 min para evaluación formativa de la clase</p>
                 </div>
             </div>
         </div>
@@ -810,23 +822,23 @@
 
         <!-- SECCION 4: CONTENIDO -->
         <div class="seccion-mat">
-            <h2><span>&#128221;</span> Contenido y Personalizacion</h2>
+            <h2><span>&#128221;</span> Contenido y Personalización</h2>
             <div class="campo">
-                <label>Contenido especifico del documento</label>
-                <textarea id="inputContenido" placeholder="Describe el tema principal. Ej: Conexion de reles programables tipo Zelio con sensores de temperatura NTC para control on/off de ventilacion en tableros industriales..."></textarea>
+                <label>Contenido específico del documento</label>
+                <textarea id="inputContenido" placeholder="Describe el tema principal. Ej: Conexión de relés programables tipo Zelio con sensores de temperatura NTC para control on/off de ventilación en tableros industriales..."></textarea>
             </div>
             <div class="campo-row">
                 <div class="campo">
                     <label>Nivel de dificultad</label>
                     <select id="selectDificultad">
-                        <option value="basico">Basico - Introduccion al tema</option>
-                        <option value="intermedio" selected>Intermedio - Aplicacion practica</option>
-                        <option value="avanzado">Avanzado - Analisis y resolucion</option>
+                        <option value="basico">Básico — Introducción al tema</option>
+                        <option value="intermedio" selected>Intermedio — Aplicación práctica</option>
+                        <option value="avanzado">Avanzado — Análisis y resolución</option>
                     </select>
                 </div>
                 <div class="campo">
                     <label>Nombre del profesor</label>
-                    <input type="text" id="inputProfesor" placeholder="Ej: Eduardo Yanez">
+                    <input type="text" id="inputProfesor" placeholder="Ej: Eduardo Yáñez">
                 </div>
             </div>
         </div>
@@ -836,7 +848,7 @@
             <h2><span>&#128247;</span> Material de Referencia para Ejercicios</h2>
             <p style="color:var(--text-muted);font-size:0.88rem;margin-bottom:1rem;">
                 Sube un archivo <strong>.txt</strong> con ejercicios, enunciados o contenido de referencia, o pega el texto directamente.
-                La plataforma usara este material para generar preguntas mas especificas y contextualizadas al contenido real.
+                La plataforma usará este material para generar preguntas más específicas y contextualizadas al contenido real.
             </p>
             <div class="campo">
                 <label>Cargar archivo de texto (.txt)</label>
@@ -855,13 +867,13 @@
 
         <!-- SECCION 6: OPCIONES DE EVALUACIÓN (visible para evaluacion/prueba/control) -->
         <div class="seccion-mat" id="seccionEvalOpciones" style="display:none">
-            <h2><span>&#9881;</span> Opciones de Evaluacion</h2>
+            <h2><span>&#9881;</span> Opciones de Evaluación</h2>
             <div class="campo-row">
                 <div class="campo">
                     <label>Cantidad de preguntas</label>
                     <select id="selectCantPreg">
-                        <option value="5">5 preguntas (control rapido)</option>
-                        <option value="10" selected>10 preguntas (estandar)</option>
+                        <option value="5">5 preguntas (control rápido)</option>
+                        <option value="10" selected>10 preguntas (estándar)</option>
                         <option value="15">15 preguntas (completo)</option>
                         <option value="20">20 preguntas (prueba extensa)</option>
                     </select>
@@ -880,12 +892,12 @@
             <div class="campo">
                 <label>Tipos de preguntas a incluir</label>
                 <div class="tipos-preguntas-grid" id="tiposPreguntas">
-                    <label class="tipo-preg-item checked"><input type="checkbox" value="sm" checked onchange="toggleCheckItem(this)"> &#9673; Seleccion multiple</label>
+                    <label class="tipo-preg-item checked"><input type="checkbox" value="sm" checked onchange="toggleCheckItem(this)"> &#9673; Selección múltiple</label>
                     <label class="tipo-preg-item checked"><input type="checkbox" value="vf" checked onchange="toggleCheckItem(this)"> &#10003; Verdadero / Falso</label>
                     <label class="tipo-preg-item"><input type="checkbox" value="desarrollo" onchange="toggleCheckItem(this)"> &#9997; Desarrollo</label>
                     <label class="tipo-preg-item"><input type="checkbox" value="completar" onchange="toggleCheckItem(this)"> &#9998; Completar</label>
                     <label class="tipo-preg-item"><input type="checkbox" value="emparejar" onchange="toggleCheckItem(this)"> &#8596; Emparejar</label>
-                    <label class="tipo-preg-item"><input type="checkbox" value="caso" onchange="toggleCheckItem(this)"> &#128269; Analisis de caso</label>
+                    <label class="tipo-preg-item"><input type="checkbox" value="caso" onchange="toggleCheckItem(this)"> &#128269; Análisis de caso</label>
                 </div>
             </div>
             <div class="campo">
@@ -907,7 +919,7 @@
             <p class="ia-desc">
                 Usa Google Gemini para generar material educativo de alta calidad, 100% adaptado a tus OA, nivel y contenido.
                 La IA construye preguntas en los niveles cognitivos de Bloom que elijas, integra los valores salesianos y
-                usa la terminologia correcta para la asignatura o modulo. Requiere una API key gratuita de Google AI Studio.
+                usa la terminología correcta para la asignatura o módulo. Requiere una API key gratuita de Google AI Studio.
             </p>
             <div class="campo-row">
                 <div class="campo">
@@ -947,18 +959,21 @@
                 <span id="keyStatus" style="margin-left:.7rem;font-size:.82rem"></span>
             </div>
             <div class="ia-instrucciones">
-                <strong>&#128161; La IA generara exactamente lo que necesitas:</strong>
+                <strong>&#128161; La IA generará exactamente lo que necesitas:</strong>
                 <ul>
                     <li>Contenido alineado al OA y criterios seleccionados</li>
                     <li>Preguntas en los niveles cognitivos de Bloom elegidos</li>
                     <li>Lenguaje adaptado al nivel del curso y dificultad</li>
                     <li>Valores Salesianos integrados de forma natural</li>
-                    <li>Formato listo para imprimir con portada y rubrica</li>
+                    <li>Formato listo para imprimir con portada y rúbrica</li>
                 </ul>
             </div>
             <button class="btn-generar-ia" onclick="generarConIA()" id="btnIA">
                 &#129302; Generar con IA &mdash; Gemini
             </button>
+            <small style="color:var(--text-muted);font-size:.75rem;margin-top:.4rem;display:block;text-align:center">
+                Recomendado · Calidad profesional · Se adapta a tu OA y dificultad
+            </small>
             <div id="iaStatus" class="ia-status" style="display:none"></div>
         </div>
 
@@ -985,8 +1000,11 @@
         </div>
     </main>
 
-    <!-- TOAST -->
-    <div class="toast" id="toast"></div>
+    <!-- TOAST legacy (fallback) -->
+    <div class="legacy-toast" id="toast"></div>
+
+    <!-- UI utilities premium (toasts, confirm, confetti, glow, etc.) -->
+    <script src="js/el-ui.js"></script>
 
     <!-- Firebase SDK v9 compat -->
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
@@ -1023,30 +1041,73 @@
     // =============================================
     // INICIALIZACION
     // =============================================
+    // ─────────── helpers seguros ───────────
+    function escTxt(s) {
+        if (s === null || s === undefined) return '';
+        return String(s)
+            .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+            .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+    }
+    function showToast(msg, type) {
+        if (window.ELUI && ELUI.toast) { ELUI.toast(msg, { type: type || 'info' }); return; }
+        var toast = document.getElementById('toast');
+        if (!toast) return;
+        toast.textContent = msg;
+        toast.classList.add('visible');
+        setTimeout(function() { toast.classList.remove('visible'); }, 2800);
+    }
+    function confirmPro(opts) {
+        if (window.ELUI && ELUI.confirm) return ELUI.confirm(opts || {});
+        return Promise.resolve(window.confirm((opts && (opts.message || opts.title)) || '¿Confirmar?'));
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
         // Cargar API key guardada
         var savedKey = localStorage.getItem('el_gemini_apikey');
         if (savedKey) { var el = document.getElementById('inputApiKey'); if (el) el.value = savedKey; }
 
-        // Verificar autenticacion (admin y profesor pueden acceder)
-        ELAuth.requireAuth(['profesor', 'admin']);
-
+        // Gate único de auth: una sola entrada via onUserReady (sin race con requireAuth)
         ELAuth.onUserReady(function(user) {
-            if (!user) return;
+            if (!user) {
+                // No autenticado → redirigir a login
+                try { window.location.href = 'index.html'; } catch (e) {}
+                return;
+            }
+            // Verificar rol (profesor o admin)
+            var tipo = user.tipo || user.rol || '';
+            if (tipo !== 'profesor' && tipo !== 'admin') {
+                showToast('Acceso solo para docentes.', 'warn');
+                setTimeout(function(){ try { window.location.href = 'dashboard.html'; } catch(e){} }, 1200);
+                return;
+            }
             _matUser = user;
 
-            document.getElementById('inputProfesor').value = user.nombre || user.name || '';
+            var inProf = document.getElementById('inputProfesor');
+            if (inProf) inProf.value = user.nombre || user.name || '';
 
             var contValores = document.getElementById('valoresSalesianos');
-            VALORES_SALESIANOS.forEach(function(v) {
-                var item = document.createElement('label');
-                item.className = 'checkbox-item';
-                item.innerHTML = '<input type="checkbox" value="' + v + '" onchange="toggleCheckItem(this)"> ' + v;
-                contValores.appendChild(item);
-            });
+            if (contValores) {
+                contValores.innerHTML = '';
+                VALORES_SALESIANOS.forEach(function(v) {
+                    var item = document.createElement('label');
+                    item.className = 'checkbox-item';
+                    var cb = document.createElement('input');
+                    cb.type = 'checkbox';
+                    cb.value = v;
+                    cb.addEventListener('change', function(){ toggleCheckItem(cb); });
+                    var span = document.createElement('span');
+                    span.textContent = ' ' + v;
+                    item.appendChild(cb);
+                    item.appendChild(span);
+                    contValores.appendChild(item);
+                });
+            }
 
             // Inicializar curriculo según perfil del profesor
-            initCurriculoMat(user);
+            try { initCurriculoMat(user); } catch (e) { console.warn('[material] initCurriculoMat:', e); }
+
+            // Glow premium en tarjetas
+            if (window.ELUI && ELUI.bindCardGlow) ELUI.bindCardGlow();
         }); // cierra onUserReady
     }); // cierra DOMContentLoaded
 
@@ -1404,7 +1465,7 @@
     // =============================================
 
     function generarMaterial() {
-        if (!tipoDocSeleccionado) { alert('Selecciona un tipo de documento.'); return; }
+        if (!tipoDocSeleccionado) { showToast('Selecciona un tipo de documento.', 'warn'); return; }
         var user      = _matUser || {};
         var isTP      = user.tipoProfesor === 'tecnico';
         var curso     = document.getElementById('selectCurso').value;
@@ -1412,7 +1473,7 @@
         var dificultad= document.getElementById('selectDificultad').value;
         var profesor  = document.getElementById('inputProfesor').value;
 
-        if (!curso) { alert('Selecciona el curso/nivel.'); return; }
+        if (!curso) { showToast('Selecciona el curso o nivel.', 'warn'); return; }
 
         var cursoTexto = typeof CURRICULA_CHILE !== 'undefined' ? CURRICULA_CHILE.getNivelLabel(curso) : curso;
 
@@ -1423,8 +1484,8 @@
             document.querySelectorAll('#listaOAMineduc .oaRegCheck:checked').forEach(function(cb) {
                 oasReg.push({ codigo: cb.value, descripcion: cb.getAttribute('data-desc') });
             });
-            if (!asig) { alert('Selecciona la asignatura.'); return; }
-            if (!oasReg.length) { alert('Selecciona al menos un OA Mineduc.'); return; }
+            if (!asig) { showToast('Selecciona la asignatura.', 'warn'); return; }
+            if (!oasReg.length) { showToast('Selecciona al menos un OA Mineduc.', 'warn'); return; }
             var oaTextoReg = oasReg.map(function(o){ return o.codigo + ': ' + o.descripcion; }).join('\n');
             // Construir objeto mod/ae genérico para los generadores
             var modFake = {
@@ -1455,7 +1516,7 @@
         var oaId  = document.getElementById('selectOA').value;
         var aeNum = document.getElementById('selectAE').value;
 
-        if (!modId || !oaId || !aeNum) { alert('Completa al menos: Módulo, OA y AE.'); return; }
+        if (!modId || !oaId || !aeNum) { showToast('Completa al menos: Módulo, OA y AE.', 'warn'); return; }
 
         var _modsTP = (typeof getCurriculaModulos === 'function')
             ? getCurriculaModulos(user.especialidad || '')
@@ -1472,7 +1533,7 @@
             ae = mod.aes[1];
             aeNum = 1;
         }
-        if (!ae) { alert('Selecciona un AE.'); return; }
+        if (!ae) { showToast('Selecciona un AE.', 'warn'); return; }
 
         var cont = contenido || ae.texto;
 
@@ -2804,7 +2865,7 @@
             document.getElementById('uploadZoneText').innerHTML = '&#9989; Archivo cargado: <strong>' + file.name + '</strong> (' + Math.round(file.size / 1024) + ' KB)';
         };
         reader.onerror = function() {
-            alert('No se pudo leer el archivo. Asegurate de que sea un archivo .txt o .md.');
+            showToast('No se pudo leer el archivo. Asegúrate de que sea .txt o .md.', 'error');
         };
         reader.readAsText(file, 'UTF-8');
     }
@@ -2815,31 +2876,38 @@
 
     function copiarDocumento() {
         var preview = document.getElementById('docPreview');
-        var texto = preview.innerText || preview.textContent;
+        if (!preview) return;
+        var texto = preview.innerText || preview.textContent || '';
+        if (!texto.trim()) { showToast('No hay documento que copiar.', 'warn'); return; }
+        function ok() { showToast('Documento copiado al portapapeles ✓', 'success'); }
         if (navigator.clipboard && navigator.clipboard.writeText) {
-            navigator.clipboard.writeText(texto).then(function() { mostrarToast('Documento copiado al portapapeles'); });
+            navigator.clipboard.writeText(texto).then(ok).catch(function(){
+                showToast('No se pudo copiar. Selecciona y copia manualmente.', 'error');
+            });
         } else {
-            var ta = document.createElement('textarea');
-            ta.value = texto;
-            document.body.appendChild(ta);
-            ta.select();
-            document.execCommand('copy');
-            document.body.removeChild(ta);
-            mostrarToast('Documento copiado al portapapeles');
+            try {
+                var ta = document.createElement('textarea');
+                ta.value = texto;
+                document.body.appendChild(ta);
+                ta.select();
+                document.execCommand('copy');
+                document.body.removeChild(ta);
+                ok();
+            } catch (e) {
+                showToast('No se pudo copiar.', 'error');
+            }
         }
     }
 
     function nuevoDocumento() {
-        document.getElementById('docGenerado').classList.remove('visible');
+        var dg = document.getElementById('docGenerado');
+        if (dg) dg.classList.remove('visible');
+        var saveMsg = document.getElementById('saveMsg');
+        if (saveMsg) saveMsg.style.display = 'none';
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    function mostrarToast(msg) {
-        var toast = document.getElementById('toast');
-        toast.textContent = msg;
-        toast.classList.add('visible');
-        setTimeout(function() { toast.classList.remove('visible'); }, 2500);
-    }
+    function mostrarToast(msg) { showToast(msg, 'info'); }
 
     // =============================================
     // GUARDAR EN BIBLIOTECA
@@ -2849,11 +2917,22 @@
         if (!preview || !preview.innerHTML.trim()) {
             mostrarSaveMsg('⚠️ Primero genera un documento.', '#f59e0b'); return;
         }
-        var modId   = document.getElementById('selectModulo').value;
-        var aeNum   = document.getElementById('selectAE').value;
-        var oaId    = document.getElementById('selectOA').value;
-        var curso   = document.getElementById('selectCurso').value;
-        var prof    = document.getElementById('inputProfesor').value || (getCurrentUser()||{}).name || '—';
+        // Null-safety: requerir usuario autenticado antes de guardar
+        var currentUserData = _matUser || (window.ELAuth && ELAuth.user) || null;
+        if (!currentUserData || !currentUserData.uid) {
+            mostrarSaveMsg('⚠️ Debes iniciar sesión para publicar.', '#f59e0b');
+            return;
+        }
+        var selMod = document.getElementById('selectModulo');
+        var selAE  = document.getElementById('selectAE');
+        var selOA  = document.getElementById('selectOA');
+        var selCur = document.getElementById('selectCurso');
+        var inProf = document.getElementById('inputProfesor');
+        var modId   = selMod ? selMod.value : '';
+        var aeNum   = selAE ? selAE.value : '';
+        var oaId    = selOA ? selOA.value : '';
+        var curso   = selCur ? selCur.value : '';
+        var prof    = (inProf && inProf.value) || currentUserData.nombre || currentUserData.name || '—';
         var tipo    = tipoDocSeleccionado || 'guia';
         var tipos   = {guia:'Guía de Aprendizaje',apunte:'Apunte de Clase',ficha:'Ficha Práctica',evaluacion:'Guía de Ejercicios',prueba:'Prueba Formal',control:'Control Rápido'};
         var _modsRef = (typeof getCurriculaModulos === 'function')
@@ -2877,8 +2956,7 @@
             descripcion: (modNom||modId) + (aeNum ? ' · AE' + aeNum : '') + (oaId ? ' · ' + oaId : '')
         };
 
-        // Enriquecer con datos del usuario actual
-        var currentUserData = _matUser || ELAuth.user || {};
+        // Enriquecer con datos del usuario actual (ya validado arriba)
         var isTPGuardar = currentUserData.tipoProfesor === 'tecnico';
         var asigGuardar = isTPGuardar
             ? (currentUserData.especialidad || '')
@@ -2904,13 +2982,18 @@
         guardarPromesa
             .then(function() {
                 mostrarSaveMsg('✅ Publicado en la Biblioteca. Los estudiantes ya pueden verlo. <a href="biblioteca.html" style="color:#a5b4fc;margin-left:6px;">Ver biblioteca →</a>', '#34d399');
+                showToast('Material publicado ✓', 'success');
+                if (window.ELUI && ELUI.confetti) { try { ELUI.confetti({ amount: 80 }); } catch(e){} }
             })
             .catch(function(err) {
                 console.warn('[ElectroLearn] Firebase no disponible, guardando localmente:', err);
-                var mats = JSON.parse(localStorage.getItem('electrolearn_materiales') || '[]');
-                mats.push(entrada);
-                localStorage.setItem('electrolearn_materiales', JSON.stringify(mats));
+                try {
+                    var mats = JSON.parse(localStorage.getItem('electrolearn_materiales') || '[]');
+                    mats.push(entrada);
+                    localStorage.setItem('electrolearn_materiales', JSON.stringify(mats));
+                } catch (e) {}
                 mostrarSaveMsg('✅ Publicado localmente. <a href="biblioteca.html" style="color:#a5b4fc;margin-left:6px;">Ver biblioteca →</a>', '#34d399');
+                showToast('Publicado localmente.', 'info');
             });
     }
 

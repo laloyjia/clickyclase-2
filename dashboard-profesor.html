@@ -4,8 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Panel Docente — ElectroLearn</title>
+<meta name="description" content="Panel docente premium de ElectroLearn: planificaciones, materiales, herramientas IA y calendario de clases.">
 
-<!-- Firebase SDK v9 compat -->
+<!-- Firebase SDK v10 compat -->
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
 <script src="js/firebase-rest.js"></script>
@@ -16,384 +17,553 @@
 <script src="js/ia-client.js"></script>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 
+<!-- Premium design system -->
+<link rel="stylesheet" href="css/styles.css">
+<script src="js/el-ui.js" defer></script>
+
 <style>
-:root{--bg:#0f172a;--surface:#1e293b;--surface2:#273549;--border:rgba(99,102,241,.25);--accent:#6366f1;--accent2:#8b5cf6;--gold:#f59e0b;--green:#10b981;--red:#ef4444;--text:#e2e8f0;--muted:#94a3b8}
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
-.orb{position:fixed;border-radius:50%;filter:blur(80px);opacity:.1;pointer-events:none;z-index:0}
-.orb1{width:500px;height:500px;background:radial-gradient(#6366f1,transparent);top:-100px;left:-100px}
-.orb2{width:400px;height:400px;background:radial-gradient(#10b981,transparent);bottom:-80px;right:-80px}
-.layout{display:grid;grid-template-columns:250px 1fr;min-height:100vh;position:relative;z-index:1}
-.sidebar{background:rgba(15,23,42,.97);border-right:1px solid var(--border);padding:0;display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto}
-.sidebar-top{padding:24px 20px 20px;border-bottom:1px solid var(--border)}
-.sidebar-logo{font-family:'Space Grotesk',sans-serif;font-size:1.1rem;font-weight:700;color:var(--accent);display:flex;align-items:center;gap:8px;margin-bottom:10px}
-.sidebar-user{display:flex;align-items:center;gap:10px}
-.sidebar-avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.9rem;flex-shrink:0}
-.sidebar-name{font-size:.875rem;font-weight:600;line-height:1.2}
-.sidebar-role{font-size:.72rem;color:var(--muted)}
-.sidebar-nav{flex:1;padding:12px 0}
-.nav-section{padding:16px 20px 6px;font-size:.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;font-weight:600}
-.nav-item{display:flex;align-items:center;gap:10px;padding:10px 20px;cursor:pointer;transition:all .2s;color:var(--muted);font-size:.85rem;border-left:3px solid transparent;text-decoration:none}
-.nav-item:hover{background:rgba(99,102,241,.08);color:var(--text)}
-.nav-item.active{background:rgba(99,102,241,.13);color:var(--accent);border-left-color:var(--accent);font-weight:600}
-.nav-item.danger:hover{background:rgba(239,68,68,.08);color:var(--red)}
-.sidebar-bottom{padding:16px 20px;border-top:1px solid var(--border)}
-.tipo-tag{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:20px;font-size:.72rem;font-weight:600}
-.main{padding:28px;overflow-y:auto;max-height:100vh}
-.page-header{margin-bottom:28px}
-.page-header h1{font-family:'Space Grotesk',sans-serif;font-size:1.7rem;font-weight:700;background:linear-gradient(135deg,var(--accent),var(--green));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-.page-header p{color:var(--muted);font-size:.875rem;margin-top:4px}
-.stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:16px;margin-bottom:28px}
-.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px;transition:transform .2s}
-.stat-card:hover{transform:translateY(-2px)}
-.stat-icon{font-size:1.5rem;margin-bottom:8px}
-.stat-num{font-family:'Space Grotesk',sans-serif;font-size:1.8rem;font-weight:800;color:var(--accent)}
-.stat-label{font-size:.75rem;color:var(--muted);margin-top:2px}
-.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
-.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
-.card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:24px;margin-bottom:20px}
-.card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
-.card-title{font-size:1rem;font-weight:700;display:flex;align-items:center;gap:8px}
-.btn{padding:9px 18px;border-radius:8px;border:none;cursor:pointer;font-size:.85rem;font-weight:600;transition:all .2s;display:inline-flex;align-items:center;gap:7px;text-decoration:none}
-.btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff}
-.btn-primary:hover{opacity:.9;transform:translateY(-1px)}
-.btn-success{background:rgba(16,185,129,.15);border:1px solid rgba(16,185,129,.3);color:var(--green)}
-.btn-success:hover{background:rgba(16,185,129,.25)}
-.btn-outline{background:transparent;border:1px solid var(--border);color:var(--text)}
-.btn-outline:hover{border-color:var(--accent);color:var(--accent)}
-.btn-danger{background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.3);color:var(--red)}
-.btn-sm{padding:5px 12px;font-size:.78rem}
-.badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:12px;font-size:.72rem;font-weight:600}
-.badge-green{background:rgba(16,185,129,.12);color:var(--green);border:1px solid rgba(16,185,129,.25)}
-.badge-blue{background:rgba(99,102,241,.12);color:#818cf8;border:1px solid rgba(99,102,241,.25)}
-.badge-gold{background:rgba(245,158,11,.12);color:var(--gold);border:1px solid rgba(245,158,11,.25)}
-.modulo-card{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:16px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
-.modulo-card::before{content:'';position:absolute;top:0;left:0;width:100%;height:3px;background:linear-gradient(90deg,var(--accent),var(--accent2))}
-.modulo-card:hover{border-color:var(--accent);transform:translateY(-1px)}
-.modulo-code{font-family:'Space Grotesk',sans-serif;font-size:.8rem;font-weight:700;color:var(--accent);margin-bottom:6px}
-.modulo-name{font-size:.9rem;font-weight:600;margin-bottom:4px;line-height:1.3}
-.modulo-meta{font-size:.75rem;color:var(--muted)}
-.asig-card{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;display:flex;align-items:center;gap:12px;transition:all .2s}
-.asig-card:hover{border-color:rgba(99,102,241,.5)}
-.asig-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
-.asig-name{font-size:.88rem;font-weight:600}
-.asig-niveles{font-size:.73rem;color:var(--muted);margin-top:2px}
-.list-item{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid rgba(99,102,241,.08);gap:12px}
-.list-item:last-child{border-bottom:none}
-.list-icon{font-size:1.2rem;flex-shrink:0}
-.list-info{flex:1;min-width:0}
-.list-title{font-size:.88rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.list-meta{font-size:.75rem;color:var(--muted);margin-top:2px}
-.empty-state{text-align:center;padding:32px 20px;color:var(--muted)}
-.empty-state .emoji{font-size:2.5rem;display:block;margin-bottom:12px}
-.empty-state p{font-size:.875rem}
-.quick-actions{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px}
-.qa-btn{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px;cursor:pointer;text-align:center;transition:all .2s;text-decoration:none;display:block}
-.qa-btn:hover{border-color:var(--accent);background:rgba(99,102,241,.06);transform:translateY(-2px)}
-.qa-icon{font-size:1.8rem;display:block;margin-bottom:8px}
-.qa-label{font-size:.85rem;font-weight:600;color:var(--text)}
-.qa-sub{font-size:.72rem;color:var(--muted);margin-top:3px}
-.tab-bar{display:flex;gap:4px;margin-bottom:20px;background:var(--surface2);padding:4px;border-radius:10px}
-.tab-btn{flex:1;padding:8px;border-radius:8px;border:none;background:transparent;color:var(--muted);cursor:pointer;font-size:.82rem;font-weight:600;transition:all .2s}
-.tab-btn.active{background:var(--surface);color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,.3)}
-.tab-content{display:none}
-.tab-content.active{display:block}
-.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
-.section-title{font-size:1rem;font-weight:700}
-.spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-@media(max-width:768px){.layout{grid-template-columns:1fr}.sidebar{display:none}.grid-2{grid-template-columns:1fr}.grid-3{grid-template-columns:1fr 1fr}}
+  /* ───────── Layout específico del panel docente ───────── */
+  body { background: var(--bg, #0b1020); color: var(--text, #e5e7ff); min-height: 100vh; overflow-x: hidden; }
+
+  .bg-orbs { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+  .bg-orbs::before, .bg-orbs::after {
+    content: ''; position: absolute; border-radius: 50%; filter: blur(110px); opacity: .35;
+  }
+  .bg-orbs::before { width: 540px; height: 540px; background: radial-gradient(circle,#7c3aed,transparent 65%); top: -160px; left: -120px; }
+  .bg-orbs::after  { width: 460px; height: 460px; background: radial-gradient(circle,#10b981,transparent 65%); bottom: -160px; right: -120px; }
+
+  .layout-pro { display: grid; grid-template-columns: 280px 1fr; min-height: 100vh; position: relative; z-index: 1; }
+  .main-pro   { padding: 28px 32px 60px; max-width: 1480px; width: 100%; margin: 0 auto; }
+
+  .side-user-card {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px; border-radius: 14px;
+    background: var(--glass-2, rgba(255,255,255,.04));
+    border: 1px solid var(--border-soft, rgba(255,255,255,.08));
+    margin-bottom: 8px;
+  }
+  .side-user-avatar {
+    width: 42px; height: 42px; border-radius: 12px;
+    display: grid; place-items: center;
+    background: linear-gradient(135deg,#7c3aed,#22d3ee);
+    color:#fff; font-weight: 800; font-size: 1.05rem;
+    box-shadow: 0 8px 22px rgba(124,58,237,.4);
+    flex-shrink: 0;
+  }
+  .side-user-info { min-width: 0; flex: 1; }
+  .side-user-name { font-weight: 700; font-size: .92rem; line-height: 1.15; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .side-user-role { font-size: .72rem; color: var(--text-muted,#94a3b8); margin-top: 2px; }
+
+  /* Hero del docente */
+  .hero-prof {
+    display: grid; grid-template-columns: auto 1fr auto; gap: 22px; align-items: center;
+    margin-bottom: 26px;
+  }
+  .hero-prof .hero-avatar-big {
+    width: 96px; height: 96px; border-radius: 26px;
+    background: linear-gradient(135deg,#7c3aed,#22d3ee);
+    display: grid; place-items: center;
+    color:#fff; font-weight: 800; font-size: 2.2rem;
+    box-shadow: 0 18px 40px rgba(124,58,237,.5);
+    position: relative;
+  }
+  .hero-prof .hero-avatar-big::after {
+    content:''; position:absolute; inset:-6px; border-radius: 32px;
+    border: 2px solid rgba(124,58,237,.45);
+    animation: pulseRing 2.4s ease-out infinite;
+  }
+  @keyframes pulseRing { 0%{transform:scale(1);opacity:.85} 100%{transform:scale(1.18);opacity:0} }
+  .hero-prof .hero-cta { display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end; }
+
+  /* Stats row */
+  .stats-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:16px; margin-bottom:26px; }
+
+  /* Quick action cards */
+  .quick-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:14px; }
+  .quick-card {
+    position: relative; overflow:hidden;
+    padding:20px 18px; border-radius: 18px;
+    border:1px solid var(--border-soft, rgba(255,255,255,.08));
+    background: var(--glass-2, rgba(255,255,255,.04));
+    cursor:pointer; text-decoration:none; color:inherit;
+    transition: transform .25s var(--ease-out, ease), box-shadow .25s, border-color .25s;
+    display:block;
+  }
+  .quick-card::before {
+    content:''; position:absolute; inset:0;
+    background: radial-gradient(420px circle at var(--mx,50%) var(--my,0%), rgba(124,58,237,.16), transparent 55%);
+    opacity:0; transition: opacity .3s; pointer-events:none;
+  }
+  .quick-card:hover { transform: translateY(-4px); border-color: rgba(124,58,237,.35); box-shadow: 0 20px 40px rgba(0,0,0,.35); }
+  .quick-card:hover::before { opacity: 1; }
+  .quick-card .qc-icon {
+    width:46px; height:46px; border-radius:14px; display:grid; place-items:center;
+    font-size:1.3rem; margin-bottom:14px;
+    background: var(--grad-primary, linear-gradient(135deg,#7c3aed,#22d3ee));
+    box-shadow: 0 10px 24px rgba(124,58,237,.32);
+  }
+  .quick-card.qc-emerald .qc-icon { background: linear-gradient(135deg,#10b981,#34d399); box-shadow:0 10px 24px rgba(16,185,129,.32); }
+  .quick-card.qc-rose    .qc-icon { background: linear-gradient(135deg,#ef4444,#fb7185); box-shadow:0 10px 24px rgba(239,68,68,.32); }
+  .quick-card.qc-amber   .qc-icon { background: linear-gradient(135deg,#f59e0b,#fbbf24); box-shadow:0 10px 24px rgba(245,158,11,.32); }
+  .quick-card.qc-cyan    .qc-icon { background: linear-gradient(135deg,#06b6d4,#22d3ee); box-shadow:0 10px 24px rgba(6,182,212,.32); }
+  .quick-card.qc-violet  .qc-icon { background: linear-gradient(135deg,#8b5cf6,#a78bfa); box-shadow:0 10px 24px rgba(139,92,246,.32); }
+  .quick-card .qc-title { font-weight: 700; font-size: .98rem; }
+  .quick-card .qc-sub   { font-size: .78rem; color: var(--text-muted,#94a3b8); margin-top: 4px; line-height: 1.4; }
+  .quick-card .qc-tag   { display:inline-block; margin-top:12px; padding:3px 9px; border-radius:999px; font-size:.7rem; background:rgba(124,58,237,.16); color:#c4b5fd; font-weight:600; }
+
+  /* Módulos / asignaturas — tarjetas */
+  .mod-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:14px; }
+  .mod-card-pro {
+    position:relative; overflow:hidden;
+    padding:18px; border-radius: 16px;
+    background: var(--glass-2, rgba(255,255,255,.04));
+    border: 1px solid var(--border-soft, rgba(255,255,255,.08));
+    transition: transform .2s, border-color .2s, box-shadow .2s;
+  }
+  .mod-card-pro::before {
+    content:''; position:absolute; left:0; top:0; bottom:0; width:4px;
+    background: var(--grad-primary, linear-gradient(180deg,#7c3aed,#22d3ee));
+  }
+  .mod-card-pro:hover { transform: translateY(-3px); border-color: rgba(124,58,237,.4); box-shadow: 0 16px 36px rgba(0,0,0,.35); }
+  .mod-card-pro .mc-code { font-family: 'Space Grotesk', sans-serif; font-weight: 800; font-size: .88rem; color:#a78bfa; }
+  .mod-card-pro .mc-name { font-weight: 700; font-size: .95rem; margin-top: 4px; line-height: 1.3; }
+  .mod-card-pro .mc-meta { font-size: .76rem; color: var(--text-muted,#94a3b8); margin-top: 8px; }
+
+  /* Lista de materiales */
+  .mat-list  { display:flex; flex-direction:column; gap:10px; }
+  .mat-item  {
+    display:flex; align-items:center; gap:14px; padding:14px 16px;
+    border-radius:14px; background: var(--glass-2, rgba(255,255,255,.04));
+    border:1px solid var(--border-soft, rgba(255,255,255,.08));
+    transition: transform .18s, border-color .18s, box-shadow .18s;
+  }
+  .mat-item:hover { transform: translateX(3px); border-color: rgba(124,58,237,.35); box-shadow: 0 10px 22px rgba(0,0,0,.25); }
+  .mat-item .mi-ico { width:42px; height:42px; border-radius:12px; display:grid; place-items:center; font-size:1.2rem; flex-shrink:0; background:rgba(124,58,237,.15); }
+  .mat-item .mi-info { flex:1; min-width:0; }
+  .mat-item .mi-title{ font-weight:700; font-size:.92rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .mat-item .mi-meta { font-size:.74rem; color: var(--text-muted,#94a3b8); margin-top:3px; }
+
+  /* Tabs (módulos detalle) */
+  .tab-bar-pro { display:flex; flex-wrap:wrap; gap:6px; padding:6px; background:var(--glass-2, rgba(255,255,255,.04)); border-radius:12px; margin-bottom:14px; }
+  .tab-btn-pro { flex:1 1 80px; min-width:60px; padding:8px; border:0; background:transparent; color:var(--text-muted,#94a3b8); cursor:pointer; font-weight:600; font-size:.8rem; border-radius:8px; transition: all .2s; }
+  .tab-btn-pro:hover { color:#fff; }
+  .tab-btn-pro.active { background: linear-gradient(135deg,rgba(124,58,237,.32),rgba(34,211,238,.18)); color:#fff; box-shadow: 0 6px 18px rgba(124,58,237,.28); }
+  .tab-content-pro { display:none; animation: fadeIn .25s ease; }
+  .tab-content-pro.active { display:block; }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:none} }
+
+  /* Empty / loading state */
+  .empty-pro { text-align:center; padding:42px 20px; color: var(--text-muted,#94a3b8); }
+  .empty-pro .e-emoji { font-size: 2.6rem; display:block; margin-bottom: 10px; opacity: .85; }
+  .empty-pro p { font-size: .9rem; line-height: 1.5; }
+
+  /* Page header */
+  .page-h { margin-bottom: 22px; }
+  .page-h h1 {
+    font-family:'Space Grotesk', sans-serif; font-size: 1.85rem; font-weight: 800; line-height: 1.1;
+    background: linear-gradient(135deg,#fff 30%, #a78bfa 90%);
+    -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .page-h p { color: var(--text-muted,#94a3b8); margin-top: 6px; font-size: .92rem; }
+
+  /* Calendario premium */
+  .cal-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:6px; }
+  .cal-head { display:grid; grid-template-columns:repeat(7,1fr); gap:6px; margin-bottom:6px; }
+  .cal-head > div { text-align:center; font-size:.72rem; font-weight:700; color: var(--text-muted,#94a3b8); padding:6px 0; }
+  .cal-day {
+    min-height: 84px; padding: 8px;
+    border-radius: 10px; cursor: pointer;
+    background: var(--glass-2, rgba(255,255,255,.04));
+    border: 1px solid var(--border-soft, rgba(255,255,255,.08));
+    transition: all .18s; position:relative;
+  }
+  .cal-day:hover { border-color: rgba(124,58,237,.45); transform: translateY(-1px); }
+  .cal-day.is-today { background: linear-gradient(135deg, rgba(124,58,237,.22), rgba(34,211,238,.10)); border-color: #7c3aed; box-shadow: 0 6px 18px rgba(124,58,237,.25); }
+  .cal-day.is-empty { background: transparent; border: 1px dashed rgba(255,255,255,.06); cursor: default; }
+  .cal-day.is-empty:hover { transform: none; border-color: rgba(255,255,255,.06); }
+  .cal-day-num { font-size: .82rem; font-weight: 700; }
+  .cal-day.is-today .cal-day-num { color:#fff; }
+  .cal-evt { font-size:.66rem; padding:2px 5px; border-radius:5px; margin-top:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+  .cal-evt-clase      { background: rgba(124,58,237,.22); border-left:3px solid #7c3aed; }
+  .cal-evt-evaluacion { background: rgba(239,68,68,.22);  border-left:3px solid #ef4444; }
+  .cal-evt-taller     { background: rgba(6,182,212,.22);  border-left:3px solid #06b6d4; }
+  .cal-evt-reunion    { background: rgba(245,158,11,.22); border-left:3px solid #f59e0b; }
+  .cal-evt-otro       { background: rgba(148,163,184,.18); border-left:3px solid #94a3b8; }
+
+  /* Modal Herramienta IA — premium */
+  .modal-ia-back {
+    position: fixed; inset: 0; z-index: 200; display: none;
+    background: rgba(8,11,28,.75); backdrop-filter: blur(8px);
+    align-items: center; justify-content: center; padding: 16px;
+    animation: fadeIn .2s ease;
+  }
+  .modal-ia-back.show { display: flex; }
+  .modal-ia {
+    background: linear-gradient(180deg, rgba(30,30,50,.96), rgba(20,22,38,.96));
+    border: 1px solid rgba(124,58,237,.28);
+    border-radius: 22px; padding: 28px;
+    width: min(760px, 96vw); max-height: 92vh; overflow-y: auto;
+    position: relative; box-shadow: 0 30px 80px rgba(0,0,0,.55);
+  }
+  .modal-ia .m-close {
+    position: absolute; top: 14px; right: 14px;
+    background: rgba(255,255,255,.06); border: 0; color: #cbd5e1;
+    cursor: pointer; border-radius: 10px;
+    width: 34px; height: 34px; font-size: 1rem; transition: all .2s;
+  }
+  .modal-ia .m-close:hover { background: rgba(239,68,68,.2); color: #fca5a5; }
+  .modal-ia .m-title { display: flex; align-items: center; gap: 10px; font-size: 1.18rem; font-weight: 800; }
+  .modal-ia .m-sub   { color: var(--text-muted,#94a3b8); font-size: .82rem; margin: 4px 0 16px; }
+
+  .fg { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+  .fg label { font-size: .76rem; color: var(--text-muted,#94a3b8); font-weight: 600; }
+  .fg input, .fg select, .fg textarea {
+    background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.1);
+    border-radius: 10px; padding: 10px 12px; color: #e5e7ff;
+    font-size: .88rem; font-family: inherit; outline: none; transition: border-color .2s, box-shadow .2s;
+  }
+  .fg input:focus, .fg select:focus, .fg textarea:focus {
+    border-color: #7c3aed; box-shadow: 0 0 0 3px rgba(124,58,237,.18);
+  }
+  .fg textarea { resize: vertical; min-height: 80px; font-family: 'Inter', system-ui, sans-serif; line-height: 1.45; }
+  .fg-grid  { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .fg-grid3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px; }
+
+  .check-box-row {
+    display:flex; flex-wrap:wrap; gap:8px 16px; padding:12px;
+    background: rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.08); border-radius:10px;
+  }
+  .check-box-row label {
+    display:flex; align-items:center; gap:6px;
+    font-size:.82rem; cursor:pointer; color:#e5e7ff; font-weight: 400;
+  }
+  .check-box-row input[type=checkbox] { accent-color:#7c3aed; cursor:pointer; }
+
+  .oa-container {
+    background: rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.08);
+    border-radius: 10px; padding: 12px; min-height: 52px; max-height: 200px; overflow-y: auto;
+  }
+  .oa-eje { width: 100%; font-size: .68rem; color: var(--text-muted,#94a3b8); font-weight: 700; margin-top: 6px; text-transform: uppercase; letter-spacing: .06em; }
+  .oa-label {
+    display:flex; align-items:flex-start; gap:6px; cursor:pointer;
+    font-size:.78rem; color:#e5e7ff; font-weight: 400; max-width: 340px; line-height: 1.35;
+  }
+  .oa-label input { accent-color:#7c3aed; margin-top:2px; flex-shrink:0; }
+
+  .btn-ia-pro {
+    background: linear-gradient(135deg,#7c3aed,#22d3ee);
+    color:#fff; font-weight: 700; padding: 10px 20px;
+    border: 0; border-radius: 12px; cursor: pointer;
+    box-shadow: 0 10px 24px rgba(124,58,237,.4);
+    display: inline-flex; align-items: center; gap: 8px;
+    transition: all .2s; font-size: .9rem;
+  }
+  .btn-ia-pro:hover { transform: translateY(-2px); box-shadow: 0 14px 32px rgba(124,58,237,.5); }
+  .btn-ia-pro:disabled { opacity: .6; cursor: not-allowed; transform: none; }
+  .ia-spin { display:inline-block; width:14px; height:14px; border:2px solid rgba(255,255,255,.4); border-top-color:#fff; border-radius:50%; animation: spin .7s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Footer */
+  .foot-pro {
+    margin-top: 60px; padding: 28px 32px;
+    border-top: 1px solid var(--border-soft, rgba(255,255,255,.08));
+    color: var(--text-muted,#94a3b8); font-size: .82rem;
+    display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;
+  }
+  .foot-pro a { color: inherit; text-decoration: none; margin-left: 14px; transition: color .2s; }
+  .foot-pro a:hover { color: #c4b5fd; }
+
+  /* Mobile drawer */
+  .btn-hamb { display: none; }
+  @media (max-width: 920px) {
+    .layout-pro { grid-template-columns: 1fr; }
+    .side-pro { position: fixed; top: 0; left: 0; bottom: 0; width: 280px; z-index: 90; transform: translateX(-100%); transition: transform .25s ease; }
+    .side-pro.is-open { transform: translateX(0); box-shadow: 0 30px 60px rgba(0,0,0,.5); }
+    .btn-hamb { display: inline-flex; }
+    .main-pro { padding: 20px 18px 60px; padding-top: 70px; }
+    .hero-prof { grid-template-columns: 1fr; text-align: center; }
+    .hero-prof .hero-cta { justify-content: center; }
+    .hero-prof .hero-avatar-big { margin: 0 auto; }
+    .fg-grid, .fg-grid3 { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 540px) {
+    .stats-row { grid-template-columns: 1fr 1fr; }
+    .quick-grid { grid-template-columns: 1fr 1fr; }
+  }
 </style>
 </head>
 <body>
-<div class="orb orb1"></div>
-<div class="orb orb2"></div>
+<div class="bg-orbs" aria-hidden="true"></div>
 
-<div class="layout">
+<!-- Hamburger (mobile) -->
+<button class="btn-hamb" aria-label="Abrir menú" aria-controls="sidebarProf">
+  <span></span><span></span><span></span>
+</button>
 
-  <!-- ── SIDEBAR ──────────────────────────────── -->
-  <aside class="sidebar">
-    <div class="sidebar-top">
-      <div class="sidebar-logo">⚡ ElectroLearn</div>
-      <div class="sidebar-user">
-        <div class="sidebar-avatar" id="sAvatar">P</div>
-        <div>
-          <div class="sidebar-name" id="sNombre">Cargando…</div>
-          <div class="sidebar-role" id="sTipo">Docente</div>
-        </div>
+<div class="layout-pro">
+
+  <!-- ── SIDEBAR PREMIUM ──────────────────────────── -->
+  <aside id="sidebarProf" class="side-pro" aria-label="Navegación principal">
+    <div class="side-brand">
+      <div class="b-ico" aria-hidden="true">⚡</div>
+      <div class="b-txt">ElectroLearn</div>
+    </div>
+
+    <div class="side-user-card">
+      <div class="side-user-avatar" id="sAvatar">P</div>
+      <div class="side-user-info">
+        <div class="side-user-name" id="sNombre">Cargando…</div>
+        <div class="side-user-role" id="sTipo">Docente</div>
       </div>
     </div>
 
-    <nav class="sidebar-nav">
-      <div class="nav-section">Panel</div>
-      <a class="nav-item active" onclick="showSec('inicio')">🏠 Inicio</a>
-      <a class="nav-item" onclick="showSec('modulos')">📦 Mis Módulos/Asignaturas</a>
-      <a class="nav-item" onclick="showSec('materiales')">📚 Mis Materiales</a>
-      <a class="nav-item" onclick="showSec('planificaciones')">📅 Mis Planificaciones</a>
-      <a class="nav-item" onclick="showSec('calendario')">📆 Calendario de Clases</a>
-
-      <div class="nav-section">Recursos</div>
-      <a class="nav-item" onclick="showSec('biblioteca')">📖 Biblioteca</a>
-      <div class="nav-section">✨ Herramientas IA</div>
-      <a class="nav-item" onclick="showSec('herramientas')">🛠️ Crear materiales</a>
-      <a class="nav-item" href="planificacion.html" data-perm="planificar">📅 Nueva planificación</a>
-      <a class="nav-item" href="material.html" data-perm="material">📚 Nuevo material</a>
-
-      <div class="nav-section">Sistema</div>
-      <a class="nav-item" id="linkAdmin" href="admin.html" style="display:none">🏫 Panel Admin</a>
-      <a class="nav-item danger" onclick="ELAuth.logout()">🚪 Cerrar Sesión</a>
+    <div class="side-section-label">Panel</div>
+    <nav>
+      <a class="side-item active" data-sec="inicio" href="#"><span class="si-ico">🏠</span> Inicio</a>
+      <a class="side-item" data-sec="modulos" href="#"><span class="si-ico">📦</span> Mis módulos</a>
+      <a class="side-item" data-sec="materiales" href="#"><span class="si-ico">📚</span> Mis materiales</a>
+      <a class="side-item" data-sec="planificaciones" href="#"><span class="si-ico">📅</span> Mis planificaciones</a>
+      <a class="side-item" data-sec="calendario" href="#"><span class="si-ico">📆</span> Calendario</a>
     </nav>
 
-    <div class="sidebar-bottom">
-      <div style="font-size:.72rem;color:var(--muted)">ElectroLearn v2.0 · Salesianos Talca</div>
-    </div>
+    <div class="side-section-label">Recursos</div>
+    <nav>
+      <a class="side-item" href="biblioteca.html"><span class="si-ico">📖</span> Biblioteca</a>
+      <a class="side-item" data-sec="herramientas" href="#"><span class="si-ico">✨</span> Herramientas IA</a>
+      <a class="side-item" href="planificacion.html" data-perm="planificar"><span class="si-ico">📝</span> Nueva planificación</a>
+      <a class="side-item" href="material.html" data-perm="material"><span class="si-ico">➕</span> Nuevo material</a>
+    </nav>
+
+    <div class="side-section-label">Sistema</div>
+    <nav>
+      <a class="side-item" id="linkAdmin" href="admin.html" style="display:none"><span class="si-ico">🏫</span> Panel admin</a>
+      <a class="side-item" href="#" id="linkLogout"><span class="si-ico">🚪</span> Cerrar sesión</a>
+    </nav>
+
+    <div class="side-foot">ElectroLearn v2.0 · Salesianos Talca</div>
   </aside>
 
-  <!-- ── MAIN ─────────────────────────────────── -->
-  <main class="main">
+  <!-- ── MAIN ─────────────────────────────────────── -->
+  <main class="main-pro">
 
-    <!-- INICIO -->
+    <!-- ═══════════ INICIO ═══════════ -->
     <section id="sec-inicio">
-      <div class="page-header">
-        <h1 id="welcomeTitle">¡Bienvenido, Docente!</h1>
-        <p id="welcomeSub">Panel de gestión pedagógica · ElectroLearn</p>
+      <div class="hero-pro">
+        <div class="hero-prof">
+          <div class="hero-avatar-big" id="heroAvatar">P</div>
+          <div>
+            <h1 id="welcomeTitle" class="hero-grad" style="font-size:2rem;font-weight:800;line-height:1.1">¡Bienvenido!</h1>
+            <p id="welcomeSub" class="hero-sub">Panel de gestión pedagógica · ElectroLearn</p>
+          </div>
+          <div class="hero-cta">
+            <a class="btn-pro primary" href="material.html" data-perm="material">➕ Crear material</a>
+            <a class="btn-pro ghost" href="planificacion.html" data-perm="planificar">📅 Planificar</a>
+          </div>
+        </div>
       </div>
 
-      <!-- Stats -->
-      <div class="stats-grid">
-        <div class="stat-card">
-          <div class="stat-icon">📚</div>
-          <div class="stat-num" id="statMats">0</div>
-          <div class="stat-label">Materiales creados</div>
+      <!-- Stats animadas -->
+      <div class="stats-row" id="statsRow">
+        <div class="stat-pro s-teal">
+          <div class="stat-ico">📚</div>
+          <div class="stat-num" id="statMats" data-cu-target="0">0</div>
+          <div class="stat-lbl">Materiales creados</div>
         </div>
-        <div class="stat-card">
-          <div class="stat-icon">📅</div>
-          <div class="stat-num" id="statPlans">0</div>
-          <div class="stat-label">Planificaciones</div>
+        <div class="stat-pro s-pink">
+          <div class="stat-ico">📅</div>
+          <div class="stat-num" id="statPlans" data-cu-target="0">0</div>
+          <div class="stat-lbl">Planificaciones</div>
         </div>
-        <div class="stat-card">
-          <div class="stat-icon">📦</div>
-          <div class="stat-num" id="statModulos">0</div>
-          <div class="stat-label">Módulos asignados</div>
+        <div class="stat-pro s-amber">
+          <div class="stat-ico">📦</div>
+          <div class="stat-num" id="statModulos" data-cu-target="0">0</div>
+          <div class="stat-lbl">Módulos asignados</div>
         </div>
-        <div class="stat-card">
-          <div class="stat-icon">👥</div>
-          <div class="stat-num" id="statNiveles">0</div>
-          <div class="stat-label">Niveles a cargo</div>
+        <div class="stat-pro s-green">
+          <div class="stat-ico">👥</div>
+          <div class="stat-num" id="statNiveles" data-cu-target="0">0</div>
+          <div class="stat-lbl">Niveles a cargo</div>
         </div>
       </div>
 
       <!-- Acceso rápido -->
-      <div class="card">
-        <div class="card-header">
-          <div class="card-title">⚡ Acceso Rápido</div>
-        </div>
-        <div class="quick-actions" style="grid-template-columns:repeat(auto-fill,minmax(150px,1fr))">
-          <a class="qa-btn" href="material.html" data-perm="material">
-            <span class="qa-icon">📝</span>
-            <span class="qa-label">Crear Material</span>
-            <div class="qa-sub">Guías, apuntes, fichas</div>
+      <div class="card-pro" style="margin-bottom:24px">
+        <h3 style="font-size:1.05rem;font-weight:800;margin-bottom:14px">⚡ Acceso rápido</h3>
+        <div class="quick-grid">
+          <a class="quick-card" href="material.html" data-perm="material">
+            <div class="qc-icon">📝</div>
+            <div class="qc-title">Crear material</div>
+            <div class="qc-sub">Guías, apuntes, fichas y evaluaciones</div>
+            <span class="qc-tag">✨ con IA</span>
           </a>
-          <a class="qa-btn" href="planificacion.html" data-perm="planificar">
-            <span class="qa-icon">📅</span>
-            <span class="qa-label">Planificación</span>
-            <div class="qa-sub">Planificar clases LIRMI</div>
+          <a class="quick-card qc-emerald" href="planificacion.html" data-perm="planificar">
+            <div class="qc-icon">📅</div>
+            <div class="qc-title">Planificar clase</div>
+            <div class="qc-sub">Estructura LIRMI con OA Mineduc</div>
+            <span class="qc-tag">✨ con IA</span>
           </a>
-          <a class="qa-btn" onclick="showSec('herramientas')">
-            <span class="qa-icon">✨</span>
-            <span class="qa-label">Herramientas IA</span>
-            <div class="qa-sub">Generar con IA</div>
+          <a class="quick-card qc-violet" href="#" data-sec="herramientas">
+            <div class="qc-icon">🛠️</div>
+            <div class="qc-title">Herramientas IA</div>
+            <div class="qc-sub">6 generadores especializados</div>
+            <span class="qc-tag">6 herramientas</span>
           </a>
-          <a class="qa-btn" onclick="showSec('calendario')">
-            <span class="qa-icon">📆</span>
-            <span class="qa-label">Calendario</span>
-            <div class="qa-sub">Clases del mes</div>
+          <a class="quick-card qc-cyan" href="#" data-sec="calendario">
+            <div class="qc-icon">📆</div>
+            <div class="qc-title">Calendario</div>
+            <div class="qc-sub">Tus clases y evaluaciones del mes</div>
           </a>
-          <a class="qa-btn" href="biblioteca.html">
-            <span class="qa-icon">📚</span>
-            <span class="qa-label">Biblioteca</span>
-            <div class="qa-sub">Recursos del colegio</div>
+          <a class="quick-card qc-amber" href="biblioteca.html">
+            <div class="qc-icon">📖</div>
+            <div class="qc-title">Biblioteca</div>
+            <div class="qc-sub">Recursos de toda la institución</div>
           </a>
-          <a class="qa-btn" onclick="showSec('modulos')">
-            <span class="qa-icon">🗂️</span>
-            <span class="qa-label">Mis Módulos</span>
-            <div class="qa-sub">Ver asignaciones</div>
+          <a class="quick-card qc-rose" href="#" data-sec="modulos">
+            <div class="qc-icon">🗂️</div>
+            <div class="qc-title">Mis módulos</div>
+            <div class="qc-sub">Asignaturas y módulos a cargo</div>
           </a>
         </div>
       </div>
 
-      <!-- Asignación curricular -->
-      <div class="grid-2">
-        <div class="card">
-          <div class="card-header">
-            <div class="card-title">🗂️ Mi Asignación Curricular</div>
-          </div>
+      <!-- Asignación + últimos materiales -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px" class="grid-2-pro">
+        <div class="card-pro">
+          <h3 style="font-size:1rem;font-weight:800;margin-bottom:14px;display:flex;align-items:center;gap:8px">🗂️ Mi asignación curricular</h3>
           <div id="asignacionResumen">
-            <div class="empty-state"><span class="emoji">⏳</span><p>Cargando asignación…</p></div>
+            <div class="empty-pro"><span class="e-emoji">⏳</span><p>Cargando asignación…</p></div>
           </div>
         </div>
 
-        <div class="card">
-          <div class="card-header">
-            <div class="card-title">📋 Últimos Materiales</div>
-            <a class="btn btn-outline btn-sm" onclick="showSec('materiales')">Ver todos</a>
+        <div class="card-pro">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+            <h3 style="font-size:1rem;font-weight:800;display:flex;align-items:center;gap:8px">📋 Últimos materiales</h3>
+            <a class="btn-pro ghost" data-sec="materiales" href="#" style="padding:5px 12px;font-size:.78rem">Ver todos →</a>
           </div>
           <div id="ultimosMats">
-            <div class="empty-state"><span class="emoji">📂</span><p>Sin materiales aún</p></div>
+            <div class="empty-pro"><span class="e-emoji">📂</span><p>Cargando…</p></div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- MÓDULOS / ASIGNATURAS -->
-    <section id="sec-modulos" style="display:none">
-      <div class="page-header">
-        <h1>📦 Mis Módulos y Asignaturas</h1>
-        <p>Contenido curricular asignado por el administrador</p>
+    <!-- ═══════════ MÓDULOS ═══════════ -->
+    <section id="sec-modulos" hidden>
+      <div class="page-h">
+        <h1>📦 Mis módulos y asignaturas</h1>
+        <p>Contenido curricular asignado por el administrador.</p>
       </div>
       <div id="modulosContent">
-        <div class="empty-state"><span class="emoji">⏳</span><p>Cargando…</p></div>
+        <div class="empty-pro"><span class="e-emoji">⏳</span><p>Cargando…</p></div>
       </div>
     </section>
 
-    <!-- MATERIALES -->
-    <section id="sec-materiales" style="display:none">
-      <div class="page-header">
-        <h1>📚 Mis Materiales</h1>
-        <p>Recursos didácticos que has publicado</p>
+    <!-- ═══════════ MATERIALES ═══════════ -->
+    <section id="sec-materiales" hidden>
+      <div class="page-h">
+        <h1>📚 Mis materiales</h1>
+        <p>Recursos didácticos que has publicado en la plataforma.</p>
       </div>
-      <div class="card">
-        <div class="section-header">
-          <div class="section-title">Materiales publicados</div>
-          <a class="btn btn-primary btn-sm" href="material.html" data-perm="material">➕ Nuevo material</a>
+      <div class="card-pro">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:10px">
+          <div style="font-weight:700;font-size:1rem">Materiales publicados</div>
+          <a class="btn-pro primary" href="material.html" data-perm="material" style="padding:7px 14px;font-size:.82rem">➕ Nuevo material</a>
         </div>
         <div id="matsList">
-          <div class="empty-state"><span class="emoji">📂</span><p>No has subido materiales aún.<br>¡Crea tu primer recurso!</p></div>
+          <div class="empty-pro"><span class="e-emoji">⏳</span><p>Cargando…</p></div>
         </div>
       </div>
     </section>
 
-    <!-- PLANIFICACIONES -->
-    <section id="sec-planificaciones" style="display:none">
-      <div class="page-header">
-        <h1>📅 Mis Planificaciones</h1>
-        <p>Planificaciones de clases registradas</p>
+    <!-- ═══════════ PLANIFICACIONES ═══════════ -->
+    <section id="sec-planificaciones" hidden>
+      <div class="page-h">
+        <h1>📅 Mis planificaciones</h1>
+        <p>Planificaciones de clases registradas.</p>
       </div>
-      <div class="card">
-        <div class="section-header">
-          <div class="section-title">Planificaciones</div>
-          <a class="btn btn-primary btn-sm" href="planificacion.html" data-perm="planificar">➕ Nueva planificación</a>
+      <div class="card-pro">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:10px">
+          <div style="font-weight:700;font-size:1rem">Planificaciones</div>
+          <a class="btn-pro primary" href="planificacion.html" data-perm="planificar" style="padding:7px 14px;font-size:.82rem">➕ Nueva planificación</a>
         </div>
         <div id="plansList">
-          <div class="empty-state"><span class="emoji">📋</span><p>No has creado planificaciones aún.</p></div>
+          <div class="empty-pro"><span class="e-emoji">⏳</span><p>Cargando…</p></div>
         </div>
       </div>
     </section>
 
-    <!-- HERRAMIENTAS IA -->
-    <section id="sec-herramientas" style="display:none">
-      <div class="page-header">
-        <h1>🛠️ Crear Materiales con IA</h1>
-        <p>Genera borradores en segundos y edítalos a tu medida</p>
+    <!-- ═══════════ HERRAMIENTAS IA ═══════════ -->
+    <section id="sec-herramientas" hidden>
+      <div class="page-h">
+        <h1>🛠️ Crear material con IA</h1>
+        <p>Genera borradores en segundos y edítalos a tu medida — todo apoyado en el currículum Mineduc.</p>
       </div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:18px;margin-bottom:28px">
-
-        <!-- Planificación -->
-        <div class="card" style="padding:20px;cursor:pointer;transition:all .2s;border:1px solid var(--border)" onclick="abrirHerramienta('planificacion')"
-             onmouseenter="this.style.borderColor='#6366f1'" onmouseleave="this.style.borderColor='rgba(99,102,241,.25)'">
-          <div style="font-size:2.2rem;margin-bottom:12px">📅</div>
-          <div style="font-weight:700;font-size:1rem;margin-bottom:6px">Planificación de Clase</div>
-          <div style="font-size:.8rem;color:var(--muted)">Genera un plan completo con inicio, desarrollo, cierre e indicadores de logro</div>
-          <div style="margin-top:14px"><span style="font-size:.72rem;padding:3px 8px;background:rgba(99,102,241,.1);color:#818cf8;border-radius:20px">✨ IA disponible</span></div>
-        </div>
-
-        <!-- Guía de Aprendizaje -->
-        <div class="card" style="padding:20px;cursor:pointer;transition:all .2s;border:1px solid var(--border)" onclick="abrirHerramienta('guia')"
-             onmouseenter="this.style.borderColor='#10b981'" onmouseleave="this.style.borderColor='rgba(99,102,241,.25)'">
-          <div style="font-size:2.2rem;margin-bottom:12px">📄</div>
-          <div style="font-weight:700;font-size:1rem;margin-bottom:6px">Guía de Aprendizaje</div>
-          <div style="font-size:.8rem;color:var(--muted)">Crea guías con actividades, conceptos clave y autoevaluación para tus estudiantes</div>
-          <div style="margin-top:14px"><span style="font-size:.72rem;padding:3px 8px;background:rgba(16,185,129,.1);color:#34d399;border-radius:20px">✨ IA disponible</span></div>
-        </div>
-
-        <!-- Prueba/Evaluación -->
-        <div class="card" style="padding:20px;cursor:pointer;transition:all .2s;border:1px solid var(--border)" onclick="abrirHerramienta('prueba')"
-             onmouseenter="this.style.borderColor='#ef4444'" onmouseleave="this.style.borderColor='rgba(99,102,241,.25)'">
-          <div style="font-size:2.2rem;margin-bottom:12px">📊</div>
-          <div style="font-weight:700;font-size:1rem;margin-bottom:6px">Prueba / Evaluación</div>
-          <div style="font-size:.8rem;color:var(--muted)">Genera instrumentos con selección múltiple, V/F, desarrollo y pauta de corrección</div>
-          <div style="margin-top:14px"><span style="font-size:.72rem;padding:3px 8px;background:rgba(239,68,68,.1);color:#f87171;border-radius:20px">✨ IA disponible</span></div>
-        </div>
-
-        <!-- Apunte -->
-        <div class="card" style="padding:20px;cursor:pointer;transition:all .2s;border:1px solid var(--border)" onclick="abrirHerramienta('apunte')"
-             onmouseenter="this.style.borderColor='#f59e0b'" onmouseleave="this.style.borderColor='rgba(99,102,241,.25)'">
-          <div style="font-size:2.2rem;margin-bottom:12px">📝</div>
-          <div style="font-weight:700;font-size:1rem;margin-bottom:6px">Apunte de Contenido</div>
-          <div style="font-size:.8rem;color:var(--muted)">Crea apuntes teóricos con conceptos, ejemplos, glosario y preguntas de comprensión</div>
-          <div style="margin-top:14px"><span style="font-size:.72rem;padding:3px 8px;background:rgba(245,158,11,.1);color:#fbbf24;border-radius:20px">✨ IA disponible</span></div>
-        </div>
-
-        <!-- Revisión de Instrumento -->
-        <div class="card" style="padding:20px;cursor:pointer;transition:all .2s;border:1px solid var(--border)" onclick="abrirHerramienta('revision')"
-             onmouseenter="this.style.borderColor='#8b5cf6'" onmouseleave="this.style.borderColor='rgba(99,102,241,.25)'">
-          <div style="font-size:2.2rem;margin-bottom:12px">🔍</div>
-          <div style="font-weight:700;font-size:1rem;margin-bottom:6px">Revisión de Instrumento</div>
-          <div style="font-size:.8rem;color:var(--muted)">Pega tu prueba o guía existente y la IA la analiza y sugiere mejoras pedagógicas</div>
-          <div style="margin-top:14px"><span style="font-size:.72rem;padding:3px 8px;background:rgba(139,92,246,.1);color:#a78bfa;border-radius:20px">✨ IA disponible</span></div>
-        </div>
-
-        <!-- Guía de Taller -->
-        <div class="card" style="padding:20px;cursor:pointer;transition:all .2s;border:1px solid var(--border)" onclick="abrirHerramienta('taller')"
-             onmouseenter="this.style.borderColor='#06b6d4'" onmouseleave="this.style.borderColor='rgba(99,102,241,.25)'">
-          <div style="font-size:2.2rem;margin-bottom:12px">🔧</div>
-          <div style="font-weight:700;font-size:1rem;margin-bottom:6px">Guía para Taller</div>
-          <div style="font-size:.8rem;color:var(--muted)">Crea guías de actividades prácticas con normas de seguridad, procedimiento y lista de cotejo</div>
-          <div style="margin-top:14px"><span style="font-size:.72rem;padding:3px 8px;background:rgba(6,182,212,.1);color:#22d3ee;border-radius:20px">✨ IA disponible</span></div>
-        </div>
-
+      <div class="quick-grid" style="grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px">
+        <a class="quick-card" href="#" data-herr="planificacion">
+          <div class="qc-icon">📅</div>
+          <div class="qc-title">Planificación de clase</div>
+          <div class="qc-sub">Inicio, desarrollo, cierre e indicadores de logro.</div>
+          <span class="qc-tag">✨ IA disponible</span>
+        </a>
+        <a class="quick-card qc-emerald" href="#" data-herr="guia">
+          <div class="qc-icon">📄</div>
+          <div class="qc-title">Guía de aprendizaje</div>
+          <div class="qc-sub">Actividades, conceptos clave y autoevaluación.</div>
+          <span class="qc-tag">✨ IA disponible</span>
+        </a>
+        <a class="quick-card qc-rose" href="#" data-herr="prueba">
+          <div class="qc-icon">📊</div>
+          <div class="qc-title">Prueba / Evaluación</div>
+          <div class="qc-sub">Selección múltiple, V/F, desarrollo y pauta.</div>
+          <span class="qc-tag">✨ IA disponible</span>
+        </a>
+        <a class="quick-card qc-amber" href="#" data-herr="apunte">
+          <div class="qc-icon">📝</div>
+          <div class="qc-title">Apunte de contenido</div>
+          <div class="qc-sub">Conceptos, ejemplos, glosario y comprensión.</div>
+          <span class="qc-tag">✨ IA disponible</span>
+        </a>
+        <a class="quick-card qc-violet" href="#" data-herr="revision">
+          <div class="qc-icon">🔍</div>
+          <div class="qc-title">Revisión de instrumento</div>
+          <div class="qc-sub">Pega tu prueba o guía y la IA sugiere mejoras.</div>
+          <span class="qc-tag">✨ IA disponible</span>
+        </a>
+        <a class="quick-card qc-cyan" href="#" data-herr="taller">
+          <div class="qc-icon">🔧</div>
+          <div class="qc-title">Guía para taller</div>
+          <div class="qc-sub">Procedimiento, seguridad y lista de cotejo.</div>
+          <span class="qc-tag">✨ IA disponible</span>
+        </a>
       </div>
     </section>
 
-    <!-- BIBLIOTECA -->
-    <section id="sec-biblioteca" style="display:none">
-      <div class="page-header">
-        <h1>📖 Biblioteca de Recursos</h1>
-        <p>Todos los materiales disponibles en la plataforma</p>
+    <!-- ═══════════ CALENDARIO ═══════════ -->
+    <section id="sec-calendario" hidden>
+      <div class="page-h">
+        <h1>📆 Calendario de clases</h1>
+        <p>Organiza tus clases, evaluaciones y compromisos del mes.</p>
       </div>
-      <div class="card">
-        <div class="section-header">
-          <div class="section-title">Recursos disponibles</div>
-        </div>
-        <div id="bibliotecaList">
-          <div class="empty-state"><span class="emoji">📚</span><p>Cargando biblioteca…</p></div>
-        </div>
-      </div>
-    </section>
 
-    <!-- CALENDARIO -->
-    <section id="sec-calendario" style="display:none">
-      <div class="page-header">
-        <h1>📆 Calendario de Clases</h1>
-        <p>Organiza y planifica tus clases mes a mes</p>
-      </div>
-      <div class="card" style="margin-bottom:20px">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:12px">
+      <div class="card-pro" style="margin-bottom:20px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px">
           <div style="display:flex;align-items:center;gap:10px">
-            <button onclick="calNavMes(-1)" class="btn btn-outline btn-sm">‹</button>
-            <span id="calTitulo" style="font-family:'Space Grotesk',sans-serif;font-size:1.1rem;font-weight:700;min-width:180px;text-align:center"></span>
-            <button onclick="calNavMes(1)" class="btn btn-outline btn-sm">›</button>
+            <button id="calPrev" class="btn-pro ghost" aria-label="Mes anterior" style="padding:6px 10px">‹</button>
+            <span id="calTitulo" style="font-family:'Space Grotesk',sans-serif;font-size:1.1rem;font-weight:800;min-width:200px;text-align:center"></span>
+            <button id="calNext" class="btn-pro ghost" aria-label="Mes siguiente" style="padding:6px 10px">›</button>
           </div>
-          <button class="btn btn-primary btn-sm" onclick="calNuevoEvento()">+ Agregar clase / evento</button>
+          <button id="calNuevo" class="btn-pro primary" style="padding:7px 14px;font-size:.82rem">+ Agregar clase / evento</button>
         </div>
-        <div id="calGrid"></div>
+        <div class="cal-head" id="calHead"></div>
+        <div class="cal-grid" id="calGrid"></div>
       </div>
-      <div class="card">
-        <div class="card-header">
-          <div class="card-title">📋 Eventos del mes</div>
-        </div>
+
+      <div class="card-pro">
+        <h3 style="font-size:1rem;font-weight:800;margin-bottom:14px">📋 Eventos del mes</h3>
         <div id="calListaEventos"></div>
       </div>
     </section>
@@ -401,992 +571,1037 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
   </main>
 </div>
 
+<!-- Footer -->
+<footer class="foot-pro">
+  <div>© 2026 ElectroLearn · Salesianos Talca</div>
+  <div>
+    <a href="biblioteca.html">Biblioteca</a>
+    <a href="material.html">Crear material</a>
+    <a href="planificacion.html">Planificar clase</a>
+  </div>
+</footer>
+
+<!-- Modales -->
+<div id="modalHerr" class="modal-ia-back" role="dialog" aria-modal="true" aria-label="Crear material con IA"></div>
+<div id="modalCal"  class="modal-ia-back" role="dialog" aria-modal="true" aria-label="Agregar evento al calendario"></div>
+
 <script>
-// ═══════════════════════════════════════════════════════════════
-//  PANEL DOCENTE — Lógica principal
-// ═══════════════════════════════════════════════════════════════
+(function() {
+  'use strict';
 
-var _profeUser = null;
+  // ═══════════════════════════════════════════════════════════════
+  //  Helpers de seguridad — escape para prevenir XSS
+  // ═══════════════════════════════════════════════════════════════
+  function escTxt(s) {
+    if (s === null || s === undefined) return '';
+    return String(s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+  function escAttr(s) { return escTxt(s); }
+  function safeEmail(email, fb) {
+    return (window.ELUI && window.ELUI.safeEmailHandle)
+      ? window.ELUI.safeEmailHandle(email, fb || 'docente')
+      : (email && typeof email === 'string' && email.indexOf('@') > 0 ? email.split('@')[0] : (fb || 'docente'));
+  }
+  function fmtFecha(iso) {
+    if (!iso) return '—';
+    try { return new Date(iso).toLocaleDateString('es-CL'); } catch(_) { return '—'; }
+  }
+  function toast(msg, type) {
+    if (window.ELUI && window.ELUI.toast) return window.ELUI.toast(msg, { type: type || 'info' });
+    console.log('[' + (type||'info') + '] ' + msg);
+  }
 
-// ── Secciones ─────────────────────────────────────────────────
-function showSec(id) {
-  document.querySelectorAll('main > section').forEach(function(s) { s.style.display = 'none'; });
-  document.querySelectorAll('.nav-item').forEach(function(n) { n.classList.remove('active'); });
-  document.getElementById('sec-' + id).style.display = 'block';
-  document.querySelector('.nav-item[onclick="showSec(\'' + id + '\')"]').classList.add('active');
+  // ═══════════════════════════════════════════════════════════════
+  //  Estado
+  // ═══════════════════════════════════════════════════════════════
+  var _profeUser = null;
 
-  // Lazy load
-  if (id === 'materiales')     loadMisMateriales();
-  if (id === 'planificaciones') loadMisPlanificaciones();
-  if (id === 'biblioteca')     loadBiblioteca();
-  if (id === 'modulos')        renderModulosDetalle();
-  if (id === 'calendario')     calRender();
-}
+  // ═══════════════════════════════════════════════════════════════
+  //  Navegación entre secciones
+  // ═══════════════════════════════════════════════════════════════
+  function showSec(id) {
+    document.querySelectorAll('main.main-pro > section').forEach(function(s) { s.hidden = true; });
+    document.querySelectorAll('.side-item').forEach(function(n) { n.classList.remove('active'); });
+    var sec = document.getElementById('sec-' + id);
+    if (sec) sec.hidden = false;
+    var nav = document.querySelector('.side-item[data-sec="' + id + '"]');
+    if (nav) nav.classList.add('active');
 
-// ── Verificar sesión y cargar datos ──────────────────────────
-ELAuth.onUserReady(function(user) {
-  if (!user) { window.location.href = 'index.html'; return; }
+    // Lazy load por sección
+    if (id === 'materiales')      loadMisMateriales();
+    if (id === 'planificaciones') loadMisPlanificaciones();
+    if (id === 'modulos')         renderModulosDetalle();
+    if (id === 'calendario')      calRender();
 
-  // Solo profesores y admins llegan aquí
-  var adminEmails = window.EL_ADMIN_EMAILS || [window.EL_ADMIN_EMAIL];
-  var esAdmin = user.role === 'admin' || adminEmails.indexOf(user.email) !== -1;
-  if (user.role !== 'profesor' && !esAdmin) {
-    window.location.href = 'dashboard.html';
+    // Cierra el drawer en mobile
+    var side = document.getElementById('sidebarProf');
+    if (side) side.classList.remove('is-open');
+
+    if (window.scrollTo) window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // Wire de la navegación tras DOM ready
+  document.addEventListener('click', function(e) {
+    var t = e.target.closest('[data-sec]');
+    if (t) { e.preventDefault(); showSec(t.getAttribute('data-sec')); return; }
+
+    var h = e.target.closest('[data-herr]');
+    if (h) { e.preventDefault(); abrirHerramienta(h.getAttribute('data-herr')); return; }
+
+    if (e.target.closest('#linkLogout')) {
+      e.preventDefault();
+      if (window.ELAuth && window.ELAuth.logout) ELAuth.logout();
+    }
+  });
+
+  // ═══════════════════════════════════════════════════════════════
+  //  Auth + boot
+  // ═══════════════════════════════════════════════════════════════
+  if (!window.ELAuth || !window.ELAuth.onUserReady) {
+    document.addEventListener('DOMContentLoaded', function() {
+      toast('No se pudo iniciar la sesión. Recarga la página.', 'error');
+    });
     return;
   }
 
-  // Mostrar enlace admin si corresponde
-  if (esAdmin) {
-    var la = document.getElementById('linkAdmin');
-    if (la) la.style.display = '';
-  }
+  ELAuth.onUserReady(function(user) {
+    if (!user) { window.location.href = 'index.html'; return; }
 
-  _profeUser = user;
-  initDashboard(user);
-});
-
-function initDashboard(user) {
-  // ── Sidebar ──
-  var inicial = (user.nombre || user.email || 'P').charAt(0).toUpperCase();
-  document.getElementById('sAvatar').textContent = inicial;
-  document.getElementById('sNombre').textContent = user.nombre || user.email.split('@')[0];
-
-  var tipoLabels = { basica: '📚 Educación Básica', media: '🎓 Plan Común', tecnico: '⚙️ Técnico-Profesional' };
-  var tipoLabel  = tipoLabels[user.tipoProfesor] || '🎓 Docente';
-  document.getElementById('sTipo').textContent = tipoLabel;
-
-  // ── Header ──
-  var nombre = user.nombre ? user.nombre.split(' ')[0] : 'Docente';
-  document.getElementById('welcomeTitle').textContent = '¡Bienvenido, ' + nombre + '!';
-  document.getElementById('welcomeSub').textContent = tipoLabel + ' · ElectroLearn';
-
-  // ── Stats ──
-  var mods  = (user.modulos && user.modulos.length) || (user.asignaturas && user.asignaturas.length) || 0;
-  var nivs  = (user.niveles && user.niveles.length) || 0;
-  document.getElementById('statModulos').textContent = mods;
-  document.getElementById('statNiveles').textContent = nivs;
-
-  // ── Permisos ──
-  var canPlan = !user.permisos || user.permisos.planificar !== false;
-  var canMat  = !user.permisos || user.permisos.crearMaterial !== false;
-  document.querySelectorAll('[data-perm="planificar"]').forEach(function(el) {
-    el.style.display = canPlan ? '' : 'none';
-  });
-  document.querySelectorAll('[data-perm="material"]').forEach(function(el) {
-    el.style.display = canMat ? '' : 'none';
-  });
-
-  // ── Asignación curricular ──
-  renderAsignacionResumen(user);
-
-  // ── Últimos materiales (preview) ──
-  loadUltimosMats(user.email);
-
-  // ── Cargar stats de materiales y planificaciones ──
-  ELDB.materiales.listar({ profesor: user.email }).then(function(mats) {
-    document.getElementById('statMats').textContent = mats.length;
-  }).catch(function() {});
-  ELDB.planificaciones.listar({ profesor: user.email }).then(function(plans) {
-    document.getElementById('statPlans').textContent = plans.length;
-  }).catch(function() {});
-}
-
-// ── Asignación curricular ────────────────────────────────────
-function renderAsignacionResumen(user) {
-  var el = document.getElementById('asignacionResumen');
-  var html = '';
-
-  if (user.tipoProfesor === 'tecnico') {
-    // EMTP
-    if (user.especialidad) {
-      var espData = CURRICULA_CHILE.getEspecialidades().find(function(e) { return e.key === user.especialidad; });
-      html += '<div style="margin-bottom:12px">';
-      html += '<div class="modulo-code">⚙️ Especialidad EMTP</div>';
-      html += '<div class="modulo-name">' + (espData ? espData.nombre : user.especialidad) + '</div>';
-      if (espData) html += '<div class="modulo-meta">' + espData.sector + '</div>';
-      html += '</div>';
-    }
-    if (user.modulos && user.modulos.length) {
-      html += '<div class="modulo-code" style="margin-bottom:6px">Módulos asignados (' + user.modulos.length + ')</div>';
-      html += '<div style="display:flex;flex-wrap:wrap;gap:6px">';
-      user.modulos.forEach(function(m) { html += '<span class="badge badge-blue">' + m + '</span>'; });
-      html += '</div>';
-    }
-  } else if (user.tipoProfesor === 'media') {
-    if (user.asignaturas && user.asignaturas.length) {
-      html += '<div class="modulo-code" style="margin-bottom:8px">🎓 Plan Común — Asignaturas</div>';
-      user.asignaturas.forEach(function(a) {
-        html += '<div style="padding:6px 0;border-bottom:1px solid rgba(99,102,241,.08);font-size:.85rem">' + a + '</div>';
-      });
-    }
-  } else if (user.tipoProfesor === 'basica') {
-    if (user.asignaturas && user.asignaturas.length) {
-      html += '<div class="modulo-code" style="margin-bottom:8px">📚 Básica — Asignaturas</div>';
-      user.asignaturas.forEach(function(a) {
-        html += '<div style="padding:6px 0;border-bottom:1px solid rgba(99,102,241,.08);font-size:.85rem">' + a + '</div>';
-      });
-    }
-  }
-
-  if (user.niveles && user.niveles.length) {
-    html += '<div style="margin-top:12px"><div class="modulo-code" style="margin-bottom:6px">Niveles a cargo</div>';
-    html += '<div style="display:flex;flex-wrap:wrap;gap:6px">';
-    user.niveles.forEach(function(n) { html += '<span class="badge badge-green">' + n + '</span>'; });
-    html += '</div></div>';
-  }
-
-  if (!html) {
-    html = '<div class="empty-state"><span class="emoji">⚠️</span><p>El administrador aún no ha asignado módulos o asignaturas a tu cuenta.<br>Contacta al administrador del sistema.</p></div>';
-  }
-
-  // ── Clase(s) asignada(s) ──
-  if (user.cursos && user.cursos.length) {
-    html += '<div style="margin-top:12px"><div class="modulo-code" style="margin-bottom:6px">📋 Clase(s) asignada(s)</div>';
-    html += '<div style="display:flex;flex-wrap:wrap;gap:6px">';
-    user.cursos.forEach(function(c) { html += '<span class="badge badge-blue">' + c + '</span>'; });
-    html += '</div></div>';
-  }
-
-  // ── Permisos ──
-  var canPlan = !user.permisos || user.permisos.planificar !== false;
-  var canMat  = !user.permisos || user.permisos.crearMaterial !== false;
-  html += '<div style="margin-top:12px"><div class="modulo-code" style="margin-bottom:6px">🔐 Permisos</div>';
-  html += '<div style="display:flex;flex-wrap:wrap;gap:6px">';
-  html += '<span class="badge ' + (canPlan ? 'badge-green' : 'badge-red') + '">📅 ' + (canPlan ? 'Puede planificar' : 'Sin permiso planificar') + '</span>';
-  html += '<span class="badge ' + (canMat  ? 'badge-green' : 'badge-red') + '">📚 ' + (canMat  ? 'Puede crear material' : 'Sin permiso material') + '</span>';
-  html += '</div></div>';
-
-  el.innerHTML = html;
-}
-
-// ── Últimos materiales (preview en inicio) ───────────────────
-function loadUltimosMats(email) {
-  ELDB.materiales.listar({ profesor: email }).then(function(mats) {
-    var el = document.getElementById('ultimosMats');
-    if (!mats.length) {
-      el.innerHTML = '<div class="empty-state"><span class="emoji">📂</span><p>Sin materiales aún.<br><a href="material.html" style="color:var(--accent)">Sube tu primer recurso →</a></p></div>';
+    // Solo profesores y admins
+    var adminEmails = window.EL_ADMIN_EMAILS || (window.EL_ADMIN_EMAIL ? [window.EL_ADMIN_EMAIL] : []);
+    var esAdmin = user.role === 'admin' || (user.email && adminEmails.indexOf(user.email) !== -1);
+    if (user.role !== 'profesor' && !esAdmin) {
+      window.location.href = 'dashboard.html';
       return;
     }
-    el.innerHTML = mats.slice(0, 4).map(function(m) {
-      var iconos = { guia: '📄', apunte: '📝', evaluacion: '📊', planificacion: '📅', ficha: '🗒️' };
-      var f = m.fechaISO ? new Date(m.fechaISO).toLocaleDateString('es-CL') : '—';
-      return '<div class="list-item">' +
-        '<span class="list-icon">' + (iconos[m.tipo] || '📎') + '</span>' +
-        '<div class="list-info"><div class="list-title">' + (m.titulo || 'Sin título') + '</div>' +
-        '<div class="list-meta">' + (m.modulo || m.asignatura || '—') + ' · ' + f + '</div></div>' +
-        '<span class="badge badge-blue" style="font-size:.7rem">' + (m.tipo || '?') + '</span>' +
+
+    if (esAdmin) {
+      var la = document.getElementById('linkAdmin');
+      if (la) la.style.display = '';
+    }
+
+    _profeUser = user;
+    initDashboard(user);
+  });
+
+  // ═══════════════════════════════════════════════════════════════
+  //  Init dashboard
+  // ═══════════════════════════════════════════════════════════════
+  function initDashboard(user) {
+    var nombreCorto = user.nombre || safeEmail(user.email, 'Docente');
+    var inicial     = (nombreCorto.charAt(0) || 'D').toUpperCase();
+
+    // ── Sidebar ──
+    var sAv = document.getElementById('sAvatar');     if (sAv) sAv.textContent = inicial;
+    var sNm = document.getElementById('sNombre');     if (sNm) sNm.textContent = nombreCorto;
+    var hAv = document.getElementById('heroAvatar');  if (hAv) hAv.textContent = inicial;
+
+    var tipoLabels = { basica: '📚 Educación Básica', media: '🎓 Plan Común', tecnico: '⚙️ Técnico-Profesional' };
+    var tipoLabel  = tipoLabels[user.tipoProfesor] || '🎓 Docente';
+    var sTp = document.getElementById('sTipo');       if (sTp) sTp.textContent = tipoLabel;
+
+    // ── Hero ──
+    var primerNombre = (user.nombre || nombreCorto).split(' ')[0];
+    var wt = document.getElementById('welcomeTitle');
+    var ws = document.getElementById('welcomeSub');
+    if (wt) wt.textContent = '¡Bienvenido, ' + primerNombre + '!';
+    if (ws) ws.textContent = tipoLabel + ' · ElectroLearn';
+
+    // ── Permisos ──
+    var canPlan = !user.permisos || user.permisos.planificar    !== false;
+    var canMat  = !user.permisos || user.permisos.crearMaterial !== false;
+    document.querySelectorAll('[data-perm="planificar"]').forEach(function(el) { el.style.display = canPlan ? '' : 'none'; });
+    document.querySelectorAll('[data-perm="material"]').forEach(function(el)   { el.style.display = canMat  ? '' : 'none'; });
+
+    // ── Stats iniciales (sincrónicos) ──
+    var mods = (user.modulos && user.modulos.length) || (user.asignaturas && user.asignaturas.length) || 0;
+    var nivs = (user.niveles && user.niveles.length) || 0;
+    cu(document.getElementById('statModulos'), mods);
+    cu(document.getElementById('statNiveles'), nivs);
+
+    // ── Asignación curricular ──
+    renderAsignacionResumen(user);
+
+    // ── Datos remotos (preview + stats async) ──
+    cargarMaterialesProfesor(user.email);
+
+    // ── Sidebar drawer (mobile) ──
+    if (window.ELUI && window.ELUI.bindSidebarDrawer) {
+      window.ELUI.bindSidebarDrawer({ sidebarSelector: '#sidebarProf', hambSelector: '.btn-hamb' });
+    }
+    // ── Glow en quick cards y stat cards ──
+    if (window.ELUI && window.ELUI.bindCardGlow) window.ELUI.bindCardGlow(document);
+
+    // ── Calendario nav ──
+    var cp = document.getElementById('calPrev');  if (cp) cp.addEventListener('click', function(){ calNavMes(-1); });
+    var cn = document.getElementById('calNext');  if (cn) cn.addEventListener('click', function(){ calNavMes(1); });
+    var cnv = document.getElementById('calNuevo');if (cnv) cnv.addEventListener('click', function(){ calNuevoEvento(); });
+  }
+
+  function cu(el, target) {
+    if (!el) return;
+    if (window.ELUI && window.ELUI.countUp) {
+      window.ELUI.countUp(el, target);
+    } else {
+      el.textContent = String(target);
+    }
+  }
+
+  // ═══════════════════════════════════════════════════════════════
+  //  Carga materiales del profesor (stats + preview en inicio)
+  // ═══════════════════════════════════════════════════════════════
+  function cargarMaterialesProfesor(email) {
+    if (!window.ELDB || !ELDB.materiales) return;
+    ELDB.materiales.listar({ profesor: email }).then(function(mats) {
+      cu(document.getElementById('statMats'), mats.length);
+      pintarUltimosMats(mats);
+    }).catch(function() {});
+
+    if (ELDB.planificaciones) {
+      ELDB.planificaciones.listar({ profesor: email }).then(function(plans) {
+        cu(document.getElementById('statPlans'), plans.length);
+      }).catch(function() {});
+    }
+  }
+
+  function pintarUltimosMats(mats) {
+    var el = document.getElementById('ultimosMats');
+    if (!el) return;
+    if (!mats || !mats.length) {
+      el.innerHTML = '<div class="empty-pro"><span class="e-emoji">📂</span><p>Sin materiales aún.<br><a href="material.html" style="color:#a78bfa">Sube tu primer recurso →</a></p></div>';
+      return;
+    }
+    var ICONO = { guia:'📄', apunte:'📝', evaluacion:'📊', planificacion:'📅', ficha:'🗒️' };
+    el.innerHTML = '<div class="mat-list">' + mats.slice(0, 4).map(function(m) {
+      var tipo  = String(m.tipo || '').toLowerCase();
+      var ico   = ICONO[tipo] || '📎';
+      return '<div class="mat-item">' +
+        '<div class="mi-ico">' + ico + '</div>' +
+        '<div class="mi-info">' +
+          '<div class="mi-title">' + escTxt(m.titulo || 'Sin título') + '</div>' +
+          '<div class="mi-meta">' + escTxt(m.modulo || m.asignatura || '—') + ' · ' + escTxt(fmtFecha(m.fechaISO)) + '</div>' +
+        '</div>' +
+        '<span class="chip is-active" style="font-size:.7rem">' + escTxt(m.tipo || '?') + '</span>' +
+      '</div>';
+    }).join('') + '</div>';
+  }
+
+  // ═══════════════════════════════════════════════════════════════
+  //  Asignación curricular (resumen)
+  // ═══════════════════════════════════════════════════════════════
+  function renderAsignacionResumen(user) {
+    var el = document.getElementById('asignacionResumen');
+    if (!el) return;
+    var bloques = [];
+
+    if (user.tipoProfesor === 'tecnico') {
+      if (user.especialidad && window.CURRICULA_CHILE) {
+        var espData = (CURRICULA_CHILE.getEspecialidades() || []).find(function(e) { return e.key === user.especialidad; });
+        bloques.push(
+          '<div style="margin-bottom:14px">' +
+            '<div style="font-family:Space Grotesk,sans-serif;font-weight:800;color:#a78bfa;font-size:.78rem">⚙️ Especialidad EMTP</div>' +
+            '<div style="font-weight:700;font-size:1rem;margin-top:4px">' + escTxt(espData ? espData.nombre : user.especialidad) + '</div>' +
+            (espData && espData.sector ? '<div style="font-size:.78rem;color:#94a3b8;margin-top:2px">' + escTxt(espData.sector) + '</div>' : '') +
+          '</div>'
+        );
+      }
+      if (user.modulos && user.modulos.length) {
+        bloques.push(
+          '<div style="margin-bottom:12px">' +
+            '<div style="font-family:Space Grotesk,sans-serif;font-weight:800;color:#a78bfa;font-size:.78rem;margin-bottom:6px">Módulos asignados (' + user.modulos.length + ')</div>' +
+            '<div style="display:flex;flex-wrap:wrap;gap:6px">' +
+              user.modulos.map(function(m) { return '<span class="chip">' + escTxt(m) + '</span>'; }).join('') +
+            '</div>' +
+          '</div>'
+        );
+      }
+    } else if (user.tipoProfesor === 'media' || user.tipoProfesor === 'basica') {
+      var titulo = user.tipoProfesor === 'media' ? '🎓 Plan común — Asignaturas' : '📚 Básica — Asignaturas';
+      if (user.asignaturas && user.asignaturas.length) {
+        bloques.push(
+          '<div style="margin-bottom:14px">' +
+            '<div style="font-family:Space Grotesk,sans-serif;font-weight:800;color:#a78bfa;font-size:.78rem;margin-bottom:8px">' + titulo + '</div>' +
+            '<div style="display:flex;flex-direction:column;gap:6px">' +
+              user.asignaturas.map(function(a) {
+                return '<div style="padding:8px 12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:10px;font-size:.86rem">' + escTxt(a) + '</div>';
+              }).join('') +
+            '</div>' +
+          '</div>'
+        );
+      }
+    }
+
+    if (user.niveles && user.niveles.length) {
+      bloques.push(
+        '<div style="margin-bottom:12px">' +
+          '<div style="font-family:Space Grotesk,sans-serif;font-weight:800;color:#a78bfa;font-size:.78rem;margin-bottom:6px">Niveles a cargo</div>' +
+          '<div style="display:flex;flex-wrap:wrap;gap:6px">' +
+            user.niveles.map(function(n) { return '<span class="chip is-active">' + escTxt(n) + '</span>'; }).join('') +
+          '</div>' +
+        '</div>'
+      );
+    }
+
+    if (user.cursos && user.cursos.length) {
+      bloques.push(
+        '<div style="margin-bottom:12px">' +
+          '<div style="font-family:Space Grotesk,sans-serif;font-weight:800;color:#a78bfa;font-size:.78rem;margin-bottom:6px">📋 Clase(s) asignada(s)</div>' +
+          '<div style="display:flex;flex-wrap:wrap;gap:6px">' +
+            user.cursos.map(function(c) { return '<span class="chip">' + escTxt(c) + '</span>'; }).join('') +
+          '</div>' +
+        '</div>'
+      );
+    }
+
+    var canPlan = !user.permisos || user.permisos.planificar    !== false;
+    var canMat  = !user.permisos || user.permisos.crearMaterial !== false;
+    bloques.push(
+      '<div>' +
+        '<div style="font-family:Space Grotesk,sans-serif;font-weight:800;color:#a78bfa;font-size:.78rem;margin-bottom:6px">🔐 Permisos</div>' +
+        '<div style="display:flex;flex-wrap:wrap;gap:6px">' +
+          '<span class="chip ' + (canPlan ? 'is-active' : '') + '" style="' + (canPlan ? '' : 'opacity:.55') + '">📅 ' + (canPlan ? 'Puede planificar' : 'Sin permiso planificar') + '</span>' +
+          '<span class="chip ' + (canMat  ? 'is-active' : '') + '" style="' + (canMat  ? '' : 'opacity:.55') + '">📚 ' + (canMat  ? 'Puede crear material' : 'Sin permiso material') + '</span>' +
+        '</div>' +
+      '</div>'
+    );
+
+    if (bloques.length === 1) { // Solo permisos = no hay nada asignado
+      el.innerHTML = '<div class="empty-pro"><span class="e-emoji">⚠️</span><p>El administrador aún no ha asignado módulos o asignaturas a tu cuenta.<br>Contacta al administrador del sistema.</p></div>' + bloques[0];
+    } else {
+      el.innerHTML = bloques.join('');
+    }
+  }
+
+  // ═══════════════════════════════════════════════════════════════
+  //  Detalle de módulos
+  // ═══════════════════════════════════════════════════════════════
+  function renderModulosDetalle() {
+    var user = _profeUser; if (!user) return;
+    var el = document.getElementById('modulosContent');
+    if (!el) return;
+    if (typeof CURRICULA_CHILE === 'undefined') {
+      el.innerHTML = '<div class="empty-pro"><span class="e-emoji">⚠️</span><p>El currículum aún no se cargó. Recarga la página.</p></div>';
+      return;
+    }
+
+    if (user.tipoProfesor === 'tecnico' && user.especialidad) {
+      var mods = CURRICULA_CHILE.getModulos(user.especialidad) || [];
+      var asignados = user.modulos || [];
+      var filtrados = asignados.length ? mods.filter(function(m) { return asignados.indexOf(m.num) !== -1; }) : mods;
+      var espData   = (CURRICULA_CHILE.getEspecialidades() || []).find(function(e) { return e.key === user.especialidad; });
+
+      el.innerHTML =
+        '<div class="card-pro">' +
+          '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px">' +
+            '<div style="font-weight:800;font-size:1.05rem">⚙️ ' + escTxt(espData ? espData.nombre : user.especialidad) + '</div>' +
+            '<span class="chip is-active">' + filtrados.length + ' módulos</span>' +
+          '</div>' +
+          '<div class="mod-grid">' +
+            filtrados.map(function(m) {
+              return '<div class="mod-card-pro">' +
+                '<div class="mc-code">' + escTxt(m.num) + '</div>' +
+                '<div class="mc-name">' + escTxt(m.nombre) + '</div>' +
+                (m.horas ? '<div class="mc-meta">' + escTxt(m.horas) + ' hrs</div>' : '') +
+              '</div>';
+            }).join('') +
+          '</div>' +
         '</div>';
-    }).join('');
-  }).catch(function() {});
-}
+      return;
+    }
 
-// ── Módulos detalle ──────────────────────────────────────────
-function renderModulosDetalle() {
-  var user = _profeUser;
-  if (!user) return;
-  var el = document.getElementById('modulosContent');
+    function renderAsigConTabs(asig, niveles, scope, tipoLabel, normNivel) {
+      var safeId = 'asig-' + asig.replace(/[^a-zA-Z0-9]/g,'');
+      var tabsHtml = niveles.map(function(n, i) {
+        return '<button class="tab-btn-pro' + (i === 0 ? ' active' : '') + '" data-tab="' + safeId + '-' + escAttr(n) + '">' + escTxt(normNivel(n)) + '</button>';
+      }).join('');
+      var contentHtml = niveles.map(function(n, i) {
+        var asigObj = scope.asignaturas.find(function(a) { return a.nombre === asig; });
+        var unidades = (asigObj && asigObj.unidades && asigObj.unidades[n]) || [];
+        return '<div id="' + safeId + '-' + escAttr(n) + '" class="tab-content-pro' + (i === 0 ? ' active' : '') + '">' +
+          (unidades.length
+            ? '<div style="display:flex;flex-direction:column;gap:6px">' +
+                unidades.map(function(u, ui) {
+                  return '<div style="padding:10px 12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:10px;font-size:.85rem"><strong style="color:#a78bfa;margin-right:8px">U' + (ui+1) + '</strong>' + escTxt(u) + '</div>';
+                }).join('') +
+              '</div>'
+            : '<div class="empty-pro"><span class="e-emoji">📋</span><p>Sin unidades definidas para este nivel.</p></div>') +
+        '</div>';
+      }).join('');
 
-  if (user.tipoProfesor === 'tecnico' && user.especialidad) {
-    var mods = CURRICULA_CHILE.getModulos(user.especialidad);
-    var asignados = user.modulos || [];
-    var filtrados = asignados.length ? mods.filter(function(m) { return asignados.indexOf(m.num) !== -1; }) : mods;
+      return '<div class="card-pro" style="margin-bottom:18px" data-asig-card="' + escAttr(safeId) + '">' +
+        '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px">' +
+          '<div style="font-weight:800;font-size:1.05rem">' + escTxt(tipoLabel + ' ' + asig) + '</div>' +
+          '<div style="display:flex;flex-wrap:wrap;gap:6px">' +
+            niveles.map(function(n) { return '<span class="chip">' + escTxt(normNivel(n)) + '</span>'; }).join('') +
+          '</div>' +
+        '</div>' +
+        '<div class="tab-bar-pro">' + tabsHtml + '</div>' +
+        contentHtml +
+      '</div>';
+    }
 
-    var espData = CURRICULA_CHILE.getEspecialidades().find(function(e) { return e.key === user.especialidad; });
-    var html = '<div class="card"><div class="card-header"><div class="card-title">⚙️ ' + (espData ? espData.nombre : user.especialidad) + '</div>';
-    html += '<span class="badge badge-gold">' + filtrados.length + ' módulos</span></div>';
-    html += '<div class="grid-3">';
-    filtrados.forEach(function(m) {
-      html += '<div class="modulo-card">' +
-        '<div class="modulo-code">' + m.num + '</div>' +
-        '<div class="modulo-name">' + m.nombre + '</div>' +
-        '<div class="modulo-meta" style="margin-top:6px">';
-      if (m.horas) html += m.horas + ' hrs';
-      html += '</div></div>';
+    if (user.tipoProfesor === 'media') {
+      var asigs   = user.asignaturas || [];
+      var niveles = user.niveles || ['1M','2M','3M','4M'];
+      el.innerHTML = asigs.length
+        ? asigs.map(function(a) { return renderAsigConTabs(a, niveles, CURRICULA_CHILE.planComun, '🎓', function(n){ return n; }); }).join('')
+        : '<div class="empty-pro"><span class="e-emoji">⚠️</span><p>Sin asignaturas asignadas.</p></div>';
+    } else if (user.tipoProfesor === 'basica') {
+      var asigsB   = user.asignaturas || [];
+      var nivelesB = user.niveles || ['1B','2B','3B','4B','5B','6B','7B','8B'];
+      el.innerHTML = asigsB.length
+        ? asigsB.map(function(a) { return renderAsigConTabs(a, nivelesB, CURRICULA_CHILE.basica, '📚', function(n){ return n.replace('B','°B'); }); }).join('')
+        : '<div class="empty-pro"><span class="e-emoji">⚠️</span><p>Sin asignaturas asignadas.</p></div>';
+    } else {
+      el.innerHTML = '<div class="empty-pro"><span class="e-emoji">⚠️</span><p>No hay asignación curricular configurada.<br>Contacta al administrador.</p></div>';
+    }
+
+    // Wire de tabs (un solo handler por contenedor)
+    el.querySelectorAll('[data-asig-card]').forEach(function(card) {
+      card.addEventListener('click', function(e) {
+        var btn = e.target.closest('.tab-btn-pro');
+        if (!btn) return;
+        var target = btn.getAttribute('data-tab'); if (!target) return;
+        card.querySelectorAll('.tab-btn-pro').forEach(function(b) { b.classList.remove('active'); });
+        card.querySelectorAll('.tab-content-pro').forEach(function(c) { c.classList.remove('active'); });
+        btn.classList.add('active');
+        var tc = document.getElementById(target); if (tc) tc.classList.add('active');
+      });
     });
-    html += '</div></div>';
+  }
+
+  // ═══════════════════════════════════════════════════════════════
+  //  Mis materiales (sección)
+  // ═══════════════════════════════════════════════════════════════
+  function loadMisMateriales() {
+    if (!_profeUser || !window.ELDB) return;
+    var el = document.getElementById('matsList'); if (!el) return;
+    if (window.ELUI && window.ELUI.skeletonGrid) {
+      window.ELUI.skeletonGrid(el, 4, { h: 70 });
+    } else {
+      el.innerHTML = '<div class="empty-pro"><span class="e-emoji">⏳</span><p>Cargando…</p></div>';
+    }
+
+    ELDB.materiales.listar({ profesor: _profeUser.email }).then(function(mats) {
+      if (!mats.length) {
+        el.innerHTML = '<div class="empty-pro"><span class="e-emoji">📂</span><p>No has subido materiales.<br><a href="material.html" style="color:#a78bfa">Sube tu primer recurso →</a></p></div>';
+        return;
+      }
+      var ICONO  = { guia:'📄', apunte:'📝', evaluacion:'📊', planificacion:'📅', ficha:'🗒️' };
+      var COLOR  = { guia:'#34d399', apunte:'#60a5fa', evaluacion:'#f87171', planificacion:'#a78bfa', ficha:'#fbbf24' };
+      el.innerHTML = '<div class="mat-list">' + mats.map(function(m) {
+        var tipo = String(m.tipo || '').toLowerCase();
+        var ico  = ICONO[tipo] || '📎';
+        var clr  = COLOR[tipo] || '#a78bfa';
+        return '<div class="mat-item">' +
+          '<div class="mi-ico" style="background:' + clr + '20;color:' + clr + '">' + ico + '</div>' +
+          '<div class="mi-info">' +
+            '<div class="mi-title">' + escTxt(m.titulo || 'Sin título') + '</div>' +
+            '<div class="mi-meta">' + escTxt(m.modulo || m.asignatura || '—') + ' · ' + escTxt(fmtFecha(m.fechaISO)) + ' · ' + escTxt(String(m.vistas || 0)) + ' vistas</div>' +
+          '</div>' +
+          '<span class="chip" style="background:' + clr + '20;color:' + clr + ';border-color:' + clr + '40">' + escTxt(m.tipo || '?') + '</span>' +
+        '</div>';
+      }).join('') + '</div>';
+    }).catch(function(err) {
+      el.innerHTML = '<div class="empty-pro"><span class="e-emoji">❌</span><p>Error al cargar: ' + escTxt(err && err.message || 'desconocido') + '</p></div>';
+    });
+  }
+
+  // ═══════════════════════════════════════════════════════════════
+  //  Mis planificaciones
+  // ═══════════════════════════════════════════════════════════════
+  function loadMisPlanificaciones() {
+    if (!_profeUser || !window.ELDB || !ELDB.planificaciones) return;
+    var el = document.getElementById('plansList'); if (!el) return;
+    if (window.ELUI && window.ELUI.skeletonGrid) {
+      window.ELUI.skeletonGrid(el, 3, { h: 70 });
+    } else {
+      el.innerHTML = '<div class="empty-pro"><span class="e-emoji">⏳</span><p>Cargando…</p></div>';
+    }
+
+    ELDB.planificaciones.listar({ profesor: _profeUser.email }).then(function(plans) {
+      if (!plans.length) {
+        el.innerHTML = '<div class="empty-pro"><span class="e-emoji">📋</span><p>Sin planificaciones aún.<br><a href="planificacion.html" style="color:#a78bfa">Crear primera →</a></p></div>';
+        return;
+      }
+      el.innerHTML = '<div class="mat-list">' + plans.map(function(p) {
+        return '<div class="mat-item">' +
+          '<div class="mi-ico">📅</div>' +
+          '<div class="mi-info">' +
+            '<div class="mi-title">' + escTxt(p.titulo || 'Sin título') + '</div>' +
+            '<div class="mi-meta">' + escTxt(p.modulo || p.asignatura || '—') + ' · Clase: ' + escTxt(fmtFecha(p.fechaClase)) + (p.horas ? ' · ' + escTxt(String(p.horas)) + ' h' : '') + '</div>' +
+          '</div>' +
+        '</div>';
+      }).join('') + '</div>';
+    }).catch(function(err) {
+      el.innerHTML = '<div class="empty-pro"><span class="e-emoji">❌</span><p>Error: ' + escTxt(err && err.message || 'desconocido') + '</p></div>';
+    });
+  }
+
+  // ═══════════════════════════════════════════════════════════════
+  //  Herramientas IA
+  // ═══════════════════════════════════════════════════════════════
+  var HERR = {
+    planificacion: { titulo:'📅 Planificación de clase',     color:'#7c3aed' },
+    guia:          { titulo:'📄 Guía de aprendizaje',        color:'#10b981' },
+    prueba:        { titulo:'📊 Prueba / Evaluación',        color:'#ef4444' },
+    apunte:        { titulo:'📝 Apunte de contenido',        color:'#f59e0b' },
+    revision:      { titulo:'🔍 Revisión de instrumento',    color:'#8b5cf6' },
+    taller:        { titulo:'🔧 Guía para taller',           color:'#06b6d4' }
+  };
+
+  var NEE_CHILE = [
+    { key:'tea',         label:'TEA — Espectro Autista' },
+    { key:'tdah',        label:'TDAH — Déficit Atencional' },
+    { key:'dislexia',    label:'Dislexia (DEA Lectura)' },
+    { key:'discalculia', label:'Discalculia (DEA Matemática)' },
+    { key:'disgrafia',   label:'Disgrafía (DEA Escritura)' },
+    { key:'hipoacusia',  label:'Hipoacusia / Sordera' },
+    { key:'baja-vision', label:'Baja visión / Ceguera' },
+    { key:'deficit-int', label:'Déficit intelectual' },
+    { key:'tl',          label:'Trastorno del lenguaje (TEL)' },
+    { key:'motor',       label:'Trastorno motor / Físico' },
+    { key:'emocional',   label:'Trastorno emocional / Conductual' },
+    { key:'dotacion',    label:'Altas capacidades / Dotación' }
+  ];
+
+  var _herrFocusRelease = null;
+
+  function abrirHerramienta(tipo) {
+    var h = HERR[tipo]; if (!h) return;
+    var user = _profeUser || {};
+    var isTP = user.tipoProfesor === 'tecnico';
+
+    function opciones(arr) { return (arr || []).map(function(v) { return '<option value="' + escAttr(v) + '">' + escTxt(v) + '</option>'; }).join(''); }
+    var asigOpts  = opciones(user.asignaturas);
+    if (user.especialidad) asigOpts += '<option value="' + escAttr(user.especialidad) + '">' + escTxt(user.especialidad) + ' (Especialidad)</option>';
+    var nivOpts   = opciones(user.niveles);
+    var modOpts   = isTP ? opciones(user.modulos) : '';
+
+    var modField = isTP
+      ? '<div class="fg"><label>Módulo TP</label><select id="hModulo"><option value="">— Seleccionar —</option>' + modOpts + '</select></div>'
+      : '';
+
+    var extraRevision = tipo === 'revision'
+      ? '<div class="fg"><label>Material a revisar *</label><textarea id="hTextoRevisar" rows="5" placeholder="Pega aquí tu prueba, guía u otro instrumento…"></textarea></div>'
+      : '';
+
+    var tiposPreg = (tipo === 'prueba' || tipo === 'guia' || tipo === 'apunte')
+      ? '<div class="fg"><label>Tipos de preguntas / actividades</label>' +
+        '<div class="check-box-row">' +
+          '<label><input type="checkbox" id="pAlt"   value="alternativas">    Selección múltiple</label>' +
+          '<label><input type="checkbox" id="pVF"    value="vf">              Verdadero / Falso</label>' +
+          '<label><input type="checkbox" id="pDes"   value="desarrollo">      Desarrollo</label>' +
+          '<label><input type="checkbox" id="pCorta" value="corta">           Respuesta corta</label>' +
+          '<label><input type="checkbox" id="pEmp"   value="emparejamiento">  Emparejamiento</label>' +
+          '<label><input type="checkbox" id="pCasos" value="casos">           Análisis de caso</label>' +
+        '</div></div>'
+      : '';
+
+    var neeField = tipo === 'planificacion'
+      ? '<div class="fg"><label>NEE diagnosticadas en el curso (opcional)</label>' +
+        '<div class="check-box-row">' +
+          NEE_CHILE.map(function(n) {
+            return '<label><input type="checkbox" class="neeCheck" value="' + escAttr(n.key) + '"> ' + escTxt(n.label) + '</label>';
+          }).join('') +
+        '</div></div>'
+      : '';
+
+    var colegioVal = escAttr(user.colegio || '');
+    var emoji      = h.titulo.split(' ')[0];
+    var tituloTxt  = h.titulo.substring(h.titulo.indexOf(' ') + 1);
+
+    var modal = document.getElementById('modalHerr');
+    modal.innerHTML =
+      '<div class="modal-ia">' +
+        '<button class="m-close" aria-label="Cerrar">×</button>' +
+        '<div class="m-title"><span style="font-size:1.5rem">' + emoji + '</span> ' + escTxt(tituloTxt) + '</div>' +
+        '<p class="m-sub">Completa los campos y usa el asistente IA para generar un borrador editable.</p>' +
+        '<div class="fg-grid">' +
+          '<div class="fg"><label>Institución educativa</label><input id="hColegio" placeholder="ej: Liceo Salesiano de Talca" value="' + colegioVal + '"></div>' +
+          '<div class="fg"><label>Asignatura / Módulo</label><select id="hAsig"><option value="">— Seleccionar —</option>' + asigOpts + '</select></div>' +
+          modField +
+          '<div class="fg"><label>Nivel / Curso</label><select id="hNivel"><option value="">— Seleccionar —</option>' + nivOpts + '</select></div>' +
+          '<div class="fg"><label>Tema específico</label><input id="hTema" placeholder="ej: Circuitos eléctricos en serie"></div>' +
+          '<div class="fg"><label>Horas / Duración</label><input id="hHoras" placeholder="ej: 2 horas pedagógicas"></div>' +
+        '</div>' +
+        '<div class="fg"><label>Objetivo de aprendizaje / AE (escribe o selecciona abajo)</label><input id="hOA" placeholder="ej: OA3 — Leer textos con fluidez y comprensión…"></div>' +
+        '<div class="fg">' +
+          '<label style="display:flex;align-items:center;gap:8px">📋 OA del programa Mineduc <span style="font-size:.66rem;background:rgba(124,58,237,.18);color:#c4b5fd;padding:2px 8px;border-radius:10px;font-weight:700">selecciona uno o más</span></label>' +
+          '<div id="oaContainer" class="oa-container"><p style="font-size:.78rem;color:#94a3b8;font-style:italic">Selecciona asignatura y nivel para ver los OA disponibles.</p></div>' +
+        '</div>' +
+        '<div class="' + (tipo === 'prueba' || tipo === 'guia' || tipo === 'apunte' ? 'fg-grid3' : 'fg-grid') + '">' +
+          '<div class="fg"><label>Nivel taxonómico (Bloom)</label>' +
+            '<select id="hTaxonomia">' +
+              '<option value="">— Sin especificar —</option>' +
+              '<option value="recordar">Recordar — conocimiento factual</option>' +
+              '<option value="comprender">Comprender — explicar e interpretar</option>' +
+              '<option value="aplicar">Aplicar — usar en situaciones nuevas</option>' +
+              '<option value="analizar">Analizar — descomponer y comparar</option>' +
+              '<option value="evaluar">Evaluar — juzgar y justificar</option>' +
+              '<option value="crear">Crear — diseñar y producir algo nuevo</option>' +
+            '</select>' +
+          '</div>' +
+          (tipo === 'prueba' || tipo === 'guia' || tipo === 'apunte'
+            ? '<div class="fg"><label>N° de preguntas / ítems</label><input id="hNPreguntas" type="number" min="1" max="80" placeholder="ej: 20"></div>' +
+              '<div class="fg"><label>Unidad / Período</label><input id="hUnidad" placeholder="ej: Unidad 2 — Electricidad"></div>'
+            : '') +
+        '</div>' +
+        tiposPreg + neeField + extraRevision +
+        '<div class="fg"><label>Indicaciones adicionales (opcional)</label><input id="hExtra" placeholder="ej: Énfasis en normas de seguridad, incluir diagrama, nivel básico…"></div>' +
+        '<div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;align-items:center">' +
+          '<button id="btnIA" class="btn-ia-pro" type="button">✨ Generar con IA</button>' +
+          '<span style="font-size:.78rem;color:#94a3b8">o escribe directamente en el borrador →</span>' +
+        '</div>' +
+        '<div class="fg">' +
+          '<label>Resultado / Borrador editable</label>' +
+          '<textarea id="hResultado" rows="14" placeholder="El borrador generado por IA aparecerá aquí. También puedes escribir directamente."></textarea>' +
+        '</div>' +
+        '<div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px">' +
+          '<button class="btn-pro ghost" id="btnCancelarHerr">Cancelar</button>' +
+          '<button class="btn-pro primary" id="btnGuardarHerr">💾 Guardar en mis materiales</button>' +
+        '</div>' +
+      '</div>';
+
+    modal.classList.add('show');
+    document.body.classList.add('no-scroll');
+
+    // Wire up
+    var inner = modal.querySelector('.modal-ia');
+    inner.querySelector('.m-close').onclick = cerrarHerramienta;
+    document.getElementById('btnCancelarHerr').onclick = cerrarHerramienta;
+    document.getElementById('btnIA').onclick           = function() { usarIA(tipo); };
+    document.getElementById('btnGuardarHerr').onclick  = function() { guardarHerramienta(tipo); };
+
+    // Backdrop click & ESC
+    modal.onclick = function(e) { if (e.target === modal) cerrarHerramienta(); };
+    document.addEventListener('keydown', _herrEscHandler);
+
+    // OA loader dinámico
+    var elAsig  = document.getElementById('hAsig');
+    var elNivel = document.getElementById('hNivel');
+    if (elAsig)  elAsig.addEventListener('change',  _loadOAsEnModal);
+    if (elNivel) elNivel.addEventListener('change', _loadOAsEnModal);
+    _loadOAsEnModal();
+
+    // Focus trap
+    if (window.ELUI && window.ELUI.trapFocus) {
+      _herrFocusRelease = window.ELUI.trapFocus(inner);
+    }
+  }
+
+  function _herrEscHandler(e) {
+    if (e.key === 'Escape') cerrarHerramienta();
+  }
+  function cerrarHerramienta() {
+    var modal = document.getElementById('modalHerr');
+    modal.classList.remove('show');
+    modal.innerHTML = '';
+    document.body.classList.remove('no-scroll');
+    document.removeEventListener('keydown', _herrEscHandler);
+    if (_herrFocusRelease) { _herrFocusRelease(); _herrFocusRelease = null; }
+  }
+
+  // OA loader dinámico
+  var _ASIG_SIGLA_MAP = {
+    'lenguaje':'LEN', 'lenguaje y comunicacion':'LEN', 'lengua y literatura':'LEN',
+    'matematica':'MAT', 'ciencias naturales':'CN', 'historia':'HCS',
+    'historia, geografia y cs':'HCS', 'ingles':'ING',
+    'fisica':'FIS', 'quimica':'QUI', 'biologia':'BIO'
+  };
+  var _NIVEL_KEY_MAP = {
+    '1b':'1B','1º básico':'1B','1° básico':'1B','primero básico':'1B',
+    '2b':'2B','2º básico':'2B','2° básico':'2B','segundo básico':'2B',
+    '3b':'3B','3º básico':'3B','3° básico':'3B','tercero básico':'3B',
+    '4b':'4B','4º básico':'4B','4° básico':'4B','cuarto básico':'4B',
+    '5b':'5B','5º básico':'5B','5° básico':'5B','quinto básico':'5B',
+    '6b':'6B','6º básico':'6B','6° básico':'6B','sexto básico':'6B',
+    '7b':'7B','7º básico':'7B','7° básico':'7B','séptimo básico':'7B',
+    '8b':'8B','8º básico':'8B','8° básico':'8B','octavo básico':'8B',
+    '1m':'1M','1º medio':'1M','1° medio':'1M','primero medio':'1M',
+    '2m':'2M','2º medio':'2M','2° medio':'2M','segundo medio':'2M',
+    '3m':'3M','3º medio':'3M','3° medio':'3M','tercer medio':'3M',
+    '4m':'4M','4º medio':'4M','4° medio':'4M','cuarto medio':'4M'
+  };
+  function _resolveNivelKey(raw) {
+    if (!raw) return null;
+    var k = String(raw).trim().toLowerCase();
+    if (_NIVEL_KEY_MAP[k]) return _NIVEL_KEY_MAP[k];
+    if (/^[1-8][bm]$/i.test(k)) return k.toUpperCase();
+    return null;
+  }
+  function _resolveAsigSigla(raw) {
+    if (!raw) return null;
+    var k = String(raw).trim().toLowerCase().replace(/[áéíóúñ]/g, function(c){
+      return ({á:'a',é:'e',í:'i',ó:'o',ú:'u',ñ:'n'})[c] || c;
+    });
+    if (_ASIG_SIGLA_MAP[k]) return _ASIG_SIGLA_MAP[k];
+    for (var key in _ASIG_SIGLA_MAP) {
+      if (k.indexOf(key) !== -1 || key.indexOf(k) !== -1) return _ASIG_SIGLA_MAP[key];
+    }
+    return null;
+  }
+  function _loadOAsEnModal() {
+    var container = document.getElementById('oaContainer');
+    if (!container) return;
+    var asigRaw  = document.getElementById('hAsig')  ? document.getElementById('hAsig').value  : '';
+    var nivelRaw = document.getElementById('hNivel') ? document.getElementById('hNivel').value : '';
+    var sigla = _resolveAsigSigla(asigRaw);
+    var nivel = _resolveNivelKey(nivelRaw);
+    if (!sigla || !nivel || typeof CURRICULA_CHILE === 'undefined' || !CURRICULA_CHILE.getOAs) {
+      container.innerHTML = '<p style="font-size:.78rem;color:#94a3b8;font-style:italic">Selecciona asignatura y nivel para ver los OA disponibles.</p>';
+      return;
+    }
+    var oas = CURRICULA_CHILE.getOAs(sigla, nivel);
+    if (!oas || !oas.length) {
+      container.innerHTML = '<p style="font-size:.78rem;color:#94a3b8;font-style:italic">No hay OAs registrados para esta combinación.</p>';
+      return;
+    }
+    var byEje = {};
+    oas.forEach(function(o) {
+      var eje = o.eje || 'General';
+      if (!byEje[eje]) byEje[eje] = [];
+      byEje[eje].push(o);
+    });
+    var html = '<div style="display:flex;flex-wrap:wrap;gap:6px 14px">';
+    Object.keys(byEje).forEach(function(eje) {
+      if (eje) html += '<div class="oa-eje">' + escTxt(eje) + '</div>';
+      byEje[eje].forEach(function(o) {
+        var desc = o.desc || o.descripcion || '';
+        var corto = desc.length > 60 ? (desc.slice(0, 60) + '…') : desc;
+        html += '<label class="oa-label" title="' + escAttr(desc) + '">' +
+          '<input type="checkbox" class="oaCheck" data-codigo="' + escAttr(o.codigo) + '" data-desc="' + escAttr(desc) + '">' +
+          '<span><strong>' + escTxt(o.codigo) + '</strong> — ' + escTxt(corto) + '</span>' +
+        '</label>';
+      });
+    });
+    html += '</div>';
+    container.innerHTML = html;
+  }
+
+  function _getDatosHerr() {
+    var user = _profeUser || {};
+    function _v(id) { var el = document.getElementById(id); return el ? el.value : ''; }
+    var tiposPreg = [];
+    ['pAlt','pVF','pDes','pCorta','pEmp','pCasos'].forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el && el.checked) tiposPreg.push(el.value);
+    });
+    var nee = [];
+    document.querySelectorAll('.neeCheck').forEach(function(el) { if (el.checked) nee.push(el.value); });
+    var oasSeleccionados = [];
+    document.querySelectorAll('.oaCheck').forEach(function(el) {
+      if (el.checked) oasSeleccionados.push({ codigo: el.getAttribute('data-codigo'), descripcion: el.getAttribute('data-desc') });
+    });
+    var oaManual = _v('hOA');
+    var oaTexto  = oaManual || oasSeleccionados.map(function(o){ return o.codigo + ': ' + o.descripcion; }).join('; ') || '';
+    return {
+      colegio:           _v('hColegio') || user.colegio || '',
+      asignatura:        _v('hAsig')    || (user.asignaturas && user.asignaturas[0]) || '',
+      modulo:            _v('hModulo'),
+      nivel:             _v('hNivel'),
+      unidad:            _v('hUnidad'),
+      tema:              _v('hTema'),
+      horas:             _v('hHoras'),
+      oa:                oaTexto,
+      oas_seleccionados: oasSeleccionados,
+      taxonomia:         _v('hTaxonomia'),
+      nPreguntas:        _v('hNPreguntas'),
+      tiposPreguntas:    tiposPreg,
+      nee:               nee,
+      extra:             _v('hExtra'),
+      especialidad:      user.especialidad || '',
+      texto_a_revisar:   _v('hTextoRevisar')
+    };
+  }
+
+  function usarIA(tipo) {
+    if (!window.ELAsistente || !ELAsistente.generar) {
+      toast('El asistente IA no está disponible en este momento.', 'error');
+      return;
+    }
+    var btn = document.getElementById('btnIA');
+    var datos = _getDatosHerr();
+    btn.disabled = true; btn.innerHTML = '<span class="ia-spin"></span> Generando…';
+    ELAsistente.generar(tipo, datos)
+      .then(function(txt) {
+        document.getElementById('hResultado').value = txt;
+        toast('Borrador listo. Revisa y edita antes de guardar.', 'success');
+      })
+      .catch(function(e) {
+        toast('Error IA: ' + (e && e.message || 'desconocido'), 'error');
+      })
+      .then(function() { btn.disabled = false; btn.innerHTML = '✨ Generar con IA'; });
+  }
+
+  function guardarHerramienta(tipo) {
+    var rEl = document.getElementById('hResultado');
+    var resultado = rEl ? rEl.value.trim() : '';
+    if (!resultado) { toast('Escribe o genera contenido antes de guardar.', 'warn'); return; }
+    var user = _profeUser;
+    if (!user || !user.email) { toast('Sesión inválida. Recarga la página.', 'error'); return; }
+
+    var datos = _getDatosHerr();
+    var tipoLabel = { planificacion:'Planificación', guia:'Guía', prueba:'Prueba', apunte:'Apunte', revision:'Revisión', taller:'Guía Taller' };
+    var entrada = {
+      titulo:         (tipoLabel[tipo] || tipo) + (datos.tema ? ' — ' + datos.tema : '') + (datos.asignatura ? ' (' + datos.asignatura + ')' : ''),
+      tipo:           tipo,
+      contenido:      resultado,
+      asignatura:     datos.asignatura,
+      modulo:         datos.modulo,
+      nivel:          datos.nivel,
+      unidad:         datos.unidad || '',
+      oa:             datos.oa,
+      horas:          datos.horas,
+      taxonomia:      datos.taxonomia || '',
+      nPreguntas:     datos.nPreguntas || '',
+      tiposPreguntas: datos.tiposPreguntas || [],
+      nee:            datos.nee || [],
+      colegio:        datos.colegio || user.colegio || '',
+      profesor:       user.nombre || user.email,
+      email:          user.email,
+      uid:            user.uid,
+      generadoIA:     true,
+      fechaISO:       new Date().toISOString(),
+      vistas:         0,
+      activo:         true
+    };
+    if (!window.ELDB || !ELDB.materiales) { toast('Base de datos no disponible.', 'error'); return; }
+    ELDB.materiales.crear(entrada)
+      .then(function() {
+        toast('Guardado en "Mis materiales".', 'success');
+        if (window.ELUI && window.ELUI.confetti) window.ELUI.confetti({ amount: 60, duration: 1700 });
+        setTimeout(cerrarHerramienta, 900);
+        cargarMaterialesProfesor(user.email);
+      })
+      .catch(function(e) {
+        toast('Error guardando: ' + (e && e.message || 'desconocido'), 'error');
+      });
+  }
+
+  // ═══════════════════════════════════════════════════════════════
+  //  Calendario
+  // ═══════════════════════════════════════════════════════════════
+  var _calYear  = new Date().getFullYear();
+  var _calMonth = new Date().getMonth();
+  var _calEventos = [];
+  var _calFocusRelease = null;
+
+  function calNavMes(dir) {
+    _calMonth += dir;
+    if (_calMonth > 11) { _calMonth = 0;  _calYear++; }
+    if (_calMonth < 0)  { _calMonth = 11; _calYear--; }
+    calRender();
+  }
+
+  function calRender() {
+    var user = _profeUser || {};
+    var tit = new Date(_calYear, _calMonth, 1)
+      .toLocaleDateString('es-CL', { month: 'long', year: 'numeric' });
+    var ttEl = document.getElementById('calTitulo');
+    if (ttEl) ttEl.textContent = tit.charAt(0).toUpperCase() + tit.slice(1);
+
+    if (!user.uid || !window.EL_DB) {
+      _calEventos = [];
+      calDibujarHead(); calDibujarGrid(); calDibujarLista();
+      return;
+    }
+
+    var inicioMes = _calYear + '-' + String(_calMonth + 1).padStart(2, '0');
+    EL_DB.collection('calendarios_docentes').doc(user.uid).collection('eventos').get()
+      .then(function(snap) {
+        _calEventos = snap.docs
+          .map(function(d) { return Object.assign({ _id: d.id }, d.data()); })
+          .filter(function(e) { return e.fecha && e.fecha.startsWith(inicioMes); });
+        calDibujarHead(); calDibujarGrid(); calDibujarLista();
+      })
+      .catch(function() {
+        _calEventos = [];
+        calDibujarHead(); calDibujarGrid(); calDibujarLista();
+      });
+  }
+
+  function calDibujarHead() {
+    var el = document.getElementById('calHead'); if (!el) return;
+    var dias = ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
+    el.innerHTML = dias.map(function(d) { return '<div>' + d + '</div>'; }).join('');
+  }
+
+  function calDibujarGrid() {
+    var el = document.getElementById('calGrid'); if (!el) return;
+    var primerDia = (new Date(_calYear, _calMonth, 1).getDay() + 6) % 7; // 0=Lun
+    var diasMes   = new Date(_calYear, _calMonth + 1, 0).getDate();
+    var hoy       = new Date();
+    var esHoyMes  = hoy.getFullYear() === _calYear && hoy.getMonth() === _calMonth;
+
+    var html = '';
+    for (var i = 0; i < primerDia; i++) html += '<div class="cal-day is-empty"></div>';
+    for (var d = 1; d <= diasMes; d++) {
+      var fechaStr = _calYear + '-' + String(_calMonth + 1).padStart(2, '0') + '-' + String(d).padStart(2, '0');
+      var evs = _calEventos.filter(function(e) { return e.fecha === fechaStr; });
+      var esHoy = esHoyMes && hoy.getDate() === d;
+      var dotsHtml = evs.slice(0, 3).map(function(e) {
+        var tipo = e.tipo || 'otro';
+        return '<div class="cal-evt cal-evt-' + escAttr(tipo) + '">' + escTxt(e.titulo || 'Evento') + '</div>';
+      }).join('');
+      if (evs.length > 3) dotsHtml += '<div style="font-size:.62rem;color:#94a3b8;padding-left:2px">+' + (evs.length - 3) + ' más</div>';
+      html +=
+        '<div class="cal-day' + (esHoy ? ' is-today' : '') + '" data-fecha="' + escAttr(fechaStr) + '">' +
+          '<div class="cal-day-num">' + d + '</div>' +
+          dotsHtml +
+        '</div>';
+    }
     el.innerHTML = html;
 
-  } else if (user.tipoProfesor === 'media') {
-    var asigs = user.asignaturas || [];
-    var niveles = user.niveles || ['1M','2M','3M','4M'];
-    var html = '';
-
-    asigs.forEach(function(asig) {
-      html += '<div class="card"><div class="card-header"><div class="card-title">🎓 ' + asig + '</div>';
-      html += '<div style="display:flex;gap:6px">';
-      niveles.forEach(function(n) { html += '<span class="badge badge-green">' + n + '</span>'; });
-      html += '</div></div>';
-
-      // Mostrar unidades por nivel
-      html += '<div class="tab-bar">';
-      niveles.forEach(function(n, i) {
-        html += '<button class="tab-btn' + (i === 0 ? ' active' : '') + '" onclick="switchTab(this,\'asig-' + asig.replace(/[^a-zA-Z0-9]/g,'') + '\',\'' + n + '\')">' + n + '</button>';
-      });
-      html += '</div>';
-
-      niveles.forEach(function(n, i) {
-        var asigObj = CURRICULA_CHILE.planComun.asignaturas.find(function(a) { return a.nombre === asig; });
-        var unidades = (asigObj && asigObj.unidades && asigObj.unidades[n]) || [];
-        html += '<div id="asig-' + asig.replace(/[^a-zA-Z0-9]/g,'') + '-' + n + '" class="tab-content' + (i === 0 ? ' active' : '') + '">';
-        if (unidades.length) {
-          html += '<div style="display:flex;flex-direction:column;gap:6px">';
-          unidades.forEach(function(u, ui) {
-            html += '<div style="padding:8px 12px;background:var(--surface2);border-radius:8px;font-size:.85rem"><span style="color:var(--accent);font-weight:700;margin-right:8px">U' + (ui+1) + '</span>' + u + '</div>';
-          });
-          html += '</div>';
-        } else {
-          html += '<div class="empty-state"><span class="emoji">📋</span><p>Sin unidades definidas para este nivel</p></div>';
-        }
-        html += '</div>';
-      });
-
-      html += '</div>';
+    // Click en día → abrir nuevo evento
+    el.querySelectorAll('.cal-day:not(.is-empty)').forEach(function(c) {
+      c.addEventListener('click', function() { calNuevoEvento(c.getAttribute('data-fecha')); });
     });
-
-    el.innerHTML = html || '<div class="empty-state"><span class="emoji">⚠️</span><p>Sin asignaturas asignadas.</p></div>';
-
-  } else if (user.tipoProfesor === 'basica') {
-    var asigs = user.asignaturas || [];
-    var niveles = user.niveles || ['1B','2B','3B','4B','5B','6B','7B','8B'];
-    var html = '';
-
-    asigs.forEach(function(asig) {
-      html += '<div class="card"><div class="card-header"><div class="card-title">📚 ' + asig + '</div>';
-      html += '<div style="display:flex;gap:6px">';
-      niveles.forEach(function(n) { html += '<span class="badge badge-green">' + n.replace('B','° B') + '</span>'; });
-      html += '</div></div>';
-
-      html += '<div class="tab-bar">';
-      niveles.forEach(function(n, i) {
-        html += '<button class="tab-btn' + (i === 0 ? ' active' : '') + '" onclick="switchTab(this,\'basig-' + asig.replace(/[^a-zA-Z0-9]/g,'') + '\',\'' + n + '\')">' + n.replace('B','°B') + '</button>';
-      });
-      html += '</div>';
-
-      niveles.forEach(function(n, i) {
-        var asigObj = CURRICULA_CHILE.basica.asignaturas.find(function(a) { return a.nombre === asig; });
-        var unidades = (asigObj && asigObj.unidades && asigObj.unidades[n]) || [];
-        html += '<div id="basig-' + asig.replace(/[^a-zA-Z0-9]/g,'') + '-' + n + '" class="tab-content' + (i === 0 ? ' active' : '') + '">';
-        if (unidades.length) {
-          html += '<div style="display:flex;flex-direction:column;gap:6px">';
-          unidades.forEach(function(u, ui) {
-            html += '<div style="padding:8px 12px;background:var(--surface2);border-radius:8px;font-size:.85rem"><span style="color:var(--accent);font-weight:700;margin-right:8px">U' + (ui+1) + '</span>' + u + '</div>';
-          });
-          html += '</div>';
-        }
-        html += '</div>';
-      });
-
-      html += '</div>';
-    });
-
-    el.innerHTML = html || '<div class="empty-state"><span class="emoji">⚠️</span><p>Sin asignaturas asignadas.</p></div>';
-
-  } else {
-    el.innerHTML = '<div class="empty-state"><span class="emoji">⚠️</span><p>No hay asignación curricular configurada.<br>Contacta al administrador.</p></div>';
   }
-}
 
-function switchTab(btn, prefix, nivel) {
-  var parent = btn.closest('.card');
-  parent.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
-  parent.querySelectorAll('.tab-content').forEach(function(c) { c.classList.remove('active'); });
-  btn.classList.add('active');
-  var tc = document.getElementById(prefix + '-' + nivel);
-  if (tc) tc.classList.add('active');
-}
-
-// ── Mis materiales ───────────────────────────────────────────
-function loadMisMateriales() {
-  if (!_profeUser) return;
-  var el = document.getElementById('matsList');
-  el.innerHTML = '<div class="empty-state"><span class="emoji">⏳</span><p>Cargando…</p></div>';
-
-  ELDB.materiales.listar({ profesor: _profeUser.email }).then(function(mats) {
-    if (!mats.length) {
-      el.innerHTML = '<div class="empty-state"><span class="emoji">📂</span><p>No has subido materiales.<br><a href="material.html" style="color:var(--accent)">Sube tu primer recurso →</a></p></div>';
+  function calDibujarLista() {
+    var el = document.getElementById('calListaEventos'); if (!el) return;
+    if (!_calEventos.length) {
+      el.innerHTML = '<div class="empty-pro"><span class="e-emoji">📆</span><p>Sin eventos este mes.<br>Haz clic en un día o en "+ Agregar clase".</p></div>';
       return;
     }
-    var iconos = { guia: '📄', apunte: '📝', evaluacion: '📊', planificacion: '📅', ficha: '🗒️' };
-    el.innerHTML = mats.map(function(m) {
-      var f = m.fechaISO ? new Date(m.fechaISO).toLocaleDateString('es-CL') : '—';
-      var c = { guia:'#34d399', apunte:'#60a5fa', evaluacion:'#f43f5e', planificacion:'#818cf8', ficha:'#f59e0b' };
-      var clr = c[m.tipo] || '#94a3b8';
-      return '<div class="list-item">' +
-        '<span class="list-icon">' + (iconos[m.tipo] || '📎') + '</span>' +
-        '<div class="list-info">' +
-          '<div class="list-title">' + (m.titulo || 'Sin título') + '</div>' +
-          '<div class="list-meta">' + (m.modulo || m.asignatura || '—') + ' · ' + f + ' · ' + (m.vistas || 0) + ' vistas</div>' +
-        '</div>' +
-        '<span class="badge" style="background:' + clr + '18;color:' + clr + ';border:1px solid ' + clr + '33">' + (m.tipo || '?') + '</span>' +
+    var LBL = { clase:'🎓 Clase', evaluacion:'📊 Evaluación', taller:'🔧 Taller', reunion:'📌 Reunión', otro:'📎 Otro' };
+    var sorted = _calEventos.slice().sort(function(a, b) { return (a.fecha || '') < (b.fecha || '') ? -1 : 1; });
+    el.innerHTML = '<div style="display:flex;flex-direction:column;gap:8px">' +
+      sorted.map(function(e) {
+        var tipo = e.tipo || 'otro';
+        var fecha = e.fecha
+          ? new Date(e.fecha + 'T12:00:00').toLocaleDateString('es-CL', { weekday: 'short', day: 'numeric', month: 'short' })
+          : '—';
+        return '<div style="display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border-radius:12px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07)">' +
+          '<div class="cal-evt cal-evt-' + escAttr(tipo) + '" style="font-size:.75rem;padding:6px 10px;flex-shrink:0">' + escTxt(LBL[tipo] || LBL.otro) + '</div>' +
+          '<div style="flex:1;min-width:0">' +
+            '<div style="font-weight:700;font-size:.92rem">' + escTxt(e.titulo || 'Sin título') + '</div>' +
+            '<div style="font-size:.75rem;color:#94a3b8;margin-top:2px">' + escTxt(fecha) + (e.hora ? ' · ' + escTxt(e.hora) : '') + (e.asignatura ? ' · ' + escTxt(e.asignatura) : '') + '</div>' +
+            (e.descripcion ? '<div style="font-size:.78rem;color:#cbd5e1;margin-top:6px">' + escTxt(e.descripcion) + '</div>' : '') +
+          '</div>' +
+          '<button class="btn-pro ghost cal-del" data-id="' + escAttr(e._id) + '" aria-label="Eliminar evento" style="padding:5px 10px;font-size:.78rem">🗑️</button>' +
         '</div>';
-    }).join('');
-  }).catch(function(err) {
-    el.innerHTML = '<div class="empty-state"><span class="emoji">❌</span><p>Error al cargar: ' + err.message + '</p></div>';
-  });
-}
+      }).join('') + '</div>';
+    el.querySelectorAll('.cal-del').forEach(function(btn) {
+      btn.addEventListener('click', function() { calEliminarEvento(btn.getAttribute('data-id')); });
+    });
+  }
 
-// ── Mis planificaciones ─────────────────────────────────────
-function loadMisPlanificaciones() {
-  if (!_profeUser) return;
-  var el = document.getElementById('plansList');
-  el.innerHTML = '<div class="empty-state"><span class="emoji">⏳</span><p>Cargando…</p></div>';
-
-  ELDB.planificaciones.listar({ profesor: _profeUser.email }).then(function(plans) {
-    if (!plans.length) {
-      el.innerHTML = '<div class="empty-state"><span class="emoji">📋</span><p>Sin planificaciones.<br><a href="planificacion.html" style="color:var(--accent)">Crear primera →</a></p></div>';
-      return;
+  function calNuevoEvento(fechaPre) {
+    var user = _profeUser || {};
+    if (!user.uid) { toast('Sesión inválida. Recarga la página.', 'error'); return; }
+    var asigOpts = '';
+    if (user.asignaturas && user.asignaturas.length) {
+      user.asignaturas.forEach(function(a) { asigOpts += '<option value="' + escAttr(a) + '">' + escTxt(a) + '</option>'; });
     }
-    el.innerHTML = plans.map(function(p) {
-      var f = p.fechaClase ? new Date(p.fechaClase).toLocaleDateString('es-CL') : '—';
-      return '<div class="list-item">' +
-        '<span class="list-icon">📅</span>' +
-        '<div class="list-info">' +
-          '<div class="list-title">' + (p.titulo || 'Sin título') + '</div>' +
-          '<div class="list-meta">' + (p.modulo || p.asignatura || '—') + ' · Clase: ' + f + (p.horas ? ' · ' + p.horas + 'h' : '') + '</div>' +
+    if (user.especialidad) asigOpts += '<option value="' + escAttr(user.especialidad) + '">' + escTxt(user.especialidad) + '</option>';
+    var fechaHoy = fechaPre || new Date().toISOString().slice(0, 10);
+
+    var modal = document.getElementById('modalCal');
+    modal.innerHTML =
+      '<div class="modal-ia" style="width:min(480px,95vw)">' +
+        '<button class="m-close" aria-label="Cerrar">×</button>' +
+        '<div class="m-title">📆 Agregar evento / clase</div>' +
+        '<p class="m-sub">Programa una clase, evaluación o reunión.</p>' +
+        '<div class="fg"><label>Título del evento *</label><input id="calTit" placeholder="ej: Clase — Electricidad básica"></div>' +
+        '<div class="fg-grid">' +
+          '<div class="fg"><label>Fecha *</label><input id="calFecha" type="date" value="' + escAttr(fechaHoy) + '"></div>' +
+          '<div class="fg"><label>Hora (opcional)</label><input id="calHora" type="time"></div>' +
         '</div>' +
-        '</div>';
-    }).join('');
-  }).catch(function(err) {
-    el.innerHTML = '<div class="empty-state"><span class="emoji">❌</span><p>Error: ' + err.message + '</p></div>';
-  });
-}
-
-// ── Biblioteca ─────────────────────────────────────────────
-function loadBiblioteca() {
-  var el = document.getElementById('bibliotecaList');
-  el.innerHTML = '<div class="empty-state"><span class="emoji">⏳</span><p>Cargando biblioteca…</p></div>';
-
-  ELDB.materiales.listar().then(function(mats) {
-    if (!mats.length) {
-      el.innerHTML = '<div class="empty-state"><span class="emoji">📚</span><p>La biblioteca está vacía.</p></div>';
-      return;
-    }
-    var iconos = { guia: '📄', apunte: '📝', evaluacion: '📊', planificacion: '📅', ficha: '🗒️' };
-    el.innerHTML = '<table style="width:100%;border-collapse:collapse;font-size:.85rem">' +
-      '<thead><tr style="text-align:left">' +
-      '<th style="padding:8px 12px;color:var(--muted);font-size:.72rem;text-transform:uppercase">Título</th>' +
-      '<th style="padding:8px 12px;color:var(--muted);font-size:.72rem;text-transform:uppercase">Tipo</th>' +
-      '<th style="padding:8px 12px;color:var(--muted);font-size:.72rem;text-transform:uppercase">Módulo/Asig.</th>' +
-      '<th style="padding:8px 12px;color:var(--muted);font-size:.72rem;text-transform:uppercase">Profesor</th>' +
-      '<th style="padding:8px 12px;color:var(--muted);font-size:.72rem;text-transform:uppercase">Fecha</th>' +
-      '</tr></thead><tbody>' +
-      mats.map(function(m) {
-        var f = m.fechaISO ? new Date(m.fechaISO).toLocaleDateString('es-CL') : '—';
-        return '<tr style="border-bottom:1px solid rgba(99,102,241,.08)">' +
-          '<td style="padding:10px 12px"><strong>' + (m.titulo || 'Sin título') + '</strong></td>' +
-          '<td style="padding:10px 12px">' + (iconos[m.tipo] || '📎') + ' ' + (m.tipo || '—') + '</td>' +
-          '<td style="padding:10px 12px;color:var(--muted)">' + (m.modulo || m.asignatura || '—') + '</td>' +
-          '<td style="padding:10px 12px;color:var(--muted);font-size:.8rem">' + (m.profesor || m.email || '—') + '</td>' +
-          '<td style="padding:10px 12px;color:var(--muted);font-size:.8rem">' + f + '</td>' +
-          '</tr>';
-      }).join('') +
-      '</tbody></table>';
-  }).catch(function(err) {
-    el.innerHTML = '<div class="empty-state"><span class="emoji">❌</span><p>Error al cargar: ' + err.message + '</p></div>';
-  });
-}
-
-// ── Herramientas IA ───────────────────────────────────────────
-var _herr = {
-  planificacion: { titulo:'📅 Planificación de Clase',  color:'#6366f1' },
-  guia:          { titulo:'📄 Guía de Aprendizaje',     color:'#10b981' },
-  prueba:        { titulo:'📊 Prueba / Evaluación',     color:'#ef4444' },
-  apunte:        { titulo:'📝 Apunte de Contenido',     color:'#f59e0b' },
-  revision:      { titulo:'🔍 Revisión de Instrumento', color:'#8b5cf6' },
-  taller:        { titulo:'🔧 Guía para Taller',        color:'#06b6d4' }
-};
-
-var NEE_CHILE = [
-  { key:'tea',         label:'TEA — Espectro Autista' },
-  { key:'tdah',        label:'TDAH — Déficit Atencional' },
-  { key:'dislexia',    label:'Dislexia (DEA Lectura)' },
-  { key:'discalculia', label:'Discalculia (DEA Matemática)' },
-  { key:'disgrafia',   label:'Disgrafía (DEA Escritura)' },
-  { key:'hipoacusia',  label:'Hipoacusia / Sordera' },
-  { key:'baja-vision', label:'Baja Visión / Ceguera' },
-  { key:'deficit-int', label:'Déficit Intelectual' },
-  { key:'tl',          label:'Trastorno del Lenguaje (TEL)' },
-  { key:'motor',       label:'Trastorno Motor / Físico' },
-  { key:'emocional',   label:'Trastorno Emocional / Conductual' },
-  { key:'dotacion',    label:'Altas Capacidades / Dotación' }
-];
-
-function abrirHerramienta(tipo) {
-  var h = _herr[tipo];
-  var user = _profeUser || {};
-  var isTP = user.tipoProfesor === 'tecnico';
-
-  var asigOpts = '';
-  if (user.asignaturas && user.asignaturas.length) {
-    user.asignaturas.forEach(function(a){ asigOpts += '<option>'+a+'</option>'; });
-  }
-  if (user.especialidad) asigOpts += '<option value="'+user.especialidad+'">'+user.especialidad+' (Especialidad)</option>';
-
-  var nivOpts = '';
-  if (user.niveles && user.niveles.length) {
-    user.niveles.forEach(function(n){ nivOpts += '<option>'+n+'</option>'; });
-  }
-
-  var modOpts = '';
-  if (isTP && user.modulos && user.modulos.length) {
-    user.modulos.forEach(function(m){ modOpts += '<option>'+m+'</option>'; });
-  }
-
-  var modField = isTP
-    ? '<div class="fg"><label>Módulo TP</label><select id="hModulo"><option value="">— Seleccionar —</option>'+modOpts+'</select></div>'
-    : '';
-
-  // ── Campos extra por tipo ──────────────────────────────────────
-  var extraRevision = tipo === 'revision'
-    ? '<div class="fg"><label>Material a revisar *</label><textarea id="hTextoRevisar" rows="5" placeholder="Pega aquí tu prueba, guía u otro instrumento..."></textarea></div>'
-    : '';
-
-  // Tipos de pregunta (prueba, guia, apunte)
-  var tiposPreg = (tipo === 'prueba' || tipo === 'guia' || tipo === 'apunte')
-    ? '<div class="fg" style="margin-bottom:14px"><label>Tipos de preguntas / actividades</label>' +
-      '<div style="display:flex;flex-wrap:wrap;gap:8px 16px;padding:10px;background:var(--surface2);border:1px solid var(--border);border-radius:8px">' +
-      '<label style="display:flex;align-items:center;gap:6px;font-size:.82rem;color:var(--text);font-weight:400;cursor:pointer"><input type="checkbox" id="pAlt" value="alternativas" style="accent-color:'+h.color+'"> Selección múltiple</label>' +
-      '<label style="display:flex;align-items:center;gap:6px;font-size:.82rem;color:var(--text);font-weight:400;cursor:pointer"><input type="checkbox" id="pVF" value="vf" style="accent-color:'+h.color+'"> Verdadero / Falso</label>' +
-      '<label style="display:flex;align-items:center;gap:6px;font-size:.82rem;color:var(--text);font-weight:400;cursor:pointer"><input type="checkbox" id="pDes" value="desarrollo" style="accent-color:'+h.color+'"> Desarrollo</label>' +
-      '<label style="display:flex;align-items:center;gap:6px;font-size:.82rem;color:var(--text);font-weight:400;cursor:pointer"><input type="checkbox" id="pCorta" value="corta" style="accent-color:'+h.color+'"> Respuesta corta</label>' +
-      '<label style="display:flex;align-items:center;gap:6px;font-size:.82rem;color:var(--text);font-weight:400;cursor:pointer"><input type="checkbox" id="pEmp" value="emparejamiento" style="accent-color:'+h.color+'"> Emparejamiento</label>' +
-      '<label style="display:flex;align-items:center;gap:6px;font-size:.82rem;color:var(--text);font-weight:400;cursor:pointer"><input type="checkbox" id="pCasos" value="casos" style="accent-color:'+h.color+'"> Análisis de caso</label>' +
-      '</div></div>'
-    : '';
-
-  // NEE (solo planificación)
-  var neeField = tipo === 'planificacion'
-    ? '<div class="fg" style="margin-bottom:14px"><label>NEE diagnosticadas en el curso (opcional)</label>' +
-      '<div style="display:flex;flex-wrap:wrap;gap:6px 14px;padding:10px;background:var(--surface2);border:1px solid var(--border);border-radius:8px">' +
-      NEE_CHILE.map(function(n){
-        return '<label style="display:flex;align-items:center;gap:5px;font-size:.78rem;color:var(--text);font-weight:400;cursor:pointer">' +
-               '<input type="checkbox" class="neeCheck" value="'+n.key+'" style="accent-color:#6366f1"> '+n.label+'</label>';
-      }).join('') +
-      '</div></div>'
-    : '';
-
-  // Institución educativa
-  var colegioVal = user.colegio || '';
-
-  document.getElementById('modalHerr').innerHTML = `
-<div style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:28px;width:min(720px,96vw);max-height:93vh;overflow-y:auto;position:relative">
-  <button onclick="cerrarHerramienta()" style="position:absolute;top:14px;right:14px;background:var(--surface2);border:none;color:var(--muted);cursor:pointer;border-radius:8px;width:30px;height:30px;font-size:1rem">✕</button>
-  <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
-    <span style="font-size:1.4rem">${h.titulo.split(' ')[0]}</span>
-    <h2 style="font-size:1.15rem">${h.titulo.substring(h.titulo.indexOf(' ')+1)}</h2>
-  </div>
-  <p style="color:var(--muted);font-size:.8rem;margin-bottom:18px">Completa los campos y usa el asistente IA para generar un borrador editable</p>
-  <div id="herrNotif" class="notif"></div>
-  <style>
-    .fg{display:flex;flex-direction:column;gap:5px;margin-bottom:14px}
-    .fg label{font-size:.78rem;color:var(--muted);font-weight:500}
-    .fg input,.fg select,.fg textarea{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-size:.875rem;outline:none;resize:vertical}
-    .fg input:focus,.fg select:focus,.fg textarea:focus{border-color:${h.color}}
-    .fggrid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-    .fggrid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
-  </style>
-
-  <div class="fggrid">
-    <div class="fg"><label>Institución educativa</label><input id="hColegio" placeholder="ej: Liceo Salesiano de Talca" value="${colegioVal}"></div>
-    <div class="fg"><label>Asignatura / Módulo</label><select id="hAsig"><option value="">— Seleccionar —</option>${asigOpts}</select></div>
-    ${modField || ''}
-    <div class="fg"><label>Nivel / Curso</label><select id="hNivel"><option value="">— Seleccionar —</option>${nivOpts}</select></div>
-    <div class="fg"><label>Tema específico</label><input id="hTema" placeholder="ej: Circuitos eléctricos en serie"></div>
-    <div class="fg"><label>Horas / Duración</label><input id="hHoras" placeholder="ej: 2 horas pedagógicas"></div>
-  </div>
-
-  <div class="fg"><label>Objetivo de Aprendizaje / AE (escribe o selecciona abajo)</label><input id="hOA" placeholder="ej: OA3 — Leer textos con fluidez y comprensión..."></div>
-
-  <div class="fg" style="margin-bottom:6px">
-    <label style="display:flex;align-items:center;gap:6px">
-      📋 OA del Programa Mineduc
-      <span style="font-size:.68rem;background:rgba(99,102,241,.15);color:#818cf8;padding:2px 7px;border-radius:10px;font-weight:600">selecciona uno o más</span>
-    </label>
-    <div id="oaContainer" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px;min-height:48px;max-height:180px;overflow-y:auto">
-      <p style="font-size:.75rem;color:var(--muted);font-style:italic">Selecciona asignatura y nivel para ver los OA disponibles.</p>
-    </div>
-  </div>
-
-  <div class="fggrid${tipo === 'prueba' || tipo === 'guia' || tipo === 'apunte' ? '3' : ''}">
-    <div class="fg"><label>Nivel taxonómico (Bloom)</label>
-      <select id="hTaxonomia">
-        <option value="">— Sin especificar —</option>
-        <option value="recordar">Recordar — conocimiento factual</option>
-        <option value="comprender">Comprender — explicar e interpretar</option>
-        <option value="aplicar">Aplicar — usar en situaciones nuevas</option>
-        <option value="analizar">Analizar — descomponer y comparar</option>
-        <option value="evaluar">Evaluar — juzgar y justificar</option>
-        <option value="crear">Crear — diseñar y producir algo nuevo</option>
-      </select>
-    </div>
-    ${tipo === 'prueba' || tipo === 'guia' || tipo === 'apunte'
-      ? '<div class="fg"><label>N° de preguntas / ítems</label><input id="hNPreguntas" type="number" min="1" max="80" placeholder="ej: 20"></div>'
-      : ''}
-    ${tipo === 'prueba' || tipo === 'guia' || tipo === 'apunte'
-      ? '<div class="fg"><label>Unidad / Período</label><input id="hUnidad" placeholder="ej: Unidad 2 — Electricidad"></div>'
-      : ''}
-  </div>
-
-  ${tiposPreg}
-  ${neeField}
-  ${extraRevision}
-
-  <div class="fg"><label>Indicaciones adicionales (opcional)</label><input id="hExtra" placeholder="ej: Énfasis en normas de seguridad, incluir diagrama, nivel básico..."></div>
-
-  <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;align-items:center">
-    <button id="btnIA" class="btn-ia" onclick="usarIA('${tipo}')">✨ Generar con IA</button>
-    <span style="font-size:.75rem;color:var(--muted)">o escribe directamente en el borrador →</span>
-  </div>
-  <div class="fg">
-    <label>Resultado / Borrador editable</label>
-    <textarea id="hResultado" rows="14" placeholder="El borrador generado por IA aparecerá aquí. También puedes escribir directamente."></textarea>
-  </div>
-  <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px">
-    <button class="btn btn-outline btn-sm" onclick="cerrarHerramienta()">Cancelar</button>
-    <button class="btn btn-primary" onclick="guardarHerramienta('${tipo}')">💾 Guardar en mis materiales</button>
-  </div>
-</div>`;
-
-  document.getElementById('modalHerr').style.display = 'flex';
-
-  // Wire up dynamic OA loader when asig or nivel changes
-  var elAsig  = document.getElementById('hAsig');
-  var elNivel = document.getElementById('hNivel');
-  function _onCambioCurso() { _loadOAsEnModal(); }
-  if (elAsig)  elAsig.addEventListener('change',  _onCambioCurso);
-  if (elNivel) elNivel.addEventListener('change', _onCambioCurso);
-  // Auto-load if both already have values (TP case)
-  _loadOAsEnModal();
-}
-
-function cerrarHerramienta() {
-  document.getElementById('modalHerr').style.display = 'none';
-}
-
-// ── OA Loader dinámico ────────────────────────────────────────
-// Mapeo nombre asignatura → sigla CURRICULA_CHILE
-var _ASIG_SIGLA_MAP = {
-  'lenguaje':             'LEN', 'lenguaje y comunicación': 'LEN', 'lengua y literatura': 'LEN',
-  'matemática':           'MAT', 'matematica':              'MAT',
-  'ciencias naturales':   'CN',  'historia':                'HCS',
-  'historia, geografía y cs': 'HCS', 'inglés':              'ING',
-  'física':               'FIS', 'química':                 'QUI',
-  'biología':             'BIO'
-};
-// Mapeo nombre nivel → clave CURRICULA_CHILE
-var _NIVEL_KEY_MAP = {
-  '1b':'1B','1º básico':'1B','1° básico':'1B','primero básico':'1B',
-  '2b':'2B','2º básico':'2B','2° básico':'2B','segundo básico':'2B',
-  '3b':'3B','3º básico':'3B','3° básico':'3B','tercero básico':'3B',
-  '4b':'4B','4º básico':'4B','4° básico':'4B','cuarto básico':'4B',
-  '5b':'5B','5º básico':'5B','5° básico':'5B','quinto básico':'5B',
-  '6b':'6B','6º básico':'6B','6° básico':'6B','sexto básico':'6B',
-  '7b':'7B','7º básico':'7B','7° básico':'7B','séptimo básico':'7B',
-  '8b':'8B','8º básico':'8B','8° básico':'8B','octavo básico':'8B',
-  '1m':'1M','1º medio':'1M','1° medio':'1M','primero medio':'1M',
-  '2m':'2M','2º medio':'2M','2° medio':'2M','segundo medio':'2M',
-  '3m':'3M','3º medio':'3M','3° medio':'3M','tercer medio':'3M',
-  '4m':'4M','4º medio':'4M','4° medio':'4M','cuarto medio':'4M'
-};
-
-function _resolveNivelKey(raw) {
-  if (!raw) return null;
-  var k = raw.trim().toLowerCase();
-  if (_NIVEL_KEY_MAP[k]) return _NIVEL_KEY_MAP[k];
-  // Try direct: "1B", "7B", "1M"
-  if (/^[1-8][bBmM]$/.test(raw.trim())) return raw.trim().toUpperCase();
-  return null;
-}
-
-function _resolveAsigSigla(raw) {
-  if (!raw) return null;
-  var k = raw.trim().toLowerCase().replace(/[áéíóúñ]/g, function(c){
-    return {á:'a',é:'e',í:'i',ó:'o',ú:'u',ñ:'n'}[c]||c;
-  });
-  if (_ASIG_SIGLA_MAP[k]) return _ASIG_SIGLA_MAP[k];
-  // Partial match
-  for (var key in _ASIG_SIGLA_MAP) {
-    if (k.indexOf(key) !== -1 || key.indexOf(k) !== -1) return _ASIG_SIGLA_MAP[key];
-  }
-  return null;
-}
-
-function _loadOAsEnModal() {
-  var container = document.getElementById('oaContainer');
-  if (!container) return;
-
-  var asigRaw  = document.getElementById('hAsig')  ? document.getElementById('hAsig').value  : '';
-  var nivelRaw = document.getElementById('hNivel') ? document.getElementById('hNivel').value : '';
-
-  var sigla = _resolveAsigSigla(asigRaw);
-  var nivel = _resolveNivelKey(nivelRaw);
-
-  if (!sigla || !nivel || typeof CURRICULA_CHILE === 'undefined') {
-    container.innerHTML = '<p style="font-size:.75rem;color:var(--muted);font-style:italic">Selecciona asignatura y nivel para ver los OA disponibles.</p>';
-    return;
-  }
-
-  var oas = CURRICULA_CHILE.getOAs(sigla, nivel);
-  if (!oas || !oas.length) {
-    container.innerHTML = '<p style="font-size:.75rem;color:var(--muted);font-style:italic">No hay OAs registrados para esta combinación.</p>';
-    return;
-  }
-
-  // Group by eje
-  var byEje = {};
-  oas.forEach(function(o) {
-    var eje = o.eje || 'General';
-    if (!byEje[eje]) byEje[eje] = [];
-    byEje[eje].push(o);
-  });
-
-  var html = '<div style="display:flex;flex-wrap:wrap;gap:6px 12px;">';
-  Object.keys(byEje).forEach(function(eje) {
-    if (eje) html += '<div style="width:100%;font-size:.7rem;color:var(--muted);font-weight:700;margin-top:6px;text-transform:uppercase;letter-spacing:.05em">' + eje + '</div>';
-    byEje[eje].forEach(function(o) {
-      var desc = o.desc || o.descripcion || '';
-      // Truncate desc for tooltip
-      var tip = desc.replace(/"/g,'&quot;');
-      html += '<label title="' + tip + '" style="display:flex;align-items:flex-start;gap:5px;cursor:pointer;font-size:.78rem;color:var(--text);font-weight:400;max-width:320px">' +
-        '<input type="checkbox" class="oaCheck" data-codigo="' + o.codigo + '" data-desc="' + tip + '" style="accent-color:#6366f1;margin-top:2px;flex-shrink:0">' +
-        '<span><strong>' + o.codigo + '</strong> — ' + (desc.slice(0,60) || '…') + (desc.length > 60 ? '…' : '') + '</span>' +
-        '</label>';
-    });
-  });
-  html += '</div>';
-  container.innerHTML = html;
-}
-
-function _getDatosHerr() {
-  var user = _profeUser || {};
-  function _v(id) { var el = document.getElementById(id); return el ? el.value : ''; }
-
-  // Collect question types (checkboxes)
-  var tiposPreg = [];
-  ['pAlt','pVF','pDes','pCorta','pEmp','pCasos'].forEach(function(id) {
-    var el = document.getElementById(id);
-    if (el && el.checked) tiposPreg.push(el.value);
-  });
-
-  // Collect NEE (checkboxes with class neeCheck)
-  var nee = [];
-  document.querySelectorAll('.neeCheck').forEach(function(el) {
-    if (el.checked) nee.push(el.value);
-  });
-
-  // Collect selected OAs from Mineduc selector
-  var oasSeleccionados = [];
-  document.querySelectorAll('.oaCheck').forEach(function(el) {
-    if (el.checked) {
-      oasSeleccionados.push({
-        codigo:     el.getAttribute('data-codigo'),
-        descripcion: el.getAttribute('data-desc')
-      });
-    }
-  });
-
-  // Build the OA text field: use manual input OR selected OAs OR both
-  var oaManual = _v('hOA');
-  var oaTexto  = oaManual || oasSeleccionados.map(function(o){ return o.codigo + ': ' + o.descripcion; }).join('; ') || '';
-
-  return {
-    colegio:              _v('hColegio') || user.colegio || '',
-    asignatura:           _v('hAsig')    || (user.asignaturas && user.asignaturas[0]) || '',
-    modulo:               _v('hModulo'),
-    nivel:                _v('hNivel'),
-    unidad:               _v('hUnidad'),
-    tema:                 _v('hTema'),
-    horas:                _v('hHoras'),
-    oa:                   oaTexto,
-    oas_seleccionados:    oasSeleccionados,   // array [{codigo, descripcion}]
-    taxonomia:            _v('hTaxonomia'),
-    nPreguntas:           _v('hNPreguntas'),
-    tiposPreguntas:       tiposPreg,
-    nee:                  nee,
-    extra:                _v('hExtra'),
-    especialidad:         user.especialidad || '',
-    texto_a_revisar:      _v('hTextoRevisar')
-  };
-}
-
-function usarIA(tipo) {
-  var btn = document.getElementById('btnIA');
-  var datos = _getDatosHerr();
-  btn.disabled = true; btn.innerHTML = '<span class="ia-spin"></span> Generando…';
-  ELAsistente.generar(tipo, datos)
-    .then(function(txt) {
-      document.getElementById('hResultado').value = txt;
-      var n = document.getElementById('herrNotif');
-      n.textContent = '✅ Borrador listo. Revisa y edita antes de guardar.';
-      n.className = 'notif ok show';
-      setTimeout(function(){ n.classList.remove('show'); }, 5000);
-    })
-    .catch(function(e) {
-      var n = document.getElementById('herrNotif');
-      n.textContent = '❌ Error IA: '+e.message;
-      n.className = 'notif err show';
-    })
-    .then(function(){ btn.disabled=false; btn.innerHTML='✨ Generar con IA'; });
-}
-
-var _tipoActual = '';
-function guardarHerramienta(tipo) {
-  var resultado = document.getElementById('hResultado') ? document.getElementById('hResultado').value.trim() : '';
-  if (!resultado) { alert('Escribe o genera contenido antes de guardar'); return; }
-  var user = _profeUser || {};
-  var datos = _getDatosHerr();
-  var tipoLabel = {planificacion:'Planificación',guia:'Guía',prueba:'Prueba',apunte:'Apunte',revision:'Revisión',taller:'Guía Taller'};
-  var entrada = {
-    titulo:          (tipoLabel[tipo]||tipo) + (datos.tema?' — '+datos.tema:'') + (datos.asignatura?' ('+datos.asignatura+')':''),
-    tipo:            tipo,
-    contenido:       resultado,
-    asignatura:      datos.asignatura,
-    modulo:          datos.modulo,
-    nivel:           datos.nivel,
-    unidad:          datos.unidad || '',
-    oa:              datos.oa,
-    horas:           datos.horas,
-    taxonomia:       datos.taxonomia || '',
-    nPreguntas:      datos.nPreguntas || '',
-    tiposPreguntas:  datos.tiposPreguntas || [],
-    nee:             datos.nee || [],
-    colegio:         datos.colegio || user.colegio || '',
-    profesor:        user.nombre || user.email,
-    email:           user.email,
-    uid:             user.uid,
-    generadoIA:      true,
-    fechaISO:        new Date().toISOString(),
-    vistas:          0,
-    activo:          true
-  };
-  ELDB.materiales.crear(entrada)
-    .then(function() {
-      var n = document.getElementById('herrNotif');
-      n.textContent = '✅ Guardado en "Mis Materiales"';
-      n.className = 'notif ok show';
-      setTimeout(function(){ cerrarHerramienta(); }, 1500);
-    })
-    .catch(function(e) {
-      var n = document.getElementById('herrNotif');
-      n.textContent = '❌ Error guardando: '+e.message;
-      n.className = 'notif err show';
-    });
-}
-
-// ═══════════════════════════════════════════════════════════════
-//  CALENDARIO DE CLASES
-// ═══════════════════════════════════════════════════════════════
-var _calYear  = new Date().getFullYear();
-var _calMonth = new Date().getMonth();  // 0-based
-var _calEventos = [];
-
-var CAL_COLORES = {
-  clase:         { bg:'rgba(99,102,241,.18)',  border:'#6366f1', label:'🎓 Clase' },
-  evaluacion:    { bg:'rgba(239,68,68,.18)',   border:'#ef4444', label:'📊 Evaluación' },
-  taller:        { bg:'rgba(6,182,212,.18)',   border:'#06b6d4', label:'🔧 Taller' },
-  reunion:       { bg:'rgba(245,158,11,.18)',  border:'#f59e0b', label:'📌 Reunión' },
-  otro:          { bg:'rgba(148,163,184,.12)', border:'#94a3b8', label:'📎 Otro' }
-};
-
-function calNavMes(dir) {
-  _calMonth += dir;
-  if (_calMonth > 11) { _calMonth = 0;  _calYear++; }
-  if (_calMonth < 0)  { _calMonth = 11; _calYear--; }
-  calRender();
-}
-
-function calRender() {
-  var user = _profeUser || {};
-  var titulo = new Date(_calYear, _calMonth, 1)
-    .toLocaleDateString('es-CL', { month:'long', year:'numeric' });
-  document.getElementById('calTitulo').textContent =
-    titulo.charAt(0).toUpperCase() + titulo.slice(1);
-
-  // Cargar eventos del mes desde Firestore
-  var colRef = EL_DB.collection('calendarios_docentes')
-    .doc(user.uid || 'anon')
-    .collection('eventos');
-
-  var inicioMes = new Date(_calYear, _calMonth, 1).toISOString().slice(0,7); // YYYY-MM
-  colRef.get().then(function(snap) {
-    _calEventos = snap.docs
-      .map(function(d) { return Object.assign({ _id: d.id }, d.data()); })
-      .filter(function(e) { return e.fecha && e.fecha.startsWith(inicioMes); });
-    calDibujarGrid();
-    calDibujarLista();
-  }).catch(function() {
-    _calEventos = [];
-    calDibujarGrid();
-    calDibujarLista();
-  });
-}
-
-function calDibujarGrid() {
-  var primerDia = new Date(_calYear, _calMonth, 1).getDay(); // 0=Dom
-  primerDia = (primerDia + 6) % 7; // convertir a 0=Lun
-  var diasMes  = new Date(_calYear, _calMonth + 1, 0).getDate();
-  var hoy      = new Date();
-  var esHoyMes = hoy.getFullYear() === _calYear && hoy.getMonth() === _calMonth;
-
-  var dias = ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
-  var html = '<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:4px">' +
-    dias.map(function(d){ return '<div style="text-align:center;font-size:.7rem;font-weight:700;color:var(--muted);padding:6px 0">'+d+'</div>'; }).join('') +
-    '</div>';
-
-  html += '<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px">';
-
-  // Celdas vacías del inicio
-  for (var i = 0; i < primerDia; i++) {
-    html += '<div style="min-height:72px;border-radius:8px;background:rgba(255,255,255,.02)"></div>';
-  }
-
-  // Días
-  for (var d = 1; d <= diasMes; d++) {
-    var esHoy = esHoyMes && hoy.getDate() === d;
-    var fechaStr = _calYear + '-' + String(_calMonth+1).padStart(2,'0') + '-' + String(d).padStart(2,'0');
-    var evsDia = _calEventos.filter(function(e){ return e.fecha === fechaStr; });
-    var dotsHtml = evsDia.slice(0,3).map(function(e){
-      var c = CAL_COLORES[e.tipo] || CAL_COLORES.otro;
-      return '<div style="font-size:.65rem;background:'+c.bg+';border-left:2px solid '+c.border+';border-radius:3px;padding:1px 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px">'+(e.titulo||'Evento')+'</div>';
-    }).join('');
-    if (evsDia.length > 3) dotsHtml += '<div style="font-size:.6rem;color:var(--muted);padding-left:2px">+' + (evsDia.length-3) + ' más</div>';
-
-    html += '<div onclick="calVerDia(\''+fechaStr+'\')" style="min-height:72px;border-radius:8px;background:'+(esHoy?'rgba(99,102,241,.18)':'var(--surface2)')+';border:1px solid '+(esHoy?'var(--accent)':'var(--border)')+';padding:6px;cursor:pointer;transition:border-color .15s" onmouseover="this.style.borderColor=\'var(--accent)\'" onmouseout="this.style.borderColor=\''+(esHoy?'var(--accent)':'var(--border)')+'\'">'+
-      '<div style="font-size:.78rem;font-weight:'+(esHoy?'800':'600')+';color:'+(esHoy?'var(--accent)':'var(--text)')+'">'+d+'</div>'+
-      dotsHtml +
+        '<div class="fg-grid">' +
+          '<div class="fg"><label>Tipo de evento</label>' +
+            '<select id="calTipo">' +
+              '<option value="clase">🎓 Clase</option>' +
+              '<option value="evaluacion">📊 Evaluación</option>' +
+              '<option value="taller">🔧 Taller</option>' +
+              '<option value="reunion">📌 Reunión</option>' +
+              '<option value="otro">📎 Otro</option>' +
+            '</select>' +
+          '</div>' +
+          '<div class="fg"><label>Asignatura</label>' +
+            '<select id="calAsig"><option value="">— General —</option>' + asigOpts + '</select>' +
+          '</div>' +
+        '</div>' +
+        '<div class="fg"><label>Descripción (opcional)</label><textarea id="calDesc" rows="2" placeholder="Objetivos, observaciones, materiales necesarios…"></textarea></div>' +
+        '<div style="display:flex;gap:10px;justify-content:flex-end;margin-top:6px">' +
+          '<button class="btn-pro ghost" id="btnCancelarCal">Cancelar</button>' +
+          '<button class="btn-pro primary" id="btnGuardarCal">💾 Guardar evento</button>' +
+        '</div>' +
       '</div>';
+
+    modal.classList.add('show');
+    document.body.classList.add('no-scroll');
+
+    var inner = modal.querySelector('.modal-ia');
+    inner.querySelector('.m-close').onclick = cerrarModalCal;
+    document.getElementById('btnCancelarCal').onclick = cerrarModalCal;
+    document.getElementById('btnGuardarCal').onclick  = calGuardarEvento;
+    modal.onclick = function(e) { if (e.target === modal) cerrarModalCal(); };
+    document.addEventListener('keydown', _calEscHandler);
+
+    if (window.ELUI && window.ELUI.trapFocus) _calFocusRelease = window.ELUI.trapFocus(inner);
+  }
+  function _calEscHandler(e) { if (e.key === 'Escape') cerrarModalCal(); }
+  function cerrarModalCal() {
+    var modal = document.getElementById('modalCal');
+    modal.classList.remove('show');
+    modal.innerHTML = '';
+    document.body.classList.remove('no-scroll');
+    document.removeEventListener('keydown', _calEscHandler);
+    if (_calFocusRelease) { _calFocusRelease(); _calFocusRelease = null; }
   }
 
-  html += '</div>';
-  document.getElementById('calGrid').innerHTML = html;
-}
-
-function calDibujarLista() {
-  var el = document.getElementById('calListaEventos');
-  if (!_calEventos.length) {
-    el.innerHTML = '<div class="empty-state"><span class="emoji">📆</span><p>Sin eventos este mes. Haz clic en un día o en "+ Agregar clase".</p></div>';
-    return;
+  function calGuardarEvento() {
+    var user = _profeUser;
+    if (!user || !user.uid) { toast('Sesión inválida. Recarga la página.', 'error'); return; }
+    var tit   = (document.getElementById('calTit')  || {}).value || '';
+    var fecha = (document.getElementById('calFecha')|| {}).value || '';
+    tit = tit.trim();
+    if (!tit || !fecha) { toast('Título y fecha son obligatorios.', 'warn'); return; }
+    var entrada = {
+      titulo:      tit,
+      fecha:       fecha,
+      hora:        (document.getElementById('calHora') || {}).value || '',
+      tipo:        (document.getElementById('calTipo') || {}).value || 'otro',
+      asignatura:  (document.getElementById('calAsig') || {}).value || '',
+      descripcion: ((document.getElementById('calDesc')|| {}).value || '').trim(),
+      uid:         user.uid,
+      email:       user.email,
+      creadoEn:    new Date().toISOString()
+    };
+    if (!window.EL_DB) { toast('Base de datos no disponible.', 'error'); return; }
+    EL_DB.collection('calendarios_docentes').doc(user.uid).collection('eventos').add(entrada)
+      .then(function() {
+        cerrarModalCal();
+        toast('Evento agregado.', 'success');
+        calRender();
+      })
+      .catch(function(e) {
+        toast('Error: ' + (e && e.message || 'desconocido'), 'error');
+      });
   }
-  var sorted = _calEventos.slice().sort(function(a,b){ return a.fecha < b.fecha ? -1 : 1; });
-  el.innerHTML = '<div style="display:flex;flex-direction:column;gap:8px">' +
-    sorted.map(function(e) {
-      var c = CAL_COLORES[e.tipo] || CAL_COLORES.otro;
-      var fecha = e.fecha ? new Date(e.fecha+'T12:00:00').toLocaleDateString('es-CL',{weekday:'short',day:'numeric',month:'short'}) : '—';
-      return '<div style="display:flex;align-items:flex-start;gap:12px;padding:12px 14px;background:'+c.bg+';border:1px solid '+c.border+';border-radius:10px">' +
-        '<div style="flex:1">' +
-        '<div style="font-size:.88rem;font-weight:700">'+(e.titulo||'Sin título')+'</div>' +
-        '<div style="font-size:.75rem;color:var(--muted);margin-top:2px">'+c.label+' · '+fecha+(e.hora?' · '+e.hora:'')+(e.asignatura?' · '+e.asignatura:'')+'</div>' +
-        (e.descripcion?'<div style="font-size:.78rem;color:var(--text);margin-top:4px;opacity:.8">'+e.descripcion+'</div>':'') +
-        '</div>' +
-        '<button onclick="calEliminarEvento(\''+e._id+'\')" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:1rem;padding:2px;flex-shrink:0" title="Eliminar">🗑️</button>' +
-        '</div>';
-    }).join('') + '</div>';
-}
 
-function calVerDia(fecha) {
-  // Pre-fill date in new event modal
-  calNuevoEvento(fecha);
-}
-
-function calNuevoEvento(fechaPre) {
-  var user = _profeUser || {};
-  var asigOpts = '';
-  if (user.asignaturas && user.asignaturas.length) {
-    user.asignaturas.forEach(function(a){ asigOpts += '<option>'+a+'</option>'; });
-  }
-  if (user.especialidad) asigOpts += '<option>'+user.especialidad+'</option>';
-
-  var fechaHoy = fechaPre || new Date().toISOString().slice(0,10);
-
-  document.getElementById('modalCal').innerHTML = `
-<div style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:28px;width:min(480px,95vw);position:relative">
-  <button onclick="cerrarModalCal()" style="position:absolute;top:14px;right:14px;background:var(--surface2);border:none;color:var(--muted);cursor:pointer;border-radius:8px;width:30px;height:30px;font-size:1rem">✕</button>
-  <h2 style="font-size:1.1rem;margin-bottom:18px">📆 Agregar evento / clase</h2>
-  <div id="calNotif" class="notif"></div>
-  <style>.cg{display:flex;flex-direction:column;gap:5px;margin-bottom:12px}.cg label{font-size:.78rem;color:var(--muted);font-weight:500}.cg input,.cg select,.cg textarea{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-size:.875rem;outline:none}.cg input:focus,.cg select:focus{border-color:#6366f1}.cggrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}</style>
-  <div class="cg"><label>Título del evento *</label><input id="calTit" placeholder="ej: Clase — Electricidad Básica"></div>
-  <div class="cggrid">
-    <div class="cg"><label>Fecha *</label><input id="calFecha" type="date" value="${fechaHoy}"></div>
-    <div class="cg"><label>Hora (opcional)</label><input id="calHora" type="time"></div>
-  </div>
-  <div class="cggrid">
-    <div class="cg"><label>Tipo de evento</label>
-      <select id="calTipo">
-        <option value="clase">🎓 Clase</option>
-        <option value="evaluacion">📊 Evaluación</option>
-        <option value="taller">🔧 Taller</option>
-        <option value="reunion">📌 Reunión / Otro compromiso</option>
-        <option value="otro">📎 Otro</option>
-      </select>
-    </div>
-    <div class="cg"><label>Asignatura</label>
-      <select id="calAsig"><option value="">— General —</option>${asigOpts}</select>
-    </div>
-  </div>
-  <div class="cg"><label>Descripción (opcional)</label><textarea id="calDesc" rows="2" placeholder="Objetivos, observaciones, materiales necesarios..."></textarea></div>
-  <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:6px">
-    <button class="btn btn-outline btn-sm" onclick="cerrarModalCal()">Cancelar</button>
-    <button class="btn btn-primary" onclick="calGuardarEvento()">💾 Guardar evento</button>
-  </div>
-</div>`;
-  document.getElementById('modalCal').style.display = 'flex';
-}
-
-function cerrarModalCal() {
-  document.getElementById('modalCal').style.display = 'none';
-}
-
-function calGuardarEvento() {
-  var user = _profeUser || {};
-  var tit   = document.getElementById('calTit').value.trim();
-  var fecha = document.getElementById('calFecha').value;
-  if (!tit || !fecha) {
-    var n = document.getElementById('calNotif');
-    n.textContent = '⚠️ Título y fecha son obligatorios'; n.className='notif warn show'; return;
-  }
-  var entrada = {
-    titulo:      tit,
-    fecha:       fecha,
-    hora:        document.getElementById('calHora').value || '',
-    tipo:        document.getElementById('calTipo').value,
-    asignatura:  document.getElementById('calAsig').value || '',
-    descripcion: document.getElementById('calDesc').value.trim(),
-    uid:         user.uid,
-    email:       user.email,
-    creadoEn:    new Date().toISOString()
-  };
-  EL_DB.collection('calendarios_docentes')
-    .doc(user.uid || 'anon')
-    .collection('eventos')
-    .add(entrada)
-    .then(function() {
-      cerrarModalCal();
-      calRender();
-    })
-    .catch(function(e) {
-      var n = document.getElementById('calNotif');
-      n.textContent = '❌ Error: '+e.message; n.className='notif err show';
+  function calEliminarEvento(id) {
+    if (!id || !_profeUser || !_profeUser.uid || !window.EL_DB) return;
+    var doConfirm = (window.ELUI && window.ELUI.confirm)
+      ? window.ELUI.confirm({ title: 'Eliminar evento', message: '¿Eliminar este evento del calendario? Esta acción no se puede deshacer.', okText: 'Eliminar', cancelText: 'Cancelar', danger: true })
+      : Promise.resolve(window.confirm('¿Eliminar este evento?'));
+    doConfirm.then(function(ok) {
+      if (!ok) return;
+      EL_DB.collection('calendarios_docentes').doc(_profeUser.uid).collection('eventos').doc(id).delete()
+        .then(function() { toast('Evento eliminado.', 'success'); calRender(); })
+        .catch(function(e) { toast('Error: ' + (e && e.message || 'desconocido'), 'error'); });
     });
-}
+  }
 
-function calEliminarEvento(id) {
-  if (!confirm('¿Eliminar este evento?')) return;
-  var user = _profeUser || {};
-  EL_DB.collection('calendarios_docentes')
-    .doc(user.uid || 'anon')
-    .collection('eventos')
-    .doc(id)
-    .delete()
-    .then(function() { calRender(); })
-    .catch(function(e) { alert('Error: '+e.message); });
-}
+  // Exponer mínimas funciones globales (por compatibilidad y debugging)
+  window._showSecProf = showSec;
+
+})();
 </script>
-
-<!-- Modal Herramienta IA -->
-<div id="modalHerr" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;align-items:center;justify-content:center;padding:16px"></div>
-
-<!-- Modal Calendario -->
-<div id="modalCal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;align-items:center;justify-content:center;padding:16px"></div>
 
 </body>
 </html>
