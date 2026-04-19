@@ -344,7 +344,7 @@ tr:hover td{background:rgba(99,102,241,.05)}
     </section>
 
     <!-- RECURSOS CURRICULARES -->
-    <\!-- CONFIGURACIÓN IA -->
+    <!-- CONFIGURACIÓN IA -->
     <section id="sec-gemini" class="tab-section" style="display:none">
       <div class="page-header"><h1>🤖 Configuración IA — Gemini</h1><p>Administra las API Keys y el modelo por defecto para todos los profesores.</p></div>
       <div class="card" style="margin-bottom:20px">
@@ -1242,8 +1242,8 @@ function cargarConfigIA() {
 
 function renderKeysIA() {
   var cont = document.getElementById('listaKeysIA');
-  if (\!cont) return;
-  if (\!_iaConfig.keys.length) {
+  if (!cont) return;
+  if (!_iaConfig.keys.length) {
     cont.innerHTML = '<p style="color:var(--muted);font-size:.85rem;font-style:italic">No hay keys configuradas. Agrega al menos una.</p>';
     return;
   }
@@ -1260,8 +1260,8 @@ function renderKeysIA() {
 function agregarKeyIA() {
   var input = document.getElementById('inputNuevaKey');
   var key = input ? input.value.trim() : '';
-  if (\!key || key.length < 20) { notifIA('notifKeysIA', 'Ingresa una API Key valida (AIzaSy...)', 'warn'); return; }
-  if (_iaConfig.keys.indexOf(key) \!== -1) { notifIA('notifKeysIA', 'Esa key ya esta en el pool.', 'warn'); return; }
+  if (!key || key.length < 20) { notifIA('notifKeysIA', 'Ingresa una API Key valida (AIzaSy...)', 'warn'); return; }
+  if (_iaConfig.keys.indexOf(key) !== -1) { notifIA('notifKeysIA', 'Esa key ya esta en el pool.', 'warn'); return; }
   _iaConfig.keys.push(key);
   guardarConfigIA('notifKeysIA', 'Key agregada correctamente.').then(function() {
     if (input) input.value = '';
@@ -1270,7 +1270,7 @@ function agregarKeyIA() {
 }
 
 function eliminarKeyIA(idx) {
-  if (\!confirm('Eliminar esta API Key del pool?')) return;
+  if (!confirm('Eliminar esta API Key del pool?')) return;
   _iaConfig.keys.splice(idx, 1);
   guardarConfigIA('notifKeysIA', 'Key eliminada.').then(renderKeysIA);
 }
@@ -1289,7 +1289,7 @@ function guardarConfigIA(notifId, okMsg) {
 
 function notifIA(id, msg, tipo) {
   var el = document.getElementById(id);
-  if (\!el) return;
+  if (!el) return;
   var color = tipo === 'ok' ? '#34d399' : tipo === 'warn' ? '#fbbf24' : '#f87171';
   el.innerHTML = '<span style="color:' + color + '">' + msg + '</span>';
   setTimeout(function() { if(el) el.innerHTML = ''; }, 4000);
