@@ -684,8 +684,10 @@ ELAuth.onUserReady(function(user) {
 });
 
 function redirectByRole(user) {
-  var admins = window.EL_ADMIN_EMAILS || [window.EL_ADMIN_EMAIL];
-  if (user.role === 'admin' || admins.indexOf(user.email) !== -1) {
+  // SEGURIDAD: acceso a admin.html SOLO si el email está en la lista explícita.
+  // El campo role en Firestore no es suficiente — podría estar mal asignado.
+  var admins = window.EL_ADMIN_EMAILS || (window.EL_ADMIN_EMAIL ? [window.EL_ADMIN_EMAIL] : []);
+  if (admins.indexOf(user.email) !== -1) {
     window.location.href = 'admin.html';
   } else if (user.role === 'profesor') {
     window.location.href = 'dashboard-profesor.html';
@@ -761,9 +763,23 @@ function doChangePass(e) {
       });
     })
     .then(function() {
-      var u = window._pendingUser;
-      if (u) { u.primerIngreso = false; redirectByRole(u); }
-      else window.location.reload();
+      // Releer desde Firestore para garantizar rol correcto (no confiar en _pendingUser)
+      var cu = EL_AUTH.currentUser;
+      if (!cu) { window.location.href = 'index.html'; return Promise.resolve(null); }
+      return EL_DB.collection(EL_COLLECTIONS.USERS).doc(cu.uid).get()
+        .then(function(doc) {
+          var freshUser = doc && doc.exists
+            ? Object.assign({ uid: cu.uid, email: cu.email }, doc.data())
+            : (window._pendingUser || { uid: cu.uid, email: cu.email, role: 'estudiante' });
+          window._pendingUser = null;
+          redirectByRole(freshUser);
+        })
+        .catch(function() {
+          // Fallback si Firestore no responde
+          var u = window._pendingUser || { role: 'estudiante' };
+          window._pendingUser = null;
+          redirectByRole(u);
+        });
     })
     .catch(function(error) {
       setBtn('btnChangePass', 'Guardar y continuar', false);

@@ -596,13 +596,14 @@ var wData={tipo:null,asignaturas:[],niveles:[],especialidad:'',modulos:[],cursos
 var editingUid=null;
 var _rCurrentTab='tp';
 
-ELAuth.requireAuth(['admin','profesor']);
 ELAuth.onUserReady(function(user){
   if(!user){window.location.href='index.html';return;}
+  // SEGURIDAD: acceso admin ÚNICAMENTE por email explícito — el rol en Firestore no basta
   var adminEmails=window.EL_ADMIN_EMAILS||[EL_ADMIN_EMAIL];
-  var esAdmin=user.role==='admin'||adminEmails.indexOf(user.email)!==-1;
+  var esAdmin=adminEmails.indexOf(user.email)!==-1;
   if(!esAdmin){
-    alert('Acceso solo para administradores.');window.location.href='dashboard.html';return;
+    window.location.href = user.role==='profesor' ? 'dashboard-profesor.html' : 'dashboard.html';
+    return;
   }
   document.getElementById('adminEmail').textContent=user.nombre||user.email;
   var badge=document.getElementById('sbBadgeAdmin');if(badge)badge.style.display='inline-block';
