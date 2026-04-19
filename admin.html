@@ -139,6 +139,7 @@ tr:hover td{background:rgba(99,102,241,.05)}
     <div class="nav-item" data-sec="codigos" onclick="showSec(this,'codigos')">🔑 Códigos de Acceso</div>
 
     <div class="nav-section">Contenido</div>
+    <div class="nav-item" data-sec="gemini" onclick="showSec(this,'gemini')">🤖 Configuración IA</div>
     <div class="nav-item" data-sec="recursos" onclick="showSec(this,'recursos')">📖 Recursos Curriculares</div>
     <div class="nav-item" data-sec="materiales" onclick="showSec(this,'materiales')">
       <span>📚</span> Materiales
@@ -343,6 +344,50 @@ tr:hover td{background:rgba(99,102,241,.05)}
     </section>
 
     <!-- RECURSOS CURRICULARES -->
+    <\!-- CONFIGURACIÓN IA -->
+    <section id="sec-gemini" class="tab-section" style="display:none">
+      <div class="page-header"><h1>🤖 Configuración IA — Gemini</h1><p>Administra las API Keys y el modelo por defecto para todos los profesores.</p></div>
+      <div class="card" style="margin-bottom:20px">
+        <h3>🔑 API Keys del pool</h3>
+        <p style="color:var(--muted);font-size:.85rem;margin-bottom:16px">
+          El sistema elige una key al azar cada vez que un profesor genera material. Agrega 2–3 keys para distribuir la cuota gratuita.
+          Las keys se guardan en Firestore y <strong>nunca se muestran completas</strong> en pantalla.
+        </p>
+        <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;align-items:flex-end">
+          <div style="flex:1;min-width:280px">
+            <label style="font-size:.75rem;color:var(--muted);display:block;margin-bottom:4px">Nueva API Key (AIzaSy...)</label>
+            <input type="password" id="inputNuevaKey" placeholder="Pega aqui tu API Key de Google AI Studio"
+              style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-family:monospace;font-size:.875rem;outline:none;box-sizing:border-box">
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="agregarKeyIA()" style="white-space:nowrap">+ Agregar Key</button>
+        </div>
+        <div id="listaKeysIA" style="display:flex;flex-direction:column;gap:8px">
+          <p style="color:var(--muted);font-size:.85rem;font-style:italic">Cargando keys...</p>
+        </div>
+        <div id="notifKeysIA" style="margin-top:12px;font-size:.83rem"></div>
+      </div>
+      <div class="card">
+        <h3>Modelo por defecto</h3>
+        <p style="color:var(--muted);font-size:.85rem;margin-bottom:12px">
+          Selecciona el modelo Gemini que usaran todos los profesores.
+          <strong>Gemini 2.5 Flash</strong> es el mas capaz dentro del plan gratuito.
+        </p>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end">
+          <div style="flex:1;min-width:240px">
+            <select id="selectModeloAdmin"
+              style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-size:.875rem;outline:none">
+              <option value="gemini-2.5-flash-preview-04-17">Gemini 2.5 Flash Preview — mas capaz (recomendado)</option>
+              <option value="gemini-2.0-flash">Gemini 2.0 Flash — estable y rapido</option>
+              <option value="gemini-2.0-flash-lite">Gemini 2.0 Flash Lite — mas ligero</option>
+              <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
+            </select>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="guardarModeloIA()" style="white-space:nowrap">Guardar modelo</button>
+        </div>
+        <div id="notifModeloIA" style="margin-top:10px;font-size:.83rem"></div>
+      </div>
+    </section>
+
     <section id="sec-recursos" class="tab-section" style="display:none">
       <div class="page-header"><h1>📖 Recursos Curriculares</h1><p>Planes y programas organizados por tipo de enseñanza</p></div>
 
@@ -604,6 +649,7 @@ function showSec(el,id){
   document.getElementById('sec-'+id).style.display='block';
   el.classList.add('active');
   if(id==='recursos'&&!_recursosInit){_recursosInit=true;initRecursos();}
+  if(id==='gemini'){cargarConfigIA();}
 }
 
 function renderUsers(list){
@@ -1172,6 +1218,83 @@ function mostrarToastDB(ok, msg) {
 
 // Inicializar recursos cuando se carga esa sección
 var _recursosInit=false;
+
+// =============================================
+//  CONFIGURACION IA - GESTION DE API KEYS
+// =============================================
+var _iaConfig = { keys: [], modelo: 'gemini-2.5-flash-preview-04-17' };
+
+function cargarConfigIA() {
+  EL_DB.collection('sistema').doc('gemini').get()
+    .then(function(doc) {
+      if (doc.exists) {
+        _iaConfig = Object.assign({ keys: [], modelo: 'gemini-2.5-flash-preview-04-17' }, doc.data());
+      }
+      renderKeysIA();
+      var sel = document.getElementById('selectModeloAdmin');
+      if (sel && _iaConfig.modelo) sel.value = _iaConfig.modelo;
+    })
+    .catch(function(e) {
+      var el = document.getElementById('listaKeysIA');
+      if (el) el.innerHTML = '<p style="color:#f87171">Error: ' + e.message + '</p>';
+    });
+}
+
+function renderKeysIA() {
+  var cont = document.getElementById('listaKeysIA');
+  if (\!cont) return;
+  if (\!_iaConfig.keys.length) {
+    cont.innerHTML = '<p style="color:var(--muted);font-size:.85rem;font-style:italic">No hay keys configuradas. Agrega al menos una.</p>';
+    return;
+  }
+  cont.innerHTML = _iaConfig.keys.map(function(k, i) {
+    var masked = k.substring(0, 8) + '................' + k.slice(-4);
+    return '<div style="display:flex;align-items:center;gap:10px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 14px">' +
+      '<span style="font-family:monospace;font-size:.85rem;flex:1;color:var(--text)">' + masked + '</span>' +
+      '<span style="font-size:.72rem;background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.2);color:#34d399;padding:2px 8px;border-radius:10px">Key ' + (i+1) + '</span>' +
+      '<button onclick="eliminarKeyIA(' + i + ')" style="background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.25);color:#f87171;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:.78rem">Eliminar</button>' +
+    '</div>';
+  }).join('');
+}
+
+function agregarKeyIA() {
+  var input = document.getElementById('inputNuevaKey');
+  var key = input ? input.value.trim() : '';
+  if (\!key || key.length < 20) { notifIA('notifKeysIA', 'Ingresa una API Key valida (AIzaSy...)', 'warn'); return; }
+  if (_iaConfig.keys.indexOf(key) \!== -1) { notifIA('notifKeysIA', 'Esa key ya esta en el pool.', 'warn'); return; }
+  _iaConfig.keys.push(key);
+  guardarConfigIA('notifKeysIA', 'Key agregada correctamente.').then(function() {
+    if (input) input.value = '';
+    renderKeysIA();
+  });
+}
+
+function eliminarKeyIA(idx) {
+  if (\!confirm('Eliminar esta API Key del pool?')) return;
+  _iaConfig.keys.splice(idx, 1);
+  guardarConfigIA('notifKeysIA', 'Key eliminada.').then(renderKeysIA);
+}
+
+function guardarModeloIA() {
+  var sel = document.getElementById('selectModeloAdmin');
+  _iaConfig.modelo = sel ? sel.value : 'gemini-2.5-flash-preview-04-17';
+  guardarConfigIA('notifModeloIA', 'Modelo guardado: ' + _iaConfig.modelo);
+}
+
+function guardarConfigIA(notifId, okMsg) {
+  return EL_DB.collection('sistema').doc('gemini').set(_iaConfig)
+    .then(function() { notifIA(notifId, okMsg, 'ok'); })
+    .catch(function(e) { notifIA(notifId, 'Error: ' + e.message, 'err'); });
+}
+
+function notifIA(id, msg, tipo) {
+  var el = document.getElementById(id);
+  if (\!el) return;
+  var color = tipo === 'ok' ? '#34d399' : tipo === 'warn' ? '#fbbf24' : '#f87171';
+  el.innerHTML = '<span style="color:' + color + '">' + msg + '</span>';
+  setTimeout(function() { if(el) el.innerHTML = ''; }, 4000);
+}
+
 </script>
 </body>
 </html>

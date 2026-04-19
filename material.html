@@ -558,32 +558,6 @@
         .tipo-preg-item:hover { border-color: var(--primary-light); }
         .tipo-preg-item input { accent-color: var(--primary); }
 
-        /* ============================================
-           SECCIÓN IA
-           ============================================ */
-        .seccion-ia {
-            background: linear-gradient(135deg, rgba(108,92,231,.1), rgba(0,206,201,.08));
-            border: 1px solid rgba(108,92,231,.35);
-            border-radius: var(--radius-lg);
-            padding: 1.5rem; margin-bottom: 1.5rem;
-        }
-        .seccion-ia h2 {
-            font-size: 1.1rem; color: var(--primary-light); margin-bottom: 0.8rem;
-            padding-bottom: 0.5rem; border-bottom: 1px solid rgba(108,92,231,.25);
-            display: flex; align-items: center; gap: 0.5rem;
-            background: linear-gradient(90deg, rgba(108,92,231,.15) 0%, transparent 100%);
-            margin: -1.5rem -1.5rem 1rem; padding: 0.8rem 1.5rem;
-            border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-        }
-        .ia-desc { color: var(--text-muted); font-size: 0.88rem; margin-bottom: 1rem; line-height: 1.5; }
-        .ia-instrucciones {
-            background: rgba(0,206,201,.07); border: 1px solid rgba(0,206,201,.2);
-            border-radius: var(--radius-sm); padding: 0.8rem 1rem; margin: 1rem 0;
-            font-size: 0.85rem; color: var(--text-muted);
-        }
-        .ia-instrucciones strong { color: var(--secondary); }
-        .ia-instrucciones ul { margin: 0.4rem 0 0 1.2rem; }
-        .ia-instrucciones li { margin-bottom: 0.2rem; }
         .btn-generar-ia {
             display: block; width: 100%; padding: 1rem;
             background: linear-gradient(135deg, #6c5ce7, #00cec9);
@@ -914,69 +888,11 @@
             </div>
         </div>
 
-        <!-- SECCION 7: CREAR CON IA -->
-        <div class="seccion-ia" id="seccionIA">
-            <h2>&#129302; Crear con Inteligencia Artificial</h2>
-            <p class="ia-desc">
-                Usa Google Gemini para generar material educativo de alta calidad, 100% adaptado a tus OA, nivel y contenido.
-                La IA construye preguntas en los niveles cognitivos de Bloom que elijas, integra las actitudes transversales del Marco para la Buena Enseñanza y
-                usa la terminología correcta para la asignatura o módulo. Requiere una API key gratuita de Google AI Studio.
-            </p>
-            <div class="campo-row">
-                <div class="campo">
-                    <label>API Key de Google AI Studio</label>
-                    <input type="password" id="inputApiKey" placeholder="AIzaSy..." oninput="guardarApiKey(this.value)"
-                        style="font-family:monospace;letter-spacing:.05em">
-                    <small style="color:var(--text-muted);font-size:0.78rem;margin-top:4px;display:block">
-                        Obtén tu key gratuita en
-                        <a href="https://aistudio.google.com" target="_blank" style="color:var(--secondary)">aistudio.google.com</a>
-                        &mdash; Se guarda localmente en tu navegador, nunca se envía a nuestros servidores.
-                    </small>
-                </div>
-                <div class="campo">
-                    <label>Modelo de IA</label>
-                    <select id="selectModeloIA" onchange="onCambioModelo(this.value)">
-                        <option value="gemini-2.0-flash">Gemini 2.0 Flash &mdash; recomendado ✓</option>
-                        <option value="gemini-2.0-flash-lite">Gemini 2.0 Flash Lite &mdash; mas rapido</option>
-                        <option value="gemini-2.5-flash-preview-04-17">Gemini 2.5 Flash Preview &mdash; nuevo</option>
-                        <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
-                        <option value="gemini-1.5-flash-8b">Gemini 1.5 Flash 8B &mdash; ligero</option>
-                        <option value="custom">✏️ Ingresar modelo manualmente...</option>
-                    </select>
-                    <input type="text" id="inputModeloCustom" placeholder="Ej: gemini-2.0-flash"
-                        style="display:none;margin-top:6px;font-family:monospace;font-size:.85rem">
-                    <small style="color:var(--text-muted);font-size:.75rem;margin-top:3px;display:block">
-                        Modelos disponibles en
-                        <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color:var(--secondary)">AI Studio</a>
-                        o llama a
-                        <a href="https://generativelanguage.googleapis.com/v1beta/models?key=TU_KEY" target="_blank" style="color:var(--secondary)">ListModels</a>
-                    </small>
-                </div>
-            </div>
-            <div style="margin-top:.6rem">
-                <button onclick="verificarApiKey()" style="background:rgba(0,206,201,.1);border:1px solid rgba(0,206,201,.3);color:var(--secondary);padding:.45rem 1rem;border-radius:6px;font-size:.83rem;cursor:pointer;transition:all .2s">
-                    &#128272; Verificar API Key
-                </button>
-                <span id="keyStatus" style="margin-left:.7rem;font-size:.82rem"></span>
-            </div>
-            <div class="ia-instrucciones">
-                <strong>&#128161; La IA generará exactamente lo que necesitas:</strong>
-                <ul>
-                    <li>Contenido alineado al OA y criterios seleccionados</li>
-                    <li>Preguntas en los niveles cognitivos de Bloom elegidos</li>
-                    <li>Lenguaje adaptado al nivel del curso y dificultad</li>
-                    <li>Actitudes transversales MBE integradas de forma natural</li>
-                    <li>Formato listo para imprimir con portada y rúbrica</li>
-                </ul>
-            </div>
-            <button class="btn-generar-ia" onclick="generarConIA()" id="btnIA">
-                &#129302; Generar con IA &mdash; Gemini
-            </button>
-            <small style="color:var(--text-muted);font-size:.75rem;margin-top:.4rem;display:block;text-align:center">
-                Recomendado · Calidad profesional · Se adapta a tu OA y dificultad
-            </small>
-            <div id="iaStatus" class="ia-status" style="display:none"></div>
-        </div>
+        <!-- BOTONES DE GENERACIÓN -->
+        <button class="btn-generar-ia" onclick="generarConIA()" id="btnIA">
+            &#129302; Generar con IA &mdash; Gemini
+        </button>
+        <div id="iaStatus" class="ia-status" style="display:none"></div>
 
         <!-- BOTON GENERAR CON PLANTILLA -->
         <button class="btn-generar-template" onclick="generarMaterial()">
@@ -1072,10 +988,6 @@
     }
 
     document.addEventListener('DOMContentLoaded', function() {
-        // Cargar API key guardada
-        var savedKey = localStorage.getItem('el_gemini_apikey');
-        if (savedKey) { var el = document.getElementById('inputApiKey'); if (el) el.value = savedKey; }
-
         // Gate único de auth: una sola entrada via onUserReady (sin race con requireAuth)
         ELAuth.onUserReady(function(user) {
             if (!user) {
@@ -1632,61 +1544,14 @@
     function bloomTag(nivel) {
         return '<span class="bloom-tag bloom-tag-' + nivel + '">' + (BLOOM_LABELS[nivel] || '') + '</span>';
     }
-    function guardarApiKey(val) {
-        localStorage.setItem('el_gemini_apikey', val);
-        document.getElementById('keyStatus').textContent = '';
-    }
-
-    function onCambioModelo(val) {
-        var custom = document.getElementById('inputModeloCustom');
-        if (val === 'custom') {
-            custom.style.display = '';
-            custom.focus();
-        } else {
-            custom.style.display = 'none';
-        }
-    }
-
-    function getModeloSeleccionado() {
-        var sel = document.getElementById('selectModeloIA');
-        if (!sel) return 'gemini-2.0-flash';
-        if (sel.value === 'custom') {
-            var custom = document.getElementById('inputModeloCustom');
-            return (custom && custom.value.trim()) ? custom.value.trim() : 'gemini-2.0-flash';
-        }
-        return sel.value || 'gemini-2.0-flash';
-    }
-
-    function verificarApiKey() {
-        var apiKey = document.getElementById('inputApiKey') ? document.getElementById('inputApiKey').value.trim() : '';
-        var statusEl = document.getElementById('keyStatus');
-        if (!apiKey) { statusEl.style.color = '#ff6b6b'; statusEl.textContent = '⚠ Ingresa tu API key primero'; return; }
-        statusEl.style.color = '#a29bfe'; statusEl.textContent = '⏳ Verificando...';
-        var modelo = getModeloSeleccionado();
-        var url = 'https://generativelanguage.googleapis.com/v1beta/models/' + modelo + ':generateContent?key=' + apiKey;
-        fetch(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ contents: [{ parts: [{ text: 'Di hola en una palabra.' }] }], generationConfig: { maxOutputTokens: 10 } })
-        })
-        .then(function(r) { return r.json(); })
-        .then(function(d) {
-            if (d.error) {
-                statusEl.style.color = '#ff6b6b';
-                var msg = d.error.message || '';
-                if (msg.indexOf('not found') !== -1 || msg.indexOf('not supported') !== -1) {
-                    statusEl.textContent = '❌ Modelo "' + modelo + '" no disponible. Prueba "Gemini 2.0 Flash".';
-                } else if (msg.indexOf('API_KEY_INVALID') !== -1 || msg.indexOf('invalid') !== -1) {
-                    statusEl.textContent = '❌ API key inválida. Verifica en aistudio.google.com';
-                } else {
-                    statusEl.textContent = '❌ ' + msg.substring(0, 80);
-                }
-            } else {
-                statusEl.style.color = '#34d399';
-                statusEl.textContent = '✅ API key y modelo OK — listo para generar';
-            }
-        })
-        .catch(function(e) { statusEl.style.color = '#ff6b6b'; statusEl.textContent = '❌ Sin conexión: ' + e.message; });
+    // Carga la configuración IA desde Firestore (keys + modelo)
+    function _cargarConfigIA() {
+        if (!window.EL_DB) return Promise.reject(new Error('Firestore no disponible'));
+        return EL_DB.collection('sistema').doc('gemini').get()
+            .then(function(doc) {
+                if (!doc.exists) return null;
+                return doc.data();
+            });
     }
 
     // =============================================
@@ -2671,12 +2536,7 @@
     // GENERADOR: CREAR CON IA (Gemini API)
     // =============================================
     function generarConIA() {
-        var apiKey = (document.getElementById('inputApiKey') ? document.getElementById('inputApiKey').value.trim() : '');
-        if (!apiKey) {
-            setIAStatus('error', '&#10007; Ingresa tu API Key de Google AI Studio antes de continuar. La puedes obtener gratis en <a href="https://aistudio.google.com" target="_blank" style="color:#ff6b6b">aistudio.google.com</a>.');
-            return;
-        }
-        if (!tipoDocSeleccionado) { setIAStatus('error', '&#10007; Selecciona el tipo de documento primero.'); return; }
+        if (\!tipoDocSeleccionado) { setIAStatus('error', '&#10007; Selecciona el tipo de documento primero.'); return; }
 
         var user     = _matUser || {};
         var isTP     = user.tipoProfesor === 'tecnico';
@@ -2684,29 +2544,29 @@
         var contenido = document.getElementById('inputContenido').value;
         var dificultad= document.getElementById('selectDificultad').value;
         var profesor = document.getElementById('inputProfesor').value;
-        var cursoTexto = typeof CURRICULA_CHILE !== 'undefined' ? CURRICULA_CHILE.getNivelLabel(curso) : curso;
+        var cursoTexto = typeof CURRICULA_CHILE \!== 'undefined' ? CURRICULA_CHILE.getNivelLabel(curso) : curso;
 
-        if (!curso) { setIAStatus('error', '&#10007; Selecciona el curso/nivel primero.'); return; }
+        if (\!curso) { setIAStatus('error', '&#10007; Selecciona el curso/nivel primero.'); return; }
 
         // Recolectar OAs y contenido curricular
         var oaTexto = '';
         var asigNombre = '';
         var modNombre = '';
-        if (!isTP) {
+        if (\!isTP) {
             asigNombre = document.getElementById('selectAsignatura') ? document.getElementById('selectAsignatura').value : '';
             var oasReg = [];
             document.querySelectorAll('#listaOAMineduc .oaRegCheck:checked').forEach(function(cb) {
                 oasReg.push(cb.value + ': ' + cb.getAttribute('data-desc'));
             });
-            if (!asigNombre) { setIAStatus('error', '&#10007; Selecciona la asignatura.'); return; }
-            if (!oasReg.length) { setIAStatus('error', '&#10007; Selecciona al menos un OA Mineduc.'); return; }
+            if (\!asigNombre) { setIAStatus('error', '&#10007; Selecciona la asignatura.'); return; }
+            if (\!oasReg.length) { setIAStatus('error', '&#10007; Selecciona al menos un OA Mineduc.'); return; }
             oaTexto = oasReg.join('\n');
             modNombre = asigNombre;
         } else {
             var modId = document.getElementById('selectModulo').value;
             var oaId  = document.getElementById('selectOA').value;
             var aeNum = document.getElementById('selectAE').value;
-            if (!modId || !oaId) { setIAStatus('error', '&#10007; Selecciona Módulo y OA.'); return; }
+            if (\!modId || \!oaId) { setIAStatus('error', '&#10007; Selecciona M\u00f3dulo y OA.'); return; }
             var _modsTP = (typeof getCurriculaModulos === 'function') ? getCurriculaModulos(user.especialidad || '') : {};
             var mod = _modsTP[modId];
             modNombre = mod ? mod.nombre : modId;
@@ -2729,132 +2589,112 @@
         var evalOpts = getEvalOpciones();
         var bloomNames = evalOpts.bloomLevels.map(function(l){ return BLOOM_LABELS[l] || l; }).join(', ');
         var tiposNames = evalOpts.tiposPreg.map(function(t){
-            return {sm:'selección múltiple', vf:'verdadero/falso', desarrollo:'desarrollo', completar:'completar', emparejar:'relacionar', caso:'análisis de caso'}[t] || t;
+            return {sm:'selecci\u00f3n m\u00faltiple', vf:'verdadero/falso', desarrollo:'desarrollo', completar:'completar', emparejar:'relacionar', caso:'an\u00e1lisis de caso'}[t] || t;
         }).join(', ');
 
         var tipoNombre = {
-            guia: 'Guía de Aprendizaje',
+            guia: 'Gu\u00eda de Aprendizaje',
             apunte: 'Apunte de Clase',
-            ficha: 'Ficha Práctica de Taller',
-            evaluacion: 'Guía de Ejercicios',
+            ficha: 'Ficha Pr\u00e1ctica de Taller',
+            evaluacion: 'Gu\u00eda de Ejercicios',
             prueba: 'Prueba Formal Sumativa',
-            control: 'Control Rápido Formativo'
+            control: 'Control R\u00e1pido Formativo'
         }[tipoDocSeleccionado] || tipoDocSeleccionado;
 
-        var difTexto = { basico:'básico (primer acercamiento al tema, lenguaje simple)', intermedio:'intermedio (aplicación práctica, lenguaje técnico moderado)', avanzado:'avanzado (análisis crítico, resolución de problemas complejos)' }[dificultad] || dificultad;
+        var difTexto = { basico:'b\u00e1sico (primer acercamiento al tema, lenguaje simple)', intermedio:'intermedio (aplicaci\u00f3n pr\u00e1ctica, lenguaje t\u00e9cnico moderado)', avanzado:'avanzado (an\u00e1lisis cr\u00edtico, resoluci\u00f3n de problemas complejos)' }[dificultad] || dificultad;
 
-        // Construir prompt
-        var prompt = 'Eres un experto en educación chilena MINEDUC con conocimiento del currículum nacional vigente. ' +
+        var prompt = 'Eres un experto en educaci\u00f3n chilena MINEDUC con conocimiento del curr\u00edculum nacional vigente. ' +
         'Genera un documento educativo completo en HTML para imprimir en clase.\n\n' +
-
-        '== CONTEXTO DEL DOCUMENTO ==\n' +
-        'Tipo de documento: ' + tipoNombre + '\n' +
-        'Establecimiento: Colegio Chile\n' +
-        'Asignatura / Área: ' + asigNombre + (modNombre && modNombre !== asigNombre ? ' › ' + modNombre : '') + '\n' +
-        'Curso / Nivel: ' + cursoTexto + '\n' +
-        'Dificultad: ' + difTexto + '\n' +
-        'Profesor(a): ' + (profesor || 'Docente') + '\n' +
-        'Actitudes transversales (Marco para la Buena Enseñanza · OAT Mineduc) a integrar: ' + (valoresArr.length ? valoresArr.join(', ') : 'Responsabilidad y cumplimiento, Trabajo colaborativo') + '\n\n' +
-
-        '== OBJETIVOS DE APRENDIZAJE (OA MINEDUC) ==\n' + oaTexto + '\n\n' +
-
-        (contenido ? '== CONTENIDO ESPECÍFICO DEL MATERIAL ==\n' + contenido + '\n\n' : '') +
-
-        (document.getElementById('materialReferencia') && document.getElementById('materialReferencia').value.trim().length > 20
-            ? '== MATERIAL DE REFERENCIA DEL PROFESOR ==\n' + document.getElementById('materialReferencia').value.trim().substring(0, 2000) + '\n\n'
-            : '') +
-
-        (tipoDocSeleccionado === 'prueba' || tipoDocSeleccionado === 'control' || tipoDocSeleccionado === 'evaluacion' ?
-        '== OPCIONES DE EVALUACIÓN ==\n' +
-        'Cantidad de preguntas: ' + evalOpts.cantPreg + '\n' +
-        'Puntaje total: ' + evalOpts.puntaje + ' puntos\n' +
-        'Tipos de preguntas: ' + tiposNames + '\n' +
-        'Niveles cognitivos Bloom: ' + bloomNames + '\n\n' : '') +
-
-        '== INSTRUCCIONES DE FORMATO HTML ==\n' +
-        '- Genera SOLO el contenido HTML interno (sin etiquetas <html>, <head>, <body>, ni <style>).\n' +
-        '- Usa estas clases CSS disponibles: recuadro, recuadro-importante, recuadro-seguridad, linea-escribir, espacio-dibujo, pie-pagina, bloom-tag bloom-tag-N (N=1..6), prueba-badge, control-badge, portada-box.\n' +
-        '- Para líneas de escritura usa: <div class="linea-escribir"></div>\n' +
-        '- Para espacio de dibujo: <div class="espacio-dibujo">Descripción</div>\n' +
-        '- Cada pregunta de evaluación debe indicar: número, puntaje entre paréntesis, y badge de nivel Bloom con clase bloom-tag bloom-tag-N.\n' +
-        '- Incluye portada con tabla HTML (nombre, curso, fecha, OA, tema, profesor, puntaje).\n' +
-        '- Incluye tabla de puntajes al final para evaluaciones.\n' +
-        '- Usa <h1>, <h2>, <h3>, <table>, <ul>, <ol> con los estilos del documento.\n' +
-        '- Termina con: <div class="pie-pagina">Colegio Chile &bull; ' + asigNombre + ' &bull; ElectroLearn &bull; Material generado con IA &bull; Alineado al currículum Mineduc</div>\n\n' +
-
-        '== REQUISITOS DE CALIDAD ==\n' +
-        '- El contenido debe ser ESPECÍFICO al tema "' + (contenido || modNombre || asigNombre) + '", no genérico.\n' +
-        '- Las preguntas de evaluación deben estar redactadas completas (no decir "[pregunta aquí]"), con texto real alineado al OA.\n' +
-        '- Para selección múltiple: incluye las 4 alternativas con texto real, una correcta.\n' +
-        '- Para verdadero/falso: escribe la afirmación completa.\n' +
-        '- Integra las actitudes transversales MBE/OAT seleccionadas (' + (valoresArr.length ? valoresArr.join(', ') : 'Responsabilidad y cumplimiento') + ') de forma natural en reflexiones, contextos o actividades del documento, sin forzar el tema.\n' +
-        '- Idioma: español, formal, adecuado para el nivel ' + cursoTexto + '.\n' +
+        'TIPO DE DOCUMENTO: ' + tipoNombre + '\n' +
+        'ASIGNATURA/M\u00d3DULO: ' + modNombre + '\n' +
+        'CURSO/NIVEL: ' + cursoTexto + '\n' +
+        'TEMA O CONTENIDO: ' + contenido + '\n' +
+        'OBJETIVOS DE APRENDIZAJE:\n' + oaTexto + '\n' +
+        'PROFESOR: ' + profesor + '\n' +
+        'DIFICULTAD: ' + difTexto + '\n' +
+        (bloomNames ? 'NIVELES COGNITIVOS BLOOM: ' + bloomNames + '\n' : '') +
+        (tiposNames ? 'TIPOS DE PREGUNTAS: ' + tiposNames + '\n' : '') +
+        'CANTIDAD DE PREGUNTAS/\u00cdTEMS: ' + (evalOpts.cantPreg || 10) + '\n' +
+        'PUNTAJE TOTAL: ' + (evalOpts.puntaje || 40) + ' puntos\n\n' +
+        'INSTRUCCIONES PARA EL HTML:\n' +
+        '- El documento debe estar en HTML completo con estilos CSS inline.\n' +
+        '- Incluye portada con nombre del establecimiento "Liceo Salesiano de Talca", nombre del profesor, fecha, curso.\n' +
+        '- Usa fuentes limpias, formato listo para imprimir (m\u00e1rgenes, separaci\u00f3n de secciones).\n' +
+        '- Para selecci\u00f3n m\u00faltiple: incluye las 4 alternativas con texto real, una correcta.\n' +
+        '- Para verdadero/falso: escribe la afirmaci\u00f3n completa.\n' +
+        '- Integra las actitudes transversales MBE/OAT seleccionadas (' + (valoresArr.length ? valoresArr.join(', ') : 'Responsabilidad y cumplimiento') + ') de forma natural.\n' +
+        '- Idioma: espa\u00f1ol, formal, adecuado para el nivel ' + cursoTexto + '.\n' +
         'Genera el documento ahora:';
 
-        var modelo = getModeloSeleccionado();
-        var url = 'https://generativelanguage.googleapis.com/v1beta/models/' + modelo + ':generateContent?key=' + apiKey;
-
-        var body = JSON.stringify({
-            contents: [{ parts: [{ text: prompt }] }],
-            generationConfig: { temperature: 0.7, maxOutputTokens: 8192 }
-        });
-
-        setIAStatus('loading', '<span class="ia-spinner">&#9696;</span> Generando con <strong>' + modelo + '</strong>... Esto puede tardar 15–30 segundos.');
+        // Cargar configuración IA desde Firestore y ejecutar
+        setIAStatus('loading', '<span class=\"ia-spinner\">&#9696;</span> Cargando configuraci\u00f3n...');
         document.getElementById('btnIA').disabled = true;
 
-        fetch(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: body
-        })
-        .then(function(res) { return res.json(); })
-        .then(function(data) {
-            document.getElementById('btnIA').disabled = false;
-            if (data.error) {
-                var msg = data.error.message || JSON.stringify(data.error);
-                var hint = '';
-                if (msg.indexOf('not found') !== -1 || msg.indexOf('not supported') !== -1) {
-                    hint = '<br><br>&#128161; <strong>Solución:</strong> El modelo <em>' + modelo + '</em> no está disponible. ' +
-                    'Selecciona <strong>"Gemini 2.0 Flash"</strong> en el selector de modelo (es el más estable y gratuito).';
-                } else if (msg.indexOf('API_KEY_INVALID') !== -1 || msg.indexOf('invalid') !== -1 || msg.indexOf('INVALID_ARGUMENT') !== -1) {
-                    hint = '<br><br>&#128161; <strong>Solución:</strong> Tu API key parece incorrecta. ' +
-                    'Obtén una nueva en <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color:#ff6b6b">aistudio.google.com/app/apikey</a> ' +
-                    '(es gratuita, sin tarjeta de crédito).';
-                } else if (msg.indexOf('RESOURCE_EXHAUSTED') !== -1 || msg.indexOf('quota') !== -1) {
-                    hint = '<br><br>&#128161; <strong>Solución:</strong> Cuota agotada. Espera unos minutos o prueba con otro modelo (Gemini 2.0 Flash Lite).';
-                } else if (msg.indexOf('PERMISSION_DENIED') !== -1) {
-                    hint = '<br><br>&#128161; <strong>Solución:</strong> La API key no tiene permiso para este modelo. Verifica en AI Studio que la key esté activa.';
+        _cargarConfigIA()
+            .then(function(config) {
+                if (\!config || \!config.keys || \!config.keys.length) {
+                    setIAStatus('error', '&#10007; No hay API Keys configuradas. Contacta al administrador.');
+                    document.getElementById('btnIA').disabled = false;
+                    return;
                 }
-                setIAStatus('error', '&#10007; Error de la API: ' + msg + hint);
-                return;
-            }
-            var candidate = data.candidates && data.candidates[0];
-            if (candidate && candidate.finishReason === 'SAFETY') {
-                setIAStatus('error', '&#10007; El contenido fue bloqueado por filtros de seguridad de Google. Intenta reformular el contenido del documento.');
-                return;
-            }
-            var text = candidate && candidate.content && candidate.content.parts && candidate.content.parts[0] && candidate.content.parts[0].text;
-            if (!text) {
-                setIAStatus('error', '&#10007; La IA no devolvio contenido. Intenta de nuevo. Si el error persiste, usa el boton "Verificar API Key".');
-                return;
-            }
-            // Limpiar bloques de código markdown si los hay
-            text = text.replace(/^```html\s*/i, '').replace(/^```\s*/i, '').replace(/\s*```\s*$/i, '').trim();
-            document.getElementById('docPreview').innerHTML = text;
-            document.getElementById('docGenerado').classList.add('visible');
-            document.getElementById('docGenerado').scrollIntoView({ behavior: 'smooth' });
-            setIAStatus('ok', '&#10003; Documento generado con IA (' + modelo + ') exitosamente. Puedes imprimirlo o publicarlo en la Biblioteca.');
-        })
-        .catch(function(err) {
-            document.getElementById('btnIA').disabled = false;
-            var hint = '';
-            if (err.message && err.message.indexOf('Failed to fetch') !== -1) {
-                hint = '<br><small>Verifica tu conexión a internet. Si el problema persiste, el servicio de Google puede estar temporalmente no disponible.</small>';
-            }
-            setIAStatus('error', '&#10007; Error de conexion: ' + err.message + hint);
-        });
-    }
+                // Elegir una key al azar del pool
+                var keys = config.keys;
+                var apiKey = keys[Math.floor(Math.random() * keys.length)];
+                var modelo = config.modelo || 'gemini-2.5-flash-preview-04-17';
 
+                var url = 'https://generativelanguage.googleapis.com/v1beta/models/' + modelo + ':generateContent?key=' + apiKey;
+                var body = JSON.stringify({
+                    contents: [{ parts: [{ text: prompt }] }],
+                    generationConfig: { temperature: 0.7, maxOutputTokens: 8192 }
+                });
+
+                setIAStatus('loading', '<span class=\"ia-spinner\">&#9696;</span> Generando con <strong>' + modelo + '</strong>... Esto puede tardar 15\u201330 segundos.');
+
+                return fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: body
+                })
+                .then(function(res) { return res.json(); })
+                .then(function(data) {
+                    document.getElementById('btnIA').disabled = false;
+                    if (data.error) {
+                        var msg = data.error.message || JSON.stringify(data.error);
+                        var hint = '';
+                        if (msg.indexOf('RESOURCE_EXHAUSTED') \!== -1 || msg.indexOf('quota') \!== -1) {
+                            hint = '<br><br>&#128161; <strong>Cuota agotada en esta key.</strong> El sistema intentar\u00e1 con otra key en el siguiente intento.';
+                        } else if (msg.indexOf('API_KEY_INVALID') \!== -1 || msg.indexOf('invalid') \!== -1) {
+                            hint = '<br><br>&#128161; Revisa las API Keys en el panel de administraci\u00f3n.';
+                        }
+                        setIAStatus('error', '&#10007; Error de la API: ' + msg + hint);
+                        return;
+                    }
+                    var candidate = data.candidates && data.candidates[0];
+                    if (candidate && candidate.finishReason === 'SAFETY') {
+                        setIAStatus('error', '&#10007; Contenido bloqueado por filtros de seguridad de Google. Reformula el contenido del documento.');
+                        return;
+                    }
+                    var text = candidate && candidate.content && candidate.content.parts && candidate.content.parts[0] && candidate.content.parts[0].text;
+                    if (\!text) {
+                        setIAStatus('error', '&#10007; La IA no devolvi\u00f3 contenido. Intenta de nuevo.');
+                        return;
+                    }
+                    text = text.replace(/^```html\s*/i, '').replace(/^```\s*/i, '').replace(/\s*```\s*$/i, '').trim();
+                    document.getElementById('docPreview').innerHTML = text;
+                    document.getElementById('docGenerado').classList.add('visible');
+                    document.getElementById('docGenerado').scrollIntoView({ behavior: 'smooth' });
+                    setIAStatus('ok', '&#10003; Documento generado con IA (' + modelo + ') exitosamente. Puedes imprimirlo o publicarlo en la Biblioteca.');
+                })
+                .catch(function(err) {
+                    document.getElementById('btnIA').disabled = false;
+                    setIAStatus('error', '&#10007; Error de conexi\u00f3n: ' + err.message);
+                });
+            })
+            .catch(function(err) {
+                document.getElementById('btnIA').disabled = false;
+                setIAStatus('error', '&#10007; No se pudo cargar la configuraci\u00f3n IA: ' + err.message);
+            });
+    }
     function setIAStatus(tipo, msg) {
         var el = document.getElementById('iaStatus');
         if (!el) return;
@@ -3022,4 +2862,4 @@
     <script src="js/recommendations.js"></script>
 </body>
 </html>
-                                                                                                                         
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
