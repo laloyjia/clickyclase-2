@@ -61,11 +61,18 @@ var ELAuth = (function() {
               // Usuario en Auth pero no en Firestore → crear documento básico
               var adminEmailsList = window.EL_ADMIN_EMAILS || [window.EL_ADMIN_EMAIL];
               var esAdminEmail = adminEmailsList.indexOf(fbUser.email) !== -1;
+              // Recuperar rol desde localStorage si fue guardado en sesión anterior
+              var _rolCacheNew = null;
+              try {
+                var _cached = localStorage.getItem('el_user_role_' + fbUser.uid);
+                if (_cached && _cached !== EL_ROLES.ESTUDIANTE) _rolCacheNew = _cached;
+              } catch(e) {}
+              var _rolInicial = esAdminEmail ? EL_ROLES.ADMIN : (_rolCacheNew || EL_ROLES.ESTUDIANTE);
               _currentUser = {
                 uid: fbUser.uid,
                 email: fbUser.email,
                 nombre: fbUser.displayName || fbUser.email.split('@')[0],
-                role: esAdminEmail ? EL_ROLES.ADMIN : EL_ROLES.ESTUDIANTE,
+                role: _rolInicial,
                 xp: 0,
                 nivel: 1,
                 badges: [],

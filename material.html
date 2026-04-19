@@ -687,7 +687,7 @@
                 <div style="width:56px;height:56px;border-radius:16px;display:grid;place-items:center;font-size:1.6rem;background:linear-gradient(135deg,#7c3aed,#22d3ee);box-shadow:0 10px 24px -10px rgba(124,58,237,.8)">📚</div>
                 <div style="text-align:left">
                     <h1 style="margin:0;font-size:1.6rem;line-height:1.15">Generador de Material Educativo</h1>
-                    <p style="margin:.2rem 0 0;color:var(--text-muted,#94a3b8);font-size:.92rem">Crea guías, apuntes, fichas, pruebas y controles alineados al currículo Mineduc · Salesianos Talca.</p>
+                    <p style="margin:.2rem 0 0;color:var(--text-muted,#94a3b8);font-size:.92rem">Crea guías, apuntes, fichas, pruebas y controles alineados al currículo Mineduc · Chile.</p>
                 </div>
             </div>
             <div style="display:flex;gap:.5rem;flex-wrap:wrap;justify-content:center;margin-top:.9rem">
@@ -1083,9 +1083,11 @@
                 try { window.location.href = 'index.html'; } catch (e) {}
                 return;
             }
-            // Verificar rol (profesor o admin)
-            var tipo = user.tipo || user.rol || '';
-            if (tipo !== 'profesor' && tipo !== 'admin') {
+            // Verificar rol (profesor o admin) — el campo correcto es `role`
+            var role = user.role || user.tipo || user.rol || '';
+            var _adminEmails = window.EL_ADMIN_EMAILS || (window.EL_ADMIN_EMAIL ? [window.EL_ADMIN_EMAIL] : []);
+            var _esAdmin = _adminEmails.indexOf(user.email) !== -1;
+            if (role !== 'profesor' && role !== 'admin' && !_esAdmin) {
                 showToast('Acceso solo para docentes.', 'warn');
                 setTimeout(function(){ try { window.location.href = 'dashboard.html'; } catch(e){} }, 1200);
                 return;
@@ -1601,7 +1603,7 @@
         var user = _matUser || {};
         var isTP = user.tipoProfesor === 'tecnico';
         var area = isTP ? ('Especialidad ' + (user.especialidad || 'TP') + ' EMTP') : (user.asignaturas && user.asignaturas.length ? user.asignaturas.join(', ') : 'Plan Comun');
-        return '<div class="pie-pagina">Colegio Salesianos Talca &bull; ' + area + ' &bull; ElectroLearn &bull; Material generado automaticamente &bull; Alineado al curriculum Mineduc</div>';
+        return '<div class="pie-pagina">Colegio Chile &bull; ' + area + ' &bull; ElectroLearn &bull; Material generado automaticamente &bull; Alineado al curriculum Mineduc</div>';
     }
 
     // Helper: leer opciones de evaluacion del formulario
@@ -1703,7 +1705,7 @@
         }).join('');
 
         return '<h1>GUIA DE APRENDIZAJE</h1>' +
-        '<div class="doc-subtitulo">Colegio Salesianos Talca &bull; Especialidad Electronica &bull; Formacion Diferenciada TP<br>' +
+        '<div class="doc-subtitulo">Colegio Chile &bull; Especialidad Electronica &bull; Formacion Diferenciada TP<br>' +
         'Modulo: ' + mod.num + ' &ndash; ' + mod.nombre + ' &nbsp;|&nbsp; Curso: ' + curso + ' &nbsp;|&nbsp; Nivel: ' + difTexto + '<br>Profesor: ' + prof + '</div>' +
 
         '<table>' +
@@ -1860,7 +1862,7 @@
         var contCorto = cont.length > 70 ? cont.substring(0, 67) + '...' : cont;
 
         return '<h1>APUNTE DE CLASE</h1>' +
-        '<div class="doc-subtitulo">Colegio Salesianos Talca &bull; Especialidad Electronica &bull; Formacion Diferenciada TP<br>' +
+        '<div class="doc-subtitulo">Colegio Chile &bull; Especialidad Electronica &bull; Formacion Diferenciada TP<br>' +
         'Modulo: ' + mod.num + ' &ndash; ' + mod.nombre + ' &nbsp;|&nbsp; Curso: ' + curso + '<br>Profesor: ' + prof + '</div>' +
 
         '<div class="recuadro">' +
@@ -2008,7 +2010,7 @@
         '<li>Manuales tecnicos de fabricantes: Siemens, Schneider Electric, ABB, Allen-Bradley, Phoenix Contact.</li>' +
         '<li>Norma Electrica Chilena NCh Elec. 4/2003 y actualizaciones vigentes.</li>' +
         '<li>IEC 60364: Instalaciones Electricas en Edificios. IEC 61131: Controladores Programables.</li>' +
-        '<li>Plataforma ElectroLearn &mdash; Colegio Salesianos Talca: recursos digitales del modulo.</li>' +
+        '<li>Plataforma ElectroLearn &mdash; Colegio Chile: recursos digitales del modulo.</li>' +
         '</ul>' +
 
         '<div class="recuadro"><strong>&#128155; Reflexion Salesiana:</strong> El valor de <strong>' + val1 + '</strong> nos recuerda que la excelencia tecnica no es solo saber hacer, ' +
@@ -2032,7 +2034,7 @@
         }).join('');
 
         return '<h1>FICHA DE TRABAJO PRACTICO</h1>' +
-        '<div class="doc-subtitulo">Colegio Salesianos Talca &bull; Taller de Electronica &bull; Formacion Diferenciada TP<br>' +
+        '<div class="doc-subtitulo">Colegio Chile &bull; Taller de Electronica &bull; Formacion Diferenciada TP<br>' +
         'Modulo: ' + mod.num + ' &ndash; ' + mod.nombre + ' &nbsp;|&nbsp; Curso: ' + curso + '<br>Profesor: ' + prof + '</div>' +
 
         '<table>' +
@@ -2270,7 +2272,7 @@
 
         // ENCABEZADO
         html += '<h1>GUIA DE EJERCICIOS</h1>' +
-        '<div class="doc-subtitulo">Colegio Salesianos Talca &bull; ' + area + ' &bull; Curso: ' + curso + '<br>' +
+        '<div class="doc-subtitulo">Colegio Chile &bull; ' + area + ' &bull; Curso: ' + curso + '<br>' +
         'Profesor(a): ' + prof + ' &nbsp;|&nbsp; Nivel: ' + difTexto + '</div>' +
 
         '<table>' +
@@ -2448,7 +2450,7 @@
         var html = '<div class="portada-box">' +
         '<div style="text-align:center;margin-bottom:1rem">' +
         '<div class="prueba-badge">PRUEBA SUMATIVA</div>' +
-        '<div style="font-size:.85rem;color:#636e72;margin-top:4px">' + area + ' &bull; Colegio Salesianos Talca</div>' +
+        '<div style="font-size:.85rem;color:#636e72;margin-top:4px">' + area + ' &bull; Colegio Chile</div>' +
         '</div>' +
         '<table>' +
         '<tr><th style="width:30%">Nombre</th><td colspan="3">' + lineas(1) + '</td></tr>' +
@@ -2611,7 +2613,7 @@
         var html = '<div class="portada-box">' +
         '<div style="text-align:center;margin-bottom:.8rem">' +
         '<div class="control-badge">CONTROL FORMATIVO</div>' +
-        '<div style="font-size:.82rem;color:#636e72;margin-top:4px">' + area + ' &bull; Colegio Salesianos Talca &bull; ' + curso + '</div>' +
+        '<div style="font-size:.82rem;color:#636e72;margin-top:4px">' + area + ' &bull; Colegio Chile &bull; ' + curso + '</div>' +
         '</div>' +
         '<table>' +
         '<tr><th style="width:35%">Nombre</th><td>' + lineas(1) + '</td><th style="width:20%">Fecha</th><td>' + lineas(1) + '</td></tr>' +
@@ -2747,7 +2749,7 @@
 
         '== CONTEXTO DEL DOCUMENTO ==\n' +
         'Tipo de documento: ' + tipoNombre + '\n' +
-        'Establecimiento: Colegio Salesianos Talca\n' +
+        'Establecimiento: Colegio Chile\n' +
         'Asignatura / Área: ' + asigNombre + (modNombre && modNombre !== asigNombre ? ' › ' + modNombre : '') + '\n' +
         'Curso / Nivel: ' + cursoTexto + '\n' +
         'Dificultad: ' + difTexto + '\n' +
@@ -2778,7 +2780,7 @@
         '- Incluye portada con tabla HTML (nombre, curso, fecha, OA, tema, profesor, puntaje).\n' +
         '- Incluye tabla de puntajes al final para evaluaciones.\n' +
         '- Usa <h1>, <h2>, <h3>, <table>, <ul>, <ol> con los estilos del documento.\n' +
-        '- Termina con: <div class="pie-pagina">Colegio Salesianos Talca &bull; ' + asigNombre + ' &bull; ElectroLearn &bull; Material generado con IA &bull; Alineado al currículum Mineduc</div>\n\n' +
+        '- Termina con: <div class="pie-pagina">Colegio Chile &bull; ' + asigNombre + ' &bull; ElectroLearn &bull; Material generado con IA &bull; Alineado al currículum Mineduc</div>\n\n' +
 
         '== REQUISITOS DE CALIDAD ==\n' +
         '- El contenido debe ser ESPECÍFICO al tema "' + (contenido || modNombre || asigNombre) + '", no genérico.\n' +
@@ -3020,3 +3022,4 @@
     <script src="js/recommendations.js"></script>
 </body>
 </html>
+                                                                                                                         
