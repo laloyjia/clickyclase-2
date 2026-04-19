@@ -578,38 +578,6 @@
       </div>
     </section>
 
-    <!-- ═══════════ MIS MATERIALES ═══════════ -->
-    <section id="sec-materiales" hidden>
-      <div class="page-h">
-        <h1>📚 Mis materiales</h1>
-        <p>Todo el material pedagógico que has creado o subido a la biblioteca.</p>
-      </div>
-
-      <div class="card-pro">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px">
-          <h3 style="font-size:1rem;font-weight:800;margin:0">🗂️ Historial completo</h3>
-          <a class="btn-pro primary" href="material.html" data-perm="material" style="padding:7px 14px;font-size:.82rem">➕ Crear material</a>
-        </div>
-        <div id="matsList"><div class="empty-pro"><span class="e-emoji">⏳</span><p>Cargando…</p></div></div>
-      </div>
-    </section>
-
-    <!-- ═══════════ MIS PLANIFICACIONES ═══════════ -->
-    <section id="sec-planificaciones" hidden>
-      <div class="page-h">
-        <h1>📅 Mis planificaciones</h1>
-        <p>Planificaciones de clase generadas con IA y alineadas al Marco para la Buena Enseñanza.</p>
-      </div>
-
-      <div class="card-pro">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px">
-          <h3 style="font-size:1rem;font-weight:800;margin:0">🗓️ Todas mis planificaciones</h3>
-          <a class="btn-pro primary" href="planificacion.html" data-perm="planificar" style="padding:7px 14px;font-size:.82rem">➕ Nueva planificación</a>
-        </div>
-        <div id="plansList"><div class="empty-pro"><span class="e-emoji">⏳</span><p>Cargando…</p></div></div>
-      </div>
-    </section>
-
   </main>
 </div>
 
@@ -725,7 +693,12 @@
     }
 
     _profeUser = user;
-    initDashboard(user);
+    try {
+      initDashboard(user);
+    } catch (err) {
+      console.error('[dashboard-profesor] initDashboard falló:', err);
+      toast('Error al cargar el panel: ' + (err && err.message ? err.message : 'desconocido'), 'error');
+    }
   });
 
   // ═══════════════════════════════════════════════════════════════
