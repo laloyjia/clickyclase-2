@@ -54,7 +54,7 @@ var ELAuth = (function() {
         _fetchUserDocConReintentos(fbUser.uid)
           .then(function(doc) {
             if (doc.exists) {
-              _currentUser = Object.assign({ uid: fbUser.uid, email: fbUser.email }, doc.data());
+              _currentUser = Object.assign({}, doc.data(), { uid: fbUser.uid, email: fbUser.email });
               // Guardar rol en localStorage como caché de respaldo para modo offline
               try { localStorage.setItem('el_user_role_' + fbUser.uid, _currentUser.role || EL_ROLES.ESTUDIANTE); } catch(e) {}
             } else {
@@ -145,7 +145,7 @@ var ELAuth = (function() {
       })
       .then(function(doc) {
         if (doc && doc.exists) {
-          _currentUser = Object.assign({ uid: _firebaseUser.uid, email: _firebaseUser.email }, doc.data());
+          _currentUser = Object.assign({}, doc.data(), { uid: _firebaseUser.uid, email: _firebaseUser.email });
         } else if (doc && !doc.exists) {
           // Doc no existe → crear con rol correcto
           var adminEmailsLogin = window.EL_ADMIN_EMAILS || [window.EL_ADMIN_EMAIL];

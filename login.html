@@ -679,7 +679,9 @@ function setBtn(id, html, dis) {
 //  SESIÓN ACTIVA → REDIRIGIR
 // ══════════════════════════════════
 ELAuth.onUserReady(function(user) {
-  if (!user || user.primerIngreso) return;
+  // SEGURIDAD: solo redirigir si primerIngreso es EXPLÍCITAMENTE false.
+  // Si es undefined (admin sin primerIngreso seteado) NO redirigir → muestra formulario.
+  if (!user || user.primerIngreso !== false) return;
   redirectByRole(user);
 });
 
@@ -768,8 +770,10 @@ function doChangePass(e) {
       if (!cu) { window.location.href = 'index.html'; return Promise.resolve(null); }
       return EL_DB.collection(EL_COLLECTIONS.USERS).doc(cu.uid).get()
         .then(function(doc) {
+          // SEGURIDAD: el email de Firebase Auth (cu.email) siempre tiene precedencia
+          // sobre el campo email del documento Firestore (evita override con email incorrecto)
           var freshUser = doc && doc.exists
-            ? Object.assign({ uid: cu.uid, email: cu.email }, doc.data())
+            ? Object.assign({}, doc.data(), { uid: cu.uid, email: cu.email })
             : (window._pendingUser || { uid: cu.uid, email: cu.email, role: 'estudiante' });
           window._pendingUser = null;
           redirectByRole(freshUser);
