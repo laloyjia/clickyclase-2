@@ -1103,12 +1103,19 @@
         var navInfo = document.getElementById('navProfesorInfo');
         if (navInfo) navInfo.textContent = user.nombre || '';
 
-        var isTP = user.tipoProfesor === 'tecnico';
+        // Para admins sin tipoProfesor configurado → modo TP por defecto (Liceo Salesiano es TP)
+        var _adminEmails2 = window.EL_ADMIN_EMAILS || (window.EL_ADMIN_EMAIL ? [window.EL_ADMIN_EMAIL] : []);
+        var _esAdminMat   = _adminEmails2.indexOf(user.email) !== -1;
+        var isTP = user.tipoProfesor === 'tecnico' || (_esAdminMat && !user.tipoProfesor);
 
         // Poblar selectCurso
+        // Si el usuario no tiene niveles asignados (admin o perfil incompleto) → mostrar todos
         var selCurso = document.getElementById('selectCurso');
         selCurso.innerHTML = '<option value="">-- Seleccionar curso --</option>';
-        (user.niveles || []).forEach(function(n) {
+        var _nivelesUsar = (user.niveles && user.niveles.length > 0)
+            ? user.niveles
+            : (typeof CURRICULA_CHILE !== 'undefined' ? CURRICULA_CHILE.getAllNiveles() : []);
+        _nivelesUsar.forEach(function(n) {
             var opt = document.createElement('option');
             opt.value = n;
             opt.textContent = (typeof CURRICULA_CHILE !== 'undefined') ? CURRICULA_CHILE.getNivelLabel(n) : n;
@@ -1136,7 +1143,12 @@
             var selAsig = document.getElementById('selectAsignatura');
             if (selAsig) {
                 selAsig.innerHTML = '<option value="">-- Seleccionar asignatura --</option>';
-                (user.asignaturas || []).forEach(function(a) {
+                // Si no tiene asignaturas asignadas → mostrar lista genérica
+                var _asigUsar = (user.asignaturas && user.asignaturas.length > 0)
+                    ? user.asignaturas
+                    : ['Lenguaje y Comunicación','Matemática','Historia','Ciencias Naturales',
+                       'Inglés','Educación Física','Artes Visuales','Música','Tecnología'];
+                _asigUsar.forEach(function(a) {
                     var opt = document.createElement('option');
                     opt.value = a; opt.textContent = a;
                     selAsig.appendChild(opt);
