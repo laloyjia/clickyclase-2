@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Crear Admin — ElectroLearn</title>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+<style>
+  body { font-family: monospace; background: #0f172a; color: #e2e8f0; display: flex;
+         align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
+  .box { background: #1e293b; border: 1px solid #334155; border-radius: 16px;
+         padding: 40px; max-width: 480px; width: 100%; text-align: center; }
+  h2 { color: #6366f1; margin-bottom: 8px; }
+  .log { text-align: left; background: #0f172a; border-radius: 8px; padding: 16px;
+         margin-top: 20px; font-size: .85rem; line-height: 1.8; min-height: 80px; }
+  .ok  { color: #4ade80; }
+  .err { color: #f87171; }
+  .inf { color: #94a3b8; }
+  .btn { margin-top: 20px; padding: 12px 32px; background: #6366f1; color: #fff;
+         border: none; border-radius: 8px; font-size: 1rem; cursor: pointer; }
+  .btn:disabled { opacity: .5; cursor: not-allowed; }
+  a.home { display: inline-block; margin-top: 16px; color: #818cf8; font-size: .85rem; }
+</style>
+</head>
+<body>
+<div class="box">
+  <h2>⚙️ Crear Administrador</h2>
+  <p style="color:#94a3b8;font-size:.85rem">ElectroLearn · Solo para uso interno</p>
+
+  <div class="log" id="log"><span class="inf">Presiona el botón para comenzar…</span></div>
+
+  <button class="btn" id="btn" onclick="crearAdmin()">Crear Administrador</button>
+  <br>
+  <a class="home" href="index.html">← Volver al inicio</a>
+</div>
+
+<script>
+// ── Configuración Firebase ──────────────────────────
+var FIREBASE_CONFIG = {
+  apiKey:            "AIzaSyBnF5NyEVijpds9EnEC5XiiYl31tvJ4Y5M",
+  authDomain:        "electrolearn-prod.firebaseapp.com",
+  projectId:         "electrolearn-prod",
+  storageBucket:     "electrolearn-prod.firebasestorage.app",
+  messagingSenderId: "537489844804",
+  appId:             "1:537489844804:web:cf468785e90aeed3362a11"
+};
+
+if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
+var AUTH = firebase.auth();
+var DB   = firebase.firestore();
+
+// ── Datos del administrador ─────────────────────────
+var ADMIN_EMAIL  = 'eduyanezjara@gmail.com';
+var ADMIN_PASS   = 'Lalo123..';
+var ADMIN_NOMBRE = 'Eduardo Yáñez';
+
+function log(msg, tipo) {
+  tipo = tipo || 'inf';
+  var el = document.getElementById('log');
+  el.innerHTML += '<div class="' + tipo + '">' + msg + '</div>';
+  el.scrollTop = el.scrollHeight;
+}
+
+function crearAdmin() {
+  var btn = document.getElementById('btn');
+  btn.disabled = true;
+  document.getElementById('log').innerHTML = '';
+  log('Iniciando creación de administrador…');
+
+  // Intentar crear cuenta nueva
+  AUTH.createUserWithEmailAndPassword(ADMIN_EMAIL, ADMIN_PASS)
+    .then(function(cred) {
+      log('✅ Cuenta creada en Firebase Auth', 'ok');
+      return guardarFirestore(cred.user.uid);
+    })
+    .catch(function(err) {
+      if (err.code === 'auth/email-already-in-use') {
+        log('ℹ️ El email ya existe — actualizando contraseña…', 'inf');
+        // Iniciar sesión para obtener el usuario
+        return AUTH.signInWithEmailAndPassword(ADMIN_EMAIL, ADMIN_PASS)
+          .then(function(cred) {
+            log('✅ Sesión iniciada con credenciales existentes', 'ok');
+            return guardarFirestore(cred.user.uid);
+          })
+          .catch(function(e2) {
+            log('⚠️ Error al iniciar sesión: ' + e2.message, 'err');
+            log('Prueba cambiar la contraseña desde Firebase Console.', 'err');
+            btn.disabled = false;
+          });
+      } else {
+        log('❌ Error: ' + err.message, 'err');
+        btn.disabled = false;
+      }
+    });
+}
+
+function guardarFirestore(uid) {
+  log('Guardando perfil en Firestore (uid: ' + uid + ')…');
+  var perfil = {
+    uid:          uid,
+    nombre:       ADMIN_NOMBRE,
+    email:        ADMIN_EMAIL,
+    role:         'admin',
+    xp:           0,
+    nivel:        1,
+    badges:       [],
+    evaluaciones: [],
+    activo:       true,
+    primerIngreso: false,
+    creadoEn:     new Date().toISOString()
+  };
+  return DB.collection('usuarios').doc(uid).set(perfil)
+    .then(function() {
+      log('✅ Documento creado en Firestore', 'ok');
+      log('', 'inf');
+      log('══════════════════════════════', 'ok');
+      log('✅  ADMINISTRADOR LISTO', 'ok');
+      log('Email : ' + ADMIN_EMAIL, 'ok');
+      log('Clave : ' + ADMIN_PASS, 'ok');
+      log('Rol   : admin', 'ok');
+      log('══════════════════════════════', 'ok');
+      log('');
+      var btn = document.getElementById('btn');
+      btn.textContent = '✅ Listo — Ir al login';
+      btn.disabled = false;
+      btn.onclick = function() { window.location.href = 'index.html'; };
+    })
+    .catch(function(err) {
+      log('❌ Error Firestore: ' + err.message, 'err');
+      document.getElementById('btn').disabled = false;
+    });
+}
+</script>
+</body>
+</html>
