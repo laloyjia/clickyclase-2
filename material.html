@@ -930,7 +930,6 @@
     <script src="js/firebase-config.js"></script>
     <script src="js/firebase-auth.js"></script>
     <script src="js/firebase-db.js"></script>
-    <script src="js/auth.js"></script>
     <script src="js/curricula-chile.js"></script>
     <!-- ── Plan Común ──────────────────────────────────────── -->
     <script src="js/curricula/plan-comun/datos-plan-comun.js"></script>
@@ -1103,18 +1102,45 @@
         var navInfo = document.getElementById('navProfesorInfo');
         if (navInfo) navInfo.textContent = user.nombre || '';
 
-        // Para admins sin tipoProfesor configurado → modo TP por defecto (Liceo Salesiano es TP)
+        // Detectar si es admin
         var _adminEmails2 = window.EL_ADMIN_EMAILS || (window.EL_ADMIN_EMAIL ? [window.EL_ADMIN_EMAIL] : []);
         var _esAdminMat   = _adminEmails2.indexOf(user.email) !== -1;
+
+        // Para admin sin tipoProfesor: modo TP con todos los cursos disponibles
+        // Para profesor sin perfil configurado: mostrar aviso y bloquear
+        var sinPerfil = !user.tipoProfesor && !_esAdminMat;
+        if (sinPerfil) {
+            // Mostrar banner de aviso prominente
+            var ctx = document.getElementById('contextoBar');
+            if (ctx) {
+                ctx.style.display = 'flex';
+                ctx.style.background = 'rgba(245,158,11,.12)';
+                ctx.style.border = '1px solid rgba(245,158,11,.3)';
+                ctx.style.borderRadius = '12px';
+                ctx.innerHTML =
+                    '<span style="font-size:1.2rem">⚠️</span>' +
+                    '<div>' +
+                    '<strong style="color:#fcd34d">Tu perfil docente no está configurado.</strong>' +
+                    '<span style="color:#94a3b8;font-size:.85rem;margin-left:8px">Pide al administrador que configure tu tipo de enseñanza, niveles y asignaturas desde el Panel Admin → Profesores → 🔑 Permisos.</span>' +
+                    '</div>';
+            }
+            // Deshabilitar el formulario de creación de material
+            var formMat = document.querySelector('.form-material, #formMaterial, main');
+            showToast('Tu perfil no tiene cursos asignados. Contacta al administrador.', 'warn');
+            return; // salir de initCurriculoMat
+        }
+
         var isTP = user.tipoProfesor === 'tecnico' || (_esAdminMat && !user.tipoProfesor);
 
-        // Poblar selectCurso
-        // Si el usuario no tiene niveles asignados (admin o perfil incompleto) → mostrar todos
+        // Poblar selectCurso con los niveles asignados
+        // Admin sin niveles → mostrar todos; Profesor → solo sus niveles asignados
         var selCurso = document.getElementById('selectCurso');
         selCurso.innerHTML = '<option value="">-- Seleccionar curso --</option>';
         var _nivelesUsar = (user.niveles && user.niveles.length > 0)
             ? user.niveles
-            : (typeof CURRICULA_CHILE !== 'undefined' ? CURRICULA_CHILE.getAllNiveles() : []);
+            : (_esAdminMat && typeof CURRICULA_CHILE !== 'undefined'
+               ? CURRICULA_CHILE.getAllNiveles()
+               : []);
         _nivelesUsar.forEach(function(n) {
             var opt = document.createElement('option');
             opt.value = n;
@@ -1133,7 +1159,7 @@
             if (campoMod)   campoMod.style.display   = '';
             if (secTP)      secTP.style.display       = '';
             if (secReg)     secReg.style.display      = 'none';
-            filtrarModulos(); // siempre cargar módulos para TP (nivel es orientativo)
+            filtrarModulos();
         } else {
             if (campoAsig) campoAsig.style.display = '';
             if (campoMod)  campoMod.style.display  = 'none';
@@ -1143,12 +1169,7 @@
             var selAsig = document.getElementById('selectAsignatura');
             if (selAsig) {
                 selAsig.innerHTML = '<option value="">-- Seleccionar asignatura --</option>';
-                // Si no tiene asignaturas asignadas → mostrar lista genérica
-                var _asigUsar = (user.asignaturas && user.asignaturas.length > 0)
-                    ? user.asignaturas
-                    : ['Lenguaje y Comunicación','Matemática','Historia','Ciencias Naturales',
-                       'Inglés','Educación Física','Artes Visuales','Música','Tecnología'];
-                _asigUsar.forEach(function(a) {
+                (user.asignaturas || []).forEach(function(a) {
                     var opt = document.createElement('option');
                     opt.value = a; opt.textContent = a;
                     selAsig.appendChild(opt);
