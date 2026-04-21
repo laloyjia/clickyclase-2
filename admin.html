@@ -376,7 +376,7 @@ tr:hover td{background:rgba(99,102,241,.05)}
           <div style="flex:1;min-width:240px">
             <select id="selectModeloAdmin"
               style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-size:.875rem;outline:none">
-              <option value="gemini-2.5-flash-preview-04-17">Gemini 2.5 Flash Preview — mas capaz (recomendado)</option>
+              <option value="gemini-2.5-flash">Gemini 2.5 Flash — mas capaz (recomendado)</option>
               <option value="gemini-2.0-flash">Gemini 2.0 Flash — estable y rapido</option>
               <option value="gemini-2.0-flash-lite">Gemini 2.0 Flash Lite — mas ligero</option>
               <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
@@ -1225,13 +1225,13 @@ var _recursosInit=false;
 // =============================================
 //  CONFIGURACION IA - GESTION DE API KEYS
 // =============================================
-var _iaConfig = { keys: [], modelo: 'gemini-2.5-flash-preview-04-17' };
+var _iaConfig = { keys: [], modelo: 'gemini-2.5-flash' };
 
 function cargarConfigIA() {
   EL_DB.collection('sistema').doc('gemini').get()
     .then(function(doc) {
       if (doc.exists) {
-        _iaConfig = Object.assign({ keys: [], modelo: 'gemini-2.5-flash-preview-04-17' }, doc.data());
+        _iaConfig = Object.assign({ keys: [], modelo: 'gemini-2.5-flash' }, doc.data());
       }
       renderKeysIA();
       var sel = document.getElementById('selectModeloAdmin');
@@ -1280,7 +1280,7 @@ function eliminarKeyIA(idx) {
 
 function guardarModeloIA() {
   var sel = document.getElementById('selectModeloAdmin');
-  _iaConfig.modelo = sel ? sel.value : 'gemini-2.5-flash-preview-04-17';
+  _iaConfig.modelo = sel ? sel.value : 'gemini-2.5-flash';
   guardarConfigIA('notifModeloIA', 'Modelo guardado: ' + _iaConfig.modelo);
 }
 
