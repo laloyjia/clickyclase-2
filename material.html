@@ -2712,9 +2712,10 @@
                 // Elegir una key al azar del pool
                 var keys = config.keys;
                 var apiKey = keys[Math.floor(Math.random() * keys.length)];
-                // Si el modelo guardado es el preview eliminado, usar 2.0-flash como fallback
+                // Modelos deprecados — reemplazar automáticamente por gemini-2.5-flash
+var _MODELOS_DEPRECADOS = ['gemini-2.5-flash-preview-04-17','gemini-2.0-flash','gemini-2.0-flash-lite','gemini-1.5-flash'];
 var _modeloGuardado = config.modelo || '';
-if (!_modeloGuardado || _modeloGuardado.indexOf('preview') !== -1) _modeloGuardado = 'gemini-2.0-flash';
+if (!_modeloGuardado || _MODELOS_DEPRECADOS.indexOf(_modeloGuardado) !== -1) _modeloGuardado = 'gemini-2.5-flash';
 var modelo = _modeloGuardado;
 
                 var url = 'https://generativelanguage.googleapis.com/v1beta/models/' + modelo + ':generateContent?key=' + apiKey;
