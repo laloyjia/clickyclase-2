@@ -1965,8 +1965,8 @@
             : 'Curso regular, aplicar DUA preventivo.';
 
         var promptBase =
-            'Actua como un Evaluador Par del CPEIP y Experto en Diseno Instruccional chileno, especialista en el Marco para la Buena Ensenanza (MBE) actualizado y en el Diseno Universal para el Aprendizaje (DUA).\n' +
-            'Tu tarea: Disenar la planificacion detallada de una clase que alcance el nivel "Destacado" en la rubrica del Portafolio Docente.\n\n';
+            'Eres un experto en MBE y DUA del Mineduc Chile. Genera la planificacion de clase nivel DESTACADO.\n' +
+            'REGLA ABSOLUTA: NO te presentes. NO escribas introduccion. NO expliques lo que haras. Comienza DIRECTAMENTE con el emoji y titulo del punto 1, sin ningun texto previo.\n\n';
 
         if (!isTP) {
             // ── RAMA REGULAR (Basica / Plan Comun) ──────────────────
@@ -2033,40 +2033,36 @@
         }
 
         promptBase +=
-            'Restricciones y formato de salida:\n' +
-            'Responde en texto plano bien estructurado con los siguientes apartados. ' +
-            'NO uses markdown con asteriscos para negrita. Usa letras mayusculas para titulos.\n\n' +
+            'FORMATO DE SALIDA — usa exactamente estos titulos con sus emojis, sin introduccion previa:\n\n' +
 
-            '1. OBJETIVO DE LA CLASE (TRIDIMENSIONAL)\n' +
-            'Redacta un objetivo claro que contenga Habilidad + Contenido + Actitud, observable y evaluable.\n\n' +
+            '\ud83c\udfaf 1. OBJETIVO DE LA CLASE (TRIDIMENSIONAL)\n' +
+            'Habilidad + Contenido + Actitud. Observable, evaluable y redactado en infinitivo.\n\n' +
 
-            '2. INICIO (' + minIni + ' minutos — 15% del tiempo)\n' +
-            '- ACTIVACION: Estrategia ludica o desafiante para rescatar conocimientos previos.\n' +
-            '- CONFLICTO COGNITIVO: Pregunta problematizadora que conecte con la realidad del estudiante.\n' +
-            '- EXPLICITACION: Como se presentara el objetivo y la meta de la clase a los alumnos.\n\n' +
+            '\ud83d\udd25 2. INICIO (' + minIni + ' min | 15% del tiempo)\n' +
+            '\u25b6 ACTIVACION: Estrategia ludica o desafiante para rescatar conocimientos previos.\n' +
+            '\u2753 CONFLICTO COGNITIVO: Pregunta problematizadora conectada con la realidad laboral/cotidiana del estudiante.\n' +
+            '\ud83d\udccc EXPLICITACION: Como se presentara el objetivo y la meta de la clase (visible para todos).\n\n' +
 
-            '3. DESARROLLO (' + minDes + ' minutos — 65% del tiempo)\n' +
-            '- SECUENCIA DIDACTICA: Actividades centradas en el estudiante (protagonismo activo).\n' +
-            '- MODELAJE DOCENTE: Como el profesor mostrara la habilidad paso a paso (andamiaje).\n' +
-            '- TRABAJO COLABORATIVO: Instrucciones claras para trabajo entre pares o grupos.\n' +
-            '- MONITOREO Y RETROALIMENTACION: Preguntas guia que el docente usara mientras recorre la sala para destrabar el aprendizaje (Dominio C del MBE).\n\n' +
+            '\u2699\ufe0f 3. DESARROLLO (' + minDes + ' min | 65% del tiempo)\n' +
+            '\ud83d\udcda SECUENCIA DIDACTICA: Actividades paso a paso centradas en el ESTUDIANTE (protagonismo activo, no exposicion pasiva).\n' +
+            '\ud83d\udc68\u200d\ud83c\udfeb MODELAJE DOCENTE: Como el profesor mostrara la habilidad paso a paso pensando en voz alta (andamiaje explicito).\n' +
+            '\ud83e\udd1d TRABAJO COLABORATIVO: Instrucciones claras, roles asignados, producto esperado.\n' +
+            '\ud83d\udd0e MONITOREO Y RETROALIMENTACION: Al menos 5 preguntas guia que el docente usara recorriendo la sala para destrabar el aprendizaje (Dominio C MBE). Una pregunta debe ser especifica para estudiantes con NEE si corresponde.\n\n' +
 
-            '4. CIERRE (' + minCie + ' minutos — 20% del tiempo)\n' +
-            '- SINTESIS: Actividad donde los ESTUDIANTES (no el profesor) resuman lo aprendido.\n' +
-            '- METACOGNICION: Preguntas para que reflexionen sobre como aprendieron y que dificultades tuvieron.\n\n' +
+            '\ud83c\udfc1 4. CIERRE (' + minCie + ' min | 20% del tiempo)\n' +
+            '\ud83d\udde3\ufe0f SINTESIS: Actividad donde los ESTUDIANTES (no el profesor) construyan el resumen o conclusion de la clase.\n' +
+            '\ud83e\udde0 METACOGNICION: 3 preguntas para reflexionar sobre como aprendieron, que fue dificil y como lo superaron.\n\n' +
 
-            '5. EVALUACION FORMATIVA\n' +
-            'Un instrumento rapido (ejemplo: Ticket de salida con 2 preguntas de aplicacion, NO de memoria) y los indicadores de logro.\n\n' +
+            '\ud83d\udcdd 5. EVALUACION FORMATIVA\n' +
+            'Ticket de salida con 2 preguntas de APLICACION (no de memoria). Incluye los indicadores de logro para cada pregunta.\n\n' +
 
-            '6. ESTRATEGIAS DUA\n' +
-            'Detalla 3 acciones concretas aplicadas en esta clase para garantizar:\n' +
-            '  a) Representacion (como se presenta la informacion)\n' +
-            '  b) Expresion (como demuestran lo aprendido)\n' +
-            '  c) Implicacion (como se motiva y sostiene el interes)\n\n' +
+            '\u267f 6. ESTRATEGIAS DUA\n' +
+            '3 acciones concretas con ejemplos especificos para esta clase:\n' +
+            '  \ud83d\udcd6 a) REPRESENTACION: Como se presentara la informacion en multiples formatos.\n' +
+            '  \u270d\ufe0f b) EXPRESION: Como demostraran lo aprendido de distintas formas.\n' +
+            '  \u2764\ufe0f c) IMPLICACION: Como se motivara y sostendra el interes de todos.\n\n' +
 
-            'IMPORTANTE: Asegura coherencia didactica entre todos los apartados. ' +
-            'El objetivo debe verse reflejado en el desarrollo, cierre y evaluacion. ' +
-            'El nivel de exigencia debe ser DESTACADO segun la rubrica del Portafolio Docente CPEIP.';
+            'COHERENCIA OBLIGATORIA: El objetivo debe verse reflejado en desarrollo, cierre y evaluacion. Nivel DESTACADO CPEIP. Sin introduccion, directo al punto 1.';
 
         return promptBase;
     }
@@ -2174,299 +2170,7 @@
 </body>
 </html>
 
-            tipoProfesor:user.tipoProfesor || '',
-            fechaClase:  fecha ? new Date(fecha).toISOString() : new Date().toISOString()
-        };
-
-        if (window.ELDB && typeof ELDB.planificaciones \!== 'undefined') {
-            ELDB.planificaciones.guardar(entrada)
-                .then(function() {
-                    mostrarPlanMsg('✅ Planificación guardada en la Biblioteca. <a href="biblioteca.html#calendario" style="color:#a5b4fc;margin-left:6px;">Ver calendario →</a>', '#34d399');
-                })
-                .catch(function(err) {
-                    var plans = JSON.parse(localStorage.getItem('electrolearn_planificaciones') || '[]');
-                    plans.push(entrada);
-                    localStorage.setItem('electrolearn_planificaciones', JSON.stringify(plans));
-                    mostrarPlanMsg('✅ Planificación guardada localmente. <a href="biblioteca.html#calendario" style="color:#a5b4fc;margin-left:6px;">Ver calendario →</a>', '#34d399');
-                });
-        } else {
-            var plans = JSON.parse(localStorage.getItem('electrolearn_planificaciones') || '[]');
-            plans.push(entrada);
-            localStorage.setItem('electrolearn_planificaciones', JSON.stringify(plans));
-            mostrarPlanMsg('✅ Planificación guardada localmente.', '#34d399');
-        }
-    }
-
-    function mostrarPlanMsg(html, color) {
-        var el = document.getElementById('planSaveMsg');
-        if (\!el) return;
-        el.innerHTML = html;
-        el.style.display = 'block';
-        el.style.background = color + '18';
-        el.style.border = '1px solid ' + color + '44';
-        el.style.color = color;
-        setTimeout(function(){ el.style.display = 'none'; }, 8000);
-    }
-
-    // =============================================
-    // GENERADOR IA MBE/DUA — NIVEL DESTACADO
-    // =============================================
-
-    function _setPlanIAStatus(tipo, html) {
-        var el = document.getElementById('planIAStatus');
-        if (\!el) return;
-        var colores = { loading: '#6366f1', error: '#ef4444', ok: '#10b981' };
-        el.style.display = 'block';
-        el.style.background = (colores[tipo] || '#6366f1') + '18';
-        el.style.border = '1px solid ' + (colores[tipo] || '#6366f1') + '44';
-        el.style.color = colores[tipo] || '#a5b4fc';
-        el.innerHTML = html;
-    }
-
-    function _cargarConfigIA_plan() {
-        return EL_DB.collection('sistema').doc('gemini').get()
-            .then(function(doc) { return (doc && doc.exists) ? doc.data() : {}; })
-            .catch(function() { return {}; });
-    }
-
-    function _construirPromptMBE(user, isTP) {
-        var curso     = document.getElementById('selectCurso') ? document.getElementById('selectCurso').value : '';
-        var horas     = document.getElementById('inputHoras') ? (document.getElementById('inputHoras').value || '2') : '2';
-        var contenido = document.getElementById('inputContenido') ? document.getElementById('inputContenido').value : '';
-        var cursoTexto = (typeof CURRICULA_CHILE \!== 'undefined') ? CURRICULA_CHILE.getNivelLabel(curso) : curso;
-        var minTot = parseInt(horas) * 45;
-        var minIni = Math.round(minTot * 0.15);
-        var minDes = Math.round(minTot * 0.65);
-        var minCie = minTot - minIni - minDes;
-
-        var valores = [];
-        document.querySelectorAll('#valoresSalesianos input:checked').forEach(function(cb){ valores.push(cb.value); });
-
-        var neeList = [];
-        document.querySelectorAll('#listaNEE input:checked').forEach(function(cb){ neeList.push(cb.getAttribute('data-nombre')); });
-        var contextoNEE = neeList.length > 0
-            ? 'Curso con NEE: ' + neeList.join(', ') + '. Aplicar DUA.'
-            : 'Curso regular, aplicar DUA preventivo.';
-
-        var p = 'Actua como un Evaluador Par del CPEIP y Experto en Diseno Instruccional chileno, especialista en el Marco para la Buena Ensenanza (MBE) actualizado y en el Diseno Universal para el Aprendizaje (DUA).\n' +
-                'Tu tarea: Disenar la planificacion detallada de una clase que alcance el nivel DESTACADO en la rubrica del Portafolio Docente.\n\n';
-
-        if (\!isTP) {
-            var asigNombre = document.getElementById('selectAsignatura') ? document.getElementById('selectAsignatura').value : '';
-            var unidad     = document.getElementById('inputUnidadReg') ? document.getElementById('inputUnidadReg').value : '';
-            var oasSeleccionados = [];
-            document.querySelectorAll('#listaOAMineduc .oaRegCheck:checked').forEach(function(cb){
-                oasSeleccionados.push(cb.value + ': ' + cb.getAttribute('data-desc'));
-            });
-            var oaTexto = oasSeleccionados.length > 0 ? oasSeleccionados.join('\n') : (contenido || 'No especificado');
-
-            p += 'Variables de la clase:\n' +
-                 '* Asignatura: ' + asigNombre + (unidad ? ' | Unidad: ' + unidad : '') + '\n' +
-                 '* Nivel: ' + cursoTexto + '\n' +
-                 '* Tiempo total: ' + minTot + ' minutos (' + horas + ' horas pedagogicas)\n' +
-                 '* Objetivo de Aprendizaje (OA Mineduc):\n' + oaTexto + '\n' +
-                 '* Habilidad y Actitud a desarrollar: ' + (valores.length ? valores.join(', ') : 'Responsabilidad, Trabajo colaborativo') + '\n' +
-                 (contenido ? '* Contenido especifico: ' + contenido + '\n' : '') +
-                 '* Contexto del curso: ' + contextoNEE + '\n\n';
-        } else {
-            var modId  = document.getElementById('selectModulo') ? document.getElementById('selectModulo').value : '';
-            var aeOpt  = document.getElementById('selectAE');
-            var aeTexto = aeOpt && aeOpt.selectedIndex >= 0 ? aeOpt.options[aeOpt.selectedIndex].text || '' : '';
-
-            var ceList = [];
-            document.querySelectorAll('#listaCE input[type="checkbox"]:checked').forEach(function(cb){
-                var lbl = cb.closest('label');
-                ceList.push(lbl ? lbl.textContent.trim() : cb.value);
-            });
-
-            var oagDetalle = '';
-            var oagInfoEl = document.querySelector('#listaOAG .info-box');
-            if (oagInfoEl) oagDetalle = oagInfoEl.textContent.trim();
-            if (\!oagDetalle) {
-                document.querySelectorAll('#listaOAG .oag-tag').forEach(function(el){ oagDetalle += el.title + ' '; });
-            }
-
-            var espKey  = user.especialidad || '';
-            var espData = (typeof CURRICULA_CHILE \!== 'undefined') ? CURRICULA_CHILE.getEspecialidades().find(function(e){ return e.key === espKey; }) : null;
-            var espNom  = espData ? espData.nombre + ' (' + espData.sector + ')' : espKey;
-
-            p += 'Esta planificacion es para ENSENANZA MEDIA TECNICO-PROFESIONAL (EMTP).\n\n' +
-                 'Variables de la clase:\n' +
-                 '* Especialidad: ' + espNom + '\n' +
-                 '* Modulo: ' + modId + '\n' +
-                 '* Nivel: ' + cursoTexto + '\n' +
-                 '* Tiempo total: ' + minTot + ' minutos (' + horas + ' horas pedagogicas)\n' +
-                 '* Aprendizaje Esperado (AE): ' + aeTexto + '\n' +
-                 '* Criterios de Evaluacion (CE) seleccionados:\n' +
-                 (ceList.length ? ceList.map(function(c){ return '  - ' + c; }).join('\n') : '  - No seleccionados') + '\n' +
-                 '* Objetivos de Aprendizaje Genericos (OAG): ' + (oagDetalle || 'Consultar curriculo EMTP') + '\n' +
-                 '* Habilidad y Actitud a desarrollar: ' + (valores.length ? valores.join(', ') : 'Responsabilidad, Trabajo colaborativo') + '\n' +
-                 (contenido ? '* Contenido especifico: ' + contenido + '\n' : '') +
-                 '* Contexto del curso: ' + contextoNEE + '\n\n';
-        }
-
-        p += 'Restricciones y formato de salida:\n' +
-             'Responde en texto plano estructurado. NO uses markdown con asteriscos. Usa titulos en MAYUSCULAS.\n\n' +
-
-             '1. OBJETIVO DE LA CLASE (TRIDIMENSIONAL)\n' +
-             'Habilidad + Contenido + Actitud. Observable y evaluable.\n\n' +
-
-             '2. INICIO (' + minIni + ' minutos — 15% del tiempo)\n' +
-             '- ACTIVACION: Estrategia ludica o desafiante para rescatar conocimientos previos.\n' +
-             '- CONFLICTO COGNITIVO: Pregunta problematizadora conectada con la realidad del estudiante.\n' +
-             '- EXPLICITACION: Como se presentara el objetivo y la meta de la clase.\n\n' +
-
-             '3. DESARROLLO (' + minDes + ' minutos — 65% del tiempo)\n' +
-             '- SECUENCIA DIDACTICA: Actividades centradas en el estudiante (protagonismo activo).\n' +
-             '- MODELAJE DOCENTE: Como el profesor mostrara la habilidad paso a paso (andamiaje).\n' +
-             '- TRABAJO COLABORATIVO: Instrucciones claras para trabajo entre pares o grupos.\n' +
-             '- MONITOREO Y RETROALIMENTACION: Preguntas guia que el docente usara recorriendo la sala para destrabar el aprendizaje (Dominio C MBE).\n\n' +
-
-             '4. CIERRE (' + minCie + ' minutos — 20% del tiempo)\n' +
-             '- SINTESIS: Actividad donde los ESTUDIANTES (no el profesor) resuman lo aprendido.\n' +
-             '- METACOGNICION: Preguntas para reflexionar sobre como aprendieron y que dificultades tuvieron.\n\n' +
-
-             '5. EVALUACION FORMATIVA\n' +
-             'Instrumento rapido (Ticket de salida con 2 preguntas de aplicacion, NO de memoria) e indicadores de logro.\n\n' +
-
-             '6. ESTRATEGIAS DUA\n' +
-             '3 acciones concretas para garantizar:\n' +
-             '  a) Representacion (como se presenta la informacion)\n' +
-             '  b) Expresion (como demuestran lo aprendido)\n' +
-             '  c) Implicacion (como se motiva y sostiene el interes)\n\n' +
-
-             'Coherencia didactica obligatoria entre todos los apartados. Nivel DESTACADO segun rubrica Portafolio Docente CPEIP.';
-
-        return p;
-    }
-
-    function generarPlanIAMBE() {
-        var user  = _planifUser || {};
-        var isTP  = user.tipoProfesor === 'tecnico';
-        var curso = document.getElementById('selectCurso') ? document.getElementById('selectCurso').value : '';
-        if (\!curso) { alert('Por favor selecciona el curso/nivel primero.'); return; }
-
-        var container = document.getElementById('planIAContainer');
-        var resultEl  = document.getElementById('planIAResult');
-        container.style.display = 'block';
-        resultEl.textContent = '';
-        container.scrollIntoView({ behavior: 'smooth', block: 'start' });
-
-        var btn = document.getElementById('btnPlanIA');
-        if (btn) btn.disabled = true;
-        _setPlanIAStatus('loading', 'Cargando configuracion IA...');
-
-        var prompt = _construirPromptMBE(user, isTP);
-
-        _cargarConfigIA_plan()
-            .then(function(config) {
-                if (\!config || \!config.keys || \!config.keys.length) {
-                    _setPlanIAStatus('error', 'No hay API Keys configuradas. Contacta al administrador.');
-                    if (btn) btn.disabled = false;
-                    return;
-                }
-                var apiKey = config.keys[Math.floor(Math.random() * config.keys.length)];
-                var _dep = ['gemini-2.5-flash-preview-04-17','gemini-2.0-flash','gemini-2.0-flash-lite','gemini-1.5-flash'];
-                var _mod = config.modelo || '';
-                if (\!_mod || _dep.indexOf(_mod) \!== -1) _mod = 'gemini-2.5-flash';
-                var url = 'https://generativelanguage.googleapis.com/v1beta/models/' + _mod + ':generateContent?key=' + apiKey;
-
-                _setPlanIAStatus('loading', 'Generando planificacion MBE/DUA con ' + _mod + '... Esto puede tardar 20-40 segundos.');
-
-                return fetch(url, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        contents: [{ parts: [{ text: prompt }] }],
-                        generationConfig: { temperature: 0.72, maxOutputTokens: 8192 }
-                    })
-                })
-                .then(function(res) { return res.json(); })
-                .then(function(data) {
-                    if (btn) btn.disabled = false;
-                    if (data.error) {
-                        _setPlanIAStatus('error', 'Error API: ' + (data.error.message || JSON.stringify(data.error)));
-                        return;
-                    }
-                    var candidate = data.candidates && data.candidates[0];
-                    var text = candidate && candidate.content && candidate.content.parts && candidate.content.parts[0] && candidate.content.parts[0].text;
-                    if (\!text) {
-                        _setPlanIAStatus('error', 'La IA no devolvio contenido. Intenta de nuevo.');
-                        return;
-                    }
-                    text = text.replace(/\*\*(.*?)\*\*/g, '$1').replace(/^#{1,3}\s+/gm, '').replace(/^\*\s+/gm, '- ').trim();
-                    resultEl.textContent = text;
-                    window._planIATexto = text;
-                    _setPlanIAStatus('ok', 'Planificacion generada exitosamente — Nivel Destacado MBE/DUA');
-                })
-                .catch(function(err) {
-                    if (btn) btn.disabled = false;
-                    _setPlanIAStatus('error', 'Error de red: ' + err.message);
-                });
-            });
-    }
-
-    function copiarPlanIA() {
-        var texto = window._planIATexto || document.getElementById('planIAResult').textContent;
-        if (\!texto) { alert('No hay planificacion generada aun.'); return; }
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-            navigator.clipboard.writeText(texto).then(function(){ mostrarToast('Planificacion copiada al portapapeles'); });
-        } else {
-            var ta = document.createElement('textarea');
-            ta.value = texto; document.body.appendChild(ta); ta.select();
-            document.execCommand('copy'); document.body.removeChild(ta);
-            mostrarToast('Planificacion copiada al portapapeles');
-        }
-    }
-
-    function guardarPlanIAFirestore() {
-        var texto = window._planIATexto || document.getElementById('planIAResult').textContent;
-        if (\!texto) { alert('No hay planificacion generada aun.'); return; }
-        var user  = _planifUser || {};
-        var curso = document.getElementById('selectCurso') ? document.getElementById('selectCurso').value : '';
-        var fecha = document.getElementById('inputFecha') ? document.getElementById('inputFecha').value : '';
-        var horas = document.getElementById('inputHoras') ? document.getElementById('inputHoras').value : '2';
-        var titulo = 'Planif. MBE/DUA — ' + (curso || 'Sin curso') + (fecha ? ' — ' + fecha : '');
-        var entrada = {
-            titulo: titulo, tipo: 'planificacion-ia-mbe', texto: texto,
-            profesor: user.nombre || user.email || '', curso: curso, fecha: fecha, horas: horas,
-            creadoEn: new Date().toISOString(), activo: true, uid: user.uid || ''
-        };
-        EL_DB.collection('planificaciones').add(entrada)
-            .then(function(){ mostrarToast('Planificacion guardada en Biblioteca'); })
-            .catch(function(e){ alert('Error al guardar: ' + e.message); });
-    }
-
-    </script>
-    <script src="js/recommendations.js"></script>
-</body>
-</html>
-
-        );
-        } else {
-            var ta = document.createElement('textarea');
-            ta.value = texto; document.body.appendChild(ta); ta.select();
-            document.execCommand('copy'); document.body.removeChild(ta);
-            mostrarToast('Planificacion copiada al portapapeles');
-        }
-    }
-
-    function guardarPlanIAFirestore() {
-        var texto = window._planIATexto || document.getElementById('planIAResult').textContent;
-        if (\!texto) { alert('No hay planificacion generada aun.'); return; }
-        var user  = _planifUser || {};
-        var curso = document.getElementById('selectCurso') ? document.getElementById('selectCurso').value : '';
-        var fecha = document.getElementById('inputFecha') ? document.getElementById('inputFecha').value : '';
-        var horas = document.getElementById('inputHoras') ? document.getElementById('inputHoras').value : '2';
-        var titulo = 'Planif. MBE/DUA - ' + (curso || 'Sin curso') + (fecha ? ' - ' + fecha : '');
-        var entrada = {
-            titulo: titulo, tipo: 'planificacion-ia-mbe', texto: texto,
-            profesor: user.nombre || user.email || '', curso: curso, fecha: fecha, horas: horas,
-            creadoEn: new Date().toISOString(), activo: true, uid: user.uid || ''
-        };
-        EL_DB.collection('planificaciones').add(entrada)
-            .then(function(){ mostrarToast('Planificacion guardada en Biblioteca'); })
-            .catch(function(e){ alert('Error al guardar: ' + e.message); });
+ rt('Error al guardar: ' + e.message); });
     }
 
     </script>
