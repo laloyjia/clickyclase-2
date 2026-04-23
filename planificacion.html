@@ -1450,6 +1450,60 @@
     // GENERAR PLANIFICACION PARA LIRMI
     // =============================================
 
+    // Muestra campos LIRMI desde texto IA dividido por secciones
+    function _mostrarCamposLIRMI(textoIA, datosGenerales) {
+        // Separar secciones por emojis de titulo o por "N. "
+        var separadores = [
+            /(?=\ud83c\udfaf\s*1\.)/,  // 🎯
+            /(?=\ud83d\udd25\s*2\.)/,  // 🔥
+            /(?=\u2699\ufe0f\s*3\.)/,  // ⚙️
+            /(?=\ud83c\udfc1\s*4\.)/,  // 🏁
+            /(?=\ud83d\udcdd\s*5\.)/,  // 📝
+            /(?=\u267f\s*6\.)/         // ♿
+        ];
+        var titulos = [
+            'OBJETIVO DE LA CLASE',
+            'INICIO',
+            'DESARROLLO',
+            'CIERRE',
+            'EVALUACION FORMATIVA',
+            'ESTRATEGIAS DUA'
+        ];
+
+        // Intentar split por emojis, fallback por "1." "2." etc.
+        var secciones = [];
+        var texto = textoIA.trim();
+        var partes = texto.split(/(?=(?:\ud83c\udfaf|\ud83d\udd25|\u2699\ufe0f|\ud83c\udfc1|\ud83d\udcdd|\u267f)\s*\d\.)/u);
+        if (partes.length < 3) {
+            // Fallback: split por numeros de seccion
+            partes = texto.split(/(?=\d\.\s+[A-Z\u00C0-\u00FF]{3,})/);
+        }
+        // Filtrar partes vacias
+        partes = partes.filter(function(p){ return p.trim().length > 0; });
+
+        var campos = [];
+        // Campo 0: datos generales (fijo)
+        campos.push({ titulo: 'Datos Generales', texto: datosGenerales });
+        // Campos IA
+        partes.forEach(function(parte, i) {
+            campos.push({ titulo: titulos[i] || ('Seccion ' + (i+1)), texto: parte.trim() });
+        });
+
+        window._camposLIRMI = campos;
+        var container = document.getElementById('camposLIRMI');
+        container.innerHTML = '';
+        campos.forEach(function(campo, idx) {
+            var div = document.createElement('div');
+            div.className = 'resultado-campo';
+            div.innerHTML = '<div class="resultado-campo-header"><h3>' + campo.titulo + '</h3><button class="btn-copiar" onclick="copiarCampo(this,' + idx + ')">Copiar</button></div>' +
+                            '<div class="resultado-texto" id="campoTexto_' + idx + '" style="white-space:pre-wrap">' + escapeHtml(campo.texto) + '</div>';
+            container.appendChild(div);
+        });
+        var rc = document.getElementById('resultadoContainer');
+        rc.classList.add('visible');
+        rc.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
     function generarPlanificacion() {
         var user     = _planifUser || {};
         var isTP     = user.tipoProfesor === 'tecnico';
@@ -1458,14 +1512,77 @@
         var horas    = document.getElementById('inputHoras').value;
         var profesor = document.getElementById('inputProfesor').value;
         var contenido = document.getElementById('inputContenido').value;
-        var recurso   = document.getElementById('selectRecurso').value;
 
         if (!curso) { alert('Por favor selecciona el curso/nivel.'); return; }
 
-        // ── Rama profesores básica/media ─────────────────────────────
-        if (!isTP) {
-            return generarPlanificacionRegular(user, curso, fecha, horas, profesor, contenido, recurso);
+        var cursoTexto = (typeof CURRICULA_CHILE !== 'undefined') ? CURRICULA_CHILE.getNivelLabel(curso) : curso;
+        var datosGenerales = 'Establecimiento: Liceo Salesiano de Talca\n' +
+            'Curso: ' + cursoTexto + '\nFecha: ' + (fecha || '—') + '\n' +
+            'Horas pedagogicas: ' + horas + '\nProfesor: ' + profesor;
+
+        // Validacion TP
+        if (isTP) {
+            var modId = document.getElementById('selectModulo') ? document.getElementById('selectModulo').value : '';
+            if (!modId) { alert('Por favor selecciona un modulo.'); return; }
         }
+
+        // Mostrar estado de carga en LIRMI
+        var container = document.getElementById('camposLIRMI');
+        container.innerHTML = '<div style="text-align:center;padding:24px;color:var(--muted)"><div style="font-size:2rem;margin-bottom:8px">&#9696;</div><p>Generando con IA — MBE/DUA...</p></div>';
+        var rc = document.getElementById('resultadoContainer');
+        rc.classList.add('visible');
+        rc.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+        var btnLIRMI = document.querySelector('[onclick="generarPlanificacion()"]');
+        if (btnLIRMI) btnLIRMI.disabled = true;
+
+        var prompt = _construirPromptMBE(user, isTP);
+
+        _cargarConfigIA_plan()
+            .then(function(config) {
+                if (!config || !config.keys || !config.keys.length) {
+                    container.innerHTML = '<p style="color:#ef4444;padding:16px">No hay API Keys configuradas. Contacta al administrador.</p>';
+                    if (btnLIRMI) btnLIRMI.disabled = false;
+                    return;
+                }
+                var apiKey = config.keys[Math.floor(Math.random() * config.keys.length)];
+                var _dep = ['gemini-2.5-flash-preview-04-17','gemini-2.0-flash','gemini-2.0-flash-lite','gemini-1.5-flash'];
+                var _mod = config.modelo || '';
+                if (!_mod || _dep.indexOf(_mod) !== -1) _mod = 'gemini-2.5-flash';
+                var url = 'https://generativelanguage.googleapis.com/v1beta/models/' + _mod + ':generateContent?key=' + apiKey;
+
+                return fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: prompt }] }],
+                        generationConfig: { temperature: 0.72, maxOutputTokens: 8192 }
+                    })
+                })
+                .then(function(res) { return res.json(); })
+                .then(function(data) {
+                    if (btnLIRMI) btnLIRMI.disabled = false;
+                    if (data.error) {
+                        container.innerHTML = '<p style="color:#ef4444;padding:16px">Error API: ' + (data.error.message || '') + '</p>';
+                        return;
+                    }
+                    var candidate = data.candidates && data.candidates[0];
+                    var text = candidate && candidate.content && candidate.content.parts && candidate.content.parts[0] && candidate.content.parts[0].text;
+                    if (!text) {
+                        container.innerHTML = '<p style="color:#ef4444;padding:16px">La IA no devolvio contenido. Intenta de nuevo.</p>';
+                        return;
+                    }
+                    text = text.replace(/\*\*(.*?)\*\*/g, '$1').replace(/^#{1,3}\s+/gm, '').trim();
+                    _mostrarCamposLIRMI(text, datosGenerales);
+                })
+                .catch(function(err) {
+                    if (btnLIRMI) btnLIRMI.disabled = false;
+                    container.innerHTML = '<p style="color:#ef4444;padding:16px">Error de red: ' + err.message + '</p>';
+                });
+            });
+
+        // ── rama legado TP sin IA (fallback si no hay config) ─────────
+        if (false) { // bloque deshabilitado, mantenido como referencia
 
         // ── Rama profesores TP ───────────────────────────────────────
         var modId = document.getElementById('selectModulo').value;
@@ -1649,6 +1766,7 @@
 
         // Scroll al resultado
         resultadoContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        } // end if(false) — legado TP deshabilitado
     }
 
     // =============================================
@@ -2059,46 +2177,48 @@
             '\u267f 6. ESTRATEGIAS DUA\n' +
             '3 acciones concretas con ejemplos especificos para esta clase:\n' +
             '  \ud83d\udcd6 a) REPRESENTACION: Como se presentara la informacion en multiples formatos.\n' +
-            '  \u270d\ufe0f b) EXPRESION: Como demostraran lo aprendido de distintas formas.\n' +
-            '  \u2764\ufe0f c) IMPLICACION: Como se motivara y sostendra el interes de todos.\n\n' +
-
-            'COHERENCIA OBLIGATORIA: El objetivo debe verse reflejado en desarrollo, cierre y evaluacion. Nivel DESTACADO CPEIP. Sin introduccion, directo al punto 1.';
+            '  \u270d\ufe0f b) EXPRESION Y ACCION: Variedad de formas para que los estudiantes demuestren su aprendizaje (oral, escrito, grafico, demostracion practica).\n' +
+            '  \u267b\ufe0f c) MOTIVACION Y COMPROMISO: Estrategias para mantener el interes, la autorregulacion y la participacion activa de todos.\n\n' +
+            'Lenguaje claro, directo y practico. Cada seccion debe ser ESPECIFICA para esta clase, NO generica ni abstracta. Extiendete en cada punto.';
 
         return promptBase;
     }
 
+    // ── generarPlanIAMBE — botón "🤖 Generar con IA — MBE/DUA" ─────────────
     function generarPlanIAMBE() {
         var user  = _planifUser || {};
         var isTP  = user.tipoProfesor === 'tecnico';
         var curso = document.getElementById('selectCurso') ? document.getElementById('selectCurso').value : '';
-        if (!curso) { alert('Por favor selecciona el curso/nivel primero.'); return; }
 
+        if (!curso) { alert('Por favor selecciona el curso/nivel.'); return; }
+        if (isTP) {
+            var modSel = document.getElementById('selectModulo') ? document.getElementById('selectModulo').value : '';
+            if (!modSel) { alert('Por favor selecciona un modulo.'); return; }
+        }
+
+        var btnIA = document.getElementById('btnPlanIA');
         var container = document.getElementById('planIAContainer');
-        var resultEl  = document.getElementById('planIAResult');
-        container.style.display = 'block';
-        resultEl.textContent = '';
-        container.scrollIntoView({ behavior: 'smooth', block: 'start' });
-
-        var btn = document.getElementById('btnPlanIA');
-        if (btn) btn.disabled = true;
-        _setPlanIAStatus('loading', '<span>&#9696;</span> Cargando configuracion IA...');
+        var statusEl  = document.getElementById('planIAStatus');
+        var textEl    = document.getElementById('planIAText');
+        if (btnIA) btnIA.disabled = true;
+        if (container) container.style.display = 'block';
+        _setPlanIAStatus('loading', '&#9696; Generando planificacion MBE/DUA nivel DESTACADO...');
+        if (textEl) textEl.innerHTML = '';
 
         var prompt = _construirPromptMBE(user, isTP);
 
         _cargarConfigIA_plan()
             .then(function(config) {
                 if (!config || !config.keys || !config.keys.length) {
-                    _setPlanIAStatus('error', '&#10007; No hay API Keys configuradas. Contacta al administrador.');
-                    if (btn) btn.disabled = false;
+                    _setPlanIAStatus('error', 'No hay API Keys configuradas. Contacta al administrador.');
+                    if (btnIA) btnIA.disabled = false;
                     return;
                 }
                 var apiKey = config.keys[Math.floor(Math.random() * config.keys.length)];
-                var _deprecados = ['gemini-2.5-flash-preview-04-17','gemini-2.0-flash','gemini-2.0-flash-lite','gemini-1.5-flash'];
+                var _dep = ['gemini-2.5-flash-preview-04-17','gemini-2.0-flash','gemini-2.0-flash-lite','gemini-1.5-flash'];
                 var _mod = config.modelo || '';
-                if (!_mod || _deprecados.indexOf(_mod) !== -1) _mod = 'gemini-2.5-flash';
+                if (!_mod || _dep.indexOf(_mod) !== -1) _mod = 'gemini-2.5-flash';
                 var url = 'https://generativelanguage.googleapis.com/v1beta/models/' + _mod + ':generateContent?key=' + apiKey;
-
-                _setPlanIAStatus('loading', '<span>&#9696;</span> Generando planificacion MBE/DUA con <strong>' + _mod + '</strong>... Esto puede tardar 20-40 segundos.');
 
                 return fetch(url, {
                     method: 'POST',
@@ -2110,70 +2230,75 @@
                 })
                 .then(function(res) { return res.json(); })
                 .then(function(data) {
-                    if (btn) btn.disabled = false;
+                    if (btnIA) btnIA.disabled = false;
                     if (data.error) {
-                        _setPlanIAStatus('error', '&#10007; Error API: ' + (data.error.message || JSON.stringify(data.error)));
+                        _setPlanIAStatus('error', 'Error API: ' + (data.error.message || 'desconocido'));
                         return;
                     }
                     var candidate = data.candidates && data.candidates[0];
                     var text = candidate && candidate.content && candidate.content.parts && candidate.content.parts[0] && candidate.content.parts[0].text;
                     if (!text) {
-                        _setPlanIAStatus('error', '&#10007; La IA no devolvio contenido. Intenta de nuevo.');
+                        _setPlanIAStatus('error', 'La IA no devolvio contenido. Intenta de nuevo.');
                         return;
                     }
-                    // Limpiar markdown residual
-                    text = text.replace(/\*\*(.*?)\*\*/g, '$1').replace(/^#{1,3}\s+/gm, '').replace(/^\*\s+/gm, '- ').trim();
-                    resultEl.textContent = text;
+                    text = text.replace(/\*\*(.*?)\*\*/g, '$1').replace(/^#{1,3}\s+/gm, '').trim();
+                    _setPlanIAStatus('ok', 'Planificacion generada correctamente.');
+                    if (textEl) textEl.innerText = text;
                     window._planIATexto = text;
-                    _setPlanIAStatus('ok', '&#10003; Planificacion generada exitosamente — Nivel Destacado MBE/DUA');
+                    if (container) container.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 })
                 .catch(function(err) {
-                    if (btn) btn.disabled = false;
-                    _setPlanIAStatus('error', '&#10007; Error de red: ' + err.message);
+                    if (btnIA) btnIA.disabled = false;
+                    _setPlanIAStatus('error', 'Error de red: ' + err.message);
                 });
             });
     }
 
     function copiarPlanIA() {
-        var texto = window._planIATexto || document.getElementById('planIAResult').textContent;
-        if (!texto) { alert('No hay planificacion generada aun.'); return; }
+        var texto = window._planIATexto || (document.getElementById('planIAText') ? document.getElementById('planIAText').innerText : '');
+        if (!texto) { alert('No hay planificacion generada todavia.'); return; }
         if (navigator.clipboard && navigator.clipboard.writeText) {
-            navigator.clipboard.writeText(texto).then(function(){ mostrarToast('Planificacion copiada al portapapeles'); });
+            navigator.clipboard.writeText(texto).then(function() {
+                mostrarToast('Planificacion copiada al portapapeles');
+            }).catch(function() {
+                _copiarFallback(texto);
+            });
         } else {
-            var ta = document.createElement('textarea');
-            ta.value = texto; document.body.appendChild(ta); ta.select();
-            document.execCommand('copy'); document.body.removeChild(ta);
-            mostrarToast('Planificacion copiada al portapapeles');
+            _copiarFallback(texto);
         }
     }
 
+    function _copiarFallback(texto) {
+        var ta = document.createElement('textarea');
+        ta.value = texto;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        try { document.execCommand('copy'); mostrarToast('Planificacion copiada'); } catch(e) { alert('No se pudo copiar.'); }
+        document.body.removeChild(ta);
+    }
+
     function guardarPlanIAFirestore() {
-        var texto = window._planIATexto || document.getElementById('planIAResult').textContent;
-        if (!texto) { alert('No hay planificacion generada aun.'); return; }
-        var user   = _planifUser || {};
-        var curso  = document.getElementById('selectCurso') ? document.getElementById('selectCurso').value : '';
-        var fecha  = document.getElementById('inputFecha') ? document.getElementById('inputFecha').value : '';
-        var horas  = document.getElementById('inputHoras') ? document.getElementById('inputHoras').value : '2';
-        var titulo = 'Planif. MBE/DUA — ' + (curso || 'Sin curso') + (fecha ? ' — ' + fecha : '');
-        var entrada = {
-            titulo: titulo, tipo: 'planificacion-ia-mbe', texto: texto,
-            profesor: user.nombre || user.email || '', curso: curso, fecha: fecha, horas: horas,
-            creadoEn: new Date().toISOString(), activo: true, uid: user.uid || ''
+        var texto = window._planIATexto || '';
+        if (!texto) { alert('No hay planificacion generada todavia.'); return; }
+        var user = _planifUser || {};
+        var curso = document.getElementById('selectCurso') ? document.getElementById('selectCurso').value : '';
+        var fecha = document.getElementById('inputFecha') ? document.getElementById('inputFecha').value : new Date().toISOString().slice(0,10);
+        var datos = {
+            tipo: 'mbe_dua',
+            texto: texto,
+            curso: curso,
+            fecha: fecha,
+            profesorUid: user.uid || '',
+            profesorNombre: (document.getElementById('inputProfesor') ? document.getElementById('inputProfesor').value : '') || user.displayName || '',
+            creadoEn: new Date().toISOString()
         };
-        EL_DB.collection('planificaciones').add(entrada)
-            .then(function(){ mostrarToast('Planificacion guardada en Biblioteca'); })
-            .catch(function(e){ alert('Error al guardar: ' + e.message); });
+        EL_DB.collection('planificaciones').add(datos)
+            .then(function() { mostrarToast('Planificacion guardada en Firebase'); })
+            .catch(function(err) { alert('Error al guardar: ' + (err.message || err)); });
     }
 
     </script>
-    <script src="js/recommendations.js"></script>
-</body>
-</html>
-
- rt('Error al guardar: ' + e.message); });
-    }
-
-    </script>
-    <script src="js/recommendations.js"></script>
 </body>
 </html>
