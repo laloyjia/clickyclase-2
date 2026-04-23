@@ -590,6 +590,23 @@
                     <option value="Clase hibrida (teorica + practica)">Clase hibrida (teorica + practica)</option>
                 </select>
             </div>
+
+            <!-- Contexto del curso (opcional) -->
+            <div class="campo">
+                <button type="button" id="btnToggleContexto"
+                    onclick="toggleContextoCurso()"
+                    style="display:inline-flex;align-items:center;gap:8px;padding:9px 18px;border-radius:8px;border:1px dashed var(--border,rgba(255,255,255,.15));background:transparent;color:var(--text-muted,#94a3b8);cursor:pointer;font-size:.88rem;font-weight:600;transition:.2s;"
+                    onmouseover="this.style.borderColor='var(--accent,#6366f1)';this.style.color='var(--accent,#6366f1)'"
+                    onmouseout="this.style.borderColor='var(--border,rgba(255,255,255,.15))';this.style.color='var(--text-muted,#94a3b8)'">
+                    <span id="iconoContexto">&#43;</span> Agregar contexto del curso (opcional)
+                </button>
+                <div id="panelContextoCurso" style="display:none;margin-top:10px;">
+                    <textarea id="inputContextoCurso"
+                        rows="3"
+                        placeholder="Ej: 35 alumnos, 4 con NEE transitorias, estudiantes muy kinestesicos, grupo con bajo manejo lector pero alta participacion oral..."
+                        style="width:100%;resize:vertical;"></textarea>
+                </div>
+            </div>
         </div>
 
         <!-- ========== BOTON GENERAR ========== -->
@@ -1883,6 +1900,19 @@
     // FUNCIONES DE COPIADO
     // =============================================
 
+    function toggleContextoCurso() {
+        var panel  = document.getElementById('panelContextoCurso');
+        var icono  = document.getElementById('iconoContexto');
+        var btn    = document.getElementById('btnToggleContexto');
+        var abierto = panel.style.display !== 'none';
+        panel.style.display = abierto ? 'none' : 'block';
+        icono.innerHTML = abierto ? '&#43;' : '&#8722;';
+        btn.querySelector('span').nextSibling.textContent = abierto
+            ? ' Agregar contexto del curso (opcional)'
+            : ' Ocultar contexto del curso';
+        if (!abierto) document.getElementById('inputContextoCurso').focus();
+    }
+
     function escapeHtml(text) {
         var div = document.createElement('div');
         div.textContent = text;
@@ -2078,6 +2108,12 @@
         var contextoNEE = neeList.length > 0
             ? 'Curso con NEE: ' + neeList.join(', ') + '. Aplicar DUA.'
             : 'Curso regular, aplicar DUA preventivo.';
+
+        // Contexto adicional ingresado manualmente (opcional)
+        var contextoExtra = (document.getElementById('inputContextoCurso') || {}).value || '';
+        if (contextoExtra.trim()) {
+            contextoNEE += ' Informacion adicional del curso: ' + contextoExtra.trim();
+        }
 
         var promptBase =
             'Eres un experto en MBE y DUA del Mineduc Chile. Genera la planificacion de clase nivel DESTACADO.\n' +
