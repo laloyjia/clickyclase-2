@@ -1530,8 +1530,7 @@
         if (!curso) { alert('Por favor selecciona el curso/nivel.'); return; }
 
         var cursoTexto = (typeof CURRICULA_CHILE !== 'undefined') ? CURRICULA_CHILE.getNivelLabel(curso) : curso;
-        var datosGenerales = 'Establecimiento: Liceo Salesiano de Talca\n' +
-            'Curso: ' + cursoTexto + '\nFecha: ' + (fecha || '—') + '\n' +
+        var datosGenerales = 'Curso: ' + cursoTexto + '\nFecha: ' + (fecha || '—') + '\n' +
             'Horas pedagogicas: ' + horas + '\nProfesor: ' + profesor;
 
         // Validacion TP
@@ -1671,7 +1670,7 @@
         // 1. Datos generales
         campos.push({
             titulo: 'Datos Generales',
-            texto: 'Establecimiento: Colegio __\nCurso: ' + cursoTexto + '\nFecha: ' + fecha + '\nHoras pedagogicas: ' + horas + '\nProfesor: ' + profesor + '\nEspecialidad: ' + especialidadNombre + '\nModulo: ' + mod.num + ' - ' + mod.nombre + ' (' + mod.horas + ' horas totales)'
+            texto: 'Curso: ' + cursoTexto + '\nFecha: ' + fecha + '\nHoras pedagogicas: ' + horas + '\nProfesor: ' + profesor + '\nEspecialidad: ' + especialidadNombre + '\nModulo: ' + mod.num + ' - ' + mod.nombre + ' (' + mod.horas + ' horas totales)'
         });
 
         // 2. Objetivo de Aprendizaje
@@ -1821,7 +1820,7 @@
 
         var campos = [];
         campos.push({ titulo: 'Datos Generales',
-            texto: 'Establecimiento: Colegio __\nCurso: ' + cursoTexto + '\nFecha: ' + fecha +
+            texto: 'Curso: ' + cursoTexto + '\nFecha: ' + fecha +
                    '\nHoras pedagogicas: ' + horas + '\nProfesor: ' + profesor +
                    '\nAsignatura: ' + asigNombre + (unidad ? '\nUnidad: ' + unidad : '') });
         campos.push({ titulo: 'Objetivos de Aprendizaje (OA Mineduc)', texto: oaTexto });
@@ -1872,7 +1871,7 @@
         var horasN = parseInt(horas) || 2;
         var minTot = horasN * 45;
         var campos = [
-            { titulo: 'Datos Generales', texto: 'Establecimiento: Colegio __\nCurso: ' + cursoTexto + '\nFecha: ' + fecha + '\nHoras pedagógicas: ' + horas + '\nProfesor: ' + profesor + '\nEspecialidad: ' + espNom + '\nMódulo: ' + modId + ' - ' + modData.nombre },
+            { titulo: 'Datos Generales', texto: 'Curso: ' + cursoTexto + '\nFecha: ' + fecha + '\nHoras pedagógicas: ' + horas + '\nProfesor: ' + profesor + '\nEspecialidad: ' + espNom + '\nMódulo: ' + modId + ' - ' + modData.nombre },
             { titulo: 'Objetivo de Aprendizaje', texto: 'Módulo ' + modId + ': ' + modData.nombre + (modData.horas ? ' (' + modData.horas + 'h)' : '') },
             { titulo: 'Contenido Específico', texto: contenido || 'Por especificar.' },
             { titulo: 'Tipo de Actividad', texto: recurso || 'Por especificar.' },
