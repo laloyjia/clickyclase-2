@@ -5,13 +5,24 @@
 //  Fuente: Bases Curriculares Mineduc (DS 439/2012 Básica, DS 369/2015 7°B–2°M,
 //          DS 193/2019 3°M–4°M FG).
 //
+//  OAs portados desde Programas de Estudio oficiales:
+//    · 1B–4B   : DS 2960/2012 (Bases Curriculares Educación Básica).
+//    · 1M–2M   : Programa de Estudio 2019 (DS 369/2015).
+//    · 3M–4M FG: Programa de Estudio 2021 (DS 193/2019).
+//
+//  Pendiente:
+//    · 5B–8B   : se agregarán cuando se suban los Programas de Estudio
+//                correspondientes (actualmente sin OAs portados).
+//    · Electivo "Artes Visuales, Audiovisuales y Multimediales" (HC 3°–4° medio)
+//                se documentará como asignatura separada, fuera de plan común.
+//
 //  Estructura:
 //    window.CURRICULA_PLAN_COMUN['artes'] = {
-//      nombre, sigla, tramo, niveles,
+//      nombre, sigla, niveles,
 //      oas: { '1B': [ { codigo, eje, descripcion }, ... ], ... },
-//      actitudes: [...],      // específicas de la asignatura (o heredadas de _comun)
-//      habilidades: [...],    // ejes de habilidades de la asignatura
-//      unidades: { '1B': [...] }  // opcional — a completar en Fase B
+//      actitudes: [...],      // específicas de Artes
+//      habilidades: [...],
+//      unidades: { '1B': [...], ... }
 //    }
 // =============================================================================
 
@@ -20,7 +31,7 @@ window.CURRICULA_PLAN_COMUN = window.CURRICULA_PLAN_COMUN || {};
 CURRICULA_PLAN_COMUN['artes'] = {
   nombre: 'Artes Visuales',
   sigla:  'ART',
-  niveles: ['1B','2B','3B','4B','5B','6B','7B','8B','1M','2M'],
+  niveles: ['1B','2B','3B','4B','5B','6B','7B','8B','1M','2M','3M','4M'],
   unidades: {
     '1B': ['Expresión plástica libre','Color y forma','Arte y entorno'],
     '2B': ['Técnicas básicas','Observación artística','Arte chileno básico'],
@@ -30,19 +41,100 @@ CURRICULA_PLAN_COMUN['artes'] = {
     '6B': ['Arte latinoamericano','Diseño básico','Crítica de arte'],
     '7B': ['Arte contemporáneo','Lenguajes artísticos','Proyecto creativo'],
     '8B': ['Arte y sociedad','Portafolio artístico','Arte digital básico'],
-    '1M': ['Lenguaje visual contemporáneo','Arte y patrimonio','Proyecto artístico'],
-    '2M': ['Arte latinoamericano y chileno','Diseño y comunicación visual','Proyecto final']
+    '1M': ['Grabado y libro de artista','Arquitectura','Diseño urbano y pintura mural','Arte digital'],
+    '2M': ['Arte y problemáticas sociales','Escultura y diseño','Video y multimedia','Comunicación y difusión'],
+    '3M': ['Experimentando y decidiendo para crear','Referentes para crear','Desafíos artísticos interdisciplinarios','Compartiendo y difundiendo'],
+    '4M': ['Experimentando y decidiendo para crear','Referentes para crear','Desafíos artísticos interdisciplinarios','Compartiendo y difundiendo']
   },
   // ───────────────────────────────────────────────────────────────────────────
-  //  OAs — schema: { codigo: 'OA1', eje: '...', descripcion: '...' }
-  //  TODO: insertar OAs oficiales al subir Bases (DS 439/2012 + DS 369/2015).
+  //  OAs — schema: { codigo, eje, descripcion }
+  //  Ejes Básica y 1M-2M: "Expresar y crear visualmente", "Apreciar y responder frente al arte",
+  //                        "Difusión y comunicación" (solo 1M-2M).
+  //  Ejes 3M-4M FG:        "Expresar y crear", "Apreciar y responder", "Comunicar y difundir".
   // ───────────────────────────────────────────────────────────────────────────
   oas: {
-    '1B': [ /* TODO */ ], '2B': [ /* TODO */ ], '3B': [ /* TODO */ ], '4B': [ /* TODO */ ],
-    '5B': [ /* TODO */ ], '6B': [ /* TODO */ ], '7B': [ /* TODO */ ], '8B': [ /* TODO */ ],
-    '1M': [ /* TODO */ ], '2M': [ /* TODO */ ]
+    '1B': [
+      {codigo:'OA1', eje:'Expresar y crear visualmente', descripcion:'Expresar y crear trabajos de arte a partir de la observación del entorno natural (paisaje, animales y plantas), entorno cultural (vida cotidiana y familiar) y entorno artístico (obras de arte local, chileno, latinoamericano y del resto del mundo).'},
+      {codigo:'OA2', eje:'Expresar y crear visualmente', descripcion:'Experimentar y aplicar elementos del lenguaje visual en sus trabajos de arte: línea (gruesa, delgada, recta, ondulada e irregular); color (puros, mezclados, fríos y cálidos); textura (visual y táctil).'},
+      {codigo:'OA3', eje:'Expresar y crear visualmente', descripcion:'Expresar emociones e ideas en sus trabajos de arte a partir de la experimentación con: materiales de modelado, de reciclaje, naturales, papeles, cartones, pegamentos, lápices, pinturas, textiles e imágenes digitales; herramientas para dibujar, pintar, cortar, modelar, unir y tecnológicas (pincel, tijera, esteca, computador, entre otras); procedimientos de dibujo, pintura, collage, escultura, dibujo digital y otros.'},
+      {codigo:'OA4', eje:'Apreciar y responder frente al arte', descripcion:'Observar y comunicar oralmente sus primeras impresiones de lo que sienten y piensan de obras de arte por variados medios. (Observar anualmente al menos 10 obras de arte local o chileno, 10 latinoamericanas y 10 de arte universal).'},
+      {codigo:'OA5', eje:'Apreciar y responder frente al arte', descripcion:'Explicar sus preferencias frente al trabajo de arte personal y de sus pares, usando elementos del lenguaje visual.'}
+    ],
+    '2B': [
+      {codigo:'OA1', eje:'Expresar y crear visualmente', descripcion:'Expresar y crear trabajos de arte a partir de la observación del entorno natural (figura humana y paisajes chilenos), entorno cultural (personas y patrimonio cultural de Chile) y entorno artístico (obras de arte local, chileno, latinoamericano y del resto del mundo).'},
+      {codigo:'OA2', eje:'Expresar y crear visualmente', descripcion:'Experimentar y aplicar elementos del lenguaje visual (incluidos los del nivel anterior) en sus trabajos de arte: línea (vertical, horizontal, diagonal, espiral y quebrada); color (primarios y secundarios); formas (geométricas).'},
+      {codigo:'OA3', eje:'Expresar y crear visualmente', descripcion:'Expresar emociones e ideas en sus trabajos de arte a partir de la experimentación con: materiales de modelado, de reciclaje, naturales, papeles, cartones, pegamentos, lápices, pinturas, textiles e imágenes digitales; herramientas para dibujar, pintar, cortar, modelar, unir y tecnológicas (pincel, tijera, mirete, computador, entre otras); procedimientos de dibujo, pintura, collage, escultura, dibujo digital, entre otros.'},
+      {codigo:'OA4', eje:'Apreciar y responder frente al arte', descripcion:'Comunicar y explicar sus impresiones de lo que sienten y piensan de obras de arte por variados medios. (Observar anualmente al menos 10 obras de arte local o chileno, 10 latinoamericanas y 10 de arte universal).'},
+      {codigo:'OA5', eje:'Apreciar y responder frente al arte', descripcion:'Explicar sus preferencias frente al trabajo de arte personal y de sus pares, usando elementos del lenguaje visual.'}
+    ],
+    '3B': [
+      {codigo:'OA1', eje:'Expresar y crear visualmente', descripcion:'Crear trabajos de arte con un propósito expresivo personal y basados en la observación del entorno natural (animales, plantas y fenómenos naturales); entorno cultural (creencias de distintas culturas: mitos, seres imaginarios, dioses, fiestas, tradiciones, otros); entorno artístico (arte de la Antigüedad y movimientos artísticos como fauvismo, expresionismo y art nouveau).'},
+      {codigo:'OA2', eje:'Expresar y crear visualmente', descripcion:'Aplicar elementos del lenguaje visual (incluidos los de niveles anteriores) en sus trabajos de arte, con diversos propósitos expresivos y creativos: color (frío, cálido y expresivo); textura (en plano y volumen); forma (real y recreada).'},
+      {codigo:'OA3', eje:'Expresar y crear visualmente', descripcion:'Crear trabajos de arte a partir de experiencias, intereses y temas del entorno natural y artístico, demostrando manejo de: materiales de modelado, de reciclaje, naturales, papeles, cartones, pegamentos, lápices, pinturas, textiles e imágenes digitales; herramientas para dibujar, pintar, cortar, modelar, unir y tecnológicas (pincel, tijera, mirete, computador, cámara fotográfica, entre otras); procedimientos de dibujo, pintura, grabado, escultura, técnicas mixtas, artesanía, fotografía, entre otros.'},
+      {codigo:'OA4', eje:'Apreciar y responder frente al arte', descripcion:'Describir sus observaciones de obras de arte y objetos, usando elementos del lenguaje visual y expresando lo que sienten y piensan. (Observar anualmente al menos 15 obras de arte y artesanía local y chilena, 15 latinoamericanas y 15 de arte universal).'},
+      {codigo:'OA5', eje:'Apreciar y responder frente al arte', descripcion:'Describir fortalezas y aspectos a mejorar en el trabajo de arte personal y de sus pares, usando criterios de uso de materiales, procedimientos técnicos y propósito expresivo.'}
+    ],
+    '4B': [
+      {codigo:'OA1', eje:'Expresar y crear visualmente', descripcion:'Crear trabajos de arte con un propósito expresivo personal y basados en la observación del entorno natural (naturaleza y paisaje americano); entorno cultural (América y sus tradiciones: cultura precolombina, tradiciones y artesanía americana); entorno artístico (arte precolombino y movimientos artísticos como muralismo mexicano, naif y surrealismo en Chile, Latinoamérica y en el resto del mundo).'},
+      {codigo:'OA2', eje:'Expresar y crear visualmente', descripcion:'Aplicar elementos del lenguaje visual (incluidos los de niveles anteriores) en sus trabajos de arte, con diversos propósitos expresivos y creativos: líneas de contorno; color (tono y matiz); forma (figurativa y no figurativa).'},
+      {codigo:'OA3', eje:'Expresar y crear visualmente', descripcion:'Crear trabajos de arte a partir de experiencias, intereses y temas del entorno natural y artístico, demostrando manejo de: materiales de modelado, de reciclaje, naturales, papeles, cartones, pegamentos, lápices, pinturas, textiles e imágenes digitales; herramientas para dibujar, pintar, cortar, unir, modelar y tecnológicas (pincel, tijera, mirete, computador, cámara fotográfica, entre otras); procedimientos de dibujo, pintura, grabado, escultura, técnicas mixtas, artesanía, fotografía, entre otros.'},
+      {codigo:'OA4', eje:'Apreciar y responder frente al arte', descripcion:'Describir sus observaciones de obras de arte y objetos, usando elementos del lenguaje visual y expresando lo que sienten y piensan. (Observar anualmente al menos 15 obras de arte y artesanía local y chilena, 15 de arte latinoamericano y 15 de arte universal).'},
+      {codigo:'OA5', eje:'Apreciar y responder frente al arte', descripcion:'Describir fortalezas y aspectos a mejorar en el trabajo de arte personal y de sus pares, aplicando criterios de uso de materiales, procedimientos técnicos y propósito expresivo.'}
+    ],
+    '5B': [ /* TODO: subir Programa de Estudio AV 5° básico */ ],
+    '6B': [ /* TODO: subir Programa de Estudio AV 6° básico */ ],
+    '7B': [ /* TODO: subir Programa de Estudio AV 7° básico */ ],
+    '8B': [ /* TODO: subir Programa de Estudio AV 8° básico */ ],
+    '1M': [
+      {codigo:'OA1', eje:'Expresar y crear visualmente', descripcion:'Crear proyectos visuales con diversos propósitos, basados en la apreciación y reflexión acerca de la arquitectura, los espacios y el diseño urbano, en diferentes medios y contextos.'},
+      {codigo:'OA2', eje:'Expresar y crear visualmente', descripcion:'Crear trabajos y proyectos visuales basados en sus imaginarios personales, investigando el manejo de materiales sustentables en procedimientos de grabado y pintura mural.'},
+      {codigo:'OA3', eje:'Expresar y crear visualmente', descripcion:'Crear proyectos visuales basados en imaginarios personales, investigando en medios contemporáneos como libros de artista y arte digital.'},
+      {codigo:'OA4', eje:'Apreciar y responder frente al arte', descripcion:'Realizar juicios críticos de manifestaciones visuales considerando las condiciones contextuales de su creador y utilizando criterios estéticos pertinentes.'},
+      {codigo:'OA5', eje:'Apreciar y responder frente al arte', descripcion:'Realizar juicios críticos de trabajos y proyectos visuales personales y de sus pares, fundamentados en criterios referidos al contexto, la materialidad, el lenguaje visual y el propósito expresivo.'},
+      {codigo:'OA6', eje:'Difusión y comunicación', descripcion:'Diseñar propuestas de difusión hacia la comunidad de trabajos y proyectos de arte, en el contexto escolar y local, de forma directa o virtual, teniendo presente las manifestaciones visuales a exponer, el espacio, el montaje, el público y el aporte a la comunidad, entre otros.'}
+    ],
+    '2M': [
+      {codigo:'OA1', eje:'Expresar y crear visualmente', descripcion:'Crear proyectos visuales basados en la valoración crítica de manifestaciones estéticas referidas a problemáticas sociales y juveniles, en el espacio público y en diferentes contextos.'},
+      {codigo:'OA2', eje:'Expresar y crear visualmente', descripcion:'Crear trabajos y proyectos visuales basados en diferentes desafíos creativos, investigando el manejo de materiales sustentables en procedimientos de escultura y diseño.'},
+      {codigo:'OA3', eje:'Expresar y crear visualmente', descripcion:'Crear proyectos visuales basados en diferentes desafíos creativos, utilizando medios contemporáneos como video y multimedia.'},
+      {codigo:'OA4', eje:'Apreciar y responder frente al arte', descripcion:'Argumentar juicios críticos referidos a la valoración de diversas manifestaciones visuales, configurando una selección personal de criterios estéticos.'},
+      {codigo:'OA5', eje:'Apreciar y responder frente al arte', descripcion:'Argumentar evaluaciones y juicios críticos, valorando el trabajo visual personal y de sus pares, y seleccionando criterios de análisis según el tipo de trabajo o proyecto visual apreciado.'},
+      {codigo:'OA6', eje:'Difusión y comunicación', descripcion:'Implementar propuestas de difusión hacia la comunidad de trabajos y proyectos de arte, en el contexto escolar o local, de forma directa o virtual, contemplando las manifestaciones visuales a exponer, el espacio, el montaje, el público y el aporte a la comunidad, entre otros.'}
+    ],
+    // 3°M y 4°M — Formación General, Programa de Estudio 2021 (DS 193/2019).
+    // Los mismos 7 OA se desarrollan en ambos niveles, con distinta profundidad y énfasis.
+    '3M': [
+      {codigo:'OA1', eje:'Expresar y crear', descripcion:'Experimentar con diversidad de soportes, procedimientos y materiales utilizados en la ilustración, las artes audiovisuales y multimediales.'},
+      {codigo:'OA2', eje:'Expresar y crear', descripcion:'Crear obras y proyectos de ilustración, audiovisuales y multimediales, para expresar sensaciones, emociones e ideas, tomando riesgos creativos al seleccionar temas, materiales, soportes y procedimientos.'},
+      {codigo:'OA3', eje:'Expresar y crear', descripcion:'Crear obras y proyectos de ilustración, audiovisuales o multimediales a partir de la apreciación de distintos referentes artísticos y culturales.'},
+      {codigo:'OA4', eje:'Apreciar y responder', descripcion:'Analizar e interpretar propósitos expresivos de obras visuales, audiovisuales y multimediales contemporáneas, a partir de criterios estéticos (lenguaje visual, materiales, procedimientos, emociones, sensaciones e ideas que genera, entre otros), utilizando conceptos disciplinarios.'},
+      {codigo:'OA5', eje:'Apreciar y responder', descripcion:'Argumentar juicios estéticos acerca de obras visuales, audiovisuales y multimediales contemporáneas, considerando propósitos expresivos, criterios estéticos, elementos simbólicos y aspectos contextuales.'},
+      {codigo:'OA6', eje:'Apreciar y responder', descripcion:'Evaluar críticamente procesos y resultados de obras y proyectos visuales, audiovisuales y multimediales personales y de sus pares, considerando criterios estéticos y propósitos expresivos, y dando cuenta de una postura personal fundada y respetuosa.'},
+      {codigo:'OA7', eje:'Comunicar y difundir', descripcion:'Diseñar y gestionar colaborativamente proyectos de difusión de obras visuales, audiovisuales y multimediales propios, empleando diversidad de medios o TIC.'}
+    ],
+    '4M': [
+      {codigo:'OA1', eje:'Expresar y crear', descripcion:'Experimentar con diversidad de soportes, procedimientos y materiales utilizados en la ilustración, las artes audiovisuales y multimediales.'},
+      {codigo:'OA2', eje:'Expresar y crear', descripcion:'Crear obras y proyectos de ilustración, audiovisuales y multimediales, para expresar sensaciones, emociones e ideas, tomando riesgos creativos al seleccionar temas, materiales, soportes y procedimientos.'},
+      {codigo:'OA3', eje:'Expresar y crear', descripcion:'Crear obras y proyectos de ilustración, audiovisuales o multimediales a partir de la apreciación de distintos referentes artísticos y culturales.'},
+      {codigo:'OA4', eje:'Apreciar y responder', descripcion:'Analizar e interpretar propósitos expresivos de obras visuales, audiovisuales y multimediales contemporáneas, a partir de criterios estéticos (lenguaje visual, materiales, procedimientos, emociones, sensaciones e ideas que genera, entre otros), utilizando conceptos disciplinarios.'},
+      {codigo:'OA5', eje:'Apreciar y responder', descripcion:'Argumentar juicios estéticos acerca de obras visuales, audiovisuales y multimediales contemporáneas, considerando propósitos expresivos, criterios estéticos, elementos simbólicos y aspectos contextuales.'},
+      {codigo:'OA6', eje:'Apreciar y responder', descripcion:'Evaluar críticamente procesos y resultados de obras y proyectos visuales, audiovisuales y multimediales personales y de sus pares, considerando criterios estéticos y propósitos expresivos, y dando cuenta de una postura personal fundada y respetuosa.'},
+      {codigo:'OA7', eje:'Comunicar y difundir', descripcion:'Diseñar y gestionar colaborativamente proyectos de difusión de obras visuales, audiovisuales y multimediales propios, empleando diversidad de medios o TIC.'}
+    ]
   },
-  actitudes:   [],  // hereda de _comun
-  habilidades: ['Expresar y crear visualmente','Apreciar y responder frente al arte']
+  // Actitudes — Básica (1B-8B, DS 2960/2012) y Media (1M-2M) comparten gran parte;
+  // 3M-4M FG usa las actitudes del marco "Habilidades para el Siglo XXI".
+  actitudes: [
+    'Disfrutar de múltiples expresiones artísticas.',
+    'Demostrar disposición a expresar artísticamente las propias ideas y sentimientos.',
+    'Valorar y cuidar el patrimonio artístico de su comunidad, región, país y de la humanidad.',
+    'Demostrar disposición a desarrollar su creatividad, experimentando, imaginando y pensando divergentemente.',
+    'Demostrar disposición a trabajar en equipo, colaborar con otros y aceptar consejos y críticas.',
+    'Respetar y valorar el trabajo riguroso y el esfuerzo propio y de otros.',
+    'Respetar el trabajo artístico de otros, valorando la originalidad.',
+    'Aportar a la sustentabilidad del medioambiente utilizando o reciclando de manera responsable materiales en sus trabajos y proyectos visuales.',
+    'Compartir trabajos y proyectos visuales con su comunidad o en otros círculos.',
+    'Buscar, evaluar y usar información disponible en diversos medios y fuentes.'
+  ],
+  habilidades: ['Expresar y crear visualmente','Apreciar y responder frente al arte','Difusión y comunicación']
 };
-
