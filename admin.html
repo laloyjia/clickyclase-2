@@ -843,13 +843,13 @@ function buildStep3(){
   '</div>';
   if(t==='basica'){
     html+='<h3 style="margin-bottom:12px">📚 Asignaturas — Educación Básica</h3><div class="multi-select-box" id="asigBox">';
-    CURRICULA_CHILE.basica.asignaturas.forEach(function(a){html+='<label><input type="checkbox" value="'+a.nombre+'" onchange="tgAsig(this)"><span class="cdot" style="background:'+a.color+'"></span>'+a.nombre+'</label>';});
+    CURRICULA_CHILE.getAsignaturas('basica').forEach(function(a){html+='<label><input type="checkbox" value="'+a.nombre+'" onchange="tgAsig(this)"><span class="cdot" style="background:'+(a.color||'#888')+'"></span>'+a.nombre+'</label>';});
     html+='</div><h3 style="margin:16px 0 12px">Niveles asignados</h3><div class="multi-select-box" id="nivBox">';
     ['1B','2B','3B','4B','5B','6B','7B','8B'].forEach(function(n){html+='<label><input type="checkbox" value="'+n+'" onchange="tgNiv(this)">'+n+'</label>';});
     html+='</div>'+permHtml;
   }else if(t==='media'){
     html+='<h3 style="margin-bottom:12px">🎓 Asignaturas — Plan Común</h3><div class="multi-select-box" id="asigBox">';
-    CURRICULA_CHILE.planComun.asignaturas.forEach(function(a){html+='<label><input type="checkbox" value="'+a.nombre+'" onchange="tgAsig(this)"><span class="cdot" style="background:'+a.color+'"></span>'+a.nombre+'</label>';});
+    CURRICULA_CHILE.getAsignaturas('media').forEach(function(a){html+='<label><input type="checkbox" value="'+a.nombre+'" onchange="tgAsig(this)"><span class="cdot" style="background:'+(a.color||'#888')+'"></span>'+a.nombre+'</label>';});
     html+='</div><h3 style="margin:16px 0 12px">Niveles asignados</h3><div class="multi-select-box" id="nivBox">';
     ['1M','2M','3M','4M'].forEach(function(n){html+='<label><input type="checkbox" value="'+n+'" onchange="tgNiv(this)">'+n+' Medio</label>';});
     html+='</div>'+permHtml;
@@ -976,18 +976,18 @@ function loadRModulos(){
 
 function renderComunGrid(){
   var grid=document.getElementById('rComunGrid');
-  var asigs=CURRICULA_CHILE.planComun.asignaturas;
+  var asigs=CURRICULA_CHILE.getAsignaturas('media');
   grid.innerHTML=asigs.map(function(a){
     return '<div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden">'+
       '<div style="background:rgba(99,102,241,.12);padding:16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px">'+
-        '<div style="width:12px;height:12px;border-radius:50%;background:'+a.color+';flex-shrink:0"></div>'+
+        '<div style="width:12px;height:12px;border-radius:50%;background:'+(a.color||'#888')+';flex-shrink:0"></div>'+
         '<div><div style="font-size:.9rem;font-weight:700">'+a.nombre+'</div>'+
         '<div style="font-size:.72rem;color:var(--muted)">' + a.sigla + ' · Niveles: '+a.niveles.join(', ')+'</div></div>'+
       '</div>'+
       '<div style="padding:14px">'+
         '<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:10px">'+
         a.niveles.map(function(n){
-          var us=a.unidades&&a.unidades[n]?a.unidades[n]:[];
+          var us=CURRICULA_CHILE.getUnidades(a.sigla,n)||[];
           return '<span style="font-size:.72rem;padding:3px 8px;background:rgba(99,102,241,.1);border:1px solid rgba(99,102,241,.2);border-radius:6px;color:#818cf8">'+n+' ('+us.length+' U)</span>';
         }).join('')+
         '</div>'+
@@ -999,11 +999,11 @@ function renderComunGrid(){
 
 function renderBasicaGrid(){
   var grid=document.getElementById('rBasicaGrid');
-  var asigs=CURRICULA_CHILE.basica.asignaturas;
+  var asigs=CURRICULA_CHILE.getAsignaturas('basica');
   grid.innerHTML=asigs.map(function(a){
     return '<div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden">'+
       '<div style="background:rgba(16,185,129,.08);padding:16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px">'+
-        '<div style="width:12px;height:12px;border-radius:50%;background:'+a.color+';flex-shrink:0"></div>'+
+        '<div style="width:12px;height:12px;border-radius:50%;background:'+(a.color||'#888')+';flex-shrink:0"></div>'+
         '<div><div style="font-size:.9rem;font-weight:700">'+a.nombre+'</div>'+
         '<div style="font-size:.72rem;color:var(--muted)">'+a.sigla+' · 1° a 8° Básico</div></div>'+
       '</div>'+
@@ -1099,9 +1099,9 @@ function ppBuildAsig() {
   if (_ppData.tipo === 'basica') {
     html += '<h4 style="margin-bottom:8px;font-size:.85rem;color:var(--muted)">📚 Asignaturas — Educación Básica</h4>';
     html += '<div class="multi-select-box" id="ppAsigBox">';
-    CURRICULA_CHILE.basica.asignaturas.forEach(function(a) {
+    CURRICULA_CHILE.getAsignaturas('basica').forEach(function(a) {
       var chk = _ppData.asignaturas.indexOf(a.nombre) !== -1 ? 'checked' : '';
-      html += '<label><input type="checkbox" value="'+a.nombre+'" onchange="ppTgAsig(this)" '+chk+'><span class="cdot" style="background:'+a.color+'"></span>'+a.nombre+'</label>';
+      html += '<label><input type="checkbox" value="'+a.nombre+'" onchange="ppTgAsig(this)" '+chk+'><span class="cdot" style="background:'+(a.color||'#888')+'"></span>'+a.nombre+'</label>';
     });
     html += '</div>';
     html += '<h4 style="margin:14px 0 8px;font-size:.85rem;color:var(--muted)">Niveles asignados</h4>';
@@ -1114,9 +1114,9 @@ function ppBuildAsig() {
   } else if (_ppData.tipo === 'media') {
     html += '<h4 style="margin-bottom:8px;font-size:.85rem;color:var(--muted)">🎓 Asignaturas — Plan Común</h4>';
     html += '<div class="multi-select-box" id="ppAsigBox">';
-    CURRICULA_CHILE.planComun.asignaturas.forEach(function(a) {
+    CURRICULA_CHILE.getAsignaturas('media').forEach(function(a) {
       var chk = _ppData.asignaturas.indexOf(a.nombre) !== -1 ? 'checked' : '';
-      html += '<label><input type="checkbox" value="'+a.nombre+'" onchange="ppTgAsig(this)" '+chk+'><span class="cdot" style="background:'+a.color+'"></span>'+a.nombre+'</label>';
+      html += '<label><input type="checkbox" value="'+a.nombre+'" onchange="ppTgAsig(this)" '+chk+'><span class="cdot" style="background:'+(a.color||'#888')+'"></span>'+a.nombre+'</label>';
     });
     html += '</div>';
     html += '<h4 style="margin:14px 0 8px;font-size:.85rem;color:var(--muted)">Niveles</h4>';

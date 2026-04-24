@@ -1115,19 +1115,26 @@ var CURRICULA_CHILE = (function() {
     // getUnidades(asigSigla, nivel) → array de unidades (strings u objetos)
     // El plan común nuevo es la fuente autoritativa. Si no tiene datos para
     // ese nivel, cae al legacy (basica/planComun.asignaturas).
+    // Acepta tanto sigla canónica plan-común (HIS, EDF, ART) como alias legacy
+    // (HCS, EF, AV) gracias al match por clave canónica.
     getUnidades: function(asigSigla, nivel) {
       if (!asigSigla || !nivel) return [];
+      var self = this;
+      var askedKey = self._siglaToPlanComunKey(asigSigla);
       // 1) Fuente autoritativa: plan común nuevo
       if (typeof window !== 'undefined' && window.CURRICULA_PLAN_COMUN) {
-        var key = this._siglaToPlanComunKey(asigSigla);
-        var PC  = window.CURRICULA_PLAN_COMUN;
-        if (PC[key] && PC[key].unidades && PC[key].unidades[nivel] && PC[key].unidades[nivel].length) {
-          return PC[key].unidades[nivel];
+        var PC = window.CURRICULA_PLAN_COMUN;
+        if (PC[askedKey] && PC[askedKey].unidades && PC[askedKey].unidades[nivel] && PC[askedKey].unidades[nivel].length) {
+          return PC[askedKey].unidades[nivel];
         }
       }
-      // 2) Fallback legacy (basica/planComun en este mismo archivo)
+      // 2) Fallback legacy (basica/planComun en este mismo archivo) — match
+      //    por sigla exacta o por clave canónica (así HIS encuentra HCS, etc.)
       var arr = nivel.endsWith('B') ? basica.asignaturas : planComun.asignaturas;
-      var asig = arr.find ? arr.find(function(a){ return a.sigla === asigSigla; }) : null;
+      var asig = arr.find ? arr.find(function(a){
+        if (a.sigla === asigSigla) return true;
+        return askedKey && self._siglaToPlanComunKey(a.sigla) === askedKey;
+      }) : null;
       if (asig && asig.unidades && asig.unidades[nivel] && asig.unidades[nivel].length) {
         return asig.unidades[nivel];
       }
