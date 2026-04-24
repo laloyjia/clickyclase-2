@@ -1052,8 +1052,50 @@ var CURRICULA_CHILE = (function() {
     getOAs: function(asigSigla, nivel) {
       var arr = nivel.endsWith('B') ? basica.asignaturas : planComun.asignaturas;
       var asig = arr.find ? arr.find(function(a){ return a.sigla === asigSigla; }) : null;
-      if (!asig) return [];
-      return (asig.oas && asig.oas[nivel]) || [];
+      var oas = (asig && asig.oas && asig.oas[nivel]) || [];
+      if (oas.length) {
+        // Normalizar formato: algunos registros usan {desc}, otros {descripcion}
+        return oas.map(function(o){
+          return {
+            codigo: o.codigo,
+            descripcion: o.descripcion || o.desc || '',
+            desc: o.desc || o.descripcion || '',
+            eje: o.eje || 'General'
+          };
+        });
+      }
+      // Fallback: consultar CURRICULA_PLAN_COMUN por sigla o alias de nombre
+      if (typeof window !== 'undefined' && window.CURRICULA_PLAN_COMUN) {
+        var PC = window.CURRICULA_PLAN_COMUN;
+        // Mapeo de siglas legacy → keys del plan común
+        var SIGLA_TO_KEY = {
+          'LEN': 'lenguaje',
+          'MAT': 'matematica',
+          'HCS': 'historia', 'HIS': 'historia',
+          'CN':  'ciencias',
+          'BIO': 'biologia',
+          'FIS': 'fisica',
+          'QUI': 'quimica',
+          'ING': 'ingles',
+          'EF':  'ed-fisica', 'EDF': 'ed-fisica',
+          'ART': 'artes',
+          'MUS': 'musica',
+          'TEC': 'tecnologia',
+          'ORI': 'orientacion'
+        };
+        var key = SIGLA_TO_KEY[asigSigla] || (asigSigla || '').toLowerCase();
+        if (PC[key] && PC[key].oas && PC[key].oas[nivel]) {
+          return PC[key].oas[nivel].map(function(o){
+            return {
+              codigo: o.codigo,
+              descripcion: o.descripcion || o.desc || '',
+              desc: o.desc || o.descripcion || '',
+              eje: o.eje || 'General'
+            };
+          });
+        }
+      }
+      return [];
     },
 
     getModulos: function(sectorKey) {
