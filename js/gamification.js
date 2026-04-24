@@ -1,6 +1,6 @@
 /* ============================================
    ElectroLearn — Gamificacion v1.0
-   Salesianos Talca · Especialidad Electronica
+   Especialidad Electronica
    ============================================ */
 
 // ================================================

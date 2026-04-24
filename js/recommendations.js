@@ -1,6 +1,6 @@
 /* ============================================================
    ElectroLearn — Motor de Recomendaciones Curriculares v1.0
-   Salesianos Talca · Especialidad Electrónica
+   Especialidad Electrónica
    ============================================================
    Uso:
      renderRecomendaciones('EN1', '3', 'OA1')
