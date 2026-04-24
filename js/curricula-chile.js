@@ -1050,11 +1050,31 @@ var CURRICULA_CHILE = (function() {
     },
 
     getOAs: function(asigSigla, nivel) {
+      // Plan común es la fuente autoritativa. Si no tiene OAs para ese nivel
+      // (oas[nivel] ausente o array vacío), caemos al legacy básica/planComun.
+      if (typeof window !== 'undefined' && window.CURRICULA_PLAN_COMUN) {
+        var PC  = window.CURRICULA_PLAN_COMUN;
+        var key = (this._siglaToPlanComunKey
+                    ? this._siglaToPlanComunKey(asigSigla)
+                    : (asigSigla || '').toLowerCase());
+        if (PC[key] && PC[key].oas && Array.isArray(PC[key].oas[nivel]) && PC[key].oas[nivel].length) {
+          return PC[key].oas[nivel].map(function(o){
+            var out = {
+              codigo: o.codigo,
+              descripcion: o.descripcion || o.desc || '',
+              desc: o.desc || o.descripcion || '',
+              eje: o.eje || 'General'
+            };
+            if (o.provisional) out.provisional = true;
+            return out;
+          });
+        }
+      }
+      // Fallback legacy
       var arr = nivel.endsWith('B') ? basica.asignaturas : planComun.asignaturas;
       var asig = arr.find ? arr.find(function(a){ return a.sigla === asigSigla; }) : null;
       var oas = (asig && asig.oas && asig.oas[nivel]) || [];
       if (oas.length) {
-        // Normalizar formato: algunos registros usan {desc}, otros {descripcion}
         return oas.map(function(o){
           return {
             codigo: o.codigo,
@@ -1064,38 +1084,149 @@ var CURRICULA_CHILE = (function() {
           };
         });
       }
-      // Fallback: consultar CURRICULA_PLAN_COMUN por sigla o alias de nombre
+      return [];
+    },
+
+    // ── Helpers del Plan Común (delegación a CURRICULA_PLAN_COMUN) ──
+    // Mapeo de siglas legacy → keys del plan común (reutilizado por varios helpers)
+    _siglaToPlanComunKey: function(sigla) {
+      var map = {
+        'LEN': 'lenguaje',
+        'MAT': 'matematica',
+        'HCS': 'historia', 'HIS': 'historia',
+        'CN':  'ciencias',
+        'BIO': 'biologia',
+        'FIS': 'fisica',
+        'QUI': 'quimica',
+        'ING': 'ingles',
+        'EF':  'ed-fisica', 'EDF': 'ed-fisica',
+        'ART': 'artes', 'AV': 'artes',
+        'MUS': 'musica',
+        'TEC': 'tecnologia',
+        'ORI': 'orientacion',
+        'CLA': 'chile-latam',
+        'MUG': 'mundo-global',
+        'FIL': 'filosofia',
+        'EC':  'ed-ciudadana'
+      };
+      return map[sigla] || (sigla || '').toLowerCase();
+    },
+
+    // getUnidades(asigSigla, nivel) → array de unidades (strings u objetos)
+    // El plan común nuevo es la fuente autoritativa. Si no tiene datos para
+    // ese nivel, cae al legacy (basica/planComun.asignaturas).
+    getUnidades: function(asigSigla, nivel) {
+      if (!asigSigla || !nivel) return [];
+      // 1) Fuente autoritativa: plan común nuevo
       if (typeof window !== 'undefined' && window.CURRICULA_PLAN_COMUN) {
-        var PC = window.CURRICULA_PLAN_COMUN;
-        // Mapeo de siglas legacy → keys del plan común
-        var SIGLA_TO_KEY = {
-          'LEN': 'lenguaje',
-          'MAT': 'matematica',
-          'HCS': 'historia', 'HIS': 'historia',
-          'CN':  'ciencias',
-          'BIO': 'biologia',
-          'FIS': 'fisica',
-          'QUI': 'quimica',
-          'ING': 'ingles',
-          'EF':  'ed-fisica', 'EDF': 'ed-fisica',
-          'ART': 'artes',
-          'MUS': 'musica',
-          'TEC': 'tecnologia',
-          'ORI': 'orientacion'
-        };
-        var key = SIGLA_TO_KEY[asigSigla] || (asigSigla || '').toLowerCase();
-        if (PC[key] && PC[key].oas && PC[key].oas[nivel]) {
-          return PC[key].oas[nivel].map(function(o){
-            return {
-              codigo: o.codigo,
-              descripcion: o.descripcion || o.desc || '',
-              desc: o.desc || o.descripcion || '',
-              eje: o.eje || 'General'
-            };
-          });
+        var key = this._siglaToPlanComunKey(asigSigla);
+        var PC  = window.CURRICULA_PLAN_COMUN;
+        if (PC[key] && PC[key].unidades && PC[key].unidades[nivel] && PC[key].unidades[nivel].length) {
+          return PC[key].unidades[nivel];
         }
       }
+      // 2) Fallback legacy (basica/planComun en este mismo archivo)
+      var arr = nivel.endsWith('B') ? basica.asignaturas : planComun.asignaturas;
+      var asig = arr.find ? arr.find(function(a){ return a.sigla === asigSigla; }) : null;
+      if (asig && asig.unidades && asig.unidades[nivel] && asig.unidades[nivel].length) {
+        return asig.unidades[nivel];
+      }
       return [];
+    },
+
+    // getActitudes(asigSigla, nivelOtramo) — delega en getPlanComunActitudes si existe
+    getActitudes: function(asigSigla, nivelOtramo) {
+      if (typeof window !== 'undefined' && typeof window.getPlanComunActitudes === 'function') {
+        var key = this._siglaToPlanComunKey(asigSigla);
+        return window.getPlanComunActitudes(key, nivelOtramo) || [];
+      }
+      return [];
+    },
+
+    // getHabilidades(asigSigla, nivelOtramo) — delega en getPlanComunHabilidades si existe
+    getHabilidades: function(asigSigla, nivelOtramo) {
+      if (typeof window !== 'undefined' && typeof window.getPlanComunHabilidades === 'function') {
+        var key = this._siglaToPlanComunKey(asigSigla);
+        return window.getPlanComunHabilidades(key, nivelOtramo) || [];
+      }
+      return [];
+    },
+
+    // getOAT(tramoONivel) → objetivos de aprendizaje transversales (dimensiones)
+    getOAT: function(tramoONivel) {
+      if (typeof window !== 'undefined' && typeof window.getPlanComunOAT === 'function') {
+        return window.getPlanComunOAT(tramoONivel) || [];
+      }
+      return [];
+    },
+
+    // getAsignaturas(tramo) → lista unificada de asignaturas para 'basica' o 'media'.
+    // Fuente:
+    //   1) Plan común (autoritativo) — incluye asignaturas FG que sólo viven ahí
+    //      (p.ej. Filosofía, Educación Ciudadana en 3°-4° medio).
+    //   2) Legacy (basica.asignaturas / planComun.asignaturas) como respaldo y
+    //      para enriquecer color/nombre cuando el plan común no los trae.
+    // Dedup por clave plan-común canónica (vía _siglaToPlanComunKey) para que
+    // siglas divergentes (HCS↔HIS, EF↔EDF, AV↔ART) colapsen en una sola entrada.
+    // Retorna [{ key, nombre, sigla, color, niveles }].
+    getAsignaturas: function(tramo) {
+      if (tramo !== 'basica' && tramo !== 'media') return [];
+      var self = this;
+      var seen = {};       // key canónica → índice en out
+      var out  = [];
+      var nivelRe = tramo === 'basica' ? /B$/ : /M$/;
+
+      function canonKey(sigla) {
+        return self._siglaToPlanComunKey
+          ? self._siglaToPlanComunKey(sigla)
+          : (sigla || '').toLowerCase();
+      }
+
+      // 1) Plan común primero (autoritativo)
+      if (typeof window !== 'undefined' && window.CURRICULA_PLAN_COMUN) {
+        var PC = window.CURRICULA_PLAN_COMUN;
+        Object.keys(PC).forEach(function(key) {
+          if (key === '_comun') return;
+          var a = PC[key];
+          if (!a || !a.sigla || !Array.isArray(a.niveles)) return;
+          var niv = a.niveles.filter(function(n) { return nivelRe.test(n); });
+          if (!niv.length) return;
+          if (seen[key] !== undefined) return;
+          seen[key] = out.length;
+          out.push({
+            key:     key,
+            nombre:  a.nombre,
+            sigla:   a.sigla,
+            color:   a.color || null,
+            niveles: niv
+          });
+        });
+      }
+
+      // 2) Fallback legacy — añade asignaturas faltantes y enriquece color/niveles
+      var legacyArr = (tramo === 'basica' ? basica.asignaturas : planComun.asignaturas) || [];
+      legacyArr.forEach(function(a) {
+        if (!a || !a.sigla) return;
+        var key = canonKey(a.sigla);
+        var niv = (a.niveles || []).filter(function(n) { return nivelRe.test(n); });
+        if (seen[key] !== undefined) {
+          // Ya está: enriquecer color desde legacy si plan común no lo trajo
+          var existing = out[seen[key]];
+          if (existing && !existing.color && a.color) existing.color = a.color;
+          return;
+        }
+        if (!niv.length) return;
+        seen[key] = out.length;
+        out.push({
+          key:     key,
+          nombre:  a.nombre,
+          sigla:   a.sigla,
+          color:   a.color || null,
+          niveles: niv
+        });
+      });
+
+      return out;
     },
 
     getModulos: function(sectorKey) {

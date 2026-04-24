@@ -20,7 +20,25 @@ window.CURRICULA_PLAN_COMUN = window.CURRICULA_PLAN_COMUN || {};
 CURRICULA_PLAN_COMUN['ingles'] = {
   nombre: 'Inglés',
   sigla:  'ING',
+  // Inglés como asignatura obligatoria es 5B-4M según DS 439/2012 + DS 369/2015.
+  // Se conservan 1B-4B para planificación del Plan Salesiano que parte desde 1B.
   niveles: ['1B','2B','3B','4B','5B','6B','7B','8B','1M','2M','3M','4M'],
+  unidades: {
+    '1B': ['Listening: greetings','Speaking: simple words','Vocabulary: family & colors'],
+    '2B': ['Listening: classroom','Speaking: short phrases','Vocabulary: animals & numbers'],
+    '3B': ['Listening: daily life','Speaking: simple Q&A','Vocabulary: food & school'],
+    '4B': ['Listening: stories','Speaking: simple dialogues','Vocabulary: body & clothes'],
+    '5B': ['Hello!: Greetings','My Family and Friends','My Daily Routine'],
+    '6B': ['My World','Food and Health','Free Time Activities'],
+    '7B': ['My Community','Travel and Adventure','Technology in my Life'],
+    '8B': ['Changes in our World','Global Issues','Future Perspectives'],
+    '1M': ['Identity and Belonging','Community and Society','Science and Innovation'],
+    '2M': ['Arts and Expression','Environment and Sustainability','Work and Career'],
+    '3M': ['Global Challenges','Culture and Diversity','Technology and Future'],
+    '4M': ['Independent Reading','Academic Writing','Communication and Media']
+  },
+  actitudes:   [],  // hereda de _comun
+  habilidades: ['Comprensión auditiva','Comprensión lectora','Expresión oral','Expresión escrita'],
   oas: {
     '5B': [
       { codigo: 'OA1',  eje: 'Comprensión auditiva', descripcion: 'Escuchar y demostrar comprensión de información explícita de textos orales adaptados y auténticos simples, literarios y no literarios, tales como descripciones, diálogos y exposiciones, con una duración de al menos un minuto, al identificar propósito, personajes, información específica y vocabulario temático.' },
