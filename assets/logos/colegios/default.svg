@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" role="img" aria-label="Logo institucional">
+  <defs>
+    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e3a8a"/>
+      <stop offset="100%" stop-color="#3b82f6"/>
+    </linearGradient>
+  </defs>
+  <rect width="200" height="200" rx="24" fill="url(#g)"/>
+  <text x="100" y="118" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif"
+        font-size="92" font-weight="700" fill="#ffffff" letter-spacing="-2">EL</text>
+  <text x="100" y="158" text-anchor="middle" font-family="Arial, sans-serif"
+        font-size="14" font-weight="600" fill="rgba(255,255,255,0.85)" letter-spacing="3">COLEGIO</text>
+</svg>

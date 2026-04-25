@@ -424,6 +424,104 @@
             color: #b2bec3;
         }
 
+        /* --- Header institucional (logo + nombre + tipo doc + barra título) --- */
+        .doc-preview .doc-header-inst {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.9rem 0.4rem 1rem 0.4rem;
+            border-bottom: 1px solid #e2e6ea;
+            margin-bottom: 0.9rem;
+        }
+        .doc-preview .doc-header-inst .doc-logo-wrap {
+            flex: 0 0 auto;
+            width: 78px;
+            height: 78px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #ffffff;
+            border-radius: 8px;
+        }
+        .doc-preview .doc-header-inst .doc-logo {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+        .doc-preview .doc-header-inst .doc-inst-text {
+            flex: 1 1 auto;
+            text-align: center;
+        }
+        .doc-preview .doc-header-inst .doc-liceo {
+            font-family: 'Georgia', 'Times New Roman', serif;
+            font-size: 1.55rem;
+            font-weight: 700;
+            color: #4a5560;
+            letter-spacing: 0.5px;
+            line-height: 1.15;
+        }
+        .doc-preview .doc-header-inst .doc-tipo {
+            margin-top: 0.15rem;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #6b7480;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        .doc-preview .doc-header-inst .doc-spacer {
+            flex: 0 0 78px;
+        }
+
+        .doc-preview .doc-titulo-bar {
+            background: #1e2a44;
+            color: #ffffff;
+            text-align: center;
+            font-weight: 700;
+            font-size: 1.05rem;
+            letter-spacing: 1px;
+            padding: 0.7rem 1rem;
+            margin: 0 0 0.9rem 0;
+            border-radius: 4px;
+            text-transform: uppercase;
+        }
+
+        .doc-preview table.doc-meta {
+            margin: 0 0 1rem 0;
+            border: 1px solid #4a5560;
+        }
+        .doc-preview table.doc-meta th {
+            background: #ffffff;
+            color: #1e2a44;
+            text-align: center;
+            font-weight: 700;
+            font-size: 0.75rem;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            border: 1px solid #4a5560;
+            padding: 0.45rem 0.5rem;
+            width: 25%;
+        }
+        .doc-preview table.doc-meta td {
+            background: #ffffff;
+            border: 1px solid #4a5560;
+            padding: 0.55rem 0.6rem;
+            font-size: 0.88rem;
+            color: #2d3436;
+            min-height: 1.6rem;
+            width: 25%;
+        }
+        .doc-preview table.doc-meta tr:nth-child(even) { background: #ffffff; }
+
+        @media (max-width: 600px) {
+            .doc-preview .doc-header-inst .doc-liceo { font-size: 1.15rem; }
+            .doc-preview .doc-header-inst .doc-tipo  { font-size: 0.78rem; }
+            .doc-preview .doc-header-inst .doc-logo-wrap,
+            .doc-preview .doc-header-inst .doc-spacer { width: 56px; height: 56px; flex-basis: 56px; }
+            .doc-preview table.doc-meta th,
+            .doc-preview table.doc-meta td { font-size: 0.72rem; padding: 0.35rem 0.4rem; }
+        }
+
         /* --- Botones de accion --- */
         .doc-actions {
             display: flex;
@@ -912,6 +1010,27 @@
                     <input type="text" id="inputProfesor" placeholder="Ej: Eduardo Yáñez">
                 </div>
             </div>
+            <div class="campo-row">
+                <div class="campo">
+                    <label>Institución / Liceo (aparece en el encabezado)</label>
+                    <input type="text" id="inputLiceo" list="dlColegios" placeholder="Ej: Liceo Salesiano de Talca">
+                    <datalist id="dlColegios"></datalist>
+                </div>
+                <div class="campo">
+                    <label>Duración estimada</label>
+                    <input type="text" id="inputDuracion" placeholder="Ej: 2 bloques (90 min)" value="2 bloques (90 min)">
+                </div>
+            </div>
+            <div class="campo-row">
+                <div class="campo">
+                    <label>Código del documento (opcional)</label>
+                    <input type="text" id="inputCodigoDoc" placeholder="Ej: GA-ELC-001">
+                </div>
+                <div class="campo">
+                    <label>Puntaje total (opcional)</label>
+                    <input type="text" id="inputPuntajeDoc" placeholder="Ej: 60 pts">
+                </div>
+            </div>
         </div>
 
         <!-- SECCION 5: MATERIAL DE REFERENCIA (solo para Guia de Ejercicios) -->
@@ -1026,6 +1145,7 @@
     <script src="js/firebase-config.js"></script>
     <script src="js/firebase-auth.js"></script>
     <script src="js/firebase-db.js"></script>
+    <script src="js/colegios.js"></script>
     <script src="js/curricula-chile.js"></script>
     <!-- ── Plan Común (transversales + asignatura por archivo) ── -->
     <script src="js/curricula/plan-comun/_comun.js"></script>
@@ -1119,6 +1239,22 @@
 
             var inProf = document.getElementById('inputProfesor');
             if (inProf) inProf.value = user.nombre || user.name || '';
+
+            // Pre-cargar institución del perfil del profesor
+            var inLiceo = document.getElementById('inputLiceo');
+            if (inLiceo) {
+                var nombreInst = (window.ELColegios && ELColegios.nombreColegio)
+                    ? ELColegios.nombreColegio(user)
+                    : (user.colegio || '');
+                inLiceo.value = nombreInst || '';
+            }
+            // Poblar datalist con catálogo de colegios registrados
+            var dl = document.getElementById('dlColegios');
+            if (dl && window.ELColegios && ELColegios.COLEGIOS_REG) {
+                dl.innerHTML = ELColegios.COLEGIOS_REG.map(function(c){
+                    return '<option value="' + (c.nombre.replace(/"/g,'&quot;')) + '">';
+                }).join('');
+            }
 
             var contValores = document.getElementById('valoresSalesianos');
             if (contValores) {
@@ -1818,7 +1954,70 @@
         var user = _matUser || {};
         var isTP = user.tipoProfesor === 'tecnico';
         var area = isTP ? ('Especialidad ' + (user.especialidad || 'TP') + ' EMTP') : (user.asignaturas && user.asignaturas.length ? user.asignaturas.join(', ') : 'Plan Comun');
-        return '<div class="pie-pagina">Colegio Chile &bull; ' + area + ' &bull; ElectroLearn &bull; Material generado automaticamente &bull; Alineado al curriculum Mineduc</div>';
+        var nombreInst = _nombreInstitucion();
+        var inst = nombreInst ? (nombreInst + ' &bull; ') : '';
+        return '<div class="pie-pagina">' + inst + area + ' &bull; ElectroLearn &bull; Material generado automaticamente &bull; Alineado al curriculum Mineduc</div>';
+    }
+
+    // ── Helpers institucionales (logo + nombre liceo + header de documento) ──
+    function _nombreInstitucion() {
+        var user = _matUser || {};
+        var elIn = document.getElementById('inputLiceo');
+        var manual = elIn ? (elIn.value || '').trim() : '';
+        if (manual) return manual;
+        if (window.ELColegios && ELColegios.nombreColegio) return ELColegios.nombreColegio(user) || '';
+        return user.colegio || user.colegioNombre || '';
+    }
+    function _logoTagInstitucion(size) {
+        var user = _matUser || {};
+        var elIn = document.getElementById('inputLiceo');
+        var manual = elIn ? (elIn.value || '').trim() : '';
+        // Si el usuario escribió algo distinto al perfil, sintetizamos un user-like para resolver
+        var pseudoUser = manual ? { colegio: manual, colegioSlug: user.colegioSlug } : user;
+        if (window.ELColegios && ELColegios.logoImgTag) {
+            return ELColegios.logoImgTag(pseudoUser, { size: size || 64, className: 'doc-logo' });
+        }
+        return '<img class="doc-logo" alt="" src="assets/logos/colegios/default.svg" style="width:' + (size||64) + 'px;height:' + (size||64) + 'px;object-fit:contain;">';
+    }
+    /**
+     * Header institucional uniforme: logo (izq), nombre liceo + tipo de documento (centro), spacer (der).
+     */
+    function headerInstitucional(tipoDoc) {
+        var nombreInst = _nombreInstitucion() || 'Institución educativa';
+        var logo = _logoTagInstitucion(78);
+        return '<div class="doc-header-inst">' +
+            '<div class="doc-logo-wrap">' + logo + '</div>' +
+            '<div class="doc-inst-text">' +
+                '<div class="doc-liceo">' + nombreInst + '</div>' +
+                '<div class="doc-tipo">' + (tipoDoc || '') + '</div>' +
+            '</div>' +
+            '<div class="doc-spacer" aria-hidden="true"></div>' +
+        '</div>';
+    }
+    /**
+     * Barra de título del documento (azul oscuro centrada).
+     */
+    function tituloBar(titulo) {
+        return '<div class="doc-titulo-bar">' + (titulo || '') + '</div>';
+    }
+    /**
+     * Tabla 4×4 de metadata: estudiante/código, estudiante/duración, profesor/curso, fecha/puntaje.
+     */
+    function metaTabla(opts) {
+        opts = opts || {};
+        function _v(id) { var el = document.getElementById(id); return el ? (el.value || '').trim() : ''; }
+        var codigo   = opts.codigo   || _v('inputCodigoDoc') || '';
+        var duracion = opts.duracion || _v('inputDuracion') || '';
+        var profesor = opts.profesor || '';
+        var curso    = opts.curso    || '';
+        var puntaje  = opts.puntaje  || _v('inputPuntajeDoc') || '';
+        var celda = function (v) { return v ? ('<td>' + v + '</td>') : '<td></td>'; };
+        return '<table class="doc-meta">' +
+            '<tr><th>Nombre de estudiante</th><td></td><th>Código</th>' + celda(codigo) + '</tr>' +
+            '<tr><th>Nombre de estudiante</th><td></td><th>Duración</th>' + celda(duracion) + '</tr>' +
+            '<tr><th>Nombre del profesor</th>' + celda(profesor) + '<th>Curso</th>' + celda(curso) + '</tr>' +
+            '<tr><th>Fecha</th><td></td><th>Puntaje</th>' + celda(puntaje) + '</tr>' +
+        '</table>';
     }
 
     // Helper: leer opciones de evaluacion del formulario
@@ -1872,16 +2071,26 @@
             return '<tr><td style="font-size:0.82rem;">' + t + '</td><td style="text-align:center;">&#9633;</td><td style="text-align:center;">&#9633;</td><td style="text-align:center;">&#9633;</td></tr>';
         }).join('');
 
-        return '<h1>GUIA DE APRENDIZAJE</h1>' +
-        '<div class="doc-subtitulo">Colegio Chile &bull; Especialidad Electronica &bull; Formacion Diferenciada TP<br>' +
-        'Modulo: ' + mod.num + ' &ndash; ' + mod.nombre + ' &nbsp;|&nbsp; Curso: ' + curso + ' &nbsp;|&nbsp; Nivel: ' + difTexto + '<br>Profesor: ' + prof + '</div>' +
+        // ── Header institucional + barra de título ──
+        var tituloDoc = (cont || ae.texto || mod.nombre || 'Guía de aprendizaje').toString();
+        // Recortar a 90 chars por estética (sin cortar palabra)
+        if (tituloDoc.length > 90) {
+            var corte = tituloDoc.lastIndexOf(' ', 90);
+            tituloDoc = tituloDoc.substring(0, corte > 50 ? corte : 90) + '…';
+        }
+        return headerInstitucional('Guía de aprendizaje') +
+        tituloBar(tituloDoc) +
+        metaTabla({ profesor: prof, curso: curso }) +
+
+        '<div class="doc-subtitulo" style="margin-top:0.2rem;">' +
+            'Módulo / Asignatura: <strong>' + (mod.nombre || mod.num || '') + '</strong> &nbsp;|&nbsp; ' +
+            'Nivel: <strong>' + difTexto + '</strong> &nbsp;|&nbsp; ' +
+            'Valores (MBE): <strong>' + valTexto + '</strong>' +
+        '</div>' +
 
         '<table>' +
-        '<tr><th style="width:30%">Nombre del estudiante</th><td colspan="3">' + lineas(1) + '</td></tr>' +
-        '<tr><th>Fecha inicio</th><td>' + lineas(1) + '</td><th>Fecha entrega</th><td>' + lineas(1) + '</td></tr>' +
-        '<tr><th>OA (' + oaId + ')</th><td colspan="3" style="font-size:0.83rem;">' + mod.oas[oaId] + '</td></tr>' +
-        '<tr><th>AE ' + aeNum + '</th><td colspan="3" style="font-size:0.83rem;">' + ae.texto + '</td></tr>' +
-        '<tr><th>Valores (MBE)</th><td colspan="3">' + valTexto + '</td></tr>' +
+        '<tr><th>OA (' + oaId + ')</th><td style="font-size:0.83rem;">' + (mod.oas && mod.oas[oaId] ? mod.oas[oaId] : (oaId || '')) + '</td></tr>' +
+        '<tr><th style="width:30%">AE ' + aeNum + '</th><td style="font-size:0.83rem;">' + (ae && ae.texto ? ae.texto : '') + '</td></tr>' +
         '</table>' +
 
         '<div class="recuadro-importante"><strong>&#127919; Proposito de esta guia:</strong> Esta guia te acompanara paso a paso en el estudio y comprension de <em>' + cont + '</em>. ' +

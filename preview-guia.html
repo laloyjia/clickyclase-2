@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Preview · Guía de Aprendizaje (rediseño)</title>
+<style>
+  body { background:#0f172a; padding:30px; font-family:'Segoe UI',Arial,sans-serif; }
+  .doc-preview { background:rgba(255,255,255,0.95); color:#1a1a2e; border-radius:14px;
+    padding:2.5rem; max-width:920px; margin:0 auto; line-height:1.7; }
+  .doc-preview h1 { color:#2d3436; font-size:1.5rem; text-align:center; border-bottom:3px solid #6C5CE7; padding-bottom:0.8rem; }
+  .doc-preview h2 { color:#6C5CE7; font-size:1.15rem; margin-top:1.5rem; border-left:4px solid #6C5CE7; padding-left:0.8rem; }
+  .doc-preview p { margin-bottom:0.8rem; font-size:0.92rem; color:#2d3436; }
+  .doc-preview table { width:100%; border-collapse:collapse; margin:1rem 0; }
+  .doc-preview th { background:#6C5CE7; color:white; padding:0.6rem; font-size:0.85rem; text-align:left; }
+  .doc-preview td { border:1px solid #dfe6e9; padding:0.5rem 0.6rem; font-size:0.85rem; }
+  .doc-preview .doc-subtitulo { text-align:center; color:#636e72; font-size:0.9rem; margin-bottom:1.5rem; }
+  .doc-preview .recuadro-importante { background:#fff3e0; border-left:4px solid #ff9800; padding:0.8rem 1rem; margin:1rem 0; border-radius:0 8px 8px 0; }
+  .doc-preview .pie-pagina { margin-top:2rem; padding-top:1rem; border-top:1px solid #dfe6e9; text-align:center; font-size:0.8rem; color:#b2bec3; }
+
+  .doc-preview .doc-header-inst { display:flex; align-items:center; gap:1rem; padding:0.9rem 0.4rem 1rem 0.4rem;
+    border-bottom:1px solid #e2e6ea; margin-bottom:0.9rem; }
+  .doc-preview .doc-header-inst .doc-logo-wrap { flex:0 0 auto; width:78px; height:78px; display:flex;
+    align-items:center; justify-content:center; background:#fff; border-radius:8px; }
+  .doc-preview .doc-header-inst .doc-logo { max-width:100%; max-height:100%; object-fit:contain; }
+  .doc-preview .doc-header-inst .doc-inst-text { flex:1 1 auto; text-align:center; }
+  .doc-preview .doc-header-inst .doc-liceo { font-family:'Georgia','Times New Roman',serif; font-size:1.55rem;
+    font-weight:700; color:#4a5560; letter-spacing:0.5px; line-height:1.15; }
+  .doc-preview .doc-header-inst .doc-tipo { margin-top:0.15rem; font-size:0.95rem; font-weight:600;
+    color:#6b7480; letter-spacing:1px; text-transform:uppercase; }
+  .doc-preview .doc-header-inst .doc-spacer { flex:0 0 78px; }
+  .doc-preview .doc-titulo-bar { background:#1e2a44; color:#fff; text-align:center; font-weight:700; font-size:1.05rem;
+    letter-spacing:1px; padding:0.7rem 1rem; margin:0 0 0.9rem 0; border-radius:4px; text-transform:uppercase; }
+  .doc-preview table.doc-meta { margin:0 0 1rem 0; border:1px solid #4a5560; }
+  .doc-preview table.doc-meta th { background:#fff; color:#1e2a44; text-align:center; font-weight:700;
+    font-size:0.75rem; letter-spacing:0.5px; text-transform:uppercase; border:1px solid #4a5560;
+    padding:0.45rem 0.5rem; width:25%; }
+  .doc-preview table.doc-meta td { background:#fff; border:1px solid #4a5560; padding:0.55rem 0.6rem;
+    font-size:0.88rem; color:#2d3436; min-height:1.6rem; width:25%; }
+  .doc-preview table.doc-meta tr:nth-child(even) { background:#fff; }
+
+  .nota { color:#94a3b8; max-width:920px; margin:0 auto 18px auto; font-size:0.9rem; }
+</style>
+</head>
+<body>
+
+<p class="nota">Vista previa estática del nuevo encabezado de Guía de Aprendizaje (con datos de ejemplo). Este archivo es solo demostrativo — el render real ocurre desde <code>material.html</code>.</p>
+
+<div class="doc-preview">
+
+  <!-- Header institucional -->
+  <div class="doc-header-inst">
+    <div class="doc-logo-wrap">
+      <img class="doc-logo" alt="Logo institucional" src="assets/logos/colegios/default.svg"
+           onerror="this.onerror=null;this.src='assets/logos/colegios/default.svg';">
+    </div>
+    <div class="doc-inst-text">
+      <div class="doc-liceo">Liceo Salesiano de Talca</div>
+      <div class="doc-tipo">Guía de aprendizaje</div>
+    </div>
+    <div class="doc-spacer" aria-hidden="true"></div>
+  </div>
+
+  <!-- Barra de título -->
+  <div class="doc-titulo-bar">MEDICIÓN DE RESISTENCIAS EN SERIE Y PARALELO</div>
+
+  <!-- Tabla 4×4 de metadata -->
+  <table class="doc-meta">
+    <tr><th>Nombre de estudiante</th><td></td><th>Código</th><td>GA-ELC-001</td></tr>
+    <tr><th>Nombre de estudiante</th><td></td><th>Duración</th><td>2 bloques (90 min)</td></tr>
+    <tr><th>Nombre del profesor</th><td>Eduardo Yáñez</td><th>Curso</th><td>3° Medio</td></tr>
+    <tr><th>Fecha</th><td></td><th>Puntaje</th><td>60 pts</td></tr>
+  </table>
+
+  <div class="doc-subtitulo" style="margin-top:0.2rem;">
+    Módulo / Asignatura: <strong>Análisis de circuitos eléctricos</strong> &nbsp;|&nbsp;
+    Nivel: <strong>Intermedio - Aplicación práctica</strong> &nbsp;|&nbsp;
+    Valores (MBE): <strong>Responsabilidad, Trabajo</strong>
+  </div>
+
+  <table>
+    <tr><th>OA (OA1)</th><td style="font-size:0.83rem;">Aplica leyes fundamentales de la electricidad (Ohm, Kirchhoff) en la resolución de circuitos en CC y CA.</td></tr>
+    <tr><th style="width:30%">AE 1</th><td style="font-size:0.83rem;">Mide tensión, corriente y resistencia en circuitos serie y paralelo, registrando los valores con instrumentos calibrados y aplicando las normas de seguridad correspondientes.</td></tr>
+  </table>
+
+  <div class="recuadro-importante"><strong>🎯 Propósito de esta guía:</strong> Esta guía te acompañará paso a paso en el estudio y comprensión de <em>medición de resistencias en serie y paralelo</em>.</div>
+
+  <h2>1. 🔍 Evaluación diagnóstica</h2>
+  <p>Aquí continuaría el cuerpo de la guía con sus secciones (diagnóstica, marco teórico, actividades, autoevaluación)…</p>
+
+  <div class="pie-pagina">Liceo Salesiano de Talca · Especialidad Electrónica EMTP · ElectroLearn · Material generado automáticamente · Alineado al currículum Mineduc</div>
+</div>
+
+</body>
+</html>
