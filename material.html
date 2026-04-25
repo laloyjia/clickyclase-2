@@ -735,7 +735,7 @@
                 </div>
             </div>
             <div style="display:flex;gap:.5rem;flex-wrap:wrap;justify-content:center;margin-top:.9rem">
-                <span class="stat-pro" style="display:inline-flex;align-items:center;gap:.35rem;padding:.3rem .7rem;border-radius:999px;font-size:.78rem;background:rgba(124,58,237,.14);border:1px solid rgba(124,58,237,.3);color:#c4b5fd">🧠 IA Gemini</span>
+                <span class="stat-pro" style="display:inline-flex;align-items:center;gap:.35rem;padding:.3rem .7rem;border-radius:999px;font-size:.78rem;background:rgba(124,58,237,.14);border:1px solid rgba(124,58,237,.3);color:#c4b5fd">🧠 IA integrada</span>
                 <span class="stat-pro" style="display:inline-flex;align-items:center;gap:.35rem;padding:.3rem .7rem;border-radius:999px;font-size:.78rem;background:rgba(34,211,238,.12);border:1px solid rgba(34,211,238,.3);color:#67e8f9">🎯 Bloom</span>
                 <span class="stat-pro" style="display:inline-flex;align-items:center;gap:.35rem;padding:.3rem .7rem;border-radius:999px;font-size:.78rem;background:rgba(52,211,153,.12);border:1px solid rgba(52,211,153,.3);color:#6ee7b7">💛 Valores (MBE)</span>
                 <span class="stat-pro" style="display:inline-flex;align-items:center;gap:.35rem;padding:.3rem .7rem;border-radius:999px;font-size:.78rem;background:rgba(244,114,182,.12);border:1px solid rgba(244,114,182,.3);color:#f9a8d4">📚 Publica a Biblioteca</span>
@@ -986,7 +986,7 @@
 
         <!-- BOTONES DE GENERACIÓN -->
         <button class="btn-generar-ia" onclick="generarConIA()" id="btnIA">
-            &#129302; Generar con IA &mdash; Gemini
+            &#129302; Generar con IA
         </button>
         <div id="iaStatus" class="ia-status" style="display:none"></div>
 
@@ -2836,7 +2836,7 @@
     }
 
     // =============================================
-    // GENERADOR: CREAR CON IA (Gemini API)
+    // GENERADOR: CREAR CON IA
     // =============================================
     function generarConIA() {
         if (!tipoDocSeleccionado) { setIAStatus('error', '&#10007; Selecciona el tipo de documento primero.'); return; }

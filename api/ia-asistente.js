@@ -286,10 +286,10 @@ export default async function handler(req, res) {
     if (data.error) return res.status(502).json({ error: data.error.message });
 
     const texto = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-    if (!texto) return res.status(502).json({ error: 'Gemini no devolvió respuesta' });
+    if (!texto) return res.status(502).json({ error: 'La IA no devolvió respuesta' });
 
     return res.status(200).json({ resultado: texto });
   } catch (e) {
-    return res.status(500).json({ error: 'Error conectando con Gemini: ' + e.message });
+    return res.status(500).json({ error: 'Error conectando con la IA: ' + e.message });
   }
 }
