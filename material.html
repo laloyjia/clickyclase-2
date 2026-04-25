@@ -176,6 +176,76 @@
         }
         .ce-item { width: 100%; }
 
+        /* --- DROPDOWN / DETAILS COLAPSABLE --- */
+        .dropdown-panel {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+            transition: border-color 0.2s;
+        }
+        .dropdown-panel:hover { border-color: var(--primary-light); }
+        .dropdown-panel[open] { border-color: var(--primary); }
+        .dropdown-panel > summary {
+            list-style: none;
+            cursor: pointer;
+            padding: 0.7rem 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.6rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text);
+            user-select: none;
+            transition: background 0.2s;
+        }
+        .dropdown-panel > summary::-webkit-details-marker { display: none; }
+        .dropdown-panel > summary:hover { background: rgba(255,255,255,0.04); }
+        .dropdown-panel > summary::before {
+            content: '▸';
+            font-size: 0.8rem;
+            color: var(--primary-light);
+            transition: transform 0.2s ease;
+            display: inline-block;
+            width: 0.8rem;
+        }
+        .dropdown-panel[open] > summary::before { transform: rotate(90deg); }
+        .dropdown-panel .dp-title { flex: 1; }
+        .dropdown-panel .dp-badge {
+            background: rgba(108,92,231,0.18);
+            color: var(--primary-light);
+            border: 1px solid rgba(108,92,231,0.4);
+            border-radius: 999px;
+            padding: 0.15rem 0.7rem;
+            font-size: 0.78rem;
+            font-weight: 700;
+            min-width: 1.6rem;
+            text-align: center;
+        }
+        .dropdown-panel .dp-badge.empty {
+            background: rgba(255,255,255,0.03);
+            color: var(--text-muted);
+            border-color: var(--glass-border);
+        }
+        .dropdown-panel > .dp-body {
+            padding: 0.5rem 1rem 1rem;
+            border-top: 1px solid var(--glass-border);
+            background: rgba(0,0,0,0.12);
+        }
+        .dropdown-panel #listaOAMineduc .checkbox-item,
+        .dropdown-panel #listaOAMineduc label.checkbox-item { width: 100%; }
+
+        /* --- UNIDAD / TIEMPO --- */
+        .unidad-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 0.7rem;
+        }
+        @media (max-width: 600px) {
+            .unidad-grid { grid-template-columns: 1fr; }
+        }
+
         .info-box {
             background: rgba(108,92,231,0.1);
             border: 1px solid rgba(108,92,231,0.3);
@@ -773,14 +843,32 @@
             <div id="sec-regular-mat" style="display:none">
                 <div class="campo">
                     <label>Objetivos de Aprendizaje Mineduc</label>
-                    <p style="font-size:0.82rem;color:var(--text-muted);margin-bottom:0.5rem">Selecciona los OA para este material.</p>
-                    <div id="listaOAMineduc" class="checkbox-group">
-                        <span style="color:var(--text-muted);font-size:0.85rem">Selecciona asignatura y nivel para ver los OA.</span>
-                    </div>
+                    <details class="dropdown-panel" id="dropOAMineduc">
+                        <summary>
+                            <span class="dp-title">Selecciona los OA</span>
+                            <span class="dp-badge empty" id="badgeOAMineduc">0</span>
+                        </summary>
+                        <div class="dp-body">
+                            <p style="font-size:0.82rem;color:var(--text-muted);margin:0 0 0.7rem">Selecciona los OA para este material.</p>
+                            <div id="listaOAMineduc" class="checkbox-group">
+                                <span style="color:var(--text-muted);font-size:0.85rem">Selecciona asignatura y nivel para ver los OA.</span>
+                            </div>
+                        </div>
+                    </details>
                 </div>
                 <div class="campo">
                     <label>Unidad / Período</label>
-                    <input type="text" id="inputUnidadReg" placeholder="Ej: Unidad 1 — Números naturales">
+                    <div class="unidad-grid">
+                        <select id="selectUnidadReg" onchange="onCambioUnidadRegMat()">
+                            <option value="">-- Selecciona una unidad oficial --</option>
+                        </select>
+                        <input type="text" id="inputTiempoReg" placeholder="Tiempo (ej: 9 semanas)" oninput="actualizarUnidadCompuestaMat()">
+                    </div>
+                    <input type="text" id="inputUnidadRegNombre" placeholder="Nombre de la unidad (editable)" style="margin-top:0.5rem;display:none" oninput="actualizarUnidadCompuestaMat()">
+                    <input type="hidden" id="inputUnidadReg">
+                    <p id="hintUnidadReg" style="font-size:0.78rem;color:var(--text-muted);margin:0.4rem 0 0;display:none">
+                        Tiempo sugerido por Mineduc: <strong id="hintTiempoSug"></strong>
+                    </p>
                 </div>
             </div>
         </div>
@@ -791,8 +879,16 @@
         <!-- SECCION 3: VALORES Y ACTITUDES (MBE) -->
         <div class="seccion-mat">
             <h2><span>&#128155;</span> Valores <span style="font-size:.7em;font-weight:500;color:var(--muted)">· Marco para la Buena Enseñanza</span></h2>
-            <p style="margin:4px 0 10px;color:var(--muted);font-size:.85rem">Selecciona las actitudes transversales que la IA integrará en el material, alineadas a los Dominios del MBE y a los Objetivos de Aprendizaje Transversales (OAT).</p>
-            <div class="checkbox-group" id="valoresSalesianos"></div>
+            <details class="dropdown-panel" id="dropValores">
+                <summary>
+                    <span class="dp-title">Actitudes transversales (MBE / OAT)</span>
+                    <span class="dp-badge empty" id="badgeValores">0</span>
+                </summary>
+                <div class="dp-body">
+                    <p style="margin:0 0 10px;color:var(--muted);font-size:.85rem">Selecciona las actitudes transversales que la IA integrará en el material, alineadas a los Dominios del MBE y a los Objetivos de Aprendizaje Transversales (OAT).</p>
+                    <div class="checkbox-group" id="valoresSalesianos"></div>
+                </div>
+            </details>
         </div>
 
         <!-- SECCION 4: CONTENIDO -->
@@ -1033,7 +1129,7 @@
                     var cb = document.createElement('input');
                     cb.type = 'checkbox';
                     cb.value = v;
-                    cb.addEventListener('change', function(){ toggleCheckItem(cb); });
+                    cb.addEventListener('change', function(){ toggleCheckItem(cb); actualizarBadgeValoresMat(); });
                     var span = document.createElement('span');
                     span.textContent = ' ' + v;
                     item.appendChild(cb);
@@ -1041,6 +1137,10 @@
                     contValores.appendChild(item);
                 });
             }
+
+            // Inicializar badges en 0 (las funciones existen más abajo en el script)
+            if (typeof actualizarBadgeOAMat      === 'function') actualizarBadgeOAMat();
+            if (typeof actualizarBadgeValoresMat === 'function') actualizarBadgeValoresMat();
 
             // Inicializar curriculo según perfil del profesor
             try { initCurriculoMat(user); } catch (e) { console.warn('[material] initCurriculoMat:', e); }
@@ -1253,6 +1353,10 @@
         var nivel      = document.getElementById('selectCurso') ? document.getElementById('selectCurso').value : '';
         var sigla      = _resolveAsigSiglaMat(asigNombre);
 
+        // Resetear unidades y contador cada vez que cambia asig/nivel
+        cargarUnidadesRegularMat(sigla, nivel);
+        actualizarBadgeOAMat();
+
         if (!sigla || !nivel || typeof CURRICULA_CHILE === 'undefined') {
             container.innerHTML = '<span style="color:var(--text-muted);font-size:0.85rem">Selecciona asignatura y nivel.</span>';
             return;
@@ -1270,12 +1374,123 @@
             byEje[eje].forEach(function(o) {
                 var desc = o.desc || o.descripcion || '';
                 var tip  = desc.replace(/"/g,'&quot;');
-                html += '<label class="checkbox-item" title="' + tip + '" style="align-items:flex-start;gap:8px">' +
-                    '<input type="checkbox" class="oaRegCheck" value="' + o.codigo + '" data-desc="' + tip + '" onchange="toggleCheckItem(this)">' +
-                    '<span><strong>' + o.codigo + '</strong> — ' + (desc.slice(0,110) || '…') + (desc.length > 110 ? '…' : '') + '</span></label>';
+                html += '<label class="checkbox-item" title="' + tip + '" style="align-items:flex-start;gap:8px;width:100%">' +
+                    '<input type="checkbox" class="oaRegCheck" value="' + o.codigo + '" data-desc="' + tip + '" onchange="toggleCheckItem(this); actualizarBadgeOAMat();">' +
+                    '<span><strong>' + o.codigo + '</strong> — ' + (desc.slice(0,140) || '…') + (desc.length > 140 ? '…' : '') + '</span></label>';
             });
         });
         container.innerHTML = html;
+    }
+
+    // ─────────────────────────────────────────────────────────────────────
+    // UNIDAD / TIEMPO — selector poblado desde plan común oficial (material)
+    // ─────────────────────────────────────────────────────────────────────
+    var TIEMPO_SUG_DEFAULT_MAT = '8 a 9 semanas';
+
+    function cargarUnidadesRegularMat(sigla, nivel) {
+        var sel = document.getElementById('selectUnidadReg');
+        if (!sel) return;
+        sel.innerHTML = '<option value="">-- Selecciona una unidad oficial --</option>';
+        var nomInput = document.getElementById('inputUnidadRegNombre');
+        var hidden   = document.getElementById('inputUnidadReg');
+        var hint     = document.getElementById('hintUnidadReg');
+        if (nomInput) { nomInput.value = ''; nomInput.style.display = 'none'; }
+        if (hidden)   { hidden.value = ''; }
+        if (hint)     { hint.style.display = 'none'; }
+
+        if (!sigla || !nivel || typeof CURRICULA_CHILE === 'undefined') return;
+        var unidades = (typeof CURRICULA_CHILE.getUnidades === 'function')
+            ? CURRICULA_CHILE.getUnidades(sigla, nivel)
+            : [];
+        if (!unidades || !unidades.length) {
+            var optManual = document.createElement('option');
+            optManual.value = '__custom__';
+            optManual.textContent = '✎ Escribir unidad personalizada…';
+            sel.appendChild(optManual);
+            return;
+        }
+        unidades.forEach(function(u, i) {
+            var nombre = (typeof u === 'string') ? u : (u && u.nombre) || ('Unidad ' + (i+1));
+            var opt = document.createElement('option');
+            opt.value = nombre;
+            opt.textContent = 'Unidad ' + (i+1) + ': ' + nombre;
+            sel.appendChild(opt);
+        });
+        var optCustom = document.createElement('option');
+        optCustom.value = '__custom__';
+        optCustom.textContent = '✎ Escribir unidad personalizada…';
+        sel.appendChild(optCustom);
+    }
+
+    function onCambioUnidadRegMat() {
+        var sel       = document.getElementById('selectUnidadReg');
+        var nomInput  = document.getElementById('inputUnidadRegNombre');
+        var tiempoIn  = document.getElementById('inputTiempoReg');
+        var hint      = document.getElementById('hintUnidadReg');
+        var hintSug   = document.getElementById('hintTiempoSug');
+        if (!sel) return;
+
+        if (sel.value === '__custom__') {
+            if (nomInput) { nomInput.style.display = ''; nomInput.value = ''; nomInput.focus(); }
+        } else if (sel.value) {
+            if (nomInput) { nomInput.style.display = 'none'; nomInput.value = sel.value; }
+        } else {
+            if (nomInput) { nomInput.style.display = 'none'; nomInput.value = ''; }
+        }
+
+        if (tiempoIn && !tiempoIn.value && sel.value && sel.value !== '__custom__') {
+            tiempoIn.placeholder = 'Tiempo (ej: ' + TIEMPO_SUG_DEFAULT_MAT + ')';
+            if (hint && hintSug) {
+                hintSug.textContent = TIEMPO_SUG_DEFAULT_MAT;
+                hint.style.display = '';
+            }
+        } else if (hint) {
+            hint.style.display = 'none';
+        }
+        actualizarUnidadCompuestaMat();
+    }
+
+    function actualizarUnidadCompuestaMat() {
+        var sel       = document.getElementById('selectUnidadReg');
+        var nomInput  = document.getElementById('inputUnidadRegNombre');
+        var tiempoIn  = document.getElementById('inputTiempoReg');
+        var hidden    = document.getElementById('inputUnidadReg');
+        if (!hidden) return;
+        var nombre = '';
+        if (sel && sel.value === '__custom__') {
+            nombre = (nomInput && nomInput.value) ? nomInput.value.trim() : '';
+        } else if (sel && sel.value) {
+            if (nomInput && nomInput.style.display !== 'none' && nomInput.value) {
+                nombre = nomInput.value.trim();
+            } else {
+                nombre = sel.value;
+            }
+        }
+        var tiempo = (tiempoIn && tiempoIn.value) ? tiempoIn.value.trim() : '';
+        var compuesto = '';
+        if (nombre && tiempo)      compuesto = nombre + ' — ' + tiempo;
+        else if (nombre)            compuesto = nombre;
+        else if (tiempo)            compuesto = tiempo;
+        hidden.value = compuesto;
+    }
+
+    // ─────────────────────────────────────────────────────────────────────
+    // BADGES (contador en summary de cada dropdown)
+    // ─────────────────────────────────────────────────────────────────────
+    function _setBadgeMat(badgeId, count) {
+        var b = document.getElementById(badgeId);
+        if (!b) return;
+        b.textContent = String(count);
+        if (count > 0) b.classList.remove('empty');
+        else           b.classList.add('empty');
+    }
+    function actualizarBadgeOAMat() {
+        var n = document.querySelectorAll('#listaOAMineduc .oaRegCheck:checked').length;
+        _setBadgeMat('badgeOAMineduc', n);
+    }
+    function actualizarBadgeValoresMat() {
+        var n = document.querySelectorAll('#valoresSalesianos input[type="checkbox"]:checked').length;
+        _setBadgeMat('badgeValores', n);
     }
 
     function filtrarModulos() {
