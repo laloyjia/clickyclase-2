@@ -3080,6 +3080,169 @@
     }
 
     // =============================================
+    // PROMPTS POR TIPO DE DOCUMENTO (IA)
+    // =============================================
+    /**
+     * Reglas comunes que protegen el wrapper institucional. Toda variante de
+     * prompt debe terminar incluyendo este bloque para evitar que la IA genere
+     * portada/encabezado/h1 propios.
+     */
+    function _promptReglasComunes() {
+        return 'REGLAS ESTRICTAS DE FORMATO (MUY IMPORTANTE):\n' +
+        '- NO generes encabezado institucional, portada, logo ni datos del colegio: el sistema ya antepone automáticamente el logo, el nombre del liceo, el tipo de documento, el título en barra azul oscuro y una tabla con: nombre del estudiante, código, duración, profesor, curso, fecha, puntaje. NO los repitas.\n' +
+        '- NO escribas <h1> con el título del documento (el sistema lo pone en una barra superior).\n' +
+        '- NO incluyas filas de "Nombre del estudiante", "Fecha", "Curso", "Puntaje", "Profesor" en el cuerpo: ya están en la tabla del encabezado.\n' +
+        '- Devuelve SOLO HTML del cuerpo (puedes usar <h2>, <h3>, <p>, <ol>, <ul>, <table>, <strong>, <em>, <hr>). Sin <html>, <head>, <body>, <style> ni CSS inline excesivo; el sistema ya tiene estilos cargados.\n' +
+        '- Idioma: español de Chile, ortografía correcta, sin anglicismos innecesarios.\n';
+    }
+
+    /**
+     * Bloque de datos del documento, común a todos los prompts.
+     */
+    function _promptDatos(ctx) {
+        return 'DATOS DEL DOCUMENTO:\n' +
+        '- Tipo: ' + ctx.tipoNombre + '\n' +
+        '- Institución: ' + ctx.nombreInst + '\n' +
+        '- Asignatura/Módulo: ' + ctx.modNombre + '\n' +
+        '- Curso/Nivel: ' + ctx.cursoTexto + '\n' +
+        '- Tema o contenido específico: ' + (ctx.contenido || '(no especificado)') + '\n' +
+        '- Objetivos de Aprendizaje (Mineduc):\n' + (ctx.oaTexto || '(no especificados)') + '\n' +
+        '- Dificultad pedagógica: ' + ctx.difTexto + '\n' +
+        (ctx.valoresStr ? '- Actitudes/valores MBE a integrar: ' + ctx.valoresStr + '\n' : '') +
+        '\n';
+    }
+
+    /**
+     * Prompt específico de Guía de Aprendizaje.
+     * Estructura "5 momentos" + objetivo amigable. Tono al estudiante.
+     */
+    function _promptGuia(ctx) {
+        return 'Actúa como un experto en diseño de material didáctico y evaluador del Marco para la Buena Enseñanza (MBE). ' +
+        'Tu tarea es crear una Guía de Aprendizaje estructurada, motivadora y centrada en el estudiante.\n\n' +
+        _promptDatos(ctx) +
+        'TONO Y ESTILO (obligatorio):\n' +
+        '- Redacta TODO el contenido dirigido directamente al estudiante usando "tú": cercano, motivador y claro.\n' +
+        '- Considera el nivel ' + ctx.cursoTexto + ' al elegir vocabulario, ejemplos y extensión.\n' +
+        '- NO uses lenguaje técnico para profesores en el cuerpo de la guía. Debe quedar lista para imprimir y entregar al alumno.\n' +
+        '- Asegura una progresión basada en la Taxonomía de Bloom (de recordar a aplicar/crear).\n\n' +
+        'ESTRUCTURA OBLIGATORIA (en este orden, con estos títulos exactos en <h2>):\n' +
+        '1. <h2>🎯 Objetivo de hoy</h2>\n' +
+        '   - Un párrafo breve en lenguaje amigable que comience con "Hoy aprenderemos a…" o equivalente, traduciendo el OA a algo que el estudiante entienda.\n' +
+        '   - NO incluyas espacios para Nombre/Fecha/Curso: ya están en la tabla del sistema.\n' +
+        '2. <h2>💡 Momento 1: ¡Despierta tu mente!</h2>\n' +
+        '   - Activación: una pregunta breve, dato curioso o sugerencia de imagen que conecte el tema con la vida cotidiana del estudiante o con lo que ya sabe.\n' +
+        '   - Si sugieres una imagen, escríbela como "[Imagen sugerida: descripción breve]" en una línea aparte.\n' +
+        '   - Cierra con una pregunta gatillante para responder oralmente o por escrito.\n' +
+        '3. <h2>🔍 Momento 2: Exploremos juntos</h2>\n' +
+        '   - Modelaje/contenido: explicación BREVE, visual y estructurada del concepto clave.\n' +
+        '   - Incluye al menos un "Ejemplo Resuelto" o "Paso a Paso" que muestre cómo se aplica la habilidad.\n' +
+        '   - Usa listas, mini-tablas o pasos numerados para mantenerlo visual.\n' +
+        '4. <h2>✋ Momento 3: Manos a la obra</h2>\n' +
+        '   - Práctica guiada: 2 o 3 ejercicios o actividades de complejidad básica/media (Bloom 1-3: recordar, comprender, aplicar).\n' +
+        '   - Para cada ejercicio incluye una "💡 Pista" o "💡 Tip" al margen pensada en apoyo DUA para estudiantes que se estanquen.\n' +
+        '   - Numera los ejercicios con <ol> y deja una línea horizontal o espacio para que el estudiante escriba la respuesta.\n' +
+        '5. <h2>🚀 Momento 4: Tu gran desafío</h2>\n' +
+        '   - Práctica independiente: 1 o 2 actividades de alta demanda cognitiva (Bloom 4-6: analizar, evaluar, crear).\n' +
+        '   - Sin pistas. Deben requerir fundamentar, comparar, crear, juzgar o resolver un problema nuevo.\n' +
+        '6. <h2>🌱 Momento 5: ¿Qué aprendimos hoy?</h2>\n' +
+        '   - Una <table> de autoevaluación con 3 criterios concretos relativos al objetivo de la guía.\n' +
+        '     Columnas exactas: "Criterio | Logrado ✅ | Por lograr 🔄". Cada fila marca un criterio diferente.\n' +
+        '   - Después de la tabla, dos preguntas de metacognición en <ol>, dejando espacio para responder.\n' +
+        '     Una de ellas debe ser similar a "¿Qué fue lo más difícil y cómo lo superaste?".\n\n' +
+        (ctx.valoresStr
+            ? 'INTEGRACIÓN DE VALORES MBE:\n' +
+              '- Integra de forma natural (no forzada) las actitudes: ' + ctx.valoresStr + '. Pueden aparecer como invitación al final de un Momento, en una pista DUA o como criterio de la tabla de autoevaluación.\n\n'
+            : '') +
+        _promptReglasComunes() +
+        '\nGenera ahora SOLO el cuerpo HTML de la Guía de Aprendizaje siguiendo exactamente esta estructura.';
+    }
+
+    /**
+     * Prompt específico de Apunte de Clase.
+     * Texto académico riguroso + sección "Comprueba tu Aprendizaje" con 6 preguntas Bloom + pauta breve.
+     */
+    function _promptApunte(ctx) {
+        return 'Actúa como un experto disciplinar y catedrático especialista en diseño de material de estudio. ' +
+        'Tu tarea es redactar un Apunte de Clase riguroso, extenso, fidedigno y muy bien estructurado, ' +
+        'destinado a estudiantes de ' + ctx.cursoTexto + '.\n\n' +
+        _promptDatos(ctx) +
+        'DATOS DEL CONTENIDO (a respetar estrictamente):\n' +
+        '- Asignatura/Área: ' + ctx.modNombre + '\n' +
+        '- Tema Central: ' + (ctx.contenido || '(no especificado)') + '\n' +
+        '- Foco o Indicaciones específicas (subtemas obligatorios, enfoques o conceptos clave que NO deben faltar):\n' +
+        (ctx.oaTexto || '(no especificados)') + '\n\n' +
+        'INSTRUCCIONES PARA EL DESARROLLO DEL APUNTE (El Contenido):\n' +
+        '1. Rigor y Extensión:\n' +
+        '   - Redacta un texto académico extenso y de alta calidad, equivalente a varias páginas de lectura.\n' +
+        '   - El contenido debe ser fidedigno, técnicamente correcto y estar a la altura del nivel ' + ctx.cursoTexto + '.\n' +
+        '   - Evita el lenguaje coloquial; mantén un tono formal, expositivo y didáctico.\n' +
+        '2. Estructura del Texto:\n' +
+        '   - Organiza el apunte en secciones claras con <h2> y, donde corresponda, subtítulos <h3>.\n' +
+        '   - Comienza con una introducción que contextualice el tema y explique su relevancia.\n' +
+        '   - Desarrolla los subtemas en orden lógico, asegurando que TODOS los focos indicados arriba estén cubiertos.\n' +
+        '   - Cierra con una sección de síntesis o conclusión que recoja las ideas centrales.\n' +
+        '3. Definiciones y Ejemplos:\n' +
+        '   - Cada concepto clave debe estar definido con precisión (puedes usar <strong> para resaltar el término).\n' +
+        '   - Acompaña las definiciones con ejemplos concretos, casos aplicados, esquemas en texto, mini-tablas o pasos numerados cuando ayuden a comprender.\n' +
+        '   - Si el tema lo requiere, incluye fórmulas, ecuaciones o diagramas descritos en texto.\n' +
+        '4. Glosario (al final, antes de las preguntas):\n' +
+        '   - Incluye una sección <h2>Glosario</h2> con una <table> de 2 columnas ("Término | Definición") con los 5 a 8 términos más importantes del apunte.\n\n' +
+        'INSTRUCCIONES PARA LA SECCIÓN DE EVALUACIÓN (Las Preguntas):\n' +
+        '- Al final del texto, crea una sección titulada exactamente <h2>Comprueba tu Aprendizaje</h2>.\n' +
+        '- Redacta 6 preguntas basadas estrictamente en la Taxonomía de Bloom, ordenadas de menor a mayor complejidad cognitiva.\n' +
+        '- Etiqueta cada pregunta con su nivel correspondiente, en este formato exacto al inicio de la pregunta:\n' +
+        '  * <strong>Nivel 1 (Recordar):</strong> pregunta de identificación, definición o reconocimiento.\n' +
+        '  * <strong>Nivel 2 (Comprender):</strong> pregunta de explicación con palabras propias o resumen.\n' +
+        '  * <strong>Nivel 3 (Aplicar):</strong> pregunta que requiera usar el conocimiento en una situación concreta.\n' +
+        '  * <strong>Nivel 4 (Analizar):</strong> pregunta que requiera descomponer, comparar o relacionar.\n' +
+        '  * <strong>Nivel 5 (Evaluar):</strong> pregunta de juicio fundamentado o toma de decisión justificada.\n' +
+        '  * <strong>Nivel 6 (Crear):</strong> pregunta que pida diseñar, proponer o construir algo nuevo a partir del contenido.\n' +
+        '- Presenta las 6 preguntas en una lista <ol>.\n\n' +
+        'PAUTA DE CORRECCIÓN BREVE:\n' +
+        '- Después de las preguntas, agrega una sección <h2>Pauta de Corrección</h2> con las respuestas esperadas o los conceptos clave que el estudiante debería mencionar para cada una de las 6 preguntas.\n' +
+        '- Sé conciso (1 a 3 líneas por pregunta); para preguntas de desarrollo, lista los conceptos mínimos esperados.\n\n' +
+        (ctx.valoresStr
+            ? 'INTEGRACIÓN DE VALORES MBE:\n' +
+              '- Cuando sea natural, integra las actitudes ' + ctx.valoresStr + ' a través de los ejemplos o casos del apunte (sin forzar). NO las menciones explícitamente como sección.\n\n'
+            : '') +
+        'FORMATO DE SALIDA:\n' +
+        '- Entrega el apunte directamente, SIN saludos ni introducciones conversacionales tipo "Aquí tienes…" o "Claro, profesor…".\n' +
+        '- Empieza directamente con el primer <h2> del apunte.\n\n' +
+        _promptReglasComunes() +
+        '\nGenera ahora SOLO el cuerpo HTML del Apunte de Clase siguiendo exactamente esta estructura.';
+    }
+
+    /**
+     * Prompt genérico (fallback) para tipos aún no rediseñados.
+     * Mantiene el comportamiento previo.
+     */
+    function _promptGenerico(ctx) {
+        return 'Eres un experto en educación chilena MINEDUC con conocimiento del currículum nacional vigente. ' +
+        'Genera el CUERPO de un documento educativo en HTML para imprimir en clase.\n\n' +
+        _promptDatos(ctx) +
+        (ctx.bloomNames ? 'NIVELES COGNITIVOS BLOOM: ' + ctx.bloomNames + '\n' : '') +
+        (ctx.tiposNames ? 'TIPOS DE PREGUNTAS: ' + ctx.tiposNames + '\n' : '') +
+        'CANTIDAD DE PREGUNTAS/ÍTEMS: ' + ctx.cantPreg + '\n' +
+        'PUNTAJE TOTAL: ' + ctx.puntaje + ' puntos\n\n' +
+        'ESTRUCTURA SUGERIDA (adáptala al tipo): 1) instrucciones generales breves, 2) marco teórico/contexto si aplica, 3) actividades/preguntas/ítems numerados, 4) cierre o autoevaluación.\n' +
+        '- Para selección múltiple: incluye 4 alternativas con texto real, una correcta marcada SOLO en una clave de respuestas al final entre comentarios <!-- -->.\n' +
+        '- Para verdadero/falso: escribe la afirmación completa.\n' +
+        (ctx.valoresStr ? '- Integra las actitudes MBE/OAT (' + ctx.valoresStr + ') de forma natural en las consignas.\n' : '') +
+        '\n' + _promptReglasComunes() +
+        '\nGenera ahora SOLO el cuerpo del documento:';
+    }
+
+    /**
+     * Dispatcher: devuelve el prompt apropiado para el tipo de documento.
+     */
+    function _buildPromptPorTipo(tipo, ctx) {
+        if (tipo === 'guia')   return _promptGuia(ctx);
+        if (tipo === 'apunte') return _promptApunte(ctx);
+        // TODO: ficha, evaluacion, prueba, control — Eduardo entregará cada prompt.
+        return _promptGenerico(ctx);
+    }
+
+    // =============================================
     // GENERADOR: CREAR CON IA
     // =============================================
     function generarConIA() {
@@ -3152,32 +3315,27 @@
 
         var nombreInst = _nombreInstitucion() || 'la institución educativa';
 
-        var prompt = 'Eres un experto en educaci\u00f3n chilena MINEDUC con conocimiento del curr\u00edculum nacional vigente. ' +
-        'Genera el CUERPO de un documento educativo en HTML para imprimir en clase.\n\n' +
-        'TIPO DE DOCUMENTO: ' + tipoNombre + '\n' +
-        'INSTITUCI\u00d3N: ' + nombreInst + '\n' +
-        'ASIGNATURA/M\u00d3DULO: ' + modNombre + '\n' +
-        'CURSO/NIVEL: ' + cursoTexto + '\n' +
-        'TEMA O CONTENIDO: ' + contenido + '\n' +
-        'OBJETIVOS DE APRENDIZAJE:\n' + oaTexto + '\n' +
-        'PROFESOR: ' + profesor + '\n' +
-        'DIFICULTAD: ' + difTexto + '\n' +
-        (bloomNames ? 'NIVELES COGNITIVOS BLOOM: ' + bloomNames + '\n' : '') +
-        (tiposNames ? 'TIPOS DE PREGUNTAS: ' + tiposNames + '\n' : '') +
-        'CANTIDAD DE PREGUNTAS/\u00cdTEMS: ' + (evalOpts.cantPreg || 10) + '\n' +
-        'PUNTAJE TOTAL: ' + (evalOpts.puntaje || 40) + ' puntos\n\n' +
-        'REGLAS ESTRICTAS DE FORMATO (MUY IMPORTANTE):\n' +
-        '- NO generes encabezado, portada, logo ni datos institucionales: el sistema ya antepone autom\u00e1ticamente el logo del colegio, el nombre del liceo, el tipo de documento, el t\u00edtulo en barra azul oscuro y una tabla con campos: nombre del estudiante, c\u00f3digo, duraci\u00f3n, profesor, curso, fecha, puntaje. NO los repitas.\n' +
-        '- NO escribas <h1> con el t\u00edtulo del documento (el sistema lo pone en una barra superior). Empieza directamente por el contenido pedag\u00f3gico (secci\u00f3n 1).\n' +
-        '- NO incluyas filas de "Nombre del estudiante", "Fecha", "Curso", "Puntaje", "Profesor" ni similares en el cuerpo: ya est\u00e1n en la tabla del encabezado.\n' +
-        '- Devuelve solo HTML del cuerpo (puedes usar <h2>, <h3>, <p>, <ol>, <ul>, <table>, <strong>, <em>, etc.). Sin <html>, <head>, <body> ni <style>.\n' +
-        '- Estructura sugerida (adapt\u00e1ndose al tipo): 1) instrucciones generales breves, 2) marco te\u00f3rico/contexto (si aplica), 3) actividades/preguntas/\u00edtems numerados, 4) cierre o autoevaluaci\u00f3n.\n' +
-        '- Para selecci\u00f3n m\u00faltiple: incluye las 4 alternativas con texto real, una correcta marcada solo en una clave de respuestas al final entre comentarios <!-- -->.\n' +
-        '- Para verdadero/falso: escribe la afirmaci\u00f3n completa.\n' +
-        '- Integra las actitudes transversales MBE/OAT seleccionadas (' + (valoresArr.length ? valoresArr.join(', ') : 'Responsabilidad y cumplimiento') + ') de forma natural en las consignas.\n' +
-        '- Idioma: espa\u00f1ol, formal, adecuado para el nivel ' + cursoTexto + '.\n' +
-        '- No uses CSS inline excesivo; el sistema ya tiene estilos cargados.\n' +
-        'Genera ahora SOLO el cuerpo del documento:';
+        // Construir contexto único para los builders de prompt
+        var ctxPrompt = {
+            tipoDocSel: tipoDocSeleccionado,
+            tipoNombre: tipoNombre,
+            nombreInst: nombreInst,
+            modNombre:  modNombre,
+            cursoTexto: cursoTexto,
+            contenido:  contenido,
+            oaTexto:    oaTexto,
+            profesor:   profesor,
+            difTexto:   difTexto,
+            dificultad: dificultad,
+            bloomNames: bloomNames,
+            tiposNames: tiposNames,
+            cantPreg:   evalOpts.cantPreg || 10,
+            puntaje:    evalOpts.puntaje  || 40,
+            valoresStr: (valoresArr && valoresArr.length) ? valoresArr.join(', ') : '',
+            valoresArr: valoresArr || []
+        };
+
+        var prompt = _buildPromptPorTipo(tipoDocSeleccionado, ctxPrompt);
 
         // Cargar configuración IA desde Firestore y ejecutar
         setIAStatus('loading', '<span class=\"ia-spinner\">&#9696;</span> Cargando configuraci\u00f3n...');
