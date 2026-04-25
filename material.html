@@ -3213,6 +3213,84 @@
     }
 
     /**
+     * Prompt específico de Prueba Sumativa.
+     * Voz de Jefe de UTP / Experto en Evaluación. 7 ítems obligatorios + tabla de
+     * especificaciones + pauta de corrección y rúbrica analítica de 3 niveles.
+     */
+    function _promptPrueba(ctx) {
+        return 'Actúa como un Jefe de Unidad Técnico Pedagógica (UTP) y Experto en Evaluación Educativa. ' +
+        'Tu tarea es construir un instrumento de evaluación sumativa exhaustivo, válido y alineado a los estándares de evaluación para el aprendizaje.\n\n' +
+        _promptDatos(ctx) +
+        'DATOS DE LA EVALUACIÓN (a respetar estrictamente):\n' +
+        '- Asignatura: ' + ctx.modNombre + '\n' +
+        '- Nivel: ' + ctx.cursoTexto + '\n' +
+        '- Objetivo(s) de Aprendizaje (OA) a evaluar:\n' + (ctx.oaTexto || '(no especificados)') + '\n' +
+        '- Tema Específico: ' + (ctx.contenido || '(no especificado)') + '\n' +
+        '- Puntaje total objetivo: ' + ctx.puntaje + ' puntos (distribúyelos coherentemente entre los 7 ítems).\n\n' +
+
+        'ESTRUCTURA Y REGLAS DEL INSTRUMENTO (en este orden exacto):\n\n' +
+
+        '1. <h2>Tabla de Especificaciones (para el docente)</h2>\n' +
+        '   - Genera una <table> inicial dirigida al docente con estas columnas exactas:\n' +
+        '     "N° de pregunta | Tipo de Ítem | Habilidad de Bloom | Contenido | Puntaje".\n' +
+        '   - Una fila por cada pregunta de los 7 ítems del instrumento. Que el puntaje total sume ' + ctx.puntaje + '.\n\n' +
+
+        '2. <h2>Instrumento de Evaluación</h2>\n' +
+        '   - Redacta la prueba completa dirigida al estudiante, con instrucciones claras y el espacio de puntaje "(__/X pts)" al lado de cada ítem.\n' +
+        '   - Estructúrala en estas 7 secciones obligatorias, cada una con su <h3>:\n\n' +
+
+        '   <h3>Ítem I: Selección Múltiple (Recordar/Comprender)</h3>\n' +
+        '   - Genera 5 preguntas, cada una con 4 alternativas etiquetadas A, B, C, D.\n' +
+        '   - Los distractores deben ser plausibles y basados en errores comunes que cometen los estudiantes.\n' +
+        '   - PROHIBIDO usar "Todas las anteriores", "Ninguna de las anteriores", "A y B", etc.\n' +
+        '   - Usa <ol> para las preguntas y <ol type="A"> o lista con A) B) C) D) para las alternativas.\n\n' +
+
+        '   <h3>Ítem II: Verdadero o Falso (Comprender)</h3>\n' +
+        '   - Genera 5 afirmaciones numeradas.\n' +
+        '   - Incluye explícitamente al inicio del ítem la instrucción: "Marca V o F. JUSTIFICA con una oración cada afirmación que consideres falsa".\n' +
+        '   - Deja un espacio (línea horizontal o "______") después de cada afirmación para la justificación.\n\n' +
+
+        '   <h3>Ítem III: Completar (Recordar)</h3>\n' +
+        '   - Redacta un párrafo breve y coherente sobre el tema con exactamente 5 espacios en blanco marcados como "_____ (1)", "_____ (2)", etc.\n' +
+        '   - Los espacios deben corresponder a conceptos clave del tema, no a palabras triviales.\n' +
+        '   - Debajo del párrafo, deja una lista numerada del 1 al 5 para que el estudiante escriba el concepto faltante.\n\n' +
+
+        '   <h3>Ítem IV: Términos Pareados (Comprender/Relacionar)</h3>\n' +
+        '   - Crea una <table> de 2 columnas: Columna A con 4 conceptos clave (numerados 1-4) y Columna B con 6 definiciones (etiquetadas a, b, c, d, e, f).\n' +
+        '   - La Columna B DEBE tener más opciones que la A para evitar que el estudiante responda por simple descarte.\n' +
+        '   - Las definiciones distractoras (las 2 que sobran) deben ser conceptualmente cercanas pero claramente incorrectas para los conceptos de la Columna A.\n\n' +
+
+        '   <h3>Ítem V: Aplicación (Aplicar)</h3>\n' +
+        '   - Plantea 1 ejercicio práctico directo, adecuado a la asignatura "' + ctx.modNombre + '" y al tema "' + (ctx.contenido || 'el contenido indicado') + '".\n' +
+        '   - Puede ser un problema de cálculo, un análisis paso a paso, una clasificación, una interpretación de gráfico/esquema descrito, etc.\n' +
+        '   - Indica claramente qué se pide y deja espacio para el desarrollo.\n\n' +
+
+        '   <h3>Ítem VI: Análisis de Caso (Analizar)</h3>\n' +
+        '   - Redacta un caso ficticio, una situación problema o un fragmento de texto fuente de 1 a 2 párrafos de extensión, contextualizado al tema.\n' +
+        '   - Luego, formula 2 preguntas de análisis basadas ESTRICTAMENTE en esa lectura (no preguntas generales del tema).\n' +
+        '   - Las preguntas deben requerir descomponer, comparar, relacionar o inferir desde el caso.\n\n' +
+
+        '   <h3>Ítem VII: Desarrollo y Argumentación (Evaluar/Crear)</h3>\n' +
+        '   - Formula 1 pregunta abierta de alta demanda cognitiva donde el estudiante deba asumir una postura, fundamentar una respuesta compleja o proponer una solución.\n' +
+        '   - La consigna debe pedir explícitamente argumentar/justificar/proponer.\n\n' +
+
+        '3. <h2>Pauta de Corrección y Rúbrica (Solucionario para el docente)</h2>\n' +
+        '   - Subtítulo claro <h3>Respuestas Ítems I a V</h3>: entrega las respuestas exactas para los Ítems I, II, III, IV y V. Para el Ítem II incluye además la justificación correcta de las afirmaciones falsas.\n' +
+        '   - Subtítulo <h3>Respuesta Esperada — Ítem VI (Análisis de Caso)</h3>: párrafo breve con los elementos centrales que la respuesta debe contener para cada una de las 2 preguntas.\n' +
+        '   - Subtítulo <h3>Respuesta Esperada — Ítem VII (Desarrollo)</h3>: párrafo breve describiendo qué tesis/argumentos demuestran logro.\n' +
+        '   - Subtítulo <h3>Rúbrica Analítica — Ítems VI y VII</h3>: <table> con columnas exactas\n' +
+        '     "Criterio | Logrado | Medianamente Logrado | Por Lograr", con 3 a 4 criterios (ej: comprensión del caso/tema, calidad de la argumentación, uso de conceptos disciplinares, claridad y estructura). Describe brevemente qué debe demostrar el estudiante en cada nivel.\n\n' +
+
+        (ctx.valoresStr
+            ? 'INTEGRACIÓN DE VALORES MBE:\n' +
+              '- Cuando sea natural, refleja las actitudes ' + ctx.valoresStr + ' en los contextos del Ítem V (Aplicación) o el Ítem VI (Caso). NO crees una sección aparte de "valores".\n\n'
+            : '') +
+
+        _promptReglasComunes() +
+        '\nGenera ahora SOLO el cuerpo HTML de la Prueba Sumativa siguiendo exactamente esta estructura.';
+    }
+
+    /**
      * Prompt genérico (fallback) para tipos aún no rediseñados.
      * Mantiene el comportamiento previo.
      */
@@ -3238,7 +3316,8 @@
     function _buildPromptPorTipo(tipo, ctx) {
         if (tipo === 'guia')   return _promptGuia(ctx);
         if (tipo === 'apunte') return _promptApunte(ctx);
-        // TODO: ficha, evaluacion, prueba, control — Eduardo entregará cada prompt.
+        if (tipo === 'prueba') return _promptPrueba(ctx);
+        // TODO: ficha, evaluacion, control — Eduardo entregará cada prompt.
         return _promptGenerico(ctx);
     }
 
