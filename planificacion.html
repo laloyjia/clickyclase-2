@@ -157,6 +157,85 @@
             width: 100%;
         }
 
+        /* --- DROPDOWN / DETAILS COLAPSABLE --- */
+        .dropdown-panel {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+            transition: border-color 0.2s;
+        }
+        .dropdown-panel:hover { border-color: var(--primary-light); }
+        .dropdown-panel[open] { border-color: var(--primary); }
+
+        .dropdown-panel > summary {
+            list-style: none;
+            cursor: pointer;
+            padding: 0.7rem 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.6rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text);
+            user-select: none;
+            transition: background 0.2s;
+        }
+        .dropdown-panel > summary::-webkit-details-marker { display: none; }
+        .dropdown-panel > summary:hover { background: rgba(255,255,255,0.04); }
+
+        .dropdown-panel > summary::before {
+            content: '▸';
+            font-size: 0.8rem;
+            color: var(--primary-light);
+            transition: transform 0.2s ease;
+            display: inline-block;
+            width: 0.8rem;
+        }
+        .dropdown-panel[open] > summary::before { transform: rotate(90deg); }
+
+        .dropdown-panel .dp-title { flex: 1; }
+
+        .dropdown-panel .dp-badge {
+            background: rgba(108,92,231,0.18);
+            color: var(--primary-light);
+            border: 1px solid rgba(108,92,231,0.4);
+            border-radius: 999px;
+            padding: 0.15rem 0.7rem;
+            font-size: 0.78rem;
+            font-weight: 700;
+            min-width: 1.6rem;
+            text-align: center;
+        }
+        .dropdown-panel .dp-badge.empty {
+            background: rgba(255,255,255,0.03);
+            color: var(--text-muted);
+            border-color: var(--glass-border);
+        }
+
+        .dropdown-panel > .dp-body {
+            padding: 0.5rem 1rem 1rem;
+            border-top: 1px solid var(--glass-border);
+            background: rgba(0,0,0,0.12);
+        }
+
+        /* En el dropdown, los OA se muestran apilados (no inline) para mejor lectura */
+        .dropdown-panel #listaOAMineduc .checkbox-item,
+        .dropdown-panel #listaOAMineduc label.checkbox-item {
+            width: 100%;
+        }
+
+        /* --- UNIDAD / TIEMPO --- */
+        .unidad-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 0.7rem;
+        }
+        @media (max-width: 600px) {
+            .unidad-grid { grid-template-columns: 1fr; }
+        }
+
         /* --- TAGS OAG --- */
         .oag-tags {
             display: flex;
@@ -531,16 +610,34 @@
             <div id="sec-regular-obj" style="display:none">
                 <div class="campo">
                     <label>Objetivos de Aprendizaje Mineduc</label>
-                    <p style="font-size:0.82rem;color:var(--text-muted);margin-bottom:0.5rem">
-                        Selecciona los OA correspondientes a la asignatura y nivel elegidos.
-                    </p>
-                    <div id="listaOAMineduc" class="checkbox-group">
-                        <span style="color: var(--text-muted); font-size:0.85rem;">Selecciona asignatura y nivel para ver los OA.</span>
-                    </div>
+                    <details class="dropdown-panel" id="dropOAMineduc">
+                        <summary>
+                            <span class="dp-title">Selecciona los OA</span>
+                            <span class="dp-badge empty" id="badgeOAMineduc">0</span>
+                        </summary>
+                        <div class="dp-body">
+                            <p style="font-size:0.82rem;color:var(--text-muted);margin:0 0 0.7rem">
+                                Selecciona los OA correspondientes a la asignatura y nivel elegidos.
+                            </p>
+                            <div id="listaOAMineduc" class="checkbox-group">
+                                <span style="color: var(--text-muted); font-size:0.85rem;">Selecciona asignatura y nivel para ver los OA.</span>
+                            </div>
+                        </div>
+                    </details>
                 </div>
                 <div class="campo">
                     <label>Unidad / Período</label>
-                    <input type="text" id="inputUnidadReg" placeholder="Ej: Unidad 2 — Números y operaciones">
+                    <div class="unidad-grid">
+                        <select id="selectUnidadReg" onchange="onCambioUnidadReg()">
+                            <option value="">-- Selecciona una unidad oficial --</option>
+                        </select>
+                        <input type="text" id="inputTiempoReg" placeholder="Tiempo (ej: 9 semanas)" oninput="actualizarUnidadCompuesta()">
+                    </div>
+                    <input type="text" id="inputUnidadRegNombre" placeholder="Nombre de la unidad (editable)" style="margin-top:0.5rem;display:none" oninput="actualizarUnidadCompuesta()">
+                    <input type="hidden" id="inputUnidadReg">
+                    <p id="hintUnidadReg" style="font-size:0.78rem;color:var(--text-muted);margin:0.4rem 0 0;display:none">
+                        Tiempo sugerido por Mineduc: <strong id="hintTiempoSug"></strong>
+                    </p>
                 </div>
             </div>
         </div>
@@ -551,16 +648,32 @@
         <!-- ========== SECCION 3: VALORES (MBE) Y NEE ========== -->
         <div class="seccion-plan">
             <h2><span class="icono">&#128155;</span> Valores <span style="font-size:.7em;font-weight:500;color:var(--text-muted)">· Marco para la Buena Enseñanza</span></h2>
-            <p style="color: var(--text-muted); font-size:0.85rem; margin-bottom:0.8rem;">Actitudes transversales alineadas al MBE (Dominios A/B/C/D) y a los Objetivos de Aprendizaje Transversales (OAT) Mineduc. La IA las integrará de forma natural en la planificación.</p>
-            <div class="checkbox-group" id="valoresSalesianos">
-            </div>
+            <details class="dropdown-panel" id="dropValores">
+                <summary>
+                    <span class="dp-title">Actitudes transversales (MBE / OAT)</span>
+                    <span class="dp-badge empty" id="badgeValores">0</span>
+                </summary>
+                <div class="dp-body">
+                    <p style="color: var(--text-muted); font-size:0.85rem; margin:0 0 0.8rem;">Actitudes transversales alineadas al MBE (Dominios A/B/C/D) y a los Objetivos de Aprendizaje Transversales (OAT) Mineduc. La IA las integrará de forma natural en la planificación.</p>
+                    <div class="checkbox-group" id="valoresSalesianos">
+                    </div>
+                </div>
+            </details>
         </div>
 
         <div class="seccion-plan">
             <h2><span class="icono">&#129513;</span> Necesidades Educativas Especiales (NEE/PIE)</h2>
-            <p style="color: var(--text-muted); font-size:0.85rem; margin-bottom:0.8rem;">Selecciona los diagnosticos presentes en el curso para incluir adecuaciones curriculares.</p>
-            <div class="checkbox-group" id="listaNEE">
-            </div>
+            <details class="dropdown-panel" id="dropNEE">
+                <summary>
+                    <span class="dp-title">Diagnósticos presentes en el curso</span>
+                    <span class="dp-badge empty" id="badgeNEE">0</span>
+                </summary>
+                <div class="dp-body">
+                    <p style="color: var(--text-muted); font-size:0.85rem; margin:0 0 0.8rem;">Selecciona los diagnosticos presentes en el curso para incluir adecuaciones curriculares.</p>
+                    <div class="checkbox-group" id="listaNEE">
+                    </div>
+                </div>
+            </details>
         </div>
 
         <!-- ========== SECCION 4: CONTENIDO DE LA CLASE ========== -->
@@ -761,7 +874,7 @@
             VALORES_SALESIANOS.forEach(function(v) {
                 const item = document.createElement('label');
                 item.className = 'checkbox-item';
-                item.innerHTML = '<input type="checkbox" value="' + v + '" onchange="toggleCheckItem(this)"> ' + v;
+                item.innerHTML = '<input type="checkbox" value="' + v + '" onchange="toggleCheckItem(this); actualizarBadgeValores();"> ' + v;
                 contValores.appendChild(item);
             });
 
@@ -770,9 +883,14 @@
             DIAGNOSTICOS_NEE.forEach(function(n) {
                 const item = document.createElement('label');
                 item.className = 'checkbox-item';
-                item.innerHTML = '<input type="checkbox" value="' + n.id + '" data-nombre="' + n.nombre + '" data-desc="' + n.desc + '" onchange="toggleCheckItem(this)"> ' + n.nombre;
+                item.innerHTML = '<input type="checkbox" value="' + n.id + '" data-nombre="' + n.nombre + '" data-desc="' + n.desc + '" onchange="toggleCheckItem(this); actualizarBadgeNEE();"> ' + n.nombre;
                 contNEE.appendChild(item);
             });
+
+            // Inicializar badges en 0
+            actualizarBadgeOA();
+            actualizarBadgeValores();
+            actualizarBadgeNEE();
 
             // Inicializar curriculo según perfil del profesor
             initCurriculo(user);
@@ -914,6 +1032,10 @@
         var sigla = _resolveAsigSiglaLocal(asigNombre);
         var nivel = nivelRaw;  // ya viene en formato '1B', '2M', etc.
 
+        // Limpiar unidades cada vez que cambian asig/nivel
+        cargarUnidadesRegular(sigla, nivel);
+        actualizarBadgeOA();
+
         if (!sigla || !nivel || typeof CURRICULA_CHILE === 'undefined') {
             container.innerHTML = '<span style="color:var(--text-muted);font-size:0.85rem">Selecciona asignatura y nivel para ver los OA.</span>';
             return;
@@ -936,13 +1058,133 @@
             byEje[eje].forEach(function(o) {
                 var desc = o.desc || o.descripcion || '';
                 var tip  = desc.replace(/"/g,'&quot;');
-                html += '<label class="checkbox-item" title="' + tip + '" style="align-items:flex-start;gap:8px">' +
-                    '<input type="checkbox" class="oaRegCheck" value="' + o.codigo + '" data-desc="' + tip + '" onchange="toggleCheckItem(this)">' +
-                    '<span><strong>' + o.codigo + '</strong> — ' + (desc.slice(0,120) || '…') + (desc.length > 120 ? '…' : '') + '</span>' +
+                html += '<label class="checkbox-item" title="' + tip + '" style="align-items:flex-start;gap:8px;width:100%">' +
+                    '<input type="checkbox" class="oaRegCheck" value="' + o.codigo + '" data-desc="' + tip + '" onchange="toggleCheckItem(this); actualizarBadgeOA();">' +
+                    '<span><strong>' + o.codigo + '</strong> — ' + (desc.slice(0,140) || '…') + (desc.length > 140 ? '…' : '') + '</span>' +
                     '</label>';
             });
         });
         container.innerHTML = html;
+    }
+
+    // ─────────────────────────────────────────────────────────────────────
+    // UNIDAD / TIEMPO — selector poblado desde plan común oficial
+    // ─────────────────────────────────────────────────────────────────────
+    // Tiempos sugeridos por defecto según tramo (Programas Mineduc):
+    //   · Plan común suele dividir el año en 4 unidades de ~9 semanas c/u.
+    //   · El docente puede sobrescribir con cualquier valor.
+    var TIEMPO_SUG_DEFAULT = '8 a 9 semanas';
+
+    function cargarUnidadesRegular(sigla, nivel) {
+        var sel = document.getElementById('selectUnidadReg');
+        if (!sel) return;
+        sel.innerHTML = '<option value="">-- Selecciona una unidad oficial --</option>';
+        var nomInput = document.getElementById('inputUnidadRegNombre');
+        var hidden   = document.getElementById('inputUnidadReg');
+        var hint     = document.getElementById('hintUnidadReg');
+        if (nomInput) { nomInput.value = ''; nomInput.style.display = 'none'; }
+        if (hidden)   { hidden.value = ''; }
+        if (hint)     { hint.style.display = 'none'; }
+
+        if (!sigla || !nivel || typeof CURRICULA_CHILE === 'undefined') return;
+        var unidades = (typeof CURRICULA_CHILE.getUnidades === 'function')
+            ? CURRICULA_CHILE.getUnidades(sigla, nivel)
+            : [];
+        if (!unidades || !unidades.length) {
+            var optManual = document.createElement('option');
+            optManual.value = '__custom__';
+            optManual.textContent = '✎ Escribir unidad personalizada…';
+            sel.appendChild(optManual);
+            return;
+        }
+        unidades.forEach(function(u, i) {
+            var nombre = (typeof u === 'string') ? u : (u && u.nombre) || ('Unidad ' + (i+1));
+            var opt = document.createElement('option');
+            opt.value = nombre;
+            opt.textContent = 'Unidad ' + (i+1) + ': ' + nombre;
+            sel.appendChild(opt);
+        });
+        var optCustom = document.createElement('option');
+        optCustom.value = '__custom__';
+        optCustom.textContent = '✎ Escribir unidad personalizada…';
+        sel.appendChild(optCustom);
+    }
+
+    function onCambioUnidadReg() {
+        var sel       = document.getElementById('selectUnidadReg');
+        var nomInput  = document.getElementById('inputUnidadRegNombre');
+        var tiempoIn  = document.getElementById('inputTiempoReg');
+        var hint      = document.getElementById('hintUnidadReg');
+        var hintSug   = document.getElementById('hintTiempoSug');
+        if (!sel) return;
+
+        if (sel.value === '__custom__') {
+            if (nomInput) { nomInput.style.display = ''; nomInput.value = ''; nomInput.focus(); }
+        } else if (sel.value) {
+            if (nomInput) { nomInput.style.display = 'none'; nomInput.value = sel.value; }
+        } else {
+            if (nomInput) { nomInput.style.display = 'none'; nomInput.value = ''; }
+        }
+
+        // Sugerencia de tiempo si está vacío
+        if (tiempoIn && !tiempoIn.value && sel.value && sel.value !== '__custom__') {
+            tiempoIn.placeholder = 'Tiempo (ej: ' + TIEMPO_SUG_DEFAULT + ')';
+            if (hint && hintSug) {
+                hintSug.textContent = TIEMPO_SUG_DEFAULT;
+                hint.style.display = '';
+            }
+        } else if (hint) {
+            hint.style.display = 'none';
+        }
+        actualizarUnidadCompuesta();
+    }
+
+    function actualizarUnidadCompuesta() {
+        var sel       = document.getElementById('selectUnidadReg');
+        var nomInput  = document.getElementById('inputUnidadRegNombre');
+        var tiempoIn  = document.getElementById('inputTiempoReg');
+        var hidden    = document.getElementById('inputUnidadReg');
+        if (!hidden) return;
+        var nombre = '';
+        if (sel && sel.value === '__custom__') {
+            nombre = (nomInput && nomInput.value) ? nomInput.value.trim() : '';
+        } else if (sel && sel.value) {
+            // si el usuario edita el nombre de una unidad oficial, preferimos su edición
+            if (nomInput && nomInput.style.display !== 'none' && nomInput.value) {
+                nombre = nomInput.value.trim();
+            } else {
+                nombre = sel.value;
+            }
+        }
+        var tiempo = (tiempoIn && tiempoIn.value) ? tiempoIn.value.trim() : '';
+        var compuesto = '';
+        if (nombre && tiempo)      compuesto = nombre + ' — ' + tiempo;
+        else if (nombre)            compuesto = nombre;
+        else if (tiempo)            compuesto = tiempo;
+        hidden.value = compuesto;
+    }
+
+    // ─────────────────────────────────────────────────────────────────────
+    // BADGES (contador en summary de cada dropdown)
+    // ─────────────────────────────────────────────────────────────────────
+    function _setBadge(badgeId, count) {
+        var b = document.getElementById(badgeId);
+        if (!b) return;
+        b.textContent = String(count);
+        if (count > 0) b.classList.remove('empty');
+        else           b.classList.add('empty');
+    }
+    function actualizarBadgeOA() {
+        var n = document.querySelectorAll('#listaOAMineduc .oaRegCheck:checked').length;
+        _setBadge('badgeOAMineduc', n);
+    }
+    function actualizarBadgeValores() {
+        var n = document.querySelectorAll('#valoresSalesianos input[type="checkbox"]:checked').length;
+        _setBadge('badgeValores', n);
+    }
+    function actualizarBadgeNEE() {
+        var n = document.querySelectorAll('#listaNEE input[type="checkbox"]:checked').length;
+        _setBadge('badgeNEE', n);
     }
 
     function filtrarModulos() {
