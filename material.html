@@ -2238,13 +2238,24 @@
         var valTexto = valores.length > 0 ? valores.join(', ') : 'Responsabilidad';
         var contCorto = cont.length > 70 ? cont.substring(0, 67) + '...' : cont;
 
-        return '<h1>APUNTE DE CLASE</h1>' +
-        '<div class="doc-subtitulo">Colegio Chile &bull; Especialidad Electronica &bull; Formacion Diferenciada TP<br>' +
-        'Modulo: ' + mod.num + ' &ndash; ' + mod.nombre + ' &nbsp;|&nbsp; Curso: ' + curso + '<br>Profesor: ' + prof + '</div>' +
+        var tituloDoc = (cont || ae.texto || mod.nombre || 'Apunte de clase').toString();
+        if (tituloDoc.length > 90) {
+            var corte = tituloDoc.lastIndexOf(' ', 90);
+            tituloDoc = tituloDoc.substring(0, corte > 50 ? corte : 90) + '…';
+        }
+
+        return headerInstitucional('Apunte de clase') +
+        tituloBar(tituloDoc) +
+        metaTabla({ profesor: prof, curso: curso }) +
+
+        '<div class="doc-subtitulo" style="margin-top:0.2rem;">' +
+            'Módulo / Asignatura: <strong>' + (mod.nombre || mod.num || '') + '</strong> &nbsp;|&nbsp; ' +
+            'Valores (MBE): <strong>' + valTexto + '</strong>' +
+        '</div>' +
 
         '<div class="recuadro">' +
-        '<strong>&#127919; ' + oaId + ':</strong> ' + mod.oas[oaId] + '<br><br>' +
-        '<strong>&#128205; AE ' + aeNum + ':</strong> ' + ae.texto + '<br><br>' +
+        '<strong>&#127919; ' + oaId + ':</strong> ' + (mod.oas && mod.oas[oaId] ? mod.oas[oaId] : '') + '<br><br>' +
+        '<strong>&#128205; AE ' + aeNum + ':</strong> ' + (ae && ae.texto ? ae.texto : '') + '<br><br>' +
         '<strong>&#128196; Tema:</strong> ' + cont +
         '</div>' +
 
@@ -2387,7 +2398,7 @@
         '<li>Manuales tecnicos de fabricantes: Siemens, Schneider Electric, ABB, Allen-Bradley, Phoenix Contact.</li>' +
         '<li>Norma Electrica Chilena NCh Elec. 4/2003 y actualizaciones vigentes.</li>' +
         '<li>IEC 60364: Instalaciones Electricas en Edificios. IEC 61131: Controladores Programables.</li>' +
-        '<li>Plataforma ElectroLearn &mdash; Colegio Chile: recursos digitales del modulo.</li>' +
+        '<li>Plataforma ElectroLearn — recursos digitales de la asignatura/módulo.</li>' +
         '</ul>' +
 
         '<div class="recuadro"><strong>&#128155; Reflexion Salesiana:</strong> El valor de <strong>' + val1 + '</strong> nos recuerda que la excelencia tecnica no es solo saber hacer, ' +
@@ -2410,16 +2421,20 @@
             return '<tr><td style="font-size:0.82rem;">' + t + '</td><td style="text-align:center;">20</td><td>' + lineas(1) + '</td></tr>';
         }).join('');
 
-        return '<h1>FICHA DE TRABAJO PRACTICO</h1>' +
-        '<div class="doc-subtitulo">Colegio Chile &bull; Taller de Electronica &bull; Formacion Diferenciada TP<br>' +
-        'Modulo: ' + mod.num + ' &ndash; ' + mod.nombre + ' &nbsp;|&nbsp; Curso: ' + curso + '<br>Profesor: ' + prof + '</div>' +
+        var tituloDocFP = (cont || ae.texto || mod.nombre || 'Ficha de trabajo práctico').toString();
+        if (tituloDocFP.length > 90) {
+            var corteFP = tituloDocFP.lastIndexOf(' ', 90);
+            tituloDocFP = tituloDocFP.substring(0, corteFP > 50 ? corteFP : 90) + '…';
+        }
 
-        '<table>' +
-        '<tr><th style="width:28%">Nombre(s) del estudiante</th><td colspan="3">' + lineas(1) + '</td></tr>' +
-        '<tr><th>Fecha</th><td>' + lineas(1) + '</td><th>Grupo N&deg;</th><td>' + lineas(1) + '</td></tr>' +
-        '<tr><th>Modulo / Actividad</th><td colspan="3" style="font-size:0.83rem;">' + mod.num + ' &ndash; ' + cont + '</td></tr>' +
-        '<tr><th>Tiempo estimado</th><td>' + difTexto + '</td><th>Firma profesor</th><td>' + lineas(1) + '</td></tr>' +
-        '</table>' +
+        return headerInstitucional('Ficha de trabajo práctico') +
+        tituloBar(tituloDocFP) +
+        metaTabla({ profesor: prof, curso: curso, duracion: difTexto }) +
+
+        '<div class="doc-subtitulo" style="margin-top:0.2rem;">' +
+            'Módulo / Taller: <strong>' + (mod.nombre || mod.num || '') + '</strong> &nbsp;|&nbsp; ' +
+            'Actividad: <strong>' + cont + '</strong>' +
+        '</div>' +
 
         '<div class="recuadro-seguridad">' +
         '<strong>&#9888; PROTOCOLO DE SEGURIDAD OBLIGATORIO &mdash; Firma antes de comenzar</strong><br>' +
@@ -2648,15 +2663,22 @@
         var seccionesResumen = [];
 
         // ENCABEZADO
-        html += '<h1>GUIA DE EJERCICIOS</h1>' +
-        '<div class="doc-subtitulo">Colegio Chile &bull; ' + area + ' &bull; Curso: ' + curso + '<br>' +
-        'Profesor(a): ' + prof + ' &nbsp;|&nbsp; Nivel: ' + difTexto + '</div>' +
+        var tituloDocGE = (cont || ae.texto || mod.nombre || 'Guía de ejercicios').toString();
+        if (tituloDocGE.length > 90) {
+            var corteGE = tituloDocGE.lastIndexOf(' ', 90);
+            tituloDocGE = tituloDocGE.substring(0, corteGE > 50 ? corteGE : 90) + '…';
+        }
+        html += headerInstitucional('Guía de ejercicios') +
+        tituloBar(tituloDocGE) +
+        metaTabla({ profesor: prof, curso: curso, puntaje: puntaje + ' pts' }) +
+
+        '<div class="doc-subtitulo" style="margin-top:0.2rem;">' +
+            'Asignatura / Módulo: <strong>' + area + '</strong> &nbsp;|&nbsp; ' +
+            'Nivel: <strong>' + difTexto + '</strong>' +
+        '</div>' +
 
         '<table>' +
-        '<tr><th style="width:30%">Nombre del estudiante</th><td colspan="3">' + lineas(1) + '</td></tr>' +
-        '<tr><th>Fecha</th><td>' + lineas(1) + '</td><th>Puntaje obtenido</th><td>_____ / ' + puntaje + ' pts</td></tr>' +
-        '<tr><th>OA (' + oaId + ')</th><td colspan="3" style="font-size:0.83rem;">' + oaTxt + '</td></tr>' +
-        '<tr><th>Tema</th><td colspan="3">' + cont + '</td></tr>' +
+        '<tr><th style="width:30%">OA (' + oaId + ')</th><td style="font-size:0.83rem;">' + oaTxt + '</td></tr>' +
         '</table>' +
 
         '<div class="recuadro-importante"><strong>&#128221; Instrucciones generales:</strong> Lee cada pregunta completa antes de responder. ' +
@@ -2823,23 +2845,29 @@
         var aeTxt = ae.texto || cont;
         var oaTxt = (mod.oas && mod.oas[oaId]) ? mod.oas[oaId] : (aeTxt.substring(0,120));
 
-        // Portada
-        var html = '<div class="portada-box">' +
-        '<div style="text-align:center;margin-bottom:1rem">' +
-        '<div class="prueba-badge">PRUEBA SUMATIVA</div>' +
-        '<div style="font-size:.85rem;color:#636e72;margin-top:4px">' + area + ' &bull; Colegio Chile</div>' +
+        // Portada institucional
+        var tituloDocPR = (cont || aeTxt || mod.nombre || 'Prueba sumativa').toString();
+        if (tituloDocPR.length > 90) {
+            var cortePR = tituloDocPR.lastIndexOf(' ', 90);
+            tituloDocPR = tituloDocPR.substring(0, cortePR > 50 ? cortePR : 90) + '…';
+        }
+        var html = headerInstitucional('Prueba sumativa') +
+        tituloBar(tituloDocPR) +
+        metaTabla({ profesor: prof, curso: curso, puntaje: puntaje + ' pts' }) +
+
+        '<div class="doc-subtitulo" style="margin-top:0.2rem;">' +
+            'Asignatura / Módulo: <strong>' + area + '</strong> &nbsp;|&nbsp; ' +
+            'Nivel: <strong>' + difTexto + '</strong>' +
         '</div>' +
+
         '<table>' +
-        '<tr><th style="width:30%">Nombre</th><td colspan="3">' + lineas(1) + '</td></tr>' +
-        '<tr><th>Curso</th><td>' + curso + '</td><th>Fecha</th><td>' + lineas(1) + '</td></tr>' +
-        '<tr><th>OA evaluado</th><td colspan="3" style="font-size:.82rem;">' + oaTxt + '</td></tr>' +
-        '<tr><th>Tema</th><td colspan="3">' + contCorto + '</td></tr>' +
-        '<tr><th>Profesor(a)</th><td>' + prof + '</td><th>Puntaje obtenido</th><td style="font-size:1rem;font-weight:700;">_____ / ' + puntaje + ' pts</td></tr>' +
+        '<tr><th style="width:30%">OA evaluado (' + oaId + ')</th><td style="font-size:.82rem;">' + oaTxt + '</td></tr>' +
         '</table>' +
-        '<div style="font-size:.8rem;color:#636e72;margin-top.6rem;padding:.6rem;background:#f8f9fa;border-radius:6px;">' +
+
+        '<div class="recuadro-importante" style="font-size:.85rem;">' +
         '<strong>Instrucciones:</strong> Lee cada pregunta con atención antes de responder. Escribe con letra clara y legible. Fundamenta tus respuestas cuando se indique. ' +
         'Cualquier tipo de copia o deshonestidad académica anulará tu evaluación. El valor de la <strong>' + val1 + '</strong> se refleja en cada decisión que tomes.' +
-        '</div></div>';
+        '</div>';
 
         var numQ = 1;
         var seccionRubrica = [];
@@ -2987,18 +3015,25 @@
         var bloomLvls = evalOpts.bloomLevels && evalOpts.bloomLevels.length ? evalOpts.bloomLevels : [1,2,3];
         var oaTxt = (mod.oas && mod.oas[oaId]) ? mod.oas[oaId] : (ae.texto || cont).substring(0, 100);
 
-        var html = '<div class="portada-box">' +
-        '<div style="text-align:center;margin-bottom:.8rem">' +
-        '<div class="control-badge">CONTROL FORMATIVO</div>' +
-        '<div style="font-size:.82rem;color:#636e72;margin-top:4px">' + area + ' &bull; Colegio Chile &bull; ' + curso + '</div>' +
+        var tituloDocCT = (cont || ae.texto || mod.nombre || 'Control formativo').toString();
+        if (tituloDocCT.length > 90) {
+            var corteCT = tituloDocCT.lastIndexOf(' ', 90);
+            tituloDocCT = tituloDocCT.substring(0, corteCT > 50 ? corteCT : 90) + '…';
+        }
+        var html = headerInstitucional('Control formativo') +
+        tituloBar(tituloDocCT) +
+        metaTabla({ profesor: prof, curso: curso, duracion: '10–15 min', puntaje: puntaje + ' pts' }) +
+
+        '<div class="doc-subtitulo" style="margin-top:0.2rem;">' +
+            'Asignatura / Módulo: <strong>' + area + '</strong> &nbsp;|&nbsp; ' +
+            'Tema: <strong>' + contCorto + '</strong>' +
         '</div>' +
+
         '<table>' +
-        '<tr><th style="width:35%">Nombre</th><td>' + lineas(1) + '</td><th style="width:20%">Fecha</th><td>' + lineas(1) + '</td></tr>' +
-        '<tr><th>Tema</th><td colspan="3">' + contCorto + '</td></tr>' +
-        '<tr><th>Profesor(a)</th><td>' + prof + '</td><th>Puntaje</th><td>_____ / ' + puntaje + ' pts</td></tr>' +
+        '<tr><th style="width:30%">OA evaluado (' + oaId + ')</th><td style="font-size:.82rem;">' + oaTxt + '</td></tr>' +
         '</table>' +
-        '<p style="font-size:.8rem;color:#636e72;margin-top:.5rem">Tiempo estimado: 10–15 minutos &bull; Responde con letra clara &bull; ' + val1 + ' ante todo.</p>' +
-        '</div>';
+
+        '<p style="font-size:.85rem;color:#555;margin:0.6rem 0 1rem 0;">Responde con letra clara · El valor de la <strong>' + val1 + '</strong> guía tu trabajo.</p>';
 
         var numQ = 1;
         var ptsCu = Math.floor(puntaje / cantPreg);
