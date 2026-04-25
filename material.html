@@ -3115,9 +3115,12 @@
 
         var difTexto = { basico:'b\u00e1sico (primer acercamiento al tema, lenguaje simple)', intermedio:'intermedio (aplicaci\u00f3n pr\u00e1ctica, lenguaje t\u00e9cnico moderado)', avanzado:'avanzado (an\u00e1lisis cr\u00edtico, resoluci\u00f3n de problemas complejos)' }[dificultad] || dificultad;
 
+        var nombreInst = _nombreInstitucion() || 'la institución educativa';
+
         var prompt = 'Eres un experto en educaci\u00f3n chilena MINEDUC con conocimiento del curr\u00edculum nacional vigente. ' +
-        'Genera un documento educativo completo en HTML para imprimir en clase.\n\n' +
+        'Genera el CUERPO de un documento educativo en HTML para imprimir en clase.\n\n' +
         'TIPO DE DOCUMENTO: ' + tipoNombre + '\n' +
+        'INSTITUCI\u00d3N: ' + nombreInst + '\n' +
         'ASIGNATURA/M\u00d3DULO: ' + modNombre + '\n' +
         'CURSO/NIVEL: ' + cursoTexto + '\n' +
         'TEMA O CONTENIDO: ' + contenido + '\n' +
@@ -3128,15 +3131,18 @@
         (tiposNames ? 'TIPOS DE PREGUNTAS: ' + tiposNames + '\n' : '') +
         'CANTIDAD DE PREGUNTAS/\u00cdTEMS: ' + (evalOpts.cantPreg || 10) + '\n' +
         'PUNTAJE TOTAL: ' + (evalOpts.puntaje || 40) + ' puntos\n\n' +
-        'INSTRUCCIONES PARA EL HTML:\n' +
-        '- El documento debe estar en HTML completo con estilos CSS inline.\n' +
-        '- Incluye portada con nombre del establecimiento "Liceo Salesiano de Talca", nombre del profesor, fecha, curso.\n' +
-        '- Usa fuentes limpias, formato listo para imprimir (m\u00e1rgenes, separaci\u00f3n de secciones).\n' +
-        '- Para selecci\u00f3n m\u00faltiple: incluye las 4 alternativas con texto real, una correcta.\n' +
+        'REGLAS ESTRICTAS DE FORMATO (MUY IMPORTANTE):\n' +
+        '- NO generes encabezado, portada, logo ni datos institucionales: el sistema ya antepone autom\u00e1ticamente el logo del colegio, el nombre del liceo, el tipo de documento, el t\u00edtulo en barra azul oscuro y una tabla con campos: nombre del estudiante, c\u00f3digo, duraci\u00f3n, profesor, curso, fecha, puntaje. NO los repitas.\n' +
+        '- NO escribas <h1> con el t\u00edtulo del documento (el sistema lo pone en una barra superior). Empieza directamente por el contenido pedag\u00f3gico (secci\u00f3n 1).\n' +
+        '- NO incluyas filas de "Nombre del estudiante", "Fecha", "Curso", "Puntaje", "Profesor" ni similares en el cuerpo: ya est\u00e1n en la tabla del encabezado.\n' +
+        '- Devuelve solo HTML del cuerpo (puedes usar <h2>, <h3>, <p>, <ol>, <ul>, <table>, <strong>, <em>, etc.). Sin <html>, <head>, <body> ni <style>.\n' +
+        '- Estructura sugerida (adapt\u00e1ndose al tipo): 1) instrucciones generales breves, 2) marco te\u00f3rico/contexto (si aplica), 3) actividades/preguntas/\u00edtems numerados, 4) cierre o autoevaluaci\u00f3n.\n' +
+        '- Para selecci\u00f3n m\u00faltiple: incluye las 4 alternativas con texto real, una correcta marcada solo en una clave de respuestas al final entre comentarios <!-- -->.\n' +
         '- Para verdadero/falso: escribe la afirmaci\u00f3n completa.\n' +
-        '- Integra las actitudes transversales MBE/OAT seleccionadas (' + (valoresArr.length ? valoresArr.join(', ') : 'Responsabilidad y cumplimiento') + ') de forma natural.\n' +
+        '- Integra las actitudes transversales MBE/OAT seleccionadas (' + (valoresArr.length ? valoresArr.join(', ') : 'Responsabilidad y cumplimiento') + ') de forma natural en las consignas.\n' +
         '- Idioma: espa\u00f1ol, formal, adecuado para el nivel ' + cursoTexto + '.\n' +
-        'Genera el documento ahora:';
+        '- No uses CSS inline excesivo; el sistema ya tiene estilos cargados.\n' +
+        'Genera ahora SOLO el cuerpo del documento:';
 
         // Cargar configuración IA desde Firestore y ejecutar
         setIAStatus('loading', '<span class=\"ia-spinner\">&#9696;</span> Cargando configuraci\u00f3n...');
@@ -3196,10 +3202,34 @@ var modelo = _modeloGuardado;
                         return;
                     }
                     text = text.replace(/^```html\s*/i, '').replace(/^```\s*/i, '').replace(/\s*```\s*$/i, '').trim();
-                    document.getElementById('docPreview').innerHTML = text;
+                    // Si la IA igual envió documento completo, extraer solo el body
+                    var mBody = text.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
+                    if (mBody) text = mBody[1].trim();
+                    // Quitar <html>/<head>/<style> sueltos por si vinieron sin <body>
+                    text = text.replace(/<!doctype[^>]*>/gi, '')
+                               .replace(/<\/?html[^>]*>/gi, '')
+                               .replace(/<head[\s\S]*?<\/head>/gi, '')
+                               .replace(/<style[\s\S]*?<\/style>/gi, '')
+                               .replace(/<\/?body[^>]*>/gi, '')
+                               .trim();
+                    // Quitar el primer <h1> que contenga el título del doc (la IA a veces no obedece)
+                    text = text.replace(/^\s*<h1[^>]*>[\s\S]*?<\/h1>/i, '').trim();
+
+                    // Construir título del documento (lo que va en la barra azul oscuro)
+                    var tituloDoc = (contenido || tipoNombre || 'Documento').toString();
+                    if (tituloDoc.length > 90) {
+                        var corte = tituloDoc.lastIndexOf(' ', 90);
+                        tituloDoc = tituloDoc.substring(0, corte > 50 ? corte : 90) + '…';
+                    }
+
+                    var headerHtml = headerInstitucional(tipoNombre) +
+                                     tituloBar(tituloDoc) +
+                                     metaTabla({ profesor: profesor, curso: cursoTexto });
+
+                    document.getElementById('docPreview').innerHTML = headerHtml + text + pieDoc();
                     document.getElementById('docGenerado').classList.add('visible');
                     document.getElementById('docGenerado').scrollIntoView({ behavior: 'smooth' });
-                    setIAStatus('ok', '&#10003; Documento generado con IA (' + modelo + ') exitosamente. Puedes imprimirlo o publicarlo en la Biblioteca.');
+                    setIAStatus('ok', '&#10003; Documento generado con IA exitosamente. Puedes imprimirlo o publicarlo en la Biblioteca.');
                 })
                 .catch(function(err) {
                     document.getElementById('btnIA').disabled = false;
