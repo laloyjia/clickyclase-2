@@ -211,45 +211,85 @@ CURRICULA_PLAN_COMUN['historia'] = {
   }
 };
 
-CURRICULA_PLAN_COMUN['chile-latam'] = {
-  nombre: 'Chile y la región latinoamericana',
-  sigla:  'CLA',
-  niveles: ['3M','4M'],
-  oas: {
-    '3M': [
-      { codigo: 'OA1', eje: 'Historia',             descripcion: 'Analizar los procesos de conformación de la nación y de los Estados latinoamericanos durante el siglo XIX, considerando los proyectos políticos, la consolidación territorial, las luchas por la independencia y la organización de las nuevas repúblicas, y evaluar la influencia de estos procesos en la identidad regional.' },
-      { codigo: 'OA2', eje: 'Historia',             descripcion: 'Analizar las transformaciones económicas, sociales y políticas de Chile y América Latina durante el siglo XX (modernización, industrialización, populismos, revoluciones, dictaduras militares, retorno a la democracia) e interpretar su proyección hacia el presente.' },
-      { codigo: 'OA3', eje: 'Geografía',            descripcion: 'Caracterizar el espacio geográfico de Chile y América Latina considerando la diversidad de paisajes, climas, recursos naturales y formas de poblamiento, y evaluar los desafíos ambientales y territoriales actuales (megaminería, deforestación amazónica, contaminación urbana, escasez hídrica).' },
-      { codigo: 'OA4', eje: 'Sociedad y cultura',   descripcion: 'Analizar la diversidad social y cultural de América Latina considerando la multiculturalidad, los pueblos indígenas, la herencia afrodescendiente, las migraciones y los procesos de hibridación cultural, y reconocer su aporte a la identidad regional.' },
-      { codigo: 'OA5', eje: 'Formación Ciudadana',  descripcion: 'Evaluar los desafíos comunes que enfrentan los países latinoamericanos en materia de democracia, derechos humanos, desigualdad social, violencia, corrupción, narcotráfico y migraciones, y proponer estrategias de cooperación regional.' },
-      { codigo: 'OA6', eje: 'Formación Ciudadana',  descripcion: 'Analizar el rol de Chile en América Latina y en el mundo, considerando los procesos de integración regional (Mercosur, Alianza del Pacífico, Unasur, Celac), la cooperación internacional y el lugar de Chile en organismos multilaterales.' }
-    ],
-    '4M': [
-      { codigo: 'OA1', eje: 'Historia',             descripcion: 'Analizar los procesos de cambio social en América Latina en el siglo XXI, considerando movimientos indígenas, feministas, estudiantiles, medioambientales, y evaluar su impacto en las agendas políticas nacionales y regionales.' },
-      { codigo: 'OA2', eje: 'Geografía',            descripcion: 'Evaluar las desigualdades territoriales y socioeconómicas al interior de Chile y entre los países de América Latina, considerando indicadores de desarrollo humano, concentración de la riqueza, acceso a servicios, y proponer estrategias para su superación.' },
-      { codigo: 'OA3', eje: 'Sociedad y cultura',   descripcion: 'Analizar los desafíos culturales contemporáneos en Chile y América Latina, considerando la protección del patrimonio, la industria cultural, la circulación de las artes, el acceso a la cultura y el rol de los medios digitales.' }
-    ]
-  }
-};
+// =============================================================================
+//  ELECTIVOS DE FORMACIÓN GENERAL — 3° y 4° medio
+//  Fuente: Bases Curriculares 3°–4° medio (DS 193/2019).
+//  OAs idénticos para 3°M y 4°M según Programa de Estudio Mineduc 2021.
+// =============================================================================
 
-CURRICULA_PLAN_COMUN['mundo-global'] = {
-  nombre: 'Comprensión histórica del presente (Mundo global)',
-  sigla:  'MUG',
-  niveles: ['3M','4M'],
-  oas: {
-    '3M': [
-      { codigo: 'OA1', eje: 'Historia',             descripcion: 'Analizar los principales procesos históricos que han configurado el mundo global actual, considerando el fin de la Guerra Fría, la reunificación alemana, la disolución de la URSS, el auge del neoliberalismo, la emergencia de China e India y la redefinición de las relaciones internacionales.' },
-      { codigo: 'OA2', eje: 'Geografía',            descripcion: 'Evaluar el impacto de la globalización económica en las sociedades contemporáneas, considerando la interdependencia financiera, la deslocalización productiva, los tratados de libre comercio y la emergencia de nuevos actores económicos.' },
-      { codigo: 'OA3', eje: 'Sociedad y cultura',   descripcion: 'Analizar los procesos de hibridación y homogeneización cultural en un mundo globalizado, considerando el rol de los medios de comunicación, las industrias culturales, internet, las redes sociales y el surgimiento de identidades transnacionales.' },
-      { codigo: 'OA4', eje: 'Sociedad y cultura',   descripcion: 'Reconocer la multiculturalidad y la diversidad religiosa como rasgos de las sociedades contemporáneas, y evaluar los desafíos de la convivencia en contextos de pluralismo cultural, migración y tensiones interculturales.' },
-      { codigo: 'OA5', eje: 'Formación Ciudadana',  descripcion: 'Analizar los principales desafíos globales del siglo XXI (cambio climático, terrorismo, crisis migratorias, pandemias, desigualdad global, ciberseguridad) y evaluar el rol de los organismos internacionales, los Estados y la ciudadanía global en su abordaje.' },
-      { codigo: 'OA6', eje: 'Formación Ciudadana',  descripcion: 'Evaluar el concepto de ciudadanía global y los desafíos éticos y políticos que enfrentan las democracias contemporáneas (populismos, polarización, posverdad, amenazas a las libertades, desinformación) y proponer formas de compromiso crítico con el mundo global.' }
-    ],
-    '4M': [
-      { codigo: 'OA1', eje: 'Historia',             descripcion: 'Analizar la emergencia de nuevas potencias y la redefinición del orden mundial en el siglo XXI, considerando el auge de Asia-Pacífico, el rol de China como actor global, los conflictos en Medio Oriente y los desafíos del multilateralismo.' },
-      { codigo: 'OA2', eje: 'Geografía',            descripcion: 'Analizar los procesos de transformación del espacio urbano contemporáneo (metropolización, segregación, gentrificación, sostenibilidad urbana) y evaluar sus impactos sociales, económicos y ambientales.' },
-      { codigo: 'OA3', eje: 'Sociedad y cultura',   descripcion: 'Evaluar el impacto de las tecnologías digitales en la sociedad contemporánea, considerando la revolución de los datos, la inteligencia artificial, la automatización del trabajo, y los desafíos éticos y políticos que emergen.' }
+(function buildOasCLA() {
+  var OAS_CLA = [
+    { codigo:'OA1', eje:'Conocimiento y comprensión', descripcion:'Analizar procesos sociales y culturales recientes de Chile y América Latina tales como migraciones, cambios demográficos y urbanización, considerando avances y desafíos comunes en materia de equidad, diversidad e interculturalidad.' },
+    { codigo:'OA2', eje:'Conocimiento y comprensión', descripcion:'Explicar procesos comunes de los Estados latinoamericanos en la historia política reciente, incluyendo la relación entre el poder civil y las fuerzas armadas, transiciones, la defensa y promoción de los derechos humanos y el fortalecimiento de las democracias.' },
+    { codigo:'OA3', eje:'Conocimiento y comprensión', descripcion:'Investigar cómo en América Latina los Estados responden a desafíos económicos y sociales, como pobreza, desigualdad, crecimiento económico, desarrollo social y diversificación de la matriz productiva, aplicando conceptos de la economía e información de fuentes e indicadores económicos (PIB, distribución del ingreso, empleo y producción, entre otros).' },
+    { codigo:'OA4', eje:'Conocimiento y comprensión', descripcion:'Analizar, a partir de distintas interpretaciones y perspectivas, el presente de distintos pueblos indígenas de Chile y Latinoamérica, considerando su cultura, los procesos históricos recientes y los avances y desafíos en su relación con los Estados nacionales de la región.' },
+    { codigo:'OA5', eje:'Conocimiento y comprensión', descripcion:'Evaluar, a partir de la investigación, el estado del medioambiente en Chile y América Latina, incluyendo efectos de distintas actividades humanas y acciones emprendidas por los Estados de la región para avanzar en sustentabilidad.' },
+    { codigo:'OA6', eje:'Conocimiento y comprensión', descripcion:'Analizar las oportunidades que ofrecen a los Estados de América Latina la integración y la cooperación internacional, examinando la conformación de bloques económicos y los tratados y acuerdos en materia de economía, derechos humanos, educación, género, salud y ciencia.' },
+    { codigo:'OA7', eje:'Conocimiento y comprensión', descripcion:'Participar en forma colaborativa en el diseño de propuestas para dar solución a problemas presentes a nivel local relacionadas con temas abordados en el nivel.' },
+    { codigo:'OAa', eje:'Habilidades — Investigación', descripcion:'Investigar sobre la realidad considerando: formulación de preguntas o problemas de investigación a partir de la observación de fenómenos; levantamiento de información a partir de métodos y técnicas propias de historia, geografía, economía y otras ciencias sociales; análisis crítico de las evidencias y evaluación de su validez, considerando su uso ético para respaldar opiniones; definición del marco teórico, del estado de la cuestión y de los conceptos disciplinares del tema a investigar; análisis de las propias conclusiones en relación con los supuestos iniciales.' },
+    { codigo:'OAb', eje:'Habilidades — Pensamiento crítico', descripcion:'Hacer conexiones entre fenómenos, acontecimientos y/o procesos de la realidad considerando conceptos como multidimensionalidad, multicausalidad y multiescalaridad, temporalidad, y variables y patrones.' },
+    { codigo:'OAc', eje:'Habilidades — Pensamiento crítico', descripcion:'Elaborar interpretaciones y argumentos, basados en fuentes variadas y pertinentes, haciendo uso ético de la información.' },
+    { codigo:'OAd', eje:'Habilidades — Pensamiento crítico', descripcion:'Analizar interpretaciones y perspectivas de diversas fuentes, considerando propósito, intencionalidad, enfoque y contexto del autor, y las preguntas que intenta responder.' },
+    { codigo:'OAe', eje:'Habilidades — Pensamiento crítico', descripcion:'Evaluar la validez de las propias interpretaciones sobre acontecimientos, fenómenos y procesos estudiados, a través del diálogo y el uso de fuentes.' },
+    { codigo:'OAf', eje:'Habilidades — Pensamiento crítico', descripcion:'Elaborar juicios éticos de manera rigurosa y basados en conocimiento disciplinar sobre hitos, fenómenos, procesos, ideas, acciones de personas, entre otros.' },
+    { codigo:'OAg', eje:'Habilidades — Comunicación', descripcion:'Comunicar explicaciones, conclusiones u opiniones fundamentadas haciendo uso de lenguaje, las normas y convenciones de la disciplina.' }
+  ];
+  CURRICULA_PLAN_COMUN['chile-latam'] = {
+    nombre: 'Chile y la región latinoamericana',
+    sigla:  'CLA',
+    tramo:  'media',
+    niveles: ['3M','4M'],
+    unidades: {
+      '3M': ['Procesos políticos recientes en América Latina','Pueblos indígenas y diversidad cultural','Desafíos económicos y sociales','Integración y cooperación regional'],
+      '4M': ['Procesos políticos recientes en América Latina','Pueblos indígenas y diversidad cultural','Desafíos económicos y sociales','Integración y cooperación regional']
+    },
+    oas: { '3M': OAS_CLA, '4M': OAS_CLA },
+    actitudes: [
+      'Trabajar con responsabilidad y liderazgo en la realización de las tareas colaborativas y en función del logro de metas comunes.',
+      'Participar asumiendo posturas razonadas en distintos ámbitos: cultural, social, político y medioambiental, entre otros.',
+      'Actuar de acuerdo con los principios de la ética en el uso de la información y de la tecnología, respetando la propiedad intelectual y la privacidad de las personas.',
+      'Pensar con flexibilidad para reelaborar las propias ideas, puntos de vista y creencias.',
+      'Trabajar colaborativamente en la generación, desarrollo y gestión de proyectos y la resolución de problemas, integrando las diferentes ideas y puntos de vista.',
+      'Trabajar con empatía y respeto en el contexto de la diversidad, eliminando toda expresión de prejuicio y discriminación.'
     ]
-  }
-};
+  };
+})();
+
+(function buildOasMUG() {
+  var OAS_MUG = [
+    { codigo:'OA1', eje:'Conocimiento y comprensión', descripcion:'Analizar procesos migratorios contemporáneos en distintas regiones del mundo considerando múltiples causas, principales características, impactos en la sociedad de origen y de destino, y los desafíos para las sociedades y los Estados nacionales.' },
+    { codigo:'OA2', eje:'Conocimiento y comprensión', descripcion:'Investigar algunos aspectos de la economía global actual como cambios en la producción y en el mercado del trabajo, el rol del comercio mundial y del mercado financiero, y nuevas formas de consumo, aplicando conceptos de la economía (escasez, oferta y demanda, precio, balanza comercial, entre otros).' },
+    { codigo:'OA3', eje:'Conocimiento y comprensión', descripcion:'Explicar el cambio climático como fenómeno global, incluyendo controversias sobre sus múltiples causas, los grados de responsabilidad de distintos actores y sus principales consecuencias para la población.' },
+    { codigo:'OA4', eje:'Conocimiento y comprensión', descripcion:'Analizar, por medio de la investigación, desastres socionaturales, considerando amenazas naturales, el papel de la sociedad y el Estado en la prevención y gestión del riesgo, factores que inciden en la vulnerabilidad de la población y avances de Chile y otros países en la materia.' },
+    { codigo:'OA5', eje:'Conocimiento y comprensión', descripcion:'Explicar, por medio de la investigación, transformaciones del Estado-nación en la actualidad, en relación con aspectos como la ciudadanía en un mundo cada vez más interconectado, la internacionalización de la economía y la relación con otros Estados y organismos intergubernamentales.' },
+    { codigo:'OA6', eje:'Conocimiento y comprensión', descripcion:'Analizar algunos conflictos internacionales que involucran a Estados nacionales, sociedades o grupos, explicando sus contextos, posibilidades de resolución y aplicando conceptos de la ciencia política como poder, soberanía, ideología, derechos humanos, opinión pública, entre otros.' },
+    { codigo:'OA7', eje:'Conocimiento y comprensión', descripcion:'Participar en forma colaborativa en el diseño de propuestas para dar solución a problemas presentes a nivel local relacionadas con temas abordados en el nivel.' },
+    { codigo:'OAa', eje:'Habilidades — Investigación', descripcion:'Investigar sobre la realidad considerando: formulación de preguntas o problemas de investigación a partir de la observación de fenómenos; levantamiento de información a partir de métodos y técnicas propias de historia, geografía, economía y otras ciencias sociales; análisis crítico de las evidencias y evaluación de su validez, considerando su uso ético para respaldar opiniones; definición del marco teórico, del estado de la cuestión y de los conceptos disciplinares del tema a investigar; análisis de las propias conclusiones en relación con los supuestos iniciales.' },
+    { codigo:'OAb', eje:'Habilidades — Pensamiento crítico', descripcion:'Hacer conexiones entre fenómenos, acontecimientos y/o procesos de la realidad considerando conceptos como multidimensionalidad, multicausalidad y multiescalaridad, temporalidad, y variables y patrones.' },
+    { codigo:'OAc', eje:'Habilidades — Pensamiento crítico', descripcion:'Elaborar interpretaciones y argumentos, basados en fuentes variadas y pertinentes, haciendo uso ético de la información.' },
+    { codigo:'OAd', eje:'Habilidades — Pensamiento crítico', descripcion:'Analizar interpretaciones y perspectivas de diversas fuentes, considerando propósito, intencionalidad, enfoque y contexto del autor, y las preguntas que intenta responder.' },
+    { codigo:'OAe', eje:'Habilidades — Pensamiento crítico', descripcion:'Evaluar la validez de las propias interpretaciones sobre acontecimientos, fenómenos y procesos estudiados, a través del diálogo y el uso de fuentes.' },
+    { codigo:'OAf', eje:'Habilidades — Pensamiento crítico', descripcion:'Elaborar juicios éticos de manera rigurosa y basados en conocimiento disciplinar sobre hitos, fenómenos, procesos, ideas, acciones de personas, entre otros.' },
+    { codigo:'OAg', eje:'Habilidades — Comunicación', descripcion:'Comunicar explicaciones, conclusiones u opiniones fundamentadas haciendo uso de lenguaje, las normas y convenciones de la disciplina.' }
+  ];
+  CURRICULA_PLAN_COMUN['mundo-global'] = {
+    nombre: 'Comprensión histórica del presente (Mundo global)',
+    sigla:  'MUG',
+    tramo:  'media',
+    niveles: ['3M','4M'],
+    unidades: {
+      '3M': ['Procesos migratorios y Estado-nación','Conflictos internacionales y economía global','Cambio climático y desastres socionaturales','Ciudadanía global y propuestas locales'],
+      '4M': ['Procesos migratorios y Estado-nación','Conflictos internacionales y economía global','Cambio climático y desastres socionaturales','Ciudadanía global y propuestas locales']
+    },
+    oas: { '3M': OAS_MUG, '4M': OAS_MUG },
+    actitudes: [
+      'Pensar con flexibilidad para reelaborar las propias ideas, puntos de vista y creencias.',
+      'Trabajar colaborativamente en la generación, desarrollo y gestión de proyectos y la resolución de problemas, integrando las diferentes ideas y puntos de vista.',
+      'Trabajar con empatía y respeto en el contexto de la diversidad, eliminando toda expresión de prejuicio y discriminación.',
+      'Participar asumiendo posturas razonadas en distintos ámbitos: cultural, social, político, medioambiental, entre otros.',
+      'Trabajar con responsabilidad y liderazgo en la realización de las tareas colaborativas y en función del logro de metas comunes.',
+      'Actuar de acuerdo con los principios de la ética en el uso de la información y de la tecnología, respetando la propiedad intelectual y la privacidad de las personas.'
+    ]
+  };
+})();
 

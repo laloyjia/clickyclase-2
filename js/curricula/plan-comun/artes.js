@@ -138,3 +138,46 @@ CURRICULA_PLAN_COMUN['artes'] = {
   ],
   habilidades: ['Expresar y crear visualmente','Apreciar y responder frente al arte','Difusión y comunicación']
 };
+
+// =============================================================================
+//  ELECTIVO DE FORMACIÓN GENERAL — Artes Visuales, Audiovisuales y Multimediales
+//  3°–4° medio (DS 193/2019). Programa de Estudio Mineduc 2021.
+//  Los 7 OAs son idénticos para 3°M y 4°M; el profesor decide qué OAs trabaja
+//  en cada unidad y nivel según el plan de la asignatura.
+// =============================================================================
+
+(function buildOasAVM() {
+  var OAS_AVM = [
+    {codigo:'OA1', eje:'Expresar y crear', descripcion:'Innovar al resolver desafíos y problemas de las artes visuales, audiovisuales y multimediales, considerando aspectos expresivos, estéticos y las evaluaciones críticas personal y de otros.'},
+    {codigo:'OA2', eje:'Expresar y crear', descripcion:'Crear obras y proyectos que respondan a necesidades de expresión y comunicación personales o grupales, basados en la investigación con soportes, materiales y procedimientos, y en referentes artísticos nacionales e internacionales.'},
+    {codigo:'OA3', eje:'Comunicar y difundir', descripcion:'Diseñar y gestionar presentaciones a públicos específicos para comunicar propósitos, aspectos del proceso y resultados de obras y trabajos, empleando materiales, herramientas y tecnologías tradicionales y emergentes.'},
+    {codigo:'OA4', eje:'Apreciar y responder', descripcion:'Analizar estéticamente obras visuales, audiovisuales y multimediales de diferentes épocas y procedencias, relacionando tratamiento de los lenguajes artísticos, elementos simbólicos y contextos.'},
+    {codigo:'OA5', eje:'Apreciar y responder', descripcion:'Argumentar juicios estéticos de obras visuales, audiovisuales y multimediales de diferentes épocas y procedencias, a partir de análisis estéticos e interpretaciones personales.'},
+    {codigo:'OA6', eje:'Apreciar y responder', descripcion:'Evaluar críticamente procesos y resultados de obras y proyectos personales y de sus pares, considerando relaciones entre propósitos expresivos y/o comunicativos, aspectos estéticos y decisiones tomadas durante el proceso.'},
+    {codigo:'OA7', eje:'Comunicar y difundir', descripcion:'Relacionar, a partir de investigaciones, las habilidades y conocimientos de la asignatura con diferentes contextos laborales, profesionales y de desarrollo personal.'}
+  ];
+  CURRICULA_PLAN_COMUN['artes-hc'] = {
+    nombre: 'Artes Visuales, Audiovisuales y Multimediales',
+    sigla:  'AVM',
+    tramo:  'media',
+    niveles: ['3M','4M'],
+    unidades: {
+      '3M': ['Investigando la memoria a través de las artes visuales','Obras audiovisuales y su relación con el contexto','Creando obras multimediales a partir de imaginarios personales','Compartiendo experiencias con las artes'],
+      '4M': ['Investigando la memoria a través de las artes visuales','Obras audiovisuales y su relación con el contexto','Creando obras multimediales a partir de imaginarios personales','Compartiendo experiencias con las artes']
+    },
+    oas: { '3M': OAS_AVM, '4M': OAS_AVM },
+    actitudes: [
+      'Pensar con perseverancia y proactividad para encontrar soluciones innovadoras a los problemas.',
+      'Demostrar disposición a desarrollar su creatividad, experimentando, imaginando y pensando divergentemente.',
+      'Trabajar con autonomía y proactividad en trabajos personales y colaborativos para alcanzar las metas propuestas.',
+      'Trabajar colaborativamente en la generación, desarrollo y gestión de proyectos y la resolución de problemas, integrando las diferentes ideas y puntos de vista.',
+      'Pensar con flexibilidad para reelaborar las propias ideas, puntos de vista y creencias.',
+      'Tomar decisiones que conduzcan a la creación, innovación y trasformación de las personas y de la sociedad.',
+      'Trabajar con empatía y respeto en el contexto de la diversidad, eliminando toda expresión de prejuicio y discriminación.',
+      'Valorar las TIC como una oportunidad para informarse, investigar, socializar, comunicarse y participar como ciudadano.',
+      'Actuar de acuerdo con los principios de la ética en el uso de la información y de la tecnología, respetando la propiedad intelectual y la privacidad de las personas.',
+      'Participar asumiendo posturas razonadas en distintos ámbitos: cultural, social, político, medioambiental, entre otros.'
+    ],
+    habilidades: ['Expresar y crear','Apreciar y responder','Comunicar y difundir']
+  };
+})();
