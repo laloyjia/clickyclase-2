@@ -114,8 +114,10 @@ a{color:#6366f1;font-weight:600}
 </div>
 
 <script>
+// ── Firebase ───────────────────────────────────────────────────
+// Solo usamos Auth del SDK; para Firestore usamos EL_DB (cliente REST).
 var auth = firebase.auth();
-var db   = firebase.firestore();
+// EL_DB se inicializa desde firebase-config.js automáticamente.
 
 // ── Crear cuenta ───────────────────────────────────────────────
 function crearCuenta() {
@@ -130,26 +132,63 @@ function crearCuenta() {
   if (pass.length < 6)            { showMsg('msgCrear','❌ Contraseña mín. 6 caracteres.','err'); return; }
   if (pass !== pass2)             { showMsg('msgCrear','❌ Las contraseñas no coinciden.','err'); return; }
 
+  // Verificar que el correo coincide con la lista de admins en firebase-config.js
+  // si se está creando un admin
+  var adminEmails = (typeof EL_ADMIN_EMAILS !== 'undefined') ? EL_ADMIN_EMAILS
+                  : (typeof EL_ADMIN_EMAIL !== 'undefined' ? [EL_ADMIN_EMAIL] : []);
+  if (rol === 'admin' && adminEmails.length && adminEmails.indexOf(email) === -1) {
+    showMsg('msgCrear',
+      '❌ El correo <code>' + email + '</code> no está en la lista de administradores autorizados ' +
+      '(<code>EL_ADMIN_EMAILS</code> en <code>firebase-config.js</code>). Agrégalo allí primero o usa uno de: ' +
+      adminEmails.map(function(e){return '<code>'+e+'</code>';}).join(', '), 'err');
+    return;
+  }
+
   btn.disabled  = true;
   btn.innerHTML = '<span class="spinner"></span> Creando…';
 
   auth.createUserWithEmailAndPassword(email, pass)
     .then(function(cred) {
       var uid = cred.user.uid;
-      return db.collection('usuarios').doc(uid).set({
-        uid: uid, nombre: nombre, email: email, role: rol,
-        xp: 0, nivel: 1, badges: [], evaluaciones: [], activo: true,
-        tipoProfesor: 'tecnico', especialidad: 'Electrónica',
-        asignaturas: [], modulos: ['EN1','EN2','EN3','EN4','EN5','EN6','EN7','EN8','EN9','EN11'],
-        niveles: ['3M','4M'], creadoEn: new Date().toISOString()
-      });
+      // Esquema completo, alineado con firebase-auth.js _crearUsuarioFirebase
+      var perfil = {
+        uid:             uid,
+        nombre:          nombre,
+        email:           email,
+        role:            rol,
+        tipoProfesor:    rol === 'admin' ? '' : 'tecnico',
+        especialidad:    rol === 'admin' ? '' : 'Electrónica',
+        asignaturas:     [],
+        niveles:         rol === 'admin' ? [] : ['3M','4M'],
+        modulos:         rol === 'admin' ? [] : ['EN1','EN2','EN3','EN4','EN5','EN6','EN7','EN8','EN9','EN11'],
+        seccion:         '',
+        cursos:          [],
+        liceos:          [],
+        liceoPrincipal:  '',
+        permisos:        { planificar: true, crearMaterial: true },
+        xp:              0,
+        nivel:           1,
+        badges:          [],
+        evaluaciones:    [],
+        activo:          true,
+        primerIngreso:   false,
+        creadoEn:        new Date().toISOString(),
+        creadoPor:       'setup.html'
+      };
+      // EL_DB es el cliente REST de Firestore (firebase-rest.js)
+      if (typeof EL_DB === 'undefined' || !EL_DB.collection) {
+        throw new Error('EL_DB no disponible. Verifica que firebase-rest.js esté cargado.');
+      }
+      return EL_DB.collection('usuarios').doc(uid).set(perfil);
     })
     .then(function() {
       showMsg('msgCrear',
         '✅ <strong>¡Cuenta creada!</strong><br>' +
         '📧 Correo: <code>' + email + '</code><br>' +
+        '🎭 Rol: <code>' + rol + '</code><br>' +
         '🔑 Usa la contraseña que ingresaste<br><br>' +
-        '<a href="index.html">👉 Ir a iniciar sesión →</a>',
+        '<a href="index.html">👉 Ir a iniciar sesión →</a><br><br>' +
+        '<small style="color:#94a3b8">⚠️ Recomendado: elimina <code>setup.html</code> del repo después de usarlo.</small>',
       'ok');
       btn.innerHTML = '✅ Creado';
     })
@@ -157,7 +196,7 @@ function crearCuenta() {
       btn.disabled  = false;
       btn.innerHTML = 'Crear cuenta';
       var m = e.message || '';
-      if (m.includes('email-already-in-use')) m = 'Ya existe una cuenta con ese correo. Usa la opción de restablecimiento abajo.';
+      if (m.includes('email-already-in-use') || m.includes('EMAIL_EXISTS')) m = 'Ya existe una cuenta con ese correo. Usa la opción de restablecimiento abajo.';
       else if (m.includes('invalid-email'))   m = 'Formato de correo inválido.';
       else if (m.includes('api-key'))         m = 'Error de configuración Firebase. Verifica firebase-config.js';
       showMsg('msgCrear','❌ ' + m,'err');
