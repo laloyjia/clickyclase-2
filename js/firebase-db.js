@@ -404,14 +404,19 @@ var ELDB = (function() {
      * filtra solo activos.
      */
     listar: function (incluirInactivos) {
-      var query = EL_DB.collection(EL_COLLECTIONS.LICEOS);
-      if (!incluirInactivos) query = query.where('activo', '==', true);
-      return query.orderBy('nombre', 'asc').get()
+      // NOTA: evitamos where('activo','==',true) porque en Firestore REST
+      // a veces devuelve vacío si el campo no es estrictamente boolean,
+      // o si falta un índice. Traemos TODO y filtramos en JS.
+      var query = EL_DB.collection(EL_COLLECTIONS.LICEOS).orderBy('nombre', 'asc');
+      return query.get()
         .then(function (snap) {
           var items = [];
           snap.forEach(function (doc) {
             items.push(Object.assign({ slug: doc.id }, doc.data()));
           });
+          if (!incluirInactivos) {
+            items = items.filter(function (l) { return l && l.activo !== false; });
+          }
           return items;
         })
         .catch(function (err) {

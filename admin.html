@@ -776,10 +776,13 @@ function loadData(){
   // Liceos: solo cargamos contador y cache para el badge; el render completo
   // se dispara al entrar a la sección.
   if(ELDB.liceos&&typeof ELDB.liceos.listar==='function'){
-    ELDB.liceos.listar().then(function(list){
+    // Pedimos TODO (incluidos inactivos) para evitar el where('activo','==',true)
+    // del REST que a veces devuelve vacío. Filtramos en JS si hace falta.
+    ELDB.liceos.listar(true).then(function(list){
       allLiceos=list||[];
       var sb=document.getElementById('sbCntLiceos');
-      if(sb)sb.textContent=allLiceos.length;
+      // Para el badge mostramos solo activos
+      if(sb)sb.textContent=allLiceos.filter(function(l){return l.activo!==false;}).length;
       // Si la sección ya estaba abierta, refrescar tabla
       if(_liceosLoaded)renderLiceos(allLiceos);
     }).catch(function(e){console.warn('[Admin] liceos:',e&&e.message);});
@@ -1240,8 +1243,10 @@ function buildStep3(){
 function poblarLiceosBox(boxId,targetState){
   var box=document.getElementById(boxId);
   if(!box)return;
-  // Siempre consultamos Firestore para tener el catálogo más fresco
-  var fuente=(ELDB.liceos&&ELDB.liceos.listar)?ELDB.liceos.listar():Promise.resolve([]);
+  // Siempre consultamos Firestore para tener el catálogo más fresco.
+  // Pedimos TODO (incluidos inactivos) y filtramos en JS — evita depender
+  // del where('activo','==',true) en REST que a veces devuelve vacío.
+  var fuente=(ELDB.liceos&&ELDB.liceos.listar)?ELDB.liceos.listar(true):Promise.resolve([]);
   fuente.then(function(list){
     var activos=(list||[]).filter(function(l){return l.activo!==false;});
     allLiceos=list||allLiceos;

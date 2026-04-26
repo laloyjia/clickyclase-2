@@ -65,10 +65,13 @@
       return Promise.resolve(COLEGIOS_REG);
     }
 
-    _cargandoPromise = ELDB.liceos.listar()
+    // Pedimos TODO (incluidos inactivos) y filtramos en JS — evita depender
+    // del where('activo','==',true) en REST que a veces devuelve vacío.
+    _cargandoPromise = ELDB.liceos.listar(true)
       .then(function (lista) {
-        if (lista && lista.length) {
-          _cache = lista;
+        var activos = (lista || []).filter(function (l) { return l && l.activo !== false; });
+        if (activos.length) {
+          _cache = activos;
         } else {
           // Firestore vacío (primera vez). Mantener semilla y proponer seed.
           _cache = COLEGIOS_REG.slice();
