@@ -73,7 +73,8 @@ var EL_COLLECTIONS = {
   EVALUACIONES:    'evaluaciones',
   CODIGOS:         'codigos_acceso',
   CURRICULA:       'curricula',
-  RECURSOS:        'recursos_curricula'
+  RECURSOS:        'recursos_curricula',
+  LICEOS:          'liceos'
 };
 
 // ─────────────────────────────────────────────────────────────

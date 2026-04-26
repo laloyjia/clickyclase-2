@@ -12,6 +12,7 @@
 <script src="js/firebase-config.js"></script>
 <script src="js/firebase-auth.js"></script>
 <script src="js/firebase-db.js"></script>
+<script src="js/colegios.js"></script>
 <!-- Datos curriculares TP por especialidad — cargan ANTES de curricula-chile.js -->
 <script src="js/curricula/tp/datos-electricidad.js"></script>
 <script src="js/curricula/tp/datos-mecanica-automotriz.js"></script>
@@ -135,6 +136,10 @@ tr:hover td{background:rgba(99,102,241,.05)}
     <div class="nav-item" data-sec="profesores" onclick="showSec(this,'profesores')">
       <span>🎓</span> Profesores
       <span id="sbCntProfs" style="margin-left:auto;background:rgba(99,102,241,.2);color:var(--accent);font-size:.68rem;padding:1px 7px;border-radius:10px;font-weight:700"></span>
+    </div>
+    <div class="nav-item" data-sec="liceos" onclick="showSec(this,'liceos')">
+      <span>🏫</span> Liceos / Colegios
+      <span id="sbCntLiceos" style="margin-left:auto;background:rgba(245,158,11,.2);color:var(--gold);font-size:.68rem;padding:1px 7px;border-radius:10px;font-weight:700"></span>
     </div>
     <div class="nav-item" data-sec="codigos" onclick="showSec(this,'codigos')">🔑 Códigos de Acceso</div>
 
@@ -273,6 +278,42 @@ tr:hover td{background:rgba(99,102,241,.05)}
         <div class="tbl-wrap">
           <table><thead><tr><th>Nombre</th><th>Correo</th><th>Tipo</th><th>Asignaturas/Especialidad</th><th>Niveles</th><th>Acciones</th></tr></thead>
           <tbody id="profsTbody"><tr><td colspan="6" style="text-align:center;color:var(--muted)">Cargando…</td></tr></tbody></table>
+        </div>
+      </div>
+    </section>
+
+    <!-- LICEOS / COLEGIOS -->
+    <section id="sec-liceos" class="tab-section" style="display:none">
+      <div class="page-header"><h1>🏫 Liceos / Colegios</h1><p>Catálogo institucional. Cada liceo se asigna a uno o más profesores y su logo aparece en el encabezado de los documentos generados.</p></div>
+
+      <!-- Banner informativo -->
+      <div class="card" style="background:rgba(99,102,241,.06);border-color:rgba(99,102,241,.25)">
+        <div style="display:flex;gap:14px;align-items:flex-start">
+          <div style="font-size:1.6rem">💡</div>
+          <div style="flex:1">
+            <div style="font-weight:700;margin-bottom:4px">Cómo subir el logo del liceo</div>
+            <div style="font-size:.85rem;color:var(--muted);line-height:1.55">
+              Los logos viven como archivos estáticos en <code style="background:rgba(99,102,241,.15);padding:1px 6px;border-radius:4px;font-family:monospace;font-size:.78rem">assets/logos/colegios/&lt;slug&gt;.png</code>.
+              Después de crear el liceo aquí, sube el archivo PNG (mín. 256×256 px, fondo transparente) por git al repositorio. Si no existe el archivo se mostrará el logo por defecto.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+          <h3 style="margin:0">📋 Liceos registrados</h3>
+          <div style="display:flex;gap:8px">
+            <input id="liceoSearch" class="search-input" placeholder="Buscar liceo…" oninput="filtrarLiceos()" style="min-width:200px;font-size:.8rem;padding:6px 12px">
+            <label style="display:flex;align-items:center;gap:6px;font-size:.78rem;color:var(--muted);cursor:pointer">
+              <input type="checkbox" id="liceoIncInact" onchange="loadLiceos()" style="accent-color:var(--accent)"> Incluir inactivos
+            </label>
+            <button class="btn btn-primary btn-sm" onclick="abrirModalLiceo()">➕ Nuevo liceo</button>
+          </div>
+        </div>
+        <div class="tbl-wrap">
+          <table><thead><tr><th>Logo</th><th>Nombre</th><th>RBD</th><th>Comuna</th><th>Dependencia</th><th>Estado</th><th>Acciones</th></tr></thead>
+          <tbody id="liceosTbody"><tr><td colspan="7" style="text-align:center;color:var(--muted)">Cargando…</td></tr></tbody></table>
         </div>
       </div>
     </section>
@@ -553,6 +594,72 @@ tr:hover td{background:rgba(99,102,241,.05)}
   </div>
 </div>
 
+<!-- MODAL LICEO / COLEGIO -->
+<div class="modal-bg" id="modalLiceo">
+  <div class="modal" style="max-width:680px">
+    <button class="modal-close" onclick="closeModal('modalLiceo')">✕</button>
+    <h2 id="liceoModalTitle">🏫 Nuevo Liceo</h2>
+    <div id="liceoNotif" class="notif"></div>
+    <input type="hidden" id="liceoEditingSlug">
+    <div class="form-grid">
+      <div class="form-group full-width">
+        <label>Nombre oficial del liceo *</label>
+        <input id="liceoNombre" placeholder="ej: Liceo Salesiano de Talca" oninput="liceoAutoSlug()">
+      </div>
+      <div class="form-group">
+        <label>Slug (identificador) *</label>
+        <input id="liceoSlug" placeholder="liceo-salesiano-talca">
+        <small style="color:var(--muted);font-size:.7rem;margin-top:2px">Solo minúsculas, números y guiones. Debe coincidir con el nombre del archivo PNG del logo.</small>
+      </div>
+      <div class="form-group">
+        <label>RBD (Rol Base de Datos)</label>
+        <input id="liceoRbd" placeholder="ej: 2780-3" inputmode="numeric">
+      </div>
+      <div class="form-group">
+        <label>Comuna</label>
+        <input id="liceoComuna" placeholder="ej: Talca">
+      </div>
+      <div class="form-group">
+        <label>Región</label>
+        <input id="liceoRegion" placeholder="ej: Maule">
+      </div>
+      <div class="form-group">
+        <label>Dependencia</label>
+        <select id="liceoDependencia">
+          <option value="">— Seleccionar —</option>
+          <option value="municipal">Municipal</option>
+          <option value="slep">Servicio Local de Educación (SLEP)</option>
+          <option value="particular-subvencionado">Particular Subvencionado</option>
+          <option value="particular-pagado">Particular Pagado</option>
+          <option value="corporacion">Corporación / Administración Delegada</option>
+          <option value="otro">Otro</option>
+        </select>
+      </div>
+      <div class="form-group full-width">
+        <label>Ruta del logo</label>
+        <input id="liceoLogoPath" placeholder="assets/logos/colegios/liceo-salesiano-talca.png">
+        <small style="color:var(--muted);font-size:.7rem;margin-top:2px">Auto-completada según el slug. Sube el archivo PNG a esa ruta por git.</small>
+      </div>
+      <div class="form-group full-width">
+        <label>Alias (separados por coma, opcional)</label>
+        <input id="liceoAlias" placeholder="liceo salesianos, salesianos talca, colegio salesiano talca">
+      </div>
+    </div>
+    <div style="margin-top:14px;background:var(--surface2);border-radius:10px;padding:12px 16px;display:flex;gap:14px;align-items:center">
+      <div style="font-size:.78rem;color:var(--muted);flex:1">
+        <strong style="color:var(--text)">Vista previa del logo:</strong> el sistema buscará la imagen en la ruta indicada al cargar documentos. Si no existe, se mostrará el logo por defecto.
+      </div>
+      <img id="liceoLogoPreview" src="assets/logos/colegios/default.svg"
+           onerror="this.onerror=null;this.src='assets/logos/colegios/default.svg';"
+           style="width:64px;height:64px;object-fit:contain;background:#fff;border-radius:8px;padding:4px">
+    </div>
+    <div style="text-align:right;margin-top:18px;display:flex;gap:8px;justify-content:flex-end">
+      <button class="btn btn-outline" onclick="closeModal('modalLiceo')">Cancelar</button>
+      <button class="btn btn-primary" id="btnGuardarLiceo" onclick="guardarLiceo()">💾 Guardar liceo</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL RECURSO CURRICULAR -->
 <div class="modal-bg" id="modalRecurso">
   <div class="modal" style="max-width:520px">
@@ -590,10 +697,11 @@ tr:hover td{background:rgba(99,102,241,.05)}
 </div>
 
 <script>
-var allUsers=[], allMats=[], allPlans=[], allRecursos=[];
-var wData={tipo:null,asignaturas:[],niveles:[],especialidad:'',modulos:[],cursos:[],permisos:{planificar:true,crearMaterial:true}};
+var allUsers=[], allMats=[], allPlans=[], allRecursos=[], allLiceos=[];
+var wData={tipo:null,asignaturas:[],niveles:[],especialidad:'',modulos:[],cursos:[],liceos:[],liceoPrincipal:'',permisos:{planificar:true,crearMaterial:true}};
 var editingUid=null;
 var _rCurrentTab='tp';
+var _liceosLoaded=false;
 
 ELAuth.onUserReady(function(user){
   if(!user){window.location.href='index.html';return;}
@@ -643,6 +751,17 @@ function loadData(){
     renderPlans(p);
   }).catch(console.error);
   ELDB.codigos.listar().then(renderCodigos).catch(console.error);
+  // Liceos: solo cargamos contador y cache para el badge; el render completo
+  // se dispara al entrar a la sección.
+  if(ELDB.liceos&&typeof ELDB.liceos.listar==='function'){
+    ELDB.liceos.listar().then(function(list){
+      allLiceos=list||[];
+      var sb=document.getElementById('sbCntLiceos');
+      if(sb)sb.textContent=allLiceos.length;
+      // Si la sección ya estaba abierta, refrescar tabla
+      if(_liceosLoaded)renderLiceos(allLiceos);
+    }).catch(function(e){console.warn('[Admin] liceos:',e&&e.message);});
+  }
 }
 
 function showSec(el,id){
@@ -652,6 +771,7 @@ function showSec(el,id){
   el.classList.add('active');
   if(id==='recursos'&&!_recursosInit){_recursosInit=true;initRecursos();}
   if(id==='gemini'){cargarConfigIA();}
+  if(id==='liceos'){_liceosLoaded=true;loadLiceos();}
 }
 
 function renderUsers(list){
@@ -761,6 +881,176 @@ function guardarUsuario(){
 }
 function desactivar(uid){if(!confirm('¿Desactivar usuario?'))return;ELAuth.adminDesactivarUsuario(uid).then(loadData).catch(function(e){alert(e.message);});}
 
+// ─────────────────────────────────────────────────────────────
+//  LICEOS / COLEGIOS — CRUD
+// ─────────────────────────────────────────────────────────────
+var DEPENDENCIAS_LBL={
+  'municipal':'Municipal',
+  'slep':'SLEP',
+  'particular-subvencionado':'Part. Subvencionado',
+  'particular-pagado':'Part. Pagado',
+  'corporacion':'Corporación',
+  'otro':'Otro'
+};
+
+function loadLiceos(){
+  var inc=(document.getElementById('liceoIncInact')||{}).checked===true;
+  if(!ELDB.liceos||typeof ELDB.liceos.listar!=='function'){
+    document.getElementById('liceosTbody').innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--red)">⚠ Módulo de liceos no disponible</td></tr>';
+    return;
+  }
+  ELDB.liceos.listar(inc).then(function(list){
+    allLiceos=list||[];
+    var sb=document.getElementById('sbCntLiceos');
+    if(sb)sb.textContent=allLiceos.filter(function(l){return l.activo!==false;}).length;
+    renderLiceos(allLiceos);
+    // Refrescar cache de catálogo público
+    if(window.ELColegios&&typeof ELColegios.invalidarCache==='function'){
+      ELColegios.invalidarCache();
+    }
+  }).catch(function(e){
+    document.getElementById('liceosTbody').innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--red)">Error: '+(e&&e.message||'desconocido')+'</td></tr>';
+  });
+}
+
+function renderLiceos(list){
+  var tb=document.getElementById('liceosTbody');
+  if(!tb)return;
+  if(!list||!list.length){
+    tb.innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--muted)">Sin liceos registrados. Usa <strong>➕ Nuevo liceo</strong> para crear el primero.</td></tr>';
+    return;
+  }
+  tb.innerHTML=list.map(function(l){
+    var logo=l.logoPath||('assets/logos/colegios/'+l.slug+'.png');
+    var dep=DEPENDENCIAS_LBL[l.dependencia]||(l.dependencia||'—');
+    var est=l.activo!==false
+      ? '<span class="badge" style="background:rgba(16,185,129,.1);color:#10b981">Activo</span>'
+      : '<span class="badge badge-inact">Inactivo</span>';
+    var acc=l.activo!==false
+      ? '<button class="btn btn-outline btn-sm" onclick="abrirModalLiceo(\''+l.slug+'\')" title="Editar">✏️</button> '+
+        '<button class="btn btn-danger btn-sm" onclick="eliminarLiceo(\''+l.slug+'\')" title="Desactivar">🚫</button>'
+      : '<button class="btn btn-primary btn-sm" onclick="restaurarLiceo(\''+l.slug+'\')" title="Restaurar">♻️ Restaurar</button>';
+    return '<tr>'+
+      '<td><img src="'+logo+'" alt="logo" onerror="this.onerror=null;this.src=\'assets/logos/colegios/default.svg\';" '+
+        'style="width:38px;height:38px;object-fit:contain;background:#fff;border-radius:6px;padding:2px"></td>'+
+      '<td><strong>'+(l.nombre||'—')+'</strong>'+
+        '<div style="font-size:.7rem;color:var(--muted);font-family:monospace">'+l.slug+'</div></td>'+
+      '<td style="font-size:.8rem">'+(l.rbd||'—')+'</td>'+
+      '<td style="font-size:.8rem">'+(l.comuna||'—')+(l.region?' <span style="color:var(--muted)">· '+l.region+'</span>':'')+'</td>'+
+      '<td style="font-size:.78rem">'+dep+'</td>'+
+      '<td>'+est+'</td>'+
+      '<td style="display:flex;gap:6px">'+acc+'</td>'+
+    '</tr>';
+  }).join('');
+}
+
+function filtrarLiceos(){
+  var q=((document.getElementById('liceoSearch')||{}).value||'').toLowerCase().trim();
+  if(!q){renderLiceos(allLiceos);return;}
+  renderLiceos(allLiceos.filter(function(l){
+    var hay=(l.nombre||'')+' '+(l.slug||'')+' '+(l.rbd||'')+' '+(l.comuna||'')+' '+(l.region||'')+' '+((l.alias||[]).join(' '));
+    return hay.toLowerCase().indexOf(q)!==-1;
+  }));
+}
+
+function abrirModalLiceo(slug){
+  var editing=!!slug;
+  document.getElementById('liceoModalTitle').textContent=editing?'✏️ Editar Liceo':'🏫 Nuevo Liceo';
+  document.getElementById('liceoEditingSlug').value=editing?slug:'';
+  // Limpiar
+  ['liceoNombre','liceoSlug','liceoRbd','liceoComuna','liceoRegion','liceoLogoPath','liceoAlias'].forEach(function(id){
+    var el=document.getElementById(id);if(el)el.value='';
+  });
+  document.getElementById('liceoDependencia').value='';
+  document.getElementById('liceoLogoPreview').src='assets/logos/colegios/default.svg';
+  var notif=document.getElementById('liceoNotif');if(notif)notif.classList.remove('show');
+  // En edición, el slug es inmutable
+  document.getElementById('liceoSlug').readOnly=editing;
+  document.getElementById('liceoSlug').style.opacity=editing?'.6':'1';
+  if(editing){
+    var l=allLiceos.find(function(x){return x.slug===slug;});
+    if(!l){alert('Liceo no encontrado: '+slug);return;}
+    document.getElementById('liceoNombre').value=l.nombre||'';
+    document.getElementById('liceoSlug').value=l.slug||'';
+    document.getElementById('liceoRbd').value=l.rbd||'';
+    document.getElementById('liceoComuna').value=l.comuna||'';
+    document.getElementById('liceoRegion').value=l.region||'';
+    document.getElementById('liceoDependencia').value=l.dependencia||'';
+    document.getElementById('liceoLogoPath').value=l.logoPath||('assets/logos/colegios/'+l.slug+'.png');
+    document.getElementById('liceoAlias').value=Array.isArray(l.alias)?l.alias.join(', '):'';
+    document.getElementById('liceoLogoPreview').src=l.logoPath||('assets/logos/colegios/'+l.slug+'.png');
+  }
+  document.getElementById('modalLiceo').classList.add('open');
+}
+
+function liceoAutoSlug(){
+  // Solo en modo creación (slug editable)
+  var slugIn=document.getElementById('liceoSlug');
+  if(slugIn.readOnly)return;
+  var nombre=document.getElementById('liceoNombre').value;
+  var slug=(window.ELColegios&&ELColegios.slugify)?ELColegios.slugify(nombre):
+    String(nombre||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9\s-]/g,'').replace(/\s+/g,'-').replace(/-+/g,'-').replace(/^-|-$/g,'');
+  slugIn.value=slug;
+  var logoIn=document.getElementById('liceoLogoPath');
+  if(logoIn&&!logoIn.dataset.touched){
+    logoIn.value=slug?('assets/logos/colegios/'+slug+'.png'):'';
+    document.getElementById('liceoLogoPreview').src=logoIn.value||'assets/logos/colegios/default.svg';
+  }
+}
+
+// Si el admin escribe la ruta del logo a mano, marcar como "tocada" y actualizar preview
+document.addEventListener('input',function(e){
+  if(e.target&&e.target.id==='liceoLogoPath'){
+    e.target.dataset.touched='1';
+    var p=document.getElementById('liceoLogoPreview');
+    if(p)p.src=e.target.value||'assets/logos/colegios/default.svg';
+  }
+});
+
+function guardarLiceo(){
+  var slugEdit=document.getElementById('liceoEditingSlug').value;
+  var editing=!!slugEdit;
+  var nombre=document.getElementById('liceoNombre').value.trim();
+  var slug=document.getElementById('liceoSlug').value.trim().toLowerCase();
+  if(!nombre){notif('liceoNotif','❌ El nombre es obligatorio','err');return;}
+  if(!slug||!/^[a-z0-9-]+$/.test(slug)){notif('liceoNotif','❌ Slug inválido (solo minúsculas, números y guiones)','err');return;}
+  var alias=(document.getElementById('liceoAlias').value||'').split(',').map(function(s){return s.trim();}).filter(function(s){return s.length>0;});
+  var data={
+    slug:slug,
+    nombre:nombre,
+    rbd:document.getElementById('liceoRbd').value.trim(),
+    comuna:document.getElementById('liceoComuna').value.trim(),
+    region:document.getElementById('liceoRegion').value.trim(),
+    dependencia:document.getElementById('liceoDependencia').value,
+    logoPath:document.getElementById('liceoLogoPath').value.trim()||('assets/logos/colegios/'+slug+'.png'),
+    alias:alias
+  };
+  var btn=document.getElementById('btnGuardarLiceo');
+  if(btn){btn.disabled=true;btn.textContent='⏳ Guardando…';}
+  var p=editing
+    ? ELDB.liceos.actualizar(slugEdit,data)
+    : ELDB.liceos.crear(data);
+  p.then(function(){
+    notif('liceoNotif',editing?'✅ Liceo actualizado':'✅ Liceo creado','ok');
+    if(btn){btn.disabled=false;btn.textContent='💾 Guardar liceo';}
+    setTimeout(function(){closeModal('modalLiceo');loadLiceos();},900);
+  }).catch(function(e){
+    notif('liceoNotif','❌ '+(e&&e.message||'Error guardando'),'err');
+    if(btn){btn.disabled=false;btn.textContent='💾 Guardar liceo';}
+  });
+}
+
+function eliminarLiceo(slug){
+  var l=allLiceos.find(function(x){return x.slug===slug;});
+  var lbl=l?l.nombre:slug;
+  if(!confirm('¿Desactivar el liceo "'+lbl+'"?\n\nLos profesores que lo tengan asignado no lo perderán; solo dejará de aparecer en listas activas. Puedes restaurarlo cuando quieras.'))return;
+  ELDB.liceos.eliminar(slug).then(function(){loadLiceos();}).catch(function(e){alert('❌ '+(e&&e.message||'Error'));});
+}
+
+function restaurarLiceo(slug){
+  ELDB.liceos.restaurar(slug).then(function(){loadLiceos();}).catch(function(e){alert('❌ '+(e&&e.message||'Error'));});
+}
+
 // WIZARD — variante rápida con tipo preseleccionado
 function abrirWizardTipo(tipo){
   abrirWizard();
@@ -782,7 +1072,7 @@ function filtrarProfs(){
 
 // WIZARD
 function abrirWizard(){
-  wData={tipo:null,asignaturas:[],niveles:[],especialidad:'',modulos:[],cursos:[],permisos:{planificar:true,crearMaterial:true}};
+  wData={tipo:null,asignaturas:[],niveles:[],especialidad:'',modulos:[],cursos:[],liceos:[],liceoPrincipal:'',permisos:{planificar:true,crearMaterial:true}};
   ['pNombre','pEmail','pPass'].forEach(function(id){document.getElementById(id).value='';});
   document.querySelectorAll('.tipo-card').forEach(function(c){c.classList.remove('selected');});
   document.querySelectorAll('.wstep').forEach(function(s){s.className='wstep';});

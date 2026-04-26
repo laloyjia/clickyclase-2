@@ -391,6 +391,116 @@ var ELDB = (function() {
     }
   };
 
+  // ────────────────────────────────────────────────────────────
+  //  LICEOS / COLEGIOS
+  //  Documentos con id = slug (ej: 'salesianos-talca').
+  //  Shape: { slug, nombre, rbd, comuna, region, dependencia,
+  //           logoPath, alias[], activo, creadoEn, actualizadoEn,
+  //           creadoPor }
+  // ────────────────────────────────────────────────────────────
+  var liceos = {
+    /**
+     * Lista todos los liceos. Si incluirInactivos=false (default),
+     * filtra solo activos.
+     */
+    listar: function (incluirInactivos) {
+      var query = EL_DB.collection(EL_COLLECTIONS.LICEOS);
+      if (!incluirInactivos) query = query.where('activo', '==', true);
+      return query.orderBy('nombre', 'asc').get()
+        .then(function (snap) {
+          var items = [];
+          snap.forEach(function (doc) {
+            items.push(Object.assign({ slug: doc.id }, doc.data()));
+          });
+          return items;
+        })
+        .catch(function (err) {
+          console.warn('[ELDB.liceos] No se pudo listar:', err && err.message);
+          return [];
+        });
+    },
+
+    /** Devuelve un liceo por slug o null si no existe. */
+    obtener: function (slug) {
+      if (!slug) return Promise.resolve(null);
+      return EL_DB.collection(EL_COLLECTIONS.LICEOS).doc(slug).get()
+        .then(function (doc) {
+          if (!doc.exists) return null;
+          return Object.assign({ slug: doc.id }, doc.data());
+        })
+        .catch(function (err) {
+          console.warn('[ELDB.liceos] obtener', slug, err && err.message);
+          return null;
+        });
+    },
+
+    /**
+     * Crea o sobrescribe un liceo. Usa el slug como ID del doc.
+     * data: { slug, nombre, rbd?, comuna?, region?, dependencia?, logoPath?, alias? }
+     */
+    crear: function (data) {
+      if (!data || !data.slug || !data.nombre) {
+        return Promise.reject(new Error('slug y nombre son obligatorios'));
+      }
+      var slug = String(data.slug).trim().toLowerCase();
+      var entrada = {
+        slug:          slug,
+        nombre:        String(data.nombre).trim(),
+        rbd:           data.rbd          || '',
+        comuna:        data.comuna       || '',
+        region:        data.region       || '',
+        dependencia:   data.dependencia  || '',
+        logoPath:      data.logoPath     || ('assets/logos/colegios/' + slug + '.png'),
+        alias:         Array.isArray(data.alias) ? data.alias : [],
+        activo:        data.activo !== false,
+        creadoEn:      new Date().toISOString(),
+        actualizadoEn: new Date().toISOString(),
+        creadoPor:     (window.ELAuth && window.ELAuth.user) ? window.ELAuth.user.email : 'admin'
+      };
+      return EL_DB.collection(EL_COLLECTIONS.LICEOS).doc(slug).set(entrada)
+        .then(function () { return entrada; });
+    },
+
+    /** Actualiza campos de un liceo existente. */
+    actualizar: function (slug, datos) {
+      if (!slug) return Promise.reject(new Error('slug requerido'));
+      var patch = Object.assign({}, datos, {
+        actualizadoEn: new Date().toISOString()
+      });
+      // Nunca permitir cambiar el slug por update (es la id del doc)
+      delete patch.slug;
+      return EL_DB.collection(EL_COLLECTIONS.LICEOS).doc(slug).update(patch);
+    },
+
+    /** Soft delete: marca activo=false. */
+    eliminar: function (slug) {
+      if (!slug) return Promise.reject(new Error('slug requerido'));
+      return EL_DB.collection(EL_COLLECTIONS.LICEOS).doc(slug).update({
+        activo:        false,
+        actualizadoEn: new Date().toISOString()
+      });
+    },
+
+    /** Restaurar un liceo desactivado. */
+    restaurar: function (slug) {
+      if (!slug) return Promise.reject(new Error('slug requerido'));
+      return EL_DB.collection(EL_COLLECTIONS.LICEOS).doc(slug).update({
+        activo:        true,
+        actualizadoEn: new Date().toISOString()
+      });
+    },
+
+    /** Helper: convierte un texto libre a slug normalizado. */
+    slugify: function (s) {
+      return String(s || '')
+        .toLowerCase()
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9\s-]/g, '')
+        .trim()
+        .replace(/\s+/g, '-');
+    }
+  };
+
   return {
     materiales:      materiales,
     planificaciones: planificaciones,
@@ -398,6 +508,7 @@ var ELDB = (function() {
     usuarios:        usuarios,
     codigos:         codigos,
     migracion:       migracion,
-    recursos:        recursos
+    recursos:        recursos,
+    liceos:          liceos
   };
 })();
