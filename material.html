@@ -2196,35 +2196,65 @@
     }
 
     /**
-     * Inicializa el selector de liceo del profesor cuando tiene 2+ asignados.
-     * Si tiene 0 ó 1, oculta el selector y deja el campo de texto libre.
+     * Inicializa el selector de liceo del profesor.
+     *  - Si el profesor tiene 1+ liceos asignados → selector con SUS liceos
+     *  - Si tiene 0 asignados pero el catálogo Firestore tiene → selector con TODO el catálogo
+     *  - Si el catálogo está vacío y no tiene asignados → oculta el selector (input libre)
+     * Además repuebla el datalist <dlColegios> con el catálogo Firestore (no solo la semilla).
      */
     function _initSelectorLiceos(user) {
         user = user || _matUser || {};
         var slugs = Array.isArray(user.liceos) ? user.liceos : [];
-        // Compatibilidad: si el legacy 'liceoSlug' existe pero liceos[] está vacío
         if (!slugs.length && user.liceoSlug) slugs = [user.liceoSlug];
         var row = document.getElementById('rowSelectorLiceo');
         var sel = document.getElementById('selectLiceoProf');
         if (!row || !sel) return;
-        if (slugs.length < 2) { row.style.display = 'none'; return; }
 
-        // Cargar catálogo y poblar el select
         var fetcher = (window.ELColegios && ELColegios.cargar)
-            ? ELColegios.cargar()
-            : Promise.resolve(window.ELColegios && ELColegios.listar ? ELColegios.listar() : []);
+            ? ELColegios.cargar(true)
+            : Promise.resolve([]);
         fetcher.then(function (catalogo) {
+            catalogo = (catalogo || []).filter(function (c) { return c.activo !== false; });
+
+            // Repueblar datalist con catálogo Firestore completo (mejor autocompletado)
+            var dl = document.getElementById('dlColegios');
+            if (dl && catalogo.length) {
+                dl.innerHTML = catalogo.map(function (c) {
+                    return '<option value="' + (c.nombre || '').replace(/"/g, '&quot;') + '">';
+                }).join('');
+            }
+
             var byslug = {};
-            (catalogo || []).forEach(function (c) { byslug[c.slug] = c; });
-            var principal = user.liceoPrincipal || slugs[0];
-            sel.innerHTML = slugs.map(function (s) {
+            catalogo.forEach(function (c) { byslug[c.slug] = c; });
+
+            // Decidir qué liceos van en el select
+            var slugsParaSelect, etiquetaInfo, principal;
+            if (slugs.length) {
+                slugsParaSelect = slugs.filter(function (s) { return byslug[s]; });
+                if (!slugsParaSelect.length) slugsParaSelect = slugs; // por si los slugs aún no existen en catálogo
+                principal = user.liceoPrincipal || slugsParaSelect[0];
+                etiquetaInfo = (slugsParaSelect.length === 1)
+                    ? 'Liceo asignado al profesor (cámbialo solo si necesitas otro).'
+                    : 'El logo y nombre del liceo seleccionado aparecerán en el encabezado del documento.';
+            } else if (catalogo.length) {
+                slugsParaSelect = catalogo.map(function (c) { return c.slug; });
+                principal = slugsParaSelect[0];
+                etiquetaInfo = 'Tu perfil no tiene liceo asignado. Elige uno del catálogo o pídele al administrador que te asigne uno.';
+            } else {
+                row.style.display = 'none';
+                return;
+            }
+
+            sel.innerHTML = slugsParaSelect.map(function (s) {
                 var c = byslug[s];
                 var nombre = c ? c.nombre : s;
-                var sufijo = (s === principal) ? ' ★' : '';
+                var sufijo = (s === (user.liceoPrincipal || '')) ? ' ★' : '';
                 return '<option value="' + s + '"' + (s === principal ? ' selected' : '') + '>' + nombre + sufijo + '</option>';
             }).join('');
+            // Actualizar el texto descriptivo
+            var helpEl = row.querySelector('small');
+            if (helpEl) helpEl.textContent = etiquetaInfo;
             row.style.display = '';
-            // Sincronizar estado inicial del input + dataset
             cambiarLiceoActivo(sel.value);
         }).catch(function (e) {
             console.warn('[Material] No se pudo cargar catálogo de liceos:', e && e.message);
@@ -2235,20 +2265,29 @@
     /**
      * El profesor cambió el liceo activo. Actualiza el input visible y guarda el slug
      * en dataset para que _logoTagInstitucion pueda resolver el logo correcto.
+     * Resuelve el nombre desde el catálogo Firestore (cache); si aún no está,
+     * fuerza una carga.
      */
     function cambiarLiceoActivo(slug) {
         if (!slug) return;
         var inEl = document.getElementById('inputLiceo');
         if (!inEl) return;
-        var c = null;
+        function _resolver(lista) {
+            var c = (lista || []).filter(function (x) { return x.slug === slug; })[0];
+            inEl.value = c ? c.nombre : slug;
+            inEl.dataset.slug = slug;
+        }
         if (window.ELColegios && ELColegios.listar) {
             var lista = ELColegios.listar();
-            c = lista.find ? lista.find(function (x) { return x.slug === slug; })
-                           : lista.filter(function (x) { return x.slug === slug; })[0];
+            var c = lista.filter(function (x) { return x.slug === slug; })[0];
+            if (c) { _resolver(lista); return; }
         }
-        inEl.value = c ? c.nombre : slug;
-        inEl.dataset.slug = slug;
-        // Si el usuario edita manualmente luego, el dataset se conservará pero el name prevalecerá
+        // Cache miss: cargar
+        if (window.ELColegios && ELColegios.cargar) {
+            ELColegios.cargar().then(_resolver).catch(function () { _resolver([]); });
+        } else {
+            _resolver([]);
+        }
     }
     // Si el usuario edita el input a mano, limpiamos el dataset.slug (cae a búsqueda por nombre)
     document.addEventListener('input', function (e) {

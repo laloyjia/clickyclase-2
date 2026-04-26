@@ -1240,13 +1240,22 @@ function buildStep3(){
 function poblarLiceosBox(boxId,targetState){
   var box=document.getElementById(boxId);
   if(!box)return;
-  var fuente=(allLiceos&&allLiceos.length)?Promise.resolve(allLiceos.filter(function(l){return l.activo!==false;})):
-    (ELDB.liceos&&ELDB.liceos.listar?ELDB.liceos.listar():Promise.resolve([]));
+  // Siempre consultamos Firestore para tener el catálogo más fresco
+  var fuente=(ELDB.liceos&&ELDB.liceos.listar)?ELDB.liceos.listar():Promise.resolve([]);
   fuente.then(function(list){
-    if(!list||!list.length){
-      box.innerHTML='<div style="padding:10px;color:var(--muted);font-size:.8rem">No hay liceos registrados. Crea uno en <strong>🏫 Liceos / Colegios</strong>.</div>';
+    var activos=(list||[]).filter(function(l){return l.activo!==false;});
+    allLiceos=list||allLiceos;
+    if(!activos.length){
+      box.innerHTML='<div style="padding:14px;color:var(--muted);font-size:.82rem;text-align:center;background:rgba(245,158,11,.06);border:1px dashed rgba(245,158,11,.3);border-radius:8px">'+
+        '<div style="font-size:1.4rem;margin-bottom:6px">🏫</div>'+
+        '<div style="font-weight:600;color:var(--text);margin-bottom:4px">No hay liceos en el catálogo</div>'+
+        '<div style="margin-bottom:10px">Antes de asignar liceos a un profesor tienes que crear al menos uno en el catálogo.</div>'+
+        '<button class="btn btn-primary btn-sm" onclick="closeModal(\'modalLiceosProf\');closeModal(\'modalWizard\');showSec(document.querySelector(\'[data-sec=liceos]\'),\'liceos\');setTimeout(abrirModalLiceo,200);">➕ Crear el primer liceo</button>'+
+      '</div>';
       return;
     }
+    // Normalizamos a la lista que vamos a pintar (solo activos)
+    list=activos;
     var st=(targetState==='wData')?wData:_editLiceosState;
     var html=list.map(function(l){
       var checked=(st.liceos||[]).indexOf(l.slug)!==-1;
