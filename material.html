@@ -635,20 +635,94 @@
         }
         .seccion-referencia.visible { display: block; }
 
-        .upload-zone {
-            border: 2px dashed var(--glass-border);
-            border-radius: var(--radius-sm);
-            padding: 1.2rem;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s;
-            margin-bottom: 0.8rem;
-            color: var(--text-muted);
-            font-size: 0.9rem;
+        /* ============================================
+           BLOQUES INTERNOS DE "Configuración del documento"
+           ============================================ */
+        .cfg-bloque {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: var(--radius-md);
+            padding: 1.1rem 1.2rem 1rem;
+            margin-top: 1rem;
         }
-        .upload-zone:hover { border-color: var(--primary); background: rgba(99,102,241,0.05); }
-        .upload-zone.cargado { border-color: var(--success); background: rgba(16,185,129,0.05); }
-        .upload-zone input[type="file"] { display: none; }
+        .cfg-bloque-titulo {
+            font-size: .82rem;
+            font-weight: 700;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+            color: var(--text-muted, #94a3b8);
+            margin-bottom: .7rem;
+            border-left: 3px solid var(--primary, #6C5CE7);
+            padding-left: .55rem;
+        }
+        .cfg-hint {
+            font-size: .85rem;
+            color: var(--text-muted, #94a3b8);
+            margin: 0 0 .8rem 0;
+            line-height: 1.45;
+        }
+        .cfg-help {
+            display: block;
+            font-size: .76rem;
+            color: var(--text-muted, #94a3b8);
+            margin-top: .25rem;
+            font-style: italic;
+        }
+        .cfg-pill {
+            display: inline-block;
+            background: rgba(108,92,231,.18);
+            color: #c4b5fd;
+            border-radius: 12px;
+            padding: 0 .55rem;
+            font-size: .72rem;
+            font-weight: 700;
+            margin-left: .35rem;
+            vertical-align: middle;
+        }
+        .tipos-preg-tabla {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: .35rem;
+            font-size: .9rem;
+            background: rgba(255,255,255,0.02);
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+        }
+        .tipos-preg-tabla th,
+        .tipos-preg-tabla td {
+            padding: .55rem .8rem;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+        .tipos-preg-tabla th {
+            background: rgba(108,92,231,.10);
+            color: var(--text-muted, #cbd5e1);
+            font-weight: 600;
+            text-align: left;
+            font-size: .78rem;
+            letter-spacing: .04em;
+            text-transform: uppercase;
+        }
+        .tipos-preg-tabla tr:last-child td { border-bottom: none; }
+        .tipos-preg-tabla input[type="number"] {
+            width: 70px;
+            padding: .35rem .5rem;
+            text-align: center;
+            font-weight: 600;
+            background: rgba(0,0,0,.25);
+            border: 1px solid rgba(255,255,255,0.10);
+            border-radius: 6px;
+            color: var(--text, #e2e8f0);
+        }
+        .tipos-preg-tabla input[type="number"]:focus {
+            outline: none;
+            border-color: var(--primary, #6C5CE7);
+            box-shadow: 0 0 0 2px rgba(108,92,231,.25);
+        }
+        .tipos-preg-tabla tfoot td { background: rgba(108,92,231,.06); font-size: .85rem; }
+        .cfg-total { font-weight: 800; color: var(--primary, #c4b5fd); }
+        .cfg-total.invalid { color: #ef4444; }
+        .bloom-compact { gap: .35rem; }
+        .bloom-compact .bloom-item { padding: .3rem .65rem; font-size: .78rem; }
 
         /* ============================================
            BLOOM TAXONOMY BADGES (dentro del documento)
@@ -829,7 +903,7 @@
                 <div style="width:56px;height:56px;border-radius:16px;display:grid;place-items:center;font-size:1.6rem;background:linear-gradient(135deg,#7c3aed,#22d3ee);box-shadow:0 10px 24px -10px rgba(124,58,237,.8)">📚</div>
                 <div style="text-align:left">
                     <h1 style="margin:0;font-size:1.6rem;line-height:1.15">Generador de Material Educativo</h1>
-                    <p style="margin:.2rem 0 0;color:var(--text-muted,#94a3b8);font-size:.92rem">Crea guías, apuntes, fichas, pruebas y controles alineados al currículo Mineduc · Chile.</p>
+                    <p style="margin:.2rem 0 0;color:var(--text-muted,#94a3b8);font-size:.92rem">Crea guías, apuntes, pruebas y controles alineados al currículo Mineduc · Chile.</p>
                 </div>
             </div>
             <div style="display:flex;gap:.5rem;flex-wrap:wrap;justify-content:center;margin-top:.9rem">
@@ -853,11 +927,6 @@
                     <div class="icon">&#128221;</div>
                     <h3>Apunte de Clase</h3>
                     <p>Resumen teórico con conceptos clave y ejemplos</p>
-                </div>
-                <div class="tipo-doc-card" onclick="seleccionarTipo(this, 'ficha')" data-tipo="ficha">
-                    <div class="icon">&#128295;</div>
-                    <h3>Ficha Práctica</h3>
-                    <p>Paso a paso para actividad de taller o laboratorio</p>
                 </div>
                 <div class="tipo-doc-card" onclick="seleccionarTipo(this, 'evaluacion')" data-tipo="evaluacion">
                     <div class="icon">&#9997;</div>
@@ -991,114 +1060,147 @@
 
         <!-- SECCION 4: CONTENIDO -->
         <div class="seccion-mat">
-            <h2><span>&#128221;</span> Contenido y Personalización</h2>
-            <div class="campo">
-                <label>Contenido específico del documento</label>
-                <textarea id="inputContenido" placeholder="Describe el tema principal. Ej: Conexión de relés programables tipo Zelio con sensores de temperatura NTC para control on/off de ventilación en tableros industriales..."></textarea>
-            </div>
-            <div class="campo-row">
-                <div class="campo">
-                    <label>Nivel de dificultad</label>
-                    <select id="selectDificultad">
-                        <option value="basico">Básico — Introducción al tema</option>
-                        <option value="intermedio" selected>Intermedio — Aplicación práctica</option>
-                        <option value="avanzado">Avanzado — Análisis y resolución</option>
-                    </select>
-                </div>
-                <div class="campo">
-                    <label>Nombre del profesor</label>
-                    <input type="text" id="inputProfesor" placeholder="Ej: Eduardo Yáñez">
-                </div>
-            </div>
-            <div class="campo-row">
-                <div class="campo">
-                    <label>Institución / Liceo (aparece en el encabezado)</label>
-                    <input type="text" id="inputLiceo" list="dlColegios" placeholder="Ej: Liceo Salesiano de Talca">
-                    <datalist id="dlColegios"></datalist>
-                </div>
-                <div class="campo">
-                    <label>Duración estimada</label>
-                    <input type="text" id="inputDuracion" placeholder="Ej: 2 bloques (90 min)" value="2 bloques (90 min)">
-                </div>
-            </div>
-            <div class="campo-row">
-                <div class="campo">
-                    <label>Código del documento (opcional)</label>
-                    <input type="text" id="inputCodigoDoc" placeholder="Ej: GA-ELC-001">
-                </div>
-                <div class="campo">
-                    <label>Puntaje total (opcional)</label>
-                    <input type="text" id="inputPuntajeDoc" placeholder="Ej: 60 pts">
-                </div>
-            </div>
-        </div>
+            <h2><span>&#128203;</span> Configuración del documento</h2>
 
-        <!-- SECCION 5: MATERIAL DE REFERENCIA (solo para Guia de Ejercicios) -->
-        <div class="seccion-referencia" id="seccionReferencia">
-            <h2><span>&#128247;</span> Material de Referencia para Ejercicios</h2>
-            <p style="color:var(--text-muted);font-size:0.88rem;margin-bottom:1rem;">
-                Sube un archivo <strong>.txt</strong> con ejercicios, enunciados o contenido de referencia, o pega el texto directamente.
-                La plataforma usará este material para generar preguntas más específicas y contextualizadas al contenido real.
-            </p>
-            <div class="campo">
-                <label>Cargar archivo de texto (.txt)</label>
-                <div class="upload-zone" id="uploadZone" onclick="document.getElementById('archivoReferencia').click()">
-                    <input type="file" id="archivoReferencia" accept=".txt,.md,.csv" onchange="leerArchivo(this)">
-                    <span id="uploadZoneText">&#128194; Haz clic para seleccionar un archivo .txt con ejercicios o contenido</span><br>
-                    <small>Acepta .txt y .md &mdash; O pega el contenido directamente en el area de abajo</small>
+            <!-- ── Bloque A: datos generales ── -->
+            <div class="cfg-bloque">
+                <div class="cfg-bloque-titulo">Datos generales</div>
+                <div class="campo">
+                    <label>Contenido específico del documento</label>
+                    <textarea id="inputContenido" placeholder="Describe el tema principal. Ej: Medición de resistencias en serie y paralelo aplicando ley de Ohm y leyes de Kirchhoff con multímetro digital."></textarea>
+                </div>
+                <div class="campo-row">
+                    <div class="campo">
+                        <label>Nivel de dificultad</label>
+                        <select id="selectDificultad">
+                            <option value="basico">Básico — Introducción al tema</option>
+                            <option value="intermedio" selected>Intermedio — Aplicación práctica</option>
+                            <option value="avanzado">Avanzado — Análisis y resolución</option>
+                        </select>
+                    </div>
+                    <div class="campo">
+                        <label>Nombre del profesor</label>
+                        <input type="text" id="inputProfesor" placeholder="Ej: Eduardo Yáñez">
+                    </div>
+                </div>
+                <div class="campo-row">
+                    <div class="campo">
+                        <label>Institución / Liceo (aparece en el encabezado)</label>
+                        <input type="text" id="inputLiceo" list="dlColegios" placeholder="Ej: Liceo Salesiano de Talca">
+                        <datalist id="dlColegios"></datalist>
+                    </div>
+                    <div class="campo">
+                        <label>Duración estimada</label>
+                        <input type="text" id="inputDuracion" placeholder="Ej: 2 bloques (90 min)" value="2 bloques (90 min)">
+                    </div>
+                </div>
+                <div class="campo-row">
+                    <div class="campo">
+                        <label>Código del documento (opcional)</label>
+                        <input type="text" id="inputCodigoDoc" placeholder="Ej: GA-ELC-001">
+                    </div>
+                    <div class="campo">
+                        <label>Puntaje total (opcional)</label>
+                        <input type="text" id="inputPuntajeDoc" placeholder="Ej: 60 pts">
+                    </div>
                 </div>
             </div>
-            <div class="campo">
-                <label>Contenido de referencia (pega texto, ejercicios o enunciados de libros u otras fuentes)</label>
-                <textarea id="materialReferencia" rows="7"
-                    placeholder="Pega aqui el contenido de referencia: ejercicios de libros, enunciados, problemas resueltos, tablas de datos tecnicos, etc.&#10;&#10;Ejemplo:&#10;1. Calcula la corriente que circula por una resistencia de 220&#937; conectada a 12V.&#10;2. Dibuja el diagrama de un circuito RC en serie...&#10;&#10;La plataforma generara preguntas basadas en este material."></textarea>
-            </div>
-        </div>
 
-        <!-- SECCION 6: OPCIONES DE EVALUACIÓN (visible para evaluacion/prueba/control) -->
-        <div class="seccion-mat" id="seccionEvalOpciones" style="display:none">
-            <h2><span>&#9881;</span> Opciones de Evaluación</h2>
-            <div class="campo-row">
-                <div class="campo">
-                    <label>Cantidad de preguntas</label>
-                    <select id="selectCantPreg">
-                        <option value="5">5 preguntas (control rápido)</option>
-                        <option value="10" selected>10 preguntas (estándar)</option>
-                        <option value="15">15 preguntas (completo)</option>
-                        <option value="20">20 preguntas (prueba extensa)</option>
-                    </select>
+            <!-- ── Bloque B: configuración de evaluación (visible solo para evaluacion/prueba/control) ── -->
+            <div class="cfg-bloque" id="cfgEval" style="display:none">
+                <div class="cfg-bloque-titulo">Configuración de evaluación</div>
+                <p class="cfg-hint">Define cuántas preguntas tendrá la evaluación, el puntaje total y la cantidad por tipo de ítem. Para pruebas formales el máximo permitido es <strong>40 preguntas</strong>.</p>
+
+                <div class="campo-row">
+                    <div class="campo">
+                        <label>Cantidad total de preguntas <span class="cfg-pill" id="cfgPillTotal">0</span></label>
+                        <input type="number" id="inputCantPreg" min="1" max="40" step="1" value="10">
+                        <small class="cfg-help">Máximo 40. La suma de las cantidades por ítem debe coincidir con este número.</small>
+                    </div>
+                    <div class="campo">
+                        <label>Puntaje total</label>
+                        <input type="number" id="inputPuntajeEval" min="1" max="500" step="1" value="100">
+                    </div>
                 </div>
+
+                <div class="campo-row">
+                    <div class="campo">
+                        <label>Cantidad de alternativas (Selección múltiple)</label>
+                        <select id="selectAlternativas">
+                            <option value="3">3 alternativas (A, B, C)</option>
+                            <option value="4" selected>4 alternativas (A, B, C, D)</option>
+                            <option value="5">5 alternativas (A, B, C, D, E)</option>
+                        </select>
+                        <small class="cfg-help">Solo aplica a los ítems de selección múltiple.</small>
+                    </div>
+                    <div class="campo">
+                        <label>Niveles cognitivos de Bloom a incluir</label>
+                        <div class="bloom-selector bloom-compact" id="bloomSelector">
+                            <label class="bloom-item bloom-1-item checked"><input type="checkbox" value="1" checked onchange="toggleCheckItem(this)"> &#128309; Recordar</label>
+                            <label class="bloom-item bloom-2-item checked"><input type="checkbox" value="2" checked onchange="toggleCheckItem(this)"> &#128994; Comprender</label>
+                            <label class="bloom-item bloom-3-item checked"><input type="checkbox" value="3" checked onchange="toggleCheckItem(this)"> &#128993; Aplicar</label>
+                            <label class="bloom-item bloom-4-item"><input type="checkbox" value="4" onchange="toggleCheckItem(this)"> &#128308; Analizar</label>
+                            <label class="bloom-item bloom-5-item"><input type="checkbox" value="5" onchange="toggleCheckItem(this)"> &#128420; Evaluar</label>
+                            <label class="bloom-item bloom-6-item"><input type="checkbox" value="6" onchange="toggleCheckItem(this)"> &#9999; Crear</label>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="campo">
-                    <label>Puntaje total</label>
-                    <select id="selectPuntaje">
-                        <option value="100" selected>100 puntos</option>
-                        <option value="70">70 puntos</option>
-                        <option value="60">60 puntos</option>
-                        <option value="50">50 puntos</option>
-                        <option value="40">40 puntos (control)</option>
-                    </select>
+                    <label>Distribución por tipo de ítem</label>
+                    <table class="tipos-preg-tabla" id="tiposPregTabla">
+                        <thead>
+                            <tr><th>Tipo de ítem</th><th style="width:90px;text-align:center;">Cantidad</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr data-tipo="sm">
+                                <td>&#9673; Selección múltiple</td>
+                                <td><input type="number" min="0" max="40" step="1" value="5" data-cantitem></td>
+                            </tr>
+                            <tr data-tipo="vf">
+                                <td>&#10003; Verdadero / Falso (con justificación)</td>
+                                <td><input type="number" min="0" max="40" step="1" value="3" data-cantitem></td>
+                            </tr>
+                            <tr data-tipo="completar">
+                                <td>&#9998; Completar (espacios en blanco)</td>
+                                <td><input type="number" min="0" max="40" step="1" value="0" data-cantitem></td>
+                            </tr>
+                            <tr data-tipo="emparejar">
+                                <td>&#8596; Términos pareados</td>
+                                <td><input type="number" min="0" max="40" step="1" value="0" data-cantitem></td>
+                            </tr>
+                            <tr data-tipo="aplicacion">
+                                <td>&#129518; Aplicación / Ejercicio práctico</td>
+                                <td><input type="number" min="0" max="40" step="1" value="0" data-cantitem></td>
+                            </tr>
+                            <tr data-tipo="caso">
+                                <td>&#128269; Análisis de caso</td>
+                                <td><input type="number" min="0" max="40" step="1" value="0" data-cantitem></td>
+                            </tr>
+                            <tr data-tipo="desarrollo">
+                                <td>&#9997; Desarrollo / Argumentación</td>
+                                <td><input type="number" min="0" max="40" step="1" value="2" data-cantitem></td>
+                            </tr>
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td style="text-align:right;font-weight:600;color:var(--muted);">Total por ítem</td>
+                                <td style="text-align:center;"><span id="cfgTotalItems" class="cfg-total">10</span> / 40</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                    <small class="cfg-help" id="cfgTotalMsg">Ajusta cada cantidad. Si la suma no coincide con el total general, ese valor manda.</small>
                 </div>
             </div>
-            <div class="campo">
-                <label>Tipos de preguntas a incluir</label>
-                <div class="tipos-preguntas-grid" id="tiposPreguntas">
-                    <label class="tipo-preg-item checked"><input type="checkbox" value="sm" checked onchange="toggleCheckItem(this)"> &#9673; Selección múltiple</label>
-                    <label class="tipo-preg-item checked"><input type="checkbox" value="vf" checked onchange="toggleCheckItem(this)"> &#10003; Verdadero / Falso</label>
-                    <label class="tipo-preg-item"><input type="checkbox" value="desarrollo" onchange="toggleCheckItem(this)"> &#9997; Desarrollo</label>
-                    <label class="tipo-preg-item"><input type="checkbox" value="completar" onchange="toggleCheckItem(this)"> &#9998; Completar</label>
-                    <label class="tipo-preg-item"><input type="checkbox" value="emparejar" onchange="toggleCheckItem(this)"> &#8596; Emparejar</label>
-                    <label class="tipo-preg-item"><input type="checkbox" value="caso" onchange="toggleCheckItem(this)"> &#128269; Análisis de caso</label>
-                </div>
-            </div>
-            <div class="campo">
-                <label>Niveles cognitivos de Bloom a incluir</label>
-                <div class="bloom-selector" id="bloomSelector">
-                    <label class="bloom-item bloom-1-item checked"><input type="checkbox" value="1" checked onchange="toggleCheckItem(this)"> &#128309; Recordar</label>
-                    <label class="bloom-item bloom-2-item checked"><input type="checkbox" value="2" checked onchange="toggleCheckItem(this)"> &#128994; Comprender</label>
-                    <label class="bloom-item bloom-3-item checked"><input type="checkbox" value="3" checked onchange="toggleCheckItem(this)"> &#128993; Aplicar</label>
-                    <label class="bloom-item bloom-4-item"><input type="checkbox" value="4" onchange="toggleCheckItem(this)"> &#128308; Analizar</label>
-                    <label class="bloom-item bloom-5-item"><input type="checkbox" value="5" onchange="toggleCheckItem(this)"> &#128420; Evaluar</label>
-                    <label class="bloom-item bloom-6-item"><input type="checkbox" value="6" onchange="toggleCheckItem(this)"> &#9999; Crear</label>
+
+            <!-- ── Bloque C: preguntas o ejercicios específicos (solo evaluacion/prueba/control) ── -->
+            <div class="cfg-bloque" id="cfgRefs" style="display:none">
+                <div class="cfg-bloque-titulo">Preguntas o ejercicios específicos (opcional)</div>
+                <p class="cfg-hint">Pega aquí preguntas o ejercicios específicos que la IA <strong>debe incluir literalmente</strong> en la evaluación, sin reescribirlos. Útil cuando quieres reutilizar ítems de una prueba anterior, del libro de la asignatura o construidos por la jefatura.</p>
+                <div class="campo">
+                    <label>Preguntas / ejercicios literales</label>
+                    <textarea id="materialReferencia" rows="7"
+                        placeholder="Una pregunta o ejercicio por línea (o separados por una línea en blanco). Ejemplo:&#10;&#10;1. Calcula la resistencia equivalente de R1=220Ω y R2=330Ω en paralelo.&#10;2. Dibuja el circuito equivalente del problema 1 e indica la corriente total si V=12V.&#10;3. Justifica por qué un cortocircuito en una rama paralela hace caer la tensión en las demás."></textarea>
                 </div>
             </div>
         </div>
@@ -1120,6 +1222,7 @@
                 <h2><span>&#128196;</span> Documento Generado</h2>
                 <div class="doc-actions">
                     <button class="btn-accion btn-imprimir" onclick="window.print()">Imprimir / Guardar PDF</button>
+                    <button class="btn-accion" onclick="descargarDoc()" style="background:linear-gradient(135deg,rgba(37,99,235,.3),rgba(59,130,246,.2));border-color:rgba(59,130,246,.5);color:#93c5fd;" title="Descargar como documento de Word (.doc)">⬇ Descargar Word</button>
                     <button class="btn-accion btn-copiar-doc" onclick="copiarDocumento()">Copiar texto completo</button>
                     <button class="btn-accion btn-nuevo" onclick="nuevoDocumento()">Crear otro documento</button>
                     <button class="btn-accion" onclick="guardarEnBiblioteca()" style="background:linear-gradient(135deg,rgba(129,140,248,.3),rgba(52,211,153,.2));border-color:rgba(129,140,248,.5);color:#a5b4fc;" title="Publicar en la Biblioteca para que los estudiantes puedan verlo">📚 Publicar en Biblioteca</button>
@@ -1281,6 +1384,18 @@
             // Inicializar curriculo según perfil del profesor
             try { initCurriculoMat(user); } catch (e) { console.warn('[material] initCurriculoMat:', e); }
 
+            // Cablear listeners de la tabla de tipos de pregunta y de los inputs de cantidad/puntaje.
+            try {
+                var inputsItem = document.querySelectorAll('#tiposPregTabla input[data-cantitem]');
+                inputsItem.forEach(function(inp){ inp.addEventListener('input', actualizarTotalItems); });
+                var inCantPreg = document.getElementById('inputCantPreg');
+                if (inCantPreg) inCantPreg.addEventListener('input', function(){
+                    if (parseInt(inCantPreg.value, 10) > 40) inCantPreg.value = 40;
+                    actualizarTotalItems();
+                });
+                actualizarTotalItems();
+            } catch (e) { console.warn('[material] wiring eval:', e); }
+
             // Glow premium en tarjetas
             if (window.ELUI && ELUI.bindCardGlow) ELUI.bindCardGlow();
         }); // cierra onUserReady
@@ -1302,11 +1417,49 @@
         for (var i = 0; i < cards.length; i++) cards[i].classList.remove('selected');
         card.classList.add('selected');
         tipoDocSeleccionado = tipo;
-        var secRef   = document.getElementById('seccionReferencia');
-        var secEval  = document.getElementById('seccionEvalOpciones');
-        var esEval   = (tipo === 'evaluacion' || tipo === 'prueba' || tipo === 'control');
-        if (esEval) { secRef.classList.add('visible'); secEval.style.display = ''; }
-        else { secRef.classList.remove('visible'); secEval.style.display = 'none'; }
+        var cfgEval = document.getElementById('cfgEval');
+        var cfgRefs = document.getElementById('cfgRefs');
+        var esEval  = (tipo === 'evaluacion' || tipo === 'prueba' || tipo === 'control');
+        if (cfgEval) cfgEval.style.display = esEval ? '' : 'none';
+        if (cfgRefs) cfgRefs.style.display = esEval ? '' : 'none';
+        // Para 'prueba': el tope son 40. Para evaluacion/control: 40 también, igual.
+        var cantInput = document.getElementById('inputCantPreg');
+        if (cantInput) {
+            cantInput.max = 40;
+            if (parseInt(cantInput.value, 10) > 40) cantInput.value = 40;
+        }
+        actualizarTotalItems();
+    }
+
+    /**
+     * Recalcula el total de la columna "Cantidad" de la tabla de tipos de pregunta
+     * y marca en rojo si no coincide con el total general.
+     */
+    function actualizarTotalItems() {
+        var tabla = document.getElementById('tiposPregTabla');
+        if (!tabla) return;
+        var inputs = tabla.querySelectorAll('input[data-cantitem]');
+        var suma = 0;
+        for (var i = 0; i < inputs.length; i++) {
+            var n = parseInt(inputs[i].value, 10);
+            if (!isNaN(n) && n > 0) suma += n;
+        }
+        var spanT = document.getElementById('cfgTotalItems');
+        if (spanT) spanT.textContent = suma;
+        var pill = document.getElementById('cfgPillTotal');
+        if (pill) pill.textContent = suma + ' por ítem';
+        var totalGeneral = parseInt((document.getElementById('inputCantPreg') || {}).value, 10) || 0;
+        var msg = document.getElementById('cfgTotalMsg');
+        if (suma > 40) {
+            spanT && spanT.classList.add('invalid');
+            if (msg) msg.innerHTML = '<span style="color:#ef4444;font-weight:600;">⚠ La suma supera el máximo permitido (40 preguntas).</span>';
+        } else if (suma !== totalGeneral && totalGeneral > 0) {
+            spanT && spanT.classList.remove('invalid');
+            if (msg) msg.innerHTML = '<span style="color:#f59e0b;">La suma por ítem (' + suma + ') no coincide con el total general (' + totalGeneral + '). Si dejas las cantidades por ítem en 0, se distribuirán automáticamente.</span>';
+        } else {
+            spanT && spanT.classList.remove('invalid');
+            if (msg) msg.textContent = 'Suma por ítem coincide con el total general. Listo para generar.';
+        }
     }
 
     // =============================================
@@ -1864,7 +2017,6 @@
             var evalOpts = getEvalOpciones();
             if (tipoDocSeleccionado === 'guia') html = generarGuiaAprendizaje(modFake, aeFake, 1, oasReg[0].codigo, cursoTexto, cont, [], dificultad, profesor, valoresArr);
             else if (tipoDocSeleccionado === 'apunte') html = generarApunteClase(modFake, aeFake, 1, oasReg[0].codigo, cursoTexto, cont, [], dificultad, profesor, valoresArr);
-            else if (tipoDocSeleccionado === 'ficha')  html = generarFichaPractica(modFake, aeFake, 1, oasReg[0].codigo, cursoTexto, cont, [], dificultad, profesor, valoresArr);
             else if (tipoDocSeleccionado === 'evaluacion') html = generarGuiaEjercicios(modFake, aeFake, 1, oasReg[0].codigo, cursoTexto, cont, [], dificultad, profesor, valoresArr, evalOpts);
             else if (tipoDocSeleccionado === 'prueba') html = generarPrueba(modFake, aeFake, 1, oasReg[0].codigo, cursoTexto, cont, [], dificultad, profesor, valoresArr, evalOpts);
             else if (tipoDocSeleccionado === 'control') html = generarControl(modFake, aeFake, 1, oasReg[0].codigo, cursoTexto, cont, [], dificultad, profesor, valoresArr, evalOpts);
@@ -1921,8 +2073,6 @@
             html = generarGuiaAprendizaje(mod, ae, aeNum, oaId, cursoTexto, cont, cesTexto, dificultad, profesor, valoresArr);
         } else if (tipoDocSeleccionado === 'apunte') {
             html = generarApunteClase(mod, ae, aeNum, oaId, cursoTexto, cont, cesTexto, dificultad, profesor, valoresArr);
-        } else if (tipoDocSeleccionado === 'ficha') {
-            html = generarFichaPractica(mod, ae, aeNum, oaId, cursoTexto, cont, cesTexto, dificultad, profesor, valoresArr);
         } else if (tipoDocSeleccionado === 'evaluacion') {
             html = generarGuiaEjercicios(mod, ae, aeNum, oaId, cursoTexto, cont, cesTexto, dificultad, profesor, valoresArr, evalOpts);
         } else if (tipoDocSeleccionado === 'prueba') {
@@ -2020,17 +2170,50 @@
         '</table>';
     }
 
-    // Helper: leer opciones de evaluacion del formulario
+    // Helper: leer opciones de evaluacion del formulario unificado.
+    // Devuelve además itemCounts (cantidad solicitada por tipo) y cantAlternativas.
     function getEvalOpciones() {
-        var cantPreg = parseInt(document.getElementById('selectCantPreg') ? document.getElementById('selectCantPreg').value : '10') || 10;
-        var puntaje  = parseInt(document.getElementById('selectPuntaje') ? document.getElementById('selectPuntaje').value : '100') || 100;
+        var inCant = document.getElementById('inputCantPreg');
+        var inPts  = document.getElementById('inputPuntajeEval');
+        var cantPreg = inCant ? Math.max(0, Math.min(40, parseInt(inCant.value, 10) || 0)) : 10;
+        var puntaje  = inPts  ? Math.max(0, parseInt(inPts.value, 10) || 0) : 100;
+        var altSel = document.getElementById('selectAlternativas');
+        var cantAlternativas = altSel ? (parseInt(altSel.value, 10) || 4) : 4;
+
+        var itemCounts = {};
         var tiposPreg = [];
-        document.querySelectorAll('#tiposPreguntas input:checked').forEach(function(cb){ tiposPreg.push(cb.value); });
+        var rows = document.querySelectorAll('#tiposPregTabla tbody tr[data-tipo]');
+        rows.forEach(function(tr) {
+            var tipo = tr.getAttribute('data-tipo');
+            var inp  = tr.querySelector('input[data-cantitem]');
+            var n    = inp ? Math.max(0, parseInt(inp.value, 10) || 0) : 0;
+            itemCounts[tipo] = n;
+            if (n > 0) tiposPreg.push(tipo);
+        });
+
         var bloomLevels = [];
-        document.querySelectorAll('#bloomSelector input:checked').forEach(function(cb){ bloomLevels.push(parseInt(cb.value)); });
-        if (tiposPreg.length === 0) tiposPreg = ['sm', 'vf', 'desarrollo'];
+        document.querySelectorAll('#bloomSelector input:checked').forEach(function(cb){ bloomLevels.push(parseInt(cb.value, 10)); });
         if (bloomLevels.length === 0) bloomLevels = [1,2,3];
-        return { cantPreg: cantPreg, puntaje: puntaje, tiposPreg: tiposPreg, bloomLevels: bloomLevels };
+
+        // Si no se marcó ningún tipo: distribuir el total entre 3 tipos por defecto.
+        if (tiposPreg.length === 0) {
+            tiposPreg = ['sm','vf','desarrollo'];
+            itemCounts = { sm: Math.max(1, Math.round(cantPreg*0.5)), vf: Math.max(1, Math.round(cantPreg*0.3)), desarrollo: Math.max(1, cantPreg - Math.round(cantPreg*0.5) - Math.round(cantPreg*0.3)) };
+        }
+
+        // Recalcular cantPreg como la suma efectiva si la suma por ítem manda.
+        var sumaItems = 0;
+        for (var k in itemCounts) if (itemCounts.hasOwnProperty(k)) sumaItems += itemCounts[k];
+        if (sumaItems > 0) cantPreg = Math.min(40, sumaItems);
+
+        return {
+            cantPreg: cantPreg,
+            puntaje: puntaje,
+            tiposPreg: tiposPreg,
+            itemCounts: itemCounts,
+            cantAlternativas: cantAlternativas,
+            bloomLevels: bloomLevels
+        };
     }
 
     // Helper: texto Bloom
@@ -2404,180 +2587,6 @@
         '<div class="recuadro"><strong>&#128155; Reflexion Salesiana:</strong> El valor de <strong>' + val1 + '</strong> nos recuerda que la excelencia tecnica no es solo saber hacer, ' +
         'sino hacerlo bien, con integridad y compromiso con los demas. ' +
         '<em>&ldquo;La tecnica sin valores es solo una herramienta; con valores, es un instrumento de transformacion.&rdquo;</em></div>' +
-
-        pieDoc();
-    }
-
-    // =============================================
-    // GENERADOR: FICHA PRACTICA (version mejorada)
-    // =============================================
-    function generarFichaPractica(mod, ae, aeNum, oaId, curso, cont, ces, dif, prof, valores) {
-        var val1 = valores.length > 0 ? valores[0] : 'Responsabilidad';
-        var contCorto = cont.length > 60 ? cont.substring(0, 57) + '...' : cont;
-        var difTexto = dif === 'basico' ? '45 min' : dif === 'intermedio' ? '90 min' : '135 min (2 bloques)';
-
-        var cesRubrica = ces.map(function(c) {
-            var t = (c.split(': ')[1] || c).substring(0, 65);
-            return '<tr><td style="font-size:0.82rem;">' + t + '</td><td style="text-align:center;">20</td><td>' + lineas(1) + '</td></tr>';
-        }).join('');
-
-        var tituloDocFP = (cont || ae.texto || mod.nombre || 'Ficha de trabajo práctico').toString();
-        if (tituloDocFP.length > 90) {
-            var corteFP = tituloDocFP.lastIndexOf(' ', 90);
-            tituloDocFP = tituloDocFP.substring(0, corteFP > 50 ? corteFP : 90) + '…';
-        }
-
-        return headerInstitucional('Ficha de trabajo práctico') +
-        tituloBar(tituloDocFP) +
-        metaTabla({ profesor: prof, curso: curso, duracion: difTexto }) +
-
-        '<div class="doc-subtitulo" style="margin-top:0.2rem;">' +
-            'Módulo / Taller: <strong>' + (mod.nombre || mod.num || '') + '</strong> &nbsp;|&nbsp; ' +
-            'Actividad: <strong>' + cont + '</strong>' +
-        '</div>' +
-
-        '<div class="recuadro-seguridad">' +
-        '<strong>&#9888; PROTOCOLO DE SEGURIDAD OBLIGATORIO &mdash; Firma antes de comenzar</strong><br>' +
-        '<table style="margin-top:0.5rem;font-size:0.85rem;"><tr><th style="width:5%">&#9633;</th><th style="text-align:left;">Norma de seguridad a cumplir</th></tr>' +
-        '<tr><td style="text-align:center;">&#9633;</td><td>Tengo puesto el EPP completo: lentes de seguridad, guantes dielectricos y delantal de laboratorio.</td></tr>' +
-        '<tr><td style="text-align:center;">&#9633;</td><td>Verifique visualmente que todos los equipos e instrumentos estan en buen estado.</td></tr>' +
-        '<tr><td style="text-align:center;">&#9633;</td><td>Confirme con el multimetro la ausencia de tension en los puntos de intervencion.</td></tr>' +
-        '<tr><td style="text-align:center;">&#9633;</td><td>Conozco la ubicacion del extintor, botiquin y llave de corte de energia del taller.</td></tr>' +
-        '<tr><td style="text-align:center;">&#9633;</td><td>Lei el procedimiento completo antes de iniciar y anoté mis dudas para consultar al profesor.</td></tr>' +
-        '<tr><td style="text-align:center;">&#9633;</td><td>No conectare nada a la alimentacion sin autorizacion expresa del profesor.</td></tr>' +
-        '</table>' +
-        '<p style="margin-top:0.5rem;font-size:0.82rem;"><strong>Firma del estudiante (acepto cumplir estas normas):</strong>' + lineas(1) + '</p>' +
-        '</div>' +
-
-        '<h2>1. Marco curricular de la actividad</h2>' +
-        '<table>' +
-        '<tr><th style="width:25%">Objetivo (' + oaId + ')</th><td style="font-size:0.84rem;">' + mod.oas[oaId] + '</td></tr>' +
-        '<tr><th>Aprendizaje Esperado</th><td style="font-size:0.84rem;">AE ' + aeNum + ': ' + ae.texto + '</td></tr>' +
-        '<tr><th>Actividad practica</th><td><strong>' + cont + '</strong></td></tr>' +
-        '</table>' +
-
-        '<h2>2. Competencias a demostrar en esta actividad</h2>' +
-        '<p>Al finalizar esta ficha practica, deberas haber demostrado las siguientes competencias:</p>' +
-        '<ol style="line-height:2.1;">' + cesLi(ces) + '</ol>' +
-
-        '<h2>3. Materiales, herramientas e instrumentos</h2>' +
-        '<div class="recuadro-importante"><strong>Instruccion:</strong> Verifica la disponibilidad y estado de cada item antes de comenzar. Marca &#9633; cuando lo hayas revisado y registra el estado.</div>' +
-        '<table>' +
-        '<tr style="background:rgba(99,102,241,0.08)"><th style="width:5%;text-align:center;">&#9633;</th><th>Elemento</th><th style="width:12%">Cantidad</th><th style="width:18%">Estado (B/R/M)</th><th style="width:20%">Observacion</th></tr>' +
-        '<tr><td style="text-align:center;">&#9633;</td><td>Multimetro digital calibrado (CAT III o superior)</td><td style="text-align:center;">1</td><td>' + lineas(1) + '</td><td>' + lineas(1) + '</td></tr>' +
-        '<tr><td style="text-align:center;">&#9633;</td><td>Fuente de alimentacion regulable</td><td style="text-align:center;">1</td><td>' + lineas(1) + '</td><td>' + lineas(1) + '</td></tr>' +
-        '<tr><td style="text-align:center;">&#9633;</td><td>Protoboard / placa experimental</td><td style="text-align:center;">1</td><td>' + lineas(1) + '</td><td>' + lineas(1) + '</td></tr>' +
-        '<tr><td style="text-align:center;">&#9633;</td><td>Cables de conexion (set colores)</td><td style="text-align:center;">Set</td><td>' + lineas(1) + '</td><td>' + lineas(1) + '</td></tr>' +
-        '<tr><td style="text-align:center;">&#9633;</td><td>Componentes electronicos segun lista tecnica</td><td style="text-align:center;">Segun lista</td><td>' + lineas(1) + '</td><td>' + lineas(1) + '</td></tr>' +
-        '<tr><td style="text-align:center;">&#9633;</td><td>Herramientas manuales: alicate, destornillador, pinza, cortatubo</td><td style="text-align:center;">Set</td><td>' + lineas(1) + '</td><td>' + lineas(1) + '</td></tr>' +
-        '<tr><td style="text-align:center;">&#9633;</td><td>Plano o esquema tecnico de la actividad</td><td style="text-align:center;">1</td><td>' + lineas(1) + '</td><td>' + lineas(1) + '</td></tr>' +
-        '<tr><td style="text-align:center;">&#9633;</td><td>EPP completo: lentes, guantes dielectricos, delantal</td><td style="text-align:center;">1 set</td><td>' + lineas(1) + '</td><td>' + lineas(1) + '</td></tr>' +
-        '<tr><td style="text-align:center;">&#9633;</td><td>Otros (especificar):</td><td>' + lineas(1) + '</td><td>' + lineas(1) + '</td><td>' + lineas(1) + '</td></tr>' +
-        '</table>' +
-
-        '<h2>4. Evaluacion de riesgos</h2>' +
-        '<p style="font-size:0.87rem;color:#555;">Identifica los riesgos presentes en esta actividad y la medida preventiva correspondiente:</p>' +
-        '<table>' +
-        '<tr style="background:rgba(99,102,241,0.08)"><th>Riesgo identificado</th><th style="width:15%;text-align:center;">Nivel<br><small>(A/M/B)</small></th><th>Medida preventiva</th><th style="width:12%;text-align:center;">EPP requerido</th></tr>' +
-        '<tr><td>Descarga electrica por contacto con partes energizadas</td><td style="text-align:center;color:#c00;font-weight:700;">A</td><td>Verificar ausencia de tension antes de intervenir. Usar herramientas aisladas.</td><td style="text-align:center;">Guantes, lentes</td></tr>' +
-        '<tr><td>Cortocircuito por conexion erronea</td><td style="text-align:center;color:#e65100;font-weight:700;">M</td><td>Revisar el esquema antes de conectar. Solicitar revision del profesor.</td><td style="text-align:center;">Lentes</td></tr>' +
-        '<tr><td>Explosion de componente (capacitor, bateria)</td><td style="text-align:center;color:#e65100;font-weight:700;">M</td><td>Verificar polaridad y tension maxima de componentes. No superar valores nominales.</td><td style="text-align:center;">Lentes, delantal</td></tr>' +
-        '<tr><td>Quemadura por soldadura o componente caliente</td><td style="text-align:center;color:#2e7d32;font-weight:700;">B</td><td>Usar soporte para cautin. No tocar componentes recien soldados.</td><td style="text-align:center;">Guantes</td></tr>' +
-        '<tr><td>Otro riesgo identificado (especificar):</td><td>' + lineas(1) + '</td><td>' + lineas(1) + '</td><td>' + lineas(1) + '</td></tr>' +
-        '</table>' +
-
-        '<h2>5. Procedimiento paso a paso</h2>' +
-        '<div class="recuadro-importante"><strong>&#128270; Lee el procedimiento completo antes de comenzar. Marca cada paso completado con una &#9989;. Ante cualquier duda, DETENTE y consulta al profesor.</strong></div>' +
-
-        '<h3>Fase 1: Preparacion y verificacion previa (&#9633; completada)</h3>' +
-        '<ol>' +
-        '<li>Coloca el EPP completo y verifica que este en buen estado.</li>' +
-        '<li>Revisa el esquema electrico o diagrama de la actividad. Identifica cada componente y su conexion.</li>' +
-        '<li>Con el multimetro, verifica el valor nominal de las resistencias, estado de capacitores y continuidad de cables.</li>' +
-        '<li>Comprueba que la fuente de alimentacion este apagada y configurada en el voltaje correcto para esta actividad.</li>' +
-        '</ol>' +
-        '<p><strong>Observaciones fase 1:</strong></p>' + lineas(2) +
-
-        '<h3>Fase 2: Analisis del circuito o sistema (&#9633; completada)</h3>' +
-        '<ol>' +
-        '<li>Dibuja en el espacio siguiente el circuito o sistema a montar, segun el esquema entregado por el profesor. Rotula todos los componentes.</li>' +
-        '</ol>' +
-        '<div class="espacio-dibujo">Copia o reconstruye el diagrama esquematico de la actividad. Indica: componentes, valores, polaridad, puntos de medicion</div>' +
-        '<ol start="2">' +
-        '<li>Identifica los puntos de medicion: &#191;donde mediras tension? &#191;Corriente? &#191;Resistencia? Marcalos en el diagrama con las letras A, B, C...</li>' +
-        '<li>Calcula o consulta los valores teoricos esperados para cada medicion. Registralos en la tabla de la fase 4.</li>' +
-        '</ol>' +
-        '<p><strong>Observaciones fase 2:</strong></p>' + lineas(2) +
-
-        '<h3>Fase 3: Montaje y ejecucion (&#9633; completada)</h3>' +
-        '<ol>' +
-        '<li>Con la fuente de alimentacion apagada, realiza las conexiones segun el diagrama. Trabaja de forma ordenada, cable a cable.</li>' +
-        '<li>Verifica visualmente cada conexion antes de continuar. Revisa polaridad de diodos, condensadores y transistores.</li>' +
-        '<li><strong style="color:#c00;">ANTES DE ENERGIZAR:</strong> Solicita revision del montaje al profesor y espera su autorizacion. _____ Firma: ' + lineas(1) + '</li>' +
-        '<li>Con autorizacion del profesor, energiza el circuito/sistema. Observa: &#191;hay calor inusual? &#191;olor a quemado? &#191;humo? Si es asi: apaga inmediatamente y avisa.</li>' +
-        '<li>Observa el comportamiento del sistema durante los primeros 30 segundos sin tocarlo. Anota lo observado:</li>' +
-        '</ol>' + lineas(2) +
-
-        '<h3>Fase 4: Mediciones y registro de datos (&#9633; completada)</h3>' +
-        '<p>Realiza las mediciones indicadas. Registra los valores con unidades y la configuracion del multimetro utilizada:</p>' +
-        '<table>' +
-        '<tr style="background:rgba(99,102,241,0.08)"><th>Punto / Parametro</th><th>Magnitud</th><th>Config. multimetro</th><th>Valor teorico</th><th>Valor medido</th><th>&#916; Error</th><th>&#191;Aceptable?</th></tr>' +
-        '<tr><td>Punto A</td><td>' + lineas(1) + '</td><td>' + lineas(1) + '</td><td>' + lineas(1) + '</td><td>' + lineas(1) + '</td><td>' + lineas(1) + '</td><td style="text-align:center;">&#9633; S&iacute; &nbsp;&#9633; No</td></tr>' +
-        '<tr><td>Punto B</td><td>' + lineas(1) + '</td><td>' + lineas(1) + '</td><td>' + lineas(1) + '</td><td>' + lineas(1) + '</td><td>' + lineas(1) + '</td><td style="text-align:center;">&#9633; S&iacute; &nbsp;&#9633; No</td></tr>' +
-        '<tr><td>Punto C</td><td>' + lineas(1) + '</td><td>' + lineas(1) + '</td><td>' + lineas(1) + '</td><td>' + lineas(1) + '</td><td>' + lineas(1) + '</td><td style="text-align:center;">&#9633; S&iacute; &nbsp;&#9633; No</td></tr>' +
-        '<tr><td>Punto D</td><td>' + lineas(1) + '</td><td>' + lineas(1) + '</td><td>' + lineas(1) + '</td><td>' + lineas(1) + '</td><td>' + lineas(1) + '</td><td style="text-align:center;">&#9633; S&iacute; &nbsp;&#9633; No</td></tr>' +
-        '<tr><td>Punto E</td><td>' + lineas(1) + '</td><td>' + lineas(1) + '</td><td>' + lineas(1) + '</td><td>' + lineas(1) + '</td><td>' + lineas(1) + '</td><td style="text-align:center;">&#9633; S&iacute; &nbsp;&#9633; No</td></tr>' +
-        '</table>' +
-
-        '<h3>Fase 5: Verificacion de funcionamiento (&#9633; completada)</h3>' +
-        '<ol>' +
-        '<li>Confirma que el sistema opera correctamente segun los criterios del AE ' + aeNum + '. Marca cada criterio verificado:</li>' +
-        '</ol>' +
-        '<div style="margin-left:1.2rem;">' +
-        ces.map(function(c) {
-            return '<div class="check-item"><input type="checkbox"> <span style="font-size:0.84rem;">' + (c.split(': ')[1] || c) + '</span></div>';
-        }).join('') +
-        '</div>' +
-        '<ol start="2">' +
-        '<li>&#191;El sistema funciona dentro de los rangos esperados? Si no, describe la falla observada:</li>' +
-        '</ol>' + lineas(2) +
-        '<ol start="3">' +
-        '<li>Apaga la alimentacion al finalizar. Desmonta segun indicaciones del profesor.</li>' +
-        '</ol>' +
-
-        '<h3>Fase 6: Orden y cierre (&#9633; completada)</h3>' +
-        '<ol>' +
-        '<li>Desconecta todos los instrumentos y cables. Apaga la fuente de alimentacion.</li>' +
-        '<li>Guarda herramientas y componentes en su lugar. Deja el puesto de trabajo limpio y ordenado.</li>' +
-        '<li>Reporta al profesor el estado final de la actividad y los materiales utilizados.</li>' +
-        '</ol>' +
-
-        '<h2>6. Informe tecnico de la actividad</h2>' +
-
-        '<h3>6.1 Análisis de resultados</h3>' +
-        '<p><strong>a)</strong> &#191;Los valores medidos coinciden con los valores teoricos esperados? Analiza las diferencias encontradas y propone una explicacion tecnica:</p>' + lineas(4) +
-        '<p><strong>b)</strong> &#191;El sistema funciono correctamente desde el primer intento? Si hubo fallas o ajustes, describe que ocurrio y como lo solucionaste:</p>' + lineas(4) +
-        '<p><strong>c)</strong> &#191;Que dificultades tecnicas o practicas encontraste durante la actividad y como las superaste?</p>' + lineas(3) +
-
-        '<h3>6.2 Conclusiones</h3>' +
-        '<p>Escribe tus conclusiones tecnicas considerando: objetivo logrado, aprendizajes obtenidos, criterios demostrados y aspectos a mejorar:</p>' + lineas(5) +
-
-        '<h3>6.3 Reflexion salesiana</h3>' +
-        '<p>&#191;Como manifesto el valor de <strong>' + val1 + '</strong> durante esta actividad practica? Da ejemplos concretos:</p>' + lineas(3) +
-
-        '<h2>7. Rubrica de evaluacion del profesor</h2>' +
-        '<table>' +
-        '<tr style="background:rgba(99,102,241,0.08)"><th>Criterio de evaluacion</th><th style="text-align:center;width:12%">Ponderacion</th><th style="text-align:center;width:15%">Puntaje (0-100)</th></tr>' +
-        '<tr><td>Cumplimiento del protocolo de seguridad (EPP, normas)</td><td style="text-align:center;">15%</td><td>' + lineas(1) + '</td></tr>' +
-        '<tr><td>Preparacion y verificacion previa correcta</td><td style="text-align:center;">10%</td><td>' + lineas(1) + '</td></tr>' +
-        '<tr><td>Precision y calidad en el montaje / ejecucion</td><td style="text-align:center;">20%</td><td>' + lineas(1) + '</td></tr>' +
-        '<tr><td>Exactitud en las mediciones y registro de datos</td><td style="text-align:center;">20%</td><td>' + lineas(1) + '</td></tr>' +
-        cesRubrica +
-        '<tr><td>Calidad del informe tecnico y conclusiones</td><td style="text-align:center;">15%</td><td>' + lineas(1) + '</td></tr>' +
-        '<tr><td>Orden, prolijidad y ' + val1 + ' durante la actividad</td><td style="text-align:center;">10%</td><td>' + lineas(1) + '</td></tr>' +
-        '<tr style="background:rgba(99,102,241,0.05)"><td><strong>NOTA FINAL (promedio ponderado)</strong></td><td style="text-align:center;"><strong>100%</strong></td><td style="font-size:1.1rem;font-weight:700;text-align:center;">' + lineas(1) + '</td></tr>' +
-        '</table>' +
-        '<p style="font-size:0.83rem;color:#555;"><strong>Observaciones del profesor:</strong></p>' + lineas(3) +
 
         pieDoc();
     }
@@ -3214,10 +3223,88 @@
 
     /**
      * Prompt específico de Prueba Sumativa.
-     * Voz de Jefe de UTP / Experto en Evaluación. 7 ítems obligatorios + tabla de
-     * especificaciones + pauta de corrección y rúbrica analítica de 3 niveles.
+     * Voz de Jefe de UTP / Experto en Evaluación. Ítems con cantidades dinámicas
+     * según lo configurado por el docente + tabla de especificaciones + pauta + rúbrica.
      */
     function _promptPrueba(ctx) {
+        var counts = ctx.itemCounts || {};
+        var nSM   = counts.sm   || 0;
+        var nVF   = counts.vf   || 0;
+        var nCom  = counts.completar || 0;
+        var nPar  = counts.emparejar  || 0;
+        var nApl  = counts.aplicacion || 0;
+        var nCas  = counts.caso       || 0;
+        var nDes  = counts.desarrollo || 0;
+        var totalItems = nSM + nVF + nCom + nPar + nApl + nCas + nDes;
+        var nAlt = ctx.cantAlternativas || 4;
+        var letrasAlt = ['A','B','C','D','E'].slice(0, nAlt).join(', ');
+
+        // Bloque de preguntas/ejercicios literales obligatorios (si el profesor los pegó)
+        var refsLiteral = '';
+        if (ctx.materialReferencia && ctx.materialReferencia.trim().length > 5) {
+            refsLiteral = '\nPREGUNTAS O EJERCICIOS ESPECÍFICOS QUE DEBEN INCLUIRSE LITERALMENTE EN LA PRUEBA (sin reescribir):\n' +
+            '"""\n' + ctx.materialReferencia.trim() + '\n"""\n' +
+            'Reglas: respeta el enunciado tal como aparece. Si no calzan en el ítem que está construyendo la IA, ubícalos en el ítem que mejor se adecue (Aplicación, Caso o Desarrollo). Identifícalos en la Tabla de Especificaciones como "Pregunta del docente".\n\n';
+        }
+
+        // Construye el bloque de "secciones" del instrumento solo con los ítems con n > 0.
+        var secciones = '';
+        var idx = 1;
+        function nrom(i) { return ['I','II','III','IV','V','VI','VII'][i-1] || ('I'.repeat(i)); }
+
+        if (nSM > 0) {
+            secciones += '   <h3>Ítem ' + nrom(idx++) + ': Selección Múltiple (Recordar/Comprender) (__/X pts)</h3>\n' +
+            '   - Genera ' + nSM + ' preguntas, cada una con ' + nAlt + ' alternativas etiquetadas ' + letrasAlt + '.\n' +
+            '   - Los distractores deben ser plausibles y basados en errores comunes que cometen los estudiantes.\n' +
+            '   - PROHIBIDO usar "Todas las anteriores", "Ninguna de las anteriores", "A y B", etc.\n' +
+            '   - Usa <ol> para las preguntas y formato A) B) C)... para las alternativas (con tantas letras como alternativas tenga cada pregunta).\n\n';
+        }
+        if (nVF > 0) {
+            secciones += '   <h3>Ítem ' + nrom(idx++) + ': Verdadero o Falso (Comprender) (__/X pts)</h3>\n' +
+            '   - Genera ' + nVF + ' afirmaciones numeradas.\n' +
+            '   - Incluye explícitamente al inicio del ítem la instrucción: "Marca V o F. JUSTIFICA con una oración cada afirmación que consideres falsa".\n' +
+            '   - Deja un espacio (línea horizontal o "______") después de cada afirmación para la justificación.\n\n';
+        }
+        if (nCom > 0) {
+            secciones += '   <h3>Ítem ' + nrom(idx++) + ': Completar (Recordar) (__/X pts)</h3>\n' +
+            '   - Redacta un párrafo breve y coherente sobre el tema con exactamente ' + nCom + ' espacios en blanco marcados como "_____ (1)", "_____ (2)", etc.\n' +
+            '   - Los espacios deben corresponder a conceptos clave del tema, no a palabras triviales.\n' +
+            '   - Debajo del párrafo, deja una lista numerada del 1 al ' + nCom + ' para que el estudiante escriba el concepto faltante.\n\n';
+        }
+        if (nPar > 0) {
+            var defB = nPar + 2;
+            secciones += '   <h3>Ítem ' + nrom(idx++) + ': Términos Pareados (Comprender/Relacionar) (__/X pts)</h3>\n' +
+            '   - Crea una <table> de 2 columnas: Columna A con ' + nPar + ' conceptos clave (numerados 1-' + nPar + ') y Columna B con ' + defB + ' definiciones (etiquetadas a, b, c, ...).\n' +
+            '   - La Columna B DEBE tener 2 opciones más que la A para evitar que el estudiante responda por simple descarte.\n' +
+            '   - Las 2 definiciones distractoras deben ser conceptualmente cercanas pero claramente incorrectas para los conceptos de la Columna A.\n\n';
+        }
+        if (nApl > 0) {
+            secciones += '   <h3>Ítem ' + nrom(idx++) + ': Aplicación (Aplicar) (__/X pts)</h3>\n' +
+            '   - Plantea ' + nApl + ' ejercicio(s) práctico(s) directo(s), adecuados a la asignatura "' + ctx.modNombre + '" y al tema "' + (ctx.contenido || 'el contenido indicado') + '".\n' +
+            '   - Puede ser un problema de cálculo, análisis paso a paso, clasificación, interpretación de gráfico/esquema descrito, etc.\n' +
+            '   - Indica claramente qué se pide y deja espacio para el desarrollo.\n\n';
+        }
+        if (nCas > 0) {
+            var preguntasCaso = Math.max(2, Math.min(4, nCas + 1));
+            secciones += '   <h3>Ítem ' + nrom(idx++) + ': Análisis de Caso (Analizar) (__/X pts)</h3>\n' +
+            '   - Redacta un caso ficticio, situación problema o fragmento de texto fuente de 1 a 2 párrafos de extensión, contextualizado al tema.\n' +
+            '   - Si el docente solicitó ' + nCas + ' ítems de caso, puedes presentar ' + nCas + ' caso(s) breve(s) o un caso único con ' + nCas + ' preguntas de análisis basadas ESTRICTAMENTE en esa lectura (no preguntas generales del tema).\n' +
+            '   - Las preguntas deben requerir descomponer, comparar, relacionar o inferir desde el caso.\n\n';
+        }
+        if (nDes > 0) {
+            secciones += '   <h3>Ítem ' + nrom(idx++) + ': Desarrollo y Argumentación (Evaluar/Crear) (__/X pts)</h3>\n' +
+            '   - Formula ' + nDes + ' pregunta(s) abierta(s) de alta demanda cognitiva donde el estudiante deba asumir una postura, fundamentar una respuesta compleja o proponer una solución.\n' +
+            '   - La consigna debe pedir explícitamente argumentar/justificar/proponer.\n\n';
+        }
+
+        if (totalItems === 0) {
+            // Fallback: el docente no marcó ningún ítem; usar configuración estándar.
+            secciones = '   <h3>Ítem I: Selección Múltiple (__/X pts)</h3>\n   - Genera 5 preguntas con 4 alternativas A, B, C, D. Sin "Todas/Ninguna las anteriores".\n\n' +
+                        '   <h3>Ítem II: Verdadero o Falso (__/X pts)</h3>\n   - Genera 3 afirmaciones, justificación obligatoria de falsas.\n\n' +
+                        '   <h3>Ítem III: Desarrollo (__/X pts)</h3>\n   - Genera 2 preguntas abiertas con argumentación.\n\n';
+            totalItems = 10;
+        }
+
         return 'Actúa como un Jefe de Unidad Técnico Pedagógica (UTP) y Experto en Evaluación Educativa. ' +
         'Tu tarea es construir un instrumento de evaluación sumativa exhaustivo, válido y alineado a los estándares de evaluación para el aprendizaje.\n\n' +
         _promptDatos(ctx) +
@@ -3226,64 +3313,34 @@
         '- Nivel: ' + ctx.cursoTexto + '\n' +
         '- Objetivo(s) de Aprendizaje (OA) a evaluar:\n' + (ctx.oaTexto || '(no especificados)') + '\n' +
         '- Tema Específico: ' + (ctx.contenido || '(no especificado)') + '\n' +
-        '- Puntaje total objetivo: ' + ctx.puntaje + ' puntos (distribúyelos coherentemente entre los 7 ítems).\n\n' +
+        '- Cantidad de preguntas a generar (suma exacta de los ítems): ' + totalItems + ' preguntas (máximo permitido: 40).\n' +
+        '- Cantidad de alternativas para los ítems de Selección Múltiple: ' + nAlt + ' (' + letrasAlt + ').\n' +
+        '- Puntaje total objetivo: ' + ctx.puntaje + ' puntos (distribúyelos coherentemente entre los ítems definidos abajo).\n\n' +
 
-        'ESTRUCTURA Y REGLAS DEL INSTRUMENTO (en este orden exacto):\n\n' +
+        refsLiteral +
+
+        'ESTRUCTURA Y REGLAS DEL INSTRUMENTO (en este orden exacto, omite cualquier ítem cuya cantidad sea 0):\n\n' +
 
         '1. <h2>Tabla de Especificaciones (para el docente)</h2>\n' +
         '   - Genera una <table> inicial dirigida al docente con estas columnas exactas:\n' +
         '     "N° de pregunta | Tipo de Ítem | Habilidad de Bloom | Contenido | Puntaje".\n' +
-        '   - Una fila por cada pregunta de los 7 ítems del instrumento. Que el puntaje total sume ' + ctx.puntaje + '.\n\n' +
+        '   - Una fila por cada pregunta del instrumento (' + totalItems + ' filas en total). Que el puntaje total sume ' + ctx.puntaje + '.\n\n' +
 
         '2. <h2>Instrumento de Evaluación</h2>\n' +
         '   - Redacta la prueba completa dirigida al estudiante, con instrucciones claras y el espacio de puntaje "(__/X pts)" al lado de cada ítem.\n' +
-        '   - Estructúrala en estas 7 secciones obligatorias, cada una con su <h3>:\n\n' +
+        '   - Estructúrala SOLO con las secciones siguientes (cada una con su <h3>):\n\n' +
 
-        '   <h3>Ítem I: Selección Múltiple (Recordar/Comprender)</h3>\n' +
-        '   - Genera 5 preguntas, cada una con 4 alternativas etiquetadas A, B, C, D.\n' +
-        '   - Los distractores deben ser plausibles y basados en errores comunes que cometen los estudiantes.\n' +
-        '   - PROHIBIDO usar "Todas las anteriores", "Ninguna de las anteriores", "A y B", etc.\n' +
-        '   - Usa <ol> para las preguntas y <ol type="A"> o lista con A) B) C) D) para las alternativas.\n\n' +
-
-        '   <h3>Ítem II: Verdadero o Falso (Comprender)</h3>\n' +
-        '   - Genera 5 afirmaciones numeradas.\n' +
-        '   - Incluye explícitamente al inicio del ítem la instrucción: "Marca V o F. JUSTIFICA con una oración cada afirmación que consideres falsa".\n' +
-        '   - Deja un espacio (línea horizontal o "______") después de cada afirmación para la justificación.\n\n' +
-
-        '   <h3>Ítem III: Completar (Recordar)</h3>\n' +
-        '   - Redacta un párrafo breve y coherente sobre el tema con exactamente 5 espacios en blanco marcados como "_____ (1)", "_____ (2)", etc.\n' +
-        '   - Los espacios deben corresponder a conceptos clave del tema, no a palabras triviales.\n' +
-        '   - Debajo del párrafo, deja una lista numerada del 1 al 5 para que el estudiante escriba el concepto faltante.\n\n' +
-
-        '   <h3>Ítem IV: Términos Pareados (Comprender/Relacionar)</h3>\n' +
-        '   - Crea una <table> de 2 columnas: Columna A con 4 conceptos clave (numerados 1-4) y Columna B con 6 definiciones (etiquetadas a, b, c, d, e, f).\n' +
-        '   - La Columna B DEBE tener más opciones que la A para evitar que el estudiante responda por simple descarte.\n' +
-        '   - Las definiciones distractoras (las 2 que sobran) deben ser conceptualmente cercanas pero claramente incorrectas para los conceptos de la Columna A.\n\n' +
-
-        '   <h3>Ítem V: Aplicación (Aplicar)</h3>\n' +
-        '   - Plantea 1 ejercicio práctico directo, adecuado a la asignatura "' + ctx.modNombre + '" y al tema "' + (ctx.contenido || 'el contenido indicado') + '".\n' +
-        '   - Puede ser un problema de cálculo, un análisis paso a paso, una clasificación, una interpretación de gráfico/esquema descrito, etc.\n' +
-        '   - Indica claramente qué se pide y deja espacio para el desarrollo.\n\n' +
-
-        '   <h3>Ítem VI: Análisis de Caso (Analizar)</h3>\n' +
-        '   - Redacta un caso ficticio, una situación problema o un fragmento de texto fuente de 1 a 2 párrafos de extensión, contextualizado al tema.\n' +
-        '   - Luego, formula 2 preguntas de análisis basadas ESTRICTAMENTE en esa lectura (no preguntas generales del tema).\n' +
-        '   - Las preguntas deben requerir descomponer, comparar, relacionar o inferir desde el caso.\n\n' +
-
-        '   <h3>Ítem VII: Desarrollo y Argumentación (Evaluar/Crear)</h3>\n' +
-        '   - Formula 1 pregunta abierta de alta demanda cognitiva donde el estudiante deba asumir una postura, fundamentar una respuesta compleja o proponer una solución.\n' +
-        '   - La consigna debe pedir explícitamente argumentar/justificar/proponer.\n\n' +
+        secciones +
 
         '3. <h2>Pauta de Corrección y Rúbrica (Solucionario para el docente)</h2>\n' +
-        '   - Subtítulo claro <h3>Respuestas Ítems I a V</h3>: entrega las respuestas exactas para los Ítems I, II, III, IV y V. Para el Ítem II incluye además la justificación correcta de las afirmaciones falsas.\n' +
-        '   - Subtítulo <h3>Respuesta Esperada — Ítem VI (Análisis de Caso)</h3>: párrafo breve con los elementos centrales que la respuesta debe contener para cada una de las 2 preguntas.\n' +
-        '   - Subtítulo <h3>Respuesta Esperada — Ítem VII (Desarrollo)</h3>: párrafo breve describiendo qué tesis/argumentos demuestran logro.\n' +
-        '   - Subtítulo <h3>Rúbrica Analítica — Ítems VI y VII</h3>: <table> con columnas exactas\n' +
+        '   - Subtítulo <h3>Respuestas — Ítems objetivos</h3>: entrega las respuestas exactas para todos los ítems con respuesta única (Selección Múltiple, V/F, Completar, Pareados, Aplicación cuando aplique). Para V/F incluye además la justificación correcta de las afirmaciones falsas.\n' +
+        '   - Subtítulo <h3>Respuesta Esperada — Ítems abiertos</h3>: párrafo breve con los elementos centrales que la respuesta debe contener para los ítems de Análisis de Caso y Desarrollo (si fueron incluidos).\n' +
+        '   - Subtítulo <h3>Rúbrica Analítica — Ítems abiertos</h3>: <table> con columnas exactas\n' +
         '     "Criterio | Logrado | Medianamente Logrado | Por Lograr", con 3 a 4 criterios (ej: comprensión del caso/tema, calidad de la argumentación, uso de conceptos disciplinares, claridad y estructura). Describe brevemente qué debe demostrar el estudiante en cada nivel.\n\n' +
 
         (ctx.valoresStr
             ? 'INTEGRACIÓN DE VALORES MBE:\n' +
-              '- Cuando sea natural, refleja las actitudes ' + ctx.valoresStr + ' en los contextos del Ítem V (Aplicación) o el Ítem VI (Caso). NO crees una sección aparte de "valores".\n\n'
+              '- Cuando sea natural, refleja las actitudes ' + ctx.valoresStr + ' en los contextos de los ítems de Aplicación o Caso. NO crees una sección aparte de "valores".\n\n'
             : '') +
 
         _promptReglasComunes() +
@@ -3295,15 +3352,31 @@
      * Mantiene el comportamiento previo.
      */
     function _promptGenerico(ctx) {
+        var counts = ctx.itemCounts || {};
+        var distLines = [];
+        var labels = { sm:'Selección múltiple', vf:'Verdadero/Falso', completar:'Completar', emparejar:'Términos pareados', aplicacion:'Aplicación / ejercicio práctico', caso:'Análisis de caso', desarrollo:'Desarrollo / argumentación' };
+        for (var k in counts) {
+            if (counts.hasOwnProperty(k) && counts[k] > 0) distLines.push('  · ' + (labels[k] || k) + ': ' + counts[k] + ' ítem(es)');
+        }
+        var distBlock = distLines.length ? ('DISTRIBUCIÓN POR TIPO DE ÍTEM (respétala estrictamente):\n' + distLines.join('\n') + '\n') : '';
+        var nAlt = ctx.cantAlternativas || 4;
+        var letrasAlt = ['A','B','C','D','E'].slice(0, nAlt).join(', ');
+        var refsLiteral = '';
+        if (ctx.materialReferencia && ctx.materialReferencia.trim().length > 5) {
+            refsLiteral = '\nPREGUNTAS O EJERCICIOS QUE DEBEN INCLUIRSE LITERALMENTE (sin reescribir):\n"""\n' + ctx.materialReferencia.trim() + '\n"""\n';
+        }
         return 'Eres un experto en educación chilena MINEDUC con conocimiento del currículum nacional vigente. ' +
         'Genera el CUERPO de un documento educativo en HTML para imprimir en clase.\n\n' +
         _promptDatos(ctx) +
         (ctx.bloomNames ? 'NIVELES COGNITIVOS BLOOM: ' + ctx.bloomNames + '\n' : '') +
         (ctx.tiposNames ? 'TIPOS DE PREGUNTAS: ' + ctx.tiposNames + '\n' : '') +
-        'CANTIDAD DE PREGUNTAS/ÍTEMS: ' + ctx.cantPreg + '\n' +
-        'PUNTAJE TOTAL: ' + ctx.puntaje + ' puntos\n\n' +
-        'ESTRUCTURA SUGERIDA (adáptala al tipo): 1) instrucciones generales breves, 2) marco teórico/contexto si aplica, 3) actividades/preguntas/ítems numerados, 4) cierre o autoevaluación.\n' +
-        '- Para selección múltiple: incluye 4 alternativas con texto real, una correcta marcada SOLO en una clave de respuestas al final entre comentarios <!-- -->.\n' +
+        'CANTIDAD TOTAL DE PREGUNTAS/ÍTEMS: ' + ctx.cantPreg + ' (máximo permitido: 40)\n' +
+        'CANTIDAD DE ALTERNATIVAS POR PREGUNTA DE SELECCIÓN MÚLTIPLE: ' + nAlt + ' (' + letrasAlt + ')\n' +
+        distBlock +
+        'PUNTAJE TOTAL: ' + ctx.puntaje + ' puntos\n' +
+        refsLiteral + '\n' +
+        'ESTRUCTURA SUGERIDA (adáptala al tipo): 1) instrucciones generales breves, 2) marco teórico/contexto si aplica, 3) actividades/preguntas/ítems numerados respetando la distribución arriba, 4) cierre o autoevaluación.\n' +
+        '- Para selección múltiple: incluye exactamente ' + nAlt + ' alternativas (' + letrasAlt + ') con texto real, una correcta marcada SOLO en una clave de respuestas al final entre comentarios <!-- -->.\n' +
         '- Para verdadero/falso: escribe la afirmación completa.\n' +
         (ctx.valoresStr ? '- Integra las actitudes MBE/OAT (' + ctx.valoresStr + ') de forma natural en las consignas.\n' : '') +
         '\n' + _promptReglasComunes() +
@@ -3317,7 +3390,7 @@
         if (tipo === 'guia')   return _promptGuia(ctx);
         if (tipo === 'apunte') return _promptApunte(ctx);
         if (tipo === 'prueba') return _promptPrueba(ctx);
-        // TODO: ficha, evaluacion, control — Eduardo entregará cada prompt.
+        // TODO: evaluacion, control — Eduardo entregará cada prompt.
         return _promptGenerico(ctx);
     }
 
@@ -3384,7 +3457,6 @@
         var tipoNombre = {
             guia: 'Gu\u00eda de Aprendizaje',
             apunte: 'Apunte de Clase',
-            ficha: 'Ficha Pr\u00e1ctica de Taller',
             evaluacion: 'Gu\u00eda de Ejercicios',
             prueba: 'Prueba Formal Sumativa',
             control: 'Control R\u00e1pido Formativo'
@@ -3393,6 +3465,11 @@
         var difTexto = { basico:'b\u00e1sico (primer acercamiento al tema, lenguaje simple)', intermedio:'intermedio (aplicaci\u00f3n pr\u00e1ctica, lenguaje t\u00e9cnico moderado)', avanzado:'avanzado (an\u00e1lisis cr\u00edtico, resoluci\u00f3n de problemas complejos)' }[dificultad] || dificultad;
 
         var nombreInst = _nombreInstitucion() || 'la institución educativa';
+
+        // Material/preguntas literales que el docente quiera incluir tal cual
+        var materialReferencia = '';
+        var refEl = document.getElementById('materialReferencia');
+        if (refEl) materialReferencia = (refEl.value || '').trim();
 
         // Construir contexto único para los builders de prompt
         var ctxPrompt = {
@@ -3410,6 +3487,9 @@
             tiposNames: tiposNames,
             cantPreg:   evalOpts.cantPreg || 10,
             puntaje:    evalOpts.puntaje  || 40,
+            itemCounts: evalOpts.itemCounts || {},
+            cantAlternativas: evalOpts.cantAlternativas || 4,
+            materialReferencia: materialReferencia,
             valoresStr: (valoresArr && valoresArr.length) ? valoresArr.join(', ') : '',
             valoresArr: valoresArr || []
         };
@@ -3522,25 +3602,6 @@ var modelo = _modeloGuardado;
     }
 
     // =============================================
-    // LECTURA DE ARCHIVO DE REFERENCIA
-    // =============================================
-    function leerArchivo(input) {
-        if (!input.files || !input.files[0]) return;
-        var file = input.files[0];
-        var reader = new FileReader();
-        reader.onload = function(e) {
-            document.getElementById('materialReferencia').value = e.target.result;
-            var zona = document.getElementById('uploadZone');
-            zona.classList.add('cargado');
-            document.getElementById('uploadZoneText').innerHTML = '&#9989; Archivo cargado: <strong>' + file.name + '</strong> (' + Math.round(file.size / 1024) + ' KB)';
-        };
-        reader.onerror = function() {
-            showToast('No se pudo leer el archivo. Asegúrate de que sea .txt o .md.', 'error');
-        };
-        reader.readAsText(file, 'UTF-8');
-    }
-
-    // =============================================
     // FUNCIONES AUXILIARES
     // =============================================
 
@@ -3577,6 +3638,80 @@ var modelo = _modeloGuardado;
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
+    /**
+     * Descarga el documento generado como archivo de Word (.doc).
+     * Word abre HTML con extensión .doc nativamente, sin necesidad de librería ZIP.
+     */
+    function descargarDoc() {
+        var preview = document.getElementById('docPreview');
+        if (!preview || !(preview.innerHTML || '').trim()) {
+            showToast('Genera primero un documento para descargarlo.', 'warn');
+            return;
+        }
+        var titulo = (document.querySelector('#docPreview .doc-titulo-bar') || {}).textContent
+                  || (document.querySelector('#docPreview .doc-tipo') || {}).textContent
+                  || 'Documento ElectroLearn';
+        titulo = (titulo || '').toString().trim().slice(0, 80) || 'Documento';
+
+        // Estilos embebidos optimizados para impresión Word (A4, márgenes, encabezado).
+        var styles = '' +
+        '<style>' +
+        '@page { size: A4; margin: 2cm; }' +
+        'body { font-family: "Segoe UI", Calibri, Arial, sans-serif; font-size: 11pt; color: #1a1a2e; line-height: 1.55; }' +
+        'h1 { font-size: 16pt; color: #1e2a44; border-bottom: 2px solid #6C5CE7; padding-bottom: 4pt; }' +
+        'h2 { font-size: 13pt; color: #6C5CE7; border-left: 3pt solid #6C5CE7; padding-left: 6pt; margin-top: 14pt; }' +
+        'h3 { font-size: 11.5pt; color: #2d3436; margin-top: 10pt; }' +
+        'p, li, td, th { font-size: 10.5pt; }' +
+        'table { width: 100%; border-collapse: collapse; margin: 8pt 0; }' +
+        'th { background: #6C5CE7; color: #fff; padding: 5pt 7pt; text-align: left; font-size: 10pt; }' +
+        'td { border: 1pt solid #c8cdd2; padding: 4pt 7pt; }' +
+        '.doc-header-inst { display: table; width: 100%; margin-bottom: 8pt; border-bottom: 1pt solid #c8cdd2; padding-bottom: 6pt; }' +
+        '.doc-header-inst .doc-logo-wrap, .doc-header-inst .doc-inst-text, .doc-header-inst .doc-spacer { display: table-cell; vertical-align: middle; }' +
+        '.doc-header-inst .doc-logo-wrap { width: 80pt; }' +
+        '.doc-header-inst .doc-logo { max-width: 70pt; max-height: 70pt; }' +
+        '.doc-header-inst .doc-inst-text { text-align: center; }' +
+        '.doc-header-inst .doc-liceo { font-family: Georgia, "Times New Roman", serif; font-size: 16pt; font-weight: 700; color: #4a5560; }' +
+        '.doc-header-inst .doc-tipo { font-size: 10pt; font-weight: 600; color: #6b7480; letter-spacing: 1pt; text-transform: uppercase; margin-top: 2pt; }' +
+        '.doc-header-inst .doc-spacer { width: 80pt; }' +
+        '.doc-titulo-bar { background: #1e2a44; color: #fff; text-align: center; font-weight: 700; font-size: 12pt; letter-spacing: 1pt; padding: 6pt 10pt; margin: 6pt 0; text-transform: uppercase; }' +
+        'table.doc-meta th { background: #fff; color: #1e2a44; text-transform: uppercase; font-size: 8.5pt; border: 1pt solid #4a5560; }' +
+        'table.doc-meta td { background: #fff; border: 1pt solid #4a5560; }' +
+        '.recuadro-importante { background: #fff3e0; border-left: 3pt solid #ff9800; padding: 6pt 9pt; margin: 8pt 0; }' +
+        '.recuadro { background: #f0f4ff; border-left: 3pt solid #6C5CE7; padding: 6pt 9pt; margin: 8pt 0; }' +
+        '.recuadro-seguridad { background: #ffebee; border-left: 3pt solid #c62828; padding: 6pt 9pt; margin: 8pt 0; }' +
+        '.linea-escribir { border-bottom: 1pt solid #555; height: 14pt; margin: 4pt 0; }' +
+        '.pie-pagina { margin-top: 14pt; padding-top: 6pt; border-top: 1pt solid #c8cdd2; text-align: center; font-size: 8.5pt; color: #6b7480; }' +
+        '.bloom-tag { display: inline-block; padding: 1pt 6pt; border-radius: 8pt; font-size: 8pt; font-weight: 700; margin-right: 4pt; background: #ede7f6; color: #4527a0; }' +
+        '</style>';
+
+        // El logo del header viene como ruta relativa; convertirlo a absoluto para que Word lo pueda recuperar.
+        var clone = preview.cloneNode(true);
+        clone.querySelectorAll('img').forEach(function(img) {
+            try {
+                var abs = new URL(img.getAttribute('src') || '', window.location.href).href;
+                img.setAttribute('src', abs);
+            } catch (e) { /* ignore */ }
+        });
+
+        var head = '<head><meta charset="utf-8"><title>' + titulo.replace(/[<>"]/g, '') + '</title>' + styles + '</head>';
+        var body = '<body>' + clone.innerHTML + '</body>';
+        var html = '<!DOCTYPE html><html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">' + head + body + '</html>';
+
+        var blob = new Blob(['\ufeff', html], { type: 'application/msword' });
+        var url = URL.createObjectURL(blob);
+        var fname = titulo.replace(/[^a-zA-Z0-9_\-\u00C0-\u017F\s]/g, '').replace(/\s+/g, '_').slice(0, 60) || 'documento';
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = fname + '.doc';
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(function(){
+            URL.revokeObjectURL(url);
+            if (a.parentNode) a.parentNode.removeChild(a);
+        }, 200);
+        showToast('Documento descargado en formato Word (.doc).', 'success');
+    }
+
     function mostrarToast(msg) { showToast(msg, 'info'); }
 
     // =============================================
@@ -3604,7 +3739,7 @@ var modelo = _modeloGuardado;
         var curso   = selCur ? selCur.value : '';
         var prof    = (inProf && inProf.value) || currentUserData.nombre || currentUserData.name || '—';
         var tipo    = tipoDocSeleccionado || 'guia';
-        var tipos   = {guia:'Guía de Aprendizaje',apunte:'Apunte de Clase',ficha:'Ficha Práctica',evaluacion:'Guía de Ejercicios',prueba:'Prueba Formal',control:'Control Rápido'};
+        var tipos   = {guia:'Guía de Aprendizaje',apunte:'Apunte de Clase',evaluacion:'Guía de Ejercicios',prueba:'Prueba Formal',control:'Control Rápido'};
         var _modsRef = (typeof getCurriculaModulos === 'function')
             ? getCurriculaModulos((document.getElementById('selectEspecialidad') ? document.getElementById('selectEspecialidad').value : '') || '')
             : (typeof MODULOS !== 'undefined' ? MODULOS : {});
