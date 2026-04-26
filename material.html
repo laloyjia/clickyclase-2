@@ -723,6 +723,55 @@
         .cfg-total.invalid { color: #ef4444; }
         .bloom-compact { gap: .35rem; }
         .bloom-compact .bloom-item { padding: .3rem .65rem; font-size: .78rem; }
+        .version-toggle {
+            display: flex;
+            flex-direction: column;
+            gap: .45rem;
+            margin-top: .25rem;
+        }
+        .version-opt {
+            display: flex;
+            align-items: center;
+            gap: .5rem;
+            padding: .55rem .85rem;
+            border: 1px solid rgba(255,255,255,.12);
+            border-radius: 10px;
+            background: rgba(255,255,255,.03);
+            cursor: pointer;
+            transition: all .18s ease;
+            font-size: .88rem;
+        }
+        .version-opt small {
+            color: var(--muted, #9ca3af);
+            font-weight: 400;
+            font-size: .76rem;
+        }
+        .version-opt:hover {
+            border-color: rgba(108,92,231,.45);
+            background: rgba(108,92,231,.08);
+        }
+        .version-opt input[type="radio"] {
+            accent-color: var(--primary, #6c5ce7);
+            width: 16px;
+            height: 16px;
+        }
+        .version-opt:has(input:checked) {
+            border-color: rgba(108,92,231,.85);
+            background: rgba(108,92,231,.18);
+            box-shadow: 0 0 0 2px rgba(108,92,231,.18);
+        }
+        .doc-version-tag {
+            display: inline-block;
+            margin: 0 0 1rem 0;
+            padding: .35rem .85rem;
+            background: rgba(108,92,231,.18);
+            color: var(--primary, #c4b5fd);
+            border: 1px solid rgba(108,92,231,.35);
+            border-radius: 999px;
+            font-size: .8rem;
+            letter-spacing: .02em;
+            text-transform: uppercase;
+        }
 
         /* ============================================
            BLOOM TAXONOMY BADGES (dentro del documento)
@@ -1110,6 +1159,17 @@
             <div class="cfg-bloque" id="cfgEval" style="display:none">
                 <div class="cfg-bloque-titulo">Configuración de evaluación</div>
                 <p class="cfg-hint">Define cuántas preguntas tendrá la evaluación, el puntaje total y la cantidad por tipo de ítem. Para pruebas formales el máximo permitido es <strong>40 preguntas</strong>.</p>
+
+                <div class="campo-row">
+                    <div class="campo">
+                        <label>Versión a generar</label>
+                        <div class="version-toggle" role="radiogroup" aria-label="Versión del instrumento">
+                            <label class="version-opt"><input type="radio" name="versionInstrumento" value="profesor" checked> &#128218; <strong>Versión Profesor</strong> <small>(con Tabla de Especificaciones, Pauta y Rúbrica)</small></label>
+                            <label class="version-opt"><input type="radio" name="versionInstrumento" value="estudiante"> &#128104;&#8205;&#127891; <strong>Versión Estudiante</strong> <small>(solo el instrumento, sin respuestas)</small></label>
+                        </div>
+                        <small class="cfg-help">Genera dos veces para obtener ambas versiones — primero la del docente con la pauta, luego la del estudiante.</small>
+                    </div>
+                </div>
 
                 <div class="campo-row">
                     <div class="campo">
@@ -2206,13 +2266,18 @@
         for (var k in itemCounts) if (itemCounts.hasOwnProperty(k)) sumaItems += itemCounts[k];
         if (sumaItems > 0) cantPreg = Math.min(40, sumaItems);
 
+        var versionInstrumento = 'profesor';
+        var rdoVer = document.querySelector('input[name="versionInstrumento"]:checked');
+        if (rdoVer) versionInstrumento = rdoVer.value === 'estudiante' ? 'estudiante' : 'profesor';
+
         return {
             cantPreg: cantPreg,
             puntaje: puntaje,
             tiposPreg: tiposPreg,
             itemCounts: itemCounts,
             cantAlternativas: cantAlternativas,
-            bloomLevels: bloomLevels
+            bloomLevels: bloomLevels,
+            versionInstrumento: versionInstrumento
         };
     }
 
@@ -3238,6 +3303,7 @@
         var totalItems = nSM + nVF + nCom + nPar + nApl + nCas + nDes;
         var nAlt = ctx.cantAlternativas || 4;
         var letrasAlt = ['A','B','C','D','E'].slice(0, nAlt).join(', ');
+        var version = (ctx.versionInstrumento === 'estudiante') ? 'estudiante' : 'profesor';
 
         // Bloque de preguntas/ejercicios literales obligatorios (si el profesor los pegó)
         var refsLiteral = '';
@@ -3305,6 +3371,35 @@
             totalItems = 10;
         }
 
+        // Bloques opcionales según la versión del instrumento.
+        var bloqueTablaEspec = '';
+        var bloquePauta = '';
+        var notaVersion = '';
+        if (version === 'profesor') {
+            bloqueTablaEspec =
+                '1. <h2>Tabla de Especificaciones (para el docente)</h2>\n' +
+                '   - Genera una <table> inicial dirigida al docente con estas columnas exactas:\n' +
+                '     "N° de pregunta | Tipo de Ítem | Habilidad de Bloom | Contenido | Puntaje".\n' +
+                '   - Una fila por CADA pregunta del instrumento (exactamente ' + totalItems + ' filas, ni una más ni una menos). Que el puntaje total sume ' + ctx.puntaje + '.\n\n';
+
+            bloquePauta =
+                '3. <h2>Pauta de Corrección y Rúbrica (Solucionario para el docente)</h2>\n' +
+                '   - Subtítulo <h3>Respuestas — Ítems objetivos</h3>: entrega las respuestas exactas para todos los ítems con respuesta única (Selección Múltiple, V/F, Completar, Pareados, Aplicación cuando aplique). Para V/F incluye además la justificación correcta de las afirmaciones falsas.\n' +
+                '   - Subtítulo <h3>Respuesta Esperada — Ítems abiertos</h3>: párrafo breve con los elementos centrales que la respuesta debe contener para los ítems de Análisis de Caso y Desarrollo (si fueron incluidos).\n' +
+                '   - Subtítulo <h3>Rúbrica Analítica — Ítems abiertos</h3>: <table> con columnas exactas\n' +
+                '     "Criterio | Logrado | Medianamente Logrado | Por Lograr", con 3 a 4 criterios (ej: comprensión del caso/tema, calidad de la argumentación, uso de conceptos disciplinares, claridad y estructura). Describe brevemente qué debe demostrar el estudiante en cada nivel.\n\n';
+
+            notaVersion =
+                'VERSIÓN A GENERAR: PROFESOR. Debes incluir Tabla de Especificaciones + Instrumento + Pauta + Rúbrica.\n' +
+                'Al inicio del documento, agrega un <p class="doc-version-tag"><strong>Versión Profesor</strong></p> antes de la Tabla de Especificaciones.\n\n';
+        } else {
+            // Estudiante: solo el instrumento, sin pauta ni tabla de especificaciones.
+            notaVersion =
+                'VERSIÓN A GENERAR: ESTUDIANTE. SOLO debes incluir el Instrumento de Evaluación: instrucciones generales y los ítems para responder. ' +
+                'NO incluyas Tabla de Especificaciones, NI Respuestas, NI Rúbrica, NI marcadores de respuesta correcta.\n' +
+                'Al inicio, agrega un <p class="doc-version-tag"><strong>Versión Estudiante</strong></p> antes del Instrumento.\n\n';
+        }
+
         return 'Actúa como un Jefe de Unidad Técnico Pedagógica (UTP) y Experto en Evaluación Educativa. ' +
         'Tu tarea es construir un instrumento de evaluación sumativa exhaustivo, válido y alineado a los estándares de evaluación para el aprendizaje.\n\n' +
         _promptDatos(ctx) +
@@ -3313,18 +3408,16 @@
         '- Nivel: ' + ctx.cursoTexto + '\n' +
         '- Objetivo(s) de Aprendizaje (OA) a evaluar:\n' + (ctx.oaTexto || '(no especificados)') + '\n' +
         '- Tema Específico: ' + (ctx.contenido || '(no especificado)') + '\n' +
-        '- Cantidad de preguntas a generar (suma exacta de los ítems): ' + totalItems + ' preguntas (máximo permitido: 40).\n' +
+        '- Cantidad EXACTA de preguntas del instrumento: ' + totalItems + ' preguntas. Esta cifra es OBLIGATORIA: la suma de los ítems generados debe ser EXACTAMENTE ' + totalItems + '.\n' +
         '- Cantidad de alternativas para los ítems de Selección Múltiple: ' + nAlt + ' (' + letrasAlt + ').\n' +
         '- Puntaje total objetivo: ' + ctx.puntaje + ' puntos (distribúyelos coherentemente entre los ítems definidos abajo).\n\n' +
 
+        notaVersion +
         refsLiteral +
 
         'ESTRUCTURA Y REGLAS DEL INSTRUMENTO (en este orden exacto, omite cualquier ítem cuya cantidad sea 0):\n\n' +
 
-        '1. <h2>Tabla de Especificaciones (para el docente)</h2>\n' +
-        '   - Genera una <table> inicial dirigida al docente con estas columnas exactas:\n' +
-        '     "N° de pregunta | Tipo de Ítem | Habilidad de Bloom | Contenido | Puntaje".\n' +
-        '   - Una fila por cada pregunta del instrumento (' + totalItems + ' filas en total). Que el puntaje total sume ' + ctx.puntaje + '.\n\n' +
+        bloqueTablaEspec +
 
         '2. <h2>Instrumento de Evaluación</h2>\n' +
         '   - Redacta la prueba completa dirigida al estudiante, con instrucciones claras y el espacio de puntaje "(__/X pts)" al lado de cada ítem.\n' +
@@ -3332,11 +3425,12 @@
 
         secciones +
 
-        '3. <h2>Pauta de Corrección y Rúbrica (Solucionario para el docente)</h2>\n' +
-        '   - Subtítulo <h3>Respuestas — Ítems objetivos</h3>: entrega las respuestas exactas para todos los ítems con respuesta única (Selección Múltiple, V/F, Completar, Pareados, Aplicación cuando aplique). Para V/F incluye además la justificación correcta de las afirmaciones falsas.\n' +
-        '   - Subtítulo <h3>Respuesta Esperada — Ítems abiertos</h3>: párrafo breve con los elementos centrales que la respuesta debe contener para los ítems de Análisis de Caso y Desarrollo (si fueron incluidos).\n' +
-        '   - Subtítulo <h3>Rúbrica Analítica — Ítems abiertos</h3>: <table> con columnas exactas\n' +
-        '     "Criterio | Logrado | Medianamente Logrado | Por Lograr", con 3 a 4 criterios (ej: comprensión del caso/tema, calidad de la argumentación, uso de conceptos disciplinares, claridad y estructura). Describe brevemente qué debe demostrar el estudiante en cada nivel.\n\n' +
+        bloquePauta +
+
+        'REGLAS DE CUMPLIMIENTO (CRÍTICAS — el documento será descartado si no se respetan):\n' +
+        '- La cantidad TOTAL de preguntas en el Instrumento DEBE ser exactamente ' + totalItems + '. No generes menos. Si una sección dice "Genera N preguntas", DEBES escribir las N preguntas, sin truncar, sin reemplazar por "(...)" ni "y así sucesivamente".\n' +
+        '- Antes de cerrar el documento, recuenta mentalmente los ítems escritos por sección y verifica que la suma sea ' + totalItems + '.\n' +
+        '- No incluyas ningún texto explicativo, comentarios meta ni introducciones fuera de los <h2>/<h3> indicados.\n\n' +
 
         (ctx.valoresStr
             ? 'INTEGRACIÓN DE VALORES MBE:\n' +
@@ -3344,7 +3438,7 @@
             : '') +
 
         _promptReglasComunes() +
-        '\nGenera ahora SOLO el cuerpo HTML de la Prueba Sumativa siguiendo exactamente esta estructura.';
+        '\nGenera ahora SOLO el cuerpo HTML de la Prueba Sumativa siguiendo exactamente esta estructura. Recuerda: ' + totalItems + ' preguntas en total, versión ' + version + '.';
     }
 
     /**
@@ -3490,6 +3584,7 @@
             itemCounts: evalOpts.itemCounts || {},
             cantAlternativas: evalOpts.cantAlternativas || 4,
             materialReferencia: materialReferencia,
+            versionInstrumento: evalOpts.versionInstrumento || 'profesor',
             valoresStr: (valoresArr && valoresArr.length) ? valoresArr.join(', ') : '',
             valoresArr: valoresArr || []
         };
@@ -3519,10 +3614,10 @@ var modelo = _modeloGuardado;
                 var url = 'https://generativelanguage.googleapis.com/v1beta/models/' + modelo + ':generateContent?key=' + apiKey;
                 var body = JSON.stringify({
                     contents: [{ parts: [{ text: prompt }] }],
-                    generationConfig: { temperature: 0.7, maxOutputTokens: 8192 }
+                    generationConfig: { temperature: 0.7, maxOutputTokens: 65536 }
                 });
 
-                setIAStatus('loading', '<span class=\"ia-spinner\">&#9696;</span> Generando con <strong>' + modelo + '</strong>... Esto puede tardar 15\u201330 segundos.');
+                setIAStatus('loading', '<span class=\"ia-spinner\">&#9696;</span> Generando, espera un momento...');
 
                 return fetch(url, {
                     method: 'POST',
