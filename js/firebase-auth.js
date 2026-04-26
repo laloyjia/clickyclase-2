@@ -267,26 +267,28 @@ var ELAuth = (function() {
 
       // Crear documento en Firestore (como admin autenticado)
       var perfil = {
-        uid:           uid,
-        nombre:        data.nombre,
-        email:         data.email,
-        role:          data.role || EL_ROLES.PROFESOR,
-        tipoProfesor:  data.tipoProfesor || '',
-        especialidad:  data.especialidad || '',
-        asignaturas:   data.asignaturas  || [],
-        niveles:       data.niveles      || [],
-        modulos:       data.modulos      || [],
-        seccion:       data.seccion      || '',
-        cursos:        data.cursos       || [],
-        permisos:      data.permisos     || { planificar: true, crearMaterial: true },
-        xp:            0,
-        nivel:         1,
-        badges:        [],
-        evaluaciones:  [],
-        activo:        true,
-        primerIngreso: true,           // obliga cambio de contraseña al primer ingreso
-        creadoEn:      new Date().toISOString(),
-        creadoPor:     _currentUser ? _currentUser.email : 'admin'
+        uid:             uid,
+        nombre:          data.nombre,
+        email:           data.email,
+        role:            data.role || EL_ROLES.PROFESOR,
+        tipoProfesor:    data.tipoProfesor || '',
+        especialidad:    data.especialidad || '',
+        asignaturas:     data.asignaturas  || [],
+        niveles:         data.niveles      || [],
+        modulos:         data.modulos      || [],
+        seccion:         data.seccion      || '',
+        cursos:          data.cursos       || [],
+        liceos:          Array.isArray(data.liceos) ? data.liceos : [],
+        liceoPrincipal:  data.liceoPrincipal || (Array.isArray(data.liceos) && data.liceos.length ? data.liceos[0] : ''),
+        permisos:        data.permisos     || { planificar: true, crearMaterial: true },
+        xp:              0,
+        nivel:           1,
+        badges:          [],
+        evaluaciones:    [],
+        activo:          true,
+        primerIngreso:   true,           // obliga cambio de contraseña al primer ingreso
+        creadoEn:        new Date().toISOString(),
+        creadoPor:       _currentUser ? _currentUser.email : 'admin'
       };
 
       console.log('[ELAuth] Creando doc Firestore para uid:', uid);

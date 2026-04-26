@@ -660,6 +660,28 @@ tr:hover td{background:rgba(99,102,241,.05)}
   </div>
 </div>
 
+<!-- MODAL LICEOS DEL PROFESOR -->
+<div class="modal-bg" id="modalLiceosProf">
+  <div class="modal" style="max-width:560px">
+    <button class="modal-close" onclick="closeModal('modalLiceosProf')">✕</button>
+    <h2>🏫 Liceos del Profesor</h2>
+    <div id="liceosProfNotif" class="notif"></div>
+    <input type="hidden" id="liceosProfUid">
+    <div style="margin-bottom:10px">
+      <div style="font-size:.85rem;font-weight:600" id="liceosProfNombre">—</div>
+      <div style="font-size:.75rem;color:var(--muted)" id="liceosProfEmail">—</div>
+    </div>
+    <div style="font-size:.78rem;color:var(--muted);margin-bottom:8px">
+      Marca uno o más liceos. El logo del <strong>liceo principal</strong> aparecerá por defecto en sus documentos.
+    </div>
+    <div id="liceosProfBox" class="multi-select-box" style="max-height:300px;overflow-y:auto"></div>
+    <div style="text-align:right;margin-top:18px;display:flex;gap:8px;justify-content:flex-end">
+      <button class="btn btn-outline" onclick="closeModal('modalLiceosProf')">Cancelar</button>
+      <button class="btn btn-primary" id="btnGuardarLiceosProf" onclick="guardarLiceosProf()">💾 Guardar</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL RECURSO CURRICULAR -->
 <div class="modal-bg" id="modalRecurso">
   <div class="modal" style="max-width:520px">
@@ -799,7 +821,7 @@ function renderProfs(list){
   tb.innerHTML=list.map(function(p){
     var tipo=p.tipoProfesor==='basica'?'📚 Básica':p.tipoProfesor==='media'?'🎓 Plan Común':p.tipoProfesor==='tecnico'?'⚙️ EMTP':'—';
     var asig=p.asignaturas&&p.asignaturas.length?p.asignaturas.join(', '):(p.especialidad||'—');
-    return '<tr><td><strong>'+(p.nombre||'—')+'</strong></td><td style="color:var(--muted)">'+p.email+'</td><td>'+tipo+'</td><td style="font-size:.8rem">'+asig+'</td><td style="font-size:.8rem">'+(p.niveles&&p.niveles.join(', ')||'—')+'</td><td style="display:flex;gap:6px"><button class="btn btn-outline btn-sm" onclick="editUser(\''+p.uid+'\')">✏️ Datos</button><button class="btn btn-primary btn-sm" onclick="editarPermisos(\''+p.uid+'\')">🔑 Permisos</button></td></tr>';
+    return '<tr><td><strong>'+(p.nombre||'—')+'</strong></td><td style="color:var(--muted)">'+p.email+'</td><td>'+tipo+'</td><td style="font-size:.8rem">'+asig+'</td><td style="font-size:.8rem">'+(p.niveles&&p.niveles.join(', ')||'—')+'</td><td style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn btn-outline btn-sm" onclick="editUser(\''+p.uid+'\')">✏️ Datos</button><button class="btn btn-primary btn-sm" onclick="editarPermisos(\''+p.uid+'\')">🔑 Permisos</button><button class="btn btn-outline btn-sm" onclick="editarLiceosProf(\''+p.uid+'\')">🏫 Liceos</button></td></tr>';
   }).join('');
 }
 
@@ -1051,6 +1073,50 @@ function restaurarLiceo(slug){
   ELDB.liceos.restaurar(slug).then(function(){loadLiceos();}).catch(function(e){alert('❌ '+(e&&e.message||'Error'));});
 }
 
+// ─────────────────────────────────────────────────────────────
+//  Liceos asignados a un PROFESOR existente
+// ─────────────────────────────────────────────────────────────
+var _editLiceosState={liceos:[],liceoPrincipal:''};
+
+function editarLiceosProf(uid){
+  var u=allUsers.find(function(x){return x.uid===uid;});
+  if(!u){alert('Usuario no encontrado');return;}
+  document.getElementById('liceosProfUid').value=uid;
+  document.getElementById('liceosProfNombre').textContent=u.nombre||'(sin nombre)';
+  document.getElementById('liceosProfEmail').textContent=u.email||'';
+  _editLiceosState.liceos=Array.isArray(u.liceos)?u.liceos.slice():[];
+  _editLiceosState.liceoPrincipal=u.liceoPrincipal||(_editLiceosState.liceos[0]||'');
+  poblarLiceosBox('liceosProfBox','editLiceos');
+  document.getElementById('modalLiceosProf').classList.add('open');
+}
+
+function guardarLiceosProf(){
+  var uid=document.getElementById('liceosProfUid').value;
+  if(!uid)return;
+  if(!_editLiceosState.liceos.length){
+    notif('liceosProfNotif','❌ Asigna al menos un liceo','err');return;
+  }
+  if(!_editLiceosState.liceoPrincipal||_editLiceosState.liceos.indexOf(_editLiceosState.liceoPrincipal)===-1){
+    _editLiceosState.liceoPrincipal=_editLiceosState.liceos[0];
+  }
+  var btn=document.getElementById('btnGuardarLiceosProf');
+  if(btn){btn.disabled=true;btn.textContent='⏳ Guardando…';}
+  ELDB.usuarios.actualizar(uid,{
+    liceos:_editLiceosState.liceos,
+    liceoPrincipal:_editLiceosState.liceoPrincipal
+  }).then(function(){
+    notif('liceosProfNotif','✅ Liceos actualizados','ok');
+    if(btn){btn.disabled=false;btn.textContent='💾 Guardar';}
+    // Refrescar usuarios en memoria
+    var u=allUsers.find(function(x){return x.uid===uid;});
+    if(u){u.liceos=_editLiceosState.liceos.slice();u.liceoPrincipal=_editLiceosState.liceoPrincipal;}
+    setTimeout(function(){closeModal('modalLiceosProf');},900);
+  }).catch(function(e){
+    notif('liceosProfNotif','❌ '+(e&&e.message||'Error'),'err');
+    if(btn){btn.disabled=false;btn.textContent='💾 Guardar';}
+  });
+}
+
 // WIZARD — variante rápida con tipo preseleccionado
 function abrirWizardTipo(tipo){
   abrirWizard();
@@ -1096,6 +1162,8 @@ function wNext(step){
   if(step===3){
     if(wData.tipo!=='tecnico'&&wData.asignaturas.length===0){notif('wNotif','❌ Selecciona al menos una asignatura','err');return;}
     if(wData.niveles.length===0){notif('wNotif','❌ Selecciona al menos un nivel','err');return;}
+    if(!wData.liceos||wData.liceos.length===0){notif('wNotif','❌ Asigna al menos un liceo (institución educativa)','err');return;}
+    if(!wData.liceoPrincipal)wData.liceoPrincipal=wData.liceos[0];
     buildStep4();
   }
   document.getElementById('wNotif').classList.remove('show');
@@ -1111,6 +1179,12 @@ function wPrev(step){
 
 function buildStep3(){
   var t=wData.tipo,html='';
+  // Bloque liceos: se llena tras cargar el catálogo
+  var licHtml='<div style="margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid var(--border)">'+
+    '<h3 style="margin-bottom:10px;font-size:.9rem">🏫 Institución educativa</h3>'+
+    '<div style="font-size:.78rem;color:var(--muted);margin-bottom:8px">Marca uno o más liceos donde el docente trabaja. El logo del <strong>liceo principal</strong> aparecerá por defecto en sus documentos.</div>'+
+    '<div id="wLiceosBox" class="multi-select-box" style="max-height:180px;overflow-y:auto"><div style="padding:8px;color:var(--muted);font-size:.8rem">Cargando liceos…</div></div>'+
+  '</div>';
   var permHtml='<div style="margin-top:18px;padding-top:14px;border-top:1px solid var(--border)">'+
     '<h3 style="margin-bottom:10px;font-size:.9rem">📋 Clase asignada</h3>'+
     '<div class="form-group" style="margin-bottom:12px">'+
@@ -1131,6 +1205,8 @@ function buildStep3(){
       '</label>'+
     '</div>'+
   '</div>';
+  // Antepone el bloque de liceos al permHtml (queda al inicio del paso 3)
+  permHtml=licHtml+permHtml;
   if(t==='basica'){
     html+='<h3 style="margin-bottom:12px">📚 Asignaturas — Educación Básica</h3><div class="multi-select-box" id="asigBox">';
     CURRICULA_CHILE.getAsignaturas('basica').forEach(function(a){html+='<label><input type="checkbox" value="'+a.nombre+'" onchange="tgAsig(this)"><span class="cdot" style="background:'+(a.color||'#888')+'"></span>'+a.nombre+'</label>';});
@@ -1153,6 +1229,80 @@ function buildStep3(){
   document.getElementById('sp3Content').innerHTML=html;
   wData.asignaturas.forEach(function(a){var cb=document.querySelector('#asigBox input[value="'+a+'"]');if(cb)cb.checked=true;});
   wData.niveles.forEach(function(n){var cb=document.querySelector('#nivBox input[value="'+n+'"]');if(cb)cb.checked=true;});
+  poblarLiceosBox('wLiceosBox','wData');
+}
+
+/**
+ * Llena un contenedor con checkboxes de liceos activos + radios para "Principal".
+ * targetState='wData' sincroniza con wData.liceos / wData.liceoPrincipal
+ * targetState='editLiceos' sincroniza con _editLiceosState
+ */
+function poblarLiceosBox(boxId,targetState){
+  var box=document.getElementById(boxId);
+  if(!box)return;
+  var fuente=(allLiceos&&allLiceos.length)?Promise.resolve(allLiceos.filter(function(l){return l.activo!==false;})):
+    (ELDB.liceos&&ELDB.liceos.listar?ELDB.liceos.listar():Promise.resolve([]));
+  fuente.then(function(list){
+    if(!list||!list.length){
+      box.innerHTML='<div style="padding:10px;color:var(--muted);font-size:.8rem">No hay liceos registrados. Crea uno en <strong>🏫 Liceos / Colegios</strong>.</div>';
+      return;
+    }
+    var st=(targetState==='wData')?wData:_editLiceosState;
+    var html=list.map(function(l){
+      var checked=(st.liceos||[]).indexOf(l.slug)!==-1;
+      var isPrin=st.liceoPrincipal===l.slug;
+      var logo=l.logoPath||('assets/logos/colegios/'+l.slug+'.png');
+      return '<div class="liceo-row" data-slug="'+l.slug+'" '+
+        'style="display:flex;align-items:center;gap:10px;padding:6px 4px;border-bottom:1px solid var(--border)">'+
+        '<input type="checkbox" class="lic-cb" value="'+l.slug+'" '+(checked?'checked':'')+' '+
+          'onchange="toggleLiceoSel(this,\''+targetState+'\')" style="accent-color:var(--accent)">'+
+        '<img src="'+logo+'" onerror="this.onerror=null;this.src=\'assets/logos/colegios/default.svg\';" '+
+          'style="width:28px;height:28px;object-fit:contain;background:#fff;border-radius:4px;padding:1px">'+
+        '<div style="flex:1;min-width:0">'+
+          '<div style="font-size:.85rem;font-weight:600">'+l.nombre+'</div>'+
+          '<div style="font-size:.7rem;color:var(--muted)">'+(l.comuna||'')+(l.region?' · '+l.region:'')+'</div>'+
+        '</div>'+
+        '<label style="display:flex;align-items:center;gap:4px;font-size:.72rem;color:var(--muted);cursor:pointer" '+
+          'title="Marcar como principal">'+
+          '<input type="radio" name="lic-prin-'+targetState+'" value="'+l.slug+'" '+
+            (isPrin?'checked':'')+' '+(checked?'':'disabled')+' '+
+            'onchange="setLiceoPrincipal(this.value,\''+targetState+'\')" style="accent-color:var(--gold)">'+
+          'Principal'+
+        '</label>'+
+      '</div>';
+    }).join('');
+    box.innerHTML=html;
+  }).catch(function(e){
+    box.innerHTML='<div style="padding:10px;color:var(--red);font-size:.8rem">Error cargando liceos: '+(e&&e.message||'')+'</div>';
+  });
+}
+
+function toggleLiceoSel(cb,targetState){
+  var st=(targetState==='wData')?wData:_editLiceosState;
+  var slug=cb.value;
+  if(cb.checked){
+    if(st.liceos.indexOf(slug)===-1)st.liceos.push(slug);
+    if(!st.liceoPrincipal)st.liceoPrincipal=slug;
+  }else{
+    st.liceos=st.liceos.filter(function(s){return s!==slug;});
+    if(st.liceoPrincipal===slug)st.liceoPrincipal=st.liceos[0]||'';
+  }
+  // Habilitar/deshabilitar radio de Principal
+  var row=cb.closest('.liceo-row');
+  if(row){
+    var radio=row.querySelector('input[type=radio]');
+    if(radio){radio.disabled=!cb.checked;if(!cb.checked)radio.checked=false;}
+  }
+  // Si la principal cambió, sincronizar el radio correspondiente
+  if(st.liceoPrincipal){
+    var sel=document.querySelector('input[name="lic-prin-'+targetState+'"][value="'+st.liceoPrincipal+'"]');
+    if(sel)sel.checked=true;
+  }
+}
+
+function setLiceoPrincipal(slug,targetState){
+  var st=(targetState==='wData')?wData:_editLiceosState;
+  st.liceoPrincipal=slug;
 }
 
 function loadMods(){
@@ -1179,6 +1329,14 @@ function buildStep4(){
   if(wData.modulos.length)html+='<div style="display:flex;gap:16px"><span style="color:var(--muted);min-width:120px">Módulos:</span><span>'+wData.modulos.join(', ')+'</span></div>';
   html+='<div style="display:flex;gap:16px"><span style="color:var(--muted);min-width:120px">Niveles:</span><span>'+wData.niveles.join(', ')+'</span></div>';
   if(wData.cursos&&wData.cursos.length)html+='<div style="display:flex;gap:16px"><span style="color:var(--muted);min-width:120px">Clase(s):</span><span>'+wData.cursos.join(', ')+'</span></div>';
+  if(wData.liceos&&wData.liceos.length){
+    var nomLic=wData.liceos.map(function(s){
+      var l=allLiceos.find(function(x){return x.slug===s;});
+      var nom=l?l.nombre:s;
+      return s===wData.liceoPrincipal?('<strong style="color:var(--gold)">★ '+nom+'</strong>'):nom;
+    }).join(', ');
+    html+='<div style="display:flex;gap:16px"><span style="color:var(--muted);min-width:120px">Liceo(s):</span><span>'+nomLic+'</span></div>';
+  }
   html+='<div style="display:flex;gap:16px"><span style="color:var(--muted);min-width:120px">Permisos:</span><span>'+(wData.permisos.planificar?'📅 Planificar ':'')+(wData.permisos.crearMaterial?'📚 Material':'')+'</span></div>';
   html+='</div>';
   document.getElementById('sp4Preview').innerHTML=html;
@@ -1187,7 +1345,7 @@ function buildStep4(){
 function crearProfesor(){
   var btn=document.getElementById('btnCrear');
   btn.disabled=true;btn.innerHTML='<span class="spinner"></span> Creando…';
-  ELAuth.adminCrearProfesor({nombre:document.getElementById('pNombre').value.trim(),email:document.getElementById('pEmail').value.trim(),password:document.getElementById('pPass').value,tipoProfesor:wData.tipo,asignaturas:wData.asignaturas,especialidad:wData.especialidad,modulos:wData.modulos,niveles:wData.niveles,cursos:wData.cursos,permisos:wData.permisos})
+  ELAuth.adminCrearProfesor({nombre:document.getElementById('pNombre').value.trim(),email:document.getElementById('pEmail').value.trim(),password:document.getElementById('pPass').value,tipoProfesor:wData.tipo,asignaturas:wData.asignaturas,especialidad:wData.especialidad,modulos:wData.modulos,niveles:wData.niveles,cursos:wData.cursos,liceos:wData.liceos,liceoPrincipal:wData.liceoPrincipal,permisos:wData.permisos})
   .then(function(){
     notif('wNotif','✅ Profesor creado. Puede ingresar con su correo y contraseña desde cualquier dispositivo.','ok');
     loadData();btn.disabled=false;btn.innerHTML='✅ Crear Profesor';
