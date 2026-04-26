@@ -135,6 +135,93 @@ CURRICULA_PLAN_COMUN['lenguaje'] = {
     ]
   },
   actitudes:   [],  // hereda de _comun
-  habilidades: ['Lectura', 'Escritura', 'Comunicación oral', 'Investigación']
+  habilidades: ['Lectura', 'Escritura', 'Comunicación oral', 'Investigación'],
+
+  // ────────────────────────────────────────────────────────────────────
+  //  ELECTIVOS DIFERENCIADOS HC (3°M y 4°M)
+  //  Cada electivo agrupa OAs y unidades. Se exponen como sub-asignaturas.
+  //  Acceso: CURRICULA_PLAN_COMUN['lenguaje'].electivos['<key>']
+  // ────────────────────────────────────────────────────────────────────
+  electivos: {
+    'lectura-y-escritura-especializadas': {
+      nombre:  'Lectura y Escritura Especializadas',
+      sigla:   'LEE',
+      tramo:   'media',
+      niveles: ['3M', '4M'],
+      unidades: {
+        '3M': ['Géneros académicos y especializados', 'Investigación y fuentes', 'Procesos colaborativos de escritura'],
+        '4M': ['Producción de textos especializados', 'Citación y uso ético de la información', 'Comunidades de pares']
+      },
+      // Las Bases Curriculares prescriben los mismos OAs para 3°M y 4°M.
+      oas: {
+        '3M': [
+          { codigo: 'OA1', eje: 'Escritura',     descripcion: 'Producir textos pertenecientes a diversos géneros discursivos académicos, en los cuales se gestione información recogida de distintas fuentes y se demuestre dominio especializado de un tema.' },
+          { codigo: 'OA2', eje: 'Escritura',     descripcion: 'Participar de manera activa en procesos colaborativos de producción de textos especializados —como autor, lector, revisor— al interior de una comunidad de pares especialistas.' },
+          { codigo: 'OA3', eje: 'Investigación', descripcion: 'Utilizar diversas estrategias para registrar y procesar información obtenida en soportes impresos o digitales, en coherencia con el tema, los propósitos comunicativos y las convenciones discursivas.' },
+          { codigo: 'OA4', eje: 'Escritura',     descripcion: 'Utilizar diversas estrategias para construir y transformar el conocimiento por escrito, en coherencia con los temas, los propósitos comunicativos y las convenciones discursivas de los textos que producirán.' },
+          { codigo: 'OA5', eje: 'Investigación', descripcion: 'Buscar, evaluar y seleccionar rigurosamente fuentes disponibles en soportes impresos y digitales, considerando la validez, veracidad y responsabilidad de su autoría.' }
+        ],
+        '4M': [
+          { codigo: 'OA1', eje: 'Escritura',     descripcion: 'Producir textos pertenecientes a diversos géneros discursivos académicos, en los cuales se gestione información recogida de distintas fuentes y se demuestre dominio especializado de un tema.' },
+          { codigo: 'OA2', eje: 'Escritura',     descripcion: 'Participar de manera activa en procesos colaborativos de producción de textos especializados —como autor, lector, revisor— al interior de una comunidad de pares especialistas.' },
+          { codigo: 'OA3', eje: 'Investigación', descripcion: 'Utilizar diversas estrategias para registrar y procesar información obtenida en soportes impresos o digitales, en coherencia con el tema, los propósitos comunicativos y las convenciones discursivas.' },
+          { codigo: 'OA4', eje: 'Escritura',     descripcion: 'Utilizar diversas estrategias para construir y transformar el conocimiento por escrito, en coherencia con los temas, los propósitos comunicativos y las convenciones discursivas de los textos que producirán.' },
+          { codigo: 'OA5', eje: 'Investigación', descripcion: 'Buscar, evaluar y seleccionar rigurosamente fuentes disponibles en soportes impresos y digitales, considerando la validez, veracidad y responsabilidad de su autoría.' }
+        ]
+      }
+    },
+
+    'taller-de-literatura': {
+      nombre:  'Taller de Literatura',
+      sigla:   'TLIT',
+      tramo:   'media',
+      niveles: ['3M'],
+      unidades: {
+        '3M': ['Trayectorias de lectura', 'Producción literaria y creativa', 'Comunidad lectora']
+      },
+      oas: {
+        '3M': [
+          { codigo: 'OA1', eje: 'Producción',        descripcion: 'Producir diversos géneros escritos y audiovisuales para desarrollar y comunicar sus interpretaciones de las obras leídas.' },
+          { codigo: 'OA2', eje: 'Producción',        descripcion: 'Producir textos pertenecientes a diversos géneros discursivos de la literatura que den cuenta de sus proyectos personales y creativos.' },
+          { codigo: 'OA3', eje: 'Comunidad lectora', descripcion: 'Contribuir con sus comentarios, sugerencias, interpretaciones y críticas a los procesos de lectura colectiva y de escritura creativa de sus pares.' },
+          { codigo: 'OA4', eje: 'Producción',        descripcion: 'Revisar y reescribir sus propias producciones (escritas, orales o audiovisuales) a la luz de los comentarios, críticas y sugerencias de sus pares, para enriquecer su producción creativa.' },
+          { codigo: 'OA5', eje: 'Lectura',           descripcion: 'Construir trayectorias de lectura que surjan de sus propios intereses, gustos literarios e inquietudes, explicitando criterios de selección de obras y compartiéndolas con sus pares.' },
+          { codigo: 'OA6', eje: 'Producción',        descripcion: 'Producir textos y otras producciones que den cuenta de sus reflexiones sobre sí mismos y sobre diversas temáticas del mundo, surgidas de las interpretaciones de las obras leídas y de sus trayectorias de lectura.' }
+        ]
+      }
+    },
+
+    'participacion-y-argumentacion-en-democracia': {
+      nombre:  'Participación y Argumentación en Democracia',
+      sigla:   'PAD',
+      tramo:   'media',
+      niveles: ['3M', '4M'],
+      unidades: {
+        '3M': ['Discusión argumentativa', 'Pensamiento crítico', 'Postura ciudadana'],
+        '4M': ['Argumentación pública', 'Evaluación de evidencias', 'Construcción de propuestas']
+      },
+      // Las Bases Curriculares prescriben los mismos OAs para 3°M y 4°M.
+      oas: {
+        '3M': [
+          { codigo: 'OA1', eje: 'Discusión argumentativa', descripcion: 'Construir colectivamente conclusiones, soluciones, preguntas, hipótesis o acuerdos que surjan de discusiones argumentadas y razonadas, en torno a temas controversiales de la vida y la sociedad actual.' },
+          { codigo: 'OA2', eje: 'Discusión argumentativa', descripcion: 'Dialogar argumentativamente, privilegiando el componente racional de la argumentación, estableciendo relaciones lógicas y extrayendo conclusiones razonadas.' },
+          { codigo: 'OA3', eje: 'Investigación',           descripcion: 'Evaluar diversas formas en que se legitima el conocimiento en los discursos, a partir del análisis crítico de sus modos de generación y su pertinencia al ámbito de participación y a la comunidad discursiva.' },
+          { codigo: 'OA4', eje: 'Argumentación',           descripcion: 'Elaborar argumentos basándose en evidencias o información pública legitimada pertinentes al tema o problema analizado.' },
+          { codigo: 'OA5', eje: 'Argumentación',           descripcion: 'Utilizar formas de argumentación y de legitimación del conocimiento, pertinentes al ámbito de participación, a la comunidad discursiva y a los propósitos de sus argumentaciones.' },
+          { codigo: 'OA6', eje: 'Pensamiento crítico',     descripcion: 'Evaluar críticamente argumentaciones surgidas en distintos ámbitos de la sociedad, enfocándose en sus alcances, pertinencia, legitimidad de las evidencias y relaciones lógicas establecidas.' },
+          { codigo: 'OA7', eje: 'Ciudadanía',              descripcion: 'Construir una postura personal sobre diversos temas controversiales y problemáticas de la sociedad, a partir de sus investigaciones y de la evaluación y confrontación de argumentaciones y evidencias.' }
+        ],
+        '4M': [
+          { codigo: 'OA1', eje: 'Discusión argumentativa', descripcion: 'Construir colectivamente conclusiones, soluciones, preguntas, hipótesis o acuerdos que surjan de discusiones argumentadas y razonadas, en torno a temas controversiales de la vida y la sociedad actual.' },
+          { codigo: 'OA2', eje: 'Discusión argumentativa', descripcion: 'Dialogar argumentativamente, privilegiando el componente racional de la argumentación, estableciendo relaciones lógicas y extrayendo conclusiones razonadas.' },
+          { codigo: 'OA3', eje: 'Investigación',           descripcion: 'Evaluar diversas formas en que se legitima el conocimiento en los discursos, a partir del análisis crítico de sus modos de generación y su pertinencia al ámbito de participación y a la comunidad discursiva.' },
+          { codigo: 'OA4', eje: 'Argumentación',           descripcion: 'Elaborar argumentos basándose en evidencias o información pública legitimada pertinentes al tema o problema analizado.' },
+          { codigo: 'OA5', eje: 'Argumentación',           descripcion: 'Utilizar formas de argumentación y de legitimación del conocimiento, pertinentes al ámbito de participación, a la comunidad discursiva y a los propósitos de sus argumentaciones.' },
+          { codigo: 'OA6', eje: 'Pensamiento crítico',     descripcion: 'Evaluar críticamente argumentaciones surgidas en distintos ámbitos de la sociedad, enfocándose en sus alcances, pertinencia, legitimidad de las evidencias y relaciones lógicas establecidas.' },
+          { codigo: 'OA7', eje: 'Ciudadanía',              descripcion: 'Construir una postura personal sobre diversos temas controversiales y problemáticas de la sociedad, a partir de sus investigaciones y de la evaluación y confrontación de argumentaciones y evidencias.' }
+        ]
+      }
+    }
+  }
 };
 

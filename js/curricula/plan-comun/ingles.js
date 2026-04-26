@@ -87,6 +87,55 @@ CURRICULA_PLAN_COMUN['ingles'] = {
       { codigo: 'OA8',  eje: 'Expresión escrita',    descripcion: 'Escribir para cumplir las siguientes funciones: narrar una historia real o imaginada; describir personas, lugares, sentimientos, objetos y eventos; expresar planes, opiniones, acuerdos y desacuerdos fundamentados; persuadir; informar; instruir.' },
       { codigo: 'OA9',  eje: 'Expresión escrita',    descripcion: 'Escribir una variedad de textos breves y semi-extensos (artículos breves, cartas, correos, cuentos, biografías, reseñas, entradas de blog, cartas de opinión) aplicando los pasos del proceso de escritura, con estructura textual adecuada al género y apoyada por conectores.' },
       { codigo: 'OA10', eje: 'Expresión escrita',    descripcion: 'Demostrar conocimiento del lenguaje escrito mediante un repertorio de al menos 350 palabras de uso frecuente, variedad de estructuras gramaticales del nivel (presente/pasado/futuro, perfectos, condicionales I y II, voz pasiva, modales), conectores y organización textual adecuada al tipo de texto.' }
+    ],
+    '1M': [
+      { codigo: 'OA1',  eje: 'Comunicación oral', descripcion: 'Demostrar comprensión de ideas generales e información explícita en textos orales adaptados y auténticos simples, literarios y no literarios, en diversos formatos audiovisuales.' },
+      { codigo: 'OA2',  eje: 'Comunicación oral', descripcion: 'Identificar palabras, frases y expresiones clave, vocabulario temático, conectores y sonidos del idioma en textos orales y conversaciones de la clase.' },
+      { codigo: 'OA3',  eje: 'Comunicación oral', descripcion: 'Identificar en los textos escuchados propósito, tema, ideas relevantes, información específica y relaciones de contraste y problema-solución.' },
+      { codigo: 'OA4',  eje: 'Comunicación oral', descripcion: 'Seleccionar y usar estrategias para apoyar la comprensión de los textos escuchados (predicciones, inferencias, focalización, resumen).' },
+      { codigo: 'OA5',  eje: 'Comunicación oral', descripcion: 'Presentar información en forma oral usando recursos multimodales que refuercen el mensaje en forma creativa acerca de temas variados.' },
+      { codigo: 'OA6',  eje: 'Comunicación oral', descripcion: 'Participar en interacciones y exposiciones recurriendo a estrategias antes, durante y después de hablar para expresarse con claridad y fluidez.' },
+      { codigo: 'OA7',  eje: 'Comunicación oral', descripcion: 'Reaccionar a textos leídos o escuchados mediante exposiciones orales, discusiones y conversaciones grupales haciendo conexiones, expresando opiniones y formulando hipótesis.' },
+      { codigo: 'OA8',  eje: 'Comunicación oral', descripcion: 'Demostrar conocimiento y uso del lenguaje en conversaciones, discusiones y exposiciones por medio de diversas funciones comunicativas del nivel.' },
+      { codigo: 'OA9',  eje: 'Lectura',           descripcion: 'Demostrar comprensión de ideas generales e información explícita en textos adaptados y auténticos simples, en formato impreso o digital, sobre temas variados.' },
+      { codigo: 'OA10', eje: 'Lectura',           descripcion: 'Demostrar comprensión de textos no literarios identificando propósito, idea principal, información específica, relaciones entre ideas, palabras clave y conectores.' },
+      { codigo: 'OA11', eje: 'Lectura',           descripcion: 'Demostrar comprensión de textos literarios identificando tema, personajes, caracterización, entorno, trama, problema-solución y vocabulario temático.' },
+      { codigo: 'OA12', eje: 'Lectura',           descripcion: 'Seleccionar y usar estrategias de prelectura, lectura y poslectura para apoyar la comprensión de los textos leídos.' },
+      { codigo: 'OA13', eje: 'Escritura',         descripcion: 'Escribir historias e información relevante usando diversos recursos multimodales en forma atractiva y novedosa para reforzar el mensaje en textos variados.' },
+      { codigo: 'OA14', eje: 'Escritura',         descripcion: 'Escribir una variedad de textos (cuentos, correos, folletos, biografías, instrucciones, etc.) utilizando los pasos del proceso de escritura y herramientas digitales.' },
+      { codigo: 'OA15', eje: 'Escritura',         descripcion: 'Escribir para explicar, expresar opiniones y narrar usando variedad de palabras, conectores, ortografía correcta y puntuación apropiada.' },
+      { codigo: 'OA16', eje: 'Escritura',         descripcion: 'Demostrar conocimiento y uso del lenguaje en sus textos escritos por medio de diversas funciones comunicativas del nivel.' }
+    ],
+    '2M': [
+      { codigo: 'OA1',  eje: 'Comunicación oral', descripcion: 'Demostrar comprensión de ideas generales e información explícita en textos orales adaptados y auténticos simples, literarios y no literarios, en diversos formatos audiovisuales.' },
+      { codigo: 'OA2',  eje: 'Comunicación oral', descripcion: 'Identificar palabras, frases y expresiones clave, vocabulario temático, conectores y sonidos del idioma en textos orales y conversaciones de la clase.' },
+      { codigo: 'OA3',  eje: 'Comunicación oral', descripcion: 'Identificar en los textos escuchados propósito, tema, ideas relevantes, información específica y relaciones de importancia y problema-solución.' },
+      { codigo: 'OA4',  eje: 'Comunicación oral', descripcion: 'Seleccionar y usar estrategias para apoyar la comprensión de los textos escuchados (predicciones, inferencias, toma de notas, resumen).' },
+      { codigo: 'OA5',  eje: 'Comunicación oral', descripcion: 'Presentar información en forma oral usando recursos multimodales que refuercen el mensaje en forma creativa acerca de temas variados.' },
+      { codigo: 'OA6',  eje: 'Comunicación oral', descripcion: 'Participar en interacciones y exposiciones recurriendo a estrategias antes, durante y después de hablar para expresarse con claridad y fluidez.' },
+      { codigo: 'OA7',  eje: 'Comunicación oral', descripcion: 'Reaccionar a textos leídos o escuchados mediante exposiciones orales, discusiones y conversaciones grupales haciendo conexiones, evaluando ideas y formulando hipótesis.' },
+      { codigo: 'OA8',  eje: 'Comunicación oral', descripcion: 'Demostrar conocimiento y uso del lenguaje en conversaciones, discusiones y exposiciones por medio de diversas funciones comunicativas del nivel.' },
+      { codigo: 'OA9',  eje: 'Lectura',           descripcion: 'Demostrar comprensión de ideas generales e información explícita en textos adaptados y auténticos simples, en formato impreso o digital, sobre temas variados.' },
+      { codigo: 'OA10', eje: 'Lectura',           descripcion: 'Demostrar comprensión de textos no literarios identificando propósito, idea principal, información específica, relaciones entre ideas, palabras clave y conectores.' },
+      { codigo: 'OA11', eje: 'Lectura',           descripcion: 'Demostrar comprensión de textos literarios identificando tema, personajes, caracterización, entorno, trama, conflicto y vocabulario temático.' },
+      { codigo: 'OA12', eje: 'Lectura',           descripcion: 'Seleccionar y usar estrategias de prelectura, lectura y postlectura para apoyar la comprensión de los textos leídos.' },
+      { codigo: 'OA13', eje: 'Escritura',         descripcion: 'Escribir historias e información relevante usando diversos recursos multimodales en forma creativa y efectiva que refuercen el mensaje en textos variados.' },
+      { codigo: 'OA14', eje: 'Escritura',         descripcion: 'Escribir una variedad de textos (cuentos, correos, artículos, biografías, poemas, etc.) utilizando los pasos del proceso de escritura y herramientas digitales.' },
+      { codigo: 'OA15', eje: 'Escritura',         descripcion: 'Escribir para analizar, expresar opiniones y narrar usando variedad de palabras, conectores, ortografía correcta y puntuación apropiada.' },
+      { codigo: 'OA16', eje: 'Escritura',         descripcion: 'Demostrar conocimiento y uso del lenguaje en sus textos escritos por medio de diversas funciones comunicativas del nivel.' }
+    ],
+    // 3°M y 4°M en Formación General prescriben sólo 4 OAs integrados (no separados por habilidad).
+    '3M': [
+      { codigo: 'OA1', eje: 'Comprensión',  descripcion: 'Comprender información central de textos orales y escritos en contextos relacionados con sus intereses e inquietudes, con el fin de conocer las maneras en que otras culturas abordan dichos contextos.' },
+      { codigo: 'OA2', eje: 'Producción',   descripcion: 'Producir textos orales y escritos breves y claros en contextos relacionados con sus intereses e inquietudes, con el fin de expresar una postura personal crítica que respeta otras posturas.' },
+      { codigo: 'OA3', eje: 'Uso del idioma', descripcion: 'Utilizar su conocimiento del inglés en la comprensión y producción de textos orales y escritos breves y claros, con el fin de construir una postura personal crítica en contextos relacionados con sus intereses e inquietudes.' },
+      { codigo: 'OA4', eje: 'Interacción',  descripcion: 'Producir y comprender con fluidez textos orales y escritos breves y claros en situaciones comunicativas que involucren otras visiones de mundo y la propia, con el fin de interactuar y tomar conciencia de su propia identidad.' }
+    ],
+    '4M': [
+      { codigo: 'OA1', eje: 'Comprensión',  descripcion: 'Comprender información relevante para un propósito específico en textos orales y escritos en contextos relacionados con sus intereses e inquietudes, con el fin de conocer las maneras en que otras culturas abordan dichos contextos.' },
+      { codigo: 'OA2', eje: 'Producción',   descripcion: 'Producir textos orales y escritos claros en contextos relacionados con sus intereses e inquietudes, con el fin de expresar una postura personal crítica que respeta otras posturas.' },
+      { codigo: 'OA3', eje: 'Uso del idioma', descripcion: 'Utilizar su conocimiento del inglés en la comprensión y producción de textos orales y escritos claros, con el fin de construir una postura personal crítica en contextos relacionados con sus intereses e inquietudes.' },
+      { codigo: 'OA4', eje: 'Interacción',  descripcion: 'Producir y comprender con fluidez textos orales y escritos claros en situaciones comunicativas que involucren otras visiones de mundo y la propia, con el fin de interactuar y tomar conciencia de su propia identidad.' }
     ]
   }
 };
