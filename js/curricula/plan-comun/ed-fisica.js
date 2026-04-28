@@ -125,10 +125,102 @@ CURRICULA_PLAN_COMUN['ed-fisica'] = {
       { codigo: 'OA10', eje: 'Seguridad, juego limpio y liderazgo', descripcion: 'Practicar actividades físicas y/o juegos colectivos, demostrando responsabilidad, liderazgo y respeto al participar; por ejemplo: conversar y plantear discrepancias, aceptar las diferencias individuales e intentar llegar a acuerdos, jugar en forma cooperativa, aceptar el resultado y manejar el triunfo.' },
       { codigo: 'OA11', eje: 'Seguridad, juego limpio y liderazgo', descripcion: 'Practicar actividades físicas y/o deportivas, demostrando comportamientos seguros y un manejo adecuado de los materiales y los procedimientos, como: realizar un calentamiento específico individual o grupal; usar ropa adecuada para la actividad; cuidar sus pertenencias; manipular de forma segura los implementos y las instalaciones.' }
     ],
-    '7B': [ /* TODO: DS 369/2015 */ ], '8B': [ /* TODO: DS 369/2015 */ ],
-    '1M': [ /* TODO: DS 369/2015 */ ], '2M': [ /* TODO: DS 369/2015 */ ], '3M': [ /* TODO: DS 193/2019 */ ], '4M': [ /* TODO: DS 193/2019 */ ]
+    // ── 7°B — Programa de Estudio (DS 369/2015) ─ 5 OAs ──────────────────
+    '7B': [
+      { codigo: 'OA1', eje: 'Habilidades motrices', descripcion: 'Aplicar, combinar y ajustar las habilidades motrices específicas de locomoción, manipulación y estabilidad en, al menos: un deporte individual (atletismo, gimnasia artística, entre otros); un deporte de oposición (tenis, bádminton, entre otros); un deporte de colaboración (escalada, vóleibol duplas, entre otros); un deporte de oposición/colaboración (básquetbol, hándbol, hockey, entre otros); una danza (folclórica, moderna, entre otras).' },
+      { codigo: 'OA2', eje: 'Habilidades motrices', descripcion: 'Seleccionar y aplicar estrategias y tácticas específicas para la resolución de problemas durante la práctica de juegos o deportes; por ejemplo: ubicar la pelota lejos de un contrincante, utilizar los espacios para recibir un objeto sin oponentes, aplicar un sistema de juego (uno contra uno, tres contra tres, entre otros), entre otros.' },
+      { codigo: 'OA3', eje: 'Vida activa y saludable', descripcion: 'Desarrollar la resistencia cardiovascular, la fuerza muscular, la velocidad y la flexibilidad para alcanzar una condición física saludable, considerando: frecuencia; intensidad; tiempo de duración; tipo de ejercicio (correr, andar en bicicleta, realizar trabajo de fuerza, ejercicios de flexibilidad, entre otros).' },
+      { codigo: 'OA4', eje: 'Vida activa y saludable', descripcion: 'Practicar regularmente una variedad de actividades físicas alternativas y/o deportivas en diferentes entornos, aplicando conductas de autocuidado y seguridad, como realizar al menos 30 minutos diarios de actividades físicas de su interés, evitar el consumo de drogas, tabaco y alcohol, ejecutar un calentamiento, aplicar reglas y medidas de seguridad, hidratarse con agua de forma permanente, entre otras.' },
+      { codigo: 'OA5', eje: 'Responsabilidad personal y social en la actividad física y el deporte', descripcion: 'Participar en una variedad de actividades físicas y/o deportivas de su interés y que se desarrollan en su comunidad escolar y/o en su entorno; por ejemplo: integrarse en talleres de actividades físicas y/o deportivas extraprogramáticas en su comunidad y/o entorno; asumir variados roles en la participación y promoción de una vida activa; utilizar los entornos cercanos para realizar alguna actividad física y/o deportiva (plazas, parques, entre otros).' }
+    ],
+    // ── 8°B — Programa de Estudio (DS 369/2015) ─ 5 OAs ──────────────────
+    '8B': [
+      { codigo: 'OA1', eje: 'Habilidades motrices', descripcion: 'Seleccionar, combinar y aplicar con mayor dominio las habilidades motrices específicas de locomoción, manipulación y estabilidad en, al menos: un deporte individual (atletismo, gimnasia artística, entre otros); un deporte de oposición (tenis, bádminton, entre otros); un deporte de colaboración (escalada, vóleibol duplas, entre otros); un deporte de oposición/colaboración (básquetbol, hándbol, hockey, entre otros); una danza (folclórica, moderna, entre otras).' },
+      { codigo: 'OA2', eje: 'Habilidades motrices', descripcion: 'Seleccionar, evaluar y aplicar estrategias y tácticas específicas para la resolución de problemas durante la práctica de juegos o deportes; por ejemplo: ubicar la pelota lejos de un contrincante, utilizar los espacios para recibir un objeto sin oponentes, aplicar un sistema de juego (uno contra uno, tres contra tres, entre otros), entre otros.' },
+      { codigo: 'OA3', eje: 'Vida activa y saludable', descripcion: 'Desarrollar la resistencia cardiovascular, la fuerza muscular, la velocidad y la flexibilidad para alcanzar una condición física saludable, considerando: frecuencia; intensidad; tiempo de duración y recuperación; progresión; tipo de ejercicio (correr, andar en bicicleta, realizar trabajo de fuerza, ejercicios de flexibilidad, entre otros).' },
+      { codigo: 'OA4', eje: 'Vida activa y saludable', descripcion: 'Practicar regularmente una variedad de actividades físicas alternativas y/o deportivas en diferentes entornos, aplicando conductas de autocuidado y seguridad, como realizar al menos 30 minutos diarios de actividades físicas de su interés, evitar el consumo de drogas, tabaco y alcohol, ejecutar un calentamiento, aplicar reglas y medidas de seguridad, hidratarse con agua de forma permanente, entre otras.' },
+      { codigo: 'OA5', eje: 'Responsabilidad personal y social en la actividad física y el deporte', descripcion: 'Promover y participar en una variedad de actividades físicas y/o deportivas de su interés y que se desarrollan en su comunidad escolar y/o en su entorno; por ejemplo: promover la práctica regular de actividad física y deportiva; participar en la organización de una variedad de actividades físicas y/o deportivas que sean de interés personal y de la comunidad; utilizar estrategias para promover la práctica regular de actividad física (por ejemplo: elaborar afiches o diarios murales, entre otros).' }
+    ],
+    // ── 1°M — Programa de Estudio (DS 369/2015) ─ 5 OAs ─────────────────
+    '1M': [
+      { codigo: 'OA1', eje: 'Habilidades motrices', descripcion: 'Perfeccionar y aplicar controladamente las habilidades motrices específicas de locomoción, manipulación y estabilidad en, al menos: un deporte individual (gimnasia rítmica, natación, entre otros); un deporte de oposición (bádminton, tenis de mesa, entre otros); un deporte de colaboración (kayak, escalada, entre otros); un deporte de oposición/colaboración (fútbol, vóleibol, rugby, entre otros); una danza (folclórica, popular, entre otras).' },
+      { codigo: 'OA2', eje: 'Habilidades motrices', descripcion: 'Modificar, evaluar y aplicar las estrategias y tácticas específicas utilizadas para la resolución de problemas durante la práctica de juegos o deportes; por ejemplo: ubicar la pelota en un punto estratégico de la cancha, cambiar la posición o la función de los jugadores durante el partido, implementar y evaluar un sistema de posiciones de ataque junto a otros jugadores, entre otras.' },
+      { codigo: 'OA3', eje: 'Vida activa y saludable', descripcion: 'Diseñar y aplicar un plan de entrenamiento personal para alcanzar una condición física saludable, desarrollando la resistencia cardiovascular, la fuerza muscular, la velocidad y la flexibilidad, considerando: tiempo asignado para el plan de entrenamiento (por ejemplo: 4 a 6 semanas); frecuencia, intensidad, tiempo de duración y recuperación, progresión y tipo de ejercicio; niveles de condición física al iniciar el plan de entrenamiento; actividades físicas que sean de interés personal y contribuyan a mejorar la condición física; ingesta y gasto calórico.' },
+      { codigo: 'OA4', eje: 'Vida activa y saludable', descripcion: 'Practicar regularmente una variedad de actividades físicas alternativas y/o deportivas en diferentes entornos, aplicando conductas de autocuidado, seguridad y primeros auxilios, como: realizar al menos 30 minutos diarios de actividades físicas de su interés; promover campañas para evitar el consumo de drogas, tabaco y alcohol; aplicar maniobras básicas de primeros auxilios en situaciones de riesgo; dirigir y ejecutar un calentamiento de manera grupal; hidratarse con agua de forma permanente.' },
+      { codigo: 'OA5', eje: 'Responsabilidad personal y social en el deporte y la actividad física', descripcion: 'Participar y promover una variedad de actividades físicas y/o deportivas de su interés y que se desarrollen en su comunidad escolar y/o en su entorno; por ejemplo: evaluar los programas que ofrece la comunidad para promover la práctica regular de actividad física; aplicar y desarrollar estrategias específicas para mejorar su condición física y la de los demás; desarrollar estrategias grupales para promover una vida activa dentro de su comunidad escolar o su entorno cercano.' }
+    ],
+    // ── 2°M — Programa de Estudio (DS 369/2015) ─ 5 OAs ─────────────────
+    '2M': [
+      { codigo: 'OA1', eje: 'Habilidades motrices', descripcion: 'Perfeccionar y aplicar con precisión las habilidades motrices específicas de locomoción, manipulación y estabilidad en, al menos: un deporte individual (gimnasia rítmica, natación, entre otros); un deporte de oposición (bádminton, tenis de mesa, entre otros); un deporte de colaboración (kayak, escalada, entre otros); un deporte de oposición/colaboración (fútbol, vóleibol, rugby, entre otros); una danza (folclórica, popular, entre otras).' },
+      { codigo: 'OA2', eje: 'Habilidades motrices', descripcion: 'Diseñar, aplicar y evaluar las estrategias y tácticas específicas utilizadas para la resolución de problemas durante la práctica de juegos o deportes; por ejemplo: ajustar las velocidades del golpe según la posición del contrincante, elaborar en forma grupal una táctica para recuperar el balón desde el campo del adversario, evaluar la aplicación de una estrategia defensiva en función del resultado, entre otros.' },
+      { codigo: 'OA3', eje: 'Vida activa y saludable', descripcion: 'Diseñar, evaluar y aplicar un plan de entrenamiento personal para alcanzar una condición física saludable, desarrollando la resistencia cardiovascular, la fuerza muscular, la velocidad y la flexibilidad, considerando: tiempo asignado para el plan de entrenamiento (por ejemplo: 4 a 6 semanas); frecuencia, intensidad, tiempo de duración y recuperación, progresión y tipo de ejercicio; niveles de condición física al iniciar el plan de entrenamiento; actividades físicas que sean de interés personal y contribuyan a mejorar la condición física; ingesta y gasto calórico.' },
+      { codigo: 'OA4', eje: 'Vida activa y saludable', descripcion: 'Practicar regularmente una variedad de actividades físicas alternativas y/o deportivas en diferentes entornos, aplicando conductas de autocuidado, seguridad y primeros auxilios, como: realizar al menos 30 minutos diarios de actividades físicas de su interés; promover campañas para evitar el consumo de drogas, tabaco y alcohol; aplicar maniobras básicas de primeros auxilios en situaciones de riesgo; dirigir y ejecutar un calentamiento de manera grupal; hidratarse con agua de forma permanente.' },
+      { codigo: 'OA5', eje: 'Responsabilidad personal y social en el deporte y la actividad física', descripcion: 'Participar, liderar y promover una variedad de actividades físicas y/o deportivas de su interés y que se desarrollen en su comunidad escolar y/o en su entorno; por ejemplo: sugerir estrategias grupales para organizar actividades físicas y/o deportivas; demostrar distintos estilos de liderazgo en la promoción de una vida activa; proponer y crear una variedad de actividades físicas y deportivas para desarrollar los planes para promover una vida activa en su comunidad; fomentar y crear estrategias para adherir a la práctica de actividad física permanente.' }
+    ],
+    '3M': [ /* FG no obligatorio en 3°-4°M; ver electivos abajo */ ],
+    '4M': [ /* FG no obligatorio en 3°-4°M; ver electivos abajo */ ]
   },
   actitudes:   [],  // hereda de _comun
-  habilidades: ['Habilidades motrices','Vida activa y saludable','Seguridad, juego limpio y liderazgo']
+  habilidades: ['Habilidades motrices','Vida activa y saludable','Seguridad, juego limpio y liderazgo'],
+
+  // ────────────────────────────────────────────────────────────────────
+  //  ELECTIVOS DIFERENCIADOS HC (3°M y 4°M) — DS 193/2019
+  //  Programas de Estudio Mineduc, febrero 2021. Las Bases Curriculares
+  //  prescriben los mismos OAs para 3°M y 4°M.
+  // ────────────────────────────────────────────────────────────────────
+  electivos: {
+    'educacion-fisica-y-salud-1': {
+      nombre:  'Educación Física y Salud (Programa 1)',
+      sigla:   'EFS1',
+      tramo:   'media',
+      niveles: ['3M', '4M'],
+      unidades: {
+        '3M': ['Habilidades motrices y juego modificado','Plan de entrenamiento personal','Vida activa y bienestar comunitario','Estilo de vida saludable y entorno social'],
+        '4M': ['Habilidades motrices y juego modificado','Plan de entrenamiento personal','Vida activa y bienestar comunitario','Estilo de vida saludable y entorno social']
+      },
+      oas: {
+        '3M': [
+          { codigo: 'OA1', eje: 'Habilidades motrices', descripcion: 'Aplicar individual y colectivamente las habilidades motrices especializadas de manera creativa y segura, en una variedad de actividades físicas que sean de sus intereses y en diferentes entornos.' },
+          { codigo: 'OA2', eje: 'Habilidades motrices', descripcion: 'Evaluar el impacto de las estrategias y tácticas individuales y colectivas utilizadas para la resolución de problemas en el juego, el deporte y la recreación, asumiendo distintos roles y tareas.' },
+          { codigo: 'OA3', eje: 'Vida activa y saludable', descripcion: 'Diseñar y aplicar un plan de entrenamiento para mejorar su rendimiento físico considerando sus características personales y funcionales.' },
+          { codigo: 'OA4', eje: 'Responsabilidad personal y social', descripcion: 'Promover el bienestar, el autocuidado, la vida activa y la alimentación saludable en su comunidad, valorando la diversidad de las personas a través de la aplicación de programas y proyectos deportivos, recreativos y socioculturales.' },
+          { codigo: 'OA5', eje: 'Responsabilidad personal y social', descripcion: 'Analizar cómo los factores sociales, culturales, económicos y tecnológicos favorecen el desarrollo de oportunidades para la adquisición de un estilo de vida activo saludable a nivel local, regional y global.' }
+        ],
+        '4M': [
+          { codigo: 'OA1', eje: 'Habilidades motrices', descripcion: 'Aplicar individual y colectivamente las habilidades motrices especializadas de manera creativa y segura, en una variedad de actividades físicas que sean de sus intereses y en diferentes entornos.' },
+          { codigo: 'OA2', eje: 'Habilidades motrices', descripcion: 'Evaluar el impacto de las estrategias y tácticas individuales y colectivas utilizadas para la resolución de problemas en el juego, el deporte y la recreación, asumiendo distintos roles y tareas.' },
+          { codigo: 'OA3', eje: 'Vida activa y saludable', descripcion: 'Diseñar y aplicar un plan de entrenamiento para mejorar su rendimiento físico considerando sus características personales y funcionales.' },
+          { codigo: 'OA4', eje: 'Responsabilidad personal y social', descripcion: 'Promover el bienestar, el autocuidado, la vida activa y la alimentación saludable en su comunidad, valorando la diversidad de las personas a través de la aplicación de programas y proyectos deportivos, recreativos y socioculturales.' },
+          { codigo: 'OA5', eje: 'Responsabilidad personal y social', descripcion: 'Analizar cómo los factores sociales, culturales, económicos y tecnológicos favorecen el desarrollo de oportunidades para la adquisición de un estilo de vida activo saludable a nivel local, regional y global.' }
+        ]
+      }
+    },
+    'educacion-fisica-y-salud-2': {
+      nombre:  'Educación Física y Salud (Programa 2)',
+      sigla:   'EFS2',
+      tramo:   'media',
+      niveles: ['3M', '4M'],
+      unidades: {
+        '3M': ['Evaluación de habilidades motrices','Estrategias y juego inteligente','Plan de entrenamiento responsable','Programas y proyectos comunitarios'],
+        '4M': ['Evaluación de habilidades motrices','Estrategias y juego inteligente','Plan de entrenamiento responsable','Programas y proyectos comunitarios']
+      },
+      oas: {
+        '3M': [
+          { codigo: 'OA1', eje: 'Habilidades motrices', descripcion: 'Evaluar individual y colectivamente las habilidades motrices especializadas utilizadas en una variedad de actividades físicas que sean de su interés y en diferentes entornos.' },
+          { codigo: 'OA2', eje: 'Habilidades motrices', descripcion: 'Organizar y aplicar individual y colectivamente estrategias y tácticas para desarrollar un juego inteligente, asumiendo distintos roles y tareas.' },
+          { codigo: 'OA3', eje: 'Vida activa y saludable', descripcion: 'Aplicar responsablemente un plan de entrenamiento para mejorar su rendimiento físico considerando sus características personales y funcionales.' },
+          { codigo: 'OA4', eje: 'Responsabilidad personal y social', descripcion: 'Evaluar el impacto de variados programas y proyectos deportivos, recreativos y socioculturales que promuevan de manera colectiva el bienestar, el autocuidado, la vida activa y la alimentación saludable en su comunidad, considerando la diversidad de las personas.' },
+          { codigo: 'OA5', eje: 'Responsabilidad personal y social', descripcion: 'Evaluar por medio de la práctica regular de actividad física cómo los factores sociales, culturales, económicos y tecnológicos favorecen el desarrollo de oportunidades para la adquisición de un estilo de vida activo saludable a nivel local, regional y global.' }
+        ],
+        '4M': [
+          { codigo: 'OA1', eje: 'Habilidades motrices', descripcion: 'Evaluar individual y colectivamente las habilidades motrices especializadas utilizadas en una variedad de actividades físicas que sean de su interés y en diferentes entornos.' },
+          { codigo: 'OA2', eje: 'Habilidades motrices', descripcion: 'Organizar y aplicar individual y colectivamente estrategias y tácticas para desarrollar un juego inteligente, asumiendo distintos roles y tareas.' },
+          { codigo: 'OA3', eje: 'Vida activa y saludable', descripcion: 'Aplicar responsablemente un plan de entrenamiento para mejorar su rendimiento físico considerando sus características personales y funcionales.' },
+          { codigo: 'OA4', eje: 'Responsabilidad personal y social', descripcion: 'Evaluar el impacto de variados programas y proyectos deportivos, recreativos y socioculturales que promuevan de manera colectiva el bienestar, el autocuidado, la vida activa y la alimentación saludable en su comunidad, considerando la diversidad de las personas.' },
+          { codigo: 'OA5', eje: 'Responsabilidad personal y social', descripcion: 'Evaluar por medio de la práctica regular de actividad física cómo los factores sociales, culturales, económicos y tecnológicos favorecen el desarrollo de oportunidades para la adquisición de un estilo de vida activo saludable a nivel local, regional y global.' }
+        ]
+      }
+    }
+  }
 };
 

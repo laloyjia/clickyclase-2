@@ -81,10 +81,40 @@ CURRICULA_PLAN_COMUN['artes'] = {
       {codigo:'OA4', eje:'Apreciar y responder frente al arte', descripcion:'Describir sus observaciones de obras de arte y objetos, usando elementos del lenguaje visual y expresando lo que sienten y piensan. (Observar anualmente al menos 15 obras de arte y artesanía local y chilena, 15 de arte latinoamericano y 15 de arte universal).'},
       {codigo:'OA5', eje:'Apreciar y responder frente al arte', descripcion:'Describir fortalezas y aspectos a mejorar en el trabajo de arte personal y de sus pares, aplicando criterios de uso de materiales, procedimientos técnicos y propósito expresivo.'}
     ],
-    '5B': [ /* TODO: subir Programa de Estudio AV 5° básico */ ],
-    '6B': [ /* TODO: subir Programa de Estudio AV 6° básico */ ],
-    '7B': [ /* TODO: subir Programa de Estudio AV 7° básico */ ],
-    '8B': [ /* TODO: subir Programa de Estudio AV 8° básico */ ],
+    // ── 5°B — Programa de Estudio (DS 2960/2012) ─ 5 OAs ─────────────────
+    '5B': [
+      {codigo:'OA1', eje:'Expresar y crear visualmente', descripcion:'Crear trabajos de arte y diseños a partir de sus propias ideas y de la observación del: entorno cultural (Chile, su paisaje y sus costumbres en el pasado y en el presente); entorno artístico (impresionismo y postimpresionismo; y diseño en Chile, Latinoamérica y del resto del mundo).'},
+      {codigo:'OA2', eje:'Expresar y crear visualmente', descripcion:'Aplicar y combinar elementos del lenguaje visual (incluidos los de niveles anteriores) en trabajos de arte y diseños con diferentes propósitos expresivos y creativos: color (complementario); formas (abiertas y cerradas); luz y sombra.'},
+      {codigo:'OA3', eje:'Expresar y crear visualmente', descripcion:'Crear trabajos de arte y diseños a partir de diferentes desafíos y temas del entorno cultural y artístico, demostrando dominio en el uso de: materiales de modelado, de reciclaje, naturales, papeles, cartones, pegamentos, lápices, pinturas, textiles e imágenes digitales; herramientas para dibujar, pintar, cortar, unir, modelar y tecnológicas (brocha, sierra de calar, esteca, cámara de video y proyector multimedia, entre otros); procedimientos de pintura, escultura, construcción, fotografía, video, diseño gráfico digital, entre otros.'},
+      {codigo:'OA4', eje:'Apreciar y responder frente al arte', descripcion:'Analizar e interpretar obras de arte y diseño en relación con la aplicación del lenguaje visual, contextos, materiales, estilos u otros. (Observar anualmente al menos 50 obras de arte y diseño chileno, latinoamericano y universal).'},
+      {codigo:'OA5', eje:'Apreciar y responder frente al arte', descripcion:'Describir y comparar trabajos de arte y diseños personales y de sus pares, considerando: fortalezas y aspectos a mejorar; uso de materiales y procedimientos; aplicación de elementos del lenguaje visual; propósitos expresivos.'}
+    ],
+    // ── 6°B — Programa de Estudio (DS 2960/2012) ─ 5 OAs ─────────────────
+    '6B': [
+      {codigo:'OA1', eje:'Expresar y crear visualmente', descripcion:'Crear trabajos de arte y diseños a partir de sus propias ideas y de la observación del: entorno cultural (el hombre contemporáneo y la ciudad); entorno artístico (el arte contemporáneo y el arte en el espacio público: murales y esculturas).'},
+      {codigo:'OA2', eje:'Expresar y crear visualmente', descripcion:'Aplicar y combinar elementos del lenguaje visual (incluidos los de niveles anteriores) en trabajos de arte y diseños con diferentes propósitos expresivos y creativos: color (gamas y contrastes); volumen (lleno y vacío).'},
+      {codigo:'OA3', eje:'Expresar y crear visualmente', descripcion:'Crear trabajos de arte y diseños a partir de diferentes desafíos y temas del entorno cultural y artístico, demostrando dominio en el uso de: materiales de modelado, de reciclaje, naturales, papeles, cartones, pegamentos, lápices, pinturas e imágenes digitales; herramientas para dibujar, pintar, cortar, unir, modelar y tecnológicas (rodillos de grabado, sierra de calar, mirete, cámara de video y proyector multimedia, entre otros); procedimientos de pintura, grabado, escultura, instalación, técnicas mixtas, arte digital, fotografía, video, murales, entre otros.'},
+      {codigo:'OA4', eje:'Apreciar y responder frente al arte', descripcion:'Analizar e interpretar obras de arte y objetos en relación con la aplicación del lenguaje visual, contextos, materiales, estilos u otros. (Observar anualmente al menos 50 obras de arte chileno, latinoamericano y universal).'},
+      {codigo:'OA5', eje:'Apreciar y responder frente al arte', descripcion:'Evaluar críticamente trabajos de arte y diseños personales y de sus pares, considerando: expresión de emociones y problemáticas sociales; uso de materiales y procedimientos; aplicación de elementos del lenguaje visual; propósitos expresivos.'}
+    ],
+    // ── 7°B — Programa de Estudio (DS 369/2015) ─ 6 OAs ─────────────────
+    '7B': [
+      {codigo:'OA1', eje:'Expresar y crear visualmente', descripcion:'Crear trabajos visuales basados en las percepciones, sentimientos e ideas generadas a partir de la observación de manifestaciones estéticas referidas a diversidad cultural, género e íconos sociales, patrimoniales y contemporáneas.'},
+      {codigo:'OA2', eje:'Expresar y crear visualmente', descripcion:'Crear trabajos visuales a partir de intereses personales, experimentando con materiales sustentables en dibujo, pintura y escultura.'},
+      {codigo:'OA3', eje:'Expresar y crear visualmente', descripcion:'Crear trabajos visuales a partir de la imaginación, experimentando con medios digitales de expresión contemporáneos como fotografía y edición de imágenes.'},
+      {codigo:'OA4', eje:'Apreciar y responder frente al arte', descripcion:'Interpretar manifestaciones visuales patrimoniales y contemporáneas, atendiendo a criterios como características del medio de expresión, materialidad y lenguaje visual.'},
+      {codigo:'OA5', eje:'Apreciar y responder frente al arte', descripcion:'Interpretar relaciones entre propósito expresivo del trabajo artístico personal y de sus pares, y la utilización del lenguaje visual.'},
+      {codigo:'OA6', eje:'Difundir y comunicar', descripcion:'Caracterizar y apreciar espacios de difusión de las artes visuales contemplando medios de expresión presentes, espacio, montaje y público, entre otros.'}
+    ],
+    // ── 8°B — Programa de Estudio (DS 369/2015) ─ 6 OAs ─────────────────
+    '8B': [
+      {codigo:'OA1', eje:'Expresar y crear visualmente', descripcion:'Crear trabajos visuales basados en la apreciación y el análisis de manifestaciones estéticas referidas a la relación entre personas, naturaleza y medioambiente, en diferentes contextos.'},
+      {codigo:'OA2', eje:'Expresar y crear visualmente', descripcion:'Crear trabajos visuales a partir de diferentes desafíos creativos, experimentando con materiales sustentables en técnicas de impresión, papeles y textiles.'},
+      {codigo:'OA3', eje:'Expresar y crear visualmente', descripcion:'Crear trabajos visuales a partir de diferentes desafíos creativos, usando medios de expresión contemporáneos como la instalación.'},
+      {codigo:'OA4', eje:'Apreciar y responder frente al arte', descripcion:'Analizar manifestaciones visuales patrimoniales y contemporáneas, contemplando criterios como: contexto, materialidad, lenguaje visual y propósito expresivo.'},
+      {codigo:'OA5', eje:'Apreciar y responder frente al arte', descripcion:'Evaluar trabajos visuales personales y de sus pares, considerando criterios como: materialidad, lenguaje visual y propósito expresivo.'},
+      {codigo:'OA6', eje:'Difundir y comunicar', descripcion:'Comparar y valorar espacios de difusión de las artes visuales, considerando: medios de expresión presentes, espacio, montaje, público y aporte a la comunidad.'}
+    ],
     '1M': [
       {codigo:'OA1', eje:'Expresar y crear visualmente', descripcion:'Crear proyectos visuales con diversos propósitos, basados en la apreciación y reflexión acerca de la arquitectura, los espacios y el diseño urbano, en diferentes medios y contextos.'},
       {codigo:'OA2', eje:'Expresar y crear visualmente', descripcion:'Crear trabajos y proyectos visuales basados en sus imaginarios personales, investigando el manejo de materiales sustentables en procedimientos de grabado y pintura mural.'},
