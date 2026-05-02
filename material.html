@@ -956,11 +956,6 @@
                     <h3>Apunte de Clase</h3>
                     <p>Resumen teórico con conceptos clave y ejemplos</p>
                 </div>
-                <div class="tipo-doc-card" onclick="seleccionarTipo(this, 'evaluacion')" data-tipo="evaluacion">
-                    <div class="icon">&#9997;</div>
-                    <h3>Guía de Ejercicios</h3>
-                    <p>Ejercicios y problemas con espacio para responder</p>
-                </div>
                 <div class="tipo-doc-card" onclick="seleccionarTipo(this, 'prueba')" data-tipo="prueba">
                     <div class="icon">&#128221;</div>
                     <h3>Prueba Formal</h3>
@@ -970,6 +965,11 @@
                     <div class="icon">&#9200;</div>
                     <h3>Control Rápido</h3>
                     <p>Quiz de 10–15 min para evaluación formativa de la clase</p>
+                </div>
+                <div class="tipo-doc-card" onclick="seleccionarTipo(this, 'diferenciada')" data-tipo="diferenciada">
+                    <div class="icon">&#9856;</div>
+                    <h3>Evaluación Diferenciada</h3>
+                    <p>Adaptación PIE para estudiantes con NEE — Decretos 83 y 67 Mineduc</p>
                 </div>
             </div>
         </div>
@@ -1245,6 +1245,50 @@
                         placeholder="Una pregunta o ejercicio por línea (o separados por una línea en blanco). Ejemplo:&#10;&#10;1. Calcula la resistencia equivalente de R1=220Ω y R2=330Ω en paralelo.&#10;2. Dibuja el circuito equivalente del problema 1 e indica la corriente total si V=12V.&#10;3. Justifica por qué un cortocircuito en una rama paralela hace caer la tensión en las demás."></textarea>
                 </div>
             </div>
+
+            <!-- ── Bloque D: Datos PIE para Evaluación Diferenciada ── -->
+            <div class="cfg-bloque" id="cfgPIE" style="display:none">
+                <div class="cfg-bloque-titulo">Datos PIE — Evaluación Diferenciada (Decretos 83 y 67 Mineduc)</div>
+                <p class="cfg-hint">Indica el diagnóstico del estudiante y el tipo de adecuación que se aplicará. La IA generará un instrumento adaptado siguiendo el rol de Educador Diferencial / Coordinador PIE.</p>
+                <div class="campo">
+                    <label>Diagnóstico NEE del estudiante</label>
+                    <select id="pieDiagnostico" style="width:100%;padding:10px;border-radius:8px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.15);color:#e5e7eb;">
+                        <option value="">— Seleccionar diagnóstico —</option>
+                        <option value="TDAH">TDAH (Trastorno por Déficit de Atención e Hiperactividad)</option>
+                        <option value="TEA">TEA (Trastorno del Espectro Autista)</option>
+                        <option value="Dislexia">Dislexia / Trastorno específico del aprendizaje de la lectura</option>
+                        <option value="Discalculia">Discalculia / Trastorno específico del aprendizaje del cálculo</option>
+                        <option value="Disgrafía">Disgrafía / Trastorno específico de la escritura</option>
+                        <option value="Discapacidad Intelectual Leve">Discapacidad Intelectual Leve</option>
+                        <option value="Discapacidad Intelectual Moderada">Discapacidad Intelectual Moderada</option>
+                        <option value="TEL">TEL (Trastorno Específico del Lenguaje)</option>
+                        <option value="Funcionamiento Intelectual Limítrofe">Funcionamiento Intelectual Limítrofe</option>
+                        <option value="Trastorno Emocional / Ansiedad">Trastorno Emocional / Ansiedad</option>
+                        <option value="Discapacidad Auditiva">Discapacidad Auditiva</option>
+                        <option value="Discapacidad Visual">Discapacidad Visual</option>
+                        <option value="Discapacidad Motora">Discapacidad Motora</option>
+                        <option value="Otro">Otro (especifica en observaciones)</option>
+                    </select>
+                </div>
+                <div class="campo">
+                    <label>Tipo de adecuación</label>
+                    <div style="display:flex;gap:14px;flex-wrap:wrap;margin-top:6px;">
+                        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+                            <input type="radio" name="pieAdecuacion" value="acceso" checked>
+                            <span>Solo de Acceso (mantiene dificultad cognitiva, adapta formato)</span>
+                        </label>
+                        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+                            <input type="radio" name="pieAdecuacion" value="significativa">
+                            <span>Significativa / PACI (Plan de Adecuación Curricular Individual)</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="campo">
+                    <label>Observaciones adicionales del estudiante (opcional)</label>
+                    <textarea id="pieObservaciones" rows="3"
+                        placeholder="Ej: Requiere apoyo visual con pictogramas. Trabaja mejor con instrucciones cortas. Tiempo extra recomendado: 30%."></textarea>
+                </div>
+            </div>
         </div>
 
         <!-- BOTONES DE GENERACIÓN -->
@@ -1463,10 +1507,13 @@
         tipoDocSeleccionado = tipo;
         var cfgEval = document.getElementById('cfgEval');
         var cfgRefs = document.getElementById('cfgRefs');
-        var esEval  = (tipo === 'evaluacion' || tipo === 'prueba' || tipo === 'control');
+        var cfgPIE  = document.getElementById('cfgPIE');
+        var esEval  = (tipo === 'prueba' || tipo === 'control' || tipo === 'diferenciada');
+        var esPIE   = (tipo === 'diferenciada');
         if (cfgEval) cfgEval.style.display = esEval ? '' : 'none';
         if (cfgRefs) cfgRefs.style.display = esEval ? '' : 'none';
-        // Para 'prueba': el tope son 40. Para evaluacion/control: 40 también, igual.
+        if (cfgPIE)  cfgPIE.style.display  = esPIE  ? '' : 'none';
+        // Para 'prueba'/'control'/'diferenciada': el tope son 40.
         var cantInput = document.getElementById('inputCantPreg');
         if (cantInput) {
             cantInput.max = 40;
@@ -2061,9 +2108,13 @@
             var evalOpts = getEvalOpciones();
             if (tipoDocSeleccionado === 'guia') html = generarGuiaAprendizaje(modFake, aeFake, 1, oasReg[0].codigo, cursoTexto, cont, [], dificultad, profesor, valoresArr);
             else if (tipoDocSeleccionado === 'apunte') html = generarApunteClase(modFake, aeFake, 1, oasReg[0].codigo, cursoTexto, cont, [], dificultad, profesor, valoresArr);
-            else if (tipoDocSeleccionado === 'evaluacion') html = generarGuiaEjercicios(modFake, aeFake, 1, oasReg[0].codigo, cursoTexto, cont, [], dificultad, profesor, valoresArr, evalOpts);
             else if (tipoDocSeleccionado === 'prueba') html = generarPrueba(modFake, aeFake, 1, oasReg[0].codigo, cursoTexto, cont, [], dificultad, profesor, valoresArr, evalOpts);
             else if (tipoDocSeleccionado === 'control') html = generarControl(modFake, aeFake, 1, oasReg[0].codigo, cursoTexto, cont, [], dificultad, profesor, valoresArr, evalOpts);
+            // Evaluación Diferenciada (NEE/PIE) solo se genera por IA — no tiene fallback HTML local.
+            else if (tipoDocSeleccionado === 'diferenciada') {
+                showToast('La Evaluación Diferenciada requiere IA. Usa el botón "Crear con IA" más abajo.', 'warn');
+                return;
+            }
             document.getElementById('docPreview').innerHTML = html;
             document.getElementById('docGenerado').classList.add('visible');
             document.getElementById('docGenerado').scrollIntoView({ behavior: 'smooth' });
@@ -2117,12 +2168,13 @@
             html = generarGuiaAprendizaje(mod, ae, aeNum, oaId, cursoTexto, cont, cesTexto, dificultad, profesor, valoresArr);
         } else if (tipoDocSeleccionado === 'apunte') {
             html = generarApunteClase(mod, ae, aeNum, oaId, cursoTexto, cont, cesTexto, dificultad, profesor, valoresArr);
-        } else if (tipoDocSeleccionado === 'evaluacion') {
-            html = generarGuiaEjercicios(mod, ae, aeNum, oaId, cursoTexto, cont, cesTexto, dificultad, profesor, valoresArr, evalOpts);
         } else if (tipoDocSeleccionado === 'prueba') {
             html = generarPrueba(mod, ae, aeNum, oaId, cursoTexto, cont, cesTexto, dificultad, profesor, valoresArr, evalOpts);
         } else if (tipoDocSeleccionado === 'control') {
             html = generarControl(mod, ae, aeNum, oaId, cursoTexto, cont, cesTexto, dificultad, profesor, valoresArr, evalOpts);
+        } else if (tipoDocSeleccionado === 'diferenciada') {
+            showToast('La Evaluación Diferenciada requiere IA. Usa el botón "Crear con IA" más abajo.', 'warn');
+            return;
         }
 
         document.getElementById('docPreview').innerHTML = html;
@@ -3548,6 +3600,95 @@
     }
 
     /**
+     * Prompt para Evaluación Diferenciada (NEE / PIE).
+     *
+     * Basado en el prompt entregado por Eduardo, alineado a los Decretos 83
+     * y 67 del MINEDUC Chile. La IA actúa como Educador Diferencial / Coordinador
+     * PIE y adapta un instrumento sumativo tradicional para un estudiante con
+     * NEE, aplicando adecuaciones de acceso o significativas según corresponda.
+     */
+    function _promptDiferenciada(ctx) {
+        var diag = ctx.pieDiagnostico || 'No especificado';
+        var ade  = ctx.pieAdecuacion  || 'acceso';
+        var obs  = ctx.pieObservaciones || '';
+        var adeNombre = (ade === 'significativa')
+            ? 'Adecuación Significativa / PACI (puede ajustar la dificultad cognitiva del OA según el Plan de Adecuación Curricular Individual)'
+            : 'Solo de Acceso (NO bajes la dificultad cognitiva, solo adapta el formato y la mediación)';
+
+        var refsLiteral = '';
+        if (ctx.materialReferencia && ctx.materialReferencia.trim().length > 5) {
+            refsLiteral = '\nMATERIAL DE REFERENCIA aportado por el docente (úsalo como base para adaptar las preguntas, manteniendo el rigor técnico pero aplicando las reglas PIE):\n"""\n' + ctx.materialReferencia.trim() + '\n"""\n';
+        }
+
+        return 'Actúa como un Educador Diferencial experto, Coordinador PIE y evaluador alineado a los Decretos 83 y 67 del MINEDUC Chile. ' +
+        'Tu tarea es adaptar un instrumento de evaluación sumativa tradicional para un estudiante con Necesidades Educativas Especiales (NEE), aplicando adecuaciones de acceso o de objetivos según corresponda.\n\n' +
+
+        'INSTITUCIÓN: ' + ctx.nombreInst + '\n' +
+        'PROFESOR: ' + (ctx.profesor || 'Docente del curso') + '\n\n' +
+
+        '═══════════════════════════════════════════════\n' +
+        'DATOS DE LA EVALUACIÓN ORIGINAL\n' +
+        '═══════════════════════════════════════════════\n' +
+        '• Asignatura: ' + ctx.modNombre + '\n' +
+        '• Nivel: ' + ctx.cursoTexto + '\n' +
+        '• Objetivo(s) de Aprendizaje (OA):\n' + ctx.oaTexto + '\n' +
+        '• Tema Específico: ' + ctx.contenido + '\n' +
+        '• Dificultad de la prueba original: ' + ctx.difTexto + '\n' +
+        (ctx.valoresStr ? '• Valores institucionales transversales: ' + ctx.valoresStr + '\n' : '') +
+        refsLiteral +
+
+        '\n═══════════════════════════════════════════════\n' +
+        'DATOS DEL ESTUDIANTE (DIAGNÓSTICO PIE)\n' +
+        '═══════════════════════════════════════════════\n' +
+        '• Diagnóstico NEE: ' + diag + '\n' +
+        '• Tipo de Adecuación: ' + adeNombre + '\n' +
+        (obs ? '• Observaciones adicionales del estudiante:\n  ' + obs + '\n' : '') +
+
+        '\n═══════════════════════════════════════════════\n' +
+        'ESTRUCTURA Y REGLAS PARA LA CREACIÓN DEL INSTRUMENTO DIFERENCIADO\n' +
+        '═══════════════════════════════════════════════\n\n' +
+
+        '1) ORIENTACIONES PIE (Para el docente):\n' +
+        'Redacta un breve párrafo (3–5 líneas) indicando qué estrategias específicas se utilizaron en esta prueba para atender al diagnóstico ' + diag + ' (por ejemplo: apoyo visual, segmentación de instrucciones, reducción de distractores, banco de palabras, iniciadores de oración, andamiaje, tiempos extendidos, etc.). Esta sección va al INICIO del documento, claramente diferenciada.\n\n' +
+
+        '2) EL INSTRUMENTO ADAPTADO (Para el estudiante):\n' +
+        'Adapta la prueba utilizando lenguaje directo, instrucciones parceladas (paso a paso) y destacando en <strong>negrita</strong> las palabras clave de instrucción (ej: <strong>subraya</strong>, <strong>marca</strong>, <strong>explica</strong>). Genera EXACTAMENTE los siguientes 6 ítems adaptados:\n\n' +
+
+        '   • ÍTEM I — Selección Múltiple Adaptada: 5 preguntas.\n' +
+        '     Regla PIE: Reduce a SOLO 3 alternativas (A, B, C). Elimina cualquier distractor capcioso, dobles negaciones (\'cuál NO es incorrecta\') y mantén oraciones cortas.\n\n' +
+
+        '   • ÍTEM II — Verdadero o Falso Amigable: 4 afirmaciones claras y literales (sin sarcasmos ni lenguaje figurado).\n' +
+        '     Regla PIE: NO exijas justificación de las falsas, o bien, pide que justifiquen solo 1 eligiéndola ellos mismos.\n\n' +
+
+        '   • ÍTEM III — Completar con Apoyo Visual: párrafo breve con 4 espacios en blanco.\n' +
+        '     Regla PIE: Incluye un recuadro o "banco de palabras" ARRIBA del texto con las opciones para que el estudiante las visualice y seleccione. Renderiza el banco como una tabla o caja claramente delimitada.\n\n' +
+
+        '   • ÍTEM IV — Términos Pareados Reducidos: 2 columnas, MÁXIMO 4 conceptos.\n' +
+        '     Regla PIE: Usa descripciones directas. ' + (diag === 'TEA' || diag === 'Dislexia' ? 'IMPORTANTE — diagnóstico ' + diag + ': sugiere EXPLÍCITAMENTE en la instrucción que unan con líneas de diferentes colores.' : 'Si el estudiante tuviera además TEA o Dislexia, sugiere unir con líneas de colores.') + '\n\n' +
+
+        '   • ÍTEM V — Aplicación o Análisis Guiado: plantea un caso o problema.\n' +
+        '     Regla PIE: SEGMENTA el problema. En lugar de hacer una sola pregunta compleja, divídela en 3 pasos simples y consecutivos. Ejemplo:\n' +
+        '       Paso 1: Identifica los datos.\n' +
+        '       Paso 2: ¿Qué fórmula/concepto usas?\n' +
+        '       Paso 3: Resuelve.\n\n' +
+
+        '   • ÍTEM VI — Desarrollo con Andamiaje: 1 pregunta de desarrollo.\n' +
+        '     Regla PIE: Incluye "iniciadores de oraciones" (ej: "Yo creo que la causa principal fue _________ porque…"). ' + (ade === 'significativa' ? 'Como esta es Adecuación Significativa, PERMITE EXPLÍCITAMENTE que el alumno responda mediante un dibujo o esquema simple si lo prefiere.' : 'Mantén la exigencia conceptual del OA original (Adecuación de Acceso).') + '\n\n' +
+
+        '3) PAUTA DE CORRECCIÓN DIFERENCIADA (al final del documento, en una sección "Para el docente / PIE"):\n' +
+        '   • Entrega las RESPUESTAS EXACTAS para los ítems I a V.\n' +
+        '   • Para el ítem VI (desarrollo), entrega una RÚBRICA flexible que valore el esfuerzo y la comprensión del concepto central por sobre la ortografía o redacción, a menos que la ortografía sea el objetivo específico evaluado. La rúbrica debe tener al menos 3 niveles (Logrado / Medianamente logrado / Por lograr) con criterios observables.\n\n' +
+
+        _promptReglasComunes() +
+        '\nGenera ahora SOLO el cuerpo HTML del documento siguiendo EXACTAMENTE esta estructura: ' +
+        '(1) Encabezado institucional con título "EVALUACIÓN DIFERENCIADA"; ' +
+        '(2) Sección "Orientaciones PIE para el docente"; ' +
+        '(3) Sección "Instrumento adaptado para el estudiante" con los 6 ítems numerados I a VI según las reglas PIE indicadas; ' +
+        '(4) Sección "Pauta de corrección diferenciada (uso del docente / PIE)" con respuestas exactas y rúbrica del ítem VI. ' +
+        'NO incluyas Tabla de Especificaciones tipo prueba sumativa estándar (ese instrumento no aplica para evaluaciones diferenciadas).';
+    }
+
+    /**
      * Prompt genérico (fallback) para tipos aún no rediseñados.
      * Mantiene el comportamiento previo.
      */
@@ -3587,10 +3728,11 @@
      * Dispatcher: devuelve el prompt apropiado para el tipo de documento.
      */
     function _buildPromptPorTipo(tipo, ctx) {
-        if (tipo === 'guia')   return _promptGuia(ctx);
-        if (tipo === 'apunte') return _promptApunte(ctx);
-        if (tipo === 'prueba') return _promptPrueba(ctx);
-        // TODO: evaluacion, control — Eduardo entregará cada prompt.
+        if (tipo === 'guia')         return _promptGuia(ctx);
+        if (tipo === 'apunte')       return _promptApunte(ctx);
+        if (tipo === 'prueba')       return _promptPrueba(ctx);
+        if (tipo === 'diferenciada') return _promptDiferenciada(ctx);
+        // 'control' y otros tipos usan el prompt genérico (decisión Eduardo).
         return _promptGenerico(ctx);
     }
 
@@ -3657,9 +3799,9 @@
         var tipoNombre = {
             guia: 'Gu\u00eda de Aprendizaje',
             apunte: 'Apunte de Clase',
-            evaluacion: 'Gu\u00eda de Ejercicios',
             prueba: 'Prueba Formal Sumativa',
-            control: 'Control R\u00e1pido Formativo'
+            control: 'Control R\u00e1pido Formativo',
+            diferenciada: 'Evaluaci\u00f3n Diferenciada (PIE)'
         }[tipoDocSeleccionado] || tipoDocSeleccionado;
 
         var difTexto = { basico:'b\u00e1sico (primer acercamiento al tema, lenguaje simple)', intermedio:'intermedio (aplicaci\u00f3n pr\u00e1ctica, lenguaje t\u00e9cnico moderado)', avanzado:'avanzado (an\u00e1lisis cr\u00edtico, resoluci\u00f3n de problemas complejos)' }[dificultad] || dificultad;
@@ -3670,6 +3812,24 @@
         var materialReferencia = '';
         var refEl = document.getElementById('materialReferencia');
         if (refEl) materialReferencia = (refEl.value || '').trim();
+
+        // Datos PIE (solo aplican cuando tipoDocSeleccionado === 'diferenciada')
+        var pieDiagnostico   = '';
+        var pieAdecuacion    = 'acceso';
+        var pieObservaciones = '';
+        if (tipoDocSeleccionado === 'diferenciada') {
+            var diagEl = document.getElementById('pieDiagnostico');
+            pieDiagnostico = diagEl ? (diagEl.value || '').trim() : '';
+            var adeRadio = document.querySelector('input[name="pieAdecuacion"]:checked');
+            pieAdecuacion = adeRadio ? adeRadio.value : 'acceso';
+            var obsEl = document.getElementById('pieObservaciones');
+            pieObservaciones = obsEl ? (obsEl.value || '').trim() : '';
+            if (!pieDiagnostico) {
+                setIAStatus('error', '&#10007; Para Evaluación Diferenciada debes seleccionar el diagnóstico NEE del estudiante.');
+                document.getElementById('btnIA').disabled = false;
+                return;
+            }
+        }
 
         // Construir contexto único para los builders de prompt
         var ctxPrompt = {
@@ -3691,7 +3851,10 @@
             cantAlternativas: evalOpts.cantAlternativas || 4,
             materialReferencia: materialReferencia,
             valoresStr: (valoresArr && valoresArr.length) ? valoresArr.join(', ') : '',
-            valoresArr: valoresArr || []
+            valoresArr: valoresArr || [],
+            pieDiagnostico:   pieDiagnostico,
+            pieAdecuacion:    pieAdecuacion,
+            pieObservaciones: pieObservaciones
         };
 
         var prompt = _buildPromptPorTipo(tipoDocSeleccionado, ctxPrompt);
