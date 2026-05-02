@@ -956,6 +956,11 @@
                     <h3>Apunte de Clase</h3>
                     <p>Resumen teórico con conceptos clave y ejemplos</p>
                 </div>
+                <div class="tipo-doc-card" onclick="seleccionarTipo(this, 'evaluacion')" data-tipo="evaluacion">
+                    <div class="icon">&#9997;</div>
+                    <h3>Guía de Ejercicios</h3>
+                    <p>Práctica intensiva por niveles (40/40/20) con caja de herramientas y solucionario</p>
+                </div>
                 <div class="tipo-doc-card" onclick="seleccionarTipo(this, 'prueba')" data-tipo="prueba">
                     <div class="icon">&#128221;</div>
                     <h3>Prueba Formal</h3>
@@ -1246,6 +1251,39 @@
                 </div>
             </div>
 
+            <!-- ── Bloque E: Habilidad a ejercitar (solo Guía de Ejercicios) ── -->
+            <div class="cfg-bloque" id="cfgHabilidad" style="display:none">
+                <div class="cfg-bloque-titulo">Habilidad a ejercitar (opcional)</div>
+                <p class="cfg-hint">Define el verbo de habilidad que se entrenará en la guía. La IA estructurará los ejercicios por niveles (40% mecanización, 40% aplicación con variables, 20% desafío). Si lo dejas vacío, la IA inferirá la habilidad del OA seleccionado.</p>
+                <div class="campo">
+                    <label>Habilidad principal</label>
+                    <select id="ejHabilidad" style="width:100%;padding:10px;border-radius:8px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.15);color:#e5e7eb;">
+                        <option value="">— Inferir del OA seleccionado —</option>
+                        <option value="Calcular">Calcular (operaciones, ecuaciones, porcentajes)</option>
+                        <option value="Resolver">Resolver problemas / situaciones</option>
+                        <option value="Aplicar">Aplicar fórmulas / reglas / procedimientos</option>
+                        <option value="Analizar">Analizar (descomponer, comparar)</option>
+                        <option value="Clasificar">Clasificar / categorizar</option>
+                        <option value="Identificar">Identificar elementos / patrones</option>
+                        <option value="Redactar">Redactar / escribir textos</option>
+                        <option value="Conjugar">Conjugar verbos</option>
+                        <option value="Escribir correctamente">Escribir correctamente (ortografía / acentuación)</option>
+                        <option value="Interpretar">Interpretar (gráficos, mapas, textos)</option>
+                        <option value="Inferir">Inferir / deducir</option>
+                        <option value="Argumentar">Argumentar / justificar</option>
+                        <option value="Traducir">Traducir / convertir representaciones</option>
+                        <option value="Modelar">Modelar matemáticamente</option>
+                        <option value="Otro">Otro (especifica abajo)</option>
+                    </select>
+                </div>
+                <div class="campo">
+                    <label>Detalle de la habilidad u objetivo de la guía (opcional)</label>
+                    <input type="text" id="ejHabilidadDetalle"
+                        placeholder="Ej: Calcular resistencia equivalente en circuitos mixtos / Redactar párrafos con conectores causales / Conjugar verbos irregulares en pretérito indefinido"
+                        style="width:100%;padding:10px;border-radius:8px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.15);color:#e5e7eb;">
+                </div>
+            </div>
+
             <!-- ── Bloque D: Datos PIE para Evaluación Diferenciada ── -->
             <div class="cfg-bloque" id="cfgPIE" style="display:none">
                 <div class="cfg-bloque-titulo">Datos PIE — Evaluación Diferenciada (Decretos 83 y 67 Mineduc)</div>
@@ -1508,11 +1546,14 @@
         var cfgEval = document.getElementById('cfgEval');
         var cfgRefs = document.getElementById('cfgRefs');
         var cfgPIE  = document.getElementById('cfgPIE');
-        var esEval  = (tipo === 'prueba' || tipo === 'control' || tipo === 'diferenciada');
+        var cfgHab  = document.getElementById('cfgHabilidad');
+        var esEval  = (tipo === 'evaluacion' || tipo === 'prueba' || tipo === 'control' || tipo === 'diferenciada');
         var esPIE   = (tipo === 'diferenciada');
+        var esGEjer = (tipo === 'evaluacion');
         if (cfgEval) cfgEval.style.display = esEval ? '' : 'none';
         if (cfgRefs) cfgRefs.style.display = esEval ? '' : 'none';
         if (cfgPIE)  cfgPIE.style.display  = esPIE  ? '' : 'none';
+        if (cfgHab)  cfgHab.style.display  = esGEjer ? '' : 'none';
         // Para 'prueba'/'control'/'diferenciada': el tope son 40.
         var cantInput = document.getElementById('inputCantPreg');
         if (cantInput) {
@@ -2108,6 +2149,7 @@
             var evalOpts = getEvalOpciones();
             if (tipoDocSeleccionado === 'guia') html = generarGuiaAprendizaje(modFake, aeFake, 1, oasReg[0].codigo, cursoTexto, cont, [], dificultad, profesor, valoresArr);
             else if (tipoDocSeleccionado === 'apunte') html = generarApunteClase(modFake, aeFake, 1, oasReg[0].codigo, cursoTexto, cont, [], dificultad, profesor, valoresArr);
+            else if (tipoDocSeleccionado === 'evaluacion') html = generarGuiaEjercicios(modFake, aeFake, 1, oasReg[0].codigo, cursoTexto, cont, [], dificultad, profesor, valoresArr, evalOpts);
             else if (tipoDocSeleccionado === 'prueba') html = generarPrueba(modFake, aeFake, 1, oasReg[0].codigo, cursoTexto, cont, [], dificultad, profesor, valoresArr, evalOpts);
             else if (tipoDocSeleccionado === 'control') html = generarControl(modFake, aeFake, 1, oasReg[0].codigo, cursoTexto, cont, [], dificultad, profesor, valoresArr, evalOpts);
             // Evaluación Diferenciada (NEE/PIE) solo se genera por IA — no tiene fallback HTML local.
@@ -2168,6 +2210,8 @@
             html = generarGuiaAprendizaje(mod, ae, aeNum, oaId, cursoTexto, cont, cesTexto, dificultad, profesor, valoresArr);
         } else if (tipoDocSeleccionado === 'apunte') {
             html = generarApunteClase(mod, ae, aeNum, oaId, cursoTexto, cont, cesTexto, dificultad, profesor, valoresArr);
+        } else if (tipoDocSeleccionado === 'evaluacion') {
+            html = generarGuiaEjercicios(mod, ae, aeNum, oaId, cursoTexto, cont, cesTexto, dificultad, profesor, valoresArr, evalOpts);
         } else if (tipoDocSeleccionado === 'prueba') {
             html = generarPrueba(mod, ae, aeNum, oaId, cursoTexto, cont, cesTexto, dificultad, profesor, valoresArr, evalOpts);
         } else if (tipoDocSeleccionado === 'control') {
@@ -3600,6 +3644,87 @@
     }
 
     /**
+     * Prompt para Guía de Ejercicios (didáctica disciplinar por niveles).
+     *
+     * Basado en el prompt entregado por Eduardo: la IA actúa como Especialista
+     * en Didáctica Disciplinar y diseña una guía intensiva con 3 niveles de
+     * dificultad creciente (40% mecanización / 40% aplicación con variables /
+     * 20% desafío de síntesis), Caja de Herramientas breve y solucionario
+     * completo al final.
+     */
+    function _promptEvaluacion(ctx) {
+        var hab = (ctx.habilidad || '').trim();
+        var habDet = (ctx.habilidadDetalle || '').trim();
+        var habilidadStr = '';
+        if (hab && hab !== 'Otro') habilidadStr = hab;
+        if (habDet) habilidadStr = habilidadStr ? (habilidadStr + ' — ' + habDet) : habDet;
+        if (!habilidadStr) habilidadStr = 'A inferir del OA y del contenido (usa el verbo principal del Objetivo de Aprendizaje)';
+
+        var totalEj = ctx.cantPreg || 15;
+        // Distribución 40/40/20 con redondeos seguros (total exacto)
+        var nN1 = Math.round(totalEj * 0.40);
+        var nN3 = Math.max(2, Math.round(totalEj * 0.20));
+        var nN2 = totalEj - nN1 - nN3;
+        if (nN2 < 1) { nN2 = 1; nN1 = totalEj - nN2 - nN3; }
+
+        var refsLiteral = '';
+        if (ctx.materialReferencia && ctx.materialReferencia.trim().length > 5) {
+            refsLiteral = '\nEJERCICIOS LITERALES aportados por el docente que DEBEN incluirse tal cual (distribúyelos según su dificultad entre los 3 niveles, sin reescribirlos):\n"""\n' + ctx.materialReferencia.trim() + '\n"""\n';
+        }
+
+        return 'Actúa como un Especialista en Didáctica Disciplinar y diseñador de material práctico. ' +
+        'Tu tarea es construir una Guía de Ejercicios intensiva, estructurada por niveles de dificultad, diseñada para que los estudiantes logren maestría y fluidez en una habilidad específica.\n\n' +
+
+        'INSTITUCIÓN: ' + ctx.nombreInst + '\n' +
+        'PROFESOR: ' + (ctx.profesor || 'Docente del curso') + '\n\n' +
+
+        '═══════════════════════════════════════════════\n' +
+        'DATOS DE LA GUÍA\n' +
+        '═══════════════════════════════════════════════\n' +
+        '• Asignatura: ' + ctx.modNombre + '\n' +
+        '• Nivel: ' + ctx.cursoTexto + '\n' +
+        '• Contenido / Eje: ' + ctx.contenido + '\n' +
+        '• Habilidad a ejercitar: ' + habilidadStr + '\n' +
+        '• Cantidad total de ejercicios: ' + totalEj + ' (distribución obligatoria 40/40/20: Nivel 1 = ' + nN1 + ' · Nivel 2 = ' + nN2 + ' · Nivel 3 = ' + nN3 + ')\n' +
+        '• Dificultad general: ' + ctx.difTexto + '\n' +
+        '• Objetivo(s) de Aprendizaje (OA):\n' + ctx.oaTexto + '\n' +
+        (ctx.valoresStr ? '• Valores institucionales transversales: ' + ctx.valoresStr + '\n' : '') +
+        refsLiteral +
+
+        '\n═══════════════════════════════════════════════\n' +
+        'ESTRUCTURA OBLIGATORIA DE LA GUÍA (DIRIGIDA AL ESTUDIANTE)\n' +
+        '═══════════════════════════════════════════════\n' +
+        'NO incluyas grandes bloques de teoría. Ve directo a la práctica, con tono motivador.\n\n' +
+
+        '1) ENCABEZADO: espacio para Nombre, Fecha, Curso y el Objetivo de la guía (formulado con verbo en infinitivo, ej: "Objetivo: Ejercitar la resolución de…").\n\n' +
+
+        '2) LA CAJA DE HERRAMIENTAS (ayuda memoria): un recuadro MUY BREVE (2 a 3 líneas o viñetas) que contenga la regla principal, la fórmula clave, o los pasos del procedimiento que el estudiante debe recordar para no quedarse bloqueado mientras practica. Renderízalo como un bloque visualmente distintivo (caja con borde, fondo claro o destacado).\n\n' +
+
+        '3) NIVEL 1 — CALENTAMIENTO (Mecanización básica) — ' + nN1 + ' ejercicios:\n' +
+        '   Aplicación directa y sencilla de la regla/fórmula/procedimiento. Ejercicios predecibles, números enteros pequeños, sin trampas, para construir confianza y mecanizar el procedimiento. Cada ejercicio debe tener espacio para que el estudiante escriba su respuesta o desarrollo.\n\n' +
+
+        '4) NIVEL 2 — ENTRENAMIENTO (Aplicación con variables) — ' + nN2 + ' ejercicios:\n' +
+        '   Sube la dificultad. Incluye pequeñas "trampas", excepciones a la regla, números fraccionarios o decimales (si es matemática), conjugaciones irregulares (si es lengua), o situaciones donde el estudiante deba pensar un poco más antes de aplicar la regla. Cada ejercicio debe forzar una decisión consciente, no automática.\n\n' +
+
+        '5) NIVEL 3 — EL DESAFÍO (Resolución de problemas / Síntesis) — ' + nN3 + ' ejercicios:\n' +
+        '   Alta complejidad. Plantea problemas de planteo CONTEXTUALIZADOS en la vida real (con datos numéricos o textuales realistas), casos de análisis o ejercicios combinados donde el estudiante deba aplicar la habilidad de forma creativa o estratégica. Pueden requerir varios pasos o integrar conceptos.\n\n' +
+
+        '6) SOLUCIONARIO COMPLETO (exclusivo para el docente) al final del documento, en una sección claramente diferenciada y rotulada como "Solucionario — Uso del docente":\n' +
+        '   • Respuestas correctas de TODOS los ejercicios de los Niveles 1 y 2 (basta el resultado).\n' +
+        '   • Para los ejercicios del Nivel 3: incluye desarrollo breve o justificación de la respuesta (no solo el resultado), explicando los pasos clave o el razonamiento esperado.\n\n' +
+
+        _promptReglasComunes() +
+        '\nGenera ahora SOLO el cuerpo HTML de la Guía de Ejercicios siguiendo EXACTAMENTE esta estructura: ' +
+        '(1) Encabezado con datos del estudiante y objetivo; ' +
+        '(2) Caja de Herramientas; ' +
+        '(3) Nivel 1 con ' + nN1 + ' ejercicios numerados 1 a ' + nN1 + '; ' +
+        '(4) Nivel 2 con ' + nN2 + ' ejercicios numerados ' + (nN1 + 1) + ' a ' + (nN1 + nN2) + '; ' +
+        '(5) Nivel 3 con ' + nN3 + ' ejercicios contextualizados numerados ' + (nN1 + nN2 + 1) + ' a ' + totalEj + '; ' +
+        '(6) Solucionario completo. ' +
+        'Mantén el tono motivador, lenguaje directo, sin teoría extensa.';
+    }
+
+    /**
      * Prompt para Evaluación Diferenciada (NEE / PIE).
      *
      * Basado en el prompt entregado por Eduardo, alineado a los Decretos 83
@@ -3730,9 +3855,10 @@
     function _buildPromptPorTipo(tipo, ctx) {
         if (tipo === 'guia')         return _promptGuia(ctx);
         if (tipo === 'apunte')       return _promptApunte(ctx);
+        if (tipo === 'evaluacion')   return _promptEvaluacion(ctx);
         if (tipo === 'prueba')       return _promptPrueba(ctx);
         if (tipo === 'diferenciada') return _promptDiferenciada(ctx);
-        // 'control' y otros tipos usan el prompt genérico (decisión Eduardo).
+        // 'control' usa el prompt genérico (decisión Eduardo).
         return _promptGenerico(ctx);
     }
 
@@ -3799,6 +3925,7 @@
         var tipoNombre = {
             guia: 'Gu\u00eda de Aprendizaje',
             apunte: 'Apunte de Clase',
+            evaluacion: 'Gu\u00eda de Ejercicios',
             prueba: 'Prueba Formal Sumativa',
             control: 'Control R\u00e1pido Formativo',
             diferenciada: 'Evaluaci\u00f3n Diferenciada (PIE)'
@@ -3812,6 +3939,16 @@
         var materialReferencia = '';
         var refEl = document.getElementById('materialReferencia');
         if (refEl) materialReferencia = (refEl.value || '').trim();
+
+        // Habilidad a ejercitar (solo aplica cuando tipoDocSeleccionado === 'evaluacion')
+        var habilidad = '';
+        var habilidadDetalle = '';
+        if (tipoDocSeleccionado === 'evaluacion') {
+            var habEl = document.getElementById('ejHabilidad');
+            habilidad = habEl ? (habEl.value || '').trim() : '';
+            var habDetEl = document.getElementById('ejHabilidadDetalle');
+            habilidadDetalle = habDetEl ? (habDetEl.value || '').trim() : '';
+        }
 
         // Datos PIE (solo aplican cuando tipoDocSeleccionado === 'diferenciada')
         var pieDiagnostico   = '';
@@ -3852,6 +3989,8 @@
             materialReferencia: materialReferencia,
             valoresStr: (valoresArr && valoresArr.length) ? valoresArr.join(', ') : '',
             valoresArr: valoresArr || [],
+            habilidad:        habilidad,
+            habilidadDetalle: habilidadDetalle,
             pieDiagnostico:   pieDiagnostico,
             pieAdecuacion:    pieAdecuacion,
             pieObservaciones: pieObservaciones
