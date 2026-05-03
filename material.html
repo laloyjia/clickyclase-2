@@ -1106,6 +1106,90 @@
             accent-color: #f472b6;
         }
         .pie-link-card small { display:block; margin-top:6px; font-size:.78rem; color:#cbd5e1; }
+
+        /* Layout dual: Prueba Estándar | Prueba PIE adaptada */
+        .eval-dual {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+            margin-top: 16px;
+        }
+        .eval-dual.with-pie {
+            grid-template-columns: minmax(0,1fr) minmax(0,1fr);
+        }
+        .eval-col {
+            border-radius: 14px;
+            padding: 18px 18px 14px;
+            border: 1px solid rgba(148,163,184,.18);
+            background: rgba(255,255,255,.02);
+        }
+        .eval-col.eval-col-std {
+            border-color: rgba(124,58,237,.35);
+            background: linear-gradient(160deg, rgba(124,58,237,.06), rgba(34,211,238,.02));
+        }
+        .eval-col.eval-col-pie {
+            border-color: rgba(244,114,182,.4);
+            background: linear-gradient(160deg, rgba(244,114,182,.07), rgba(124,58,237,.04));
+        }
+        .eval-col-titulo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: .82rem;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            color: #cbd5e1;
+            font-weight: 600;
+            padding-bottom: 10px;
+            margin-bottom: 14px;
+            border-bottom: 1px dashed rgba(148,163,184,.22);
+        }
+        .eval-col-std .eval-col-titulo { color: #c4b5fd; }
+        .eval-col-pie .eval-col-titulo { color: #f0abc4; }
+        .eval-col-titulo .col-pill {
+            font-size: .68rem;
+            padding: 2px 8px;
+            border-radius: 10px;
+            background: rgba(255,255,255,.08);
+            border: 1px solid rgba(255,255,255,.15);
+            font-weight: 500;
+            text-transform: none;
+            letter-spacing: 0;
+        }
+        @media (max-width: 1100px) {
+            .eval-dual.with-pie { grid-template-columns: 1fr; }
+        }
+
+        /* Chips de diagnóstico NEE multi-select */
+        .pie-diag-chk {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            background: rgba(244,114,182,.05);
+            border: 1px solid rgba(244,114,182,.2);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: .85rem;
+            color: #f1d6e8;
+            transition: all .15s ease;
+            user-select: none;
+        }
+        .pie-diag-chk:hover {
+            background: rgba(244,114,182,.12);
+            border-color: rgba(244,114,182,.45);
+        }
+        .pie-diag-chk input[type=checkbox] {
+            accent-color: #f472b6;
+            width: 14px;
+            height: 14px;
+            margin: 0;
+        }
+        .pie-diag-chk:has(input:checked) {
+            background: linear-gradient(135deg, rgba(244,114,182,.22), rgba(124,58,237,.14));
+            border-color: rgba(244,114,182,.6);
+            color: #ffffff;
+        }
     </style>
 </head>
 <body>
@@ -1440,30 +1524,30 @@
                             </small>
                         </span>
                     </label>
-                    <!-- Campos PIE inline (espejo de cfgPIE pero embebido) -->
+                    <!-- Campos PIE inline — multi-NEE: una versión adaptada por cada diagnóstico marcado -->
                     <div id="pruebaPIEFields" style="display:none;margin-top:14px;padding-top:12px;border-top:1px dashed rgba(244,114,182,.25);">
                         <div class="campo">
-                            <label>Diagnóstico NEE del estudiante</label>
-                            <select id="pruebaPieDiagnostico" style="width:100%;padding:10px;border-radius:8px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.15);color:#e5e7eb;">
-                                <option value="">— Seleccionar diagnóstico —</option>
-                                <option value="TDAH">TDAH</option>
-                                <option value="TEA">TEA</option>
-                                <option value="Dislexia">Dislexia</option>
-                                <option value="Discalculia">Discalculia</option>
-                                <option value="Disgrafía">Disgrafía</option>
-                                <option value="Discapacidad Intelectual Leve">Discapacidad Intelectual Leve</option>
-                                <option value="Discapacidad Intelectual Moderada">Discapacidad Intelectual Moderada</option>
-                                <option value="TEL">TEL</option>
-                                <option value="Funcionamiento Intelectual Limítrofe">Funcionamiento Intelectual Limítrofe</option>
-                                <option value="Trastorno Emocional / Ansiedad">Trastorno Emocional / Ansiedad</option>
-                                <option value="Discapacidad Auditiva">Discapacidad Auditiva</option>
-                                <option value="Discapacidad Visual">Discapacidad Visual</option>
-                                <option value="Discapacidad Motora">Discapacidad Motora</option>
-                                <option value="Otro">Otro</option>
-                            </select>
+                            <label>Diagnósticos NEE a generar <small style="color:#cbd5e1;font-weight:400;">(marca uno o varios — se generará una versión adaptada por cada uno)</small></label>
+                            <div id="pieDiagGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:6px;margin-top:6px;">
+                                <label class="pie-diag-chk"><input type="checkbox" name="pruebaPieDiag" value="TDAH"> <span>TDAH</span></label>
+                                <label class="pie-diag-chk"><input type="checkbox" name="pruebaPieDiag" value="TEA"> <span>TEA</span></label>
+                                <label class="pie-diag-chk"><input type="checkbox" name="pruebaPieDiag" value="Dislexia"> <span>Dislexia</span></label>
+                                <label class="pie-diag-chk"><input type="checkbox" name="pruebaPieDiag" value="Discalculia"> <span>Discalculia</span></label>
+                                <label class="pie-diag-chk"><input type="checkbox" name="pruebaPieDiag" value="Disgrafía"> <span>Disgrafía</span></label>
+                                <label class="pie-diag-chk"><input type="checkbox" name="pruebaPieDiag" value="Discapacidad Intelectual Leve"> <span>D. Intelectual Leve</span></label>
+                                <label class="pie-diag-chk"><input type="checkbox" name="pruebaPieDiag" value="Discapacidad Intelectual Moderada"> <span>D. Intelectual Moderada</span></label>
+                                <label class="pie-diag-chk"><input type="checkbox" name="pruebaPieDiag" value="TEL"> <span>TEL</span></label>
+                                <label class="pie-diag-chk"><input type="checkbox" name="pruebaPieDiag" value="Funcionamiento Intelectual Limítrofe"> <span>F. I. Limítrofe</span></label>
+                                <label class="pie-diag-chk"><input type="checkbox" name="pruebaPieDiag" value="Trastorno Emocional / Ansiedad"> <span>T. Emocional / Ansiedad</span></label>
+                                <label class="pie-diag-chk"><input type="checkbox" name="pruebaPieDiag" value="Discapacidad Auditiva"> <span>D. Auditiva</span></label>
+                                <label class="pie-diag-chk"><input type="checkbox" name="pruebaPieDiag" value="Discapacidad Visual"> <span>D. Visual</span></label>
+                                <label class="pie-diag-chk"><input type="checkbox" name="pruebaPieDiag" value="Discapacidad Motora"> <span>D. Motora</span></label>
+                                <label class="pie-diag-chk"><input type="checkbox" name="pruebaPieDiag" value="Otro"> <span>Otro</span></label>
+                            </div>
+                            <small class="cfg-help" id="pieDiagCount" style="margin-top:8px;display:block;color:#cbd5e1;">0 diagnósticos seleccionados.</small>
                         </div>
                         <div class="campo">
-                            <label>Tipo de adecuación</label>
+                            <label>Tipo de adecuación <small style="color:#cbd5e1;font-weight:400;">(se aplica a todas las versiones generadas)</small></label>
                             <div style="display:flex;gap:14px;flex-wrap:wrap;margin-top:6px;">
                                 <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
                                     <input type="radio" name="pruebaPieAdecuacion" value="acceso" checked>
@@ -1476,92 +1560,197 @@
                             </div>
                         </div>
                         <div class="campo">
-                            <label>Observaciones del estudiante (opcional)</label>
-                            <textarea id="pruebaPieObservaciones" rows="2" placeholder="Ej: Tiempo extra recomendado, apoyo visual, etc."></textarea>
+                            <label>Observaciones generales para las adaptaciones (opcional)</label>
+                            <textarea id="pruebaPieObservaciones" rows="2" placeholder="Ej: Tiempo extra recomendado, apoyo visual, instrucciones segmentadas."></textarea>
                         </div>
                     </div>
                 </div>
 
-                <div class="campo-row">
-                    <div class="campo">
-                        <label>Cantidad total de preguntas <span class="cfg-pill" id="cfgPillTotal">0</span></label>
-                        <input type="number" id="inputCantPreg" min="1" max="40" step="1" value="10">
-                        <small class="cfg-help">Máximo 40. La suma de las cantidades por ítem debe coincidir con este número.</small>
-                    </div>
-                    <div class="campo">
-                        <label>Puntaje total</label>
-                        <input type="number" id="inputPuntajeEval" min="1" max="500" step="1" value="100">
-                    </div>
-                </div>
+                <!-- Layout dual: Estándar | PIE Adaptada -->
+                <div class="eval-dual" id="evalDual">
 
-                <div class="campo-row">
-                    <div class="campo">
-                        <label>Cantidad de alternativas (Selección múltiple)</label>
-                        <select id="selectAlternativas">
-                            <option value="3">3 alternativas (A, B, C)</option>
-                            <option value="4" selected>4 alternativas (A, B, C, D)</option>
-                            <option value="5">5 alternativas (A, B, C, D, E)</option>
-                        </select>
-                        <small class="cfg-help">Solo aplica a los ítems de selección múltiple.</small>
-                    </div>
-                    <div class="campo">
-                        <label>Niveles cognitivos de Bloom a incluir</label>
-                        <div class="bloom-selector bloom-compact" id="bloomSelector">
-                            <label class="bloom-item bloom-1-item checked"><input type="checkbox" value="1" checked onchange="toggleCheckItem(this)"> &#128309; Recordar</label>
-                            <label class="bloom-item bloom-2-item checked"><input type="checkbox" value="2" checked onchange="toggleCheckItem(this)"> &#128994; Comprender</label>
-                            <label class="bloom-item bloom-3-item checked"><input type="checkbox" value="3" checked onchange="toggleCheckItem(this)"> &#128993; Aplicar</label>
-                            <label class="bloom-item bloom-4-item"><input type="checkbox" value="4" onchange="toggleCheckItem(this)"> &#128308; Analizar</label>
-                            <label class="bloom-item bloom-5-item"><input type="checkbox" value="5" onchange="toggleCheckItem(this)"> &#128420; Evaluar</label>
-                            <label class="bloom-item bloom-6-item"><input type="checkbox" value="6" onchange="toggleCheckItem(this)"> &#9999; Crear</label>
+                    <!-- ─── COLUMNA: PRUEBA ESTÁNDAR ─── -->
+                    <div class="eval-col eval-col-std">
+                        <div class="eval-col-titulo">
+                            🧠 Prueba Estándar
+                            <span class="col-pill" id="evalColStdPill">Para todo el curso</span>
+                        </div>
+
+                        <div class="campo-row">
+                            <div class="campo">
+                                <label>Cantidad total de preguntas <span class="cfg-pill" id="cfgPillTotal">0</span></label>
+                                <input type="number" id="inputCantPreg" min="1" max="40" step="1" value="10">
+                                <small class="cfg-help">Máximo 40. La suma de las cantidades por ítem debe coincidir con este número.</small>
+                            </div>
+                            <div class="campo">
+                                <label>Puntaje total</label>
+                                <input type="number" id="inputPuntajeEval" min="1" max="500" step="1" value="100">
+                            </div>
+                        </div>
+
+                        <div class="campo-row">
+                            <div class="campo">
+                                <label>Cantidad de alternativas (Selección múltiple)</label>
+                                <select id="selectAlternativas">
+                                    <option value="3">3 alternativas (A, B, C)</option>
+                                    <option value="4" selected>4 alternativas (A, B, C, D)</option>
+                                    <option value="5">5 alternativas (A, B, C, D, E)</option>
+                                </select>
+                                <small class="cfg-help">Solo aplica a los ítems de selección múltiple.</small>
+                            </div>
+                            <div class="campo">
+                                <label>Niveles cognitivos de Bloom a incluir</label>
+                                <div class="bloom-selector bloom-compact" id="bloomSelector">
+                                    <label class="bloom-item bloom-1-item checked"><input type="checkbox" value="1" checked onchange="toggleCheckItem(this)"> &#128309; Recordar</label>
+                                    <label class="bloom-item bloom-2-item checked"><input type="checkbox" value="2" checked onchange="toggleCheckItem(this)"> &#128994; Comprender</label>
+                                    <label class="bloom-item bloom-3-item checked"><input type="checkbox" value="3" checked onchange="toggleCheckItem(this)"> &#128993; Aplicar</label>
+                                    <label class="bloom-item bloom-4-item"><input type="checkbox" value="4" onchange="toggleCheckItem(this)"> &#128308; Analizar</label>
+                                    <label class="bloom-item bloom-5-item"><input type="checkbox" value="5" onchange="toggleCheckItem(this)"> &#128420; Evaluar</label>
+                                    <label class="bloom-item bloom-6-item"><input type="checkbox" value="6" onchange="toggleCheckItem(this)"> &#9999; Crear</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="campo">
+                            <label>Distribución por tipo de ítem</label>
+                            <table class="tipos-preg-tabla" id="tiposPregTabla">
+                                <thead>
+                                    <tr><th>Tipo de ítem</th><th style="width:90px;text-align:center;">Cantidad</th></tr>
+                                </thead>
+                                <tbody>
+                                    <tr data-tipo="sm">
+                                        <td>&#9673; Selección múltiple</td>
+                                        <td><input type="number" min="0" max="40" step="1" value="5" data-cantitem></td>
+                                    </tr>
+                                    <tr data-tipo="vf">
+                                        <td>&#10003; Verdadero / Falso (con justificación)</td>
+                                        <td><input type="number" min="0" max="40" step="1" value="3" data-cantitem></td>
+                                    </tr>
+                                    <tr data-tipo="completar">
+                                        <td>&#9998; Completar (espacios en blanco)</td>
+                                        <td><input type="number" min="0" max="40" step="1" value="0" data-cantitem></td>
+                                    </tr>
+                                    <tr data-tipo="emparejar">
+                                        <td>&#8596; Términos pareados</td>
+                                        <td><input type="number" min="0" max="40" step="1" value="0" data-cantitem></td>
+                                    </tr>
+                                    <tr data-tipo="aplicacion">
+                                        <td>&#129518; Aplicación / Ejercicio práctico</td>
+                                        <td><input type="number" min="0" max="40" step="1" value="0" data-cantitem></td>
+                                    </tr>
+                                    <tr data-tipo="caso">
+                                        <td>&#128269; Análisis de caso</td>
+                                        <td><input type="number" min="0" max="40" step="1" value="0" data-cantitem></td>
+                                    </tr>
+                                    <tr data-tipo="desarrollo">
+                                        <td>&#9997; Desarrollo / Argumentación</td>
+                                        <td><input type="number" min="0" max="40" step="1" value="2" data-cantitem></td>
+                                    </tr>
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td style="text-align:right;font-weight:600;color:var(--muted);">Total por ítem</td>
+                                        <td style="text-align:center;"><span id="cfgTotalItems" class="cfg-total">10</span> / 40</td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                            <small class="cfg-help" id="cfgTotalMsg">Ajusta cada cantidad. Si la suma no coincide con el total general, ese valor manda.</small>
                         </div>
                     </div>
-                </div>
 
-                <div class="campo">
-                    <label>Distribución por tipo de ítem</label>
-                    <table class="tipos-preg-tabla" id="tiposPregTabla">
-                        <thead>
-                            <tr><th>Tipo de ítem</th><th style="width:90px;text-align:center;">Cantidad</th></tr>
-                        </thead>
-                        <tbody>
-                            <tr data-tipo="sm">
-                                <td>&#9673; Selección múltiple</td>
-                                <td><input type="number" min="0" max="40" step="1" value="5" data-cantitem></td>
-                            </tr>
-                            <tr data-tipo="vf">
-                                <td>&#10003; Verdadero / Falso (con justificación)</td>
-                                <td><input type="number" min="0" max="40" step="1" value="3" data-cantitem></td>
-                            </tr>
-                            <tr data-tipo="completar">
-                                <td>&#9998; Completar (espacios en blanco)</td>
-                                <td><input type="number" min="0" max="40" step="1" value="0" data-cantitem></td>
-                            </tr>
-                            <tr data-tipo="emparejar">
-                                <td>&#8596; Términos pareados</td>
-                                <td><input type="number" min="0" max="40" step="1" value="0" data-cantitem></td>
-                            </tr>
-                            <tr data-tipo="aplicacion">
-                                <td>&#129518; Aplicación / Ejercicio práctico</td>
-                                <td><input type="number" min="0" max="40" step="1" value="0" data-cantitem></td>
-                            </tr>
-                            <tr data-tipo="caso">
-                                <td>&#128269; Análisis de caso</td>
-                                <td><input type="number" min="0" max="40" step="1" value="0" data-cantitem></td>
-                            </tr>
-                            <tr data-tipo="desarrollo">
-                                <td>&#9997; Desarrollo / Argumentación</td>
-                                <td><input type="number" min="0" max="40" step="1" value="2" data-cantitem></td>
-                            </tr>
-                        </tbody>
-                        <tfoot>
-                            <tr>
-                                <td style="text-align:right;font-weight:600;color:var(--muted);">Total por ítem</td>
-                                <td style="text-align:center;"><span id="cfgTotalItems" class="cfg-total">10</span> / 40</td>
-                            </tr>
-                        </tfoot>
-                    </table>
-                    <small class="cfg-help" id="cfgTotalMsg">Ajusta cada cantidad. Si la suma no coincide con el total general, ese valor manda.</small>
-                </div>
+                    <!-- ─── COLUMNA: PRUEBA PIE ADAPTADA ─── -->
+                    <div class="eval-col eval-col-pie" id="evalColPIE" style="display:none">
+                        <div class="eval-col-titulo">
+                            ⚇ Prueba PIE Adaptada
+                            <span class="col-pill" id="evalColPiePill">Para estudiantes con NEE</span>
+                        </div>
+
+                        <p class="cfg-hint" style="margin-top:0;font-size:.82rem;">
+                            Configura cómo será la <strong>versión adaptada</strong>. Suele tener menos preguntas, más tiempo y formatos accesibles. Los datos PIE (diagnóstico, adecuación) los configuras arriba en el toggle.
+                        </p>
+
+                        <div class="campo-row">
+                            <div class="campo">
+                                <label>Cantidad total de preguntas (PIE)</label>
+                                <input type="number" id="inputCantPregPIE" min="1" max="40" step="1" value="8">
+                                <small class="cfg-help">Recomendado: 60–80% de la prueba estándar.</small>
+                            </div>
+                            <div class="campo">
+                                <label>Puntaje total (PIE)</label>
+                                <input type="number" id="inputPuntajePIE" min="1" max="500" step="1" value="80">
+                            </div>
+                        </div>
+
+                        <div class="campo-row">
+                            <div class="campo">
+                                <label>Alternativas (Selección múltiple)</label>
+                                <select id="selectAlternativasPIE">
+                                    <option value="3" selected>3 alternativas (A, B, C) — recomendado PIE</option>
+                                    <option value="4">4 alternativas (A, B, C, D)</option>
+                                </select>
+                                <small class="cfg-help">PIE sugiere 3 alternativas para reducir distractores.</small>
+                            </div>
+                            <div class="campo">
+                                <label>Niveles cognitivos de Bloom a incluir (PIE)</label>
+                                <div class="bloom-selector bloom-compact" id="bloomSelectorPIE">
+                                    <label class="bloom-item bloom-1-item checked"><input type="checkbox" value="1" checked onchange="toggleCheckItem(this)"> &#128309; Recordar</label>
+                                    <label class="bloom-item bloom-2-item checked"><input type="checkbox" value="2" checked onchange="toggleCheckItem(this)"> &#128994; Comprender</label>
+                                    <label class="bloom-item bloom-3-item"><input type="checkbox" value="3" onchange="toggleCheckItem(this)"> &#128993; Aplicar</label>
+                                    <label class="bloom-item bloom-4-item"><input type="checkbox" value="4" onchange="toggleCheckItem(this)"> &#128308; Analizar</label>
+                                    <label class="bloom-item bloom-5-item"><input type="checkbox" value="5" onchange="toggleCheckItem(this)"> &#128420; Evaluar</label>
+                                    <label class="bloom-item bloom-6-item"><input type="checkbox" value="6" onchange="toggleCheckItem(this)"> &#9999; Crear</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="campo">
+                            <label>Distribución por tipo de ítem (PIE)</label>
+                            <table class="tipos-preg-tabla" id="tiposPregTablaPIE">
+                                <thead>
+                                    <tr><th>Tipo de ítem</th><th style="width:90px;text-align:center;">Cantidad</th></tr>
+                                </thead>
+                                <tbody>
+                                    <tr data-tipo="sm">
+                                        <td>&#9673; Selección múltiple adaptada</td>
+                                        <td><input type="number" min="0" max="40" step="1" value="5" data-cantitem-pie></td>
+                                    </tr>
+                                    <tr data-tipo="vf">
+                                        <td>&#10003; V/F amigable (sin justif. compleja)</td>
+                                        <td><input type="number" min="0" max="40" step="1" value="2" data-cantitem-pie></td>
+                                    </tr>
+                                    <tr data-tipo="completar">
+                                        <td>&#9998; Completar (con banco de palabras)</td>
+                                        <td><input type="number" min="0" max="40" step="1" value="0" data-cantitem-pie></td>
+                                    </tr>
+                                    <tr data-tipo="emparejar">
+                                        <td>&#8596; Pareados reducidos (≤ 4 conceptos)</td>
+                                        <td><input type="number" min="0" max="40" step="1" value="0" data-cantitem-pie></td>
+                                    </tr>
+                                    <tr data-tipo="aplicacion">
+                                        <td>&#129518; Aplicación guiada (3 pasos)</td>
+                                        <td><input type="number" min="0" max="40" step="1" value="0" data-cantitem-pie></td>
+                                    </tr>
+                                    <tr data-tipo="caso">
+                                        <td>&#128269; Análisis de caso simplificado</td>
+                                        <td><input type="number" min="0" max="40" step="1" value="0" data-cantitem-pie></td>
+                                    </tr>
+                                    <tr data-tipo="desarrollo">
+                                        <td>&#9997; Desarrollo con andamiaje</td>
+                                        <td><input type="number" min="0" max="40" step="1" value="1" data-cantitem-pie></td>
+                                    </tr>
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td style="text-align:right;font-weight:600;color:var(--muted);">Total por ítem</td>
+                                        <td style="text-align:center;"><span id="cfgTotalItemsPIE" class="cfg-total">8</span> / 40</td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                            <small class="cfg-help">Tipos pensados para estudiantes con NEE: oraciones cortas, banco de palabras, andamiaje y segmentación.</small>
+                        </div>
+                    </div>
+
+                </div><!-- /.eval-dual -->
             </div>
 
             <!-- ── Bloque C: preguntas o ejercicios específicos (solo evaluacion/prueba/control) ── -->
@@ -4450,15 +4639,18 @@ var modelo = _modeloGuardado;
             });
     }
     /**
-     * Genera la versión PIE (Evaluación Diferenciada) ANEXA a una prueba ya emitida,
-     * usando los mismos OAs/contenido y los datos PIE inline (chkAdjuntarPIE).
-     * Hace una segunda llamada IA y concatena el resultado al docPreview.
+     * Genera UNA O VARIAS versiones PIE (Evaluación Diferenciada) ANEXAS a una prueba
+     * ya emitida. Itera sobre los diagnósticos NEE marcados en pieDiagGrid: hace una
+     * llamada IA por cada uno y concatena cada resultado al docPreview con su
+     * propio cabezal indicando el diagnóstico.
      */
     function _generarPIEAdjunta(opts) {
-        var diagEl = document.getElementById('pruebaPieDiagnostico');
-        var diagnostico = diagEl ? (diagEl.value || '').trim() : '';
-        if (!diagnostico) {
-            setIAStatus('error', '&#10007; Seleccionaste "Generar también versión PIE" pero falta el diagnóstico NEE. Marca el diagnóstico y vuelve a generar.');
+        // Recolectar todos los diagnósticos marcados (multi-NEE)
+        var checks = document.querySelectorAll('input[name="pruebaPieDiag"]:checked');
+        var diagnosticos = [];
+        for (var i = 0; i < checks.length; i++) diagnosticos.push(checks[i].value);
+        if (!diagnosticos.length) {
+            setIAStatus('error', '&#10007; Marcaste "Generar también versión PIE" pero no seleccionaste ningún diagnóstico NEE. Marca al menos uno y vuelve a generar.');
             return;
         }
         var adeRadio = document.querySelector('input[name="pruebaPieAdecuacion"]:checked');
@@ -4466,60 +4658,88 @@ var modelo = _modeloGuardado;
         var obsEl = document.getElementById('pruebaPieObservaciones');
         var observaciones = obsEl ? (obsEl.value || '').trim() : '';
 
-        // Clonar el contexto base y sobreescribir con datos PIE
-        var ctxPIE = {};
-        for (var k in opts.ctxBase) ctxPIE[k] = opts.ctxBase[k];
-        ctxPIE.tipoDocSel       = 'diferenciada';
-        ctxPIE.tipoNombre       = 'Evaluación Diferenciada (PIE) — anexa a Prueba Sumativa';
-        ctxPIE.pieDiagnostico   = diagnostico;
-        ctxPIE.pieAdecuacion    = adecuacion;
-        ctxPIE.pieObservaciones = observaciones;
-        var promptPIE = _promptDiferenciada(ctxPIE);
+        // Pre-calcular ctx PIE base (sin diagnostico aún) y opciones PIE
+        var optsPIE = (typeof getEvalOpcionesPIE === 'function') ? getEvalOpcionesPIE() : null;
+        var BLOOM_LBL = (typeof BLOOM_LABELS !== 'undefined') ? BLOOM_LABELS : { 1:'Recordar', 2:'Comprender', 3:'Aplicar', 4:'Analizar', 5:'Evaluar', 6:'Crear' };
+        var TIPO_LBL = { sm:'selección múltiple', vf:'verdadero/falso', desarrollo:'desarrollo', completar:'completar', emparejar:'relacionar', caso:'análisis de caso', aplicacion:'aplicación' };
 
-        setIAStatus('loading', '<span class="ia-spinner">⠿</span> Generando versión adaptada (PIE) para ' + diagnostico + '…');
+        function _buildCtxPIE(diag) {
+            var ctxPIE = {};
+            for (var k in opts.ctxBase) ctxPIE[k] = opts.ctxBase[k];
+            ctxPIE.tipoDocSel       = 'diferenciada';
+            ctxPIE.tipoNombre       = 'Evaluación Diferenciada (PIE) — anexa a Prueba Sumativa — ' + diag;
+            ctxPIE.pieDiagnostico   = diag;
+            ctxPIE.pieAdecuacion    = adecuacion;
+            ctxPIE.pieObservaciones = observaciones;
+            if (optsPIE) {
+                ctxPIE.cantPreg          = optsPIE.cantPreg;
+                ctxPIE.puntaje           = optsPIE.puntaje;
+                ctxPIE.cantAlternativas  = optsPIE.cantAlternativas;
+                ctxPIE.itemCounts        = optsPIE.itemCounts;
+                ctxPIE.bloomNames = optsPIE.bloomLevels.map(function(l){ return BLOOM_LBL[l] || l; }).join(', ');
+                ctxPIE.tiposNames = optsPIE.tiposPreg.map(function(t){ return TIPO_LBL[t] || t; }).join(', ');
+            }
+            return ctxPIE;
+        }
+
         var url = 'https://generativelanguage.googleapis.com/v1beta/models/' + opts.modelo + ':generateContent?key=' + opts.apiKey;
-        var body = JSON.stringify({
-            contents: [{ parts: [{ text: promptPIE }] }],
-            generationConfig: { temperature: 0.7, maxOutputTokens: 65536 }
-        });
+        var preview = document.getElementById('docPreview');
 
-        fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: body })
-            .then(function(res){ return res.json(); })
-            .then(function(data){
-                if (data.error) {
-                    setIAStatus('error', '&#10007; La prueba estándar se generó OK, pero falló la versión PIE: ' + (data.error.message || ''));
-                    return;
-                }
-                var cand = data.candidates && data.candidates[0];
-                var text = cand && cand.content && cand.content.parts && cand.content.parts[0] && cand.content.parts[0].text;
-                if (!text) { setIAStatus('error', '&#10007; La IA no devolvió la versión PIE. Genera nuevamente sin marcar la prueba estándar para reintentar.'); return; }
-                text = text.replace(/^```html\s*/i, '').replace(/^```\s*/i, '').replace(/\s*```\s*$/i, '').trim();
-                var mBody = text.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
-                if (mBody) text = mBody[1].trim();
-                text = text.replace(/<!doctype[^>]*>/gi, '')
-                           .replace(/<\/?html[^>]*>/gi, '')
-                           .replace(/<head[\s\S]*?<\/head>/gi, '')
-                           .replace(/<style[\s\S]*?<\/style>/gi, '')
-                           .replace(/<\/?body[^>]*>/gi, '')
-                           .trim();
-                text = text.replace(/^\s*<h1[^>]*>[\s\S]*?<\/h1>/i, '').trim();
-
-                // Inserta divisor visual + cabecera + contenido PIE concatenado
-                var divisor = '<div style="page-break-before:always"></div>' +
-                              '<div style="margin-top:36px;padding:20px 22px;border-radius:14px;background:linear-gradient(135deg,rgba(244,114,182,.10),rgba(124,58,237,.08));border:2px dashed rgba(244,114,182,.4);text-align:center;font-size:.95rem;color:#f1d6e8;">' +
-                              '⚇ <strong>Versión adaptada PIE</strong> — Adecuación ' + (adecuacion === 'significativa' ? 'Significativa / PACI' : 'Solo de Acceso') + ' para diagnóstico <strong>' + diagnostico + '</strong>. ' +
-                              'Mismos OAs y contenido que la prueba estándar.' +
-                              '</div>';
-                var headerPIE = headerInstitucional('Evaluación Diferenciada (PIE)') +
-                                tituloBar((opts.contenido || 'Evaluación Diferenciada').toString().substring(0, 90)) +
-                                metaTabla({ profesor: opts.profesor, curso: opts.cursoTexto });
-                var preview = document.getElementById('docPreview');
-                preview.innerHTML += divisor + headerPIE + text + pieDoc();
-                setIAStatus('ok', '&#10003; ¡Listo! Se generaron AMBAS versiones: la prueba estándar y la versión adaptada PIE para ' + diagnostico + '. Encontrarás la versión adaptada después del salto de página.');
-            })
-            .catch(function(err){
-                setIAStatus('error', '&#10007; La prueba estándar se generó OK, pero falló la versión PIE: ' + err.message);
+        // Generar secuencialmente cada versión PIE para no saturar la API
+        function _generarUna(idx) {
+            if (idx >= diagnosticos.length) {
+                setIAStatus('ok', '&#10003; ¡Listo! Se generó la prueba estándar y ' + diagnosticos.length +
+                    ' versión' + (diagnosticos.length > 1 ? 'es' : '') + ' adaptada' + (diagnosticos.length > 1 ? 's' : '') +
+                    ' (PIE): ' + diagnosticos.join(', ') + '. Cada versión está separada por un salto de página.');
+                return;
+            }
+            var diag = diagnosticos[idx];
+            setIAStatus('loading', '<span class="ia-spinner">⠿</span> Generando versión PIE ' + (idx + 1) + ' de ' + diagnosticos.length + ' (' + diag + ')…');
+            var ctxPIE = _buildCtxPIE(diag);
+            var promptPIE = _promptDiferenciada(ctxPIE);
+            var body = JSON.stringify({
+                contents: [{ parts: [{ text: promptPIE }] }],
+                generationConfig: { temperature: 0.7, maxOutputTokens: 65536 }
             });
+
+            fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: body })
+                .then(function(res){ return res.json(); })
+                .then(function(data){
+                    if (data.error) {
+                        setIAStatus('error', '&#10007; Falló la versión PIE para ' + diag + ': ' + (data.error.message || ''));
+                        return;
+                    }
+                    var cand = data.candidates && data.candidates[0];
+                    var text = cand && cand.content && cand.content.parts && cand.content.parts[0] && cand.content.parts[0].text;
+                    if (!text) { setIAStatus('error', '&#10007; La IA no devolvió la versión PIE para ' + diag + '.'); return; }
+                    text = text.replace(/^```html\s*/i, '').replace(/^```\s*/i, '').replace(/\s*```\s*$/i, '').trim();
+                    var mBody = text.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
+                    if (mBody) text = mBody[1].trim();
+                    text = text.replace(/<!doctype[^>]*>/gi, '')
+                               .replace(/<\/?html[^>]*>/gi, '')
+                               .replace(/<head[\s\S]*?<\/head>/gi, '')
+                               .replace(/<style[\s\S]*?<\/style>/gi, '')
+                               .replace(/<\/?body[^>]*>/gi, '')
+                               .trim();
+                    text = text.replace(/^\s*<h1[^>]*>[\s\S]*?<\/h1>/i, '').trim();
+
+                    var divisor = '<div style="page-break-before:always"></div>' +
+                                  '<div style="margin-top:36px;padding:20px 22px;border-radius:14px;background:linear-gradient(135deg,rgba(244,114,182,.10),rgba(124,58,237,.08));border:2px dashed rgba(244,114,182,.4);text-align:center;font-size:.95rem;color:#f1d6e8;">' +
+                                  '⚇ <strong>Versión PIE ' + (idx + 1) + ' de ' + diagnosticos.length + '</strong> — Adecuación ' + (adecuacion === 'significativa' ? 'Significativa / PACI' : 'Solo de Acceso') + ' para diagnóstico <strong>' + diag + '</strong>. ' +
+                                  'Mismos OAs y contenido que la prueba estándar.' +
+                                  '</div>';
+                    var headerPIE = headerInstitucional('Evaluación Diferenciada (PIE) — ' + diag) +
+                                    tituloBar((opts.contenido || 'Evaluación Diferenciada').toString().substring(0, 90)) +
+                                    metaTabla({ profesor: opts.profesor, curso: opts.cursoTexto });
+                    preview.innerHTML += divisor + headerPIE + text + pieDoc();
+                    // Avanzar al siguiente
+                    _generarUna(idx + 1);
+                })
+                .catch(function(err){
+                    setIAStatus('error', '&#10007; Falló la versión PIE para ' + diag + ': ' + err.message);
+                });
+        }
+        _generarUna(0);
     }
 
     function setIAStatus(tipo, msg) {
@@ -4647,14 +4867,97 @@ var modelo = _modeloGuardado;
         _markStepCompleted('config', !!cant);
     }
 
-    // Toggle de campos PIE embebidos en Prueba
+    // Toggle de campos PIE embebidos en Prueba (campos diagnóstico + columna config PIE)
     function _wirePIEinPrueba() {
         var chk = document.getElementById('chkAdjuntarPIE');
         if (!chk) return;
         chk.addEventListener('change', function() {
             var box = document.getElementById('pruebaPIEFields');
             if (box) box.style.display = chk.checked ? '' : 'none';
+            var dual = document.getElementById('evalDual');
+            var col  = document.getElementById('evalColPIE');
+            if (col) col.style.display = chk.checked ? '' : 'none';
+            if (dual) {
+                if (chk.checked) dual.classList.add('with-pie');
+                else             dual.classList.remove('with-pie');
+            }
+            // Recalcular total PIE inicialmente
+            _actualizarTotalPIE();
         });
+        // Contador de NEEs marcadas
+        var diagBoxes = document.querySelectorAll('input[name="pruebaPieDiag"]');
+        function _refrescarConteoNEE() {
+            var checked = document.querySelectorAll('input[name="pruebaPieDiag"]:checked').length;
+            var el = document.getElementById('pieDiagCount');
+            if (!el) return;
+            if (checked === 0) {
+                el.textContent = 'Selecciona al menos un diagnóstico para generar la(s) versión(es) PIE.';
+                el.style.color = '#fca5a5';
+            } else {
+                el.textContent = checked + ' diagnóstico' + (checked > 1 ? 's' : '') + ' seleccionado' + (checked > 1 ? 's' : '') + '. Se generará una versión adaptada por cada uno.';
+                el.style.color = '#86efac';
+            }
+        }
+        for (var i = 0; i < diagBoxes.length; i++) {
+            diagBoxes[i].addEventListener('change', _refrescarConteoNEE);
+        }
+        _refrescarConteoNEE();
+    }
+
+    // Suma de la tabla PIE (espejo de actualizarTotalItems)
+    function _actualizarTotalPIE() {
+        var inputs = document.querySelectorAll('#tiposPregTablaPIE input[data-cantitem-pie]');
+        var total = 0;
+        for (var i = 0; i < inputs.length; i++) {
+            var v = parseInt(inputs[i].value, 10);
+            if (!isNaN(v) && v > 0) total += v;
+        }
+        var elT = document.getElementById('cfgTotalItemsPIE');
+        if (elT) elT.textContent = total;
+    }
+    // Recalcular total PIE en input
+    if (typeof window !== 'undefined') {
+        window.addEventListener('load', function(){
+            var inputs = document.querySelectorAll('#tiposPregTablaPIE input[data-cantitem-pie]');
+            for (var i = 0; i < inputs.length; i++) {
+                inputs[i].addEventListener('input', _actualizarTotalPIE);
+            }
+            _actualizarTotalPIE();
+        });
+    }
+
+    /**
+     * Lee la configuración de la columna PIE Adaptada.
+     * Devuelve un objeto con la misma forma que getEvalOpciones() pero con valores PIE.
+     */
+    function getEvalOpcionesPIE() {
+        var cantPreg = parseInt((document.getElementById('inputCantPregPIE') || {}).value, 10) || 8;
+        var puntaje  = parseInt((document.getElementById('inputPuntajePIE')  || {}).value, 10) || 80;
+        var cantAlt  = parseInt((document.getElementById('selectAlternativasPIE') || {}).value, 10) || 3;
+        // Bloom levels PIE
+        var bloomLevels = [];
+        var checks = document.querySelectorAll('#bloomSelectorPIE input[type=checkbox]:checked');
+        for (var i = 0; i < checks.length; i++) bloomLevels.push(parseInt(checks[i].value, 10));
+        // Item counts PIE
+        var itemCounts = {};
+        var rows = document.querySelectorAll('#tiposPregTablaPIE tbody tr');
+        var tiposPreg = [];
+        for (var j = 0; j < rows.length; j++) {
+            var tipo = rows[j].getAttribute('data-tipo');
+            var input = rows[j].querySelector('input[data-cantitem-pie]');
+            if (!tipo || !input) continue;
+            var v = parseInt(input.value, 10) || 0;
+            itemCounts[tipo] = v;
+            if (v > 0) tiposPreg.push(tipo);
+        }
+        return {
+            cantPreg: cantPreg,
+            puntaje: puntaje,
+            cantAlternativas: cantAlt,
+            bloomLevels: bloomLevels.length ? bloomLevels : [1, 2],
+            tiposPreg: tiposPreg.length ? tiposPreg : ['sm', 'vf'],
+            itemCounts: itemCounts
+        };
     }
 
     // Wireup global de listeners (scroll-spy + status + header colapsable)
