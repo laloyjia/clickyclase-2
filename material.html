@@ -883,6 +883,225 @@
         .doc-preview .bloom-tag-4 { background:#fce4ec; color:#880e4f; }
         .doc-preview .bloom-tag-5 { background:#ede7f6; color:#4527a0; }
         .doc-preview .bloom-tag-6 { background:#fff8e1; color:#b45309; }
+
+        /* =====================================================
+         *  REDISEÑO DASHBOARD — sidebar + FAB + header colapsable
+         * ===================================================== */
+        .mat-layout {
+            display: grid;
+            grid-template-columns: 260px minmax(0, 1fr);
+            gap: 24px;
+            align-items: start;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 16px;
+        }
+        .mat-sidebar {
+            position: sticky;
+            top: 84px;
+            align-self: start;
+            background: linear-gradient(160deg, rgba(124,58,237,.08), rgba(34,211,238,.05));
+            border: 1px solid rgba(148,163,184,.18);
+            border-radius: 18px;
+            padding: 18px 14px;
+            backdrop-filter: blur(8px);
+            max-height: calc(100vh - 110px);
+            overflow-y: auto;
+            scrollbar-width: thin;
+        }
+        .mat-sidebar::-webkit-scrollbar { width: 6px; }
+        .mat-sidebar::-webkit-scrollbar-thumb { background: rgba(148,163,184,.25); border-radius: 6px; }
+        .mat-sidebar h4 {
+            margin: 0 0 14px 4px;
+            font-size: .72rem;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            color: #94a3b8;
+            font-weight: 600;
+        }
+        .nav-step {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 12px;
+            border-radius: 10px;
+            color: #cbd5e1;
+            text-decoration: none;
+            font-size: .86rem;
+            margin-bottom: 4px;
+            cursor: pointer;
+            border: 1px solid transparent;
+            transition: all .15s ease;
+        }
+        .nav-step:hover {
+            background: rgba(124,58,237,.10);
+            color: #e5e7eb;
+        }
+        .nav-step.active {
+            background: linear-gradient(135deg, rgba(124,58,237,.22), rgba(34,211,238,.14));
+            border-color: rgba(124,58,237,.35);
+            color: #ffffff;
+        }
+        .nav-step.completed { color: #86efac; }
+        .nav-step .step-num {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            font-size: .72rem;
+            font-weight: 700;
+            background: rgba(255,255,255,.06);
+            border: 1px solid rgba(255,255,255,.15);
+        }
+        .nav-step.active .step-num {
+            background: linear-gradient(135deg,#7c3aed,#22d3ee);
+            border-color: transparent;
+            color: #ffffff;
+        }
+        .nav-step.completed .step-num {
+            background: rgba(34,197,94,.18);
+            border-color: rgba(34,197,94,.4);
+            color: #86efac;
+        }
+        .nav-step.completed .step-num::before { content: '✓'; }
+        .nav-step.completed .step-num span { display: none; }
+
+        .sidebar-status {
+            margin-top: 16px;
+            padding-top: 14px;
+            border-top: 1px solid rgba(148,163,184,.15);
+            font-size: .76rem;
+            color: #94a3b8;
+        }
+        .sidebar-status strong { color: #e5e7eb; }
+        .sidebar-status .stat-row { display:flex; justify-content:space-between; padding: 4px 0; }
+
+        /* FAB (Floating Action Button) flotante con acciones de generación */
+        .mat-fab {
+            position: fixed;
+            bottom: 22px;
+            right: 22px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 950;
+            transition: opacity .25s ease, transform .25s ease;
+        }
+        .mat-fab.collapsed { transform: translateY(120%); opacity: 0; pointer-events: none; }
+        .mat-fab .fab-btn {
+            min-width: 220px;
+            padding: 14px 22px;
+            border-radius: 14px;
+            border: none;
+            font-size: .92rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 12px 32px -8px rgba(0,0,0,.45);
+            transition: transform .15s ease;
+        }
+        .mat-fab .fab-btn:hover { transform: translateY(-2px); }
+        .mat-fab .fab-btn:disabled { opacity: .5; cursor: not-allowed; }
+        .mat-fab .fab-ia {
+            background: linear-gradient(135deg, #7c3aed, #22d3ee);
+            color: #fff;
+        }
+        .mat-fab .fab-tpl {
+            background: linear-gradient(135deg, rgba(71,85,105,.85), rgba(100,116,139,.7));
+            color: #e2e8f0;
+            border: 1px solid rgba(148,163,184,.3);
+        }
+        .mat-fab .fab-status {
+            background: rgba(15,23,42,.92);
+            border: 1px solid rgba(148,163,184,.25);
+            border-radius: 12px;
+            padding: 10px 14px;
+            font-size: .82rem;
+            color: #cbd5e1;
+            backdrop-filter: blur(10px);
+            text-align: center;
+        }
+
+        /* Header colapsable: se aplana al hacer scroll */
+        .hero-pro {
+            transition: padding .3s ease, margin .3s ease, transform .25s ease;
+        }
+        .hero-pro.compact {
+            padding: .7rem 1.2rem !important;
+        }
+        .hero-pro.compact h1 { font-size: 1.1rem !important; }
+        .hero-pro.compact p { display: none; }
+        .hero-pro.compact > div:first-child > div:first-child { /* el ícono */
+            width: 38px !important; height: 38px !important; font-size: 1.05rem !important; border-radius: 10px !important;
+        }
+        .hero-pro.compact > div:nth-child(2) { display: none; } /* ocultar las stats al compactar */
+
+        /* En mobile: sidebar se vuelve drawer */
+        @media (max-width: 980px) {
+            .mat-layout { grid-template-columns: 1fr; gap: 12px; padding: 0 8px; }
+            .mat-sidebar {
+                position: fixed;
+                top: 0;
+                left: -100%;
+                width: 280px;
+                height: 100vh;
+                max-height: 100vh;
+                border-radius: 0;
+                z-index: 900;
+                transition: left .25s ease;
+                box-shadow: 8px 0 24px rgba(0,0,0,.45);
+            }
+            .mat-sidebar.open { left: 0; }
+            .sidebar-toggle {
+                position: fixed;
+                top: 12px;
+                right: 12px;
+                z-index: 910;
+                background: rgba(15,23,42,.85);
+                color: #e5e7eb;
+                border: 1px solid rgba(148,163,184,.3);
+                border-radius: 10px;
+                padding: 8px 12px;
+                cursor: pointer;
+                display: inline-flex;
+                gap: 6px;
+                align-items: center;
+                font-size: .85rem;
+            }
+            .mat-fab .fab-btn { min-width: 0; padding: 12px 16px; font-size: .85rem; }
+        }
+        @media (min-width: 981px) {
+            .sidebar-toggle { display: none; }
+        }
+
+        /* Vincular PIE en Prueba */
+        .pie-link-card {
+            margin-top: 12px;
+            padding: 14px 16px;
+            background: linear-gradient(135deg, rgba(244,114,182,.10), rgba(124,58,237,.08));
+            border: 1px solid rgba(244,114,182,.28);
+            border-radius: 12px;
+        }
+        .pie-link-card label {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            cursor: pointer;
+            font-size: .88rem;
+            color: #f1d6e8;
+        }
+        .pie-link-card input[type=checkbox] {
+            margin-top: 3px;
+            width: 16px;
+            height: 16px;
+            accent-color: #f472b6;
+        }
+        .pie-link-card small { display:block; margin-top:6px; font-size:.78rem; color:#cbd5e1; }
     </style>
 </head>
 <body>
@@ -926,6 +1145,48 @@
             </a>
         </div>
 
+        <!-- Toggle de sidebar para mobile -->
+        <button class="sidebar-toggle" onclick="toggleSidebar()" type="button">☰ Pasos</button>
+
+        <!-- Layout: sidebar + main -->
+        <div class="mat-layout">
+
+            <!-- SIDEBAR — navegación tipo wizard -->
+            <aside class="mat-sidebar" id="matSidebar">
+                <h4>Pasos para crear material</h4>
+                <a class="nav-step active" data-step="tipo" data-target="seccionTipo" onclick="navStep(this,'seccionTipo')">
+                    <span class="step-num"><span>1</span></span>
+                    <span>Tipo de Documento</span>
+                </a>
+                <a class="nav-step" data-step="oas" data-target="seccionOAs" onclick="navStep(this,'seccionOAs')">
+                    <span class="step-num"><span>2</span></span>
+                    <span>Objetivos Curriculares</span>
+                </a>
+                <a class="nav-step" data-step="valores" data-target="seccionValores" onclick="navStep(this,'seccionValores')">
+                    <span class="step-num"><span>3</span></span>
+                    <span>Valores y Actitudes</span>
+                </a>
+                <a class="nav-step" data-step="contenido" data-target="seccionContenido" onclick="navStep(this,'seccionContenido')">
+                    <span class="step-num"><span>4</span></span>
+                    <span>Contenido del Material</span>
+                </a>
+                <a class="nav-step" data-step="config" data-target="seccionConfig" onclick="navStep(this,'seccionConfig')">
+                    <span class="step-num"><span>5</span></span>
+                    <span>Configuración</span>
+                </a>
+
+                <div class="sidebar-status" id="sidebarStatus">
+                    <div class="stat-row"><span>Tipo:</span><strong id="ssTipo">—</strong></div>
+                    <div class="stat-row"><span>Curso:</span><strong id="ssCurso">—</strong></div>
+                    <div class="stat-row"><span>Asignatura:</span><strong id="ssAsig">—</strong></div>
+                    <div class="stat-row"><span>OAs:</span><strong id="ssOAs">0</strong></div>
+                    <div class="stat-row"><span>Cant. preguntas:</span><strong id="ssCant">—</strong></div>
+                </div>
+            </aside>
+
+            <!-- COLUMNA PRINCIPAL -->
+            <div class="mat-main">
+
         <div class="material-header hero-pro" style="position:relative;overflow:hidden;border-radius:var(--radius-lg,20px);padding:1.6rem 1.4rem;margin-bottom:1.6rem;background:linear-gradient(135deg, rgba(124,58,237,.14), rgba(34,211,238,.09) 55%, rgba(244,114,182,.10));border:1px solid rgba(148,163,184,.18);box-shadow:0 18px 40px -22px rgba(124,58,237,.5)">
             <div style="display:flex;align-items:center;gap:.9rem;flex-wrap:wrap;justify-content:center">
                 <div style="width:56px;height:56px;border-radius:16px;display:grid;place-items:center;font-size:1.6rem;background:linear-gradient(135deg,#7c3aed,#22d3ee);box-shadow:0 10px 24px -10px rgba(124,58,237,.8)">📚</div>
@@ -943,7 +1204,7 @@
         </div>
 
         <!-- SECCION 1: TIPO DE DOCUMENTO -->
-        <div class="seccion-mat">
+        <div class="seccion-mat" id="seccionTipo">
             <h2><span>&#128218;</span> Tipo de Documento</h2>
             <div class="tipo-docs" id="tipoDocs">
                 <div class="tipo-doc-card" onclick="seleccionarTipo(this, 'guia')" data-tipo="guia">
@@ -980,7 +1241,7 @@
         </div>
 
         <!-- SECCION 2: OBJETIVOS CURRICULARES -->
-        <div class="seccion-mat">
+        <div class="seccion-mat" id="seccionOAs">
             <h2><span>&#127919;</span> Objetivos Curriculares</h2>
 
             <!-- Asignatura: visible sólo para básica/media -->
@@ -1077,6 +1338,7 @@
         <div id="recsPanel"></div>
 
         <!-- SECCION 3: VALORES Y ACTITUDES (MBE) -->
+        <span id="seccionValores"></span>
         <div class="seccion-mat">
             <h2><span>&#128155;</span> Valores <span style="font-size:.7em;font-weight:500;color:var(--muted)">· Marco para la Buena Enseñanza</span></h2>
             <details class="dropdown-panel" id="dropValores">
@@ -1092,6 +1354,7 @@
         </div>
 
         <!-- SECCION 4: CONTENIDO -->
+        <span id="seccionContenido"></span>
         <div class="seccion-mat">
             <h2><span>&#128203;</span> Configuración del documento</h2>
 
@@ -1147,6 +1410,7 @@
             </div>
 
             <!-- ── Bloque B: configuración de evaluación (visible solo para evaluacion/prueba/control) ── -->
+            <span id="seccionConfig"></span>
             <div class="cfg-bloque" id="cfgEval" style="display:none">
                 <div class="cfg-bloque-titulo">Configuración de evaluación</div>
                 <p class="cfg-hint">Define cuántas preguntas tendrá la evaluación, el puntaje total y la cantidad por tipo de ítem. Para pruebas formales el máximo permitido es <strong>40 preguntas</strong>.</p>
@@ -1157,6 +1421,62 @@
                     <strong>Versión Profesor</strong> (Tabla de Especificaciones, Pauta de Corrección y Rúbrica).
                     Una sola generación entrega todo.
                 </p>
+
+                <!-- Toggle: generar también versión PIE (solo aplica para tipo='prueba') -->
+                <div class="pie-link-card" id="pruebaConPIE" style="display:none">
+                    <label>
+                        <input type="checkbox" id="chkAdjuntarPIE">
+                        <span>
+                            <strong>⚇ Generar también la versión adaptada (PIE)</strong>
+                            <small>
+                                Se generan <strong>dos documentos</strong>: la prueba sumativa estándar para todo el curso
+                                y, a continuación, una <strong>versión diferenciada</strong> con los mismos OAs y contenido
+                                pero adaptada según el diagnóstico NEE que indiques abajo. Garantiza que todos los estudiantes
+                                evalúen lo mismo, con las adecuaciones que correspondan.
+                            </small>
+                        </span>
+                    </label>
+                    <!-- Campos PIE inline (espejo de cfgPIE pero embebido) -->
+                    <div id="pruebaPIEFields" style="display:none;margin-top:14px;padding-top:12px;border-top:1px dashed rgba(244,114,182,.25);">
+                        <div class="campo">
+                            <label>Diagnóstico NEE del estudiante</label>
+                            <select id="pruebaPieDiagnostico" style="width:100%;padding:10px;border-radius:8px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.15);color:#e5e7eb;">
+                                <option value="">— Seleccionar diagnóstico —</option>
+                                <option value="TDAH">TDAH</option>
+                                <option value="TEA">TEA</option>
+                                <option value="Dislexia">Dislexia</option>
+                                <option value="Discalculia">Discalculia</option>
+                                <option value="Disgrafía">Disgrafía</option>
+                                <option value="Discapacidad Intelectual Leve">Discapacidad Intelectual Leve</option>
+                                <option value="Discapacidad Intelectual Moderada">Discapacidad Intelectual Moderada</option>
+                                <option value="TEL">TEL</option>
+                                <option value="Funcionamiento Intelectual Limítrofe">Funcionamiento Intelectual Limítrofe</option>
+                                <option value="Trastorno Emocional / Ansiedad">Trastorno Emocional / Ansiedad</option>
+                                <option value="Discapacidad Auditiva">Discapacidad Auditiva</option>
+                                <option value="Discapacidad Visual">Discapacidad Visual</option>
+                                <option value="Discapacidad Motora">Discapacidad Motora</option>
+                                <option value="Otro">Otro</option>
+                            </select>
+                        </div>
+                        <div class="campo">
+                            <label>Tipo de adecuación</label>
+                            <div style="display:flex;gap:14px;flex-wrap:wrap;margin-top:6px;">
+                                <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+                                    <input type="radio" name="pruebaPieAdecuacion" value="acceso" checked>
+                                    <span>Solo de Acceso</span>
+                                </label>
+                                <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+                                    <input type="radio" name="pruebaPieAdecuacion" value="significativa">
+                                    <span>Significativa / PACI</span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="campo">
+                            <label>Observaciones del estudiante (opcional)</label>
+                            <textarea id="pruebaPieObservaciones" rows="2" placeholder="Ej: Tiempo extra recomendado, apoyo visual, etc."></textarea>
+                        </div>
+                    </div>
+                </div>
 
                 <div class="campo-row">
                     <div class="campo">
@@ -1329,14 +1649,13 @@
             </div>
         </div>
 
-        <!-- BOTONES DE GENERACIÓN -->
-        <button class="btn-generar-ia" onclick="generarConIA()" id="btnIA">
+        <!-- BOTONES DE GENERACIÓN — los originales quedan ocultos; el FAB flotante es la UI principal -->
+        <button class="btn-generar-ia" onclick="generarConIA()" id="btnIA" style="display:none">
             &#129302; Generar con IA
         </button>
         <div id="iaStatus" class="ia-status" style="display:none"></div>
 
-        <!-- BOTON GENERAR CON PLANTILLA -->
-        <button class="btn-generar-template" onclick="generarMaterial()">
+        <button class="btn-generar-template" onclick="generarMaterial()" id="btnTpl" style="display:none">
             &#128196; Generar con Plantilla (sin IA)
         </button>
 
@@ -1357,7 +1676,21 @@
                 <!-- Contenido generado por JS -->
             </div>
         </div>
+
+            </div><!-- /.mat-main -->
+        </div><!-- /.mat-layout -->
     </main>
+
+    <!-- FAB flotante con acciones de generación -->
+    <div class="mat-fab" id="matFAB">
+        <div id="fabStatus" class="fab-status" style="display:none"></div>
+        <button class="fab-btn fab-ia" type="button" onclick="generarConIA()" id="fabIA" title="Generar el documento usando IA">
+            🤖 Generar con IA
+        </button>
+        <button class="fab-btn fab-tpl" type="button" onclick="generarMaterial()" id="fabTpl" title="Generar usando plantilla local (sin IA)">
+            📄 Generar con Plantilla
+        </button>
+    </div>
 
     <!-- TOAST legacy (fallback) -->
     <div class="legacy-toast" id="toast"></div>
@@ -1554,6 +1887,9 @@
         if (cfgRefs) cfgRefs.style.display = esEval ? '' : 'none';
         if (cfgPIE)  cfgPIE.style.display  = esPIE  ? '' : 'none';
         if (cfgHab)  cfgHab.style.display  = esGEjer ? '' : 'none';
+        // Toggle PIE adjunto a Prueba (solo cuando tipo === 'prueba')
+        var pruebaConPIE = document.getElementById('pruebaConPIE');
+        if (pruebaConPIE) pruebaConPIE.style.display = (tipo === 'prueba') ? '' : 'none';
         // Para 'prueba'/'control'/'diferenciada': el tope son 40.
         var cantInput = document.getElementById('inputCantPreg');
         if (cantInput) {
@@ -4084,6 +4420,20 @@ var modelo = _modeloGuardado;
                     document.getElementById('docGenerado').classList.add('visible');
                     document.getElementById('docGenerado').scrollIntoView({ behavior: 'smooth' });
                     setIAStatus('ok', '&#10003; Documento generado con IA exitosamente. Puedes imprimirlo o publicarlo en la Biblioteca.');
+
+                    // \u2500\u2500 Generaci\u00f3n dual: si es Prueba y el toggle PIE est\u00e1 marcado, generar tambi\u00e9n la versi\u00f3n adaptada \u2500\u2500
+                    var chkPIE = document.getElementById('chkAdjuntarPIE');
+                    if (tipoDocSeleccionado === 'prueba' && chkPIE && chkPIE.checked) {
+                        _generarPIEAdjunta({
+                            apiKey: apiKey,
+                            modelo: modelo,
+                            ctxBase: ctxPrompt,
+                            tipoNombre: tipoNombre,
+                            cursoTexto: cursoTexto,
+                            profesor: profesor,
+                            contenido: contenido
+                        });
+                    }
                 })
                 .catch(function(err) {
                     document.getElementById('btnIA').disabled = false;
@@ -4095,12 +4445,231 @@ var modelo = _modeloGuardado;
                 setIAStatus('error', '&#10007; No se pudo cargar la configuraci\u00f3n IA: ' + err.message);
             });
     }
+    /**
+     * Genera la versión PIE (Evaluación Diferenciada) ANEXA a una prueba ya emitida,
+     * usando los mismos OAs/contenido y los datos PIE inline (chkAdjuntarPIE).
+     * Hace una segunda llamada IA y concatena el resultado al docPreview.
+     */
+    function _generarPIEAdjunta(opts) {
+        var diagEl = document.getElementById('pruebaPieDiagnostico');
+        var diagnostico = diagEl ? (diagEl.value || '').trim() : '';
+        if (!diagnostico) {
+            setIAStatus('error', '&#10007; Seleccionaste "Generar también versión PIE" pero falta el diagnóstico NEE. Marca el diagnóstico y vuelve a generar.');
+            return;
+        }
+        var adeRadio = document.querySelector('input[name="pruebaPieAdecuacion"]:checked');
+        var adecuacion = adeRadio ? adeRadio.value : 'acceso';
+        var obsEl = document.getElementById('pruebaPieObservaciones');
+        var observaciones = obsEl ? (obsEl.value || '').trim() : '';
+
+        // Clonar el contexto base y sobreescribir con datos PIE
+        var ctxPIE = {};
+        for (var k in opts.ctxBase) ctxPIE[k] = opts.ctxBase[k];
+        ctxPIE.tipoDocSel       = 'diferenciada';
+        ctxPIE.tipoNombre       = 'Evaluación Diferenciada (PIE) — anexa a Prueba Sumativa';
+        ctxPIE.pieDiagnostico   = diagnostico;
+        ctxPIE.pieAdecuacion    = adecuacion;
+        ctxPIE.pieObservaciones = observaciones;
+        var promptPIE = _promptDiferenciada(ctxPIE);
+
+        setIAStatus('loading', '<span class="ia-spinner">⠿</span> Generando versión adaptada (PIE) para ' + diagnostico + '…');
+        var url = 'https://generativelanguage.googleapis.com/v1beta/models/' + opts.modelo + ':generateContent?key=' + opts.apiKey;
+        var body = JSON.stringify({
+            contents: [{ parts: [{ text: promptPIE }] }],
+            generationConfig: { temperature: 0.7, maxOutputTokens: 65536 }
+        });
+
+        fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: body })
+            .then(function(res){ return res.json(); })
+            .then(function(data){
+                if (data.error) {
+                    setIAStatus('error', '&#10007; La prueba estándar se generó OK, pero falló la versión PIE: ' + (data.error.message || ''));
+                    return;
+                }
+                var cand = data.candidates && data.candidates[0];
+                var text = cand && cand.content && cand.content.parts && cand.content.parts[0] && cand.content.parts[0].text;
+                if (!text) { setIAStatus('error', '&#10007; La IA no devolvió la versión PIE. Genera nuevamente sin marcar la prueba estándar para reintentar.'); return; }
+                text = text.replace(/^```html\s*/i, '').replace(/^```\s*/i, '').replace(/\s*```\s*$/i, '').trim();
+                var mBody = text.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
+                if (mBody) text = mBody[1].trim();
+                text = text.replace(/<!doctype[^>]*>/gi, '')
+                           .replace(/<\/?html[^>]*>/gi, '')
+                           .replace(/<head[\s\S]*?<\/head>/gi, '')
+                           .replace(/<style[\s\S]*?<\/style>/gi, '')
+                           .replace(/<\/?body[^>]*>/gi, '')
+                           .trim();
+                text = text.replace(/^\s*<h1[^>]*>[\s\S]*?<\/h1>/i, '').trim();
+
+                // Inserta divisor visual + cabecera + contenido PIE concatenado
+                var divisor = '<div style="page-break-before:always"></div>' +
+                              '<div style="margin-top:36px;padding:20px 22px;border-radius:14px;background:linear-gradient(135deg,rgba(244,114,182,.10),rgba(124,58,237,.08));border:2px dashed rgba(244,114,182,.4);text-align:center;font-size:.95rem;color:#f1d6e8;">' +
+                              '⚇ <strong>Versión adaptada PIE</strong> — Adecuación ' + (adecuacion === 'significativa' ? 'Significativa / PACI' : 'Solo de Acceso') + ' para diagnóstico <strong>' + diagnostico + '</strong>. ' +
+                              'Mismos OAs y contenido que la prueba estándar.' +
+                              '</div>';
+                var headerPIE = headerInstitucional('Evaluación Diferenciada (PIE)') +
+                                tituloBar((opts.contenido || 'Evaluación Diferenciada').toString().substring(0, 90)) +
+                                metaTabla({ profesor: opts.profesor, curso: opts.cursoTexto });
+                var preview = document.getElementById('docPreview');
+                preview.innerHTML += divisor + headerPIE + text + pieDoc();
+                setIAStatus('ok', '&#10003; ¡Listo! Se generaron AMBAS versiones: la prueba estándar y la versión adaptada PIE para ' + diagnostico + '. Encontrarás la versión adaptada después del salto de página.');
+            })
+            .catch(function(err){
+                setIAStatus('error', '&#10007; La prueba estándar se generó OK, pero falló la versión PIE: ' + err.message);
+            });
+    }
+
     function setIAStatus(tipo, msg) {
         var el = document.getElementById('iaStatus');
-        if (!el) return;
-        el.style.display = 'block';
-        el.className = 'ia-status ' + tipo;
-        el.innerHTML = msg;
+        if (el) {
+            el.style.display = 'block';
+            el.className = 'ia-status ' + tipo;
+            el.innerHTML = msg;
+        }
+        // Sincronizar con el FAB flotante
+        var fabSt = document.getElementById('fabStatus');
+        if (fabSt) {
+            fabSt.style.display = 'block';
+            fabSt.style.borderColor = tipo === 'error' ? 'rgba(239,68,68,.5)'
+                                    : tipo === 'success' ? 'rgba(34,197,94,.5)'
+                                    : tipo === 'loading' ? 'rgba(124,58,237,.5)'
+                                    : 'rgba(148,163,184,.25)';
+            fabSt.innerHTML = msg;
+        }
+        var fabBtn = document.getElementById('fabIA');
+        if (fabBtn) fabBtn.disabled = (tipo === 'loading');
+    }
+
+    // =============================================
+    // SIDEBAR / SCROLL-SPY / FAB / HEADER COLAPSABLE
+    // =============================================
+
+    function navStep(el, targetId) {
+        var target = document.getElementById(targetId);
+        if (!target) return;
+        var rect = target.getBoundingClientRect();
+        var offset = window.pageYOffset + rect.top - 80;
+        window.scrollTo({ top: offset, behavior: 'smooth' });
+        // Cerrar sidebar mobile al navegar
+        var sb = document.getElementById('matSidebar');
+        if (sb && sb.classList.contains('open')) sb.classList.remove('open');
+    }
+
+    function toggleSidebar() {
+        var sb = document.getElementById('matSidebar');
+        if (sb) sb.classList.toggle('open');
+    }
+
+    function _markStepActive(stepKey) {
+        var steps = document.querySelectorAll('.nav-step');
+        for (var i = 0; i < steps.length; i++) {
+            if (steps[i].getAttribute('data-step') === stepKey) steps[i].classList.add('active');
+            else steps[i].classList.remove('active');
+        }
+    }
+
+    function _markStepCompleted(stepKey, isComplete) {
+        var steps = document.querySelectorAll('.nav-step[data-step="' + stepKey + '"]');
+        for (var i = 0; i < steps.length; i++) {
+            if (isComplete) steps[i].classList.add('completed');
+            else steps[i].classList.remove('completed');
+        }
+    }
+
+    function _scrollSpy() {
+        var anchors = ['seccionTipo', 'seccionOAs', 'seccionValores', 'seccionContenido', 'seccionConfig'];
+        var keys    = ['tipo', 'oas', 'valores', 'contenido', 'config'];
+        var current = 'tipo';
+        var threshold = 140;
+        for (var i = 0; i < anchors.length; i++) {
+            var el = document.getElementById(anchors[i]);
+            if (!el) continue;
+            var rect = el.getBoundingClientRect();
+            if (rect.top <= threshold) current = keys[i];
+        }
+        _markStepActive(current);
+    }
+
+    function _heroScroll() {
+        var hero = document.querySelector('.hero-pro');
+        if (!hero) return;
+        if (window.pageYOffset > 120) hero.classList.add('compact');
+        else hero.classList.remove('compact');
+    }
+
+    function _updateSidebarStatus() {
+        // Tipo
+        var tipoMap = { guia:'Guía Aprendizaje', apunte:'Apunte', evaluacion:'Guía Ejercicios', prueba:'Prueba Formal', control:'Control', diferenciada:'Eval. Diferenciada' };
+        var elTipo = document.getElementById('ssTipo');
+        if (elTipo) elTipo.textContent = tipoMap[tipoDocSeleccionado] || '—';
+        _markStepCompleted('tipo', !!tipoDocSeleccionado);
+
+        // Curso
+        var curso = (document.getElementById('selectCurso') || {}).value || '';
+        var cursoLbl = curso && typeof CURRICULA_CHILE !== 'undefined' ? CURRICULA_CHILE.getNivelLabel(curso) : (curso || '—');
+        var elC = document.getElementById('ssCurso');
+        if (elC) elC.textContent = cursoLbl;
+
+        // Asignatura (no TP) o módulo (TP)
+        var asig = '';
+        var asigEl = document.getElementById('selectAsignatura');
+        if (asigEl && asigEl.value) asig = asigEl.value;
+        var modEl = document.getElementById('selectModulo');
+        if (!asig && modEl && modEl.options && modEl.selectedIndex > 0) asig = modEl.options[modEl.selectedIndex].text;
+        var elA = document.getElementById('ssAsig');
+        if (elA) elA.textContent = asig || '—';
+
+        // OAs marcados
+        var oasReg = document.querySelectorAll('#listaOAMineduc .oaRegCheck:checked').length;
+        var oasTP  = document.querySelectorAll('#listaCE input:checked').length;
+        var totalOAs = oasReg + oasTP;
+        var elOAs = document.getElementById('ssOAs');
+        if (elOAs) elOAs.textContent = String(totalOAs);
+        _markStepCompleted('oas', totalOAs > 0);
+
+        // Cantidad de preguntas
+        var cant = (document.getElementById('inputCantPreg') || {}).value || '';
+        var elCa = document.getElementById('ssCant');
+        if (elCa) elCa.textContent = cant ? (cant + ' preg.') : '—';
+
+        // Marcadores: contenido completado si hay texto en inputContenido
+        var cont = (document.getElementById('inputContenido') || {}).value || '';
+        _markStepCompleted('contenido', cont.trim().length > 5);
+
+        // Valores
+        var val = document.querySelectorAll('#valoresSalesianos input:checked').length;
+        _markStepCompleted('valores', val > 0);
+
+        // Config
+        _markStepCompleted('config', !!cant);
+    }
+
+    // Toggle de campos PIE embebidos en Prueba
+    function _wirePIEinPrueba() {
+        var chk = document.getElementById('chkAdjuntarPIE');
+        if (!chk) return;
+        chk.addEventListener('change', function() {
+            var box = document.getElementById('pruebaPIEFields');
+            if (box) box.style.display = chk.checked ? '' : 'none';
+        });
+    }
+
+    // Wireup global de listeners (scroll-spy + status + header colapsable)
+    if (typeof window !== 'undefined') {
+        window.addEventListener('scroll', function(){ _scrollSpy(); _heroScroll(); }, { passive: true });
+        window.addEventListener('load', function(){
+            _scrollSpy();
+            _updateSidebarStatus();
+            _wirePIEinPrueba();
+            // Listeners de cambios para refrescar el sidebar status
+            document.addEventListener('change', _updateSidebarStatus);
+            document.addEventListener('input',  _updateSidebarStatus);
+            document.addEventListener('click',  function(e){
+                // Refrescar status al click sobre tarjetas o cambios de UI
+                if (e.target.closest && (e.target.closest('.tipo-doc-card') || e.target.closest('.nav-step'))) {
+                    setTimeout(_updateSidebarStatus, 60);
+                }
+            });
+        });
     }
 
     // =============================================
