@@ -1376,11 +1376,6 @@
                     <h3>Control Rápido</h3>
                     <p>Quiz de 10–15 min para evaluación formativa de la clase</p>
                 </div>
-                <div class="tipo-doc-card" onclick="seleccionarTipo(this, 'diferenciada')" data-tipo="diferenciada">
-                    <div class="icon">&#9856;</div>
-                    <h3>Evaluación Diferenciada</h3>
-                    <p>Adaptación PIE para estudiantes con NEE — Decretos 83 y 67 Mineduc</p>
-                </div>
             </div>
         </div>
 
@@ -1747,82 +1742,48 @@
                 </div>
             </div>
 
-            <!-- ── Bloque E: Habilidad a ejercitar (solo Guía de Ejercicios) ── -->
+            <!-- ── Bloque E: Configuración de Guía de Ejercicios (solo este tipo) ── -->
             <div class="cfg-bloque" id="cfgHabilidad" style="display:none">
-                <div class="cfg-bloque-titulo">Habilidad a ejercitar (opcional)</div>
-                <p class="cfg-hint">Define el verbo de habilidad que se entrenará en la guía. La IA estructurará los ejercicios por niveles (40% mecanización, 40% aplicación con variables, 20% desafío). Si lo dejas vacío, la IA inferirá la habilidad del OA seleccionado.</p>
-                <div class="campo">
-                    <label>Habilidad principal</label>
-                    <select id="ejHabilidad" style="width:100%;padding:10px;border-radius:8px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.15);color:#e5e7eb;">
-                        <option value="">— Inferir del OA seleccionado —</option>
-                        <option value="Calcular">Calcular (operaciones, ecuaciones, porcentajes)</option>
-                        <option value="Resolver">Resolver problemas / situaciones</option>
-                        <option value="Aplicar">Aplicar fórmulas / reglas / procedimientos</option>
-                        <option value="Analizar">Analizar (descomponer, comparar)</option>
-                        <option value="Clasificar">Clasificar / categorizar</option>
-                        <option value="Identificar">Identificar elementos / patrones</option>
-                        <option value="Redactar">Redactar / escribir textos</option>
-                        <option value="Conjugar">Conjugar verbos</option>
-                        <option value="Escribir correctamente">Escribir correctamente (ortografía / acentuación)</option>
-                        <option value="Interpretar">Interpretar (gráficos, mapas, textos)</option>
-                        <option value="Inferir">Inferir / deducir</option>
-                        <option value="Argumentar">Argumentar / justificar</option>
-                        <option value="Traducir">Traducir / convertir representaciones</option>
-                        <option value="Modelar">Modelar matemáticamente</option>
-                        <option value="Otro">Otro (especifica abajo)</option>
-                    </select>
+                <div class="cfg-bloque-titulo">Configuración de la guía de ejercicios</div>
+                <p class="cfg-hint">La guía se estructura en 3 niveles de dificultad creciente (40% mecanización, 40% aplicación con variables, 20% desafío) según el contenido que indiques arriba. La IA generará los ejercicios — principalmente <strong>matemáticos / técnicos</strong> cuando aplique — con su solucionario.</p>
+
+                <div class="campo-row">
+                    <div class="campo">
+                        <label>Cantidad de ejercicios</label>
+                        <input type="number" id="ejCantidad" min="5" max="50" step="1" value="15">
+                        <small class="cfg-help">Recomendado: 15–25 para guías intensivas. Mín 5, máx 50.</small>
+                    </div>
+                    <div class="campo">
+                        <label>Habilidad principal</label>
+                        <select id="ejHabilidad" style="width:100%;padding:10px;border-radius:8px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.15);color:#e5e7eb;">
+                            <option value="">— Inferir del OA seleccionado —</option>
+                            <option value="Calcular" selected>Calcular (operaciones, ecuaciones, porcentajes)</option>
+                            <option value="Resolver">Resolver problemas / situaciones</option>
+                            <option value="Aplicar">Aplicar fórmulas / reglas / procedimientos</option>
+                            <option value="Analizar">Analizar (descomponer, comparar)</option>
+                            <option value="Clasificar">Clasificar / categorizar</option>
+                            <option value="Identificar">Identificar elementos / patrones</option>
+                            <option value="Redactar">Redactar / escribir textos</option>
+                            <option value="Conjugar">Conjugar verbos</option>
+                            <option value="Escribir correctamente">Escribir correctamente (ortografía / acentuación)</option>
+                            <option value="Interpretar">Interpretar (gráficos, mapas, textos)</option>
+                            <option value="Inferir">Inferir / deducir</option>
+                            <option value="Argumentar">Argumentar / justificar</option>
+                            <option value="Traducir">Traducir / convertir representaciones</option>
+                            <option value="Modelar">Modelar matemáticamente</option>
+                            <option value="Otro">Otro (especifica abajo)</option>
+                        </select>
+                    </div>
                 </div>
+
                 <div class="campo">
-                    <label>Detalle de la habilidad u objetivo de la guía (opcional)</label>
+                    <label>Detalle / contexto específico de los ejercicios (opcional)</label>
                     <input type="text" id="ejHabilidadDetalle"
-                        placeholder="Ej: Calcular resistencia equivalente en circuitos mixtos / Redactar párrafos con conectores causales / Conjugar verbos irregulares en pretérito indefinido"
+                        placeholder="Ej: Ecuaciones de primer grado con paréntesis / Resistencias en serie y paralelo con multímetro / Conjugar verbos irregulares en pretérito indefinido"
                         style="width:100%;padding:10px;border-radius:8px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.15);color:#e5e7eb;">
                 </div>
             </div>
 
-            <!-- ── Bloque D: Datos PIE para Evaluación Diferenciada ── -->
-            <div class="cfg-bloque" id="cfgPIE" style="display:none">
-                <div class="cfg-bloque-titulo">Datos PIE — Evaluación Diferenciada (Decretos 83 y 67 Mineduc)</div>
-                <p class="cfg-hint">Indica el diagnóstico del estudiante y el tipo de adecuación que se aplicará. La IA generará un instrumento adaptado siguiendo el rol de Educador Diferencial / Coordinador PIE.</p>
-                <div class="campo">
-                    <label>Diagnóstico NEE del estudiante</label>
-                    <select id="pieDiagnostico" style="width:100%;padding:10px;border-radius:8px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.15);color:#e5e7eb;">
-                        <option value="">— Seleccionar diagnóstico —</option>
-                        <option value="TDAH">TDAH (Trastorno por Déficit de Atención e Hiperactividad)</option>
-                        <option value="TEA">TEA (Trastorno del Espectro Autista)</option>
-                        <option value="Dislexia">Dislexia / Trastorno específico del aprendizaje de la lectura</option>
-                        <option value="Discalculia">Discalculia / Trastorno específico del aprendizaje del cálculo</option>
-                        <option value="Disgrafía">Disgrafía / Trastorno específico de la escritura</option>
-                        <option value="Discapacidad Intelectual Leve">Discapacidad Intelectual Leve</option>
-                        <option value="Discapacidad Intelectual Moderada">Discapacidad Intelectual Moderada</option>
-                        <option value="TEL">TEL (Trastorno Específico del Lenguaje)</option>
-                        <option value="Funcionamiento Intelectual Limítrofe">Funcionamiento Intelectual Limítrofe</option>
-                        <option value="Trastorno Emocional / Ansiedad">Trastorno Emocional / Ansiedad</option>
-                        <option value="Discapacidad Auditiva">Discapacidad Auditiva</option>
-                        <option value="Discapacidad Visual">Discapacidad Visual</option>
-                        <option value="Discapacidad Motora">Discapacidad Motora</option>
-                        <option value="Otro">Otro (especifica en observaciones)</option>
-                    </select>
-                </div>
-                <div class="campo">
-                    <label>Tipo de adecuación</label>
-                    <div style="display:flex;gap:14px;flex-wrap:wrap;margin-top:6px;">
-                        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
-                            <input type="radio" name="pieAdecuacion" value="acceso" checked>
-                            <span>Solo de Acceso (mantiene dificultad cognitiva, adapta formato)</span>
-                        </label>
-                        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
-                            <input type="radio" name="pieAdecuacion" value="significativa">
-                            <span>Significativa / PACI (Plan de Adecuación Curricular Individual)</span>
-                        </label>
-                    </div>
-                </div>
-                <div class="campo">
-                    <label>Observaciones adicionales del estudiante (opcional)</label>
-                    <textarea id="pieObservaciones" rows="3"
-                        placeholder="Ej: Requiere apoyo visual con pictogramas. Trabaja mejor con instrucciones cortas. Tiempo extra recomendado: 30%."></textarea>
-                </div>
-            </div>
         </div>
 
         <!-- BOTONES DE GENERACIÓN — los originales quedan ocultos; el FAB flotante es la UI principal -->
@@ -2054,14 +2015,12 @@
         tipoDocSeleccionado = tipo;
         var cfgEval = document.getElementById('cfgEval');
         var cfgRefs = document.getElementById('cfgRefs');
-        var cfgPIE  = document.getElementById('cfgPIE');
         var cfgHab  = document.getElementById('cfgHabilidad');
-        var esEval  = (tipo === 'evaluacion' || tipo === 'prueba' || tipo === 'control' || tipo === 'diferenciada');
-        var esPIE   = (tipo === 'diferenciada');
+        // Guía de Ejercicios YA NO comparte cfgEval/cfgRefs: usa solo su propio bloque cfgHab.
+        var esEval  = (tipo === 'prueba' || tipo === 'control');
         var esGEjer = (tipo === 'evaluacion');
         if (cfgEval) cfgEval.style.display = esEval ? '' : 'none';
         if (cfgRefs) cfgRefs.style.display = esEval ? '' : 'none';
-        if (cfgPIE)  cfgPIE.style.display  = esPIE  ? '' : 'none';
         if (cfgHab)  cfgHab.style.display  = esGEjer ? '' : 'none';
         // Toggle PIE adjunto a Prueba (solo cuando tipo === 'prueba')
         var pruebaConPIE = document.getElementById('pruebaConPIE');
@@ -2664,11 +2623,6 @@
             else if (tipoDocSeleccionado === 'evaluacion') html = generarGuiaEjercicios(modFake, aeFake, 1, oasReg[0].codigo, cursoTexto, cont, [], dificultad, profesor, valoresArr, evalOpts);
             else if (tipoDocSeleccionado === 'prueba') html = generarPrueba(modFake, aeFake, 1, oasReg[0].codigo, cursoTexto, cont, [], dificultad, profesor, valoresArr, evalOpts);
             else if (tipoDocSeleccionado === 'control') html = generarControl(modFake, aeFake, 1, oasReg[0].codigo, cursoTexto, cont, [], dificultad, profesor, valoresArr, evalOpts);
-            // Evaluación Diferenciada (NEE/PIE) solo se genera por IA — no tiene fallback HTML local.
-            else if (tipoDocSeleccionado === 'diferenciada') {
-                showToast('La Evaluación Diferenciada requiere IA. Usa el botón "Crear con IA" más abajo.', 'warn');
-                return;
-            }
             document.getElementById('docPreview').innerHTML = html;
             document.getElementById('docGenerado').classList.add('visible');
             document.getElementById('docGenerado').scrollIntoView({ behavior: 'smooth' });
@@ -2728,9 +2682,6 @@
             html = generarPrueba(mod, ae, aeNum, oaId, cursoTexto, cont, cesTexto, dificultad, profesor, valoresArr, evalOpts);
         } else if (tipoDocSeleccionado === 'control') {
             html = generarControl(mod, ae, aeNum, oaId, cursoTexto, cont, cesTexto, dificultad, profesor, valoresArr, evalOpts);
-        } else if (tipoDocSeleccionado === 'diferenciada') {
-            showToast('La Evaluación Diferenciada requiere IA. Usa el botón "Crear con IA" más abajo.', 'warn');
-            return;
         }
 
         document.getElementById('docPreview').innerHTML = html;
@@ -4172,7 +4123,9 @@
         if (habDet) habilidadStr = habilidadStr ? (habilidadStr + ' — ' + habDet) : habDet;
         if (!habilidadStr) habilidadStr = 'A inferir del OA y del contenido (usa el verbo principal del Objetivo de Aprendizaje)';
 
-        var totalEj = ctx.cantPreg || 15;
+        // Cantidad de ejercicios viene del bloque cfgHabilidad (input ejCantidad).
+        // ctx.cantPreg es fallback por si el bloque no se pobló.
+        var totalEj = ctx.cantEjercicios || ctx.cantPreg || 15;
         // Distribución 40/40/20 con redondeos seguros (total exacto)
         var nN1 = Math.round(totalEj * 0.40);
         var nN3 = Math.max(2, Math.round(totalEj * 0.20));
@@ -4369,8 +4322,8 @@
         if (tipo === 'apunte')       return _promptApunte(ctx);
         if (tipo === 'evaluacion')   return _promptEvaluacion(ctx);
         if (tipo === 'prueba')       return _promptPrueba(ctx);
-        if (tipo === 'diferenciada') return _promptDiferenciada(ctx);
-        // 'control' usa el prompt genérico (decisión Eduardo).
+        // 'control' usa el prompt genérico. _promptDiferenciada se invoca solo
+        // desde el flujo dual de Prueba (toggle PIE adjunto), no como tipo standalone.
         return _promptGenerico(ctx);
     }
 
@@ -4439,8 +4392,7 @@
             apunte: 'Apunte de Clase',
             evaluacion: 'Gu\u00eda de Ejercicios',
             prueba: 'Prueba Formal Sumativa',
-            control: 'Control R\u00e1pido Formativo',
-            diferenciada: 'Evaluaci\u00f3n Diferenciada (PIE)'
+            control: 'Control R\u00e1pido Formativo'
         }[tipoDocSeleccionado] || tipoDocSeleccionado;
 
         var difTexto = { basico:'b\u00e1sico (primer acercamiento al tema, lenguaje simple)', intermedio:'intermedio (aplicaci\u00f3n pr\u00e1ctica, lenguaje t\u00e9cnico moderado)', avanzado:'avanzado (an\u00e1lisis cr\u00edtico, resoluci\u00f3n de problemas complejos)' }[dificultad] || dificultad;
@@ -4452,33 +4404,25 @@
         var refEl = document.getElementById('materialReferencia');
         if (refEl) materialReferencia = (refEl.value || '').trim();
 
-        // Habilidad a ejercitar (solo aplica cuando tipoDocSeleccionado === 'evaluacion')
+        // Configuración de Guía de Ejercicios (cantidad + habilidad)
         var habilidad = '';
         var habilidadDetalle = '';
+        var cantEjercicios = 0;
         if (tipoDocSeleccionado === 'evaluacion') {
             var habEl = document.getElementById('ejHabilidad');
             habilidad = habEl ? (habEl.value || '').trim() : '';
             var habDetEl = document.getElementById('ejHabilidadDetalle');
             habilidadDetalle = habDetEl ? (habDetEl.value || '').trim() : '';
+            var cantEl = document.getElementById('ejCantidad');
+            cantEjercicios = cantEl ? (parseInt(cantEl.value, 10) || 15) : 15;
         }
 
-        // Datos PIE (solo aplican cuando tipoDocSeleccionado === 'diferenciada')
+        // Datos PIE (legacy — solo se usaban cuando 'diferenciada' era tipo standalone;
+        // ahora la diferenciada vive como toggle dentro de Prueba Formal y se maneja
+        // por _generarPIEAdjunta() con paneles por NEE).
         var pieDiagnostico   = '';
         var pieAdecuacion    = 'acceso';
         var pieObservaciones = '';
-        if (tipoDocSeleccionado === 'diferenciada') {
-            var diagEl = document.getElementById('pieDiagnostico');
-            pieDiagnostico = diagEl ? (diagEl.value || '').trim() : '';
-            var adeRadio = document.querySelector('input[name="pieAdecuacion"]:checked');
-            pieAdecuacion = adeRadio ? adeRadio.value : 'acceso';
-            var obsEl = document.getElementById('pieObservaciones');
-            pieObservaciones = obsEl ? (obsEl.value || '').trim() : '';
-            if (!pieDiagnostico) {
-                setIAStatus('error', '&#10007; Para Evaluación Diferenciada debes seleccionar el diagnóstico NEE del estudiante.');
-                document.getElementById('btnIA').disabled = false;
-                return;
-            }
-        }
 
         // Construir contexto único para los builders de prompt
         var ctxPrompt = {
@@ -4503,6 +4447,7 @@
             valoresArr: valoresArr || [],
             habilidad:        habilidad,
             habilidadDetalle: habilidadDetalle,
+            cantEjercicios:   cantEjercicios,
             pieDiagnostico:   pieDiagnostico,
             pieAdecuacion:    pieAdecuacion,
             pieObservaciones: pieObservaciones
