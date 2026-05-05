@@ -36,8 +36,18 @@ CURRICULA_PLAN_COMUN['quimica'] = {
   //    { codigo:'OA1', eje:'Química', descripcion:'Explicar...' }
   // ───────────────────────────────────────────────────────────────────────────
   oas: {
-    '1M': [ /* TODO: OAs Química 1°M (ver ciencias.js para CN) */ ],
-    '2M': [ /* TODO: OAs Química 2°M (ver ciencias.js para CN) */ ],
+    '1M': [ /* Química 1°M — DS 1264/2016 (Bases CN 7°-2°M, eje Química). Numeración Mineduc original preservada para trazabilidad. Ver ciencias.js. */
+      { codigo: 'OA17', eje: 'Química', descripcion: 'Investigar experimentalmente y explicar, usando evidencias, que la fermentación, la combustión provocada por un motor y un calefactor, y la oxidación de metales, entre otras, son reacciones químicas presentes en la vida diaria, considerando: la producción de gas, la formación de precipitados, el cambio de temperatura, color y olor, y la emisión de luz, entre otros; la influencia de la cantidad de sustancia, la temperatura, el volumen y la presión en ellas; su representación simbólica en ecuaciones químicas; su impacto en los seres vivos y el entorno.' },
+      { codigo: 'OA18', eje: 'Química', descripcion: 'Desarrollar un modelo que describa cómo el número total de átomos no varía en una reacción química y cómo la masa se conserva aplicando la ley de la conservación de la materia.' },
+      { codigo: 'OA19', eje: 'Química', descripcion: 'Explicar la formación de compuestos binarios y ternarios, considerando las fuerzas eléctricas entre partículas y la nomenclatura inorgánica correspondiente.' },
+      { codigo: 'OA20', eje: 'Química', descripcion: 'Establecer relaciones cuantitativas entre reactantes y productos en reacciones químicas (estequiometría) y explicar la formación de compuestos útiles para los seres vivos, como la formación de la glucosa en la fotosíntesis.' }
+    ],
+    '2M': [ /* Química 2°M — DS 1264/2016 (Bases CN 7°-2°M, eje Química). Numeración Mineduc original. Ver ciencias.js. */
+      { codigo: 'OA15', eje: 'Química', descripcion: 'Explicar, por medio de modelos y la experimentación, las propiedades de las soluciones en ejemplos cercanos, considerando: el estado físico (sólido, líquido y gaseoso); sus componentes (soluto y solvente); la cantidad de soluto disuelto (concentración).' },
+      { codigo: 'OA16', eje: 'Química', descripcion: 'Planificar y conducir una investigación experimental para proveer evidencias que expliquen las propiedades coligativas de las soluciones y su importancia en procesos cotidianos (la mantención de frutas y mermeladas en conserva) e industriales (aditivos en el agua de radiadores).' },
+      { codigo: 'OA17', eje: 'Química', descripcion: 'Crear modelos del carbono y explicar sus propiedades como base para la formación de moléculas útiles para los seres vivos (biomoléculas presentes en la célula) y el entorno (hidrocarburos como petróleo y sus derivados).' },
+      { codigo: 'OA18', eje: 'Química', descripcion: 'Desarrollar modelos que expliquen la estereoquímica e isomería de compuestos orgánicos como la glucosa, identificando sus propiedades y su utilidad para los seres vivos.' }
+    ],
     '3M': [ /* TODO: OAs Química 3°M FG DS 193/2019 */ ],
     '4M': [ /* TODO: OAs Química 4°M FG DS 193/2019 */ ]
   },

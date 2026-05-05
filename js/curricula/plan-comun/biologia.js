@@ -37,8 +37,26 @@ CURRICULA_PLAN_COMUN['biologia'] = {
   //    { codigo:'OA1', eje:'Biología', descripcion:'Explicar...' }
   // ───────────────────────────────────────────────────────────────────────────
   oas: {
-    '1M': [ /* TODO: OAs Biología 1°M (ver ciencias.js para CN) */ ],
-    '2M': [ /* TODO: OAs Biología 2°M (ver ciencias.js para CN) */ ],
+    '1M': [ /* Biología 1°M — DS 1264/2016 (Bases CN 7°-2°M, eje Biología). Numeración Mineduc original preservada para trazabilidad. Ver ciencias.js. */
+      { codigo: 'OA1', eje: 'Biología', descripcion: 'Explicar, basándose en evidencias, que los fósiles: se forman a partir de restos de animales y plantas; se forman en rocas sedimentarias; se ubican de acuerdo a su antigüedad en los estratos de la Tierra.' },
+      { codigo: 'OA2', eje: 'Biología', descripcion: 'Analizar e interpretar datos para proveer de evidencias que apoyen que la diversidad de organismos es el resultado de la evolución, considerando: evidencias de la evolución (como el registro fósil, las estructuras anatómicas homólogas, la embriología y las secuencias de ADN); los postulados de la teoría de la selección natural; los aportes de científicos como Darwin y Wallace a las teorías evolutivas.' },
+      { codigo: 'OA3', eje: 'Biología', descripcion: 'Explicar, basándose en evidencias, que la clasificación de la diversidad de organismos se construye a través del tiempo sobre la base de criterios taxonómicos que permiten organizarlos en grupos y subgrupos, identificando sus relaciones de parentesco con ancestros comunes.' },
+      { codigo: 'OA4', eje: 'Biología', descripcion: 'Investigar y explicar cómo se organizan e interactúan los seres vivos en diversos ecosistemas, a partir de ejemplos de Chile, considerando: los niveles de organización de los seres vivos (como organismo, población, comunidad, ecosistema); las interacciones biológicas (como depredación, competencia, comensalismo, mutualismo, parasitismo).' },
+      { codigo: 'OA5', eje: 'Biología', descripcion: 'Analizar e interpretar los factores que afectan el tamaño de las poblaciones (propagación de enfermedades, disponibilidad de energía y de recursos alimentarios, sequías, entre otros) y predecir posibles consecuencias sobre el ecosistema.' },
+      { codigo: 'OA6', eje: 'Biología', descripcion: 'Desarrollar modelos que expliquen: el ciclo del carbono, el nitrógeno, el agua y el fósforo, y su importancia biológica; los flujos de energía en un ecosistema (redes y pirámides tróficas); la trayectoria de contaminantes y su bioacumulación.' },
+      { codigo: 'OA7', eje: 'Biología', descripcion: 'Explicar, por medio de una investigación, el rol de la fotosíntesis y la respiración celular en el ecosistema considerando: el flujo de la energía; el ciclo de la materia.' },
+      { codigo: 'OA8', eje: 'Biología', descripcion: 'Explicar y evaluar los efectos de acciones humanas (conservación ambiental, cultivos, forestación y deforestación, entre otras) y de fenómenos naturales (sequías, erupciones volcánicas, entre otras) en relación con: el equilibrio de los ecosistemas; la disponibilidad de recursos naturales renovables y no renovables; las posibles medidas para un desarrollo sustentable.' }
+    ],
+    '2M': [ /* Biología 2°M — DS 1264/2016 (Bases CN 7°-2°M, eje Biología). Numeración Mineduc original. Ver ciencias.js. */
+      { codigo: 'OA1', eje: 'Biología', descripcion: 'Explicar cómo el sistema nervioso coordina las acciones del organismo para adaptarse a estímulos del ambiente por medio de señales transmitidas por neuronas a lo largo del cuerpo, e investigar y comunicar sus cuidados, como las horas de sueño, el consumo de drogas, café y alcohol, y la prevención de traumatismos.' },
+      { codigo: 'OA2', eje: 'Biología', descripcion: 'Crear modelos que expliquen la regulación de: la glicemia por medio del control de las hormonas pancreáticas; los caracteres sexuales y las funciones reproductivas por medio del control de las hormonas sexuales en el organismo.' },
+      { codigo: 'OA3', eje: 'Biología', descripcion: 'Explicar que la sexualidad humana y la reproducción son aspectos fundamentales de la vida del ser humano, considerando los aspectos biológicos, sociales, afectivos y psicológicos, y la responsabilidad individual frente a sí mismo y los demás.' },
+      { codigo: 'OA4', eje: 'Biología', descripcion: 'Describir la fecundación, la implantación y el desarrollo del embrión, y analizar la responsabilidad de los padres en la nutrición prenatal y la lactancia.' },
+      { codigo: 'OA5', eje: 'Biología', descripcion: 'Explicar y evaluar los métodos de regulación de la fertilidad e identificar los elementos de una paternidad y una maternidad responsables.' },
+      { codigo: 'OA6', eje: 'Biología', descripcion: 'Investigar y argumentar, basándose en evidencias, que el material genético se transmite de generación en generación en organismos como plantas y animales, considerando: la comparación de la mitosis y la meiosis; las causas y consecuencias de anomalías y pérdida de control de la división celular (tumor, cáncer, trisomía, entre otros).' },
+      { codigo: 'OA7', eje: 'Biología', descripcion: 'Desarrollar una explicación científica, basada en evidencias, sobre los procesos de herencia genética en plantas y animales, aplicando los principios básicos de la herencia propuestos por Mendel.' },
+      { codigo: 'OA8', eje: 'Biología', descripcion: 'Investigar y explicar las aplicaciones que han surgido a raíz de la manipulación genética para generar alimentos, detergentes, vestuario, fármacos u otras, y evaluar sus implicancias éticas y sociales.' }
+    ],
     '3M': [ /* TODO: OAs Biología 3°M FG DS 193/2019 */ ],
     '4M': [ /* TODO: OAs Biología 4°M FG DS 193/2019 */ ]
   },
