@@ -2,8 +2,8 @@
 // DATOS CURRICULARES — Especialidad Gráfica
 // Archivo: js/curricula/tp/datos-grafica.js
 //
-// Módulos cargados: GR1–GR8 (8 módulos)
-//   3° Medio : GR1, GR2, GR3, GR4
+// Módulos cargados: GR1–GR8 + GR10 + GR11 (10 módulos)
+//   3° Medio : GR1, GR2, GR3, GR4, GR10 (Taller Diseño Gráfico), GR11 (Modelación e Impresión 3D)
 //   4° Medio : GR5, GR6, GR7, GR8
 //
 // Fuente: Programa de Estudio Mineduc — Especialidad Gráfica
@@ -179,6 +179,88 @@ CURRICULA_FULL['grafica'] = {
             'CE1': 'Selecciona adecuadamente insumos y materiales necesarios para la impresión como: solventes, lubricantes, accesorios y otros elementos, según el proceso, sus diferencias, propiedades técnicas y cuidado del medio ambiente.',
             'CE2': 'Aplica y utiliza insumos y materiales gráficos con cuidado y eficiencia según los elementos especificados en una orden de trabajo, como productos de limpieza, solventes, lubricantes, accesorios, entre otros.',
             'CE3': 'Manipula y abastece de los materiales e insumos con responsabilidad, según orden de trabajo y aplicando las normas de seguridad y cuidado del medio ambiente.'
+          }
+        }
+      }
+    },
+
+    'GR10': {
+      num:    'GR10',
+      nombre: 'Taller Diseño Gráfico',
+      nivel:  '3M',
+      horas:  114,
+      oas: {
+        'OA5': 'Realizar trabajos de diseño gráfico, que ofrezcan soluciones de comunicación visual en diversos medios y soportes, a través de la integración de diversas variables asociadas a las problemáticas comunicacionales tales como el contexto, requerimientos, usuario, medio, normativas y al manejo de un amplio repertorio de herramientas y tecnologías análogas y digitales, que le permiten articular soluciones a problemáticas de Diseño para la Información, Diseño para la Comercialización y Diseño para la Interacción en sus distintos sustratos.',
+        'OA6': 'Aplicar constantemente la normativa pertinente de higiene, de seguridad industrial y medioambiental correspondiente al tipo de sustrato y al sector productivo, para prevenir riesgos de enfermedades profesionales, accidentes, daños ambientales y de los equipos.'
+      },
+      aes: {
+        'OA1': {
+          texto: 'Realiza el diseño de diferentes piezas gráficas, favoreciendo la comunicación visual en diversos medios y soportes.',
+          ces: {
+            'CE1': 'Identifica los elementos básicos del Diseño Gráfico.',
+            'CE2': 'Identifica y prepara las herramientas y/o materiales para la realización de una pieza gráfica, considerando normas de seguridad y protección del medio ambiente.',
+            'CE3': 'Identifica el software adecuado para la realización de la pieza gráfica solicitada en orden de trabajo.',
+            'CE4': 'Realiza el diseño de diferentes piezas gráficas según orden de trabajo.'
+          }
+        },
+        'OA2': {
+          texto: 'Realiza Diseño editorial identificando sus características y utilidades en el mercado local.',
+          ces: {
+            'CE1': 'Reconoce diferentes estilos de diseño editorial.',
+            'CE2': 'Realiza diseño editorial identificando sus características.'
+          }
+        },
+        'OA3': {
+          texto: 'Realiza diseño de afiches para diferentes soportes y sistemas de impresión.',
+          ces: {
+            'CE1': 'Identifica las características del comportamiento del color según sistema de impresión.',
+            'CE2': 'Obtiene matrices según sistema de impresión y sus características de reproducción.'
+          }
+        }
+      }
+    },
+
+    'GR11': {
+      num:    'GR11',
+      nombre: 'Modelación e Impresión 3D',
+      nivel:  '3M',
+      horas:  4,
+      oas: {
+        'OA_3D': 'Integrar conocimientos de Modelación e Impresión 3D en la especialidad de Gráfica, ofreciendo aprendizajes relevantes en cuanto al diseño de piezas gráficas personalizadas de gran impacto, manejando tecnologías de modelado, slicing e impresión, y aplicando normas de seguridad y gestión ambiental.'
+      },
+      aes: {
+        'OA1': {
+          texto: 'Nivel 1 — A.1. Reconocer los fundamentos de la impresión 3D, según normas establecidas de materialidad, seguridad y gestión ambiental, manejando las tecnologías de la información y comunicación.',
+          ces: {
+            'CE1': 'Tipos de Impresión 3D: FDM (Fusión por Deposición Modelada) vs. Resina (SLA/DLP).',
+            'CE2': 'El Flujo de Trabajo (Workflow): Diseño → Modelado → Laminado → Impresión.',
+            'CE3': 'Conceptos de Diseño para Fabricación (DfM): Espesor de pared, voladizos (overhangs), soportes.'
+          }
+        },
+        'OA2': {
+          texto: 'Nivel 1 — A.2. Reconoce Impresoras 3D, materiales e insumos, y tecnologías de impresión mediante la lectura y estudio de manuales técnicos evaluando su pertinencia.',
+          ces: {
+            'CE1': 'Identificar tipos de impresoras 3D e insumos según las exigencias de cada pieza gráfica.',
+            'CE2': 'Identifica los formatos de archivo utilizados en la impresión 3D y su secuencialidad.',
+            'CE3': 'Identificar espacios apropiados para el correcto trabajo de las impresoras, junto con las herramientas necesarias y normas de seguridad establecidas.'
+          }
+        },
+        'OA3': {
+          texto: 'Nivel 1 — A.3. Modelado Básico a partir de Vectores 2D, extrusión y elevación a 3D, mediante reconocimiento de herramientas y software especializados en modelado 3D, para la obtención de archivos (G-code) para la impresión 3D.',
+          ces: {
+            'CE1': 'Creación de vectores 2D, cierre de curvas, unificación de trazos y optimización para extrusión de piezas gráficas.',
+            'CE2': 'Operaciones Booleanas: Unión, diferencia y corte de sólidos para generar formas gráficas complejas a partir de formas simples (2D), para piezas 3D.',
+            'CE3': 'Diseñar piezas con detalles gráficos integrados como grabados o relieves, comprendiendo la estructura de un archivo STL y su relevancia en la formación de una pieza gráfica en 3D.',
+            'CE4': 'Comprobación y Reparación de Errores en la Malla: Detección de agujeros y caras invertidas, uso de herramientas de reparación y exportación final: generación del archivo STL (.stl) o OBJ (.obj) con la escala correcta.'
+          }
+        },
+        'OA4': {
+          texto: 'Nivel 2 — T.4. Modelado Constructivo por Combinación de Geometrías, Confirmación y Exportación del Archivo STL.',
+          ces: {
+            'CE1': 'Operaciones Booleanas: Unión, diferencia y corte de sólidos para generar formas complejas a partir de primitivas.',
+            'CE2': 'Concepto de Malla 3D: Triángulos, aristas y vértices. Mallas Manifold vs. Non-Manifold.',
+            'CE3': 'Comprobación y Reparación de Errores en la Malla: Detección de agujeros y caras invertidas (uso de herramientas de reparación, ej. Meshmixer o la función de reparación del slicer).',
+            'CE4': 'Exportación Final: Generación del archivo STL (.stl) o OBJ (.obj) con la escala correcta.'
           }
         }
       }
