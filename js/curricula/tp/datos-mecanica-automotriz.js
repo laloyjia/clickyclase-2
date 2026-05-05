@@ -2,9 +2,10 @@
 // DATOS CURRICULARES — Especialidad Mecánica Automotriz
 // Archivo: js/curricula/tp/datos-mecanica-automotriz.js
 //
-// Módulos cargados: MA1–MA9 + MA13 (10 módulos)
+// Módulos cargados: MA1–MA9 + MA13 + MAEMP + MATHD (12 módulos)
+//   1° Medio : MATHD (Taller de Herramientas Digitales)
 //   3° Medio : MA1, MA2, MA3, MA4, MA5, MA6
-//   4° Medio : MA7, MA8, MA9, MA13
+//   4° Medio : MA7, MA8, MA9, MA13, MAEMP (Emprendimiento y Empleabilidad)
 //
 // Fuente: Programa de Estudio Mineduc — Especialidad Mecánica Automotriz
 // =============================================
@@ -434,6 +435,48 @@ CURRICULA_FULL['mecanica-automotriz'] = {
       }
     },
 
+    'MATHD': {
+      num:    'MATHD',
+      nombre: 'Taller de Herramientas Digitales',
+      nivel:  '1M',
+      horas:  76,
+      oas: {
+        'OA1': 'Utilizar e incorporar herramientas digitales tales como documentos de texto, presentaciones digitales y tablas de datos integrando diferentes técnicas en el uso de software para la comunicación efectiva dentro de un entorno digital.'
+      },
+      aes: {
+        'OA1': {
+          texto: 'Conoce y utiliza herramientas G-Suite de manera eficiente para el trabajo educativo, demostrando una actitud de autonomía y responsabilidad en uso de las herramientas digitales.',
+          ces: {
+            'CE1': 'Utiliza herramientas de G-Suite, ejecutando trabajos digitales cumpliendo con los plazos establecidos.',
+            'CE2': 'Integra las diferentes herramientas de G-Suite optimizando recursos digitales.'
+          }
+        },
+        'OA2': {
+          texto: 'Aplica diferentes herramientas de Word (símil) para crear documentos de textos, integrando y modificando textos, imágenes y tablas, según formatos establecidos.',
+          ces: {
+            'CE1': 'Emite documentos de texto de acuerdo a especificaciones y formatos establecidos utilizando las herramientas básicas del software.',
+            'CE2': 'Selecciona correctamente las herramientas necesarias para crear un documento de texto cumpliendo con los formatos y estándares exigidos.',
+            'CE3': 'Integra diferentes elementos digitales dentro del documento, dando formato y formalidad, cumpliendo con los plazos establecidos.'
+          }
+        },
+        'OA3': {
+          texto: 'Conoce y aplica diferentes herramientas de PowerPoint (símil) para crear presentaciones integrando y modificando material audiovisual, según formatos establecidos.',
+          ces: {
+            'CE1': 'Realiza presentaciones aplicando diferentes recursos digitales del software cumpliendo con los parámetros establecidos.',
+            'CE2': 'Integra diferentes materiales audiovisuales para la presentación de un contenido, respetando los tiempos y plazos establecidos.'
+          }
+        },
+        'OA4': {
+          texto: 'Conoce y aplica diferentes herramientas de Excel (símil) para crear tablas de datos, integrando fórmulas y gráficos, cumpliendo con formatos establecidos.',
+          ces: {
+            'CE1': 'Utiliza fórmulas propias del software elaborando tablas de registros de datos de manera prolija y eficiente.',
+            'CE2': 'Crea tabla de datos, permitiendo realizar búsqueda y filtrado de información de manera óptima y cumpliendo formatos establecidos.',
+            'CE3': 'Muestra eficientemente datos mediante la utilización de diferentes tipos de gráficos representativos cumpliendo con los protocolos establecidos.'
+          }
+        }
+      }
+    },
+
     'MA13': {
       num:    'MA13',
       nombre: 'Electromovilidad',
@@ -472,6 +515,55 @@ CURRICULA_FULL['mecanica-automotriz'] = {
             'CE1': 'Aplica mantenimiento a conjuntos y componentes del automóvil según manual de servicio, respetando normas de seguridad.',
             'CE2': 'Comprueba el funcionamiento correcto de los sistemas de alto y bajo voltaje, carga de la batería, conversión de voltaje, según especificaciones técnicas del fabricante.',
             'CE3': 'Realiza diagnóstico mediante escáner, lectura de códigos de avería, prueba de actuadores. Proceso de desconexión del sistema de alto voltaje para mantenciones correctivas, según manual de servicio.'
+          }
+        }
+      }
+    },
+
+    'MAEMP': {
+      num:    'MAEMP',
+      nombre: 'Emprendimiento y Empleabilidad',
+      nivel:  '4M',
+      horas:  76,
+      oas: {
+        'OA_MC': 'Módulo común — Asociado a Objetivos de Aprendizaje Genéricos. Desarrollar capacidades de emprendimiento y empleabilidad, comprendiendo el marco regulador laboral chileno, planificando la trayectoria formativa y laboral, y aplicando principios básicos de gestión financiera.'
+      },
+      aes: {
+        'OA1': {
+          texto: 'Diseña y ejecuta un proyecto para concretar iniciativas de emprendimiento, identificando las acciones a realizar, el cronograma de su ejecución y los presupuestos, definiendo alternativas de financiamiento y evaluando y controlando su avance.',
+          ces: {
+            'CE1': 'Recolecta, organiza y analiza información para identificar oportunidades de emprendimiento en su propia comunidad y región, considerando diferentes ámbitos de aplicación (deporte, tecnología, medioambiente y energía, entre otros).',
+            'CE2': 'Evalúa las oportunidades de emprendimiento, tomando en cuenta sus fortalezas y debilidades, y considerando el contexto, los recursos existentes y las normativas vigentes relacionadas.',
+            'CE3': 'Formula los objetivos para un plan de acción de una iniciativa de emprendimiento personal, productivo o social, considerando las condiciones del entorno y personales.',
+            'CE4': 'Formula un presupuesto detallado, determinando los recursos (financieros, humanos, tecnológicos y otros) requeridos para el desarrollo de su iniciativa, los plazos y los factores externos que afectan su desarrollo.',
+            'CE5': 'Elabora un mecanismo de control de avance de su iniciativa de emprendimiento y evalúa las necesidades y las alternativas de financiamiento mediante aportes públicos y privados (créditos y ahorro).',
+            'CE6': 'Ejecuta las acciones para alcanzar los objetivos planteados según la planificación realizada, perseverando pese a circunstancias adversas, evaluando los resultados y las amenazas, ajustando sus acciones para asegurar el éxito y compartiendo su experiencia con otros.'
+          }
+        },
+        'OA2': {
+          texto: 'Maneja la legislación laboral y previsional chilena como marco regulador de las relaciones entre trabajadores y empleadores, identificando los derechos y deberes de ambas partes, tanto individuales como colectivos, y la reconoce como base para establecer buenas relaciones laborales.',
+          ces: {
+            'CE1': 'Selecciona la información relevante sobre los derechos laborales y previsionales de los trabajadores garantizados por la Constitución y el Código del Trabajo, para su propia contratación o de terceros a su cargo.',
+            'CE2': 'Determina elementos críticos de diversos tipos de contratos y de finiquitos, considerando la legislación laboral vigente.',
+            'CE3': 'Elabora propuestas de creación y desarrollo de organización sindical de acuerdo a la realidad de diferentes tipos de empresas, respetando la legislación vigente y la defensa de los derechos de los trabajadores.'
+          }
+        },
+        'OA3': {
+          texto: 'Prepara los elementos necesarios para participar de un proceso de incorporación al mundo del trabajo, valorando y planificando su trayectoria formativa y laboral.',
+          ces: {
+            'CE1': 'Sistematiza información desde organismos y empresas especializadas en intermediación laboral que existen en su entorno, analizando las perspectivas laborales, sus propias condiciones laborales y las normativas relacionadas.',
+            'CE2': 'Elabora correctamente los documentos necesarios para iniciar una actividad laboral, como el curriculum vitae, reuniendo evidencias de cursos realizados, experiencia laboral previa y cartas de recomendación, y visualizando sus alternativas de acuerdo a sus expectativas y condiciones.',
+            'CE3': 'Prepara las entrevistas y las situaciones de ingreso y promoción, identificando a personas e instituciones que pueden brindarle apoyo en este proceso.',
+            'CE4': 'Evalúa si la remuneración mensual o semanal y el finiquito se han determinado de acuerdo al tipo de contrato firmado y a la legislación laboral vigente.',
+            'CE5': 'Selecciona la institución y la modalidad conveniente para su cobertura de salud y pensión, además del seguro de desempleo que le corresponde de acuerdo a su contrato y derechos, y lleva a cabo los trámites de afiliación.'
+          }
+        },
+        'OA4': {
+          texto: 'Selecciona alternativas de capacitación y de educación superior para fortalecer sus competencias o desarrollar nuevas y adquirir certificaciones, ya sea e-learning o presenciales, evaluando las diversas opciones de financiamiento.',
+          ces: {
+            'CE1': 'Evalúa las necesidades futuras del mundo laboral en el ámbito de su especialidad y sus desafíos de formación, considerando las dinámicas de empleo, tendencias e innovaciones tecnológicas.',
+            'CE2': 'Evalúa las ofertas de capacitación virtual y presencial disponibles en su entorno, incluyendo sus características (como duración, objetivos y costos) y requisitos generales.',
+            'CE3': 'Evalúa las ofertas de educación superior disponibles en su entorno, incluyendo sus características (duración, acreditación, posibilidades de reconocimiento de aprendizajes previos y alternativas de financiamiento y becas) y requisitos de entrada.'
           }
         }
       }
