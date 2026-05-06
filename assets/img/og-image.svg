@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1200" y2="630" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#0b0d1e"/>
+      <stop offset="0.5" stop-color="#1a103d"/>
+      <stop offset="1" stop-color="#0a1f2e"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="600" y2="0" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#7c3aed"/>
+      <stop offset="0.5" stop-color="#22d3ee"/>
+      <stop offset="1" stop-color="#f472b6"/>
+    </linearGradient>
+    <linearGradient id="logoBg" x1="0" y1="0" x2="170" y2="170" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#7c3aed"/>
+      <stop offset="1" stop-color="#22d3ee"/>
+    </linearGradient>
+    <linearGradient id="amp" x1="0" y1="0" x2="60" y2="60" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#fbbf24"/>
+      <stop offset="1" stop-color="#f472b6"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Fondo -->
+  <rect width="1200" height="630" fill="url(#bg)"/>
+
+  <!-- Orbes decorativos -->
+  <circle cx="100" cy="100" r="180" fill="#7c3aed" opacity="0.15"/>
+  <circle cx="1100" cy="550" r="220" fill="#22d3ee" opacity="0.12"/>
+  <circle cx="900" cy="80" r="140" fill="#f472b6" opacity="0.1"/>
+
+  <!-- Logo grande a la izquierda -->
+  <g transform="translate(110, 230)">
+    <rect width="170" height="170" rx="36" fill="url(#logoBg)"/>
+    <path d="M48 38 L48 110 L66 92 L80 124 L92 119 L78 88 L102 88 Z" fill="#fff" stroke="#0b0d1e" stroke-width="3" stroke-linejoin="round"/>
+    <circle cx="124" cy="124" r="29" fill="url(#amp)"/>
+    <text x="124" y="138" font-family="'Space Grotesk', system-ui, sans-serif" font-size="38" font-weight="800" fill="#0b0d1e" text-anchor="middle">&amp;</text>
+  </g>
+
+  <!-- Texto principal -->
+  <text x="320" y="305" font-family="'Space Grotesk', system-ui, sans-serif" font-size="92" font-weight="800" fill="#fff">Click&amp;Clase</text>
+  <rect x="320" y="328" width="280" height="6" rx="3" fill="url(#accent)"/>
+  <text x="320" y="380" font-family="'Inter', system-ui, sans-serif" font-size="32" font-weight="500" fill="#cbd5e1">Plataforma educativa para docentes chilenos</text>
+  <text x="320" y="420" font-family="'Inter', system-ui, sans-serif" font-size="22" font-weight="400" fill="#94a3b8">Material, evaluaciones y planificaciones alineadas al currículo Mineduc</text>
+
+  <!-- Chips de features abajo -->
+  <g transform="translate(110, 510)">
+    <rect width="220" height="46" rx="23" fill="#7c3aed" opacity="0.18" stroke="#7c3aed" stroke-opacity="0.5" stroke-width="1.5"/>
+    <text x="110" y="30" font-family="'Inter', sans-serif" font-size="18" font-weight="600" fill="#c4b5fd" text-anchor="middle">🤖 IA integrada</text>
+  </g>
+  <g transform="translate(346, 510)">
+    <rect width="190" height="46" rx="23" fill="#22d3ee" opacity="0.15" stroke="#22d3ee" stroke-opacity="0.45" stroke-width="1.5"/>
+    <text x="95" y="30" font-family="'Inter', sans-serif" font-size="18" font-weight="600" fill="#67e8f9" text-anchor="middle">🎯 Bloom</text>
+  </g>
+  <g transform="translate(552, 510)">
+    <rect width="240" height="46" rx="23" fill="#f472b6" opacity="0.16" stroke="#f472b6" stroke-opacity="0.45" stroke-width="1.5"/>
+    <text x="120" y="30" font-family="'Inter', sans-serif" font-size="18" font-weight="600" fill="#f9a8d4" text-anchor="middle">⚇ Adaptación PIE</text>
+  </g>
+  <g transform="translate(808, 510)">
+    <rect width="280" height="46" rx="23" fill="#34d399" opacity="0.16" stroke="#34d399" stroke-opacity="0.45" stroke-width="1.5"/>
+    <text x="140" y="30" font-family="'Inter', sans-serif" font-size="18" font-weight="600" fill="#86efac" text-anchor="middle">📚 Currículo Mineduc</text>
+  </g>
+</svg>

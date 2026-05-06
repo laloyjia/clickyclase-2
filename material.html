@@ -3,7 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Material Educativo - Click&Clase</title>
+    
+  <!-- Favicon Click&Clase -->
+  <link rel="icon" type="image/svg+xml" href="/assets/img/favicon.svg">
+  <link rel="apple-touch-icon" href="/assets/img/favicon.svg">
+  <!-- Open Graph / Facebook / WhatsApp / Slack -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Click&Clase">
+  <meta property="og:title" content="Generador de material · Click&Clase">
+  <meta property="og:description" content="Crea guías, apuntes, pruebas y controles alineados al currículo Mineduc con IA. Adaptación PIE incluida.">
+  <meta property="og:url" content="https://clickyclase.cl/material.html">
+  <meta property="og:image" content="https://clickyclase.cl/assets/img/og-image.svg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:locale" content="es_CL">
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Generador de material · Click&Clase">
+  <meta name="twitter:description" content="Crea guías, apuntes, pruebas y controles alineados al currículo Mineduc con IA. Adaptación PIE incluida.">
+  <meta name="twitter:image" content="https://clickyclase.cl/assets/img/og-image.svg">
+<title>Material Educativo - Click&Clase</title>
     <link rel="stylesheet" href="css/styles.css">
     <style>
         /* ============================================
@@ -1450,6 +1469,14 @@
                         </summary>
                         <div class="dp-body">
                             <p style="font-size:0.82rem;color:var(--text-muted);margin:0 0 0.7rem">Selecciona los OA para este material.</p>
+                            <!-- Buscador de OAs (filtra por código o descripción) -->
+                            <div style="position:relative;margin-bottom:.6rem;">
+                                <input type="text" id="oaSearch" placeholder="🔍 Buscar OA por palabra clave (ej: fracciones, Mendel, ortografía…)"
+                                    style="width:100%;padding:8px 32px 8px 12px;border-radius:8px;background:rgba(255,255,255,.05);border:1px solid rgba(124,58,237,.3);color:#e5e7eb;font-size:.85rem;">
+                                <button type="button" id="oaSearchClear" onclick="_clearOASearch()"
+                                    style="position:absolute;right:6px;top:50%;transform:translateY(-50%);background:transparent;border:0;color:#94a3b8;cursor:pointer;display:none;font-size:1.1rem;padding:2px 6px;line-height:1;" title="Limpiar búsqueda">×</button>
+                                <div id="oaSearchInfo" style="margin-top:4px;font-size:.72rem;color:#94a3b8;display:none;"></div>
+                            </div>
                             <div id="listaOAMineduc" class="checkbox-group">
                                 <span style="color:var(--text-muted);font-size:0.85rem">Selecciona asignatura y nivel para ver los OA.</span>
                             </div>
@@ -5279,6 +5306,272 @@ var modelo = _modeloGuardado;
         el.style.border = '1px solid ' + color + '44';
         el.style.color = color;
         setTimeout(function(){ el.style.display = 'none'; }, 8000);
+    }
+
+    // =========================================================
+    //  BUSCADOR DE OAs (filtra dinámicamente la lista de OA Mineduc)
+    // =========================================================
+    function _filterOAs(query) {
+        var q = (query || '').trim().toLowerCase();
+        var lista = document.getElementById('listaOAMineduc');
+        var info = document.getElementById('oaSearchInfo');
+        var clearBtn = document.getElementById('oaSearchClear');
+        if (!lista) return;
+
+        // Cada OA es un <label> que contiene un <input class="oaRegCheck">
+        var labels = lista.querySelectorAll('label');
+        if (!labels.length) {
+            if (info) info.style.display = 'none';
+            return;
+        }
+
+        if (!q) {
+            // Sin filtro: mostrar todo
+            for (var i = 0; i < labels.length; i++) labels[i].style.display = '';
+            if (info) info.style.display = 'none';
+            if (clearBtn) clearBtn.style.display = 'none';
+            return;
+        }
+
+        var visible = 0;
+        var checkedHidden = 0;
+        for (var j = 0; j < labels.length; j++) {
+            var label = labels[j];
+            var txt = label.textContent.toLowerCase();
+            // Buscar también en el data-desc del input por si el texto es corto
+            var inp = label.querySelector('.oaRegCheck');
+            var desc = inp ? (inp.getAttribute('data-desc') || '').toLowerCase() : '';
+            var match = txt.indexOf(q) !== -1 || desc.indexOf(q) !== -1;
+            if (match) {
+                label.style.display = '';
+                visible++;
+            } else {
+                label.style.display = 'none';
+                if (inp && inp.checked) checkedHidden++;
+            }
+        }
+        if (info) {
+            info.style.display = 'block';
+            var msg = visible + ' OA' + (visible !== 1 ? 's' : '') + ' coincide' + (visible !== 1 ? 'n' : '') + ' con "' + q + '"';
+            if (checkedHidden > 0) msg += ' · ⚠ ' + checkedHidden + ' OA' + (checkedHidden > 1 ? 's' : '') + ' marcado' + (checkedHidden > 1 ? 's' : '') + ' está' + (checkedHidden > 1 ? 'n' : '') + ' oculto' + (checkedHidden > 1 ? 's' : '');
+            info.textContent = msg;
+            info.style.color = checkedHidden > 0 ? '#fbbf24' : '#86efac';
+        }
+        if (clearBtn) clearBtn.style.display = 'block';
+    }
+
+    function _clearOASearch() {
+        var input = document.getElementById('oaSearch');
+        if (input) {
+            input.value = '';
+            _filterOAs('');
+            input.focus();
+        }
+    }
+    if (typeof window !== 'undefined') window._clearOASearch = _clearOASearch;
+
+    // Wireup del buscador (debounce 150ms para no filtrar en cada tecla)
+    if (typeof window !== 'undefined') {
+        window.addEventListener('load', function() {
+            var input = document.getElementById('oaSearch');
+            if (!input) return;
+            var t = null;
+            input.addEventListener('input', function(e) {
+                clearTimeout(t);
+                t = setTimeout(function() { _filterOAs(e.target.value); }, 150);
+            });
+            // Cuando cambia la asignatura/nivel, la lista se reconstruye → quitar filtro
+            var resetters = ['selectAsignatura', 'selectCurso', 'selectNivel'];
+            for (var i = 0; i < resetters.length; i++) {
+                var el = document.getElementById(resetters[i]);
+                if (el) el.addEventListener('change', function() {
+                    if (input) input.value = '';
+                    setTimeout(function() { _filterOAs(''); }, 100);
+                });
+            }
+        });
+    }
+
+    // =========================================================
+    //  BORRADOR AUTOGUARDADO (LocalStorage)
+    //  Guarda el estado del formulario cada 5s para no perder
+    //  configuraciones a media composición. Restaura al cargar.
+    // =========================================================
+    var _DRAFT_KEY = 'cc_material_draft_v1';
+    var _DRAFT_INTERVAL = 5000; // ms
+
+    function _draftCapture() {
+        var draft = {};
+        // Inputs <input>, <select>, <textarea> con id (excluir contraseñas y oculto sensible)
+        var fields = document.querySelectorAll('input[id], select[id], textarea[id]');
+        for (var i = 0; i < fields.length; i++) {
+            var f = fields[i];
+            if (f.type === 'password' || f.type === 'file' || f.type === 'submit' || f.type === 'button') continue;
+            if (f.type === 'checkbox' || f.type === 'radio') {
+                draft['_' + f.id + '_chk'] = f.checked;
+            } else {
+                draft[f.id] = f.value;
+            }
+        }
+        // Checkboxes sin id pero con name (ej: OAs Mineduc, valores, NEEs)
+        var nameChecks = document.querySelectorAll('input[type="checkbox"][name], input[type="radio"][name]');
+        for (var j = 0; j < nameChecks.length; j++) {
+            var el = nameChecks[j];
+            var key = '__chk_' + el.name + '__' + (el.value || '');
+            draft[key] = el.checked;
+        }
+        // Tipo de documento seleccionado
+        if (typeof tipoDocSeleccionado !== 'undefined') draft.__tipoDocSel = tipoDocSeleccionado;
+        // OAs Mineduc marcados (capturar codigo + valor por si se desmonta el listado al cambiar curso)
+        var oaChecks = document.querySelectorAll('#listaOAMineduc .oaRegCheck:checked');
+        var oasMineduc = [];
+        for (var k = 0; k < oaChecks.length; k++) {
+            oasMineduc.push({ codigo: oaChecks[k].value, desc: oaChecks[k].getAttribute('data-desc') || '' });
+        }
+        draft.__oasMineducSel = oasMineduc;
+        draft.__ts = Date.now();
+        return draft;
+    }
+
+    function _draftSave() {
+        try {
+            var draft = _draftCapture();
+            localStorage.setItem(_DRAFT_KEY, JSON.stringify(draft));
+            var ind = document.getElementById('draftIndicator');
+            if (ind) {
+                ind.textContent = '💾 Borrador guardado · ' + new Date().toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' });
+                ind.style.display = 'inline-flex';
+            }
+        } catch (e) { /* localStorage lleno o no disponible */ }
+    }
+
+    function _draftRestore() {
+        try {
+            var raw = localStorage.getItem(_DRAFT_KEY);
+            if (!raw) return false;
+            var draft = JSON.parse(raw);
+            if (!draft || !draft.__ts) return false;
+            // Restaurar inputs/selects/textareas
+            for (var key in draft) {
+                if (key.indexOf('__') === 0 || key.indexOf('_') === 0) continue;
+                var el = document.getElementById(key);
+                if (el) {
+                    var t = el.type || el.tagName.toLowerCase();
+                    if (t === 'checkbox' || t === 'radio') {
+                        if (draft['_' + key + '_chk'] != null) el.checked = !!draft['_' + key + '_chk'];
+                    } else if (t === 'select-one' || t === 'select') {
+                        el.value = draft[key];
+                        // Disparar change para que la UI dependiente reaccione
+                        el.dispatchEvent(new Event('change', { bubbles: true }));
+                    } else {
+                        el.value = draft[key];
+                    }
+                }
+            }
+            // Tipo de documento
+            if (draft.__tipoDocSel) {
+                var tarjeta = document.querySelector('.tipo-doc-card[data-tipo="' + draft.__tipoDocSel + '"]');
+                if (tarjeta && typeof seleccionarTipo === 'function') {
+                    seleccionarTipo(tarjeta, draft.__tipoDocSel);
+                }
+            }
+            // Checkboxes/radios con name
+            for (var k in draft) {
+                if (k.indexOf('__chk_') === 0) {
+                    var rest = k.substring(6); // strip '__chk_'
+                    var sep = rest.lastIndexOf('__');
+                    if (sep === -1) continue;
+                    var nm = rest.substring(0, sep);
+                    var val = rest.substring(sep + 2);
+                    var els = document.querySelectorAll('input[name="' + nm + '"][value="' + val + '"]');
+                    for (var i = 0; i < els.length; i++) els[i].checked = !!draft[k];
+                }
+            }
+            return draft.__ts;
+        } catch (e) { return false; }
+    }
+
+    function _draftHasContent() {
+        try {
+            var raw = localStorage.getItem(_DRAFT_KEY);
+            if (!raw) return null;
+            var draft = JSON.parse(raw);
+            if (!draft || !draft.__ts) return null;
+            // Considerar "con contenido" si hay tipo seleccionado, OA marcado o contenido escrito
+            var hasContent = !!draft.__tipoDocSel ||
+                             (draft.__oasMineducSel && draft.__oasMineducSel.length > 0) ||
+                             (draft.inputContenido && draft.inputContenido.trim().length > 5);
+            return hasContent ? draft.__ts : null;
+        } catch (e) { return null; }
+    }
+
+    function _draftClear() {
+        try {
+            localStorage.removeItem(_DRAFT_KEY);
+            var ind = document.getElementById('draftIndicator');
+            if (ind) ind.style.display = 'none';
+            showToast('Borrador descartado.', 'info');
+        } catch (e) { }
+    }
+
+    function _draftRestoreUI() {
+        var ts = _draftHasContent();
+        if (!ts) return;
+        // Banner ofreciendo restaurar
+        var fecha = new Date(ts).toLocaleString('es-CL', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+        var banner = document.createElement('div');
+        banner.id = 'draftRestoreBanner';
+        banner.style.cssText = 'position:fixed;top:90px;left:50%;transform:translateX(-50%);z-index:980;background:linear-gradient(135deg,rgba(124,58,237,.95),rgba(34,211,238,.85));color:#fff;padding:14px 22px;border-radius:14px;box-shadow:0 18px 40px -10px rgba(0,0,0,.5);font-size:.92rem;display:flex;align-items:center;gap:14px;backdrop-filter:blur(10px);max-width:600px;';
+        banner.innerHTML =
+            '<span style="font-size:1.3rem;">💾</span>' +
+            '<div style="flex:1">Tienes un borrador guardado del ' + fecha + '. ¿Quieres restaurarlo?</div>' +
+            '<button id="btnDraftRestore" style="background:#fff;color:#7c3aed;border:0;padding:8px 14px;border-radius:8px;font-weight:700;cursor:pointer;">Restaurar</button>' +
+            '<button id="btnDraftDiscard" style="background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);padding:8px 14px;border-radius:8px;font-weight:600;cursor:pointer;">Descartar</button>';
+        document.body.appendChild(banner);
+        document.getElementById('btnDraftRestore').addEventListener('click', function() {
+            var ts2 = _draftRestore();
+            if (ts2) showToast('Borrador restaurado ✓', 'success');
+            banner.remove();
+        });
+        document.getElementById('btnDraftDiscard').addEventListener('click', function() {
+            _draftClear();
+            banner.remove();
+        });
+        // Auto-cerrar después de 30s sin acción (sin descartar)
+        setTimeout(function() { if (banner.parentNode) banner.remove(); }, 30000);
+    }
+
+    // Indicador discreto de "Borrador guardado · hh:mm" en el footer del FAB
+    function _draftMountIndicator() {
+        var fab = document.getElementById('matFAB');
+        if (!fab) return;
+        var ind = document.createElement('div');
+        ind.id = 'draftIndicator';
+        ind.style.cssText = 'display:none;align-items:center;justify-content:center;font-size:.74rem;color:#94a3b8;background:rgba(15,23,42,.85);border:1px solid rgba(148,163,184,.18);border-radius:10px;padding:6px 10px;backdrop-filter:blur(8px);';
+        fab.appendChild(ind);
+    }
+
+    // Wireup
+    if (typeof window !== 'undefined') {
+        window.addEventListener('load', function() {
+            _draftMountIndicator();
+            // Restaurar al cargar (después de que termine de poblarse curricula-chile)
+            setTimeout(_draftRestoreUI, 800);
+            // Autosave cada 5 segundos
+            setInterval(_draftSave, _DRAFT_INTERVAL);
+            // También guardar al cambiar campos (debounced)
+            var saveTimer = null;
+            document.addEventListener('input', function() {
+                clearTimeout(saveTimer);
+                saveTimer = setTimeout(_draftSave, 1000);
+            });
+            document.addEventListener('change', function() {
+                clearTimeout(saveTimer);
+                saveTimer = setTimeout(_draftSave, 600);
+            });
+        });
+        // Limpiar borrador después de generar exitosamente
+        window._draftClear = _draftClear;
     }
     </script>
     <script src="js/recommendations.js"></script>
