@@ -1,6 +1,6 @@
 /**
  * firebase-auth.js
- * ElectroLearn — Autenticación y gestión de usuarios con Firebase
+ * Click&Clase — Autenticación y gestión de usuarios con Firebase
  *
  * Funciones principales:
  *  - ELAuth.login(email, password)

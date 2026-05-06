@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Panel Docente — ElectroLearn</title>
-<meta name="description" content="Panel docente premium de ElectroLearn: planificaciones, materiales, herramientas IA y calendario de clases.">
+<title>Panel Docente — Click&Clase</title>
+<meta name="description" content="Panel docente premium de Click&Clase: planificaciones, materiales, herramientas IA y calendario de clases.">
 
 <!-- Firebase SDK v10 compat -->
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
@@ -346,7 +346,7 @@
   <aside id="sidebarProf" class="side-pro" aria-label="Navegación principal">
     <div class="side-brand">
       <div class="b-ico" aria-hidden="true">⚡</div>
-      <div class="b-txt">ElectroLearn</div>
+      <div class="b-txt">Click&Clase</div>
     </div>
 
     <div class="side-user-card">
@@ -380,7 +380,7 @@
       <a class="side-item" href="#" id="linkLogout"><span class="si-ico">🚪</span> Cerrar sesión</a>
     </nav>
 
-    <div class="side-foot">ElectroLearn v2.0 · Chile</div>
+    <div class="side-foot">Click&Clase v2.0 · Chile</div>
   </aside>
 
   <!-- ── MAIN ─────────────────────────────────────── -->
@@ -393,7 +393,7 @@
           <div class="hero-avatar-big" id="heroAvatar">P</div>
           <div>
             <h1 id="welcomeTitle" class="hero-grad" style="font-size:2rem;font-weight:800;line-height:1.1">¡Bienvenido!</h1>
-            <p id="welcomeSub" class="hero-sub">Panel de gestión pedagógica · ElectroLearn</p>
+            <p id="welcomeSub" class="hero-sub">Panel de gestión pedagógica · Click&Clase</p>
           </div>
           <div class="hero-cta">
             <a class="btn-pro primary" href="material.html" data-perm="material">➕ Crear material</a>
@@ -565,15 +565,15 @@
 
 <!-- Footer -->
 <footer class="foot-pro">
-  <div>© 2026 ElectroLearn · Chile</div>
+  <div>© 2026 Click&Clase · Chile</div>
   <div>
     <a href="biblioteca.html">Biblioteca</a>
     <a href="material.html">Crear material</a>
     <a href="planificacion.html">Planificar clase</a>
   </div>
   <div style="margin-top:.4rem;display:flex;gap:1rem;flex-wrap:wrap;justify-content:center">
-    <a href="mailto:soporte.learn0@gmail.com?subject=Soporte%20ElectroLearn" style="color:#a78bfa">✉ Soporte: soporte.learn0@gmail.com</a>
-    <a href="https://wa.me/56942532644?text=Hola%2C%20soy%20docente%20y%20necesito%20soporte%20con%20ElectroLearn." target="_blank" rel="noopener" style="color:#25d366">💬 WhatsApp +56 9 4253 2644</a>
+    <a href="mailto:soporte.learn0@gmail.com?subject=Soporte%20Click&Clase" style="color:#a78bfa">✉ Soporte: soporte.learn0@gmail.com</a>
+    <a href="https://wa.me/56942532644?text=Hola%2C%20soy%20docente%20y%20necesito%20soporte%20con%20Click&Clase." target="_blank" rel="noopener" style="color:#25d366">💬 WhatsApp +56 9 4253 2644</a>
   </div>
 </footer>
 
@@ -708,7 +708,7 @@
     var wt = document.getElementById('welcomeTitle');
     var ws = document.getElementById('welcomeSub');
     if (wt) wt.textContent = '¡Bienvenido, ' + primerNombre + '!';
-    if (ws) ws.textContent = tipoLabel + ' · ElectroLearn';
+    if (ws) ws.textContent = tipoLabel + ' · Click&Clase';
 
     // ── Permisos ──
     var canPlan = !user.permisos || user.permisos.planificar    !== false;

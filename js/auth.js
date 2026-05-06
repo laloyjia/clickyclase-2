@@ -1,5 +1,5 @@
 /* ============================================
-   ElectroLearn - Autenticacion (auth.js)
+   Click&Clase - Autenticacion (auth.js)
    ============================================
    PASO 1: Login y registro LOCAL (sin servidor)
 

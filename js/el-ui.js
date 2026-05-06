@@ -1,5 +1,5 @@
 /* ============================================================
-   ElectroLearn — UI utilities premium
+   Click&Clase — UI utilities premium
    Toasts, confirmaciones, sanitización, confetti, count-up,
    tilt/glow para tarjetas y helpers reutilizables.
    Cargar después de styles.css y antes de scripts de página.

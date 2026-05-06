@@ -1,5 +1,5 @@
 /**
- * api/ia-asistente.js — ElectroLearn
+ * api/ia-asistente.js — Click&Clase
  * Proxy serverless a Google Gemini API
  * Variables de entorno requeridas: GEMINI_API_KEY
  */

@@ -1,5 +1,5 @@
 /* ============================================
-   ElectroLearn — Gamificacion v1.0
+   Click&Clase — Gamificacion v1.0
    Especialidad Electronica
    ============================================ */
 

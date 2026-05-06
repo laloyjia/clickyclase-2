@@ -1,7 +1,7 @@
 # Logos de colegios / liceos
 
 Esta carpeta almacena los logos institucionales que aparecen en el encabezado de los
-documentos generados por ElectroLearn (guías, pruebas, planificaciones, fichas, etc.).
+documentos generados por Click&Clase (guías, pruebas, planificaciones, fichas, etc.).
 
 ## Convención de nombres
 

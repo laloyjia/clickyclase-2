@@ -1,5 +1,5 @@
 /**
- * ElectroLearn — Catálogo de colegios / liceos
+ * Click&Clase — Catálogo de colegios / liceos
  * ---------------------------------------------
  * Fuente de verdad: colección Firestore `liceos` (vía ELDB.liceos).
  * Fallback: array `COLEGIOS_REG` hardcodeado (semilla mínima),

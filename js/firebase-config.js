@@ -1,6 +1,6 @@
 /**
  * firebase-config.js
- * ElectroLearn — Configuración Firebase
+ * Click&Clase — Configuración Firebase
  * Proyecto: electrolearn-prod
  *
  * IMPORTANTE: EL_DB ya NO usa el SDK de Firestore (que da "client is offline").
@@ -26,19 +26,19 @@ var FIREBASE_CONFIG = {
 // ─────────────────────────────────────────────────────────────
 (function initFirebase() {
   if (typeof firebase === 'undefined') {
-    console.error('[ElectroLearn] Firebase SDK no cargado.');
+    console.error('[Click&Clase] Firebase SDK no cargado.');
     return;
   }
   if (!firebase.apps || firebase.apps.length === 0) {
     firebase.initializeApp(FIREBASE_CONFIG);
-    console.log('[ElectroLearn] Firebase inicializado (App + Auth) OK');
+    console.log('[Click&Clase] Firebase inicializado (App + Auth) OK');
   }
 
   // Solo Auth — NO inicializamos Firestore SDK (da "client is offline")
   window.EL_AUTH = firebase.auth();
   window.EL_AUTH.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
     .catch(function (err) {
-      console.warn('[ElectroLearn] Persistencia Auth:', err.message);
+      console.warn('[Click&Clase] Persistencia Auth:', err.message);
     });
 
   // EL_DB lo inicializa firebase-rest.js (debe cargarse después de este script)
@@ -49,7 +49,7 @@ var FIREBASE_CONFIG = {
 //  Constantes globales de la app
 // ─────────────────────────────────────────────────────────────
 var EL_VERSION  = '2.1.0';
-var EL_APP_NAME = 'ElectroLearn';
+var EL_APP_NAME = 'Click&Clase';
 
 // Correos de administrador
 var EL_ADMIN_EMAIL  = 'eduyanezjara@gmail.com';
@@ -85,16 +85,16 @@ var EL_COLLECTIONS = {
 (function activarRestDB() {
   if (typeof EL_DB !== 'undefined' && typeof EL_DB._init === 'function') {
     EL_DB._init(FIREBASE_CONFIG.projectId);
-    console.log('[ElectroLearn] EL_DB REST activado para proyecto:', FIREBASE_CONFIG.projectId);
+    console.log('[Click&Clase] EL_DB REST activado para proyecto:', FIREBASE_CONFIG.projectId);
   } else {
     // EL_DB aún no está cargado (orden de scripts incorrecto)
     // Programamos la activación para cuando el DOM esté listo
     document.addEventListener('DOMContentLoaded', function () {
       if (typeof EL_DB !== 'undefined' && typeof EL_DB._init === 'function') {
         EL_DB._init(FIREBASE_CONFIG.projectId);
-        console.log('[ElectroLearn] EL_DB REST activado (deferred)');
+        console.log('[Click&Clase] EL_DB REST activado (deferred)');
       } else {
-        console.error('[ElectroLearn] EL_DB no disponible — ¿se cargó firebase-rest.js?');
+        console.error('[Click&Clase] EL_DB no disponible — ¿se cargó firebase-rest.js?');
       }
     });
   }

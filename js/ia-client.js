@@ -1,6 +1,6 @@
 /**
  * ia-client.js
- * ElectroLearn — Cliente frontend para el asistente IA
+ * Click&Clase — Cliente frontend para el asistente IA
  * Llama a /api/ia-asistente (Vercel serverless) — la API key NUNCA llega al browser
  */
 

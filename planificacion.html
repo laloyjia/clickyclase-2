@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Planificador de Clases - ElectroLearn</title>
+    <title>Planificador de Clases - Click&Clase</title>
     <link rel="stylesheet" href="css/styles.css">
     <style>
         /* ============================================
@@ -491,7 +491,7 @@
     <nav class="navbar">
         <div class="nav-brand">
             <span class="nav-icon">⚡</span>
-            <span>ElectroLearn</span>
+            <span>Click&Clase</span>
         </div>
         <div class="nav-links" style="display:flex;align-items:center;gap:12px">
             <span id="navProfesorInfo" style="font-size:.82rem;opacity:.7"></span>
@@ -2304,7 +2304,7 @@
             })
             .catch(function(err) {
                 // Si falla Firebase, guardar en localStorage como respaldo
-                console.warn('[ElectroLearn] Firebase no disponible, guardando en localStorage:', err);
+                console.warn('[Click&Clase] Firebase no disponible, guardando en localStorage:', err);
                 var plans = JSON.parse(localStorage.getItem('electrolearn_planificaciones') || '[]');
                 plans.push(entrada);
                 localStorage.setItem('electrolearn_planificaciones', JSON.stringify(plans));

@@ -1,6 +1,6 @@
 /**
  * firebase-db.js
- * ElectroLearn — Operaciones Firestore (base de datos)
+ * Click&Clase — Operaciones Firestore (base de datos)
  *
  * Módulos:
  *  - ELDB.materiales   → guardar, listar, eliminar materiales

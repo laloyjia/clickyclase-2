@@ -1,6 +1,6 @@
 /**
  * firebase-rest.js
- * ElectroLearn — Cliente Firestore via REST API (reemplaza el SDK de Firestore)
+ * Click&Clase — Cliente Firestore via REST API (reemplaza el SDK de Firestore)
  *
  * Por qué esto existe:
  *   El SDK de Firestore usa gRPC-Web / long-polling a firestore.googleapis.com

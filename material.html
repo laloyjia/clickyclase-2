@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Material Educativo - ElectroLearn</title>
+    <title>Material Educativo - Click&Clase</title>
     <link rel="stylesheet" href="css/styles.css">
     <style>
         /* ============================================
@@ -1261,7 +1261,7 @@
     <nav class="navbar">
         <div class="nav-brand">
             <span class="nav-icon">⚡</span>
-            <span>ElectroLearn</span>
+            <span>Click&Clase</span>
         </div>
         <div class="nav-links" style="display:flex;align-items:center;gap:12px">
             <span id="navProfesorInfo" style="font-size:.82rem;opacity:.7"></span>
@@ -2709,7 +2709,7 @@
         var area = isTP ? ('Especialidad ' + (user.especialidad || 'TP') + ' EMTP') : (user.asignaturas && user.asignaturas.length ? user.asignaturas.join(', ') : 'Plan Comun');
         var nombreInst = _nombreInstitucion();
         var inst = nombreInst ? (nombreInst + ' &bull; ') : '';
-        return '<div class="pie-pagina">' + inst + area + ' &bull; ElectroLearn &bull; Material generado automaticamente &bull; Alineado al curriculum Mineduc</div>';
+        return '<div class="pie-pagina">' + inst + area + ' &bull; Click&Clase &bull; Material generado automaticamente &bull; Alineado al curriculum Mineduc</div>';
     }
 
     // ── Helpers institucionales (logo + nombre liceo + header de documento) ──
@@ -3312,7 +3312,7 @@
         '<li>Manuales tecnicos de fabricantes: Siemens, Schneider Electric, ABB, Allen-Bradley, Phoenix Contact.</li>' +
         '<li>Norma Electrica Chilena NCh Elec. 4/2003 y actualizaciones vigentes.</li>' +
         '<li>IEC 60364: Instalaciones Electricas en Edificios. IEC 61131: Controladores Programables.</li>' +
-        '<li>Plataforma ElectroLearn — recursos digitales de la asignatura/módulo.</li>' +
+        '<li>Plataforma Click&Clase — recursos digitales de la asignatura/módulo.</li>' +
         '</ul>' +
 
         '<div class="recuadro"><strong>&#128155; Reflexion Salesiana:</strong> El valor de <strong>' + val1 + '</strong> nos recuerda que la excelencia tecnica no es solo saber hacer, ' +
@@ -5116,7 +5116,7 @@ var modelo = _modeloGuardado;
         }
         var titulo = (document.querySelector('#docPreview .doc-titulo-bar') || {}).textContent
                   || (document.querySelector('#docPreview .doc-tipo') || {}).textContent
-                  || 'Documento ElectroLearn';
+                  || 'Documento Click&Clase';
         titulo = (titulo || '').toString().trim().slice(0, 80) || 'Documento';
 
         // Estilos embebidos optimizados para impresión Word (A4, márgenes, encabezado).
@@ -5260,7 +5260,7 @@ var modelo = _modeloGuardado;
                 if (window.ELUI && ELUI.confetti) { try { ELUI.confetti({ amount: 80 }); } catch(e){} }
             })
             .catch(function(err) {
-                console.warn('[ElectroLearn] Firebase no disponible, guardando localmente:', err);
+                console.warn('[Click&Clase] Firebase no disponible, guardando localmente:', err);
                 try {
                     var mats = JSON.parse(localStorage.getItem('electrolearn_materiales') || '[]');
                     mats.push(entrada);

@@ -1,5 +1,5 @@
 /* ============================================================
-   ElectroLearn — Motor de Recomendaciones Curriculares v1.0
+   Click&Clase — Motor de Recomendaciones Curriculares v1.0
    Especialidad Electrónica
    ============================================================
    Uso:

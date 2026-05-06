@@ -1,5 +1,5 @@
 /**
- * curricula-chile.js  — ElectroLearn
+ * curricula-chile.js  — Click&Clase
  * Generado automáticamente desde Programas de Estudio MINEDUC
  * Incluye: Básica 1°-8°, Media 1°-4° (Plan Común), Electivos y Especialidades TP
  *
