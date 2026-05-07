@@ -2716,6 +2716,7 @@
         document.getElementById('docPreview').innerHTML = html;
         document.getElementById('docGenerado').classList.add('visible');
         document.getElementById('docGenerado').scrollIntoView({ behavior: 'smooth' });
+        try { if (typeof ELDB !== 'undefined' && ELDB.actividad) ELDB.actividad.log('generar_material_plantilla', { tipoDoc: tipoDocSeleccionado, curso: cursoTexto, asignatura: (mod && mod.nombre) || modNombre || '' }); } catch (e) {}
     }
 
     // =============================================
@@ -4570,6 +4571,7 @@ var modelo = _modeloGuardado;
                     document.getElementById('docGenerado').classList.add('visible');
                     document.getElementById('docGenerado').scrollIntoView({ behavior: 'smooth' });
                     setIAStatus('ok', '&#10003; Documento generado con IA exitosamente. Puedes imprimirlo o publicarlo en la Biblioteca.');
+                    try { if (typeof ELDB !== 'undefined' && ELDB.actividad) ELDB.actividad.log('generar_material_ia', { tipoDoc: tipoDocSeleccionado, tipoNombre: tipoNombre, curso: cursoTexto, asignatura: modNombre, contenido: (contenido || '').slice(0, 100) }); } catch (e) {}
 
                     // \u2500\u2500 Generaci\u00f3n dual: si es Prueba y el toggle PIE est\u00e1 marcado, generar tambi\u00e9n la versi\u00f3n adaptada \u2500\u2500
                     var chkPIE = document.getElementById('chkAdjuntarPIE');
@@ -5208,6 +5210,7 @@ var modelo = _modeloGuardado;
             if (a.parentNode) a.parentNode.removeChild(a);
         }, 200);
         showToast('Documento descargado en formato Word (.doc).', 'success');
+        try { if (typeof ELDB !== 'undefined' && ELDB.actividad) ELDB.actividad.log('descargar_word', { titulo: titulo }); } catch (e) {}
     }
 
     function mostrarToast(msg) { showToast(msg, 'info'); }
@@ -5286,6 +5289,7 @@ var modelo = _modeloGuardado;
             .then(function() {
                 mostrarSaveMsg('✅ Publicado en la Biblioteca. Los estudiantes ya pueden verlo. <a href="biblioteca.html" style="color:#a5b4fc;margin-left:6px;">Ver biblioteca →</a>', '#34d399');
                 showToast('Material publicado ✓', 'success');
+                try { if (typeof ELDB !== 'undefined' && ELDB.actividad) ELDB.actividad.log('publicar_biblioteca', { titulo: (entrada && entrada.titulo) || '', tipo: (entrada && entrada.tipo) || tipoDocSeleccionado }); } catch (e) {}
                 if (window.ELUI && ELUI.confetti) { try { ELUI.confetti({ amount: 80 }); } catch(e){} }
             })
             .catch(function(err) {

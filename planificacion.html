@@ -2322,6 +2322,7 @@
         guardarPromesa
             .then(function() {
                 mostrarPlanMsg('✅ Planificación guardada en la Biblioteca. <a href="biblioteca.html#calendario" style="color:#a5b4fc;margin-left:6px;">Ver calendario →</a>', '#34d399');
+                try { if (typeof ELDB !== 'undefined' && ELDB.actividad) ELDB.actividad.log('crear_planificacion', { titulo: (entrada && entrada.titulo) || '', curso: (entrada && entrada.curso) || '', asignatura: (entrada && entrada.asignatura) || '' }); } catch (e) {}
             })
             .catch(function(err) {
                 // Si falla Firebase, guardar en localStorage como respaldo

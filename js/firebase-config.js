@@ -74,7 +74,8 @@ var EL_COLLECTIONS = {
   CODIGOS:         'codigos_acceso',
   CURRICULA:       'curricula',
   RECURSOS:        'recursos_curricula',
-  LICEOS:          'liceos'
+  LICEOS:          'liceos',
+  ACTIVIDAD:       'actividad'  // Audit log: 1 doc por evento del usuario
 };
 
 // ─────────────────────────────────────────────────────────────

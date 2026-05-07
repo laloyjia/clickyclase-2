@@ -170,12 +170,30 @@ var ELAuth = (function() {
             xp: 0, nivel: 1, badges: [], evaluaciones: [], _offlineMode: true
           };
         }
+        // Audit log fire-and-forget
+        try { if (typeof ELDB !== 'undefined' && ELDB.actividad) ELDB.actividad.log('login', { rol: _currentUser && _currentUser.role }); } catch (e) {}
         return _currentUser;
+      })
+      .catch(function(err) {
+        // Log de intento fallido (sin contraseña, solo email)
+        try {
+          if (typeof EL_DB !== 'undefined' && EL_DB.collection) {
+            EL_DB.collection(EL_COLLECTIONS.ACTIVIDAD).add({
+              uid: '', userEmail: email || '', userNombre: '',
+              tipo: 'login_fallido', tipoLabel: 'Intento de login fallido',
+              meta: { errorCode: err && err.code, errorMsg: err && err.message },
+              ts: new Date().toISOString(), tsNum: Date.now()
+            }).catch(function(){});
+          }
+        } catch (e) {}
+        throw err;
       });
   }
 
   // ── Logout ───────────────────────────────────────────────────
   function logout() {
+    // Audit log antes de limpiar la sesión
+    try { if (typeof ELDB !== 'undefined' && ELDB.actividad) ELDB.actividad.log('logout', {}); } catch (e) {}
     _currentUser = null;
     _firebaseUser = null;
     return EL_AUTH.signOut().then(function() {

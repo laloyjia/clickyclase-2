@@ -175,6 +175,10 @@ tr:hover td{background:rgba(99,102,241,.05)}
       <span>📅</span> Planificaciones
       <span id="sbCntPlans" style="margin-left:auto;background:rgba(16,185,129,.15);color:var(--green);font-size:.68rem;padding:1px 7px;border-radius:10px;font-weight:700"></span>
     </div>
+    <div class="nav-item" data-sec="actividad" onclick="showSec(this,'actividad')">
+      <span>📊</span> Registro de Actividad
+      <span id="sbCntActividad" style="margin-left:auto;background:rgba(244,114,182,.18);color:#f9a8d4;font-size:.68rem;padding:1px 7px;border-radius:10px;font-weight:700"></span>
+    </div>
 
     <div class="nav-section">Acceso Rápido</div>
     <a href="dashboard-profesor.html" class="nav-item" style="color:var(--muted);text-decoration:none">👨‍🏫 Panel Profesor</a>
@@ -401,6 +405,92 @@ tr:hover td{background:rgba(99,102,241,.05)}
         <div class="tbl-wrap">
           <table><thead><tr><th>Título</th><th>Profesor</th><th>Módulo/Asig.</th><th>Fecha clase</th><th>Horas</th><th></th></tr></thead>
           <tbody id="plansTbody"><tr><td colspan="6" style="text-align:center;color:var(--muted)">Cargando…</td></tr></tbody></table>
+        </div>
+      </div>
+    </section>
+
+    <!-- REGISTRO DE ACTIVIDAD (audit log) -->
+    <section id="sec-actividad" class="tab-section" style="display:none">
+      <div class="page-header">
+        <h1>📊 Registro de Actividad</h1>
+        <p>Log de eventos por usuario: logins, generación de material, planificaciones, acciones admin.</p>
+      </div>
+
+      <!-- Estadísticas resumen -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:20px">
+        <div class="card" style="padding:16px;text-align:center">
+          <div style="font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-weight:600">Total eventos</div>
+          <div id="actStatTotal" style="font-size:1.8rem;font-weight:800;color:var(--cyan);margin-top:4px">—</div>
+        </div>
+        <div class="card" style="padding:16px;text-align:center">
+          <div style="font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-weight:600">Hoy</div>
+          <div id="actStatHoy" style="font-size:1.8rem;font-weight:800;color:#86efac;margin-top:4px">—</div>
+        </div>
+        <div class="card" style="padding:16px;text-align:center">
+          <div style="font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-weight:600">Esta semana</div>
+          <div id="actStatSemana" style="font-size:1.8rem;font-weight:800;color:#fbbf24;margin-top:4px">—</div>
+        </div>
+        <div class="card" style="padding:16px;text-align:center">
+          <div style="font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-weight:600">Usuarios activos hoy</div>
+          <div id="actStatUsuariosHoy" style="font-size:1.8rem;font-weight:800;color:#a5b4fc;margin-top:4px">—</div>
+        </div>
+      </div>
+
+      <!-- Filtros -->
+      <div class="card" style="padding:14px 16px;margin-bottom:14px">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;align-items:end">
+          <div>
+            <label style="font-size:.74rem;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.6px">Usuario (email)</label>
+            <input type="text" id="actFiltroEmail" placeholder="email o parte" style="width:100%;padding:7px 10px;border-radius:7px;background:rgba(255,255,255,.04);border:1px solid rgba(148,163,184,.2);color:#e5e7eb;font-size:.85rem;margin-top:4px">
+          </div>
+          <div>
+            <label style="font-size:.74rem;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.6px">Tipo de evento</label>
+            <select id="actFiltroTipo" style="width:100%;padding:7px 10px;border-radius:7px;background:rgba(255,255,255,.04);border:1px solid rgba(148,163,184,.2);color:#e5e7eb;font-size:.85rem;margin-top:4px">
+              <option value="">— Todos —</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size:.74rem;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.6px">Desde</label>
+            <input type="date" id="actFiltroDesde" style="width:100%;padding:7px 10px;border-radius:7px;background:rgba(255,255,255,.04);border:1px solid rgba(148,163,184,.2);color:#e5e7eb;font-size:.85rem;margin-top:4px">
+          </div>
+          <div>
+            <label style="font-size:.74rem;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.6px">Hasta</label>
+            <input type="date" id="actFiltroHasta" style="width:100%;padding:7px 10px;border-radius:7px;background:rgba(255,255,255,.04);border:1px solid rgba(148,163,184,.2);color:#e5e7eb;font-size:.85rem;margin-top:4px">
+          </div>
+          <div>
+            <label style="font-size:.74rem;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.6px">Liceo</label>
+            <input type="text" id="actFiltroLiceo" placeholder="slug del liceo" style="width:100%;padding:7px 10px;border-radius:7px;background:rgba(255,255,255,.04);border:1px solid rgba(148,163,184,.2);color:#e5e7eb;font-size:.85rem;margin-top:4px">
+          </div>
+          <div style="display:flex;gap:8px">
+            <button onclick="aplicarFiltrosActividad()" style="flex:1;padding:8px 14px;border-radius:8px;border:0;background:linear-gradient(135deg,#7c3aed,#22d3ee);color:#fff;font-weight:700;cursor:pointer;font-size:.82rem">🔍 Filtrar</button>
+            <button onclick="limpiarFiltrosActividad()" style="padding:8px 12px;border-radius:8px;border:1px solid rgba(148,163,184,.3);background:rgba(148,163,184,.08);color:#cbd5e1;cursor:pointer;font-size:.82rem">×</button>
+          </div>
+        </div>
+        <div style="margin-top:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <span id="actCount" style="font-size:.78rem;color:var(--muted)">—</span>
+          <span style="flex:1"></span>
+          <button onclick="exportarActividadCSV()" style="padding:7px 14px;border-radius:8px;border:1px solid rgba(34,197,94,.4);background:rgba(34,197,94,.12);color:#86efac;cursor:pointer;font-size:.78rem;font-weight:600">⬇ Exportar CSV</button>
+          <button onclick="recargarActividad()" style="padding:7px 14px;border-radius:8px;border:1px solid rgba(34,211,238,.4);background:rgba(34,211,238,.12);color:#67e8f9;cursor:pointer;font-size:.78rem;font-weight:600">↻ Refrescar</button>
+        </div>
+      </div>
+
+      <!-- Tabla -->
+      <div class="card">
+        <div class="tbl-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:130px">Fecha / Hora</th>
+                <th>Usuario</th>
+                <th>Acción</th>
+                <th>Detalle</th>
+                <th style="width:90px">Liceo</th>
+              </tr>
+            </thead>
+            <tbody id="actTbody">
+              <tr><td colspan="5" style="text-align:center;color:var(--muted);padding:30px">Cargando registro…</td></tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </section>
@@ -818,7 +908,191 @@ function showSec(el,id){
   if(id==='recursos'&&!_recursosInit){_recursosInit=true;initRecursos();}
   if(id==='gemini'){cargarConfigIA();}
   if(id==='liceos'){_liceosLoaded=true;loadLiceos();}
+  if(id==='actividad'){cargarActividad();}
 }
+
+// ============================================================
+//  REGISTRO DE ACTIVIDAD (audit log) — admin
+// ============================================================
+var _actividadCache = [];
+var _actividadFiltrada = [];
+
+function cargarActividad() {
+  if (typeof ELDB === 'undefined' || !ELDB.actividad) {
+    document.getElementById('actTbody').innerHTML = '<tr><td colspan="5" style="text-align:center;color:#fca5a5;padding:30px">Audit log no disponible (ELDB.actividad no cargó).</td></tr>';
+    return;
+  }
+  // Poblar select de tipos
+  var sel = document.getElementById('actFiltroTipo');
+  if (sel && sel.options.length <= 1 && ELDB.actividad.TIPOS) {
+    var tipos = ELDB.actividad.TIPOS;
+    for (var k in tipos) {
+      var opt = document.createElement('option');
+      opt.value = k; opt.textContent = tipos[k];
+      sel.appendChild(opt);
+    }
+  }
+  document.getElementById('actTbody').innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:30px">⏳ Cargando registro…</td></tr>';
+  ELDB.actividad.listar({ limit: 500 }).then(function(items) {
+    _actividadCache = items || [];
+    aplicarFiltrosActividad();
+    renderEstadisticasActividad();
+  });
+}
+
+function aplicarFiltrosActividad() {
+  var email = (document.getElementById('actFiltroEmail').value || '').trim().toLowerCase();
+  var tipo  = (document.getElementById('actFiltroTipo').value || '').trim();
+  var desdeStr = document.getElementById('actFiltroDesde').value;
+  var hastaStr = document.getElementById('actFiltroHasta').value;
+  var liceo = (document.getElementById('actFiltroLiceo').value || '').trim().toLowerCase();
+  var desde = desdeStr ? new Date(desdeStr).getTime() : 0;
+  var hasta = hastaStr ? (new Date(hastaStr).getTime() + 86400000) : Infinity;
+
+  _actividadFiltrada = _actividadCache.filter(function(e) {
+    if (email && (e.userEmail || '').toLowerCase().indexOf(email) === -1) return false;
+    if (tipo  && e.tipo !== tipo) return false;
+    if (liceo && (e.liceoSlug || '').toLowerCase().indexOf(liceo) === -1) return false;
+    if (e.tsNum < desde || e.tsNum > hasta) return false;
+    return true;
+  });
+  renderActividadTabla();
+}
+
+function limpiarFiltrosActividad() {
+  ['actFiltroEmail','actFiltroTipo','actFiltroDesde','actFiltroHasta','actFiltroLiceo'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  aplicarFiltrosActividad();
+}
+
+function recargarActividad() { cargarActividad(); }
+
+function renderActividadTabla() {
+  var tb = document.getElementById('actTbody');
+  var cnt = document.getElementById('actCount');
+  var sb = document.getElementById('sbCntActividad');
+  if (sb) sb.textContent = _actividadCache.length || '';
+  if (cnt) cnt.textContent = _actividadFiltrada.length + ' de ' + _actividadCache.length + ' eventos';
+  if (!_actividadFiltrada.length) {
+    tb.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:40px">Sin eventos que coincidan con los filtros.</td></tr>';
+    return;
+  }
+  tb.innerHTML = _actividadFiltrada.slice(0, 200).map(function(e) {
+    var d = new Date(e.tsNum || (e.ts && new Date(e.ts).getTime()));
+    var fechaTxt = d.toLocaleString('es-CL', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+    var detalle = '';
+    if (e.meta) {
+      var entries = [];
+      for (var k in e.meta) {
+        if (e.meta[k] === '' || e.meta[k] == null) continue;
+        var v = String(e.meta[k]);
+        if (v.length > 50) v = v.slice(0, 47) + '…';
+        entries.push('<span style="font-size:.74rem;background:rgba(124,58,237,.12);border:1px solid rgba(124,58,237,.25);color:#c4b5fd;padding:1px 6px;border-radius:6px;margin-right:4px">' + k + ': ' + _esc(v) + '</span>');
+      }
+      detalle = entries.join('');
+    }
+    var tipoColor = (e.tipo === 'login' || e.tipo === 'logout') ? '#86efac'
+                  : (e.tipo === 'login_fallido') ? '#fca5a5'
+                  : (e.tipo && e.tipo.indexOf('admin_') === 0) ? '#fbbf24'
+                  : (e.tipo && e.tipo.indexOf('generar_') === 0) ? '#67e8f9'
+                  : '#a5b4fc';
+    return '<tr>' +
+      '<td style="font-size:.78rem;color:var(--muted);white-space:nowrap">' + fechaTxt + '</td>' +
+      '<td><div style="font-weight:600">' + _esc(e.userNombre || '—') + '</div><div style="font-size:.72rem;color:var(--muted)">' + _esc(e.userEmail || '') + '</div></td>' +
+      '<td><span style="font-size:.78rem;color:' + tipoColor + ';font-weight:600">' + _esc(e.tipoLabel || e.tipo || '—') + '</span></td>' +
+      '<td>' + detalle + '</td>' +
+      '<td style="font-size:.74rem;color:var(--muted)">' + _esc(e.liceoSlug || '—') + '</td>' +
+    '</tr>';
+  }).join('');
+  if (_actividadFiltrada.length > 200) {
+    tb.innerHTML += '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:10px;font-size:.78rem">+ ' + (_actividadFiltrada.length - 200) + ' eventos más (refina filtros para verlos)</td></tr>';
+  }
+}
+
+function renderEstadisticasActividad() {
+  var hoy0 = new Date(); hoy0.setHours(0,0,0,0);
+  var hoyTs = hoy0.getTime();
+  var sem0 = hoyTs - 7 * 86400000;
+  var totalHoy = 0, totalSemana = 0;
+  var usuariosHoy = {};
+  for (var i = 0; i < _actividadCache.length; i++) {
+    var e = _actividadCache[i];
+    if (e.tsNum >= hoyTs) {
+      totalHoy++;
+      if (e.userEmail) usuariosHoy[e.userEmail] = 1;
+    }
+    if (e.tsNum >= sem0) totalSemana++;
+  }
+  var setText = function(id, v) { var el = document.getElementById(id); if (el) el.textContent = v; };
+  setText('actStatTotal', _actividadCache.length);
+  setText('actStatHoy', totalHoy);
+  setText('actStatSemana', totalSemana);
+  setText('actStatUsuariosHoy', Object.keys(usuariosHoy).length);
+}
+
+function exportarActividadCSV() {
+  if (!_actividadFiltrada.length) { alert('No hay eventos para exportar.'); return; }
+  var headers = ['Fecha','Usuario','Email','Acción','Tipo','Detalle','Liceo'];
+  var rows = _actividadFiltrada.map(function(e) {
+    var detalle = '';
+    if (e.meta) {
+      var pairs = [];
+      for (var k in e.meta) if (e.meta[k] !== '' && e.meta[k] != null) pairs.push(k + '=' + e.meta[k]);
+      detalle = pairs.join(' | ');
+    }
+    return [
+      e.ts || '',
+      e.userNombre || '',
+      e.userEmail || '',
+      e.tipoLabel || '',
+      e.tipo || '',
+      detalle,
+      e.liceoSlug || ''
+    ];
+  });
+  var csv = [headers].concat(rows).map(function(r) {
+    return r.map(function(c) {
+      var s = String(c == null ? '' : c).replace(/"/g, '""');
+      return '"' + s + '"';
+    }).join(',');
+  }).join('\n');
+  var blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = 'actividad-clickyclase-' + new Date().toISOString().slice(0,10) + '.csv';
+  document.body.appendChild(a); a.click();
+  setTimeout(function() { URL.revokeObjectURL(url); a.remove(); }, 200);
+}
+
+// Helper de escape HTML
+function _esc(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+// Re-aplicar filtros al teclear (debounce 250ms)
+(function _wireActividadInputs() {
+  if (typeof window === 'undefined') return;
+  window.addEventListener('load', function() {
+    var t = null;
+    ['actFiltroEmail','actFiltroLiceo'].forEach(function(id) {
+      var el = document.getElementById(id);
+      if (!el) return;
+      el.addEventListener('input', function() {
+        clearTimeout(t);
+        t = setTimeout(aplicarFiltrosActividad, 250);
+      });
+    });
+    ['actFiltroTipo','actFiltroDesde','actFiltroHasta'].forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el) el.addEventListener('change', aplicarFiltrosActividad);
+    });
+  });
+})();
 
 function renderUsers(list){
   var tb=document.getElementById('usersTbody');

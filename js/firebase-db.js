@@ -506,6 +506,133 @@ var ELDB = (function() {
     }
   };
 
+  // ============================================================
+  //  ACTIVIDAD \u2014 audit log de eventos por usuario
+  //
+  //  Schema de cada documento:
+  //    {
+  //      uid, userEmail, userNombre,    // identidad
+  //      tipo,                          // 'login' | 'generar_material_ia' | ...
+  //      tipoLabel,                     // texto legible para el panel admin
+  //      meta: { ... },                 // datos del evento
+  //      liceoSlug,                     // si aplica
+  //      ip,                            // best-effort (puede quedar vac\u00edo)
+  //      ts,                            // ISO 8601
+  //      tsNum                          // Date.now() para ordenar
+  //    }
+  //
+  //  El log() es FIRE-AND-FORGET (no bloquea la UI ni propaga errores).
+  // ============================================================
+  var ACTIVIDAD_TIPOS = {
+    'login':                       'Inicio de sesi\u00f3n',
+    'logout':                      'Cierre de sesi\u00f3n',
+    'login_fallido':               'Intento de login fallido',
+    'generar_material_ia':         'Gener\u00f3 material con IA',
+    'generar_material_plantilla':  'Gener\u00f3 material con plantilla',
+    'generar_pie_adjunta':         'Gener\u00f3 versi\u00f3n PIE adaptada',
+    'publicar_biblioteca':         'Public\u00f3 en biblioteca',
+    'descargar_word':              'Descarg\u00f3 documento Word',
+    'crear_planificacion':         'Cre\u00f3 planificaci\u00f3n',
+    'editar_planificacion':        'Edit\u00f3 planificaci\u00f3n',
+    'eliminar_planificacion':      'Elimin\u00f3 planificaci\u00f3n',
+    'admin_crear_usuario':         'Admin: cre\u00f3 usuario',
+    'admin_editar_usuario':        'Admin: edit\u00f3 usuario',
+    'admin_eliminar_usuario':      'Admin: elimin\u00f3 usuario',
+    'admin_crear_liceo':           'Admin: cre\u00f3 liceo',
+    'admin_editar_liceo':          'Admin: edit\u00f3 liceo',
+    'admin_generar_codigo':        'Admin: gener\u00f3 c\u00f3digo de acceso',
+    'admin_cambiar_apikey':        'Admin: cambi\u00f3 API key IA',
+    'visita_pagina':               'Visit\u00f3 p\u00e1gina'
+  };
+
+  var actividad = {
+    /**
+     * Registra un evento. Fire-and-forget \u2014 nunca bloquea ni lanza error.
+     * @param {string} tipo  Una de las claves de ACTIVIDAD_TIPOS.
+     * @param {object} meta  (opcional) datos del evento (cantidad, IDs, etc.)
+     */
+    log: function (tipo, meta) {
+      try {
+        if (!EL_DB || !EL_DB.collection) return Promise.resolve(null);
+        var user = (typeof ELAuth !== 'undefined' && ELAuth.usuario) ? ELAuth.usuario : null;
+        var nowIso = new Date().toISOString();
+        var entrada = {
+          uid:        user ? (user.uid || '') : '',
+          userEmail:  user ? (user.email || '') : '',
+          userNombre: user ? (user.nombre || user.displayName || '') : '',
+          tipo:       tipo || 'desconocido',
+          tipoLabel:  ACTIVIDAD_TIPOS[tipo] || tipo,
+          meta:       meta || {},
+          liceoSlug:  (user && user.liceoSlug) ? user.liceoSlug : '',
+          ts:         nowIso,
+          tsNum:      Date.now()
+        };
+        return EL_DB.collection(EL_COLLECTIONS.ACTIVIDAD).add(entrada)
+          .catch(function (err) {
+            // Silencio \u2014 el audit log no debe romper la UX si falla.
+            if (typeof console !== 'undefined' && console.warn) {
+              console.warn('[ELDB.actividad] log() fall\u00f3:', err && err.message);
+            }
+            return null;
+          });
+      } catch (e) {
+        return Promise.resolve(null);
+      }
+    },
+
+    /** Lista eventos con filtros. Solo para admin. */
+    listar: function (opts) {
+      opts = opts || {};
+      var limit = opts.limit || 200;
+      var query = EL_DB.collection(EL_COLLECTIONS.ACTIVIDAD).orderBy('tsNum', 'desc');
+      // No aplicamos where() en server para evitar \u00edndices compuestos \u2014
+      // filtramos en cliente que es m\u00e1s resiliente con el set inicial.
+      return query.get()
+        .then(function (snap) {
+          var items = [];
+          snap.forEach(function (doc) {
+            items.push(Object.assign({ id: doc.id }, doc.data()));
+          });
+          // Filtros en cliente
+          if (opts.uid)        items = items.filter(function (e) { return e.uid === opts.uid; });
+          if (opts.userEmail)  items = items.filter(function (e) { return (e.userEmail || '').toLowerCase().indexOf(opts.userEmail.toLowerCase()) !== -1; });
+          if (opts.tipo)       items = items.filter(function (e) { return e.tipo === opts.tipo; });
+          if (opts.liceoSlug)  items = items.filter(function (e) { return e.liceoSlug === opts.liceoSlug; });
+          if (opts.desde)      items = items.filter(function (e) { return e.tsNum >= opts.desde; });
+          if (opts.hasta)      items = items.filter(function (e) { return e.tsNum <= opts.hasta; });
+          return items.slice(0, limit);
+        })
+        .catch(function (err) {
+          if (typeof console !== 'undefined' && console.warn) {
+            console.warn('[ELDB.actividad] listar() fall\u00f3:', err && err.message);
+          }
+          return [];
+        });
+    },
+
+    /** Conteo de eventos por tipo (para estad\u00edsticas r\u00e1pidas). */
+    estadisticas: function () {
+      return EL_DB.collection(EL_COLLECTIONS.ACTIVIDAD).get()
+        .then(function (snap) {
+          var stats = { total: 0, porTipo: {}, porUsuario: {}, porDia: {} };
+          snap.forEach(function (doc) {
+            var d = doc.data();
+            stats.total++;
+            stats.porTipo[d.tipo] = (stats.porTipo[d.tipo] || 0) + 1;
+            var key = d.userEmail || d.uid || 'sin-id';
+            stats.porUsuario[key] = (stats.porUsuario[key] || 0) + 1;
+            var dia = (d.ts || '').substring(0, 10);
+            if (dia) stats.porDia[dia] = (stats.porDia[dia] || 0) + 1;
+          });
+          return stats;
+        })
+        .catch(function () { return { total: 0, porTipo: {}, porUsuario: {}, porDia: {} }; });
+    },
+
+    /** Tipos disponibles, para el filtro del UI. */
+    TIPOS: ACTIVIDAD_TIPOS
+  };
+
   return {
     materiales:      materiales,
     planificaciones: planificaciones,
@@ -514,6 +641,7 @@ var ELDB = (function() {
     codigos:         codigos,
     migracion:       migracion,
     recursos:        recursos,
-    liceos:          liceos
+    liceos:          liceos,
+    actividad:       actividad
   };
 })();
