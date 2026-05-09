@@ -542,7 +542,9 @@ var ELDB = (function() {
     'admin_editar_liceo':          'Admin: edit\u00f3 liceo',
     'admin_generar_codigo':        'Admin: gener\u00f3 c\u00f3digo de acceso',
     'admin_cambiar_apikey':        'Admin: cambi\u00f3 API key IA',
-    'visita_pagina':               'Visit\u00f3 p\u00e1gina'
+    'visita_pagina':               'Visit\u00f3 p\u00e1gina',
+    'alerta_seguridad':            'Alerta de seguridad',
+    'sistema_purga':               'Sistema: purga autom\u00e1tica'
   };
 
   var actividad = {
@@ -627,6 +629,132 @@ var ELDB = (function() {
           return stats;
         })
         .catch(function () { return { total: 0, porTipo: {}, porUsuario: {}, porDia: {} }; });
+    },
+
+    /**
+     * Purga eventos antiguos. Default 90 días para no llenar Firestore.
+     * Ejecuta como mucho 1 vez cada 24h (controlado vía localStorage).
+     * @param {number} dias  Días de retención (90 por defecto).
+     * @param {boolean} forzar  Si true, ignora el throttle de 24h.
+     * @returns {Promise<{ borrados:number, omitidos:boolean }>}
+     */
+    purgar: function (dias, forzar) {
+      try {
+        dias = (typeof dias === 'number' && dias > 0) ? dias : 90;
+        // Throttle: solo 1 vez por día
+        if (!forzar && typeof localStorage !== 'undefined') {
+          var ultimaPurga = parseInt(localStorage.getItem('cc_purga_actividad_ts') || '0', 10);
+          var unDia = 24 * 60 * 60 * 1000;
+          if (ultimaPurga && (Date.now() - ultimaPurga) < unDia) {
+            return Promise.resolve({ borrados: 0, omitidos: true });
+          }
+        }
+        var corteTs = Date.now() - (dias * 24 * 60 * 60 * 1000);
+        var coll = EL_DB.collection(EL_COLLECTIONS.ACTIVIDAD);
+        // Limitamos a 500 docs por pase (Firestore batch max + cuota gentil)
+        return coll.orderBy('tsNum', 'asc').get().then(function (snap) {
+          var batch = []; var total = 0;
+          snap.forEach(function (doc) {
+            var d = doc.data();
+            if (d && typeof d.tsNum === 'number' && d.tsNum < corteTs && total < 500) {
+              batch.push(coll.doc(doc.id).delete().catch(function(){}));
+              total++;
+            }
+          });
+          if (total === 0) {
+            try { localStorage.setItem('cc_purga_actividad_ts', String(Date.now())); } catch(e){}
+            return { borrados: 0, omitidos: false };
+          }
+          return Promise.all(batch).then(function () {
+            try { localStorage.setItem('cc_purga_actividad_ts', String(Date.now())); } catch(e){}
+            // Registrar en el propio audit log
+            try {
+              actividad.log('sistema_purga', { borrados: total, diasRetencion: dias });
+            } catch(e){}
+            return { borrados: total, omitidos: false };
+          });
+        }).catch(function (err) {
+          if (typeof console !== 'undefined' && console.warn) {
+            console.warn('[ELDB.actividad] purgar() falló:', err && err.message);
+          }
+          return { borrados: 0, omitidos: false, error: err && err.message };
+        });
+      } catch (e) {
+        return Promise.resolve({ borrados: 0, omitidos: false, error: e && e.message });
+      }
+    },
+
+    /**
+     * Detecta brute-force de login: si un mismo email tiene >= umbral
+     * intentos fallidos en ventana de tiempo, registra una alerta_seguridad.
+     * Llamar después de log('login_fallido').
+     * @param {string} email
+     * @param {object} opts  { umbral=10, ventanaMin=15 }
+     * @returns {Promise<{ alerta:boolean, intentos:number }>}
+     */
+    chequeoBruteForce: function (email, opts) {
+      try {
+        if (!email) return Promise.resolve({ alerta: false, intentos: 0 });
+        opts = opts || {};
+        var umbral = opts.umbral || 10;
+        var ventanaMs = (opts.ventanaMin || 15) * 60 * 1000;
+        var desde = Date.now() - ventanaMs;
+        var emailLow = email.toLowerCase();
+        return EL_DB.collection(EL_COLLECTIONS.ACTIVIDAD)
+          .orderBy('tsNum', 'desc').get()
+          .then(function (snap) {
+            var intentos = 0;
+            var rachaVigente = true; // contamos sólo la racha consecutiva más reciente
+            // snap viene desc por tsNum: el más reciente primero
+            snap.forEach(function (doc) {
+              if (!rachaVigente) return;
+              var d = doc.data();
+              if (!d || d.tsNum < desde) { rachaVigente = false; return; }
+              if ((d.userEmail || '').toLowerCase() !== emailLow) return;
+              if (d.tipo === 'login_fallido') {
+                intentos++;
+              } else if (d.tipo === 'login') {
+                // Login exitoso rompe la racha
+                rachaVigente = false;
+              }
+            });
+            if (intentos >= umbral) {
+              // Registrar alerta (fire-and-forget pero retornamos el flag)
+              try {
+                actividad.log('alerta_seguridad', {
+                  motivo: 'brute_force_login',
+                  emailObjetivo: email,
+                  intentos: intentos,
+                  ventanaMin: opts.ventanaMin || 15
+                });
+              } catch(e){}
+              return { alerta: true, intentos: intentos };
+            }
+            return { alerta: false, intentos: intentos };
+          })
+          .catch(function () { return { alerta: false, intentos: 0 }; });
+      } catch (e) {
+        return Promise.resolve({ alerta: false, intentos: 0 });
+      }
+    },
+
+    /** Lista alertas de seguridad activas (no atendidas) en últimas 24h. */
+    listarAlertas: function (horas) {
+      horas = horas || 24;
+      var desde = Date.now() - (horas * 60 * 60 * 1000);
+      return EL_DB.collection(EL_COLLECTIONS.ACTIVIDAD)
+        .orderBy('tsNum', 'desc').get()
+        .then(function (snap) {
+          var items = [];
+          snap.forEach(function (doc) {
+            var d = doc.data();
+            if (d && d.tipo === 'alerta_seguridad' && d.tsNum >= desde) {
+              items.push(Object.assign({ id: doc.id }, d));
+            }
+          });
+          return items;
+        })
+        .catch(function () { return []; });
     },
 
     /** Tipos disponibles, para el filtro del UI. */

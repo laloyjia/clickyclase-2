@@ -183,6 +183,13 @@ var ELAuth = (function() {
               tipo: 'login_fallido', tipoLabel: 'Intento de login fallido',
               meta: { errorCode: err && err.code, errorMsg: err && err.message },
               ts: new Date().toISOString(), tsNum: Date.now()
+            }).then(function () {
+              // Tras registrar el fallo, chequear racha de brute-force.
+              try {
+                if (typeof ELDB !== 'undefined' && ELDB.actividad && ELDB.actividad.chequeoBruteForce) {
+                  ELDB.actividad.chequeoBruteForce(email, { umbral: 10, ventanaMin: 15 });
+                }
+              } catch (e2) {}
             }).catch(function(){});
           }
         } catch (e) {}

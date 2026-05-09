@@ -416,6 +416,23 @@ tr:hover td{background:rgba(99,102,241,.05)}
         <p>Log de eventos por usuario: logins, generación de material, planificaciones, acciones admin.</p>
       </div>
 
+      <!-- Banner de alertas de seguridad -->
+      <div id="actAlertasBanner" style="display:none;margin-bottom:18px;padding:14px 18px;border-radius:12px;background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.4);color:#fecaca">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+          <div>
+            <div style="font-weight:700;font-size:.95rem">🚨 <span id="actAlertasCount">0</span> alerta(s) de seguridad en últimas 24h</div>
+            <div id="actAlertasResumen" style="font-size:.82rem;opacity:.85;margin-top:4px"></div>
+          </div>
+          <button onclick="verAlertasDetalle()" style="padding:6px 14px;border-radius:8px;border:1px solid rgba(248,113,113,.5);background:rgba(248,113,113,.18);color:#fecaca;cursor:pointer;font-size:.78rem;font-weight:600">Ver detalle</button>
+        </div>
+      </div>
+
+      <!-- Toolbar de mantenimiento -->
+      <div style="display:flex;gap:10px;align-items:center;justify-content:flex-end;margin-bottom:14px;flex-wrap:wrap">
+        <span id="actPurgaInfo" style="font-size:.74rem;color:var(--muted)"></span>
+        <button onclick="purgarActividadManual()" title="Borra eventos con más de 90 días de antigüedad" style="padding:6px 12px;border-radius:8px;border:1px solid rgba(251,191,36,.4);background:rgba(251,191,36,.1);color:#fbbf24;cursor:pointer;font-size:.78rem;font-weight:600">🧹 Purgar &gt;90 días</button>
+      </div>
+
       <!-- Estadísticas resumen -->
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:20px">
         <div class="card" style="padding:16px;text-align:center">
@@ -937,6 +954,87 @@ function cargarActividad() {
     _actividadCache = items || [];
     aplicarFiltrosActividad();
     renderEstadisticasActividad();
+  });
+  // Auto-purga >90d (throttle 24h interno) + alertas en paralelo
+  cargarAlertasSeguridad();
+  ejecutarAutoPurga();
+}
+
+// --- Alertas de seguridad ---------------------------------------
+var _alertasCache = [];
+function cargarAlertasSeguridad() {
+  if (!ELDB.actividad || !ELDB.actividad.listarAlertas) return;
+  ELDB.actividad.listarAlertas(24).then(function(alertas) {
+    _alertasCache = alertas || [];
+    var banner = document.getElementById('actAlertasBanner');
+    if (!banner) return;
+    if (_alertasCache.length === 0) {
+      banner.style.display = 'none';
+      return;
+    }
+    banner.style.display = 'block';
+    document.getElementById('actAlertasCount').textContent = _alertasCache.length;
+    var emails = {};
+    _alertasCache.forEach(function(a) {
+      var e = (a.meta && a.meta.emailObjetivo) || a.userEmail || 'desconocido';
+      emails[e] = (emails[e] || 0) + 1;
+    });
+    var resumen = Object.keys(emails).slice(0, 3).map(function(e) {
+      return e + ' (' + emails[e] + ')';
+    }).join(' · ');
+    if (Object.keys(emails).length > 3) resumen += ' · y ' + (Object.keys(emails).length - 3) + ' más';
+    document.getElementById('actAlertasResumen').textContent = 'Emails afectados: ' + resumen;
+  });
+}
+
+function verAlertasDetalle() {
+  if (!_alertasCache || !_alertasCache.length) {
+    alert('No hay alertas activas.');
+    return;
+  }
+  // Filtrar la tabla por tipo alerta_seguridad
+  var sel = document.getElementById('actFiltroTipo');
+  if (sel) { sel.value = 'alerta_seguridad'; aplicarFiltrosActividad(); }
+  // Scroll a la tabla
+  var tbl = document.getElementById('actTbody');
+  if (tbl) tbl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// --- Purga automática y manual ----------------------------------
+function ejecutarAutoPurga() {
+  if (!ELDB.actividad || !ELDB.actividad.purgar) return;
+  // forzar=false → respeta throttle 24h
+  ELDB.actividad.purgar(90, false).then(function(res) {
+    var info = document.getElementById('actPurgaInfo');
+    if (!info) return;
+    if (res.omitidos) {
+      var ts = parseInt(localStorage.getItem('cc_purga_actividad_ts') || '0', 10);
+      var hace = ts ? Math.round((Date.now() - ts) / (60*60*1000)) : 0;
+      info.textContent = '✓ Purga ya ejecutada hace ' + hace + 'h (próxima en ' + (24-hace) + 'h)';
+    } else {
+      info.textContent = res.borrados > 0
+        ? '🧹 Purga ejecutada: ' + res.borrados + ' evento(s) >90d eliminado(s)'
+        : '✓ Purga ejecutada: no había eventos >90d';
+    }
+  });
+}
+
+function purgarActividadManual() {
+  if (!ELDB.actividad || !ELDB.actividad.purgar) {
+    alert('Función de purga no disponible.');
+    return;
+  }
+  if (!confirm('¿Borrar permanentemente los eventos del registro con más de 90 días?\n\nEsta acción no se puede deshacer.')) return;
+  var info = document.getElementById('actPurgaInfo');
+  if (info) info.textContent = '⏳ Purgando…';
+  ELDB.actividad.purgar(90, true).then(function(res) {
+    if (info) {
+      info.textContent = res.borrados > 0
+        ? '🧹 ' + res.borrados + ' evento(s) eliminado(s)'
+        : '✓ No había eventos >90d';
+    }
+    // Recargar lista
+    cargarActividad();
   });
 }
 
