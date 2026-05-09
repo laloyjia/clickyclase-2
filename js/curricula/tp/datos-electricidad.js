@@ -341,6 +341,105 @@ CURRICULA_FULL['electricidad'] = {
           }
         }
       }
+    },
+
+    // ── E10: Eficiencia Energética y Energías Renovables (4°M, 152 hrs) ──
+    'EL10': {
+      num:    'EL10',
+      nombre: 'Eficiencia Energética y Energías Renovables',
+      nivel:  '4M',
+      horas:  152,
+      oas: {
+        'OA4': 'Ejecutar instalaciones de calefacción y fuerza motriz en baja tensión, con un máximo de 5 kW de potencia total instalada, sin alimentadores, aplicando la normativa eléctrica vigente, de acuerdo con los planos, a la memoria de cálculo y a los presupuestos con cubicación de materiales y mano de obra.'
+      },
+      aes: {
+        'OA1': {
+          texto: 'Comprender en profundidad los principios teóricos y prácticos de las diferentes tecnologías de energías renovables, incluida la captación y transformación de la energía solar, eólica, hidroeléctrica, geotérmica y biomasa.',
+          ces: {
+            'CE1': 'Analiza información de conceptos básicos de energías, en aplicación con las leyes de la termodinámica.',
+            'CE2': 'Recolecta, organiza y analiza información sobre energías no renovables asociadas a combustibles fósiles tales como el carbón, petróleo y gas natural; procesos de extracción, refinamiento y utilización, analizando impactos ambientales y sociales, identificando futuras limitaciones de las energías no renovables.',
+            'CE3': 'Recolecta, organiza y analiza información sobre energías renovables, sus principales características y formas de obtención como materia prima: solar fotovoltaica y solar térmica, aerogeneradores y parques eólicos, presas y centrales hidroeléctricas (energía de mareas y olas), combustión, biogás y energía geotérmica.',
+            'CE4': 'Establece diferencia entre energías renovables y no renovables asociando las ventajas y desventajas de cada tipo de energía en conjunto de los impactos ambientales y sociales, posibilidad y sostenibilidad a largo plazo y aspectos económicos y tecnológicos.',
+            'CE5': 'Verifica y ejecuta la transición energética y política pública considerando la importancia de la transición hacia las energías renovables con objetivos internacionales de reducción de emisiones, considerando incentivos y políticas gubernamentales para el desarrollo de infraestructuras y mercados energéticos.',
+            'CE6': 'Integra las energías renovables para una generación distribuida y sistemas híbridos, proyectando el almacenamiento de energía, redes inteligentes y gestión de la demanda para la interconexión de sistemas renovables.',
+            'CE7': 'Analiza avances tecnológicos y el desarrollo de nuevas fuentes, proyectando perspectivas de crecimiento y mercado laboral con innovación y proyectos de investigación con la energía renovable como rol principal en la mitigación del cambio climático.'
+          }
+        },
+        'OA2': {
+          texto: 'Analizar y evaluar la viabilidad técnica, económica y de proyectos de generación de energía ambiental renovable a gran escala.',
+          ces: {
+            'CE1': 'Analiza principios de generación de energía solar considerando los sistemas fotovoltaicos: principios básicos de conversión y componentes (paneles, inversores, baterías, etc.) y sus formas de conexión.',
+            'CE2': 'Utiliza herramientas aptas para diseño y dimensionamiento de sistemas fotovoltaicos contemplando la evaluación de la radiación solar y cálculo de la producción energética; proceso de montaje de paneles solares en distintas superficies, conexión de componentes (paneles, inversores, baterías) y cableado y protección eléctrica.',
+            'CE3': 'Instala y configura sistemas fotovoltaicos realizando pruebas de funcionamiento y verificación de la eficiencia con configuración de parámetros en inversores y sistemas de monitorización e interconexión con la red eléctrica (en sistemas conectados).',
+            'CE4': 'Ejecuta mantenimiento y operación de sistemas fotovoltaicos: inspección periódica de componentes, limpieza y mantenimiento de paneles, monitorización del rendimiento y diagnóstico de fallas, gestión de seguridad y protección contra incendios.',
+            'CE5': 'Analiza principios de generación de energía eólica considerando componentes de un aerogenerador (rotor, generador, torre, entre otros), tipos y aplicaciones, fundamento del diseño y dimensionamiento de parques eólicos, evaluación del recurso eólico, selección de ubicación y disposición, y cálculo de producción energética.',
+            'CE6': 'Ejecuta instalación y montaje de aerogeneradores preparando el terreno y cimentación, ensamblaje de partes, conexiones eléctricas y pruebas de funcionamiento; proyectando operación y mantenimiento de parques eólicos (monitorización del rendimiento, lubricación y mantenimiento de componentes mecánicos, mantenimiento eléctrico de transformadores y cables) asociando la seguridad y prevención de riesgos en la operación.'
+          }
+        },
+        'OA3': {
+          texto: 'Investigar y desarrollar estrategias de gestión de la energía para mejorar la eficiencia energética en industrias y empresas comerciales y particulares.',
+          ces: {
+            'CE1': 'Lee manuales y diagramas técnicos para establecer procedimientos de electrificación y movilidad sostenible, importancia de la transición hacia la movilidad eléctrica y beneficios ambientales, sociales y económicos.',
+            'CE2': 'Aplica gestión energética en hogares e industria, sistemas de monitorización del consumo, análisis de patrones de uso e identificación de oportunidades de eficiencia.',
+            'CE3': 'Diseña soluciones de almacenamiento energético; tipos de baterías y otras tecnologías de almacenamiento; integración de almacenamiento en sistemas renovables; aplicaciones en redes eléctricas y movilidad eléctrica.'
+          }
+        },
+        'OA4': {
+          texto: 'Participar en proyectos de investigación y desarrollo de nuevas tecnologías y enfoques en el campo de las energías renovables y la eficiencia energética.',
+          ces: {
+            'CE1': 'Ejecuta proyectos energéticos: ciclo de vida del proyecto, marco conceptual de la gestión de proyectos, planificación, ejecución y control; analiza seguimiento del progreso, gestión de cambios, control de calidad, comunicación con interesados y resolución de problemas; evalúa resultados, documentación final y lecciones aprendidas.',
+            'CE2': 'Aplica análisis económico de proyectos energéticos: estructura de costos (inversión inicial, operación, mantenimiento), evaluación financiera (VAN, TIR, payback), análisis de sensibilidad y riesgos, financiamiento e inversión.',
+            'CE3': 'Realiza estudios de impacto ambiental y social de los proyectos energéticos, considerando regulaciones, aprobaciones y permisos, sostenibilidad, eficiencia energética y comunidad afectada.'
+          }
+        }
+      }
+    },
+
+    // ── E11: Prevención de Riesgos (4°M, 68 hrs) ──
+    'EL11': {
+      num:    'EL11',
+      nombre: 'Prevención de Riesgos',
+      nivel:  '4M',
+      horas:  68,
+      oas: {
+        'OA7': 'Ejecutar sistemas de control, fuerza y protecciones eléctricas de máquinas, equipos e instalaciones eléctricas según los requerimientos del proyecto y las especificaciones del fabricante, respetando la normativa eléctrica y de control del medio ambiente vigente.'
+      },
+      aes: {
+        'OA1': {
+          texto: 'Interpretar correctamente la legislación sobre accidentes del trabajo y enfermedades profesionales.',
+          ces: {
+            'CE1': 'Reconoce la importancia de la Prevención de Riesgos profesionales en los lugares de trabajo.',
+            'CE2': 'Reconoce la importancia del Comité Paritario de Higiene y Seguridad y de las condiciones sanitarias y ambientales básicas en los lugares de trabajo.',
+            'CE3': 'Reconoce en la Ley 16.744 sobre accidentes del trabajo y enfermedades profesionales lo que respecta a obligatoriedad, personas protegidas, contingencias cubiertas, cotizaciones y financiamiento.'
+          }
+        },
+        'OA2': {
+          texto: 'Identificar las causas y consecuencias de los accidentes del trabajo.',
+          ces: {
+            'CE1': 'Analiza y califica distintos tipos de accidentes y determina la secuencia lógica de su ocurrencia, diferenciando los elementos que lo componen y las acciones preventivas que se pueden ejercer.',
+            'CE2': 'Identifica las causas básicas e inmediatas de los accidentes del trabajo, distinguiendo entre actos inseguros y condiciones inseguras.',
+            'CE3': 'Calcula y analiza estadísticas de accidentabilidad (índice de frecuencia, gravedad, tasa) para evaluar la efectividad de las medidas preventivas adoptadas.'
+          }
+        },
+        'OA3': {
+          texto: 'Aplicar medidas para la prevención o control de accidentes de trabajo.',
+          ces: {
+            'CE1': 'Evalúa el estado y las características técnicas de los elementos de trabajo (herramientas, equipos, instalaciones).',
+            'CE2': 'Detecta, elimina y controla riesgos de las máquinas, instalaciones y equipos eléctricos aplicando jerarquía de control (eliminación, sustitución, controles de ingeniería, administrativos y EPP).',
+            'CE3': 'Selecciona y utiliza correctamente los Elementos de Protección Personal (EPP) según el tipo de tarea y los riesgos identificados, verificando su estado y vigencia.'
+          }
+        },
+        'OA4': {
+          texto: 'Adquirir técnicas adecuadas relacionadas con la prestación de primeros auxilios.',
+          ces: {
+            'CE1': 'Clasifica los primeros auxilios y efectúa el tratamiento de emergencia de acuerdo con el procedimiento general en cada caso.',
+            'CE2': 'Realiza los llamados telefónicos que corresponden a la emergencia en ocurrencia (SAMU 131, Bomberos 132, Carabineros 133, etc.).',
+            'CE3': 'Determina por signos vitales el estado y el primer auxilio que necesita el accidentado.',
+            'CE4': 'Aplica el primer auxilio que necesita el accidentado, incluyendo RCP básica, manejo de hemorragias, quemaduras eléctricas y heridas.',
+            'CE5': 'Identifica los sistemas de Rescate en altura para establecer la forma de rescate de emergencia, de acuerdo con los procedimientos generales en cada caso.'
+          }
+        }
+      }
     }
 
   }, // fin modulos
