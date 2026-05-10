@@ -474,10 +474,7 @@ tr:hover td{background:rgba(99,102,241,.05)}
             <label style="font-size:.74rem;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.6px">Hasta</label>
             <input type="date" id="actFiltroHasta" style="width:100%;padding:7px 10px;border-radius:7px;background:rgba(255,255,255,.04);border:1px solid rgba(148,163,184,.2);color:#e5e7eb;font-size:.85rem;margin-top:4px">
           </div>
-          <div>
-            <label style="font-size:.74rem;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.6px">Liceo</label>
-            <input type="text" id="actFiltroLiceo" placeholder="slug del liceo" style="width:100%;padding:7px 10px;border-radius:7px;background:rgba(255,255,255,.04);border:1px solid rgba(148,163,184,.2);color:#e5e7eb;font-size:.85rem;margin-top:4px">
-          </div>
+          <input type="hidden" id="actFiltroLiceo" value="">
           <div style="display:flex;gap:8px">
             <button onclick="aplicarFiltrosActividad()" style="flex:1;padding:8px 14px;border-radius:8px;border:0;background:linear-gradient(135deg,#7c3aed,#22d3ee);color:#fff;font-weight:700;cursor:pointer;font-size:.82rem">🔍 Filtrar</button>
             <button onclick="limpiarFiltrosActividad()" style="padding:8px 12px;border-radius:8px;border:1px solid rgba(148,163,184,.3);background:rgba(148,163,184,.08);color:#cbd5e1;cursor:pointer;font-size:.82rem">×</button>
@@ -497,15 +494,13 @@ tr:hover td{background:rgba(99,102,241,.05)}
           <table>
             <thead>
               <tr>
-                <th style="width:130px">Fecha / Hora</th>
+                <th style="width:160px">Fecha / Hora</th>
                 <th>Usuario</th>
                 <th>Acción</th>
-                <th>Detalle</th>
-                <th style="width:90px">Liceo</th>
               </tr>
             </thead>
             <tbody id="actTbody">
-              <tr><td colspan="5" style="text-align:center;color:var(--muted);padding:30px">Cargando registro…</td></tr>
+              <tr><td colspan="3" style="text-align:center;color:var(--muted);padding:30px">Cargando registro…</td></tr>
             </tbody>
           </table>
         </div>
@@ -936,7 +931,7 @@ var _actividadFiltrada = [];
 
 function cargarActividad() {
   if (typeof ELDB === 'undefined' || !ELDB.actividad) {
-    document.getElementById('actTbody').innerHTML = '<tr><td colspan="5" style="text-align:center;color:#fca5a5;padding:30px">Audit log no disponible (ELDB.actividad no cargó).</td></tr>';
+    document.getElementById('actTbody').innerHTML = '<tr><td colspan="3" style="text-align:center;color:#fca5a5;padding:30px">Audit log no disponible (ELDB.actividad no cargó).</td></tr>';
     return;
   }
   // Poblar select de tipos
@@ -949,8 +944,14 @@ function cargarActividad() {
       sel.appendChild(opt);
     }
   }
-  document.getElementById('actTbody').innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:30px">⏳ Cargando registro…</td></tr>';
-  ELDB.actividad.listar({ limit: 500 }).then(function(items) {
+  // Por defecto, "Desde" = hace 7 días si está vacío
+  var inDesde = document.getElementById('actFiltroDesde');
+  if (inDesde && !inDesde.value) {
+    var d = new Date(); d.setDate(d.getDate() - 7);
+    inDesde.value = d.toISOString().slice(0,10);
+  }
+  document.getElementById('actTbody').innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--muted);padding:30px">⏳ Cargando registro…</td></tr>';
+  ELDB.actividad.listar({ limit: 1000 }).then(function(items) {
     _actividadCache = items || [];
     aplicarFiltrosActividad();
     renderEstadisticasActividad();
@@ -1074,38 +1075,37 @@ function renderActividadTabla() {
   if (sb) sb.textContent = _actividadCache.length || '';
   if (cnt) cnt.textContent = _actividadFiltrada.length + ' de ' + _actividadCache.length + ' eventos';
   if (!_actividadFiltrada.length) {
-    tb.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:40px">Sin eventos que coincidan con los filtros.</td></tr>';
+    tb.innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--muted);padding:40px">Sin eventos que coincidan con los filtros.</td></tr>';
     return;
   }
-  tb.innerHTML = _actividadFiltrada.slice(0, 200).map(function(e) {
+  tb.innerHTML = _actividadFiltrada.slice(0, 500).map(function(e) {
     var d = new Date(e.tsNum || (e.ts && new Date(e.ts).getTime()));
     var fechaTxt = d.toLocaleString('es-CL', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
-    var detalle = '';
-    if (e.meta) {
-      var entries = [];
-      for (var k in e.meta) {
-        if (e.meta[k] === '' || e.meta[k] == null) continue;
-        var v = String(e.meta[k]);
-        if (v.length > 50) v = v.slice(0, 47) + '…';
-        entries.push('<span style="font-size:.74rem;background:rgba(124,58,237,.12);border:1px solid rgba(124,58,237,.25);color:#c4b5fd;padding:1px 6px;border-radius:6px;margin-right:4px">' + k + ': ' + _esc(v) + '</span>');
-      }
-      detalle = entries.join('');
+    // Nombre: si está vacío, derivar del email (parte antes del @)
+    var nombre = e.userNombre || '';
+    var email  = e.userEmail || '';
+    if (!nombre && email) {
+      nombre = email.split('@')[0].replace(/[._-]+/g, ' ');
+      // Capitalizar
+      nombre = nombre.split(' ').map(function(p){ return p ? p.charAt(0).toUpperCase()+p.slice(1) : ''; }).join(' ');
     }
+    if (!nombre) nombre = '(usuario sin sesión)';
+    if (!email)  email  = '—';
     var tipoColor = (e.tipo === 'login' || e.tipo === 'logout') ? '#86efac'
                   : (e.tipo === 'login_fallido') ? '#fca5a5'
+                  : (e.tipo === 'alerta_seguridad') ? '#f87171'
                   : (e.tipo && e.tipo.indexOf('admin_') === 0) ? '#fbbf24'
                   : (e.tipo && e.tipo.indexOf('generar_') === 0) ? '#67e8f9'
                   : '#a5b4fc';
     return '<tr>' +
       '<td style="font-size:.78rem;color:var(--muted);white-space:nowrap">' + fechaTxt + '</td>' +
-      '<td><div style="font-weight:600">' + _esc(e.userNombre || '—') + '</div><div style="font-size:.72rem;color:var(--muted)">' + _esc(e.userEmail || '') + '</div></td>' +
-      '<td><span style="font-size:.78rem;color:' + tipoColor + ';font-weight:600">' + _esc(e.tipoLabel || e.tipo || '—') + '</span></td>' +
-      '<td>' + detalle + '</td>' +
-      '<td style="font-size:.74rem;color:var(--muted)">' + _esc(e.liceoSlug || '—') + '</td>' +
+      '<td><div style="font-weight:600;color:#e5e7eb">' + _esc(nombre) + '</div>' +
+        '<div style="font-size:.74rem;color:var(--muted)">' + _esc(email) + '</div></td>' +
+      '<td><span style="font-size:.82rem;color:' + tipoColor + ';font-weight:600">' + _esc(e.tipoLabel || e.tipo || '—') + '</span></td>' +
     '</tr>';
   }).join('');
-  if (_actividadFiltrada.length > 200) {
-    tb.innerHTML += '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:10px;font-size:.78rem">+ ' + (_actividadFiltrada.length - 200) + ' eventos más (refina filtros para verlos)</td></tr>';
+  if (_actividadFiltrada.length > 500) {
+    tb.innerHTML += '<tr><td colspan="3" style="text-align:center;color:var(--muted);padding:10px;font-size:.78rem">+ ' + (_actividadFiltrada.length - 500) + ' eventos más (refina filtros para verlos)</td></tr>';
   }
 }
 
@@ -1132,22 +1132,23 @@ function renderEstadisticasActividad() {
 
 function exportarActividadCSV() {
   if (!_actividadFiltrada.length) { alert('No hay eventos para exportar.'); return; }
-  var headers = ['Fecha','Usuario','Email','Acción','Tipo','Detalle','Liceo'];
+  var headers = ['Fecha','Hora','Nombre','Email','Acción'];
   var rows = _actividadFiltrada.map(function(e) {
-    var detalle = '';
-    if (e.meta) {
-      var pairs = [];
-      for (var k in e.meta) if (e.meta[k] !== '' && e.meta[k] != null) pairs.push(k + '=' + e.meta[k]);
-      detalle = pairs.join(' | ');
+    var d = new Date(e.tsNum || (e.ts && new Date(e.ts).getTime()));
+    var fecha = d.toLocaleDateString('es-CL');
+    var hora  = d.toLocaleTimeString('es-CL', { hour:'2-digit', minute:'2-digit' });
+    var nombre = e.userNombre || '';
+    var email  = e.userEmail || '';
+    if (!nombre && email) {
+      nombre = email.split('@')[0].replace(/[._-]+/g,' ');
+      nombre = nombre.split(' ').map(function(p){return p?p.charAt(0).toUpperCase()+p.slice(1):'';}).join(' ');
     }
     return [
-      e.ts || '',
-      e.userNombre || '',
-      e.userEmail || '',
-      e.tipoLabel || '',
-      e.tipo || '',
-      detalle,
-      e.liceoSlug || ''
+      fecha,
+      hora,
+      nombre || '(sin sesión)',
+      email,
+      e.tipoLabel || e.tipo || ''
     ];
   });
   var csv = [headers].concat(rows).map(function(r) {
