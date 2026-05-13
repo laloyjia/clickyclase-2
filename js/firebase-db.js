@@ -556,12 +556,35 @@ var ELDB = (function() {
     log: function (tipo, meta) {
       try {
         if (!EL_DB || !EL_DB.collection) return Promise.resolve(null);
-        var user = (typeof ELAuth !== 'undefined' && ELAuth.usuario) ? ELAuth.usuario : null;
+        // ELAuth expone el usuario como `user` (no `usuario`). Fallback al Firebase Auth nativo.
+        var user = null;
+        try {
+          if (typeof ELAuth !== 'undefined' && ELAuth.user) {
+            user = ELAuth.user;
+          } else if (typeof EL_AUTH !== 'undefined' && EL_AUTH.currentUser) {
+            var fb = EL_AUTH.currentUser;
+            user = {
+              uid: fb.uid,
+              email: fb.email || '',
+              nombre: fb.displayName || (fb.email ? fb.email.split('@')[0] : '')
+            };
+          }
+        } catch (eUser) { user = null; }
         var nowIso = new Date().toISOString();
+        // Derivar nombre: nombre > displayName > parte antes del @ del email
+        var _nombreFinal = '';
+        if (user) {
+          _nombreFinal = user.nombre || user.displayName || '';
+          if (!_nombreFinal && user.email) {
+            _nombreFinal = String(user.email).split('@')[0]
+              .replace(/[._-]+/g, ' ')
+              .replace(/\b\w/g, function (c) { return c.toUpperCase(); });
+          }
+        }
         var entrada = {
           uid:        user ? (user.uid || '') : '',
           userEmail:  user ? (user.email || '') : '',
-          userNombre: user ? (user.nombre || user.displayName || '') : '',
+          userNombre: _nombreFinal,
           tipo:       tipo || 'desconocido',
           tipoLabel:  ACTIVIDAD_TIPOS[tipo] || tipo,
           meta:       meta || {},
