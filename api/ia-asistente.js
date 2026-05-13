@@ -222,7 +222,27 @@ PROCEDIMIENTO PASO A PASO (cada paso numerado y verificable)
 CRITERIOS DE EVALUACIÓN — Lista de cotejo:
   Indicador | Logrado | Por lograr | No logrado
 INFORME DE ACTIVIDAD (preguntas de análisis al terminar)
-CONCLUSIÓN Y REFLEXIÓN`
+CONCLUSIÓN Y REFLEXIÓN`,
+
+    // ── Refinamiento conversacional: modifica un documento HTML ya generado ──
+    refinar: `Eres un experto pedagógico chileno (Mineduc). Un docente ya generó este documento educativo y quiere modificarlo con una instrucción puntual.
+
+═══════════ DOCUMENTO ACTUAL (HTML) ═══════════
+${datos.contenidoActual || ''}
+═══════════════════════════════════════════════
+
+INSTRUCCIÓN DEL DOCENTE:
+"${datos.instruccion || ''}"
+
+REGLAS ESTRICTAS:
+1. Aplica SOLO la modificación pedida; conserva el resto del documento intacto.
+2. Mantén el formato HTML del documento (preserva los tags: <h1>, <h2>, <h3>, <p>, <ul>, <ol>, <li>, <table>, <tr>, <td>, <strong>, <em>, <hr>, <br>, <div>, <span>, atributos style/class).
+3. Mantén la estructura general (encabezado, secciones en MAYÚSCULAS, pauta de corrección, tabla de especificaciones, etc.).
+4. Mantén el nivel pedagógico, la alineación curricular con OAs si los hay, y el español formal chileno.
+5. Si la instrucción es ambigua, interpreta de la forma más razonable para un profe de aula chileno.
+6. Si la instrucción pide algo que viola las reglas (ej: "elimina todo"), aplícala de forma conservadora preservando la utilidad del documento.
+
+RESPONDE SOLO CON EL HTML MODIFICADO. Sin comentarios, sin saludos, sin marcadores de código (no uses tres acentos graves). Empieza directamente con el primer tag HTML.`
   };
 
   return prompts[tipo] || `${intro}Genera un documento educativo sobre:\n${ctx}`;
@@ -267,13 +287,19 @@ export default async function handler(req, res) {
 
   const prompt = buildPrompt(tipo, datos || {});
 
+  // Refinar puede devolver el documento completo modificado → más tokens y menor temperatura para conservar estructura
+  const isRefinar = tipo === 'refinar';
+  const genCfg = isRefinar
+    ? { maxOutputTokens: 8192, temperature: 0.45, topP: 0.85 }
+    : { maxOutputTokens: 3072, temperature: 0.72, topP: 0.9 };
+
   try {
     const r = await fetch(`${GEMINI_URL}?key=${apiKey}`, {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { maxOutputTokens: 3072, temperature: 0.72, topP: 0.9 },
+        generationConfig: genCfg,
         safetySettings: [
           { category: 'HARM_CATEGORY_HARASSMENT',        threshold: 'BLOCK_NONE' },
           { category: 'HARM_CATEGORY_HATE_SPEECH',       threshold: 'BLOCK_NONE' },

@@ -1834,9 +1834,28 @@
                     <button class="btn-accion" onclick="descargarDoc()" style="background:linear-gradient(135deg,rgba(37,99,235,.3),rgba(59,130,246,.2));border-color:rgba(59,130,246,.5);color:#93c5fd;" title="Descargar como documento de Word (.doc)">⬇ Descargar Word</button>
                     <button class="btn-accion btn-copiar-doc" onclick="copiarDocumento()">Copiar texto completo</button>
                     <button class="btn-accion btn-nuevo" onclick="nuevoDocumento()">Crear otro documento</button>
+                    <button class="btn-accion" onclick="abrirRefinarIA()" style="background:linear-gradient(135deg,rgba(167,139,250,.3),rgba(124,58,237,.25));border-color:rgba(167,139,250,.5);color:#c4b5fd;" title="Pide a la IA que modifique este documento sin regenerarlo">🪄 Refinar con IA</button>
                     <button class="btn-accion" onclick="guardarEnBiblioteca()" style="background:linear-gradient(135deg,rgba(129,140,248,.3),rgba(52,211,153,.2));border-color:rgba(129,140,248,.5);color:#a5b4fc;" title="Publicar en la Biblioteca para que los estudiantes puedan verlo">📚 Publicar en Biblioteca</button>
                 </div>
                 <div id="saveMsg" style="display:none;margin-top:8px;font-size:.82rem;padding:8px 14px;border-radius:8px;"></div>
+
+                <!-- Panel de Refinamiento con IA -->
+                <div id="refinarPanel" style="display:none;margin-top:14px;padding:16px;background:linear-gradient(135deg,rgba(167,139,250,.10),rgba(124,58,237,.06));border:1px solid rgba(167,139,250,.35);border-radius:12px;">
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px">
+                        <div style="font-weight:700;color:#c4b5fd;font-size:.95rem">🪄 Refinar el documento con IA</div>
+                        <div style="display:flex;gap:6px">
+                            <button id="btnDeshacerIA" onclick="deshacerRefinamiento()" disabled style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);color:#cbd5e1;padding:6px 10px;border-radius:8px;font-size:.78rem;cursor:pointer">↶ Deshacer</button>
+                            <button onclick="cerrarRefinarIA()" style="background:transparent;border:1px solid rgba(255,255,255,.15);color:#cbd5e1;padding:6px 10px;border-radius:8px;font-size:.78rem;cursor:pointer">✕ Cerrar</button>
+                        </div>
+                    </div>
+                    <div style="font-size:.78rem;color:#94a3b8;margin-bottom:10px">Escribe en lenguaje natural lo que quieres cambiar. Ejemplos:</div>
+                    <div id="refinarChips" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px"></div>
+                    <textarea id="refinarInstr" placeholder="Ej: Hazle la pregunta 3 más difícil, agrega una pregunta de aplicación a la vida real, córtalo a 1 página, simplifica el lenguaje para 7° básico, agrega una rúbrica al final..." rows="3" style="width:100%;background:rgba(15,23,42,.6);border:1px solid rgba(255,255,255,.12);color:#e2e8f0;padding:10px 12px;border-radius:10px;font-size:.88rem;font-family:inherit;resize:vertical;outline:none"></textarea>
+                    <div id="refinarStatus" style="display:none;margin-top:10px;font-size:.8rem;padding:8px 12px;border-radius:8px"></div>
+                    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:10px">
+                        <button id="btnAplicarIA" onclick="aplicarRefinamiento()" style="background:linear-gradient(135deg,#7c3aed,#a78bfa);border:none;color:#fff;padding:9px 18px;border-radius:10px;font-size:.86rem;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:6px">✨ Aplicar cambio</button>
+                    </div>
+                </div>
             </div>
             <div class="doc-preview" id="docPreview">
                 <!-- Contenido generado por JS -->
@@ -5134,7 +5153,151 @@ var modelo = _modeloGuardado;
         if (dg) dg.classList.remove('visible');
         var saveMsg = document.getElementById('saveMsg');
         if (saveMsg) saveMsg.style.display = 'none';
+        // Limpiar historial de refinamiento al empezar un documento nuevo
+        _iaHistorial = [];
+        var btnDes = document.getElementById('btnDeshacerIA'); if (btnDes) btnDes.disabled = true;
+        cerrarRefinarIA();
         window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    //  REFINAMIENTO CONVERSACIONAL DEL DOCUMENTO CON IA
+    //  Permite al profe modificar el material generado con instrucciones
+    //  en lenguaje natural sin tener que regenerarlo desde cero.
+    // ═══════════════════════════════════════════════════════════
+    var _iaHistorial = []; // Stack de versiones anteriores (HTML)
+    var _IA_SUGERENCIAS = [
+        { label: '⬇ Más corto', text: 'Acorta el documento a la mitad manteniendo lo esencial' },
+        { label: '⬆ Más largo', text: 'Amplía el desarrollo agregando más explicaciones y ejemplos' },
+        { label: '🔥 Más difícil', text: 'Aumenta la dificultad de todas las preguntas/actividades un nivel' },
+        { label: '🧒 Más fácil', text: 'Baja la dificultad y simplifica el lenguaje para que sea más accesible' },
+        { label: '➕ Agregar pregunta', text: 'Agrega una pregunta nueva de aplicación a la vida real al final' },
+        { label: '🌎 Contexto chileno', text: 'Adapta los ejemplos y situaciones al contexto chileno (lugares, monedas, costumbres)' },
+        { label: '📋 Agregar rúbrica', text: 'Agrega al final una rúbrica de evaluación con 4 niveles de logro' },
+        { label: '🎯 Más OA-alineado', text: 'Refuerza la alineación con los OA citados explicitando los indicadores en cada actividad' }
+    ];
+
+    function abrirRefinarIA() {
+        var preview = document.getElementById('docPreview');
+        if (!preview || !(preview.innerHTML || '').trim()) {
+            if (typeof showToast === 'function') showToast('Primero genera un documento.', 'warn');
+            else alert('Primero genera un documento.');
+            return;
+        }
+        var panel = document.getElementById('refinarPanel');
+        if (!panel) return;
+        // Pintar chips si están vacíos
+        var chipsBox = document.getElementById('refinarChips');
+        if (chipsBox && !chipsBox.innerHTML) {
+            chipsBox.innerHTML = _IA_SUGERENCIAS.map(function(s) {
+                return '<button type="button" onclick="aplicarSugerenciaRefinamiento(\'' + s.text.replace(/'/g, "\\'") + '\')" ' +
+                       'style="background:rgba(167,139,250,.12);border:1px solid rgba(167,139,250,.35);color:#c4b5fd;padding:5px 10px;border-radius:14px;font-size:.74rem;cursor:pointer;transition:.15s" ' +
+                       'onmouseover="this.style.background=\'rgba(167,139,250,.22)\'" onmouseout="this.style.background=\'rgba(167,139,250,.12)\'">' +
+                       s.label + '</button>';
+            }).join('');
+        }
+        panel.style.display = 'block';
+        setTimeout(function() {
+            panel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            var ta = document.getElementById('refinarInstr');
+            if (ta) ta.focus();
+        }, 100);
+    }
+
+    function cerrarRefinarIA() {
+        var panel = document.getElementById('refinarPanel');
+        if (panel) panel.style.display = 'none';
+        var status = document.getElementById('refinarStatus');
+        if (status) status.style.display = 'none';
+    }
+
+    function aplicarSugerenciaRefinamiento(texto) {
+        var ta = document.getElementById('refinarInstr');
+        if (!ta) return;
+        ta.value = texto;
+        ta.focus();
+    }
+
+    function _refinarSetStatus(html, color) {
+        var el = document.getElementById('refinarStatus');
+        if (!el) return;
+        el.innerHTML = html;
+        el.style.display = 'block';
+        el.style.background = color + '18';
+        el.style.border = '1px solid ' + color + '44';
+        el.style.color = color;
+    }
+
+    function aplicarRefinamiento() {
+        var ta = document.getElementById('refinarInstr');
+        var preview = document.getElementById('docPreview');
+        var btn = document.getElementById('btnAplicarIA');
+        var btnDes = document.getElementById('btnDeshacerIA');
+        if (!ta || !preview) return;
+
+        var instruccion = (ta.value || '').trim();
+        if (!instruccion) {
+            _refinarSetStatus('⚠️ Escribe una instrucción o elige una sugerencia.', '#f59e0b');
+            return;
+        }
+        var contenidoActual = preview.innerHTML || '';
+        if (!contenidoActual.trim()) {
+            _refinarSetStatus('⚠️ No hay documento para refinar.', '#f59e0b');
+            return;
+        }
+
+        // Loading UI
+        btn.disabled = true;
+        var btnTxt = btn.innerHTML;
+        btn.innerHTML = '<span class="ia-spin"></span> Aplicando…';
+        _refinarSetStatus('⏳ La IA está modificando el documento…', '#a5b4fc');
+
+        // Llamada al endpoint
+        fetch('/api/ia-asistente', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                tipo: 'refinar',
+                datos: { contenidoActual: contenidoActual, instruccion: instruccion }
+            })
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (data.error) throw new Error(data.error);
+            var nuevo = String(data.resultado || '').trim();
+            if (!nuevo) throw new Error('La IA no devolvió contenido.');
+            // Eliminar posibles marcadores de código (defensivo)
+            nuevo = nuevo.replace(/^```html\s*/i, '').replace(/^```\s*/i, '').replace(/\s*```\s*$/i, '');
+            // Push al historial y reemplazar in-situ
+            _iaHistorial.push(contenidoActual);
+            if (_iaHistorial.length > 20) _iaHistorial.shift(); // límite razonable
+            preview.innerHTML = nuevo;
+            if (btnDes) btnDes.disabled = false;
+            _refinarSetStatus('✅ Cambio aplicado. Puedes deshacer si no te gusta o pedir otro ajuste.', '#34d399');
+            ta.value = '';
+            // Log de actividad
+            try { if (typeof ELDB !== 'undefined' && ELDB.actividad) ELDB.actividad.log('refinar_material_ia', { instruccion: instruccion.slice(0, 200) }); } catch (e) {}
+            // Confeti opcional
+            if (window.ELUI && ELUI.confetti) { try { ELUI.confetti({ amount: 30 }); } catch (e) {} }
+        })
+        .catch(function(err) {
+            _refinarSetStatus('❌ Error: ' + (err && err.message ? err.message : 'no se pudo refinar.'), '#f87171');
+        })
+        .finally(function() {
+            btn.disabled = false;
+            btn.innerHTML = btnTxt;
+        });
+    }
+
+    function deshacerRefinamiento() {
+        if (!_iaHistorial.length) return;
+        var preview = document.getElementById('docPreview');
+        if (!preview) return;
+        var prev = _iaHistorial.pop();
+        preview.innerHTML = prev;
+        var btnDes = document.getElementById('btnDeshacerIA');
+        if (btnDes) btnDes.disabled = (_iaHistorial.length === 0);
+        _refinarSetStatus('↶ Volviste a la versión anterior.', '#a5b4fc');
     }
 
     /**
