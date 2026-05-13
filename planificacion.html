@@ -2303,6 +2303,7 @@
                          '<p><strong>Profesor:</strong> ' + prof + ' | <strong>' + (isTP ? 'Módulo' : 'Asignatura') + ':</strong> ' + (asig || modId) + ' | <strong>Nivel:</strong> ' + cursoLabel + ' | <strong>Horas:</strong> ' + horas + '</p>' +
                          '<h3>Contenido</h3><p>' + (contenido || '—') + '</p>' +
                          '<hr/>' + camposEl.innerHTML,
+            uid:         user.uid || '',
             email:       user.email || '',
             especialidad:user.especialidad || '',
             tipoProfesor:user.tipoProfesor || '',
@@ -2322,8 +2323,25 @@
         }
 
         guardarPromesa
-            .then(function() {
-                mostrarPlanMsg('✅ Planificación guardada en la Biblioteca. <a href="biblioteca.html#calendario" style="color:#a5b4fc;margin-left:6px;">Ver calendario →</a>', '#34d399');
+            .then(function(saved) {
+                // Vincular al calendario del docente (idempotente: upsert por origenId)
+                try {
+                    var planId = (saved && saved.id) || entrada.id;
+                    if (user.uid && window.ELDB && ELDB.calendario && ELDB.calendario.upsertDesdeOrigen) {
+                        ELDB.calendario.upsertDesdeOrigen({
+                            uid:         user.uid,
+                            origenTipo:  'planificacion',
+                            origenId:    planId,
+                            titulo:      titulo,
+                            fecha:       fecha || new Date().toISOString().slice(0,10),
+                            tipo:        'planificacion',
+                            asignatura:  asig || modId || '',
+                            descripcion: 'Planificación · ' + cursoLabel + ' · ' + horas + ' h',
+                            email:       user.email || ''
+                        });
+                    }
+                } catch (eCal) { console.warn('[Click&Clase] No se pudo agendar en calendario:', eCal); }
+                mostrarPlanMsg('✅ Planificación guardada y agendada en tu calendario. <a href="dashboard-profesor.html#calendario" style="color:#a5b4fc;margin-left:6px;">Ver calendario →</a>', '#34d399');
                 try { if (typeof ELDB !== 'undefined' && ELDB.actividad) ELDB.actividad.log('crear_planificacion', { titulo: (entrada && entrada.titulo) || '', curso: (entrada && entrada.curso) || '', asignatura: (entrada && entrada.asignatura) || '' }); } catch (e) {}
             })
             .catch(function(err) {

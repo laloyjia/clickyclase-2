@@ -614,19 +614,19 @@ tr:hover td{background:rgba(99,102,241,.05)}
     </div>
     <!-- Step 2 -->
     <div class="step-panel" id="sp2">
-      <p style="color:var(--muted);margin-bottom:16px;font-size:.875rem">¿Qué tipo de docente es?</p>
+      <p style="color:var(--muted);margin-bottom:16px;font-size:.875rem">¿Qué tipo(s) de docente es? <span style="color:var(--accent)">Puede marcar más de uno</span> (ej: Básica + Plan Común).</p>
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
-        <div class="tipo-card" id="tc-basica" onclick="selTipo('basica')">
+        <div class="tipo-card" id="tc-basica" onclick="toggleTipo('basica')">
           <div style="font-size:2rem;text-align:center">📚</div>
           <div style="text-align:center;font-weight:600;margin-top:8px">Educación Básica</div>
           <div style="text-align:center;font-size:.75rem;color:var(--muted);margin-top:4px">1° a 8° Básico</div>
         </div>
-        <div class="tipo-card" id="tc-media" onclick="selTipo('media')">
+        <div class="tipo-card" id="tc-media" onclick="toggleTipo('media')">
           <div style="font-size:2rem;text-align:center">🎓</div>
           <div style="text-align:center;font-weight:600;margin-top:8px">Plan Común</div>
           <div style="text-align:center;font-size:.75rem;color:var(--muted);margin-top:4px">1° a 4° Medio C-H</div>
         </div>
-        <div class="tipo-card" id="tc-tecnico" onclick="selTipo('tecnico')">
+        <div class="tipo-card" id="tc-tecnico" onclick="toggleTipo('tecnico')">
           <div style="font-size:2rem;text-align:center">⚙️</div>
           <div style="text-align:center;font-weight:600;margin-top:8px">Técnico-Profesional</div>
           <div style="text-align:center;font-size:.75rem;color:var(--muted);margin-top:4px">EMTP — Especialidad</div>
@@ -1517,9 +1517,9 @@ function guardarLiceosProf(){
 // WIZARD — variante rápida con tipo preseleccionado
 function abrirWizardTipo(tipo){
   abrirWizard();
-  // Avanzar automáticamente al paso 2 seleccionando el tipo
+  // Avanzar automáticamente al paso 2 seleccionando el tipo (pre-marcado)
   setTimeout(function(){
-    selTipo(tipo);
+    toggleTipo(tipo);
   },100);
 }
 
@@ -1535,7 +1535,7 @@ function filtrarProfs(){
 
 // WIZARD
 function abrirWizard(){
-  wData={tipo:null,asignaturas:[],niveles:[],especialidad:'',modulos:[],cursos:[],liceos:[],liceoPrincipal:'',permisos:{planificar:true,crearMaterial:true}};
+  wData={tipo:null,tipos:[],asignaturas:[],niveles:[],especialidad:'',modulos:[],cursos:[],liceos:[],liceoPrincipal:'',permisos:{planificar:true,crearMaterial:true}};
   ['pNombre','pEmail','pPass'].forEach(function(id){document.getElementById(id).value='';});
   document.querySelectorAll('.tipo-card').forEach(function(c){c.classList.remove('selected');});
   document.querySelectorAll('.wstep').forEach(function(s){s.className='wstep';});
@@ -1546,7 +1546,19 @@ function abrirWizard(){
   document.getElementById('modalWizard').classList.add('open');
 }
 
-function selTipo(t){wData.tipo=t;document.querySelectorAll('.tipo-card').forEach(function(c){c.classList.remove('selected');});document.getElementById('tc-'+t).classList.add('selected');}
+// Toggle múltiple: un profe puede ser Básica + Plan Común simultáneamente.
+// wData.tipo se mantiene como primer tipo seleccionado por compatibilidad legacy.
+function toggleTipo(t){
+  if(!wData.tipos) wData.tipos=[];
+  var idx=wData.tipos.indexOf(t);
+  if(idx===-1){ wData.tipos.push(t); }
+  else { wData.tipos.splice(idx,1); }
+  wData.tipo = wData.tipos[0] || null;
+  document.querySelectorAll('.tipo-card').forEach(function(c){ c.classList.remove('selected'); });
+  wData.tipos.forEach(function(tk){ var el=document.getElementById('tc-'+tk); if(el) el.classList.add('selected'); });
+}
+// Mantener selTipo como alias single-select (compatibilidad si algo viejo lo llama)
+function selTipo(t){ wData.tipos=[t]; wData.tipo=t; document.querySelectorAll('.tipo-card').forEach(function(c){c.classList.remove('selected');}); var el=document.getElementById('tc-'+t); if(el) el.classList.add('selected'); }
 
 function wNext(step){
   if(step===1){
@@ -1555,9 +1567,13 @@ function wNext(step){
     if(p.length<6){notif('wNotif','❌ Contraseña mín. 6 caracteres','err');return;}
     if(!e.includes('@')){notif('wNotif','❌ Correo no válido','err');return;}
   }
-  if(step===2){if(!wData.tipo){notif('wNotif','❌ Selecciona el tipo de docente','err');return;}buildStep3();}
+  if(step===2){if(!wData.tipos||!wData.tipos.length){notif('wNotif','❌ Selecciona al menos un tipo de docente','err');return;}buildStep3();}
   if(step===3){
-    if(wData.tipo!=='tecnico'&&wData.asignaturas.length===0){notif('wNotif','❌ Selecciona al menos una asignatura','err');return;}
+    var tipos=wData.tipos||[];
+    var pideAsig = tipos.indexOf('basica')!==-1 || tipos.indexOf('media')!==-1;
+    var pideEsp  = tipos.indexOf('tecnico')!==-1;
+    if(pideAsig && wData.asignaturas.length===0){notif('wNotif','❌ Selecciona al menos una asignatura','err');return;}
+    if(pideEsp && !wData.especialidad){notif('wNotif','❌ Selecciona una especialidad EMTP','err');return;}
     if(wData.niveles.length===0){notif('wNotif','❌ Selecciona al menos un nivel','err');return;}
     if(!wData.liceos||wData.liceos.length===0){notif('wNotif','❌ Asigna al menos un liceo (institución educativa)','err');return;}
     if(!wData.liceoPrincipal)wData.liceoPrincipal=wData.liceos[0];
@@ -1575,7 +1591,9 @@ function wPrev(step){
 }
 
 function buildStep3(){
-  var t=wData.tipo,html='';
+  var tipos=(wData.tipos&&wData.tipos.length)?wData.tipos:(wData.tipo?[wData.tipo]:[]);
+  var t=tipos[0]||null; // legacy
+  var html='';
   // Bloque liceos: se llena tras cargar el catálogo
   var licHtml='<div style="margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid var(--border)">'+
     '<h3 style="margin-bottom:10px;font-size:.9rem">🏫 Institución educativa</h3>'+
@@ -1604,24 +1622,48 @@ function buildStep3(){
   '</div>';
   // Antepone el bloque de liceos al permHtml (queda al inicio del paso 3)
   permHtml=licHtml+permHtml;
-  if(t==='basica'){
-    html+='<h3 style="margin-bottom:12px">📚 Asignaturas — Educación Básica</h3><div class="multi-select-box" id="asigBox">';
-    CURRICULA_CHILE.getAsignaturas('basica').forEach(function(a){html+='<label><input type="checkbox" value="'+a.nombre+'" onchange="tgAsig(this)"><span class="cdot" style="background:'+(a.color||'#888')+'"></span>'+a.nombre+'</label>';});
-    html+='</div><h3 style="margin:16px 0 12px">Niveles asignados</h3><div class="multi-select-box" id="nivBox">';
-    ['1B','2B','3B','4B','5B','6B','7B','8B'].forEach(function(n){html+='<label><input type="checkbox" value="'+n+'" onchange="tgNiv(this)">'+n+'</label>';});
-    html+='</div>'+permHtml;
-  }else if(t==='media'){
-    html+='<h3 style="margin-bottom:12px">🎓 Asignaturas — Plan Común</h3><div class="multi-select-box" id="asigBox">';
-    CURRICULA_CHILE.getAsignaturas('media').forEach(function(a){html+='<label><input type="checkbox" value="'+a.nombre+'" onchange="tgAsig(this)"><span class="cdot" style="background:'+(a.color||'#888')+'"></span>'+a.nombre+'</label>';});
-    html+='</div><h3 style="margin:16px 0 12px">Niveles asignados</h3><div class="multi-select-box" id="nivBox">';
-    ['1M','2M','3M','4M'].forEach(function(n){html+='<label><input type="checkbox" value="'+n+'" onchange="tgNiv(this)">'+n+' Medio</label>';});
-    html+='</div>'+permHtml;
-  }else{
-    html+='<h3 style="margin-bottom:12px">⚙️ Especialidad EMTP</h3><div class="form-group"><label>Especialidad</label><select id="espSel" onchange="loadMods()"><option value="">-- Selecciona --</option>';
-    CURRICULA_CHILE.getEspecialidades().forEach(function(e){html+='<option value="'+e.key+'">'+e.nombre+' ('+e.sector+')</option>';});
-    html+='</select></div><div id="modsBox" style="margin-top:12px"></div><h3 style="margin:16px 0 12px">Niveles</h3><div class="multi-select-box" id="nivBox">';
-    ['3M','4M'].forEach(function(n){html+='<label><input type="checkbox" value="'+n+'" onchange="tgNiv(this)">'+n+' Medio</label>';});
-    html+='</div>'+permHtml;
+  var asigBlock='', nivBlock='', espBlock='';
+  // Construimos el bloque de asignaturas combinado si hay basica/media
+  var asigSources=[];
+  if(tipos.indexOf('basica')!==-1) asigSources.push({ key:'basica', titulo:'📚 Asignaturas — Educación Básica' });
+  if(tipos.indexOf('media')!==-1)  asigSources.push({ key:'media',  titulo:'🎓 Asignaturas — Plan Común (Media)' });
+  asigSources.forEach(function(src){
+    asigBlock += '<h3 style="margin-bottom:12px;margin-top:8px">'+src.titulo+'</h3><div class="multi-select-box" data-asig-group="'+src.key+'">';
+    var asigs = CURRICULA_CHILE.getAsignaturas(src.key) || [];
+    asigs.forEach(function(a){
+      var checked = (wData.asignaturas||[]).indexOf(a.nombre)!==-1 ? ' checked' : '';
+      asigBlock+='<label><input type="checkbox" value="'+a.nombre+'"'+checked+' onchange="tgAsig(this)"><span class="cdot" style="background:'+(a.color||'#888')+'"></span>'+a.nombre+'</label>';
+    });
+    asigBlock+='</div>';
+  });
+  // Niveles: unión de los niveles disponibles según tipos
+  var nivelesDisponibles=[];
+  if(tipos.indexOf('basica')!==-1)  nivelesDisponibles = nivelesDisponibles.concat([['1B','1° Básico'],['2B','2° Básico'],['3B','3° Básico'],['4B','4° Básico'],['5B','5° Básico'],['6B','6° Básico'],['7B','7° Básico'],['8B','8° Básico']]);
+  if(tipos.indexOf('media')!==-1)   nivelesDisponibles = nivelesDisponibles.concat([['1M','1° Medio'],['2M','2° Medio'],['3M','3° Medio'],['4M','4° Medio']]);
+  if(tipos.indexOf('tecnico')!==-1) {
+    // TP añade 3M/4M solo si aún no están
+    [['3M','3° Medio'],['4M','4° Medio']].forEach(function(p){ if(!nivelesDisponibles.find(function(x){return x[0]===p[0];})) nivelesDisponibles.push(p); });
+  }
+  nivBlock += '<h3 style="margin:16px 0 12px">Niveles asignados</h3><div class="multi-select-box" id="nivBox">';
+  nivelesDisponibles.forEach(function(p){
+    var checked=(wData.niveles||[]).indexOf(p[0])!==-1?' checked':'';
+    nivBlock+='<label><input type="checkbox" value="'+p[0]+'"'+checked+' onchange="tgNiv(this)">'+p[1]+'</label>';
+  });
+  nivBlock+='</div>';
+  // Especialidad y módulos TP, solo si aplica
+  if(tipos.indexOf('tecnico')!==-1){
+    espBlock+='<h3 style="margin-bottom:12px;margin-top:8px">⚙️ Especialidad EMTP</h3><div class="form-group"><label>Especialidad</label><select id="espSel" onchange="loadMods()"><option value="">-- Selecciona --</option>';
+    CURRICULA_CHILE.getEspecialidades().forEach(function(e){
+      var sel = (wData.especialidad===e.key)?' selected':'';
+      espBlock+='<option value="'+e.key+'"'+sel+'>'+e.nombre+' ('+e.sector+')</option>';
+    });
+    espBlock+='</select></div><div id="modsBox" style="margin-top:12px"></div>';
+  }
+  // Si el wizard no tiene ningún bloque (caso defensivo), avisar
+  if(!asigBlock && !espBlock){
+    html += '<div style="padding:14px;color:var(--muted);text-align:center">Selecciona al menos un tipo de docente en el paso anterior.</div>';
+  } else {
+    html += asigBlock + espBlock + nivBlock + permHtml;
   }
   document.getElementById('sp3Content').innerHTML=html;
   wData.asignaturas.forEach(function(a){var cb=document.querySelector('#asigBox input[value="'+a+'"]');if(cb)cb.checked=true;});
@@ -1727,7 +1769,9 @@ function tgMod(cb){if(cb.checked){if(wData.modulos.indexOf(cb.value)===-1)wData.
 
 function buildStep4(){
   var n=document.getElementById('pNombre').value.trim(),e=document.getElementById('pEmail').value.trim();
-  var tipo=wData.tipo==='basica'?'📚 Educación Básica':wData.tipo==='media'?'🎓 Plan Común':'⚙️ Técnico-Profesional';
+  var labelMap={basica:'📚 Educación Básica',media:'🎓 Plan Común',tecnico:'⚙️ Técnico-Profesional'};
+  var tiposArr=(wData.tipos&&wData.tipos.length)?wData.tipos:(wData.tipo?[wData.tipo]:[]);
+  var tipo=tiposArr.map(function(k){return labelMap[k]||k;}).join(' + ') || '—';
   var html='<div style="display:grid;gap:10px">';
   html+='<div style="display:flex;gap:16px"><span style="color:var(--muted);min-width:120px">Nombre:</span><strong>'+n+'</strong></div>';
   html+='<div style="display:flex;gap:16px"><span style="color:var(--muted);min-width:120px">Correo:</span><strong>'+e+'</strong></div>';
@@ -1753,7 +1797,9 @@ function buildStep4(){
 function crearProfesor(){
   var btn=document.getElementById('btnCrear');
   btn.disabled=true;btn.innerHTML='<span class="spinner"></span> Creando…';
-  ELAuth.adminCrearProfesor({nombre:document.getElementById('pNombre').value.trim(),email:document.getElementById('pEmail').value.trim(),password:document.getElementById('pPass').value,tipoProfesor:wData.tipo,asignaturas:wData.asignaturas,especialidad:wData.especialidad,modulos:wData.modulos,niveles:wData.niveles,cursos:wData.cursos,liceos:wData.liceos,liceoPrincipal:wData.liceoPrincipal,permisos:wData.permisos})
+  var tiposArr=(wData.tipos&&wData.tipos.length)?wData.tipos:(wData.tipo?[wData.tipo]:[]);
+  // tipoProfesor (string legacy) = primer tipo; tiposProfesor (array nuevo) = todos
+  ELAuth.adminCrearProfesor({nombre:document.getElementById('pNombre').value.trim(),email:document.getElementById('pEmail').value.trim(),password:document.getElementById('pPass').value,tipoProfesor:tiposArr[0]||'',tiposProfesor:tiposArr,asignaturas:wData.asignaturas,especialidad:wData.especialidad,modulos:wData.modulos,niveles:wData.niveles,cursos:wData.cursos,liceos:wData.liceos,liceoPrincipal:wData.liceoPrincipal,permisos:wData.permisos})
   .then(function(){
     notif('wNotif','✅ Profesor creado. Puede ingresar con su correo y contraseña desde cualquier dispositivo.','ok');
     loadData();btn.disabled=false;btn.innerHTML='✅ Crear Profesor';

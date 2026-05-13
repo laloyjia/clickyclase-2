@@ -5270,6 +5270,7 @@ var modelo = _modeloGuardado;
             ? (currentUserData.especialidad || '')
             : (document.getElementById('selectAsignatura') ? document.getElementById('selectAsignatura').value : (currentUserData.asignaturas && currentUserData.asignaturas[0]) || '');
         Object.assign(entrada, {
+            uid:         currentUserData.uid || '',
             email:       currentUserData.email || '',
             asignatura:  asigGuardar,
             especialidad:currentUserData.especialidad || '',
@@ -5288,8 +5289,33 @@ var modelo = _modeloGuardado;
         }
 
         guardarPromesa
-            .then(function() {
-                mostrarSaveMsg('✅ Publicado en la Biblioteca. Los estudiantes ya pueden verlo. <a href="biblioteca.html" style="color:#a5b4fc;margin-left:6px;">Ver biblioteca →</a>', '#34d399');
+            .then(function(saved) {
+                // Si es prueba o evaluación, agendar evento en el calendario del docente.
+                // Fecha por defecto: hoy + 7 días (el profe puede editarla desde el calendario).
+                var esEvaluable = (entrada.tipo === 'prueba' || entrada.tipo === 'evaluacion' || entrada.tipo === 'control');
+                var msgExtra = '';
+                if (esEvaluable) {
+                    try {
+                        var matId = (saved && saved.id) || entrada.id;
+                        if (currentUserData.uid && window.ELDB && ELDB.calendario && ELDB.calendario.upsertDesdeOrigen) {
+                            var d7 = new Date(); d7.setDate(d7.getDate() + 7);
+                            var fechaDefault = d7.toISOString().slice(0, 10);
+                            ELDB.calendario.upsertDesdeOrigen({
+                                uid:         currentUserData.uid,
+                                origenTipo:  'material',
+                                origenId:    matId,
+                                titulo:      entrada.titulo || (entrada.tipo + ' · ' + (entrada.asignatura || '')),
+                                fecha:       fechaDefault,
+                                tipo:        entrada.tipo,
+                                asignatura:  entrada.asignatura || entrada.modulo || '',
+                                descripcion: (entrada.descripcion || '') + ' (Fecha tentativa — edítala desde el calendario)',
+                                email:       currentUserData.email || ''
+                            });
+                            msgExtra = ' Agendada en tu calendario para ' + fechaDefault + '.';
+                        }
+                    } catch (eCal) { console.warn('[Click&Clase] No se pudo agendar en calendario:', eCal); }
+                }
+                mostrarSaveMsg('✅ Publicado en la Biblioteca.' + msgExtra + ' <a href="biblioteca.html" style="color:#a5b4fc;margin-left:6px;">Ver biblioteca →</a>' + (esEvaluable ? ' <a href="dashboard-profesor.html#calendario" style="color:#a5b4fc;margin-left:6px;">Ver calendario →</a>' : ''), '#34d399');
                 showToast('Material publicado ✓', 'success');
                 try { if (typeof ELDB !== 'undefined' && ELDB.actividad) ELDB.actividad.log('publicar_biblioteca', { titulo: (entrada && entrada.titulo) || '', tipo: (entrada && entrada.tipo) || tipoDocSeleccionado }); } catch (e) {}
                 if (window.ELUI && ELUI.confetti) { try { ELUI.confetti({ amount: 80 }); } catch(e){} }

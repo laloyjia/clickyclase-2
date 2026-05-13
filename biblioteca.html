@@ -515,6 +515,20 @@ document.addEventListener('DOMContentLoaded', () => {
             const navMat = document.getElementById('navMaterial');
             if (navMat) navMat.style.display = '';
         }
+        // Adaptar pestaña "Por módulo / Por asignatura" según tipo del profe
+        try {
+            const tipos = (window.getTiposProfesor ? window.getTiposProfesor(u) : (u.tipoProfesor ? [u.tipoProfesor] : []));
+            const esTP  = tipos.indexOf('tecnico') !== -1;
+            const tabBtns = document.querySelectorAll('.bib-tab');
+            tabBtns.forEach(b => {
+                if ((b.getAttribute('onclick') || '').indexOf("'modulos'") !== -1) {
+                    b.textContent = esTP ? 'Por módulo' : 'Por asignatura';
+                }
+            });
+            // Ocultar el filtro de módulos TP si el profe no es TP
+            const filtroMod = document.getElementById('bibFiltroMod');
+            if (filtroMod && !esTP) filtroMod.style.display = 'none';
+        } catch (e) { /* silencio */ }
         // Inicializar calendario en el mes actual
         const hoy = new Date();
         calYear  = hoy.getFullYear();
@@ -875,33 +889,74 @@ const MODULOS_LISTA = [
 
 function renderPorModulo() {
     const cont = document.getElementById('modulosContenido');
-    let html = '';
-    ['3ro','4to'].forEach(niv => {
-        html += `<div class="nivel-title">${niv === '3ro' ? '3° Medio · Diferenciada TP' : '4° Medio · Diferenciada TP'}</div>`;
-        MODULOS_LISTA.filter(m => m.level === niv).forEach(mod => {
-            const evs = _allMateriales.filter(m => m.modulo === mod.num);
-            const accent = niv === '3ro'
-                ? 'linear-gradient(180deg, #a78bfa, #22d3ee)'
-                : 'linear-gradient(180deg, #ec4899, #fbbf24)';
-            html += `
-              <div class="mod-card" style="--mod-color: ${accent};">
-                <div class="mod-head">
-                  <div class="mod-title">
-                    <span class="mod-num-badge">${mod.num}</span>
-                    <span>${mod.nombre}</span>
-                  </div>
-                  <span class="muted" style="font-size:var(--fs-xs);">${evs.length} recurso${evs.length !== 1 ? 's' : ''}</span>
-                </div>
-                ${evs.length === 0
-                    ? '<p class="muted" style="font-size:var(--fs-xs);">Sin materiales publicados aún.</p>'
-                    : `<div style="display:flex;flex-wrap:wrap;gap:6px;">${evs.slice(0,10).map(m => {
-                        const c = TIPO_COLORES[m.tipo] || '#a78bfa';
-                        const ic = TIPO_ICONOS[m.tipo] || '📄';
-                        return `<button class="mod-pill" onclick="abrirViewer('${m.id}')"
-                          style="background:${c}14;border-color:${c}55;color:${c};">${ic} ${escapeText((m.titulo || ('AE' + (m.ae || ''))).slice(0,40))}</button>`;
-                      }).join('')}${evs.length > 10 ? `<span class="muted" style="font-size:var(--fs-xs);padding:5px 8px;">+${evs.length-10} más</span>` : ''}</div>`}
-              </div>`;
+    const tipos = (window.getTiposProfesor ? window.getTiposProfesor(currentUser) : (currentUser && currentUser.tipoProfesor ? [currentUser.tipoProfesor] : []));
+    const esTP  = tipos.indexOf('tecnico') !== -1;
+    // ── Rama A: profe TP → vista por módulos ──
+    if (esTP || !currentUser) {
+        let html = '';
+        ['3ro','4to'].forEach(niv => {
+            html += `<div class="nivel-title">${niv === '3ro' ? '3° Medio · Diferenciada TP' : '4° Medio · Diferenciada TP'}</div>`;
+            MODULOS_LISTA.filter(m => m.level === niv).forEach(mod => {
+                const evs = _allMateriales.filter(m => m.modulo === mod.num);
+                const accent = niv === '3ro'
+                    ? 'linear-gradient(180deg, #a78bfa, #22d3ee)'
+                    : 'linear-gradient(180deg, #ec4899, #fbbf24)';
+                html += `
+                  <div class="mod-card" style="--mod-color: ${accent};">
+                    <div class="mod-head">
+                      <div class="mod-title">
+                        <span class="mod-num-badge">${mod.num}</span>
+                        <span>${mod.nombre}</span>
+                      </div>
+                      <span class="muted" style="font-size:var(--fs-xs);">${evs.length} recurso${evs.length !== 1 ? 's' : ''}</span>
+                    </div>
+                    ${evs.length === 0
+                        ? '<p class="muted" style="font-size:var(--fs-xs);">Sin materiales publicados aún.</p>'
+                        : `<div style="display:flex;flex-wrap:wrap;gap:6px;">${evs.slice(0,10).map(m => {
+                            const c = TIPO_COLORES[m.tipo] || '#a78bfa';
+                            const ic = TIPO_ICONOS[m.tipo] || '📄';
+                            return `<button class="mod-pill" onclick="abrirViewer('${m.id}')"
+                              style="background:${c}14;border-color:${c}55;color:${c};">${ic} ${escapeText((m.titulo || ('AE' + (m.ae || ''))).slice(0,40))}</button>`;
+                          }).join('')}${evs.length > 10 ? `<span class="muted" style="font-size:var(--fs-xs);padding:5px 8px;">+${evs.length-10} más</span>` : ''}</div>`}
+                  </div>`;
+            });
         });
+        cont.innerHTML = html;
+        return;
+    }
+    // ── Rama B: profe básica/plan común → vista por asignatura ──
+    const asigs = (currentUser.asignaturas || []).slice();
+    const titulo = tipos.indexOf('basica') !== -1 && tipos.indexOf('media') !== -1
+        ? '📚🎓 Mis asignaturas (Básica + Plan Común)'
+        : tipos.indexOf('media') !== -1 ? '🎓 Mis asignaturas · Plan Común'
+        : '📚 Mis asignaturas · Educación Básica';
+    let html = `<div class="nivel-title">${titulo}</div>`;
+    if (!asigs.length) {
+        cont.innerHTML = html + '<div class="empty-pro" style="padding:30px;text-align:center;color:#94a3b8"><span style="font-size:2rem">📂</span><p>No tienes asignaturas configuradas. Pídele al administrador que te asigne tus asignaturas en el panel admin.</p></div>';
+        return;
+    }
+    const accent = 'linear-gradient(180deg, #34d399, #22d3ee)';
+    asigs.forEach(asig => {
+        const asigLow = String(asig || '').toLowerCase().trim();
+        const evs = _allMateriales.filter(m => String(m.asignatura || '').toLowerCase().trim() === asigLow);
+        html += `
+          <div class="mod-card" style="--mod-color: ${accent};">
+            <div class="mod-head">
+              <div class="mod-title">
+                <span class="mod-num-badge">📘</span>
+                <span>${escapeText(asig)}</span>
+              </div>
+              <span class="muted" style="font-size:var(--fs-xs);">${evs.length} recurso${evs.length !== 1 ? 's' : ''}</span>
+            </div>
+            ${evs.length === 0
+                ? '<p class="muted" style="font-size:var(--fs-xs);">Sin materiales publicados aún.</p>'
+                : `<div style="display:flex;flex-wrap:wrap;gap:6px;">${evs.slice(0,10).map(m => {
+                    const c = TIPO_COLORES[m.tipo] || '#a78bfa';
+                    const ic = TIPO_ICONOS[m.tipo] || '📄';
+                    return `<button class="mod-pill" onclick="abrirViewer('${m.id}')"
+                      style="background:${c}14;border-color:${c}55;color:${c};">${ic} ${escapeText((m.titulo || m.tipo || 'Material').slice(0,40))}</button>`;
+                  }).join('')}${evs.length > 10 ? `<span class="muted" style="font-size:var(--fs-xs);padding:5px 8px;">+${evs.length-10} más</span>` : ''}</div>`}
+          </div>`;
     });
     cont.innerHTML = html;
 }

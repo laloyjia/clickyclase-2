@@ -291,12 +291,17 @@ var ELAuth = (function() {
       if (!uid) throw new Error('No se obtuvo UID del usuario creado.');
 
       // Crear documento en Firestore (como admin autenticado)
+      // Normalizar tipos: si vino `tiposProfesor` (array) lo usamos; si no, derivamos de `tipoProfesor`.
+      var _tipos = Array.isArray(data.tiposProfesor) && data.tiposProfesor.length
+                   ? data.tiposProfesor.slice()
+                   : (data.tipoProfesor ? [data.tipoProfesor] : []);
       var perfil = {
         uid:             uid,
         nombre:          data.nombre,
         email:           data.email,
         role:            data.role || EL_ROLES.PROFESOR,
-        tipoProfesor:    data.tipoProfesor || '',
+        tipoProfesor:    data.tipoProfesor || (_tipos[0] || ''),  // legacy string (primer tipo)
+        tiposProfesor:   _tipos,                                  // nuevo array multi-tipo
         especialidad:    data.especialidad || '',
         asignaturas:     data.asignaturas  || [],
         niveles:         data.niveles      || [],

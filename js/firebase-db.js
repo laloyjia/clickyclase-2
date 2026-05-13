@@ -10,6 +10,32 @@
  *  - ELDB.codigos      → códigos de acceso
  */
 
+// ────────────────────────────────────────────────────────────
+//  Helpers globales de tipo de profesor (compatibilidad legacy)
+//  Acepta `tipoProfesor` (string) y/o `tiposProfesor` (array)
+//  Valores válidos: 'basica' | 'media' | 'tecnico'
+// ────────────────────────────────────────────────────────────
+(function() {
+  function getTiposProfesor(user) {
+    if (!user) return [];
+    if (Array.isArray(user.tiposProfesor) && user.tiposProfesor.length) {
+      return user.tiposProfesor.slice();
+    }
+    if (user.tipoProfesor) return [user.tipoProfesor];
+    return [];
+  }
+  window.getTiposProfesor = getTiposProfesor;
+  window.profEsTP     = function(user) { return getTiposProfesor(user).indexOf('tecnico') !== -1; };
+  window.profEsBasica = function(user) { return getTiposProfesor(user).indexOf('basica')  !== -1; };
+  window.profEsMedia  = function(user) { return getTiposProfesor(user).indexOf('media')   !== -1; };
+  // Etiqueta legible para mostrar en UI
+  window.tiposProfesorLabel = function(user) {
+    var t = getTiposProfesor(user);
+    var labels = { basica: '📚 Básica', media: '🎓 Plan Común', tecnico: '⚙️ EMTP' };
+    return t.map(function(k) { return labels[k] || k; }).join(' + ') || '—';
+  };
+})();
+
 var ELDB = (function() {
   'use strict';
 
@@ -40,19 +66,27 @@ var ELDB = (function() {
      */
     listar: function(filtros) {
       filtros = filtros || {};
-      var query = EL_DB.collection(EL_COLLECTIONS.MATERIALES).where('activo', '==', true);
-
-      if (filtros.profesor)    query = query.where('email',       '==', filtros.profesor);
-      if (filtros.modulo)      query = query.where('modulo',      '==', filtros.modulo);
-      if (filtros.tipo)        query = query.where('tipo',        '==', filtros.tipo);
-      if (filtros.curso)       query = query.where('curso',       '==', filtros.curso);
-      if (filtros.asignatura)  query = query.where('asignatura',  '==', filtros.asignatura);
-      if (filtros.especialidad)query = query.where('especialidad','==', filtros.especialidad);
-
-      return query.orderBy('publicadoEn', 'desc').get()
+      // Evitamos índices compuestos: traemos todos los activos y filtramos en cliente.
+      // Si la colección crece mucho (>2k docs), conviene crear índices en Firestore.
+      return EL_DB.collection(EL_COLLECTIONS.MATERIALES).where('activo', '==', true).get()
         .then(function(snap) {
           var items = [];
           snap.forEach(function(doc) { items.push(Object.assign({ id: doc.id }, doc.data())); });
+          // Normalizador (case-insensitive y trim para campos string)
+          var eq = function(a, b) { return String(a || '').trim().toLowerCase() === String(b || '').trim().toLowerCase(); };
+          if (filtros.profesor)     items = items.filter(function(m) { return eq(m.email, filtros.profesor) || (m.uid && m.uid === filtros.profesor); });
+          if (filtros.uid)          items = items.filter(function(m) { return m.uid === filtros.uid; });
+          if (filtros.modulo)       items = items.filter(function(m) { return m.modulo === filtros.modulo; });
+          if (filtros.tipo)         items = items.filter(function(m) { return m.tipo === filtros.tipo; });
+          if (filtros.curso)        items = items.filter(function(m) { return m.curso === filtros.curso || m.nivel === filtros.curso; });
+          if (filtros.asignatura)   items = items.filter(function(m) { return eq(m.asignatura, filtros.asignatura); });
+          if (filtros.especialidad) items = items.filter(function(m) { return eq(m.especialidad, filtros.especialidad); });
+          // Orden descendente por fecha más fiable disponible
+          items.sort(function(a, b) {
+            var ta = (a.publicadoEn && a.publicadoEn.toMillis) ? a.publicadoEn.toMillis() : (a.fechaISO ? Date.parse(a.fechaISO) : 0);
+            var tb = (b.publicadoEn && b.publicadoEn.toMillis) ? b.publicadoEn.toMillis() : (b.fechaISO ? Date.parse(b.fechaISO) : 0);
+            return tb - ta;
+          });
           return items;
         });
     },
@@ -72,8 +106,17 @@ var ELDB = (function() {
     },
 
     eliminar: function(id) {
-      // Soft delete
-      return EL_DB.collection(EL_COLLECTIONS.MATERIALES).doc(id).update({ activo: false });
+      // Soft delete + sincronizar calendario del docente
+      var ref = EL_DB.collection(EL_COLLECTIONS.MATERIALES).doc(id);
+      return ref.get().then(function (doc) {
+        var data = (doc && doc.exists) ? doc.data() : null;
+        var uid = data && data.uid;
+        var updP = ref.update({ activo: false });
+        var calP = (uid && calendario && calendario.eliminarPorOrigen)
+          ? calendario.eliminarPorOrigen(uid, id).catch(function(){ return 0; })
+          : Promise.resolve(0);
+        return Promise.all([updP, calP]).then(function (r) { return r[0]; });
+      });
     },
 
     // Escuchar cambios en tiempo real
@@ -108,21 +151,29 @@ var ELDB = (function() {
 
     listar: function(filtros) {
       filtros = filtros || {};
-      var query = EL_DB.collection(EL_COLLECTIONS.PLANIFICACIONES).where('activo', '==', true);
-
-      if (filtros.profesor)    query = query.where('email',    '==', filtros.profesor);
-      if (filtros.modulo)      query = query.where('modulo',   '==', filtros.modulo);
-      if (filtros.asignatura)  query = query.where('asignatura','==', filtros.asignatura);
-      if (filtros.mes) {
-        var inicio = new Date(filtros.mes + '-01').toISOString();
-        var fin    = new Date(filtros.mes + '-31').toISOString();
-        query = query.where('fechaClase', '>=', inicio).where('fechaClase', '<=', fin);
-      }
-
-      return query.orderBy('publicadoEn', 'desc').get()
+      // Evitamos índices compuestos: traemos activos y filtramos en cliente.
+      return EL_DB.collection(EL_COLLECTIONS.PLANIFICACIONES).where('activo', '==', true).get()
         .then(function(snap) {
           var items = [];
           snap.forEach(function(doc) { items.push(Object.assign({ id: doc.id }, doc.data())); });
+          var eq = function(a, b) { return String(a || '').trim().toLowerCase() === String(b || '').trim().toLowerCase(); };
+          if (filtros.profesor)    items = items.filter(function(p) { return eq(p.email, filtros.profesor) || (p.uid && p.uid === filtros.profesor); });
+          if (filtros.uid)         items = items.filter(function(p) { return p.uid === filtros.uid; });
+          if (filtros.modulo)      items = items.filter(function(p) { return p.modulo === filtros.modulo; });
+          if (filtros.asignatura)  items = items.filter(function(p) { return eq(p.asignatura, filtros.asignatura); });
+          if (filtros.mes) {
+            var inicio = filtros.mes + '-01';
+            var fin    = filtros.mes + '-31';
+            items = items.filter(function(p) {
+              var fc = (p.fechaClase || '').slice(0, 10);
+              return fc >= inicio && fc <= fin;
+            });
+          }
+          items.sort(function(a, b) {
+            var ta = (a.publicadoEn && a.publicadoEn.toMillis) ? a.publicadoEn.toMillis() : (a.fechaISO ? Date.parse(a.fechaISO) : 0);
+            var tb = (b.publicadoEn && b.publicadoEn.toMillis) ? b.publicadoEn.toMillis() : (b.fechaISO ? Date.parse(b.fechaISO) : 0);
+            return tb - ta;
+          });
           return items;
         });
     },
@@ -136,7 +187,17 @@ var ELDB = (function() {
     },
 
     eliminar: function(id) {
-      return EL_DB.collection(EL_COLLECTIONS.PLANIFICACIONES).doc(id).update({ activo: false });
+      // Soft delete + sincronizar calendario del docente
+      var ref = EL_DB.collection(EL_COLLECTIONS.PLANIFICACIONES).doc(id);
+      return ref.get().then(function (doc) {
+        var data = (doc && doc.exists) ? doc.data() : null;
+        var uid = data && data.uid;
+        var updP = ref.update({ activo: false });
+        var calP = (uid && calendario && calendario.eliminarPorOrigen)
+          ? calendario.eliminarPorOrigen(uid, id).catch(function(){ return 0; })
+          : Promise.resolve(0);
+        return Promise.all([updP, calP]).then(function (r) { return r[0]; });
+      });
     }
   };
 
@@ -784,6 +845,114 @@ var ELDB = (function() {
     TIPOS: ACTIVIDAD_TIPOS
   };
 
+  // ────────────────────────────────────────────────────────────
+  //  CALENDARIO (eventos del docente)
+  //  Colección: calendarios_docentes/{uid}/eventos
+  //  Cada evento puede estar vinculado a una planificación o material
+  //  mediante (origenTipo, origenId). Si existe un evento con ese par
+  //  para el uid, hacemos UPDATE; si no, INSERT.
+  // ────────────────────────────────────────────────────────────
+  var calendario = {
+    /**
+     * Crea o actualiza un evento del calendario del docente vinculado a un origen.
+     * @param {object} opts
+     *   - uid          (string) UID del docente dueño del calendario [obligatorio]
+     *   - origenTipo   (string) 'planificacion' | 'material' [obligatorio]
+     *   - origenId     (string) ID del documento origen (planificación o material) [obligatorio]
+     *   - titulo       (string)
+     *   - fecha        (string) 'YYYY-MM-DD'
+     *   - hora         (string) 'HH:MM' (opcional)
+     *   - tipo         (string) 'planificacion' | 'evaluacion' | 'prueba' | 'guia' | 'otro'
+     *   - asignatura   (string)
+     *   - descripcion  (string)
+     *   - email        (string)
+     * @returns {Promise<{id:string, created:boolean}>}
+     */
+    upsertDesdeOrigen: function (opts) {
+      opts = opts || {};
+      if (!EL_DB || !EL_DB.collection) return Promise.resolve(null);
+      if (!opts.uid || !opts.origenId || !opts.origenTipo) {
+        console.warn('[ELDB.calendario] upsertDesdeOrigen: faltan uid/origenId/origenTipo');
+        return Promise.resolve(null);
+      }
+      // Normalizar fecha a YYYY-MM-DD
+      var fechaStr = opts.fecha || '';
+      if (fechaStr && fechaStr.length > 10) fechaStr = fechaStr.slice(0, 10);
+      if (!fechaStr) {
+        var hoy = new Date();
+        fechaStr = hoy.toISOString().slice(0, 10);
+      }
+      var nowIso = new Date().toISOString();
+      var coll = EL_DB.collection('calendarios_docentes').doc(opts.uid).collection('eventos');
+
+      // Buscar evento existente por (origenTipo, origenId)
+      return coll.where('origenId', '==', opts.origenId).get()
+        .then(function (snap) {
+          var existente = null;
+          snap.forEach(function (d) {
+            var data = d.data() || {};
+            if (data.origenTipo === opts.origenTipo) existente = { id: d.id, data: data };
+          });
+          var payload = {
+            titulo:         opts.titulo || '(sin título)',
+            fecha:          fechaStr,
+            hora:           opts.hora || '',
+            tipo:           opts.tipo || opts.origenTipo,
+            asignatura:     opts.asignatura || '',
+            descripcion:    opts.descripcion || '',
+            uid:            opts.uid,
+            email:          opts.email || '',
+            origenTipo:     opts.origenTipo,
+            origenId:       opts.origenId,
+            actualizadoEn:  nowIso
+          };
+          if (existente) {
+            return coll.doc(existente.id).update(payload)
+              .then(function () { return { id: existente.id, created: false }; });
+          } else {
+            payload.creadoEn = nowIso;
+            return coll.add(payload)
+              .then(function (ref) { return { id: ref.id, created: true }; });
+          }
+        })
+        .catch(function (err) {
+          console.warn('[ELDB.calendario] upsertDesdeOrigen falló:', err && err.message);
+          return null;
+        });
+    },
+
+    /**
+     * Elimina el evento del calendario vinculado a un origen.
+     * No falla si no existe.
+     */
+    eliminarPorOrigen: function (uid, origenId) {
+      if (!EL_DB || !EL_DB.collection || !uid || !origenId) return Promise.resolve(0);
+      var coll = EL_DB.collection('calendarios_docentes').doc(uid).collection('eventos');
+      return coll.where('origenId', '==', origenId).get()
+        .then(function (snap) {
+          var dels = [];
+          snap.forEach(function (d) { dels.push(coll.doc(d.id).delete()); });
+          return Promise.all(dels).then(function () { return dels.length; });
+        })
+        .catch(function (err) {
+          console.warn('[ELDB.calendario] eliminarPorOrigen falló:', err && err.message);
+          return 0;
+        });
+    },
+
+    /** Lista los eventos del calendario de un docente. */
+    listar: function (uid) {
+      if (!EL_DB || !uid) return Promise.resolve([]);
+      return EL_DB.collection('calendarios_docentes').doc(uid).collection('eventos').get()
+        .then(function (snap) {
+          var items = [];
+          snap.forEach(function (d) { items.push(Object.assign({ id: d.id }, d.data())); });
+          return items;
+        })
+        .catch(function () { return []; });
+    }
+  };
+
   return {
     materiales:      materiales,
     planificaciones: planificaciones,
@@ -793,6 +962,7 @@ var ELDB = (function() {
     migracion:       migracion,
     recursos:        recursos,
     liceos:          liceos,
-    actividad:       actividad
+    actividad:       actividad,
+    calendario:      calendario
   };
 })();
