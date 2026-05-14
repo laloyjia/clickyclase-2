@@ -701,12 +701,23 @@ tr:hover td{background:rgba(99,102,241,.05)}
                style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-size:.875rem;width:100%;outline:none">
       </div>
       <label style="font-size:.85rem;font-weight:600;margin-bottom:8px;display:block">🔐 Permisos</label>
-      <div style="display:flex;gap:16px;flex-wrap:wrap">
+      <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:14px">
         <label style="display:flex;align-items:center;gap:6px;font-size:.85rem;cursor:pointer">
           <input type="checkbox" id="ppPermPlan"> 📅 Puede planificar
         </label>
         <label style="display:flex;align-items:center;gap:6px;font-size:.85rem;cursor:pointer">
           <input type="checkbox" id="ppPermMat"> 📚 Puede crear material
+        </label>
+      </div>
+      <label style="font-size:.85rem;font-weight:600;margin-bottom:8px;display:block">🎯 Capacidades pedagógicas avanzadas</label>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <label style="display:flex;align-items:center;gap:8px;font-size:.85rem;cursor:pointer;padding:8px 12px;background:rgba(167,139,250,.06);border:1px solid rgba(167,139,250,.18);border-radius:8px">
+          <input type="checkbox" id="ppPAES">
+          <span>🎓 <strong>Formato PAES</strong> — pruebas/eval/guías en estructura oficial PAES (5 alternativas, estímulos, especificaciones).</span>
+        </label>
+        <label style="display:flex;align-items:center;gap:8px;font-size:.85rem;cursor:pointer;padding:8px 12px;background:rgba(34,211,238,.06);border:1px solid rgba(34,211,238,.18);border-radius:8px">
+          <input type="checkbox" id="ppMarzano">
+          <span>🧠 <strong>Taxonomía Marzano</strong> — habilita niveles Marzano además de Bloom.</span>
         </label>
       </div>
     </div>
@@ -1535,7 +1546,7 @@ function filtrarProfs(){
 
 // WIZARD
 function abrirWizard(){
-  wData={tipo:null,tipos:[],asignaturas:[],niveles:[],especialidad:'',modulos:[],cursos:[],liceos:[],liceoPrincipal:'',permisos:{planificar:true,crearMaterial:true}};
+  wData={tipo:null,tipos:[],asignaturas:[],niveles:[],especialidad:'',modulos:[],cursos:[],liceos:[],liceoPrincipal:'',permisos:{planificar:true,crearMaterial:true},formatoPAES:false,taxonomiaMarzano:false};
   ['pNombre','pEmail','pPass'].forEach(function(id){document.getElementById(id).value='';});
   document.querySelectorAll('.tipo-card').forEach(function(c){c.classList.remove('selected');});
   document.querySelectorAll('.wstep').forEach(function(s){s.className='wstep';});
@@ -1607,6 +1618,17 @@ function buildStep3(){
       '<input id="wCursos" placeholder="Ingresa el o los cursos, separados por coma" '+
              'style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-size:.875rem;width:100%;outline:none" '+
              'onchange="wData.cursos=this.value.split(\',\').map(function(s){return s.trim();}).filter(Boolean)">'+
+    '</div>'+
+    '<h3 style="margin-bottom:10px;font-size:.9rem">🎯 Capacidades pedagógicas avanzadas</h3>'+
+    '<div style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px">'+
+      '<label style="display:flex;align-items:center;gap:8px;font-size:.85rem;cursor:pointer;padding:8px 12px;background:rgba(167,139,250,.06);border:1px solid rgba(167,139,250,.18);border-radius:8px">'+
+        '<input type="checkbox" id="wPAES"'+(wData.formatoPAES?' checked':'')+' onchange="wData.formatoPAES=this.checked">'+
+        '<span>🎓 <strong>Formato PAES</strong> — habilita generar pruebas, evaluaciones y guías en estructura oficial PAES (5 alternativas, estímulos, tabla de especificaciones).</span>'+
+      '</label>'+
+      '<label style="display:flex;align-items:center;gap:8px;font-size:.85rem;cursor:pointer;padding:8px 12px;background:rgba(34,211,238,.06);border:1px solid rgba(34,211,238,.18);border-radius:8px">'+
+        '<input type="checkbox" id="wMarzano"'+(wData.taxonomiaMarzano?' checked':'')+' onchange="wData.taxonomiaMarzano=this.checked">'+
+        '<span>🧠 <strong>Taxonomía Marzano</strong> — habilita usar niveles Marzano (Recuperación, Comprensión, Análisis, Utilización) además de Bloom.</span>'+
+      '</label>'+
     '</div>'+
     '<h3 style="margin-bottom:10px;font-size:.9rem">🔐 Permisos del docente</h3>'+
     '<div style="display:flex;gap:16px;flex-wrap:wrap">'+
@@ -1799,7 +1821,7 @@ function crearProfesor(){
   btn.disabled=true;btn.innerHTML='<span class="spinner"></span> Creando…';
   var tiposArr=(wData.tipos&&wData.tipos.length)?wData.tipos:(wData.tipo?[wData.tipo]:[]);
   // tipoProfesor (string legacy) = primer tipo; tiposProfesor (array nuevo) = todos
-  ELAuth.adminCrearProfesor({nombre:document.getElementById('pNombre').value.trim(),email:document.getElementById('pEmail').value.trim(),password:document.getElementById('pPass').value,tipoProfesor:tiposArr[0]||'',tiposProfesor:tiposArr,asignaturas:wData.asignaturas,especialidad:wData.especialidad,modulos:wData.modulos,niveles:wData.niveles,cursos:wData.cursos,liceos:wData.liceos,liceoPrincipal:wData.liceoPrincipal,permisos:wData.permisos})
+  ELAuth.adminCrearProfesor({nombre:document.getElementById('pNombre').value.trim(),email:document.getElementById('pEmail').value.trim(),password:document.getElementById('pPass').value,tipoProfesor:tiposArr[0]||'',tiposProfesor:tiposArr,asignaturas:wData.asignaturas,especialidad:wData.especialidad,modulos:wData.modulos,niveles:wData.niveles,cursos:wData.cursos,liceos:wData.liceos,liceoPrincipal:wData.liceoPrincipal,permisos:wData.permisos,formatoPAES:!!wData.formatoPAES,taxonomiaMarzano:!!wData.taxonomiaMarzano})
   .then(function(){
     notif('wNotif','✅ Profesor creado. Puede ingresar con su correo y contraseña desde cualquier dispositivo.','ok');
     loadData();btn.disabled=false;btn.innerHTML='✅ Crear Profesor';
@@ -1991,6 +2013,8 @@ function editarPermisos(uid) {
   document.getElementById('ppCursos').value = (prof.cursos || []).join(', ');
   document.getElementById('ppPermPlan').checked = prof.permisos ? prof.permisos.planificar !== false : true;
   document.getElementById('ppPermMat').checked  = prof.permisos ? prof.permisos.crearMaterial !== false : true;
+  document.getElementById('ppPAES').checked     = !!prof.formatoPAES;
+  document.getElementById('ppMarzano').checked  = !!prof.taxonomiaMarzano;
   document.getElementById('modalPermProf').classList.add('open');
 }
 
@@ -2086,7 +2110,9 @@ function guardarPermisos() {
     permisos: {
       planificar:    document.getElementById('ppPermPlan').checked,
       crearMaterial: document.getElementById('ppPermMat').checked
-    }
+    },
+    formatoPAES:      document.getElementById('ppPAES').checked,
+    taxonomiaMarzano: document.getElementById('ppMarzano').checked
   };
   ELDB.usuarios.actualizar(uid, datos)
     .then(function() {

@@ -1554,6 +1554,33 @@
                         <small style="color:var(--muted);font-size:.72rem;display:block;margin-top:4px">El logo y nombre del liceo seleccionado aparecerán en el encabezado del documento.</small>
                     </div>
                 </div>
+                <!-- Capacidades pedagógicas avanzadas (solo si el admin habilitó al profe) -->
+                <div class="campo-row" id="rowCapAvanzadas" style="display:none;background:linear-gradient(135deg,rgba(167,139,250,.06),rgba(34,211,238,.04));border:1px solid rgba(167,139,250,.22);border-radius:10px;padding:12px 14px;margin-top:6px">
+                    <div class="campo" id="capFormatoBox" style="display:none">
+                        <label>🎓 Formato del documento</label>
+                        <select id="selFormatoMaterial" onchange="onCambioFormatoMaterial()">
+                            <option value="estandar">Estándar</option>
+                            <option value="paes">PAES (5 alternativas, estímulos, tabla de especificaciones)</option>
+                        </select>
+                    </div>
+                    <div class="campo" id="capCompPAESBox" style="display:none">
+                        <label>📚 Competencia PAES</label>
+                        <select id="selCompPAES">
+                            <option value="lectora">Competencia Lectora</option>
+                            <option value="m1">Matemática M1 (común)</option>
+                            <option value="m2">Matemática M2 (electivo)</option>
+                            <option value="ciencias">Ciencias (Bio/Fís/Quím)</option>
+                            <option value="historia">Historia y Cs Sociales</option>
+                        </select>
+                    </div>
+                    <div class="campo" id="capTaxonomiaBox" style="display:none">
+                        <label>🧠 Taxonomía aplicada</label>
+                        <select id="selTaxonomia">
+                            <option value="bloom">Bloom (defecto)</option>
+                            <option value="marzano">Marzano</option>
+                        </select>
+                    </div>
+                </div>
                 <div class="campo-row">
                     <div class="campo">
                         <label>Institución / Liceo (aparece en el encabezado)</label>
@@ -2063,6 +2090,9 @@
         for (var i = 0; i < cards.length; i++) cards[i].classList.remove('selected');
         card.classList.add('selected');
         tipoDocSeleccionado = tipo;
+        window.tipoDocSeleccionado = tipo;
+        // Refrescar visibilidad de capacidades avanzadas (PAES aplica solo a algunos tipos)
+        if (typeof _matAjustarCapacidadesUI === 'function') _matAjustarCapacidadesUI();
         var cfgEval = document.getElementById('cfgEval');
         var cfgRefs = document.getElementById('cfgRefs');
         var cfgHab  = document.getElementById('cfgHabilidad');
@@ -2277,7 +2307,41 @@
         }
         // Actualizar _matUser con datos normalizados para que el resto de la página los use
         _matUser = u;
+        // ── Activar capacidades pedagógicas avanzadas según permisos ──
+        _matAjustarCapacidadesUI();
     }
+
+    // Muestra/oculta los selectores PAES y Marzano según los permisos del profe
+    // y el tipo de documento actualmente seleccionado.
+    function _matAjustarCapacidadesUI() {
+        var u = _matUser || {};
+        var row = document.getElementById('rowCapAvanzadas');
+        var fmtBox = document.getElementById('capFormatoBox');
+        var taxBox = document.getElementById('capTaxonomiaBox');
+        var compBox = document.getElementById('capCompPAESBox');
+        if (!row) return;
+
+        var tipoAplicaPAES = (window.tipoDocSeleccionado || '');
+        // El selector de Formato PAES solo aplica a prueba/evaluacion/guia
+        var puedePAES = !!u.formatoPAES && ['prueba','evaluacion','guia'].indexOf(tipoAplicaPAES) !== -1;
+        // Taxonomía Marzano aplica a cualquier tipo que admita taxonomía (todos excepto control quizá)
+        var puedeMarzano = !!u.taxonomiaMarzano;
+
+        if (fmtBox) fmtBox.style.display  = puedePAES    ? '' : 'none';
+        if (taxBox) taxBox.style.display  = puedeMarzano ? '' : 'none';
+        // El selector de competencia PAES solo se muestra si formato='paes'
+        var selFmt = document.getElementById('selFormatoMaterial');
+        var formatoSel = selFmt ? selFmt.value : 'estandar';
+        if (compBox) compBox.style.display = (puedePAES && formatoSel === 'paes') ? '' : 'none';
+
+        var algunoVisible = (puedePAES || puedeMarzano);
+        row.style.display = algunoVisible ? '' : 'none';
+    }
+
+    function onCambioFormatoMaterial() {
+        _matAjustarCapacidadesUI();
+    }
+    window.onCambioFormatoMaterial = onCambioFormatoMaterial;
 
     function onCambioAsigNivelMat() {
         var user = _matUser || {};
@@ -4367,8 +4431,14 @@
 
     /**
      * Dispatcher: devuelve el prompt apropiado para el tipo de documento.
+     * Si el profe tiene formatoPAES habilitado Y eligió formato 'paes',
+     * usa prompts PAES por competencia para prueba/evaluacion/guia.
      */
     function _buildPromptPorTipo(tipo, ctx) {
+        // Atajo PAES (solo para tipos compatibles)
+        if (ctx && ctx.formatoActivo === 'paes' && ['prueba','evaluacion','guia'].indexOf(tipo) !== -1) {
+            return _promptPAES(tipo, ctx);
+        }
         if (tipo === 'guia')         return _promptGuia(ctx);
         if (tipo === 'apunte')       return _promptApunte(ctx);
         if (tipo === 'evaluacion')   return _promptEvaluacion(ctx);
@@ -4376,6 +4446,66 @@
         // 'control' usa el prompt genérico. _promptDiferenciada se invoca solo
         // desde el flujo dual de Prueba (toggle PIE adjunto), no como tipo standalone.
         return _promptGenerico(ctx);
+    }
+
+    // ─────────────────────────────────────────────────────────
+    //  PROMPT PAES — pruebas, evaluaciones, guías de entrenamiento
+    //  Soporta competencias: lectora, m1, m2, ciencias, historia
+    // ─────────────────────────────────────────────────────────
+    var PAES_INFO = {
+      lectora:  { nombre:'Competencia Lectora',           ejes:'Localizar / Interpretar y relacionar / Reflexionar',                             alt:5, instr:'Estímulos textuales (literarios, no literarios, infografías, gráficos). Cada estímulo con 4–8 preguntas asociadas.' },
+      m1:       { nombre:'Matemática M1 (común)',         ejes:'Números / Álgebra y Funciones / Geometría / Probabilidad y Estadística',         alt:5, instr:'Contextos cotidianos chilenos, tablas y gráficos. Habilidades: resolver problemas, modelar, representar, argumentar.' },
+      m2:       { nombre:'Matemática M2 (electivo)',      ejes:'Números complejos / Álgebra y funciones avanzado / Geometría / Estadística inferencial', alt:5, instr:'Contextos disciplinares más abstractos. Habilidades superiores: argumentar y demostrar.' },
+      ciencias: { nombre:'Ciencias (Bio/Fís/Quím)',       ejes:'Habilidades científicas / Biología / Física / Química',                          alt:5, instr:'Estímulos: experimentos, datos, gráficos, esquemas. Habilidades: interpretar evidencia, formular hipótesis, modelar.' },
+      historia: { nombre:'Historia y Cs Sociales',        ejes:'Pensamiento histórico / Geográfico / Formación ciudadana / Análisis de fuentes', alt:5, instr:'Fuentes primarias y secundarias: documentos, mapas, gráficos. Habilidades: análisis de fuentes, multicausalidad, perspectivas históricas.' }
+    };
+    function _promptPAES(tipo, ctx) {
+      var compKey = (ctx.competenciaPaes || 'lectora').toLowerCase();
+      var comp    = PAES_INFO[compKey] || PAES_INFO.lectora;
+      var nItems  = ctx.cantPreg || (compKey === 'lectora' ? 12 : 15);
+      var tipoLabel = { prueba:'PRUEBA PAES', evaluacion:'EVALUACIÓN TIPO PAES', guia:'GUÍA DE ENTRENAMIENTO PAES' }[tipo] || 'INSTRUMENTO PAES';
+      var taxLine = '';
+      if (ctx.taxonomia === 'marzano') {
+        taxLine = '\nTAXONOMÍA APLICADA: Marzano (Recuperación, Comprensión, Análisis, Utilización del Conocimiento). Distribuye los ítems en estos niveles.';
+      } else if (ctx.bloomNames) {
+        taxLine = '\nTAXONOMÍA APLICADA: Bloom (' + ctx.bloomNames + ').';
+      }
+      var instrucciones =
+        'Eres especialista en evaluación PAES (DEMRE, Chile). Construyes ítems alineados con el formato oficial vigente.\n' +
+        'Competencia: ' + comp.nombre + '\n' +
+        'Ejes a cubrir: ' + comp.ejes + '\n' +
+        'Formato obligatorio: ' + comp.instr + ' Cada ítem con ' + comp.alt + ' alternativas (A–E), solo una correcta.\n' +
+        'No se descuenta puntaje por respuestas incorrectas (PAES vigente).' + taxLine + '\n\n' +
+        '── DATOS DEL DOCUMENTO ──\n' +
+        'Institución: ' + (ctx.nombreInst || '_____') + '\n' +
+        'Profesor(a): ' + (ctx.profesor || '_____') + '\n' +
+        'Asignatura/Módulo: ' + (ctx.modNombre || '_____') + '\n' +
+        'Curso/Nivel: ' + (ctx.cursoTexto || '_____') + '\n' +
+        (ctx.contenido ? 'Contenido específico: ' + ctx.contenido + '\n' : '') +
+        (ctx.oaTexto   ? '\nOA(s) Mineduc:\n' + ctx.oaTexto + '\n' : '') +
+        (ctx.valoresStr ? '\nValores institucionales a incorporar (cuando sea natural): ' + ctx.valoresStr + '\n' : '') +
+        (ctx.materialReferencia ? '\nMaterial / referencia literal a incluir tal cual:\n' + ctx.materialReferencia + '\n' : '') +
+        '\nTotal de ítems requeridos: ' + nItems +
+        '\nDificultad: ' + (ctx.difTexto || ctx.dificultad || 'intermedio') +
+        '\n\n── ESTRUCTURA OBLIGATORIA DEL DOCUMENTO HTML ──\n' +
+        '1. Encabezado institucional + datos del estudiante (nombre, curso, fecha).\n' +
+        '2. INSTRUCCIONES GENERALES (cómo responder, no se descuenta puntaje, tiempo sugerido).\n' +
+        (compKey === 'lectora'
+          ? '3. Para cada estímulo: bloque <h2>TEXTO N — [título / tipo]</h2> con texto de 250–450 palabras, luego sus 4–8 preguntas. Repetir hasta sumar ' + nItems + ' ítems.\n'
+          : compKey === 'ciencias'
+            ? '3. Al menos 2 estímulos (experimento, tabla de datos, gráfico, esquema): <h2>ESTÍMULO N — [título]</h2> con descripción ≥120 palabras, luego sus preguntas (3–5 por estímulo).\n'
+            : compKey === 'historia'
+              ? '3. Fuentes primarias y secundarias (documentos, mapas, gráficos): <h2>FUENTE N — [autor/año/tipo]</h2> con cita o descripción 100–300 palabras, luego sus preguntas (2–5).\n'
+              : '3. Distribuir ítems entre los ejes mencionados. Al menos un tercio con contexto/estímulo (tabla, gráfico, situación cotidiana).\n'
+        ) +
+        '4. Cada ítem: enunciado claro + 5 alternativas A) B) C) D) E). Distractores plausibles (errores conceptuales típicos).\n' +
+        '5. <h2>CLAVE DE RESPUESTAS</h2>: tabla compacta con N° y letra correcta.\n' +
+        '6. <h2>TABLA DE ESPECIFICACIONES</h2>: columnas <strong>N°</strong>, <strong>Eje PAES</strong>, <strong>Habilidad</strong>, <strong>Dificultad (F/M/D)</strong>, <strong>OA Mineduc</strong>' + (ctx.taxonomia === 'marzano' ? ', <strong>Nivel Marzano</strong>' : ', <strong>Nivel Bloom</strong>') + '.\n' +
+        '7. <h2>JUSTIFICACIÓN / RESOLUCIÓN</h2>: para cada ítem, breve justificación de la clave correcta (1–3 líneas).\n\n' +
+        'IMPORTANTE: Devuelve SOLO HTML del cuerpo (no <html>, <head>, <body>, ni marcadores de código).\n' +
+        'Usa <h1> para el título, <h2> para secciones, <p>, <ol>/<ul>, <table>, <strong>. Mantén el documento legible y listo para imprimir.\n' +
+        '\nGenera ahora el documento completo:';
+      return instrucciones;
     }
 
     // =============================================
@@ -4475,6 +4605,29 @@
         var pieAdecuacion    = 'acceso';
         var pieObservaciones = '';
 
+        // ── Flags PAES / Taxonomía ──
+        // Se activan según permisos del profe + lo que eligió en los selectores.
+        var _selFormato = document.getElementById('selFormatoMaterial');
+        var _selCompPAES = document.getElementById('selCompPAES');
+        var _selTax     = document.getElementById('selTaxonomia');
+        var _formatoActivo = (user.formatoPAES && _selFormato && _selFormato.value === 'paes') ? 'paes' : 'estandar';
+        var _competenciaPaes = _selCompPAES ? (_selCompPAES.value || 'lectora') : 'lectora';
+        var _taxonomia  = (user.taxonomiaMarzano && _selTax && _selTax.value === 'marzano') ? 'marzano' : 'bloom';
+
+        // Si la taxonomía elegida es Marzano, reemplazar los nombres Bloom por niveles Marzano correspondientes
+        var bloomNamesFinal = bloomNames;
+        if (_taxonomia === 'marzano') {
+            var MARZANO_LABELS_TXT = {
+                recordar:   'Recuperación (Marzano nivel 1)',
+                comprender: 'Comprensión (Marzano nivel 2)',
+                aplicar:    'Utilización del conocimiento (Marzano nivel 4)',
+                analizar:   'Análisis (Marzano nivel 3)',
+                evaluar:    'Análisis – evaluar (Marzano nivel 3)',
+                crear:      'Utilización del conocimiento – crear (Marzano nivel 4)'
+            };
+            bloomNamesFinal = evalOpts.bloomLevels.map(function(l){ return MARZANO_LABELS_TXT[l] || l; }).join(', ');
+        }
+
         // Construir contexto único para los builders de prompt
         var ctxPrompt = {
             tipoDocSel: tipoDocSeleccionado,
@@ -4487,7 +4640,7 @@
             profesor:   profesor,
             difTexto:   difTexto,
             dificultad: dificultad,
-            bloomNames: bloomNames,
+            bloomNames: bloomNamesFinal,
             tiposNames: tiposNames,
             cantPreg:   evalOpts.cantPreg || 10,
             puntaje:    evalOpts.puntaje  || 40,
@@ -4501,7 +4654,11 @@
             cantEjercicios:   cantEjercicios,
             pieDiagnostico:   pieDiagnostico,
             pieAdecuacion:    pieAdecuacion,
-            pieObservaciones: pieObservaciones
+            pieObservaciones: pieObservaciones,
+            // ── Nuevos: capacidades PAES / Marzano ──
+            formatoActivo:    _formatoActivo,     // 'paes' | 'estandar'
+            competenciaPaes:  _competenciaPaes,   // 'lectora' | 'm1' | 'm2' | 'ciencias' | 'historia'
+            taxonomia:        _taxonomia          // 'bloom' | 'marzano'
         };
 
         var prompt = _buildPromptPorTipo(tipoDocSeleccionado, ctxPrompt);

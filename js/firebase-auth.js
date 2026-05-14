@@ -311,6 +311,8 @@ var ELAuth = (function() {
         liceos:          Array.isArray(data.liceos) ? data.liceos : [],
         liceoPrincipal:  data.liceoPrincipal || (Array.isArray(data.liceos) && data.liceos.length ? data.liceos[0] : ''),
         permisos:        data.permisos     || { planificar: true, crearMaterial: true },
+        formatoPAES:     !!data.formatoPAES,        // habilita formato PAES en pruebas/eval/guías
+        taxonomiaMarzano:!!data.taxonomiaMarzano,   // habilita taxonomía Marzano (además de Bloom)
         xp:              0,
         nivel:           1,
         badges:          [],

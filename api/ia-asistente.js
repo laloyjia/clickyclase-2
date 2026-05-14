@@ -33,8 +33,57 @@ const BLOOM = {
   crear:       'Nivel CREAR (Bloom): actividades de diseño, producción, propuesta, elaboración de algo nuevo.'
 };
 
+// ── Tabla de niveles de Marzano (Nueva Taxonomía 2001) ──────
+// Marzano agrupa el procesamiento cognitivo en 4 niveles + 2 sistemas (meta-cognición y self-system).
+const MARZANO = {
+  recuperacion:    'Nivel 1 RECUPERACIÓN (Marzano): reconocer, recordar y ejecutar procedimientos. Preguntas de identificación, definición y ejecución básica.',
+  comprension:     'Nivel 2 COMPRENSIÓN (Marzano): integrar y simbolizar información. Preguntas de síntesis, parafraseo, representaciones gráficas o esquemas.',
+  analisis:        'Nivel 3 ANÁLISIS (Marzano): emparejar, clasificar, analizar errores, generalizar y especificar. Preguntas que exigen razonamiento profundo y conexiones inferenciales.',
+  utilizacion:     'Nivel 4 UTILIZACIÓN DEL CONOCIMIENTO (Marzano): toma de decisiones, resolución de problemas, investigación experimental, indagación. Tareas de aplicación auténtica en contextos reales.',
+  metacognicion:   'Nivel 5 METACOGNICIÓN (Marzano): especificar metas, monitorear el proceso, evaluar la claridad y precisión del propio pensamiento.',
+  autosistema:     'Nivel 6 AUTO-SISTEMA (Marzano): examinar la importancia, eficacia, respuesta emocional y motivación frente a la tarea.'
+};
+
+// ── Ejes y características de las competencias PAES ──────────
+const PAES = {
+  lectora: {
+    nombre: 'Competencia Lectora PAES',
+    descripcion: 'Mide habilidades de localizar, interpretar, relacionar y reflexionar sobre textos. NO mide conocimiento literario per se.',
+    ejes: ['Localizar información', 'Interpretar y relacionar', 'Reflexionar sobre el texto'],
+    formato: 'Estímulos textuales variados (literarios, no literarios, infografías, gráficos, tablas, columnas de opinión, instructivos). Cada estímulo tiene entre 4 y 8 preguntas asociadas. 5 alternativas (A-E) por pregunta.'
+  },
+  m1: {
+    nombre: 'Matemática M1 (PAES)',
+    descripcion: 'Eje común obligatorio. Evalúa habilidades de Números, Álgebra y Funciones, Geometría, y Probabilidad y Estadística aplicadas a 7° Básico–2° Medio.',
+    ejes: ['Números', 'Álgebra y Funciones', 'Geometría', 'Probabilidad y Estadística'],
+    formato: 'Preguntas con contextos cotidianos o disciplinares. Incluye tablas, gráficos, figuras. 5 alternativas (A-E). Habilidades evaluadas: resolver problemas, modelar, representar y argumentar/comunicar.'
+  },
+  m2: {
+    nombre: 'Matemática M2 (PAES Electivo)',
+    descripcion: 'Eje electivo. Evalúa contenidos de 3° y 4° Medio: funciones, vectores, geometría analítica, probabilidad condicional, inferencia estadística.',
+    ejes: ['Números complejos', 'Álgebra y funciones (avanzado)', 'Geometría', 'Probabilidad y Estadística inferencial'],
+    formato: 'Contextos más abstractos y disciplinares. 5 alternativas (A-E). Habilidades superiores: argumentar, demostrar.'
+  },
+  ciencias: {
+    nombre: 'Ciencias PAES (Biología, Física, Química)',
+    descripcion: 'Módulo común obligatorio. Evalúa los OAs comunes de ciencias en 1°-2° Medio para todos, más electivo en una de las 3 disciplinas.',
+    ejes: ['Habilidades de pensamiento científico', 'Biología (organismos y procesos)', 'Física (movimiento, energía, ondas)', 'Química (materia y reacciones)'],
+    formato: 'Estímulos: experimentos, datos experimentales, gráficos, esquemas, fenómenos. 5 alternativas (A-E). Énfasis en interpretar evidencia y modelar.'
+  },
+  historia: {
+    nombre: 'Historia y Ciencias Sociales PAES',
+    descripcion: 'Módulo electivo. Evalúa Historia, Geografía y Formación Ciudadana de 1°-2° Medio (común) más 3°-4° Medio (electivo).',
+    ejes: ['Pensamiento histórico', 'Pensamiento geográfico', 'Formación ciudadana', 'Pensamiento crítico sobre información'],
+    formato: 'Fuentes primarias y secundarias: textos historiográficos, documentos de época, mapas, infografías, gráficos. 5 alternativas (A-E). Habilidades: análisis de fuentes, multicausalidad, perspectivas históricas.'
+  }
+};
+
 // ── Constructor de contexto pedagógico ──────────────────────
 function buildContext(datos) {
+  // Tabla taxonómica activa: Marzano si datos.taxonomiaSistema === 'marzano', si no Bloom (default)
+  const TAX_TABLE = datos.taxonomiaSistema === 'marzano' ? MARZANO : BLOOM;
+  const taxLabel  = datos.taxonomiaSistema === 'marzano' ? 'Marzano' : 'Bloom';
+
   const lines = [
     datos.colegio      ? `Institución educativa: ${datos.colegio}`            : '',
     datos.asignatura   ? `Asignatura / Módulo: ${datos.asignatura}`           : '',
@@ -44,7 +93,7 @@ function buildContext(datos) {
     datos.unidad       ? `Unidad: ${datos.unidad}`                            : '',
     datos.horas        ? `Duración: ${datos.horas} horas pedagógicas`        : '',
     datos.tema         ? `Tema específico: ${datos.tema}`                     : '',
-    datos.taxonomia    ? BLOOM[datos.taxonomia] || `Taxonomía: ${datos.taxonomia}` : '',
+    datos.taxonomia    ? (TAX_TABLE[datos.taxonomia] || `Taxonomía ${taxLabel}: ${datos.taxonomia}`) : '',
     datos.tiposPreguntas && datos.tiposPreguntas.length
                        ? `Tipos de preguntas/actividades: ${Array.isArray(datos.tiposPreguntas) ? datos.tiposPreguntas.join(', ') : datos.tiposPreguntas}` : '',
     datos.nPreguntas   ? `Cantidad total de preguntas/ítems: ${datos.nPreguntas}` : '',
@@ -83,6 +132,13 @@ function buildContext(datos) {
 // ── Prompts por herramienta ──────────────────────────────────
 function buildPrompt(tipo, datos) {
   const hasOAs = (datos.oas_seleccionados && datos.oas_seleccionados.length > 0) || datos.oa;
+
+  // ── Atajo: si el formato es PAES y aplica al tipo (prueba/evaluacion/guia), usar prompt PAES ──
+  const formatoPAES = datos.formato === 'paes';
+  const aplicaPAES  = ['prueba', 'evaluacion', 'guia'].indexOf(tipo) !== -1;
+  if (formatoPAES && aplicaPAES) {
+    return buildPromptPAES(tipo, datos);
+  }
 
   const intro = `Eres un experto pedagógico en educación chilena (Mineduc).
 Conoces el currículum nacional: Educación Básica 1°-8°, Plan Común 1°-4° Medio y EMTP.
@@ -248,6 +304,203 @@ RESPONDE SOLO CON EL HTML MODIFICADO. Sin comentarios, sin saludos, sin marcador
   return prompts[tipo] || `${intro}Genera un documento educativo sobre:\n${ctx}`;
 }
 
+// ── Prompts PAES por competencia ─────────────────────────────
+function buildPromptPAES(tipo, datos) {
+  const compKey = (datos.competenciaPaes || 'lectora').toLowerCase();
+  const comp    = PAES[compKey] || PAES.lectora;
+  const ctx     = buildContext(datos);
+  const hasOAs  = (datos.oas_seleccionados && datos.oas_seleccionados.length > 0) || datos.oa;
+  const tipoLabel = { prueba: 'PRUEBA PAES', evaluacion: 'EVALUACIÓN TIPO PAES', guia: 'GUÍA DE ENTRENAMIENTO PAES' }[tipo] || 'INSTRUMENTO PAES';
+  const nItems = datos.nPreguntas || (compKey === 'lectora' ? 12 : 15);
+
+  const intro = `Eres un experto en evaluación PAES (Prueba de Acceso a la Educación Superior, Chile, DEMRE).
+Conoces a fondo el formato oficial y los estándares de la prueba real.
+${comp.descripcion}
+EJES EVALUADOS: ${comp.ejes.join(' · ')}
+FORMATO PAES: ${comp.formato}
+${hasOAs ? 'FUNDAMENTAL: Alinea los ítems con los OA Mineduc citados.' : ''}
+Redacta en español formal chileno. Sin saludos. Responde directamente con el documento.\n\n`;
+
+  // Cuerpos diferenciados por competencia
+  if (compKey === 'lectora') {
+    return `${intro}Genera una ${tipoLabel} de COMPETENCIA LECTORA con ${nItems} ítems organizados por estímulos:
+${ctx}
+
+ESTRUCTURA OBLIGATORIA:
+════════════════════════════════════════════
+${tipoLabel} — COMPETENCIA LECTORA
+${datos.colegio ? 'Institución: ' + datos.colegio : 'Institución: _____________'}
+${hasOAs ? 'OA Mineduc evaluados: [citar códigos]' : 'OA / AE: _____________'}
+Nombre: _________________  Curso: ___  Fecha: ___
+Puntaje total: ___  Tiempo sugerido: ___ min
+════════════════════════════════════════════
+
+INSTRUCCIONES GENERALES
+- Cada texto va seguido de preguntas con 5 alternativas (A-E).
+- Marca solo UNA alternativa correcta.
+- No se descuenta por respuestas incorrectas (formato PAES).
+
+ESTRUCTURA POR ESTÍMULO (repetir para ${Math.ceil(nItems / 6)} estímulos):
+
+▸ TEXTO N (Género: literario / no literario / mixto / infografía)
+[Texto completo de 250-450 palabras según complejidad, con buen nivel de cohesión y conectores. Si es infografía o gráfico, describir el contenido con detalle textual + referencia visual.]
+
+PREGUNTAS DEL TEXTO N:
+
+1. [Pregunta de LOCALIZAR información]
+   A) ...
+   B) ...
+   C) ...
+   D) ...
+   E) ...
+
+2. [Pregunta de INTERPRETAR / RELACIONAR — inferencia, propósito, intención]
+   A-E: ...
+
+3. [Pregunta de REFLEXIONAR sobre el texto — postura del autor, evaluación crítica]
+   A-E: ...
+
+(Para Comp. Lectora cada estímulo tiene entre 4 y 8 preguntas. Distribuye ${nItems} ítems en ${Math.ceil(nItems / 6)} estímulos.)
+
+═══ CLAVE DE RESPUESTAS ═══
+1. _   2. _   3. _   ... ${nItems}. _
+
+═══ TABLA DE ESPECIFICACIONES ═══
+N° ítem | Estímulo | Eje PAES (Localizar/Interpretar/Reflexionar) | Habilidad | OA Mineduc (si aplica)
+
+═══ PAUTA DE ANÁLISIS PEDAGÓGICO ═══
+Por cada ítem incorrecto frecuente, sugiere intervención.`;
+  }
+
+  if (compKey === 'm1' || compKey === 'm2') {
+    const matNivel = compKey === 'm1' ? 'M1 (eje común, 7°B–2°M)' : 'M2 (eje electivo, 3°-4°M)';
+    return `${intro}Genera una ${tipoLabel} de MATEMÁTICA ${matNivel} con ${nItems} ítems:
+${ctx}
+
+ESTRUCTURA OBLIGATORIA:
+════════════════════════════════════════════
+${tipoLabel} — MATEMÁTICA ${matNivel}
+${datos.colegio ? 'Institución: ' + datos.colegio : 'Institución: _____________'}
+${hasOAs ? 'OA Mineduc evaluados: [citar códigos]' : 'OA / AE: _____________'}
+Nombre: _________________  Curso: ___  Fecha: ___
+Puntaje total: ___  Tiempo sugerido: ___ min
+════════════════════════════════════════════
+
+INSTRUCCIONES
+- ${nItems} preguntas con 5 alternativas (A-E), solo una correcta.
+- Se permite calculadora científica (no graficadora).
+- No se descuenta puntaje por errores (formato PAES vigente).
+
+REQUERIMIENTOS DE DISEÑO:
+1. Distribuye los ítems entre los ejes: ${comp.ejes.join(', ')}.
+2. Incluye habilidades PAES: resolver problemas (40%), modelar (25%), representar (20%), argumentar/comunicar (15%).
+3. Al menos un tercio de las preguntas debe usar un estímulo concreto (tabla, gráfico, figura, situación contextualizada cotidiana o disciplinar chilena).
+4. Dificultad progresiva: fáciles → intermedias → exigentes.
+5. Distractores plausibles que correspondan a errores conceptuales típicos.
+
+FORMATO DE CADA ÍTEM:
+N. [Enunciado claro con contexto. Si aplica, incluir tabla/gráfico textualmente descrito.]
+
+   A) ____
+   B) ____
+   C) ____
+   D) ____
+   E) ____
+
+═══ CLAVE DE RESPUESTAS ═══
+1. _   2. _   ... ${nItems}. _
+
+═══ TABLA DE ESPECIFICACIONES ═══
+N° | Eje (${comp.ejes.join('/')}) | Habilidad PAES | Dificultad (F/M/D) | OA Mineduc
+
+═══ RESOLUCIÓN PASO A PASO ═══
+Por cada ítem, breve resolución del razonamiento que llega a la clave correcta.`;
+  }
+
+  if (compKey === 'ciencias') {
+    return `${intro}Genera una ${tipoLabel} de CIENCIAS PAES con ${nItems} ítems:
+${ctx}
+
+ESTRUCTURA OBLIGATORIA:
+════════════════════════════════════════════
+${tipoLabel} — CIENCIAS (Bio / Fis / Quim)
+${datos.colegio ? 'Institución: ' + datos.colegio : 'Institución: _____________'}
+${hasOAs ? 'OA Mineduc evaluados: [citar códigos]' : 'OA / AE: _____________'}
+Nombre: _________________  Curso: ___  Fecha: ___
+Puntaje total: ___  Tiempo sugerido: ___ min
+════════════════════════════════════════════
+
+INSTRUCCIONES
+- ${nItems} preguntas con 5 alternativas (A-E), solo una correcta.
+- No se descuenta puntaje por respuestas erradas.
+
+REQUERIMIENTOS DE DISEÑO:
+1. Incluye al menos 2 estímulos largos (experimento, datos de tabla, gráfico, esquema, fenómeno) seguidos de 3-5 preguntas cada uno.
+2. Cubre los ejes: ${comp.ejes.join(', ')}.
+3. Habilidades de pensamiento científico: observar y plantear preguntas, formular hipótesis, planificar experimentos, analizar evidencia, comunicar.
+4. Distractores reflejan misconceptions comunes documentadas en literatura.
+
+FORMATO POR ESTÍMULO:
+
+▸ ESTÍMULO N: [título]
+[Descripción detallada del experimento, datos, gráfico, esquema o fenómeno — al menos 120 palabras con elementos numéricos cuando aplique.]
+
+Preguntas del estímulo:
+N. [Enunciado]
+   A) ____  B) ____  C) ____  D) ____  E) ____
+
+═══ CLAVE DE RESPUESTAS ═══
+═══ TABLA DE ESPECIFICACIONES ═══
+N° | Disciplina (Bio/Fis/Quim) | Eje | Habilidad pensamiento científico | OA
+═══ EXPLICACIÓN CIENTÍFICA DE CADA RESPUESTA ═══`;
+  }
+
+  if (compKey === 'historia') {
+    return `${intro}Genera una ${tipoLabel} de HISTORIA Y CS SOCIALES (PAES) con ${nItems} ítems:
+${ctx}
+
+ESTRUCTURA OBLIGATORIA:
+════════════════════════════════════════════
+${tipoLabel} — HISTORIA Y CS SOCIALES
+${datos.colegio ? 'Institución: ' + datos.colegio : 'Institución: _____________'}
+${hasOAs ? 'OA Mineduc evaluados: [citar códigos]' : 'OA / AE: _____________'}
+Nombre: _________________  Curso: ___  Fecha: ___
+Puntaje total: ___  Tiempo sugerido: ___ min
+════════════════════════════════════════════
+
+INSTRUCCIONES
+- ${nItems} preguntas con 5 alternativas (A-E).
+- Cada fuente va seguida de 2-5 preguntas.
+- No se descuenta puntaje.
+
+REQUERIMIENTOS DE DISEÑO:
+1. Incluye fuentes primarias (documento de época, mapa, gráfico estadístico, infografía) y secundarias (texto historiográfico).
+2. Cubre los ejes: ${comp.ejes.join(', ')}.
+3. Habilidades: análisis de fuentes, multicausalidad, contextualización, perspectivas históricas, pensamiento crítico.
+4. Distractores reflejan interpretaciones parciales o anacronismos.
+
+FORMATO POR FUENTE:
+
+▸ FUENTE N (tipo: primaria/secundaria, año, autor o referencia)
+[Cita textual o descripción detallada de mapa/gráfico — entre 100 y 300 palabras según complejidad.]
+
+Preguntas:
+N. [Enunciado que use la fuente como evidencia]
+   A) ____  B) ____  C) ____  D) ____  E) ____
+
+═══ CLAVE DE RESPUESTAS ═══
+═══ TABLA DE ESPECIFICACIONES ═══
+N° | Fuente | Eje PAES | Habilidad histórica | Período / Tema | OA
+═══ JUSTIFICACIÓN HISTORIOGRÁFICA POR ÍTEM ═══`;
+  }
+
+  // Fallback: prompt PAES genérico
+  return `${intro}Genera una ${tipoLabel} (formato PAES general) con ${nItems} ítems sobre:
+${ctx}
+
+ESTRUCTURA: 5 alternativas (A-E), tabla de especificaciones, clave, justificación.`;
+}
+
 // ── Genera las partes de una prueba según tipos seleccionados ──
 function getPartesPrueba(datos) {
   const tipos = Array.isArray(datos.tiposPreguntas)
@@ -287,11 +540,16 @@ export default async function handler(req, res) {
 
   const prompt = buildPrompt(tipo, datos || {});
 
-  // Refinar puede devolver el documento completo modificado → más tokens y menor temperatura para conservar estructura
+  // Config dinámica según tipo:
+  // - refinar: doc completo modificado → más tokens, menor temperatura
+  // - PAES: estímulos largos + tabla de especificaciones → más tokens
   const isRefinar = tipo === 'refinar';
+  const isPAES    = (datos || {}).formato === 'paes';
   const genCfg = isRefinar
     ? { maxOutputTokens: 8192, temperature: 0.45, topP: 0.85 }
-    : { maxOutputTokens: 3072, temperature: 0.72, topP: 0.9 };
+    : isPAES
+      ? { maxOutputTokens: 8192, temperature: 0.65, topP: 0.9 }
+      : { maxOutputTokens: 3072, temperature: 0.72, topP: 0.9 };
 
   try {
     const r = await fetch(`${GEMINI_URL}?key=${apiKey}`, {
