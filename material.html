@@ -2311,6 +2311,38 @@
         _matAjustarCapacidadesUI();
     }
 
+    // Mapea las asignaturas del docente a las competencias PAES permitidas.
+    // Devuelve un array con las keys habilitadas. Si no hay match seguro,
+    // devuelve todas (fallback conservador).
+    function _paesCompetenciasPermitidas(user) {
+        var u = user || {};
+        var asigs = (u.asignaturas || []).slice();
+        if (u.tipoProfesor === 'tecnico' && u.especialidad) asigs.push(u.especialidad);
+        // Limpieza: lowercase + sin acentos
+        function _norm(s) {
+            return String(s || '').toLowerCase()
+                .normalize('NFD').replace(/[̀-ͯ]/g, '')
+                .trim();
+        }
+        var permit = {};
+        asigs.forEach(function(a) {
+            var k = _norm(a);
+            if (!k) return;
+            // Lenguaje / Lectora — Lenguaje, Lengua y Literatura, Comunicación, Inglés
+            if (/(lengua|comunicac|literatura|lect|idioma|ingles|english)/.test(k)) permit.lectora = true;
+            // Matemática → M1 (común) y M2 (electivo)
+            if (/matemat/.test(k)) { permit.m1 = true; permit.m2 = true; }
+            // Ciencias — Biología, Física, Química, Cs Naturales, Cs para la ciudadanía
+            if (/(ciencia|biolog|fisic|quimic|natur)/.test(k)) permit.ciencias = true;
+            // Historia / Cs Sociales — Historia, Geografía, Filosofía, Ed Ciudadana
+            if (/(histor|geograf|sociales|ciudadan|filosof)/.test(k)) permit.historia = true;
+        });
+        var orden = ['lectora', 'm1', 'm2', 'ciencias', 'historia'];
+        var arr = orden.filter(function(k) { return permit[k]; });
+        // Fallback: si no mapeó nada (asignatura desconocida o profe sin asignaturas), mostrar todas
+        return arr.length ? arr : orden.slice();
+    }
+
     // Muestra/oculta los selectores PAES y Marzano según los permisos del profe
     // y el tipo de documento actualmente seleccionado.
     function _matAjustarCapacidadesUI() {
@@ -2332,7 +2364,42 @@
         // El selector de competencia PAES solo se muestra si formato='paes'
         var selFmt = document.getElementById('selFormatoMaterial');
         var formatoSel = selFmt ? selFmt.value : 'estandar';
-        if (compBox) compBox.style.display = (puedePAES && formatoSel === 'paes') ? '' : 'none';
+        var mostrarComp = (puedePAES && formatoSel === 'paes');
+        if (compBox) compBox.style.display = mostrarComp ? '' : 'none';
+
+        // Filtrar opciones del selector según las asignaturas del profe
+        var selComp = document.getElementById('selCompPAES');
+        if (selComp && mostrarComp) {
+            var permitidas = _paesCompetenciasPermitidas(u);
+            var visibles = 0;
+            Array.prototype.forEach.call(selComp.options, function(opt) {
+                var ok = permitidas.indexOf(opt.value) !== -1;
+                opt.hidden   = !ok;
+                opt.disabled = !ok;
+                if (ok) visibles++;
+            });
+            // Si el valor seleccionado quedó oculto, mover a la primera permitida
+            if (selComp.options[selComp.selectedIndex] && selComp.options[selComp.selectedIndex].hidden) {
+                for (var i = 0; i < selComp.options.length; i++) {
+                    if (!selComp.options[i].hidden) { selComp.selectedIndex = i; break; }
+                }
+            }
+            // Si hay solo una competencia disponible, dejar el select deshabilitado
+            // (no se puede cambiar — la opción ya está fija) y agregar un hint visible.
+            selComp.disabled = (visibles <= 1);
+            var hintEl = document.getElementById('hintCompPAES');
+            if (visibles === 1) {
+                if (!hintEl) {
+                    var hint = document.createElement('small');
+                    hint.id = 'hintCompPAES';
+                    hint.style.cssText = 'display:block;margin-top:4px;color:#a78bfa;font-size:.7rem';
+                    hint.textContent = '🔒 Asignado automáticamente según tu asignatura';
+                    compBox.appendChild(hint);
+                }
+            } else if (hintEl) {
+                hintEl.remove();
+            }
+        }
 
         var algunoVisible = (puedePAES || puedeMarzano);
         row.style.display = algunoVisible ? '' : 'none';
