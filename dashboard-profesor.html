@@ -425,6 +425,7 @@
       <a class="side-item" data-sec="materiales" href="#"><span class="si-ico">📚</span> Mis materiales</a>
       <a class="side-item" data-sec="planificaciones" href="#"><span class="si-ico">📅</span> Mis planificaciones</a>
       <a class="side-item" data-sec="calendario" href="#"><span class="si-ico">📆</span> Calendario</a>
+      <a class="side-item" data-sec="cobertura" href="#"><span class="si-ico">📈</span> Mi cobertura</a>
     </nav>
 
     <div class="side-section-label">Recursos</div>
@@ -652,6 +653,28 @@
       </div>
     </section>
 
+    <!-- ═══════════ COBERTURA CURRICULAR ═══════════ -->
+    <section id="sec-cobertura" hidden>
+      <div class="page-h">
+        <h1>📈 Mi cobertura curricular</h1>
+        <p>OAs del programa Mineduc que ya cubriste en planificaciones o materiales — y los que aún faltan.</p>
+      </div>
+
+      <div class="card-pro" style="margin-bottom:20px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px">
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+            <label style="font-size:.78rem;color:var(--muted)">Nivel</label>
+            <select id="covFiltroNivel" onchange="renderCobertura()" style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.15);color:#e2e8f0;padding:6px 10px;border-radius:8px;font-size:.82rem"></select>
+            <button class="btn-pro ghost" onclick="cargarCobertura()" style="padding:6px 12px;font-size:.78rem">↻ Actualizar</button>
+          </div>
+          <div id="covResumen" style="font-size:.82rem;color:var(--muted)"></div>
+        </div>
+        <div id="covContent">
+          <div class="empty-pro"><span class="e-emoji">⏳</span><p>Cargando cobertura…</p></div>
+        </div>
+      </div>
+    </section>
+
   </main>
 </div>
 
@@ -722,6 +745,7 @@
     if (id === 'planificaciones') loadMisPlanificaciones();
     if (id === 'modulos')         renderModulosDetalle();
     if (id === 'calendario')      calRender();
+    if (id === 'cobertura')       cargarCobertura();
 
     // Cierra el drawer en mobile
     var side = document.getElementById('sidebarProf');
@@ -1284,6 +1308,245 @@
     }).catch(function(err) {
       el.innerHTML = '<div class="empty-pro"><span class="e-emoji">❌</span><p>Error: ' + escTxt(err && err.message || 'desconocido') + '</p></div>';
     });
+  }
+
+  // ═══════════════════════════════════════════════════════════════
+  //  COBERTURA CURRICULAR
+  //  Cruza OAs del programa Mineduc con planificaciones/materiales
+  //  del docente para detectar qué OAs ya cubrió y cuáles faltan.
+  // ═══════════════════════════════════════════════════════════════
+  var _covData = null;   // { items: [{ asig, sigla, nivel, oas:[], cubiertos:{} }], niveles: [] }
+
+  // Mapa asignatura (nombre humano) → sigla (para Plan Común). Para básica
+  // CURRICULA_CHILE.getAsignaturas devuelve también sigla en el objeto, así que
+  // usamos eso. Para nombres libres caemos a lower-case.
+  function _covSiglaDeAsignatura(nombre, user) {
+    if (!nombre) return '';
+    // Buscar en las asignaturas del user para sacar la sigla si ya viene normalizada
+    var tipos = (window.getTiposProfesor ? window.getTiposProfesor(user) : (user.tipoProfesor ? [user.tipoProfesor] : []));
+    var fuentes = [];
+    if (tipos.indexOf('basica') !== -1) fuentes.push('basica');
+    if (tipos.indexOf('media')  !== -1) fuentes.push('media');
+    for (var i = 0; i < fuentes.length; i++) {
+      var asigs = (window.CURRICULA_CHILE && CURRICULA_CHILE.getAsignaturas) ? CURRICULA_CHILE.getAsignaturas(fuentes[i]) : [];
+      var match = asigs && asigs.find ? asigs.find(function(a) {
+        return a.nombre === nombre || a.sigla === nombre || (a.nombre || '').toLowerCase() === nombre.toLowerCase();
+      }) : null;
+      if (match) return match.sigla;
+    }
+    return nombre; // fallback: usar el propio nombre
+  }
+
+  function cargarCobertura() {
+    var cont = document.getElementById('covContent');
+    if (!cont || !_profeUser) return;
+    if (!window.CURRICULA_CHILE) {
+      cont.innerHTML = '<div class="empty-pro"><span class="e-emoji">⚠️</span><p>Currículum no disponible.</p></div>';
+      return;
+    }
+    cont.innerHTML = '<div class="empty-pro"><span class="e-emoji">⏳</span><p>Cargando OAs y materiales…</p></div>';
+
+    var user = _profeUser;
+    var asigs = (user.asignaturas || []).slice();
+    var niveles = (user.niveles || []).slice();
+    var tipos = (window.getTiposProfesor ? window.getTiposProfesor(user) : (user.tipoProfesor ? [user.tipoProfesor] : []));
+    var esTPSolo = tipos.length === 1 && tipos[0] === 'tecnico';
+
+    if (esTPSolo) {
+      // Para TP los OAs son AEs por módulo — usamos otra ruta
+      _covData = { items: [], niveles: [], modo: 'tp' };
+      var mods = (user.modulos || []);
+      var espKey = user.especialidad || '';
+      mods.forEach(function(modNum) {
+        var modInfo = (CURRICULA_CHILE.getModulos && espKey)
+          ? (CURRICULA_CHILE.getModulos(espKey).find ? CURRICULA_CHILE.getModulos(espKey).find(function(m){return m.num===modNum;}) : null)
+          : null;
+        var aes = (modInfo && modInfo.aes) ? modInfo.aes : [];
+        _covData.items.push({
+          asig: (modInfo && modInfo.nombre) || modNum,
+          sigla: modNum,
+          nivel: 'TP',
+          oas: aes.map(function(a){ return { codigo: a.codigo || a.num || ('AE' + a.numero), descripcion: a.descripcion || a.desc || '', eje: a.eje || 'Aprendizajes esperados' }; })
+        });
+      });
+    } else {
+      // Construir matriz asignatura × nivel solo para básica/media del user
+      _covData = { items: [], niveles: niveles.slice(), modo: 'comun' };
+      asigs.forEach(function(nombreAsig) {
+        var sigla = _covSiglaDeAsignatura(nombreAsig, user);
+        niveles.forEach(function(niv) {
+          // Filtrar: solo niveles compatibles (basica B, media M)
+          var esB = String(niv).endsWith('B');
+          var esM = String(niv).endsWith('M');
+          if (!esB && !esM) return;
+          if (esB && tipos.indexOf('basica') === -1) return;
+          if (esM && tipos.indexOf('media')  === -1 && tipos.indexOf('tecnico') === -1) return;
+          var oas = CURRICULA_CHILE.getOAs ? CURRICULA_CHILE.getOAs(sigla, niv) : [];
+          if (!oas || !oas.length) return;
+          _covData.items.push({ asig: nombreAsig, sigla: sigla, nivel: niv, oas: oas });
+        });
+      });
+    }
+
+    // Llenar filtro de niveles
+    var nivSel = document.getElementById('covFiltroNivel');
+    if (nivSel) {
+      var nivelesUnicos = [];
+      _covData.items.forEach(function(it) { if (nivelesUnicos.indexOf(it.nivel) === -1) nivelesUnicos.push(it.nivel); });
+      nivelesUnicos.sort();
+      nivSel.innerHTML = '<option value="">Todos los niveles</option>' +
+        nivelesUnicos.map(function(n) {
+          var lbl = n === 'TP' ? 'TP / EMTP' :
+                    String(n).endsWith('B') ? n.replace('B','° Básico') :
+                    String(n).endsWith('M') ? n.replace('M','° Medio') : n;
+          return '<option value="' + n + '">' + lbl + '</option>';
+        }).join('');
+    }
+
+    // Cargar planificaciones + materiales para construir índice de OAs cubiertos
+    var pPlan = ELDB.planificaciones ? ELDB.planificaciones.listar({ profesor: user.email }) : Promise.resolve([]);
+    var pMat  = ELDB.materiales      ? ELDB.materiales.listar({ profesor: user.email })      : Promise.resolve([]);
+
+    Promise.all([pPlan, pMat]).then(function(res) {
+      var plans = res[0] || [], mats = res[1] || [];
+      // Index: { 'OA3@MAT@5B': [{titulo,id,fecha,tipo,kind}] }
+      var idx = {};
+      function indexar(arr, kind) {
+        arr.forEach(function(d) {
+          var oa = d.oa || d.ae || '';
+          if (!oa) return;
+          // Para TP, modulo identifica; para básica/media, la asignatura
+          var clave = (oa + '@' + (d.modulo || d.asignatura || '') + '@' + (d.nivel || d.curso || '')).toLowerCase();
+          // Más permisivo: también indexar solo por código OA por si nivel no coincide exactamente
+          var claveLoose = oa.toLowerCase();
+          if (!idx[clave])      idx[clave]      = [];
+          if (!idx[claveLoose]) idx[claveLoose] = [];
+          var ref = { id: d.id, titulo: d.titulo, fecha: d.fechaISO || d.fecha, tipo: d.tipo, kind: kind };
+          idx[clave].push(ref);
+          idx[claveLoose].push(ref);
+        });
+      }
+      indexar(plans, 'planificacion');
+      indexar(mats, 'material');
+
+      // Para cada item, marcar OAs cubiertos
+      _covData.items.forEach(function(it) {
+        it.cubiertos = {};
+        it.oas.forEach(function(o) {
+          var k1 = (o.codigo + '@' + it.sigla + '@' + it.nivel).toLowerCase();
+          var k2 = (o.codigo || '').toLowerCase();
+          var refs = idx[k1] || idx[k2] || [];
+          if (refs.length) it.cubiertos[o.codigo] = refs;
+        });
+      });
+      renderCobertura();
+    }).catch(function(err) {
+      cont.innerHTML = '<div class="empty-pro"><span class="e-emoji">❌</span><p>Error cargando datos: ' + escTxt(err && err.message || 'desconocido') + '</p></div>';
+    });
+  }
+  window.cargarCobertura = cargarCobertura;
+
+  function renderCobertura() {
+    var cont = document.getElementById('covContent');
+    var resumenEl = document.getElementById('covResumen');
+    if (!cont || !_covData) return;
+    var filtroNivel = (document.getElementById('covFiltroNivel') || {}).value || '';
+    var items = filtroNivel ? _covData.items.filter(function(it) { return it.nivel === filtroNivel; }) : _covData.items;
+    if (!items.length) {
+      cont.innerHTML = '<div class="empty-pro"><span class="e-emoji">📋</span><p>No hay programa cargado para tus asignaturas/niveles.<br><span style="font-size:.78rem;color:var(--muted)">Verifica con el admin que tu asignación esté correcta.</span></p></div>';
+      if (resumenEl) resumenEl.textContent = '';
+      return;
+    }
+    // Resumen global
+    var totalOAs = 0, totalCub = 0;
+    items.forEach(function(it) {
+      totalOAs += it.oas.length;
+      totalCub += Object.keys(it.cubiertos || {}).length;
+    });
+    var pctGlobal = totalOAs ? Math.round(100 * totalCub / totalOAs) : 0;
+    if (resumenEl) resumenEl.innerHTML = '<strong style="color:' + _covColorPct(pctGlobal) + '">' + pctGlobal + '%</strong> global — ' + totalCub + '/' + totalOAs + ' OAs';
+
+    cont.innerHTML = '<div style="display:grid;gap:14px">' +
+      items.map(function(it, idx) {
+        var totalAsig = it.oas.length;
+        var cubAsig   = Object.keys(it.cubiertos || {}).length;
+        var pct = totalAsig ? Math.round(100 * cubAsig / totalAsig) : 0;
+        var color = _covColorPct(pct);
+        var lblNivel = it.nivel === 'TP' ? 'EMTP'
+                      : String(it.nivel).endsWith('B') ? it.nivel.replace('B','° Básico')
+                      : String(it.nivel).endsWith('M') ? it.nivel.replace('M','° Medio') : it.nivel;
+        // Agrupar OAs por eje
+        var porEje = {};
+        it.oas.forEach(function(o) { (porEje[o.eje || 'General'] = porEje[o.eje || 'General'] || []).push(o); });
+        var ejesHtml = Object.keys(porEje).map(function(eje) {
+          var oasEje = porEje[eje];
+          var oasHtml = oasEje.map(function(o) {
+            var cubierto = !!(it.cubiertos && it.cubiertos[o.codigo]);
+            var refs = (it.cubiertos && it.cubiertos[o.codigo]) || [];
+            var refsHtml = refs.length
+              ? '<div style="font-size:.7rem;color:var(--muted);margin-top:3px;padding-left:18px">' +
+                  refs.slice(0, 3).map(function(r) {
+                    var ic = r.kind === 'planificacion' ? '📅' : '📄';
+                    return ic + ' ' + escTxt((r.titulo || '').slice(0, 50));
+                  }).join(' · ') +
+                  (refs.length > 3 ? ' · +' + (refs.length - 3) : '') +
+                '</div>'
+              : '';
+            return '<div style="padding:8px 10px;border-radius:8px;background:rgba(255,255,255,' + (cubierto ? '.05' : '.02') + ');margin-bottom:5px;border-left:3px solid ' + (cubierto ? '#34d399' : '#475569') + '">' +
+              '<div style="display:flex;align-items:flex-start;gap:8px;font-size:.82rem">' +
+                '<span style="font-size:.95rem">' + (cubierto ? '✅' : '⚪') + '</span>' +
+                '<div style="flex:1;min-width:0">' +
+                  '<strong style="color:' + (cubierto ? '#86efac' : '#cbd5e1') + '">' + escTxt(o.codigo) + '</strong>' +
+                  '<span style="color:var(--muted);margin-left:6px">' + escTxt((o.descripcion || '').slice(0, 140)) + (o.descripcion && o.descripcion.length > 140 ? '…' : '') + '</span>' +
+                '</div>' +
+              '</div>' +
+              refsHtml +
+            '</div>';
+          }).join('');
+          return '<div style="margin-top:10px"><div style="font-size:.72rem;font-weight:700;color:#a78bfa;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">' + escTxt(eje) + '</div>' + oasHtml + '</div>';
+        }).join('');
+
+        return '<div class="card-pro" style="padding:16px">' +
+          '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;cursor:pointer;flex-wrap:wrap;gap:8px" onclick="this.parentNode.querySelector(\'.cov-detalle\').classList.toggle(\'cov-open\');this.querySelector(\'.cov-chev\').textContent = this.parentNode.querySelector(\'.cov-detalle\').classList.contains(\'cov-open\') ? \'▾\' : \'▸\'">' +
+            '<div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0">' +
+              '<span class="cov-chev" style="color:var(--muted);font-size:.9rem">▸</span>' +
+              '<div style="flex:1;min-width:0">' +
+                '<div style="font-weight:700;font-size:.95rem">' + escTxt(it.asig) + '</div>' +
+                '<div style="font-size:.74rem;color:var(--muted);margin-top:2px">' + escTxt(lblNivel) + '</div>' +
+              '</div>' +
+            '</div>' +
+            '<div style="display:flex;align-items:center;gap:14px">' +
+              '<div style="text-align:right">' +
+                '<div style="font-weight:800;font-size:1.1rem;color:' + color + '">' + pct + '%</div>' +
+                '<div style="font-size:.7rem;color:var(--muted)">' + cubAsig + '/' + totalAsig + ' OAs</div>' +
+              '</div>' +
+            '</div>' +
+          '</div>' +
+          '<div style="height:6px;background:rgba(255,255,255,.06);border-radius:99px;overflow:hidden;margin-bottom:6px">' +
+            '<div style="height:100%;background:' + color + ';width:' + pct + '%;transition:width .4s ease"></div>' +
+          '</div>' +
+          '<div class="cov-detalle" style="max-height:0;overflow:hidden;transition:max-height .25s ease">' +
+            ejesHtml +
+          '</div>' +
+        '</div>';
+      }).join('') +
+    '</div>';
+
+    // CSS para expandir
+    if (!document.getElementById('covCss')) {
+      var s = document.createElement('style');
+      s.id = 'covCss';
+      s.textContent = '.cov-detalle.cov-open { max-height: 5000px !important; padding-top: 8px; border-top: 1px solid rgba(255,255,255,.06); margin-top: 6px; }';
+      document.head.appendChild(s);
+    }
+  }
+  window.renderCobertura = renderCobertura;
+
+  function _covColorPct(p) {
+    if (p >= 75) return '#34d399';
+    if (p >= 40) return '#fbbf24';
+    if (p >= 15) return '#fb923c';
+    return '#f87171';
   }
 
   // ═══════════════════════════════════════════════════════════════
