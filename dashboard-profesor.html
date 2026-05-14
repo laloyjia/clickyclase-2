@@ -247,9 +247,49 @@
 
   .cal-evt-clase      { background: rgba(124,58,237,.22); border-left:3px solid #7c3aed; }
   .cal-evt-evaluacion { background: rgba(239,68,68,.22);  border-left:3px solid #ef4444; }
+  .cal-evt-prueba     { background: rgba(239,68,68,.22);  border-left:3px solid #ef4444; }
+  .cal-evt-planificacion { background: rgba(124,58,237,.22); border-left:3px solid #a78bfa; }
   .cal-evt-taller     { background: rgba(6,182,212,.22);  border-left:3px solid #06b6d4; }
   .cal-evt-reunion    { background: rgba(245,158,11,.22); border-left:3px solid #f59e0b; }
   .cal-evt-otro       { background: rgba(148,163,184,.18); border-left:3px solid #94a3b8; }
+
+  /* ── Toggle vista Mes / Semana ── */
+  .cal-view-toggle { display:inline-flex; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.1); border-radius:10px; padding:3px; gap:2px; }
+  .cal-vt { background:transparent; border:none; color:#94a3b8; padding:6px 14px; border-radius:7px; font-size:.78rem; font-weight:600; cursor:pointer; transition:.15s; }
+  .cal-vt:hover { color:#e2e8f0; }
+  .cal-vt.active { background:linear-gradient(135deg,#7c3aed,#a78bfa); color:#fff; box-shadow:0 2px 6px rgba(124,58,237,.35); }
+
+  /* ── Vista semanal ── */
+  .cal-sem-wrap { overflow-x:auto; }
+  .cal-sem { display:grid; grid-template-columns:60px repeat(7, minmax(115px,1fr)); border:1px solid rgba(255,255,255,.08); border-radius:10px; overflow:hidden; background:rgba(255,255,255,.02); }
+  .cs-head { background:rgba(255,255,255,.04); padding:10px 6px; text-align:center; font-size:.74rem; font-weight:700; color:#94a3b8; border-bottom:1px solid rgba(255,255,255,.08); }
+  .cs-head.is-today { color:#fff; background:linear-gradient(135deg,rgba(124,58,237,.35),rgba(34,211,238,.18)); }
+  .cs-head-h { } /* col esquina horas */
+  .cs-col-dia { position:relative; min-height:780px; border-left:1px solid rgba(255,255,255,.06); transition:background .15s; }
+  .cs-col-dia.is-today { background:rgba(124,58,237,.05); }
+  .cs-col-dia.drop-over { background:rgba(167,139,250,.16) !important; outline:2px dashed #a78bfa; outline-offset:-2px; }
+  .cs-col-horas { display:flex; flex-direction:column; }
+  .cs-hora-cell { height:60px; border-top:1px dashed rgba(255,255,255,.06); padding:2px 6px; font-size:.65rem; color:#64748b; text-align:right; }
+  .cs-col-dia .cs-slot { height:60px; border-top:1px dashed rgba(255,255,255,.05); }
+  .cs-col-dia .cs-slot:hover { background:rgba(124,58,237,.06); cursor:pointer; }
+  .cs-evento {
+    position:absolute; left:3px; right:3px; min-height:24px; padding:4px 6px;
+    border-radius:6px; font-size:.7rem; line-height:1.15; cursor:grab; overflow:hidden;
+    z-index:5; box-shadow:0 2px 6px rgba(0,0,0,.25);
+  }
+  .cs-evento.dragging { opacity:.4; cursor:grabbing; }
+  .cs-evento:hover { transform:translateY(-1px); box-shadow:0 4px 10px rgba(0,0,0,.35); z-index:10; }
+  .cs-evento .cs-evt-tit { font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .cs-evento .cs-evt-meta { font-size:.62rem; color:rgba(255,255,255,.7); margin-top:1px; }
+  .cs-evento.cal-evt-clase      { background:linear-gradient(135deg,rgba(124,58,237,.55),rgba(124,58,237,.35)); border-left:3px solid #7c3aed; color:#fff; }
+  .cs-evento.cal-evt-evaluacion,
+  .cs-evento.cal-evt-prueba     { background:linear-gradient(135deg,rgba(239,68,68,.55),rgba(239,68,68,.35));  border-left:3px solid #ef4444; color:#fff; }
+  .cs-evento.cal-evt-planificacion { background:linear-gradient(135deg,rgba(167,139,250,.55),rgba(167,139,250,.30)); border-left:3px solid #a78bfa; color:#fff; }
+  .cs-evento.cal-evt-taller     { background:linear-gradient(135deg,rgba(6,182,212,.55),rgba(6,182,212,.30));   border-left:3px solid #06b6d4; color:#fff; }
+  .cs-evento.cal-evt-reunion    { background:linear-gradient(135deg,rgba(245,158,11,.55),rgba(245,158,11,.30)); border-left:3px solid #f59e0b; color:#fff; }
+  .cs-evento.cal-evt-otro       { background:linear-gradient(135deg,rgba(148,163,184,.40),rgba(148,163,184,.20)); border-left:3px solid #94a3b8; color:#e2e8f0; }
+  .cs-evento .cs-evt-del { position:absolute; top:2px; right:3px; background:rgba(0,0,0,.35); border:none; color:#fff; border-radius:50%; width:18px; height:18px; font-size:.65rem; cursor:pointer; display:none; line-height:0; }
+  .cs-evento:hover .cs-evt-del { display:block; }
 
   /* Modal Herramienta IA — premium */
   .modal-ia-back {
@@ -579,14 +619,31 @@
       <div class="card-pro" style="margin-bottom:20px">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px">
           <div style="display:flex;align-items:center;gap:10px">
-            <button id="calPrev" class="btn-pro ghost" aria-label="Mes anterior" style="padding:6px 10px">‹</button>
-            <span id="calTitulo" style="font-family:'Space Grotesk',sans-serif;font-size:1.1rem;font-weight:800;min-width:200px;text-align:center"></span>
-            <button id="calNext" class="btn-pro ghost" aria-label="Mes siguiente" style="padding:6px 10px">›</button>
+            <button id="calPrev" class="btn-pro ghost" aria-label="Anterior" style="padding:6px 10px">‹</button>
+            <span id="calTitulo" style="font-family:'Space Grotesk',sans-serif;font-size:1.1rem;font-weight:800;min-width:240px;text-align:center"></span>
+            <button id="calNext" class="btn-pro ghost" aria-label="Siguiente" style="padding:6px 10px">›</button>
+            <button id="calHoy" class="btn-pro ghost" aria-label="Ir a hoy" style="padding:6px 10px;font-size:.78rem" onclick="calIrHoy()">Hoy</button>
           </div>
-          <button id="calNuevo" class="btn-pro primary" style="padding:7px 14px;font-size:.82rem">+ Agregar clase / evento</button>
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+            <div class="cal-view-toggle" role="tablist" aria-label="Vista del calendario">
+              <button id="calViewMes" class="cal-vt active" onclick="calCambiarVista('mes')" role="tab">Mes</button>
+              <button id="calViewSem" class="cal-vt" onclick="calCambiarVista('semana')" role="tab">Semana</button>
+            </div>
+            <button id="calNuevo" class="btn-pro primary" style="padding:7px 14px;font-size:.82rem">+ Agregar evento</button>
+          </div>
         </div>
-        <div class="cal-head" id="calHead"></div>
-        <div class="cal-grid" id="calGrid"></div>
+        <!-- Vista MES -->
+        <div id="calVistaMes">
+          <div class="cal-head" id="calHead"></div>
+          <div class="cal-grid" id="calGrid"></div>
+        </div>
+        <!-- Vista SEMANA -->
+        <div id="calVistaSemana" style="display:none">
+          <div class="cal-sem-wrap">
+            <div class="cal-sem" id="calSem"></div>
+          </div>
+          <div style="font-size:.7rem;color:var(--muted);margin-top:8px;text-align:center">💡 Arrastra un evento a otro día para reprogramarlo</div>
+        </div>
       </div>
 
       <div class="card-pro">
@@ -1575,40 +1632,106 @@
   // ═══════════════════════════════════════════════════════════════
   var _calYear  = new Date().getFullYear();
   var _calMonth = new Date().getMonth();
-  var _calEventos = [];
+  var _calEventos = [];          // eventos del periodo activo (mes o semana visible)
+  var _calEventosTodos = [];     // cache de todos los eventos del docente
+  var _calView = 'mes';          // 'mes' | 'semana'
+  var _calWeekStart = (function() {
+    // Lunes de la semana actual
+    var d = new Date();
+    d.setHours(0,0,0,0);
+    var dia = (d.getDay() + 6) % 7; // 0=Lun, 6=Dom
+    d.setDate(d.getDate() - dia);
+    return d;
+  })();
   var _calFocusRelease = null;
 
-  function calNavMes(dir) {
-    _calMonth += dir;
-    if (_calMonth > 11) { _calMonth = 0;  _calYear++; }
-    if (_calMonth < 0)  { _calMonth = 11; _calYear--; }
+  function calCambiarVista(v) {
+    if (v !== 'mes' && v !== 'semana') return;
+    _calView = v;
+    document.getElementById('calViewMes').classList.toggle('active', v === 'mes');
+    document.getElementById('calViewSem').classList.toggle('active', v === 'semana');
+    document.getElementById('calVistaMes').style.display    = v === 'mes'    ? '' : 'none';
+    document.getElementById('calVistaSemana').style.display = v === 'semana' ? '' : 'none';
     calRender();
+  }
+  window.calCambiarVista = calCambiarVista;
+
+  function calIrHoy() {
+    var hoy = new Date();
+    _calYear = hoy.getFullYear();
+    _calMonth = hoy.getMonth();
+    var d = new Date(hoy); d.setHours(0,0,0,0);
+    var dia = (d.getDay() + 6) % 7;
+    d.setDate(d.getDate() - dia);
+    _calWeekStart = d;
+    calRender();
+  }
+  window.calIrHoy = calIrHoy;
+
+  // Navegación unificada: avanza mes o semana según vista activa
+  function calNavMes(dir) {
+    if (_calView === 'semana') {
+      var d = new Date(_calWeekStart);
+      d.setDate(d.getDate() + 7 * dir);
+      _calWeekStart = d;
+    } else {
+      _calMonth += dir;
+      if (_calMonth > 11) { _calMonth = 0;  _calYear++; }
+      if (_calMonth < 0)  { _calMonth = 11; _calYear--; }
+    }
+    calRender();
+  }
+
+  function _calFechaStr(d) {
+    return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
   }
 
   function calRender() {
     var user = _profeUser || {};
-    var tit = new Date(_calYear, _calMonth, 1)
-      .toLocaleDateString('es-CL', { month: 'long', year: 'numeric' });
+    // Título según vista
     var ttEl = document.getElementById('calTitulo');
-    if (ttEl) ttEl.textContent = tit.charAt(0).toUpperCase() + tit.slice(1);
+    if (_calView === 'semana') {
+      var ini = new Date(_calWeekStart);
+      var fin = new Date(_calWeekStart); fin.setDate(fin.getDate() + 6);
+      var meses = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+      var lblIni = ini.getDate() + ' ' + meses[ini.getMonth()];
+      var lblFin = fin.getDate() + ' ' + meses[fin.getMonth()] + ' ' + fin.getFullYear();
+      if (ttEl) ttEl.textContent = 'Sem · ' + lblIni + ' – ' + lblFin;
+    } else {
+      var tit = new Date(_calYear, _calMonth, 1)
+        .toLocaleDateString('es-CL', { month: 'long', year: 'numeric' });
+      if (ttEl) ttEl.textContent = tit.charAt(0).toUpperCase() + tit.slice(1);
+    }
 
     if (!user.uid || !window.EL_DB) {
-      _calEventos = [];
-      calDibujarHead(); calDibujarGrid(); calDibujarLista();
+      _calEventosTodos = []; _calEventos = [];
+      if (_calView === 'semana') calDibujarSemana();
+      else { calDibujarHead(); calDibujarGrid(); calDibujarLista(); }
       return;
     }
 
-    var inicioMes = _calYear + '-' + String(_calMonth + 1).padStart(2, '0');
     EL_DB.collection('calendarios_docentes').doc(user.uid).collection('eventos').get()
       .then(function(snap) {
-        _calEventos = snap.docs
-          .map(function(d) { return Object.assign({ _id: d.id }, d.data()); })
-          .filter(function(e) { return e.fecha && e.fecha.startsWith(inicioMes); });
-        calDibujarHead(); calDibujarGrid(); calDibujarLista();
+        _calEventosTodos = snap.docs.map(function(d) { return Object.assign({ _id: d.id }, d.data()); });
+        if (_calView === 'semana') {
+          var ini = _calFechaStr(_calWeekStart);
+          var finD = new Date(_calWeekStart); finD.setDate(finD.getDate() + 6);
+          var fin = _calFechaStr(finD);
+          _calEventos = _calEventosTodos.filter(function(e) {
+            var f = (e.fecha || '').slice(0, 10);
+            return f >= ini && f <= fin;
+          });
+          calDibujarSemana();
+        } else {
+          var prefijo = _calYear + '-' + String(_calMonth + 1).padStart(2, '0');
+          _calEventos = _calEventosTodos.filter(function(e) { return e.fecha && e.fecha.startsWith(prefijo); });
+          calDibujarHead(); calDibujarGrid(); calDibujarLista();
+        }
       })
       .catch(function() {
-        _calEventos = [];
-        calDibujarHead(); calDibujarGrid(); calDibujarLista();
+        _calEventosTodos = []; _calEventos = [];
+        if (_calView === 'semana') calDibujarSemana();
+        else { calDibujarHead(); calDibujarGrid(); calDibujarLista(); }
       });
   }
 
@@ -1679,7 +1802,154 @@
     });
   }
 
-  function calNuevoEvento(fechaPre) {
+  // ═══════════════════════════════════════════════════════════════
+  //  VISTA SEMANAL — 7 días × 13 horas (07:00 → 20:00)
+  //  Eventos como bloques absolutos posicionados según hora.
+  //  Drag-to-move: arrastrar un evento a otra columna actualiza fecha.
+  // ═══════════════════════════════════════════════════════════════
+  var _CAL_HORA_INI = 7;     // 07:00
+  var _CAL_HORA_FIN = 20;    // 20:00 → grilla de 13 horas = 780px
+  var _CAL_PX_HORA  = 60;
+  var _calDragEvtId = null;
+
+  function calDibujarSemana() {
+    var cont = document.getElementById('calSem');
+    if (!cont) return;
+    var diasSem = ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
+    var hoyStr = _calFechaStr(new Date());
+    // Fechas de las 7 columnas
+    var fechasCol = [];
+    for (var i = 0; i < 7; i++) {
+      var d = new Date(_calWeekStart); d.setDate(d.getDate() + i);
+      fechasCol.push({ fecha: _calFechaStr(d), dia: diasSem[i], num: d.getDate() });
+    }
+    // Header
+    var html = '<div class="cs-head cs-head-h"></div>';
+    fechasCol.forEach(function(c) {
+      var hoy = c.fecha === hoyStr ? ' is-today' : '';
+      html += '<div class="cs-head' + hoy + '">' + c.dia + ' ' + c.num + '</div>';
+    });
+    // Columna horas (left)
+    html += '<div class="cs-col-horas">';
+    for (var h = _CAL_HORA_INI; h <= _CAL_HORA_FIN; h++) {
+      html += '<div class="cs-hora-cell">' + String(h).padStart(2,'0') + ':00</div>';
+    }
+    html += '</div>';
+    // 7 columnas de día con slots vacíos + eventos posicionados
+    fechasCol.forEach(function(c) {
+      var esHoy = c.fecha === hoyStr ? ' is-today' : '';
+      var slotsHtml = '';
+      for (var h = _CAL_HORA_INI; h <= _CAL_HORA_FIN; h++) {
+        slotsHtml += '<div class="cs-slot" data-fecha="' + c.fecha + '" data-hora="' + String(h).padStart(2,'0') + ':00"></div>';
+      }
+      // Eventos del día
+      var evsDia = _calEventos.filter(function(e) { return (e.fecha || '').slice(0,10) === c.fecha; });
+      var evsHtml = evsDia.map(function(e) {
+        var tipo = e.tipo || 'otro';
+        var hora = (e.hora || '').match(/^(\d{1,2}):(\d{2})$/);
+        var horaH = hora ? parseInt(hora[1], 10) : _CAL_HORA_INI;
+        var horaM = hora ? parseInt(hora[2], 10) : 0;
+        var topPx = ((horaH - _CAL_HORA_INI) * 60 + horaM) * (_CAL_PX_HORA / 60);
+        if (topPx < 0) topPx = 0;
+        var altura = e.duracionMin ? (e.duracionMin * (_CAL_PX_HORA / 60)) : (hora ? _CAL_PX_HORA : 30);
+        var horaLbl = hora ? (String(horaH).padStart(2,'0') + ':' + String(horaM).padStart(2,'0')) : 'todo el día';
+        return '<div class="cs-evento cal-evt-' + escAttr(tipo) + '" draggable="true" data-id="' + escAttr(e._id) + '" data-fecha="' + escAttr(e.fecha) + '" ' +
+               'style="top:' + topPx + 'px;height:' + altura + 'px" ' +
+               'title="' + escAttr((e.titulo || '') + ' · ' + horaLbl) + '">' +
+                 '<button class="cs-evt-del" data-del="' + escAttr(e._id) + '" title="Eliminar">×</button>' +
+                 '<div class="cs-evt-tit">' + escTxt(e.titulo || 'Evento') + '</div>' +
+                 '<div class="cs-evt-meta">' + escTxt(horaLbl) + (e.asignatura ? ' · ' + escTxt(e.asignatura) : '') + '</div>' +
+               '</div>';
+      }).join('');
+      html += '<div class="cs-col-dia' + esHoy + '" data-fecha="' + c.fecha + '" style="height:' + ((_CAL_HORA_FIN - _CAL_HORA_INI + 1) * _CAL_PX_HORA) + 'px">' +
+                slotsHtml + evsHtml +
+              '</div>';
+    });
+    cont.innerHTML = html;
+    cont.style.gridTemplateRows = 'auto 1fr';
+
+    // ── Bindings ──
+    // Click en slot vacío → nuevo evento pre-cargado
+    cont.querySelectorAll('.cs-slot').forEach(function(slot) {
+      slot.addEventListener('click', function(e) {
+        e.stopPropagation();
+        calNuevoEvento(slot.getAttribute('data-fecha'), slot.getAttribute('data-hora'));
+      });
+    });
+    // Botón eliminar del evento (no propaga al drag)
+    cont.querySelectorAll('.cs-evt-del').forEach(function(btn) {
+      btn.addEventListener('mousedown', function(e) { e.stopPropagation(); });
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation(); e.preventDefault();
+        calEliminarEvento(btn.getAttribute('data-del'));
+      });
+    });
+    // Drag de eventos
+    cont.querySelectorAll('.cs-evento').forEach(function(evt) {
+      evt.addEventListener('dragstart', function(e) {
+        _calDragEvtId = evt.getAttribute('data-id');
+        evt.classList.add('dragging');
+        try { e.dataTransfer.setData('text/plain', _calDragEvtId); e.dataTransfer.effectAllowed = 'move'; } catch (ex) {}
+      });
+      evt.addEventListener('dragend', function() {
+        evt.classList.remove('dragging');
+        _calDragEvtId = null;
+        cont.querySelectorAll('.cs-col-dia.drop-over').forEach(function(c) { c.classList.remove('drop-over'); });
+      });
+    });
+    // Drop targets en columnas día
+    cont.querySelectorAll('.cs-col-dia').forEach(function(col) {
+      col.addEventListener('dragover', function(e) {
+        e.preventDefault(); try { e.dataTransfer.dropEffect = 'move'; } catch (ex) {}
+        col.classList.add('drop-over');
+      });
+      col.addEventListener('dragleave', function() { col.classList.remove('drop-over'); });
+      col.addEventListener('drop', function(e) {
+        e.preventDefault();
+        col.classList.remove('drop-over');
+        var id = _calDragEvtId || (e.dataTransfer && e.dataTransfer.getData('text/plain'));
+        var nuevaFecha = col.getAttribute('data-fecha');
+        if (!id || !nuevaFecha) return;
+        calMoverEvento(id, nuevaFecha);
+      });
+    });
+  }
+
+  function calMoverEvento(id, nuevaFecha) {
+    var user = _profeUser;
+    if (!user || !user.uid || !window.EL_DB) return;
+    // Optimistic UI: mover localmente y re-renderizar al toque
+    var evt = _calEventosTodos.find(function(e) { return e._id === id; });
+    if (!evt) return;
+    var fechaAntigua = evt.fecha;
+    if (fechaAntigua === nuevaFecha) return; // mismo día, nada que hacer
+    evt.fecha = nuevaFecha;
+    // Re-filtrar y re-renderizar inmediato
+    var ini = _calFechaStr(_calWeekStart);
+    var finD = new Date(_calWeekStart); finD.setDate(finD.getDate() + 6);
+    var fin = _calFechaStr(finD);
+    _calEventos = _calEventosTodos.filter(function(e) {
+      var f = (e.fecha || '').slice(0, 10);
+      return f >= ini && f <= fin;
+    });
+    calDibujarSemana();
+    // Persistir en Firestore
+    EL_DB.collection('calendarios_docentes').doc(user.uid).collection('eventos').doc(id)
+      .update({ fecha: nuevaFecha, actualizadoEn: new Date().toISOString() })
+      .then(function() { toast('Evento movido al ' + nuevaFecha, 'success'); })
+      .catch(function(err) {
+        // Rollback
+        evt.fecha = fechaAntigua;
+        _calEventos = _calEventosTodos.filter(function(e) {
+          var f = (e.fecha || '').slice(0, 10);
+          return f >= ini && f <= fin;
+        });
+        calDibujarSemana();
+        toast('No se pudo mover el evento: ' + (err && err.message || ''), 'error');
+      });
+  }
+
+  function calNuevoEvento(fechaPre, horaPre) {
     var user = _profeUser || {};
     if (!user.uid) { toast('Sesión inválida. Recarga la página.', 'error'); return; }
     var asigOpts = '';
@@ -1688,6 +1958,7 @@
     }
     if (user.especialidad) asigOpts += '<option value="' + escAttr(user.especialidad) + '">' + escTxt(user.especialidad) + '</option>';
     var fechaHoy = fechaPre || new Date().toISOString().slice(0, 10);
+    var horaIni  = horaPre || '';
 
     var modal = document.getElementById('modalCal');
     modal.innerHTML =
@@ -1698,7 +1969,7 @@
         '<div class="fg"><label>Título del evento *</label><input id="calTit" placeholder="ej: Clase — Electricidad básica"></div>' +
         '<div class="fg-grid">' +
           '<div class="fg"><label>Fecha *</label><input id="calFecha" type="date" value="' + escAttr(fechaHoy) + '"></div>' +
-          '<div class="fg"><label>Hora (opcional)</label><input id="calHora" type="time"></div>' +
+          '<div class="fg"><label>Hora (opcional)</label><input id="calHora" type="time" value="' + escAttr(horaIni) + '"></div>' +
         '</div>' +
         '<div class="fg-grid">' +
           '<div class="fg"><label>Tipo de evento</label>' +
