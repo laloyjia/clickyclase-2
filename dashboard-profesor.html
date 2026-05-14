@@ -423,6 +423,20 @@
         </div>
       </div>
 
+      <!-- ═══════════ RESUMEN DEL DÍA / SEMANA ═══════════ -->
+      <div id="resumenDiaBanner" class="card-pro" style="margin-bottom:20px;background:linear-gradient(135deg,rgba(167,139,250,.10),rgba(34,211,238,.06));border:1px solid rgba(167,139,250,.25)">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px">
+          <div>
+            <h3 style="font-size:1.05rem;font-weight:800;display:flex;align-items:center;gap:8px;margin-bottom:4px">📊 Tu resumen — <span id="resumenFecha" style="color:#c4b5fd">cargando…</span></h3>
+            <p style="font-size:.78rem;color:var(--muted);margin:0">Tu agenda y avisos relevantes para hoy y esta semana</p>
+          </div>
+          <button id="btnResumenReload" class="btn-pro ghost" onclick="cargarResumenDia()" style="padding:6px 12px;font-size:.78rem">↻ Actualizar</button>
+        </div>
+        <div id="resumenContent" style="display:grid;gap:10px">
+          <div style="padding:20px;text-align:center;color:var(--muted);font-size:.86rem">⏳ Cargando resumen del día…</div>
+        </div>
+      </div>
+
       <!-- Stats animadas -->
       <div class="stats-row" id="statsRow">
         <div class="stat-pro s-teal">
@@ -749,6 +763,9 @@
     // ── Datos remotos (preview + stats async) ──
     cargarMaterialesProfesor(user.email);
 
+    // ── Resumen del día/semana (banner asistente) ──
+    cargarResumenDia();
+
     // ── Sidebar drawer (mobile) ──
     if (window.ELUI && window.ELUI.bindSidebarDrawer) {
       window.ELUI.bindSidebarDrawer({ sidebarSelector: '#sidebarProf', hambSelector: '.btn-hamb' });
@@ -808,6 +825,156 @@
         '<span class="chip is-active" style="font-size:.7rem">' + escTxt(m.tipo || '?') + '</span>' +
       '</div>';
     }).join('') + '</div>';
+  }
+
+  // ═══════════════════════════════════════════════════════════════
+  //  RESUMEN DEL DÍA / SEMANA — banner asistente
+  //  Cruza calendario + materiales + planificaciones del docente y
+  //  arma 3 secciones: HOY, ESTA SEMANA, ATENCIÓN.
+  // ═══════════════════════════════════════════════════════════════
+  function cargarResumenDia() {
+    var cont = document.getElementById('resumenContent');
+    var fechaEl = document.getElementById('resumenFecha');
+    var btn = document.getElementById('btnResumenReload');
+    if (!cont || !_profeUser) return;
+
+    // Setear título con la fecha de hoy
+    var hoy = new Date();
+    var diasSem = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+    var meses   = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+    if (fechaEl) fechaEl.textContent = diasSem[hoy.getDay()] + ' ' + hoy.getDate() + ' de ' + meses[hoy.getMonth()];
+
+    cont.innerHTML = '<div style="padding:20px;text-align:center;color:var(--muted);font-size:.86rem">⏳ Cargando resumen…</div>';
+    if (btn) { btn.disabled = true; var bt = btn.innerHTML; btn.innerHTML = '⏳ Actualizando…'; }
+
+    var hoy0 = new Date(hoy); hoy0.setHours(0,0,0,0);
+    var hoyStr = hoy0.toISOString().slice(0, 10);
+    var enUnaSem = new Date(hoy0); enUnaSem.setDate(enUnaSem.getDate() + 7);
+    var enUnaSemStr = enUnaSem.toISOString().slice(0, 10);
+    var hace14d = Date.now() - 14 * 24 * 60 * 60 * 1000;
+
+    // Tres promesas en paralelo
+    var pCal  = (window.ELDB && ELDB.calendario && _profeUser.uid)
+                  ? ELDB.calendario.listar(_profeUser.uid) : Promise.resolve([]);
+    var pMat  = (window.ELDB && ELDB.materiales)
+                  ? ELDB.materiales.listar({ profesor: _profeUser.email }) : Promise.resolve([]);
+    var pPlan = (window.ELDB && ELDB.planificaciones)
+                  ? ELDB.planificaciones.listar({ profesor: _profeUser.email }) : Promise.resolve([]);
+
+    Promise.all([pCal, pMat, pPlan]).then(function(res) {
+      var eventos = res[0] || [];
+      var mats    = res[1] || [];
+      var plans   = res[2] || [];
+
+      var bloques = [];
+
+      // ── SECCIÓN 1: HOY ──
+      var eventosHoy = eventos.filter(function(e) { return (e.fecha || '').slice(0, 10) === hoyStr; });
+      eventosHoy.sort(function(a, b) { return (a.hora || '99').localeCompare(b.hora || '99'); });
+      if (eventosHoy.length) {
+        var listaHoy = eventosHoy.map(function(e) {
+          var hora = e.hora ? e.hora : 'sin hora';
+          var icon = e.tipo === 'prueba' || e.tipo === 'evaluacion' ? '📊'
+                   : e.tipo === 'planificacion' ? '📅' : '🎯';
+          return '<li style="padding:6px 10px;background:rgba(255,255,255,.04);border-radius:8px;margin-bottom:6px;display:flex;gap:10px;align-items:center">' +
+            '<span style="font-size:1.05rem">' + icon + '</span>' +
+            '<div style="flex:1;min-width:0">' +
+              '<div style="font-weight:600;font-size:.86rem">' + escTxt(e.titulo || 'Actividad') + '</div>' +
+              '<div style="font-size:.72rem;color:var(--muted)">' + escTxt(hora) + (e.asignatura ? ' · ' + escTxt(e.asignatura) : '') + '</div>' +
+            '</div></li>';
+        }).join('');
+        bloques.push(
+          '<div>' +
+            '<div style="font-weight:700;color:#86efac;font-size:.86rem;margin-bottom:6px">🗓 HOY tienes ' + eventosHoy.length + ' actividad' + (eventosHoy.length === 1 ? '' : 'es') + ':</div>' +
+            '<ul style="margin:0;padding:0;list-style:none">' + listaHoy + '</ul>' +
+          '</div>'
+        );
+      }
+
+      // ── SECCIÓN 2: ESTA SEMANA (mañana → +7 días) ──
+      var eventosSemana = eventos.filter(function(e) {
+        var f = (e.fecha || '').slice(0, 10);
+        return f > hoyStr && f <= enUnaSemStr;
+      });
+      eventosSemana.sort(function(a, b) {
+        var c = String(a.fecha).localeCompare(String(b.fecha));
+        return c !== 0 ? c : (a.hora || '99').localeCompare(b.hora || '99');
+      });
+      if (eventosSemana.length) {
+        var listaSem = eventosSemana.slice(0, 5).map(function(e) {
+          var d = new Date((e.fecha || '') + 'T00:00:00');
+          var diaLabel = diasSem[d.getDay()] + ' ' + d.getDate();
+          var icon = e.tipo === 'prueba' || e.tipo === 'evaluacion' ? '📊'
+                   : e.tipo === 'planificacion' ? '📅' : '🎯';
+          return '<li style="padding:5px 10px;font-size:.82rem;display:flex;gap:8px;align-items:center">' +
+            '<span style="color:#fbbf24;font-weight:700;min-width:78px">' + escTxt(diaLabel) + '</span>' +
+            '<span>' + icon + '</span>' +
+            '<span style="flex:1;min-width:0">' + escTxt(e.titulo || 'Actividad') + (e.asignatura ? ' <span style="color:var(--muted);font-size:.72rem">· ' + escTxt(e.asignatura) + '</span>' : '') + '</span>' +
+          '</li>';
+        }).join('');
+        var extra = eventosSemana.length > 5 ? '<div style="font-size:.72rem;color:var(--muted);padding-left:10px">+ ' + (eventosSemana.length - 5) + ' más</div>' : '';
+        bloques.push(
+          '<div>' +
+            '<div style="font-weight:700;color:#fbbf24;font-size:.86rem;margin-bottom:6px">⚡ Esta semana viene:</div>' +
+            '<ul style="margin:0;padding:0;list-style:none">' + listaSem + '</ul>' + extra +
+          '</div>'
+        );
+      }
+
+      // ── SECCIÓN 3: ATENCIÓN — cursos/asignaturas sin material reciente ──
+      // Construir mapa: asignatura/módulo → timestamp último material
+      var ultimoPorAsig = {};
+      mats.forEach(function(m) {
+        var k = m.asignatura || m.modulo || '';
+        if (!k) return;
+        var t = (m.publicadoEn && m.publicadoEn.toMillis) ? m.publicadoEn.toMillis()
+              : (m.fechaISO ? Date.parse(m.fechaISO) : 0);
+        if (!ultimoPorAsig[k] || ultimoPorAsig[k] < t) ultimoPorAsig[k] = t;
+      });
+      var areasUsuario = [].concat(_profeUser.asignaturas || []).concat(_profeUser.modulos || []);
+      // Unicidad
+      var seen = {}; areasUsuario = areasUsuario.filter(function(a) { if (!a || seen[a]) return false; seen[a] = 1; return true; });
+      var pendientes = [];
+      areasUsuario.forEach(function(a) {
+        var t = ultimoPorAsig[a] || 0;
+        if (t < hace14d) {
+          var dias = t ? Math.floor((Date.now() - t) / (24*60*60*1000)) : null;
+          pendientes.push({ asig: a, dias: dias });
+        }
+      });
+      if (pendientes.length) {
+        var listaPend = pendientes.slice(0, 3).map(function(p) {
+          var subt = p.dias !== null ? ('hace ' + p.dias + ' días') : 'sin material registrado';
+          return '<li style="padding:5px 10px;font-size:.82rem;display:flex;gap:8px;align-items:center">' +
+            '<span>📭</span>' +
+            '<span style="flex:1;min-width:0"><strong>' + escTxt(p.asig) + '</strong> <span style="color:var(--muted);font-size:.74rem">— ' + subt + '</span></span>' +
+            '<a href="material.html" data-perm="material" class="chip" style="font-size:.7rem;padding:3px 8px;text-decoration:none">➕ Crear</a>' +
+          '</li>';
+        }).join('');
+        bloques.push(
+          '<div>' +
+            '<div style="font-weight:700;color:#f87171;font-size:.86rem;margin-bottom:6px">💡 Atención — sin material reciente (>14 días):</div>' +
+            '<ul style="margin:0;padding:0;list-style:none">' + listaPend + '</ul>' +
+          '</div>'
+        );
+      }
+
+      // ── EMPTY STATE ──
+      if (!bloques.length) {
+        bloques.push(
+          '<div style="padding:18px;text-align:center;color:var(--muted);font-size:.86rem">' +
+            '🎉 <strong>Día tranquilo</strong> — sin clases programadas hoy ni esta semana, y tus áreas están al día.<br>' +
+            '<span style="font-size:.78rem">Aprovecha para <a href="material.html" style="color:#a78bfa">crear material nuevo</a> o <a href="planificacion.html" style="color:#a78bfa">planificar la próxima clase</a>.</span>' +
+          '</div>'
+        );
+      }
+      cont.innerHTML = bloques.join('<div style="height:1px;background:rgba(255,255,255,.06);margin:2px 0"></div>');
+    }).catch(function(err) {
+      console.warn('[resumenDia] error:', err);
+      cont.innerHTML = '<div style="padding:14px;text-align:center;color:#f87171;font-size:.82rem">❌ No se pudo cargar el resumen: ' + escTxt(err && err.message || 'desconocido') + '</div>';
+    }).then(function() {
+      if (btn) { btn.disabled = false; btn.innerHTML = '↻ Actualizar'; }
+    });
   }
 
   // ═══════════════════════════════════════════════════════════════
@@ -1621,6 +1788,8 @@
 
   // Exponer mínimas funciones globales (por compatibilidad y debugging)
   window._showSecProf = showSec;
+  // Exponer función del banner para el botón "Actualizar" y para refrescos externos
+  window.cargarResumenDia = cargarResumenDia;
 
 })();
 </script>
