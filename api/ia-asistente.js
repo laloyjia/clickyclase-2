@@ -75,6 +75,12 @@ const PAES = {
     descripcion: 'Módulo electivo. Evalúa Historia, Geografía y Formación Ciudadana de 1°-2° Medio (común) más 3°-4° Medio (electivo).',
     ejes: ['Pensamiento histórico', 'Pensamiento geográfico', 'Formación ciudadana', 'Pensamiento crítico sobre información'],
     formato: 'Fuentes primarias y secundarias: textos historiográficos, documentos de época, mapas, infografías, gráficos. 5 alternativas (A-E). Habilidades: análisis de fuentes, multicausalidad, perspectivas históricas.'
+  },
+  ingles: {
+    nombre: 'Inglés (formato tipo PAES — Reading Comprehension)',
+    descripcion: 'Comprensión lectora en inglés. Aunque no es una prueba PAES oficial, replica el formato: textos auténticos seguidos de preguntas con 5 alternativas, alineado al estándar B1-B2 del MCER y al currículum Mineduc de Inglés 3°-4° Medio.',
+    ejes: ['Reading for gist', 'Reading for specific information', 'Inferring meaning from context', 'Author intent and tone', 'Vocabulary in context'],
+    formato: 'Textos en inglés (artículos, anuncios, blogs, emails, infografías, fragmentos literarios), 200-400 palabras según nivel. Cada texto con 4-6 preguntas en inglés con 5 alternativas (A-E) en inglés. Distractores plausibles basados en errores comunes de L2.'
   }
 };
 
@@ -453,6 +459,46 @@ N. [Enunciado]
 ═══ TABLA DE ESPECIFICACIONES ═══
 N° | Disciplina (Bio/Fis/Quim) | Eje | Habilidad pensamiento científico | OA
 ═══ EXPLICACIÓN CIENTÍFICA DE CADA RESPUESTA ═══`;
+  }
+
+  if (compKey === 'ingles') {
+    return `${intro}Genera una ${tipoLabel} de INGLÉS (Reading Comprehension, formato tipo PAES) with ${nItems} items:
+${ctx}
+
+INSTRUCTIONS (in Spanish for the teacher, EN for the student):
+- Texts and questions IN ENGLISH (B1-B2 level CEFR).
+- Each text 200-400 words.
+- Each question 5 alternatives (A-E), one correct.
+- Distractors based on common L2 misinterpretations.
+
+═══════════════════════════════
+${tipoLabel} — ENGLISH READING
+${datos.colegio ? 'Institution: ' + datos.colegio : 'Institution: _____________'}
+${hasOAs ? 'OA Mineduc evaluated: [citar códigos]' : 'OA / AE: _____________'}
+Name: _________________  Grade: ___  Date: ___
+Total points: ___  Suggested time: ___ min
+═══════════════════════════════
+
+INSTRUCTIONS FOR THE STUDENT (in English)
+Read each text carefully. For each question, choose the BEST option (A, B, C, D or E). There is only one correct answer per question. Wrong answers do not subtract points.
+
+▸ TEXT N — [title / genre: article / advertisement / blog / email / infographic / literary fragment]
+[Full text in English, 200-400 words.]
+
+QUESTIONS:
+1. [Reading for gist / specific info / inference / vocab / author intent]
+   A) ____
+   B) ____
+   C) ____
+   D) ____
+   E) ____
+
+(Distribuir ${nItems} preguntas en ${Math.ceil(nItems / 5)} textos.)
+
+═══ ANSWER KEY ═══
+═══ TABLE OF SPECIFICATIONS ═══
+N° | Text | Skill (gist/specific/inference/vocab/intent) | CEFR (B1/B2) | OA Mineduc
+═══ EXPLANATION FOR EACH KEY ═══`;
   }
 
   if (compKey === 'historia') {

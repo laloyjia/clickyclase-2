@@ -376,6 +376,57 @@
             margin-left: 1.5rem;
             margin-bottom: 0.8rem;
         }
+        /* ── Formato matemático: fracciones, raíces, ecuaciones ── */
+        .doc-preview .frac {
+            display: inline-block;
+            vertical-align: middle;
+            text-align: center;
+            line-height: 1.1;
+            margin: 0 .15em;
+        }
+        .doc-preview .frac .num {
+            display: block;
+            border-bottom: 1.5px solid #1e293b;
+            padding: 0 .25em 1px;
+        }
+        .doc-preview .frac .den {
+            display: block;
+            padding: 1px .25em 0;
+        }
+        .doc-preview .sqrt-root {
+            display: inline-block;
+            vertical-align: middle;
+        }
+        .doc-preview .sqrt-root .rad {
+            border-top: 1.5px solid #1e293b;
+            padding: 0 .15em;
+            margin-left: 1px;
+        }
+        .doc-preview sup, .doc-preview sub {
+            font-size: .75em;
+            line-height: 0;
+        }
+        .doc-preview .math-display {
+            display: block;
+            text-align: center;
+            font-size: 1.08em;
+            margin: 0.6rem 0;
+            padding: .35rem .5rem;
+            background: rgba(108,92,231,.04);
+            border-left: 3px solid #6C5CE7;
+            border-radius: 4px;
+        }
+        .doc-preview table.mat-sistema {
+            display: inline-table;
+            border: none;
+            border-left: 2px solid #1e293b;
+            padding-left: 6px;
+            margin: 4px 6px;
+        }
+        .doc-preview table.mat-sistema td {
+            border: none !important;
+            padding: 2px 6px;
+        }
         .doc-preview li {
             margin-bottom: 0.4rem;
             font-size: 0.92rem;
@@ -1268,6 +1319,20 @@
             border-color: rgba(244,114,182,.25);
         }
     </style>
+    <!-- MathJax 3 — renderiza LaTeX inline ($...$) y display ($$...$$) que la IA pueda escribir.
+         Configurado para auto-render al cargar y bajo demanda con MathJax.typeset(). -->
+    <script>
+      window.MathJax = {
+        tex: {
+          inlineMath:  [['$', '$'], ['\\(', '\\)']],
+          displayMath: [['$$', '$$'], ['\\[', '\\]']],
+          processEscapes: true
+        },
+        options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] },
+        startup: { typeset: false }
+      };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.min.js" id="MathJax-script" async></script>
 </head>
 <body>
 
@@ -1571,6 +1636,7 @@
                             <option value="m2">Matemática M2 (electivo)</option>
                             <option value="ciencias">Ciencias (Bio/Fís/Quím)</option>
                             <option value="historia">Historia y Cs Sociales</option>
+                            <option value="ingles">Inglés (Reading Comprehension)</option>
                         </select>
                     </div>
                     <div class="campo" id="capTaxonomiaBox" style="display:none">
@@ -2328,8 +2394,10 @@
         asigs.forEach(function(a) {
             var k = _norm(a);
             if (!k) return;
-            // Lenguaje / Lectora — Lenguaje, Lengua y Literatura, Comunicación, Inglés
-            if (/(lengua|comunicac|literatura|lect|idioma|ingles|english)/.test(k)) permit.lectora = true;
+            // Inglés / English — competencia propia (no es Comp. Lectora en español)
+            if (/(ingles|english)/.test(k)) { permit.ingles = true; return; }
+            // Lenguaje / Lectora — Lenguaje, Lengua y Literatura, Comunicación, Literatura
+            if (/(lengua|comunicac|literatura|lect|idioma)/.test(k)) permit.lectora = true;
             // Matemática → M1 (común) y M2 (electivo)
             if (/matemat/.test(k)) { permit.m1 = true; permit.m2 = true; }
             // Ciencias — Biología, Física, Química, Cs Naturales, Cs para la ciudadanía
@@ -2337,7 +2405,7 @@
             // Historia / Cs Sociales — Historia, Geografía, Filosofía, Ed Ciudadana
             if (/(histor|geograf|sociales|ciudadan|filosof)/.test(k)) permit.historia = true;
         });
-        var orden = ['lectora', 'm1', 'm2', 'ciencias', 'historia'];
+        var orden = ['lectora', 'm1', 'm2', 'ciencias', 'historia', 'ingles'];
         var arr = orden.filter(function(k) { return permit[k]; });
         // Fallback: si no mapeó nada (asignatura desconocida o profe sin asignaturas), mostrar todas
         return arr.length ? arr : orden.slice();
@@ -4021,6 +4089,28 @@
     /**
      * Bloque de datos del documento, común a todos los prompts.
      */
+    // Bloque universal de reglas de formato HTML que se inyecta en todos los prompts.
+    // Asegura que la IA use HTML semántico, Unicode matemático y CSS-friendly,
+    // para que se vea bien en pantalla Y al descargar como Word.
+    function _promptFormatoHTML() {
+      return '\n══════════ INSTRUCCIONES DE FORMATO (OBLIGATORIO) ══════════\n' +
+        '1. Devuelve SOLO HTML del cuerpo (sin <html>, <head>, <body>, ni marcadores tipo ```html).\n' +
+        '2. Usa <h1> para el título, <h2>/<h3> para secciones, <p> para párrafos, <ul>/<ol>/<li> para listas, <table>/<tr>/<td> para tablas (con border="1" inline y style="border-collapse:collapse;width:100%"). Usa <strong> y <em> para énfasis.\n' +
+        '3. NOTACIÓN MATEMÁTICA — REGLAS ESTRICTAS:\n' +
+        '   • Exponentes: <sup>2</sup>, <sup>3</sup>, <sup>n</sup> — NUNCA escribas x^2 ni x**2.\n' +
+        '   • Subíndices: <sub>1</sub>, <sub>n</sub>, <sub>i</sub>.\n' +
+        '   • Fracciones: <span class="frac"><span class="num">numerador</span><span class="den">denominador</span></span> — NUNCA uses "1/2" en texto plano para fracciones formales.\n' +
+        '   • Raíces: <span class="sqrt-root">√<span class="rad">contenido</span></span> para que el radical cubra la expresión. Para raíces simples basta el carácter √.\n' +
+        '   • Símbolos: usa SIEMPRE Unicode matemático directo: ² ³ ⁴ ⁿ ₀ ₁ ₂ √ ∛ ∜ π τ φ θ α β γ δ ε λ μ σ ω ∞ ° ± ∓ × ÷ · ≈ ≠ ≤ ≥ ≪ ≫ ∈ ∉ ⊂ ⊃ ∪ ∩ ∅ ∀ ∃ ∑ ∏ ∫ ∮ ∂ ∇ → ← ↔ ⇒ ⇐ ⇔ ↑ ↓.\n' +
+        '   • Vectores: <strong>v</strong> con flecha → o como <span style="text-decoration:overline">v</span>.\n' +
+        '   • Matrices y sistemas de ecuaciones: usa <table> sin bordes con celdas alineadas. O usa la notación de "llave" con tabla.\n' +
+        '   • Ecuaciones desplegadas (centradas): envuélvelas en <p style="text-align:center;font-size:1.1em;margin:8px 0"><strong>...</strong></p>.\n' +
+        '   • Para ecuaciones largas o complejas (límites, integrales con límites, productos), usa LaTeX entre $...$ inline o $$...$$ display — MathJax 3 las renderizará en pantalla y se imprimirán como texto en Word.\n' +
+        '4. UNIDADES Y NÚMEROS: separador decimal coma (formato chileno: 3,14). Unidades con espacio: "5 kg", "2,5 m/s". NO uses HTML especial para esto.\n' +
+        '5. NO inventes datos institucionales: usa los provistos en la sección de Datos.\n' +
+        '6. Mantén consistencia tipográfica: secciones en MAYÚSCULAS, una idea por párrafo, listas numeradas para procedimientos.\n';
+    }
+
     function _promptDatos(ctx) {
         return 'DATOS DEL DOCUMENTO:\n' +
         '- Tipo: ' + ctx.tipoNombre + '\n' +
@@ -4031,7 +4121,7 @@
         '- Objetivos de Aprendizaje (Mineduc):\n' + (ctx.oaTexto || '(no especificados)') + '\n' +
         '- Dificultad pedagógica: ' + ctx.difTexto + '\n' +
         (ctx.valoresStr ? '- Actitudes/valores MBE a integrar: ' + ctx.valoresStr + '\n' : '') +
-        '\n';
+        '\n' + _promptFormatoHTML() + '\n';
     }
 
     /**
@@ -4524,7 +4614,8 @@
       m1:       { nombre:'Matemática M1 (común)',         ejes:'Números / Álgebra y Funciones / Geometría / Probabilidad y Estadística',         alt:5, instr:'Contextos cotidianos chilenos, tablas y gráficos. Habilidades: resolver problemas, modelar, representar, argumentar.' },
       m2:       { nombre:'Matemática M2 (electivo)',      ejes:'Números complejos / Álgebra y funciones avanzado / Geometría / Estadística inferencial', alt:5, instr:'Contextos disciplinares más abstractos. Habilidades superiores: argumentar y demostrar.' },
       ciencias: { nombre:'Ciencias (Bio/Fís/Quím)',       ejes:'Habilidades científicas / Biología / Física / Química',                          alt:5, instr:'Estímulos: experimentos, datos, gráficos, esquemas. Habilidades: interpretar evidencia, formular hipótesis, modelar.' },
-      historia: { nombre:'Historia y Cs Sociales',        ejes:'Pensamiento histórico / Geográfico / Formación ciudadana / Análisis de fuentes', alt:5, instr:'Fuentes primarias y secundarias: documentos, mapas, gráficos. Habilidades: análisis de fuentes, multicausalidad, perspectivas históricas.' }
+      historia: { nombre:'Historia y Cs Sociales',        ejes:'Pensamiento histórico / Geográfico / Formación ciudadana / Análisis de fuentes', alt:5, instr:'Fuentes primarias y secundarias: documentos, mapas, gráficos. Habilidades: análisis de fuentes, multicausalidad, perspectivas históricas.' },
+      ingles:   { nombre:'Inglés — Reading Comprehension', ejes:'Reading for gist / Specific information / Inference / Vocab in context / Author intent', alt:5, instr:'Textos auténticos en inglés (200-400 palabras, B1-B2 MCER). 4-6 preguntas por texto en inglés con 5 alternativas en inglés. Estructura tipo PAES.' }
     };
     function _promptPAES(tipo, ctx) {
       var compKey = (ctx.competenciaPaes || 'lectora').toLowerCase();
@@ -4563,6 +4654,8 @@
             ? '3. Al menos 2 estímulos (experimento, tabla de datos, gráfico, esquema): <h2>ESTÍMULO N — [título]</h2> con descripción ≥120 palabras, luego sus preguntas (3–5 por estímulo).\n'
             : compKey === 'historia'
               ? '3. Fuentes primarias y secundarias (documentos, mapas, gráficos): <h2>FUENTE N — [autor/año/tipo]</h2> con cita o descripción 100–300 palabras, luego sus preguntas (2–5).\n'
+              : compKey === 'ingles'
+                ? '3. Textos en inglés (200-400 palabras, nivel B1-B2 MCER, géneros variados: article / blog / email / advertisement / infographic / literary fragment): <h2>TEXT N — [title / genre]</h2>. Cada texto con 4-6 preguntas IN ENGLISH con 5 alternatives IN ENGLISH. Las preguntas evalúan: gist, specific information, inference, vocab in context, author intent.\n'
               : '3. Distribuir ítems entre los ejes mencionados. Al menos un tercio con contexto/estímulo (tabla, gráfico, situación cotidiana).\n'
         ) +
         '4. Cada ítem: enunciado claro + 5 alternativas A) B) C) D) E). Distractores plausibles (errores conceptuales típicos).\n' +
@@ -4571,6 +4664,7 @@
         '7. <h2>JUSTIFICACIÓN / RESOLUCIÓN</h2>: para cada ítem, breve justificación de la clave correcta (1–3 líneas).\n\n' +
         'IMPORTANTE: Devuelve SOLO HTML del cuerpo (no <html>, <head>, <body>, ni marcadores de código).\n' +
         'Usa <h1> para el título, <h2> para secciones, <p>, <ol>/<ul>, <table>, <strong>. Mantén el documento legible y listo para imprimir.\n' +
+        _promptFormatoHTML() +
         '\nGenera ahora el documento completo:';
       return instrucciones;
     }
@@ -4813,6 +4907,10 @@ var modelo = _modeloGuardado;
                                      metaTabla({ profesor: profesor, curso: cursoTexto });
 
                     document.getElementById('docPreview').innerHTML = headerHtml + text + pieDoc();
+                    // Renderizar MathJax si la IA escribió LaTeX inline o display
+                    if (window.MathJax && MathJax.typesetPromise) {
+                        try { MathJax.typesetPromise([document.getElementById('docPreview')]).catch(function(){}); } catch (e) {}
+                    }
                     document.getElementById('docGenerado').classList.add('visible');
                     document.getElementById('docGenerado').scrollIntoView({ behavior: 'smooth' });
                     setIAStatus('ok', '&#10003; Documento generado con IA exitosamente. Puedes imprimirlo o publicarlo en la Biblioteca.');
@@ -5496,6 +5594,9 @@ var modelo = _modeloGuardado;
             _iaHistorial.push(contenidoActual);
             if (_iaHistorial.length > 20) _iaHistorial.shift(); // límite razonable
             preview.innerHTML = nuevo;
+            if (window.MathJax && MathJax.typesetPromise) {
+                try { MathJax.typesetPromise([preview]).catch(function(){}); } catch (e) {}
+            }
             if (btnDes) btnDes.disabled = false;
             _refinarSetStatus('✅ Cambio aplicado. Puedes deshacer si no te gusta o pedir otro ajuste.', '#34d399');
             ta.value = '';
@@ -5571,16 +5672,48 @@ var modelo = _modeloGuardado;
         '.doc-version-tag { display: inline-block; margin: 0 0 8pt 0; padding: 3pt 9pt; background: #dcfce7; color: #166534; border: 1pt solid #16a34a; border-radius: 999pt; font-size: 9pt; font-weight: 700; letter-spacing: .5pt; text-transform: uppercase; }' +
         '.doc-version-tag--prof { background: #ede7f6; color: #4527a0; border-color: #6C5CE7; }' +
         '.page-break { page-break-before: always; mso-special-character: line-break; height: 0; border: none; margin: 0; }' +
+        /* Fórmulas matemáticas — se ven bien en Word */
+        '.frac { display: inline-table; vertical-align: middle; text-align: center; margin: 0 2pt; }' +
+        '.frac .num { display: table-row; }' +
+        '.frac .num > * { display: table-cell; border-bottom: 1pt solid #1a1a2e; padding: 0 3pt 1pt; }' +
+        '.frac .den { display: table-row; }' +
+        '.frac .den > * { display: table-cell; padding: 1pt 3pt 0; }' +
+        '.sqrt-root { display: inline; }' +
+        '.sqrt-root .rad { border-top: 1pt solid #1a1a2e; padding: 0 2pt; margin-left: 1pt; }' +
+        '.math-display { display: block; text-align: center; font-size: 12pt; margin: 6pt 0; padding: 5pt 8pt; background: #f6f4ff; border-left: 3pt solid #6C5CE7; }' +
+        'table.mat-sistema { display: inline-table; border: none; border-left: 1.5pt solid #1a1a2e; padding-left: 4pt; margin: 0 4pt; }' +
+        'table.mat-sistema td { border: none !important; padding: 1pt 5pt; background: transparent !important; }' +
+        'sup, sub { font-size: 75%; line-height: 0; }' +
         '</style>';
 
-        // El logo del header viene como ruta relativa; convertirlo a absoluto para que Word lo pueda recuperar.
+        // ── Preparar el clon para exportación ──
         var clone = preview.cloneNode(true);
+        // 1) Logos como URL absoluta (Word los recupera mejor)
         clone.querySelectorAll('img').forEach(function(img) {
             try {
                 var abs = new URL(img.getAttribute('src') || '', window.location.href).href;
                 img.setAttribute('src', abs);
             } catch (e) { /* ignore */ }
         });
+        // 2) MathJax: reemplazar containers SVG/CHTML por su LaTeX original (más limpio en Word)
+        clone.querySelectorAll('mjx-container').forEach(function(mjx) {
+            var latex = '';
+            // MathJax 3 deja el código fuente accesible vía atributo o nodo hermano
+            var prev = mjx.previousElementSibling;
+            if (prev && prev.tagName && prev.tagName.toLowerCase() === 'script' && /math\/tex/i.test(prev.getAttribute('type') || '')) {
+                latex = prev.textContent || '';
+            }
+            if (!latex) latex = mjx.getAttribute('aria-label') || mjx.textContent || '';
+            // Limpiar LaTeX para que se vea legible: quitar \(\), \[\], $$ y $
+            latex = String(latex).replace(/^\s*[$\\][\(\[]\s*/, '').replace(/\s*[\\][\)\]]\s*$/, '').replace(/^\$+|\$+$/g, '').trim();
+            var isDisplay = (mjx.getAttribute('display') === 'true') || mjx.matches && mjx.matches('[jax][display]');
+            var rep = document.createElement(isDisplay ? 'p' : 'span');
+            if (isDisplay) rep.setAttribute('class', 'math-display');
+            rep.textContent = latex;
+            mjx.parentNode.replaceChild(rep, mjx);
+        });
+        // 3) Eliminar scripts type=math/tex sueltos que ya no son útiles en Word
+        clone.querySelectorAll('script[type^="math/tex"]').forEach(function(s){ s.remove(); });
 
         var head = '<head><meta charset="utf-8"><title>' + titulo.replace(/[<>"]/g, '') + '</title>' + styles + '</head>';
         var body = '<body>' + clone.innerHTML + '</body>';
