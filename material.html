@@ -4485,13 +4485,84 @@
             ? 'Adecuación Significativa / PACI (puede ajustar la dificultad cognitiva del OA según el Plan de Adecuación Curricular Individual)'
             : 'Solo de Acceso (NO bajes la dificultad cognitiva, solo adapta el formato y la mediación)';
 
+        // ═══════════════════════════════════════════════════════
+        //  NUEVO ENFOQUE: ADAPTACIÓN, NO REGENERACIÓN
+        //  Si recibimos la prueba estándar generada, la pasamos como
+        //  referencia para que Gemini la adapte item por item, no que
+        //  genere una prueba diferente.
+        // ═══════════════════════════════════════════════════════
+        var tienePruebaOriginal = !!(ctx.pruebaOriginalHTML && ctx.pruebaOriginalHTML.trim().length > 200);
+
+        // Reglas PIE específicas según el diagnóstico
+        var reglasPorDiagnostico = {
+            'TDAH':          '- Instrucciones SEGMENTADAS y al inicio de cada ítem en una sola línea, con verbo de acción en <strong>negrita</strong>.\n- Reducir distractores visuales (no recargar la página, usar mucho espacio en blanco entre preguntas).\n- En preguntas de selección múltiple, mantener la cantidad de alternativas original pero asegurar enunciados cortos.\n- Tiempo sugerido +50% del original.\n- Permitir que el estudiante marque cada pregunta antes de responder (checkbox o casilla).\n',
+            'TEA':           '- Lenguaje MUY literal: eliminar metáforas, sarcasmo, lenguaje figurado.\n- Instrucciones predecibles y secuenciadas: "Primero…", "Después…", "Por último…".\n- Apoyo visual: iconos o pictogramas asociados a cada tipo de tarea cuando sea posible.\n- Mantener la estructura visual idéntica entre preguntas (predecibilidad).\n- En desarrollo: ofrecer 2-3 ejemplos del formato de respuesta esperado.\n',
+            'Dislexia':      '- Fuente sugerida grande (sugerir Arial/Verdana 13-14pt), alto interlineado.\n- Separar visualmente sílabas en palabras técnicas largas la primera vez que aparecen.\n- Evitar bloques de texto densos: cada idea en una línea.\n- Apoyar enunciados con esquemas/diagramas cuando exista cálculo o procedimiento.\n- Tiempo extra; permitir lectura en voz alta por el docente.\n',
+            'Discalculia':   '- Apoyar todo cálculo con tablas auxiliares (multiplicar, conversiones, fórmulas).\n- Permitir calculadora.\n- Para problemas con cálculo: incluir los datos ya organizados en una tabla "Datos / Incógnita / Fórmula" al lado del enunciado.\n- Reducir ítems con cálculo puro; preferir interpretación de gráficos o resultados ya dados.\n',
+            'Disgrafía':     '- Permitir respuestas marcadas con X o líneas más que escritura larga.\n- En desarrollo: ofrecer alternativa oral o esquema/dibujo en vez de redacción.\n- Líneas amplias para respuestas escritas.\n- Evaluar contenido, no caligrafía ni ortografía (a menos que esto último sea el OA).\n',
+            'TEL':           '- Vocabulario simplificado pero preservando los términos técnicos clave del OA (definirlos brevemente entre paréntesis la primera vez).\n- Apoyo visual (banco de palabras) en preguntas de completar.\n- Iniciadores de oración ("Yo creo que… porque…") en preguntas de desarrollo.\n- Permitir respuestas más cortas; evaluar comprensión por sobre extensión.\n- Tiempo extra.\n',
+            'Hipoacusia':    '- Apoyo gráfico cuando haya conceptos abstractos.\n- Instrucciones SIEMPRE por escrito (no asumir comprensión auditiva).\n- Vocabulario claro, evitar idiomas o préstamos no familiares.\n- Si la evaluación tenía audio o lectura en voz alta, ofrecer transcripción adjunta.\n',
+            'Baja visión':   '- Sugerir fuente 16pt mínimo, alto contraste (negro sobre blanco), espaciado amplio.\n- Imágenes/diagramas con descripción textual también (alt text).\n- Espacios amplios para escribir respuesta.\n- Tiempo extra significativo.\n',
+            'Déficit intelectual': '- Adecuación Significativa: ajustar la dificultad cognitiva. Reducir cantidad de ítems al 60% del original priorizando los de complejidad básica/media.\n- Lenguaje claro y oraciones cortas.\n- Apoyo visual constante.\n- Preferir reconocimiento (selección) sobre producción (desarrollo).\n',
+            'Motor':         '- Permitir respuesta digital, oral o marcada (no obligar a escritura manual extensa).\n- Espacios amplios para marcar respuestas.\n- Si hay tareas que requieren manipulación física, ofrecer alternativa.\n',
+            'Emocional':     '- Reducir presión visual (no usar rojo en titulares ni "AVISO" en mayúsculas).\n- Indicar tiempos de descanso permitidos.\n- Instrucciones con tono cálido pero claro.\n- Posibilidad de saltar un ítem y volver después.\n',
+            'Altas capacidades':'- Mantener la prueba estándar igual.\n- Agregar al final 1-2 preguntas de extensión/profundización (no obligatorias) que apliquen el contenido a problemas más complejos o transversales.\n'
+        };
+        // Match flexible (el diag puede venir como "TDAH" o "TDAH — Déficit Atencional")
+        var reglasDiag = '';
+        Object.keys(reglasPorDiagnostico).forEach(function(k) {
+            if (diag.toUpperCase().indexOf(k.toUpperCase()) !== -1 || k.toUpperCase().indexOf(diag.toUpperCase()) !== -1) {
+                reglasDiag = reglasPorDiagnostico[k];
+            }
+        });
+        if (!reglasDiag) {
+            reglasDiag = '- Adecuación de acceso según el diagnóstico: segmentar instrucciones, reducir distractores, ofrecer apoyo visual cuando sea posible, tiempo extra.\n- NO bajes la dificultad cognitiva ni cambies los OAs.\n';
+        }
+
+        // ── Si tenemos la prueba estándar, prompt de ADAPTACIÓN (preferido) ──
+        if (tienePruebaOriginal) {
+            // Limpiamos algunos elementos del header institucional para no duplicarlos
+            // (el header se regenera en el cliente). Pasamos solo el cuerpo útil.
+            var pruebaParaIA = ctx.pruebaOriginalHTML;
+            // Cortar si es muy largo (proteger tokens del prompt)
+            if (pruebaParaIA.length > 35000) {
+                pruebaParaIA = pruebaParaIA.substring(0, 35000) + '\n[...prueba truncada por extensión...]';
+            }
+            return 'Actúa como Educador Diferencial experto y Coordinador PIE alineado a Decretos 83 y 67 del MINEDUC Chile.\n\n' +
+                'Tu tarea es ADAPTAR (no regenerar) la siguiente prueba estándar para un estudiante con diagnóstico ' + diag + ', aplicando ' + adeNombre + '.\n\n' +
+                '═══════ PRINCIPIO FUNDAMENTAL ═══════\n' +
+                'La prueba PIE debe ser la MISMA que la estándar: mismos contenidos, mismos OAs, mismas habilidades cognitivas y MISMA CANTIDAD DE PREGUNTAS. Solo cambia el FORMATO y la MEDIACIÓN según el diagnóstico.\n' +
+                (ade === 'acceso'
+                    ? 'NO modifiques los conceptos evaluados, NO simplifiques la dificultad cognitiva, NO reduzcas el número de ítems. Solo aplica adaptaciones de PRESENTACIÓN y APOYOS DE ACCESO.\n'
+                    : 'Como es Adecuación Significativa (PACI), puedes ajustar la complejidad y reducir cantidad de ítems al 60-70%, priorizando los de complejidad básica/media. Mantén la temática y el OA.\n') +
+                '═══════════════════════════════════════\n\n' +
+                '── DATOS DEL ESTUDIANTE ──\n' +
+                'Diagnóstico NEE: ' + diag + '\n' +
+                'Tipo de Adecuación: ' + adeNombre + '\n' +
+                (obs ? 'Observaciones del estudiante:\n' + obs + '\n' : '') + '\n' +
+                '── ADAPTACIONES ESPECÍFICAS PARA ' + diag.toUpperCase() + ' ──\n' +
+                reglasDiag + '\n' +
+                '── PRUEBA ESTÁNDAR A ADAPTAR (HTML original) ──\n' +
+                '"""\n' + pruebaParaIA + '\n"""\n\n' +
+                '── INSTRUCCIONES DE SALIDA ──\n' +
+                '1. Mantén EXACTAMENTE la misma estructura del documento original (encabezado, título, meta, items numerados, pauta).\n' +
+                '2. Mantén el MISMO número de ítems y el MISMO contenido evaluado en cada uno.\n' +
+                '3. Cambia ÚNICAMENTE la presentación y los apoyos según las reglas del diagnóstico arriba.\n' +
+                '4. Agrega al INICIO del documento una sección "ORIENTACIONES PIE PARA EL DOCENTE" (4-6 líneas) explicando qué adaptaciones específicas se aplicaron para este diagnóstico.\n' +
+                '5. Mantén la "Tabla de Especificaciones" y la "Pauta de Corrección" que tenía la prueba original (las respuestas son las mismas).\n' +
+                '6. Si aplicaste "Adecuación Significativa" y redujiste ítems, indícalo en la sección PIE para el docente.\n\n' +
+                _promptReglasComunes() +
+                '\nDevuelve SOLO el cuerpo HTML del documento adaptado. NO incluyas marcadores tipo ```html. NO comentes tu proceso. Comienza directamente con la sección "ORIENTACIONES PIE PARA EL DOCENTE" seguida del instrumento adaptado.';
+        }
+
+        // ── Fallback: si por algún motivo no tenemos la prueba original, generar desde cero ──
         var refsLiteral = '';
         if (ctx.materialReferencia && ctx.materialReferencia.trim().length > 5) {
-            refsLiteral = '\nMATERIAL DE REFERENCIA aportado por el docente (úsalo como base para adaptar las preguntas, manteniendo el rigor técnico pero aplicando las reglas PIE):\n"""\n' + ctx.materialReferencia.trim() + '\n"""\n';
+            refsLiteral = '\nMATERIAL DE REFERENCIA aportado por el docente:\n"""\n' + ctx.materialReferencia.trim() + '\n"""\n';
         }
 
         return 'Actúa como un Educador Diferencial experto, Coordinador PIE y evaluador alineado a los Decretos 83 y 67 del MINEDUC Chile. ' +
-        'Tu tarea es adaptar un instrumento de evaluación sumativa tradicional para un estudiante con Necesidades Educativas Especiales (NEE), aplicando adecuaciones de acceso o de objetivos según corresponda.\n\n' +
+        'Tu tarea es generar un instrumento de evaluación sumativa adaptado para un estudiante con Necesidades Educativas Especiales (NEE).\n\n' +
 
         'INSTITUCIÓN: ' + ctx.nombreInst + '\n' +
         'PROFESOR: ' + (ctx.profesor || 'Docente del curso') + '\n\n' +
@@ -4978,12 +5049,17 @@
                     // (apiKey/modelo ya no se pasan: _generarPIEAdjunta usa window.IA_ENDPOINT internamente)
                     var chkPIE = document.getElementById('chkAdjuntarPIE');
                     if (tipoDocSeleccionado === 'prueba' && chkPIE && chkPIE.checked) {
+                        // Capturar el HTML de la prueba est\u00e1ndar reci\u00e9n generada
+                        // para que las versiones PIE sean ADAPTACIONES de la misma
+                        // prueba, no documentos generados desde cero.
+                        var pruebaOriginalHTML = (document.getElementById('docPreview') || {}).innerHTML || '';
                         _generarPIEAdjunta({
                             ctxBase: ctxPrompt,
                             tipoNombre: tipoNombre,
                             cursoTexto: cursoTexto,
                             profesor: profesor,
-                            contenido: contenido
+                            contenido: contenido,
+                            pruebaOriginalHTML: pruebaOriginalHTML
                         });
                     }
                 })
@@ -5033,6 +5109,9 @@
             ctxPIE.pieDiagnostico   = diag;
             ctxPIE.pieAdecuacion    = adecuacion;
             ctxPIE.pieObservaciones = observaciones;
+            // ── La prueba estándar generada (HTML) viaja al prompt para que
+            //    la versión PIE sea una ADAPTACIÓN, no una nueva prueba.
+            ctxPIE.pruebaOriginalHTML = opts.pruebaOriginalHTML || '';
             if (optsPIE) {
                 ctxPIE.cantPreg          = optsPIE.cantPreg;
                 ctxPIE.puntaje           = optsPIE.puntaje;
