@@ -51,6 +51,31 @@ var FIREBASE_CONFIG = {
 var EL_VERSION  = '2.1.0';
 var EL_APP_NAME = 'Click&Clase';
 
+// ─────────────────────────────────────────────────────────────
+//  ENDPOINT IA — el sitio se sirve desde Firebase Hosting pero
+//  el endpoint serverless vive en Vercel. Detectamos el host:
+//  si NO estamos en Vercel, usamos la URL absoluta de Vercel.
+//
+//  👉 REEMPLAZA EL_VERCEL_URL con la URL de tu deploy Vercel:
+//     Vercel → tu proyecto → Production deployment → Visit
+//     (suele ser https://<nombre-del-proyecto>.vercel.app)
+// ─────────────────────────────────────────────────────────────
+var EL_VERCEL_URL = 'https://electrolearn-tau.vercel.app';
+
+window.IA_ENDPOINT = (function() {
+  try {
+    var host = (window.location && window.location.hostname) || '';
+    // En Vercel mismo o localhost: ruta relativa (más rápido, sin CORS)
+    if (/\.vercel\.app$/i.test(host) || host === 'localhost' || host === '127.0.0.1') {
+      return '/api/ia-asistente';
+    }
+    // En cualquier otro hosting (clickyclase.cl, Firebase): URL absoluta a Vercel
+    return EL_VERCEL_URL.replace(/\/+$/, '') + '/api/ia-asistente';
+  } catch (e) {
+    return '/api/ia-asistente';
+  }
+})();
+
 // Correos de administrador
 var EL_ADMIN_EMAIL  = 'eduyanezjara@gmail.com';
 var EL_ADMIN_EMAILS = [
