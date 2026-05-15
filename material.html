@@ -1443,7 +1443,7 @@
             </div>
             <div style="display:flex;gap:.5rem;flex-wrap:wrap;justify-content:center;margin-top:.9rem">
                 <span class="stat-pro" style="display:inline-flex;align-items:center;gap:.35rem;padding:.3rem .7rem;border-radius:999px;font-size:.78rem;background:rgba(124,58,237,.14);border:1px solid rgba(124,58,237,.3);color:#c4b5fd">🧠 IA integrada</span>
-                <span class="stat-pro" style="display:inline-flex;align-items:center;gap:.35rem;padding:.3rem .7rem;border-radius:999px;font-size:.78rem;background:rgba(34,211,238,.12);border:1px solid rgba(34,211,238,.3);color:#67e8f9">🎯 Bloom</span>
+                <span class="stat-pro" style="display:inline-flex;align-items:center;gap:.35rem;padding:.3rem .7rem;border-radius:999px;font-size:.78rem;background:rgba(34,211,238,.12);border:1px solid rgba(34,211,238,.3);color:#67e8f9">🎯 Taxonomía</span>
                 <span class="stat-pro" style="display:inline-flex;align-items:center;gap:.35rem;padding:.3rem .7rem;border-radius:999px;font-size:.78rem;background:rgba(52,211,153,.12);border:1px solid rgba(52,211,153,.3);color:#6ee7b7">💛 Valores (MBE)</span>
                 <span class="stat-pro" style="display:inline-flex;align-items:center;gap:.35rem;padding:.3rem .7rem;border-radius:999px;font-size:.78rem;background:rgba(244,114,182,.12);border:1px solid rgba(244,114,182,.3);color:#f9a8d4">📚 Publica a Biblioteca</span>
             </div>
@@ -1788,7 +1788,7 @@
                                 <small class="cfg-help">Solo aplica a los ítems de selección múltiple.</small>
                             </div>
                             <div class="campo">
-                                <label>Niveles cognitivos de Bloom a incluir</label>
+                                <label>Niveles cognitivos a incluir</label>
                                 <div class="bloom-selector bloom-compact" id="bloomSelector">
                                     <label class="bloom-item bloom-1-item checked"><input type="checkbox" value="1" checked onchange="toggleCheckItem(this)"> &#128309; Recordar</label>
                                     <label class="bloom-item bloom-2-item checked"><input type="checkbox" value="2" checked onchange="toggleCheckItem(this)"> &#128994; Comprender</label>
@@ -1856,7 +1856,7 @@
                         </div>
 
                         <p class="cfg-hint" style="margin-top:0;font-size:.82rem;">
-                            Cada diagnóstico marcado arriba genera <strong>su propio panel de configuración</strong> abajo: cantidad, puntaje, alternativas, Bloom y distribución por tipo de ítem propios. Cada NEE puede tener una prueba con sus propias adaptaciones.
+                            Cada diagnóstico marcado arriba genera <strong>su propio panel de configuración</strong> abajo: cantidad, puntaje, alternativas, niveles cognitivos y distribución por tipo de ítem propios. Cada NEE puede tener una prueba con sus propias adaptaciones.
                         </p>
 
                         <div id="piePanelsContainer">
@@ -3515,7 +3515,7 @@
         '<p>Elabora en el espacio siguiente un mapa conceptual, diagrama de flujo o esquema de bloques que conecte los conceptos mas importantes de este apunte. Este es tu &ldquo;mapa mental&rdquo; del tema:</p>' +
         '<div class="espacio-dibujo" style="min-height:180px;">Elabora aqui tu mapa conceptual o diagrama de sintesis &mdash; Conecta los conceptos con flechas y rotula cada relacion</div>' +
 
-        '<h2>5. &#128300; Preguntas por Niveles Taxonomicos (Bloom)</h2>' +
+        '<h2>5. &#128300; Preguntas por Niveles Taxon&oacute;micos</h2>' +
         '<p>Las siguientes 10 preguntas evaluan tu comprension en distintos niveles cognitivos, de menor a mayor complejidad. Respondalas en tu cuaderno o en las lineas proporcionadas:</p>' +
         '<div class="recuadro" style="padding:0.7rem 1rem;margin-bottom:1rem;">' +
         '<strong>Escala taxonomica aplicada:</strong> <span style="font-size:0.82rem;">' +
@@ -4141,7 +4141,7 @@
         '- Redacta TODO el contenido dirigido directamente al estudiante usando "tú": cercano, motivador y claro.\n' +
         '- Considera el nivel ' + ctx.cursoTexto + ' al elegir vocabulario, ejemplos y extensión.\n' +
         '- NO uses lenguaje técnico para profesores en el cuerpo de la guía. Debe quedar lista para imprimir y entregar al alumno.\n' +
-        '- Asegura una progresión basada en la Taxonomía de Bloom (de recordar a aplicar/crear).\n\n' +
+        '- Asegura una progresión de niveles cognitivos (de recordar a aplicar/crear).\n\n' +
         'ESTRUCTURA OBLIGATORIA (en este orden, con estos títulos exactos en <h2>):\n' +
         '1. <h2>🎯 Objetivo de hoy</h2>\n' +
         '   - Un párrafo breve en lenguaje amigable que comience con "Hoy aprenderemos a…" o equivalente, traduciendo el OA a algo que el estudiante entienda.\n' +
@@ -4155,11 +4155,11 @@
         '   - Incluye al menos un "Ejemplo Resuelto" o "Paso a Paso" que muestre cómo se aplica la habilidad.\n' +
         '   - Usa listas, mini-tablas o pasos numerados para mantenerlo visual.\n' +
         '4. <h2>✋ Momento 3: Manos a la obra</h2>\n' +
-        '   - Práctica guiada: 2 o 3 ejercicios o actividades de complejidad básica/media (Bloom 1-3: recordar, comprender, aplicar).\n' +
+        '   - Práctica guiada: 2 o 3 ejercicios o actividades de complejidad básica/media (niveles 1-3: recordar, comprender, aplicar).\n' +
         '   - Para cada ejercicio incluye una "💡 Pista" o "💡 Tip" al margen pensada en apoyo DUA para estudiantes que se estanquen.\n' +
         '   - Numera los ejercicios con <ol> y deja una línea horizontal o espacio para que el estudiante escriba la respuesta.\n' +
         '5. <h2>🚀 Momento 4: Tu gran desafío</h2>\n' +
-        '   - Práctica independiente: 1 o 2 actividades de alta demanda cognitiva (Bloom 4-6: analizar, evaluar, crear).\n' +
+        '   - Práctica independiente: 1 o 2 actividades de alta demanda cognitiva (niveles 4-6: analizar, evaluar, crear).\n' +
         '   - Sin pistas. Deben requerir fundamentar, comparar, crear, juzgar o resolver un problema nuevo.\n' +
         '6. <h2>🌱 Momento 5: ¿Qué aprendimos hoy?</h2>\n' +
         '   - Una <table> de autoevaluación con 3 criterios concretos relativos al objetivo de la guía.\n' +
@@ -4176,7 +4176,7 @@
 
     /**
      * Prompt específico de Apunte de Clase.
-     * Texto académico riguroso + sección "Comprueba tu Aprendizaje" con 6 preguntas Bloom + pauta breve.
+     * Texto académico riguroso + sección "Comprueba tu Aprendizaje" con 6 preguntas por niveles cognitivos + pauta breve.
      */
     function _promptApunte(ctx) {
         return 'Actúa como un experto disciplinar y catedrático especialista en diseño de material de estudio. ' +
@@ -4206,7 +4206,7 @@
         '   - Incluye una sección <h2>Glosario</h2> con una <table> de 2 columnas ("Término | Definición") con los 5 a 8 términos más importantes del apunte.\n\n' +
         'INSTRUCCIONES PARA LA SECCIÓN DE EVALUACIÓN (Las Preguntas):\n' +
         '- Al final del texto, crea una sección titulada exactamente <h2>Comprueba tu Aprendizaje</h2>.\n' +
-        '- Redacta 6 preguntas basadas estrictamente en la Taxonomía de Bloom, ordenadas de menor a mayor complejidad cognitiva.\n' +
+        '- Redacta 6 preguntas ordenadas estrictamente de menor a mayor complejidad cognitiva (recordar → comprender → aplicar → analizar → evaluar → crear).\n' +
         '- Etiqueta cada pregunta con su nivel correspondiente, en este formato exacto al inicio de la pregunta:\n' +
         '  * <strong>Nivel 1 (Recordar):</strong> pregunta de identificación, definición o reconocimiento.\n' +
         '  * <strong>Nivel 2 (Comprender):</strong> pregunta de explicación con palabras propias o resumen.\n' +
@@ -4357,7 +4357,7 @@
 
         '3. <h2>Tabla de Especificaciones</h2>\n' +
         '   - Genera una <table> con estas columnas exactas:\n' +
-        '     "N° de pregunta | Tipo de Ítem | Habilidad de Bloom | Contenido | Puntaje".\n' +
+        '     "N° de pregunta | Tipo de Ítem | Habilidad cognitiva | Contenido | Puntaje".\n' +
         '   - Una fila por CADA pregunta del instrumento (exactamente ' + totalItems + ' filas). El puntaje total debe sumar ' + ctx.puntaje + '.\n\n' +
 
         '4. <h2>Pauta de Corrección</h2>\n' +
@@ -4629,9 +4629,9 @@
       var tipoLabel = { prueba:'PRUEBA PAES', evaluacion:'EVALUACIÓN TIPO PAES', guia:'GUÍA DE ENTRENAMIENTO PAES' }[tipo] || 'INSTRUMENTO PAES';
       var taxLine = '';
       if (ctx.taxonomia === 'marzano') {
-        taxLine = '\nTAXONOMÍA APLICADA: Marzano (Recuperación, Comprensión, Análisis, Utilización del Conocimiento). Distribuye los ítems en estos niveles.';
+        taxLine = '\nNIVELES COGNITIVOS A APLICAR: Recuperación, Comprensión, Análisis, Utilización del Conocimiento. Distribuye los ítems en estos niveles.';
       } else if (ctx.bloomNames) {
-        taxLine = '\nTAXONOMÍA APLICADA: Bloom (' + ctx.bloomNames + ').';
+        taxLine = '\nNIVELES COGNITIVOS A APLICAR: ' + ctx.bloomNames + '.';
       }
       var instrucciones =
         'Eres especialista en evaluación PAES (DEMRE, Chile). Construyes ítems alineados con el formato oficial vigente.\n' +
@@ -4665,7 +4665,7 @@
         ) +
         '4. Cada ítem: enunciado claro + 5 alternativas A) B) C) D) E). Distractores plausibles (errores conceptuales típicos).\n' +
         '5. <h2>CLAVE DE RESPUESTAS</h2>: tabla compacta con N° y letra correcta.\n' +
-        '6. <h2>TABLA DE ESPECIFICACIONES</h2>: columnas <strong>N°</strong>, <strong>Eje PAES</strong>, <strong>Habilidad</strong>, <strong>Dificultad (F/M/D)</strong>, <strong>OA Mineduc</strong>' + (ctx.taxonomia === 'marzano' ? ', <strong>Nivel Marzano</strong>' : ', <strong>Nivel Bloom</strong>') + '.\n' +
+        '6. <h2>TABLA DE ESPECIFICACIONES</h2>: columnas <strong>N°</strong>, <strong>Eje PAES</strong>, <strong>Habilidad</strong>, <strong>Dificultad (F/M/D)</strong>, <strong>OA Mineduc</strong>, <strong>Nivel cognitivo</strong>.\n' +
         '7. <h2>JUSTIFICACIÓN / RESOLUCIÓN</h2>: para cada ítem, breve justificación de la clave correcta (1–3 líneas).\n\n' +
         'IMPORTANTE: Devuelve SOLO HTML del cuerpo (no <html>, <head>, <body>, ni marcadores de código).\n' +
         'Usa <h1> para el título, <h2> para secciones, <p>, <ol>/<ul>, <table>, <strong>. Mantén el documento legible y listo para imprimir.\n' +
@@ -5254,7 +5254,7 @@ var modelo = _modeloGuardado;
                     '</div>' +
                 '</div>' +
                 '<div class="campo">' +
-                    '<label>Niveles cognitivos de Bloom</label>' +
+                    '<label>Niveles cognitivos</label>' +
                     '<div class="bloom-selector bloom-compact">' +
                         '<label class="bloom-item bloom-1-item' + (checkedB(1) ? ' checked' : '') + '"><input type="checkbox" value="1"' + (checkedB(1) ? ' checked' : '') + ' data-pienee-bloom data-nee-slug="' + slug + '" onchange="toggleCheckItem(this)"> &#128309; Recordar</label>' +
                         '<label class="bloom-item bloom-2-item' + (checkedB(2) ? ' checked' : '') + '"><input type="checkbox" value="2"' + (checkedB(2) ? ' checked' : '') + ' data-pienee-bloom data-nee-slug="' + slug + '" onchange="toggleCheckItem(this)"> &#128994; Comprender</label>' +

@@ -23,14 +23,16 @@ const NEE_TIPS = {
   dotacion:    'Estudiante con Altas Capacidades: actividades de ampliación y profundización, proyectos de investigación, rol de tutor entre pares, desafíos de orden superior (analizar, crear).'
 };
 
-// ── Tabla de niveles de Bloom ────────────────────────────────
+// ── Tabla de niveles cognitivos (clásicos) ───────────────────
+// Equivalen a los 6 niveles ascendentes de complejidad cognitiva.
+// El documento generado NUNCA debe nombrar la taxonomía — solo los niveles.
 const BLOOM = {
-  recordar:    'Nivel RECORDAR (Bloom): preguntas de conocimiento factual, definiciones, identificación, reconocimiento.',
-  comprender:  'Nivel COMPRENDER (Bloom): preguntas que exigen explicar, describir, interpretar, resumir, clasificar.',
-  aplicar:     'Nivel APLICAR (Bloom): ejercicios que requieren usar conceptos en situaciones nuevas, resolver problemas.',
-  analizar:    'Nivel ANALIZAR (Bloom): ítems que piden descomponer, comparar, contrastar, diferenciar, examinar causas.',
-  evaluar:     'Nivel EVALUAR (Bloom): preguntas de juicio, crítica, justificación, defensa de posturas.',
-  crear:       'Nivel CREAR (Bloom): actividades de diseño, producción, propuesta, elaboración de algo nuevo.'
+  recordar:    'Nivel RECORDAR: preguntas de conocimiento factual, definiciones, identificación, reconocimiento.',
+  comprender:  'Nivel COMPRENDER: preguntas que exigen explicar, describir, interpretar, resumir, clasificar.',
+  aplicar:     'Nivel APLICAR: ejercicios que requieren usar conceptos en situaciones nuevas, resolver problemas.',
+  analizar:    'Nivel ANALIZAR: ítems que piden descomponer, comparar, contrastar, diferenciar, examinar causas.',
+  evaluar:     'Nivel EVALUAR: preguntas de juicio, crítica, justificación, defensa de posturas.',
+  crear:       'Nivel CREAR: actividades de diseño, producción, propuesta, elaboración de algo nuevo.'
 };
 
 // ── Tabla de niveles de Marzano (Nueva Taxonomía 2001) ──────
@@ -99,7 +101,7 @@ function buildContext(datos) {
     datos.unidad       ? `Unidad: ${datos.unidad}`                            : '',
     datos.horas        ? `Duración: ${datos.horas} horas pedagógicas`        : '',
     datos.tema         ? `Tema específico: ${datos.tema}`                     : '',
-    datos.taxonomia    ? (TAX_TABLE[datos.taxonomia] || `Taxonomía ${taxLabel}: ${datos.taxonomia}`) : '',
+    datos.taxonomia    ? (TAX_TABLE[datos.taxonomia] || `Nivel cognitivo: ${datos.taxonomia}`) : '',
     datos.tiposPreguntas && datos.tiposPreguntas.length
                        ? `Tipos de preguntas/actividades: ${Array.isArray(datos.tiposPreguntas) ? datos.tiposPreguntas.join(', ') : datos.tiposPreguntas}` : '',
     datos.nPreguntas   ? `Cantidad total de preguntas/ítems: ${datos.nPreguntas}` : '',
@@ -213,7 +215,7 @@ OBJETIVO DE APRENDIZAJE (citar código OA si aplica)
 INTRODUCCIÓN AL TEMA (contexto real o situación problema)
 CONCEPTOS CLAVE (definiciones precisas + ejemplos cotidianos o técnicos)
 ACTIVIDADES DE DESARROLLO (numeradas, variadas: ${datos.tiposPreguntas && datos.tiposPreguntas.length ? datos.tiposPreguntas.join(', ') : 'individual, parejas, grupo'})
-PREGUNTAS DE REFLEXIÓN (nivel ${datos.taxonomia || 'analizar'} en taxonomía de Bloom)
+PREGUNTAS DE REFLEXIÓN (nivel cognitivo ${datos.taxonomia || 'analizar'})
 AUTOEVALUACIÓN (escala de 1-4 o lista de cotejo)`,
 
     prueba: `${intro}Genera un INSTRUMENTO DE EVALUACIÓN (prueba escrita) para estudiantes chilenos:
@@ -236,7 +238,7 @@ INSTRUCCIONES GENERALES
 ${getPartesPrueba(datos)}
 PAUTA DE CORRECCIÓN (respuesta correcta y puntaje por ítem)
 TABLA DE ESPECIFICACIONES:
-  OA | Contenido | Tipo ítem | N° ítem | Habilidad Bloom | Puntaje`,
+  OA | Contenido | Tipo ítem | N° ítem | Habilidad cognitiva | Puntaje`,
 
     apunte: `${intro}Genera un APUNTE DE CONTENIDO completo para estudiantes chilenos:
 ${ctx}
@@ -258,7 +260,7 @@ CONTENIDO PRINCIPAL
   — Aplicaciones prácticas
 RESUMEN / IDEAS CLAVE (bullets concisos)
 GLOSARIO TÉCNICO (términos del área)
-PREGUNTAS DE COMPRENSIÓN (${datos.nPreguntas || '5-8'} preguntas, nivel ${datos.taxonomia || 'aplicar'} en taxonomía de Bloom)`,
+PREGUNTAS DE COMPRENSIÓN (${datos.nPreguntas || '5-8'} preguntas, nivel cognitivo ${datos.taxonomia || 'aplicar'})`,
 
     revision: `${intro}Realiza una REVISIÓN PEDAGÓGICA del siguiente material:
 ${ctx}
@@ -268,7 +270,7 @@ INFORME DE REVISIÓN:
 ANÁLISIS DE FORTALEZAS
 ÁREAS DE MEJORA (con sugerencias concretas)
 COHERENCIA CURRICULAR (¿está alineado con el OA/AE?)
-COBERTURA TAXONÓMICA (¿qué niveles de Bloom cubre?)
+COBERTURA TAXONÓMICA (¿qué niveles cognitivos cubre?)
 LENGUAJE Y CLARIDAD (¿apropiado para el nivel?)
 VERSIÓN MEJORADA de los ítems con más problemas`,
 
