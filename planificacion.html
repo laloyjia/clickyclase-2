@@ -1840,10 +1840,21 @@
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 tipo: 'raw',
-                datos: { prompt: prompt, maxTokens: 8192, temperature: 0.72 }
+                datos: { prompt: prompt, maxTokens: 6144, temperature: 0.72 }
             })
         })
-        .then(function(res) { return res.json(); })
+        .then(function(res) {
+            // Si el response no es JSON (timeout 504, error HTML), capturamos el texto
+            // y devolvemos un error legible en vez del feo "Unexpected token".
+            return res.text().then(function(txt) {
+                try { return JSON.parse(txt); } catch (_) {
+                    if (res.status === 504 || /timeout|gateway/i.test(txt)) {
+                        throw new Error('El servidor tardó demasiado en responder. Esto suele pasar cuando el documento es muy complejo. Intenta de nuevo o reduce el contenido.');
+                    }
+                    throw new Error('Respuesta inválida del servidor (HTTP ' + res.status + ').');
+                }
+            });
+        })
         .then(function(data) {
             if (btnLIRMI) btnLIRMI.disabled = false;
             if (data.error) {
@@ -1861,7 +1872,7 @@
         })
         .catch(function(err) {
             if (btnLIRMI) btnLIRMI.disabled = false;
-            container.innerHTML = '<p style="color:#ef4444;padding:16px">Error de red: ' + err.message + '</p>';
+            container.innerHTML = '<p style="color:#ef4444;padding:16px">' + err.message + '</p>';
         });
 
         // ── rama legado TP sin IA (fallback si no hay config) ─────────

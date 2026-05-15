@@ -4847,10 +4847,21 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         tipo: 'raw',
-                        datos: { prompt: prompt, maxTokens: 65536, temperature: 0.7 }
+                        datos: { prompt: prompt, maxTokens: 8192, temperature: 0.7 }
                     })
                 })
-                .then(function(res) { return res.json(); })
+                .then(function(res) {
+                    // Si la response no es JSON (timeout 504, HTML error), capturamos
+                    // el texto crudo y armamos un error legible.
+                    return res.text().then(function(txt) {
+                        try { return JSON.parse(txt); } catch (_) {
+                            if (res.status === 504 || /timeout|gateway/i.test(txt)) {
+                                throw new Error('El servidor tard\u00f3 demasiado en responder. Reduce la complejidad del documento (menos preguntas/OAs) e intenta de nuevo.');
+                            }
+                            throw new Error('Respuesta inv\u00e1lida del servidor (HTTP ' + res.status + ').');
+                        }
+                    });
+                })
                 .then(function(data) {
                     document.getElementById('btnIA').disabled = false;
                     if (data.error) {
@@ -4996,7 +5007,7 @@
             var promptPIE = _promptDiferenciada(ctxPIE);
             var body = JSON.stringify({
                 tipo: 'raw',
-                datos: { prompt: promptPIE, maxTokens: 65536, temperature: 0.7 }
+                datos: { prompt: promptPIE, maxTokens: 8192, temperature: 0.7 }
             });
 
             fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: body })
