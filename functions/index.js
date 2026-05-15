@@ -261,6 +261,10 @@ exports.iaAsistente = onRequest(
     invoker: 'public'       // permite llamadas desde el navegador
   },
   async (req, res) => {
+    // Try/catch top-level: garantizamos que SIEMPRE se devuelva JSON
+    // aunque haya un bug en el código. Si no, el cliente recibe HTML
+    // y muestra "Respuesta inválida del servidor".
+    try {
     // CORS extra (Firebase ya pone cabeceras pero reforzamos)
     res.set('Access-Control-Allow-Origin', '*');
     res.set('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -301,17 +305,18 @@ exports.iaAsistente = onRequest(
         : isRaw
           ? { maxOutputTokens: rawMax || 8192, temperature: rawTemp != null ? rawTemp : 0.7, topP: 0.9 }
           : { maxOutputTokens: 3072, temperature: 0.72, topP: 0.9 };
+
+    const modeloPedido = (datos && datos.modelo) ? String(datos.modelo) : '';
+    const modeloUsado  = GEMINI_MODELOS_PERMITIDOS.indexOf(modeloPedido) !== -1
+                         ? modeloPedido
+                         : GEMINI_MODEL_DEFAULT;
+
     // Gemini 2.5 Flash trae "thinking" activo por defecto, que añade 30-60s
     // antes de empezar a escribir. Lo desactivamos para que la prueba formal
     // termine dentro del límite de 60s de Firebase Hosting rewrite.
     if (modeloUsado === 'gemini-2.5-flash' || modeloUsado === 'gemini-2.5-flash-lite') {
       genCfg.thinkingConfig = { thinkingBudget: 0 };
     }
-
-    const modeloPedido = (datos && datos.modelo) ? String(datos.modelo) : '';
-    const modeloUsado  = GEMINI_MODELOS_PERMITIDOS.indexOf(modeloPedido) !== -1
-                         ? modeloPedido
-                         : GEMINI_MODEL_DEFAULT;
 
     let ultimoError = 'Sin keys disponibles';
     for (let intento = 0; intento < apiKeysShuffled.length; intento++) {
@@ -374,5 +379,16 @@ exports.iaAsistente = onRequest(
     return res.status(502).json({
       error: 'Todas las API keys del pool fallaron. Último error: ' + ultimoError
     });
+    } catch (errTop) {
+      console.error('[iaAsistente] Error no manejado:', errTop && errTop.stack);
+      try {
+        return res.status(500).json({
+          error: 'Error interno del servidor: ' + (errTop && errTop.message ? errTop.message : 'desconocido')
+        });
+      } catch (_) {
+        // último recurso si res ya está roto
+        return;
+      }
+    }
   }
 );

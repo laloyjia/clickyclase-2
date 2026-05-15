@@ -1845,16 +1845,19 @@
                 })
             }).then(function(res) {
                 return res.text().then(function(txt) {
-                    try { return JSON.parse(txt); } catch (_) {
-                        if ((res.status === 502 || res.status === 504) && !reintento) {
-                            return new Promise(function(r){ setTimeout(r, 2500); })
-                                   .then(function(){ return _planLlamarIA(true); });
-                        }
-                        if (res.status === 502 || res.status === 504) {
-                            throw new Error('El servidor tardó demasiado en generar la planificación. Reducí el contenido del prompt o intentá nuevamente.');
-                        }
-                        throw new Error('Respuesta inválida del servidor (HTTP ' + res.status + ').');
+                    var data; try { data = JSON.parse(txt); } catch(_) { data = null; }
+                    if (res.status >= 500 && res.status < 600 && !reintento) {
+                        return new Promise(function(r){ setTimeout(r, 3000); })
+                               .then(function(){ return _planLlamarIA(true); });
                     }
+                    if (data) return data;
+                    if (res.status === 504 || res.status === 502) {
+                        throw new Error('El servidor tardó demasiado en generar la planificación. Intentá de nuevo.');
+                    }
+                    if (res.status === 500) {
+                        throw new Error('Error interno del servidor (500). Intentá de nuevo en 30 segundos.');
+                    }
+                    throw new Error('Respuesta inválida del servidor (HTTP ' + res.status + ').');
                 });
             });
         }
@@ -2554,13 +2557,13 @@
                 })
             }).then(function(res) {
                 return res.text().then(function(txt) {
-                    try { return JSON.parse(txt); } catch (_) {
-                        if ((res.status === 502 || res.status === 504) && !reintento) {
-                            return new Promise(function(r){ setTimeout(r, 2500); })
-                                   .then(function(){ return _planMBELlamarIA(true); });
-                        }
-                        throw new Error('Servidor tardó demasiado (HTTP ' + res.status + '). Intentá nuevamente.');
+                    var data; try { data = JSON.parse(txt); } catch(_) { data = null; }
+                    if (res.status >= 500 && res.status < 600 && !reintento) {
+                        return new Promise(function(r){ setTimeout(r, 3000); })
+                               .then(function(){ return _planMBELlamarIA(true); });
                     }
+                    if (data) return data;
+                    throw new Error('Servidor tardó demasiado (HTTP ' + res.status + '). Intentá nuevamente.');
                 });
             });
         }
