@@ -70,16 +70,42 @@ CURRICULA_PLAN_COMUN['biologia'] = {
   //    CURRICULA_PLAN_COMUN['biologia'].electivos['<key>']
   // ────────────────────────────────────────────────────────────────────
   electivos: {
+
+    // ════════════════════════════════════════════════════════════════
+    //  BIOLOGÍA DE LOS ECOSISTEMAS — Aprobado por Dec. Exento N°497 (2020)
+    //  Programa de Estudio MINEDUC, febrero 2021
+    // ════════════════════════════════════════════════════════════════
     'biologia-de-los-ecosistemas': {
       nombre:  'Biología de los Ecosistemas',
       sigla:   'BEC',
       tramo:   'media',
       niveles: ['3M', '4M'],
+      decreto: 'DS 193/2019 — Aprobado Dec. Exento N°497 (2020)',
+
+      // Nombres oficiales de las 4 unidades del programa MINEDUC
       unidades: {
-        '3M': ['Biodiversidad y evolución', 'Servicios ecosistémicos y bienestar humano', 'Cambio climático y resiliencia', 'Ciencia, tecnología y sustentabilidad'],
-        '4M': ['Biodiversidad y evolución', 'Servicios ecosistémicos y bienestar humano', 'Cambio climático y resiliencia', 'Ciencia, tecnología y sustentabilidad']
+        '3M': [
+          'Analizando el estado actual de la biodiversidad',
+          'Analizando la relación entre los servicios ecosistémicos y la sociedad',
+          'Investigando evidencias del cambio climático para generar conciencia ambiental',
+          'Integrando la biología con otras ciencias para dar solución a problemas'
+        ],
+        '4M': [
+          'Analizando el estado actual de la biodiversidad',
+          'Analizando la relación entre los servicios ecosistémicos y la sociedad',
+          'Investigando evidencias del cambio climático para generar conciencia ambiental',
+          'Integrando la biología con otras ciencias para dar solución a problemas'
+        ]
       },
-      // Las Bases Curriculares prescriben los mismos OAs para 3°M y 4°M.
+
+      // Mapeo de OA → Unidad según visión global del programa oficial
+      oasPorUnidad: {
+        'Analizando el estado actual de la biodiversidad': ['OA1'],
+        'Analizando la relación entre los servicios ecosistémicos y la sociedad': ['OA2'],
+        'Investigando evidencias del cambio climático para generar conciencia ambiental': ['OA3', 'OA4'],
+        'Integrando la biología con otras ciencias para dar solución a problemas': ['OA5']
+      },
+
       oas: {
         '3M': [
           { codigo: 'OA1', eje: 'Conocimiento y comprensión', descripcion: 'Explicar el estado de la biodiversidad actual a partir de teorías y evidencias científicas sobre el origen de la vida, la evolución y la intervención humana.' },
@@ -95,17 +121,69 @@ CURRICULA_PLAN_COMUN['biologia'] = {
           { codigo: 'OA4', eje: 'Conocimiento y comprensión', descripcion: 'Investigar y comunicar cómo la sociedad, mediante la ciencia y la tecnología, puede prevenir, mitigar o reparar los efectos del cambio climático sobre los componentes y procesos biológicos de los sistemas naturales.' },
           { codigo: 'OA5', eje: 'Conocimiento y comprensión', descripcion: 'Valorar la importancia de la integración de los conocimientos de la biología con otras ciencias para el análisis y la propuesta de soluciones a problemas actuales presentes en sistemas naturales, considerando las implicancias éticas, sociales y ambientales.' }
         ]
-      }
+      },
+
+      // Objetivos de Aprendizaje de Habilidades — comunes a todas las asignaturas
+      // científicas del nivel (DS 193/2019, Habilidades del Siglo XXI + Investigación científica)
+      habilidades: [
+        { codigo: 'OAa', eje: 'Planificar y conducir investigación',     descripcion: 'Formular preguntas y problemas sobre tópicos científicos de interés, a partir de la observación de fenómenos y/o la exploración de diversas fuentes.' },
+        { codigo: 'OAb', eje: 'Planificar y conducir investigación',     descripcion: 'Planificar y desarrollar investigaciones que permitan recoger evidencias y contrastar hipótesis, con apoyo de herramientas tecnológicas y matemáticas.' },
+        { codigo: 'OAc', eje: 'Analizar e interpretar datos',            descripcion: 'Describir patrones, tendencias y relaciones entre datos, información y variables.' },
+        { codigo: 'OAd', eje: 'Analizar e interpretar datos',            descripcion: 'Analizar las relaciones entre las partes de un sistema en fenómenos y problemas de interés, a partir de tablas, gráficos, diagramas y modelos.' },
+        { codigo: 'OAe', eje: 'Construir explicaciones y soluciones',    descripcion: 'Construir, usar y comunicar argumentos científicos.' },
+        { codigo: 'OAf', eje: 'Construir explicaciones y soluciones',    descripcion: 'Desarrollar y usar modelos basados en evidencia, para predecir y explicar mecanismos y fenómenos naturales.' },
+        { codigo: 'OAg', eje: 'Construir explicaciones y soluciones',    descripcion: 'Diseñar proyectos para encontrar soluciones a problemas, usando la imaginación y la creatividad.' },
+        { codigo: 'OAh', eje: 'Evaluar',                                 descripcion: 'Evaluar la validez de información proveniente de diversas fuentes, distinguiendo entre evidencia científica e interpretación, y analizar sus alcances y limitaciones.' },
+        { codigo: 'OAi', eje: 'Evaluar',                                 descripcion: 'Analizar críticamente implicancias sociales, económicas, éticas y ambientales de problemas relacionados con controversias públicas que involucran ciencia y tecnología.' }
+      ],
+
+      // Actitudes propuestas desde el marco de Habilidades para el siglo XXI
+      actitudes: [
+        'Pensar con perseverancia y proactividad para encontrar soluciones innovadoras a los problemas.',
+        'Trabajar con autonomía y proactividad en trabajos colaborativos e individuales para llevar a cabo eficazmente proyectos de diversa índole.',
+        'Trabajar con responsabilidad y liderazgo en la realización de las tareas colaborativas y en función del bienestar común.',
+        'Interesarse por las posibilidades que ofrece la tecnología para el desarrollo intelectual, personal y social del individuo.',
+        'Pensar con apertura hacia otros para valorar la comunicación como una forma de relacionarse con diversas personas y culturas, compartiendo ideas que favorezcan el desarrollo de la vida en sociedad.',
+        'Trabajar con empatía y respeto en el contexto de la diversidad, eliminando toda expresión de prejuicio y discriminación.',
+        'Pensar con autorreflexión y autonomía para gestionar el propio aprendizaje, identificando capacidades, fortalezas y aspectos por mejorar.'
+      ]
     },
+
+    // ════════════════════════════════════════════════════════════════
+    //  BIOLOGÍA CELULAR Y MOLECULAR — Aprobado Dec. Exento N°496 (2020)
+    //  Programa de Estudio MINEDUC, febrero 2021
+    // ════════════════════════════════════════════════════════════════
     'biologia-celular-y-molecular': {
       nombre:  'Biología Celular y Molecular',
       sigla:   'BCM',
       tramo:   'media',
       niveles: ['3M', '4M'],
+      decreto: 'DS 193/2019 — Aprobado Dec. Exento N°496 (2020)',
+
+      // Nombres oficiales de las 4 unidades del programa MINEDUC
       unidades: {
-        '3M': ['Historia y biomoléculas celulares', 'Dogma central y regulación génica', 'Proteínas y procesos celulares', 'Aplicaciones biotecnológicas'],
-        '4M': ['Historia y biomoléculas celulares', 'Dogma central y regulación génica', 'Proteínas y procesos celulares', 'Aplicaciones biotecnológicas']
+        '3M': [
+          'Comprendiendo la estructura y la función de la célula',
+          'Estudiando la versatilidad de las proteínas',
+          'Analizando la relación entre expresión y regulación génica',
+          'Analizando aplicaciones en biología celular y molecular'
+        ],
+        '4M': [
+          'Comprendiendo la estructura y la función de la célula',
+          'Estudiando la versatilidad de las proteínas',
+          'Analizando la relación entre expresión y regulación génica',
+          'Analizando aplicaciones en biología celular y molecular'
+        ]
       },
+
+      // Mapeo OA → Unidad según visión global del programa oficial
+      oasPorUnidad: {
+        'Comprendiendo la estructura y la función de la célula': ['OA1', 'OA2'],
+        'Estudiando la versatilidad de las proteínas':           ['OA5'],
+        'Analizando la relación entre expresión y regulación génica': ['OA3', 'OA4'],
+        'Analizando aplicaciones en biología celular y molecular':    ['OA6', 'OA7']
+      },
+
       oas: {
         '3M': [
           { codigo: 'OA1', eje: 'Conocimiento y comprensión', descripcion: 'Investigar el desarrollo del conocimiento de biología celular y molecular a lo largo de la historia y su relación con diversas disciplinas como la química, la física y la matemática, entre otros.' },
@@ -125,7 +203,30 @@ CURRICULA_PLAN_COMUN['biologia'] = {
           { codigo: 'OA6', eje: 'Conocimiento y comprensión', descripcion: 'Analizar el desarrollo del conocimiento de biología celular y molecular en Chile y el mundo, considerando diversas líneas de investigación y la relación entre ciencia, tecnología y sociedad.' },
           { codigo: 'OA7', eje: 'Conocimiento y comprensión', descripcion: 'Analizar aplicaciones biotecnológicas en diversas áreas como tratamientos para el cáncer, preservación y uso de células madre, y producción de organismos transgénicos, entre otros, y evaluar sus implicancias éticas, sociales y legales.' }
         ]
-      }
+      },
+
+      // OAH — Habilidades comunes a las asignaturas científicas (DS 193/2019)
+      habilidades: [
+        { codigo: 'OAa', eje: 'Planificar y conducir investigación',     descripcion: 'Formular preguntas y problemas sobre tópicos científicos de interés, a partir de la observación de fenómenos y/o la exploración de diversas fuentes.' },
+        { codigo: 'OAb', eje: 'Planificar y conducir investigación',     descripcion: 'Planificar y desarrollar investigaciones que permitan recoger evidencias y contrastar hipótesis, con apoyo de herramientas tecnológicas y matemáticas.' },
+        { codigo: 'OAc', eje: 'Analizar e interpretar datos',            descripcion: 'Describir patrones, tendencias y relaciones entre datos, información y variables.' },
+        { codigo: 'OAd', eje: 'Analizar e interpretar datos',            descripcion: 'Analizar las relaciones entre las partes de un sistema en fenómenos y problemas de interés, a partir de tablas, gráficos, diagramas y modelos.' },
+        { codigo: 'OAe', eje: 'Construir explicaciones y soluciones',    descripcion: 'Construir, usar y comunicar argumentos científicos.' },
+        { codigo: 'OAf', eje: 'Construir explicaciones y soluciones',    descripcion: 'Desarrollar y usar modelos basados en evidencia, para predecir y explicar mecanismos y fenómenos naturales.' },
+        { codigo: 'OAg', eje: 'Construir explicaciones y soluciones',    descripcion: 'Diseñar proyectos para encontrar soluciones a problemas, usando la imaginación y la creatividad.' },
+        { codigo: 'OAh', eje: 'Evaluar',                                 descripcion: 'Evaluar la validez de información proveniente de diversas fuentes, distinguiendo entre evidencia científica e interpretación, y analizar sus alcances y limitaciones.' },
+        { codigo: 'OAi', eje: 'Evaluar',                                 descripcion: 'Analizar críticamente implicancias sociales, económicas, éticas y ambientales de problemas relacionados con controversias públicas que involucran ciencia y tecnología.' }
+      ],
+
+      actitudes: [
+        'Pensar con perseverancia y proactividad para encontrar soluciones innovadoras a los problemas.',
+        'Trabajar con autonomía y proactividad en trabajos colaborativos e individuales para llevar a cabo eficazmente proyectos de diversa índole.',
+        'Trabajar con responsabilidad y liderazgo en la realización de las tareas colaborativas y en función del bienestar común.',
+        'Interesarse por las posibilidades que ofrece la tecnología para el desarrollo intelectual, personal y social del individuo.',
+        'Trabajar con empatía y respeto en el contexto de la diversidad, eliminando toda expresión de prejuicio y discriminación.',
+        'Pensar con autorreflexión y autonomía para gestionar el propio aprendizaje, identificando capacidades, fortalezas y aspectos por mejorar.',
+        'Trabajar colaborativamente en la generación, desarrollo y gestión de proyectos y la resolución de problemas, integrando las diferentes ideas y puntos de vista.'
+      ]
     }
   }
 };

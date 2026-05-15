@@ -255,7 +255,7 @@ exports.iaAsistente = onRequest(
     region: 'us-central1',
     secrets: [GEMINI_API_KEY],
     timeoutSeconds: 540,    // 9 minutos — sobrado para Gemini
-    memory: '512MiB',
+    memory: '1GiB',          // subido de 512MiB para prompts grandes (>40 preguntas)
     cors: true,
     maxInstances: 10,
     invoker: 'public'       // permite llamadas desde el navegador
@@ -301,6 +301,12 @@ exports.iaAsistente = onRequest(
         : isRaw
           ? { maxOutputTokens: rawMax || 8192, temperature: rawTemp != null ? rawTemp : 0.7, topP: 0.9 }
           : { maxOutputTokens: 3072, temperature: 0.72, topP: 0.9 };
+    // Gemini 2.5 Flash trae "thinking" activo por defecto, que añade 30-60s
+    // antes de empezar a escribir. Lo desactivamos para que la prueba formal
+    // termine dentro del límite de 60s de Firebase Hosting rewrite.
+    if (modeloUsado === 'gemini-2.5-flash' || modeloUsado === 'gemini-2.5-flash-lite') {
+      genCfg.thinkingConfig = { thinkingBudget: 0 };
+    }
 
     const modeloPedido = (datos && datos.modelo) ? String(datos.modelo) : '';
     const modeloUsado  = GEMINI_MODELOS_PERMITIDOS.indexOf(modeloPedido) !== -1

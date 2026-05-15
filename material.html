@@ -4959,28 +4959,38 @@
         // en variables de entorno y nunca la expone al cliente.
         setIAStatus('loading', '<span class=\"ia-spinner\">&#9696;</span> Generando, espera un momento...');
         document.getElementById('btnIA').disabled = true;
-        Promise.resolve()
-            .then(function() {
-                return fetch(window.IA_ENDPOINT || '/api/ia-asistente', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        tipo: 'raw',
-                        datos: { prompt: prompt, maxTokens: 32768, temperature: 0.7 }
-                    })
+        // Llamada con 1 reintento autom\u00e1tico en 502/504 (timeout de hosting)
+        function _llamarIA(reintento) {
+            return fetch(window.IA_ENDPOINT || '/api/ia-asistente', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    tipo: 'raw',
+                    datos: { prompt: prompt, maxTokens: 16384, temperature: 0.7 }
                 })
-                .then(function(res) {
-                    // Si la response no es JSON (timeout 504, HTML error), capturamos
-                    // el texto crudo y armamos un error legible.
-                    return res.text().then(function(txt) {
-                        try { return JSON.parse(txt); } catch (_) {
-                            if (res.status === 504 || /timeout|gateway/i.test(txt)) {
-                                throw new Error('El servidor tard\u00f3 demasiado en responder. Reduce la complejidad del documento (menos preguntas/OAs) e intenta de nuevo.');
-                            }
-                            throw new Error('Respuesta inv\u00e1lida del servidor (HTTP ' + res.status + ').');
+            }).then(function(res) {
+                return res.text().then(function(txt) {
+                    try { return JSON.parse(txt); } catch (_) {
+                        // Body no es JSON \u2192 Firebase Hosting cort\u00f3 la conexi\u00f3n (502/504)
+                        // o el servidor crashe\u00f3. Reintentar 1 vez.
+                        if ((res.status === 502 || res.status === 504) && !reintento) {
+                            setIAStatus('loading', '<span class="ia-spinner">&#9696;</span> Servidor lento, reintentando\u2026');
+                            return new Promise(function(r){ setTimeout(r, 2500); })
+                                   .then(function(){ return _llamarIA(true); });
                         }
-                    });
-                })
+                        if (res.status === 502 || res.status === 504) {
+                            throw new Error('El servidor tard\u00f3 demasiado en generar el documento. Reduc\u00ed la cantidad de preguntas a 20-25, o seleccion\u00e1 menos OAs y volv\u00e9 a intentar.');
+                        }
+                        if (/timeout|gateway/i.test(txt)) {
+                            throw new Error('El servidor tard\u00f3 demasiado en responder. Reduc\u00ed la complejidad del documento (menos preguntas/OAs) e intent\u00e1 de nuevo.');
+                        }
+                        throw new Error('Respuesta inv\u00e1lida del servidor (HTTP ' + res.status + ').');
+                    }
+                });
+            });
+        }
+        Promise.resolve()
+            .then(function() { return _llamarIA(false); })
                 .then(function(data) {
                     document.getElementById('btnIA').disabled = false;
                     if (data.error) {

@@ -1835,26 +1835,30 @@
         var prompt = _construirPromptMBE(user, isTP);
 
         // SEGURIDAD: ya no leemos API keys desde Firestore. Vamos al endpoint serverless.
-        fetch(window.IA_ENDPOINT || '/api/ia-asistente', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                tipo: 'raw',
-                datos: { prompt: prompt, maxTokens: 6144, temperature: 0.72 }
-            })
-        })
-        .then(function(res) {
-            // Si el response no es JSON (timeout 504, error HTML), capturamos el texto
-            // y devolvemos un error legible en vez del feo "Unexpected token".
-            return res.text().then(function(txt) {
-                try { return JSON.parse(txt); } catch (_) {
-                    if (res.status === 504 || /timeout|gateway/i.test(txt)) {
-                        throw new Error('El servidor tardó demasiado en responder. Esto suele pasar cuando el documento es muy complejo. Intenta de nuevo o reduce el contenido.');
+        function _planLlamarIA(reintento) {
+            return fetch(window.IA_ENDPOINT || '/api/ia-asistente', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    tipo: 'raw',
+                    datos: { prompt: prompt, maxTokens: 6144, temperature: 0.72 }
+                })
+            }).then(function(res) {
+                return res.text().then(function(txt) {
+                    try { return JSON.parse(txt); } catch (_) {
+                        if ((res.status === 502 || res.status === 504) && !reintento) {
+                            return new Promise(function(r){ setTimeout(r, 2500); })
+                                   .then(function(){ return _planLlamarIA(true); });
+                        }
+                        if (res.status === 502 || res.status === 504) {
+                            throw new Error('El servidor tardó demasiado en generar la planificación. Reducí el contenido del prompt o intentá nuevamente.');
+                        }
+                        throw new Error('Respuesta inválida del servidor (HTTP ' + res.status + ').');
                     }
-                    throw new Error('Respuesta inválida del servidor (HTTP ' + res.status + ').');
-                }
+                });
             });
-        })
+        }
+        _planLlamarIA(false)
         .then(function(data) {
             if (btnLIRMI) btnLIRMI.disabled = false;
             if (data.error) {
@@ -2540,15 +2544,27 @@
         var prompt = _construirPromptMBE(user, isTP);
 
         // SEGURIDAD: ya no leemos API keys desde Firestore. Vamos al endpoint serverless.
-        fetch(window.IA_ENDPOINT || '/api/ia-asistente', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                tipo: 'raw',
-                datos: { prompt: prompt, maxTokens: 8192, temperature: 0.72 }
-            })
-        })
-        .then(function(res) { return res.json(); })
+        function _planMBELlamarIA(reintento) {
+            return fetch(window.IA_ENDPOINT || '/api/ia-asistente', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    tipo: 'raw',
+                    datos: { prompt: prompt, maxTokens: 8192, temperature: 0.72 }
+                })
+            }).then(function(res) {
+                return res.text().then(function(txt) {
+                    try { return JSON.parse(txt); } catch (_) {
+                        if ((res.status === 502 || res.status === 504) && !reintento) {
+                            return new Promise(function(r){ setTimeout(r, 2500); })
+                                   .then(function(){ return _planMBELlamarIA(true); });
+                        }
+                        throw new Error('Servidor tardó demasiado (HTTP ' + res.status + '). Intentá nuevamente.');
+                    }
+                });
+            });
+        }
+        _planMBELlamarIA(false)
         .then(function(data) {
             if (btnIA) btnIA.disabled = false;
             if (data.error) {
