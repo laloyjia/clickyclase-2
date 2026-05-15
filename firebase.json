@@ -5,28 +5,38 @@
       "firebase.json",
       "**/.*",
       "**/node_modules/**",
-      "api/**"
+      "api/**",
+      "functions/**"
     ],
-    "rewrites": [],
+    "rewrites": [
+      {
+        "source": "/api/ia-asistente",
+        "function": {
+          "functionId": "iaAsistente",
+          "region": "us-central1"
+        }
+      }
+    ],
     "headers": [
       {
         "source": "**/*.@(js|css)",
         "headers": [
-          {
-            "key": "Cache-Control",
-            "value": "max-age=3600"
-          }
+          { "key": "Cache-Control", "value": "max-age=3600" }
         ]
       },
       {
         "source": "**/*.html",
         "headers": [
-          {
-            "key": "Cache-Control",
-            "value": "no-cache"
-          }
+          { "key": "Cache-Control", "value": "no-cache" }
         ]
       }
     ]
+  },
+  "functions": {
+    "source": "functions",
+    "runtime": "nodejs22"
+  },
+  "firestore": {
+    "rules": "firestore.rules"
   }
 }

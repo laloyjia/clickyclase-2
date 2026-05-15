@@ -4101,6 +4101,7 @@
     // para que se vea bien en pantalla Y al descargar como Word.
     function _promptFormatoHTML() {
       return '\n══════════ INSTRUCCIONES DE FORMATO (OBLIGATORIO) ══════════\n' +
+        '0. ANTI-LOOP CRÍTICO: NUNCA escribas más de 60 underscores seguidos (`______`), guiones (`------`), igual (`======`), asteriscos (`******`) o puntos (`......`). Para líneas de escritura de respuesta usa <div class="linea-escribir"></div> o exactamente "_______________________" (~30 chars). Si necesitas varias líneas, usa varios divs/elementos separados, NO una sola secuencia larga.\n' +
         '1. Devuelve SOLO HTML del cuerpo (sin <html>, <head>, <body>, ni marcadores tipo ```html).\n' +
         '2. Usa <h1> para el título, <h2>/<h3> para secciones, <p> para párrafos, <ul>/<ol>/<li> para listas, <table>/<tr>/<td> para tablas (con border="1" inline y style="border-collapse:collapse;width:100%"). Usa <strong> y <em> para énfasis.\n' +
         '3. NOTACIÓN MATEMÁTICA — REGLAS ESTRICTAS:\n' +
@@ -4895,6 +4896,16 @@
                     // Quitar el primer <h1> que contenga el título del doc (la IA a veces no obedece)
                     text = text.replace(/^\s*<h1[^>]*>[\s\S]*?<\/h1>/i, '').trim();
 
+                    // ── DEFENSA ANTI-DEGENERACIÓN ──
+                    // La IA a veces entra en loop generando miles de "_____" o "-----".
+                    // Cortamos cualquier secuencia >80 a un máximo razonable.
+                    text = text.replace(/_{80,}/g, '_'.repeat(60))
+                               .replace(/-{80,}/g, '-'.repeat(60))
+                               .replace(/\*{80,}/g, '*'.repeat(40))
+                               .replace(/\.{80,}/g, '.'.repeat(40))
+                               .replace(/={80,}/g, '='.repeat(40))
+                               .replace(/(<br\s*\/?>\s*){10,}/gi, '<br><br>');
+
                     // Construir título del documento (lo que va en la barra azul oscuro)
                     var tituloDoc = (contenido || tipoNombre || 'Documento').toString();
                     if (tituloDoc.length > 90) {
@@ -4917,11 +4928,10 @@
                     try { if (typeof ELDB !== 'undefined' && ELDB.actividad) ELDB.actividad.log('generar_material_ia', { tipoDoc: tipoDocSeleccionado, tipoNombre: tipoNombre, curso: cursoTexto, asignatura: modNombre, contenido: (contenido || '').slice(0, 100) }); } catch (e) {}
 
                     // \u2500\u2500 Generaci\u00f3n dual: si es Prueba y el toggle PIE est\u00e1 marcado, generar tambi\u00e9n la versi\u00f3n adaptada \u2500\u2500
+                    // (apiKey/modelo ya no se pasan: _generarPIEAdjunta usa window.IA_ENDPOINT internamente)
                     var chkPIE = document.getElementById('chkAdjuntarPIE');
                     if (tipoDocSeleccionado === 'prueba' && chkPIE && chkPIE.checked) {
                         _generarPIEAdjunta({
-                            apiKey: apiKey,
-                            modelo: modelo,
                             ctxBase: ctxPrompt,
                             tipoNombre: tipoNombre,
                             cursoTexto: cursoTexto,
