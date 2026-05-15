@@ -4522,28 +4522,75 @@
         'Redacta un breve párrafo (3–5 líneas) indicando qué estrategias específicas se utilizaron en esta prueba para atender al diagnóstico ' + diag + ' (por ejemplo: apoyo visual, segmentación de instrucciones, reducción de distractores, banco de palabras, iniciadores de oración, andamiaje, tiempos extendidos, etc.). Esta sección va al INICIO del documento, claramente diferenciada.\n\n' +
 
         '2) EL INSTRUMENTO ADAPTADO (Para el estudiante):\n' +
-        'Adapta la prueba utilizando lenguaje directo, instrucciones parceladas (paso a paso) y destacando en <strong>negrita</strong> las palabras clave de instrucción (ej: <strong>subraya</strong>, <strong>marca</strong>, <strong>explica</strong>). Genera EXACTAMENTE los siguientes 6 ítems adaptados:\n\n' +
+        'Adapta la prueba utilizando lenguaje directo, instrucciones parceladas (paso a paso) y destacando en <strong>negrita</strong> las palabras clave de instrucción (ej: <strong>subraya</strong>, <strong>marca</strong>, <strong>explica</strong>).\n\n' +
 
-        '   • ÍTEM I — Selección Múltiple Adaptada: 5 preguntas.\n' +
-        '     Regla PIE: Reduce a SOLO 3 alternativas (A, B, C). Elimina cualquier distractor capcioso, dobles negaciones (\'cuál NO es incorrecta\') y mantén oraciones cortas.\n\n' +
-
-        '   • ÍTEM II — Verdadero o Falso Amigable: 4 afirmaciones claras y literales (sin sarcasmos ni lenguaje figurado).\n' +
-        '     Regla PIE: NO exijas justificación de las falsas, o bien, pide que justifiquen solo 1 eligiéndola ellos mismos.\n\n' +
-
-        '   • ÍTEM III — Completar con Apoyo Visual: párrafo breve con 4 espacios en blanco.\n' +
-        '     Regla PIE: Incluye un recuadro o "banco de palabras" ARRIBA del texto con las opciones para que el estudiante las visualice y seleccione. Renderiza el banco como una tabla o caja claramente delimitada.\n\n' +
-
-        '   • ÍTEM IV — Términos Pareados Reducidos: 2 columnas, MÁXIMO 4 conceptos.\n' +
-        '     Regla PIE: Usa descripciones directas. ' + (diag === 'TEA' || diag === 'Dislexia' ? 'IMPORTANTE — diagnóstico ' + diag + ': sugiere EXPLÍCITAMENTE en la instrucción que unan con líneas de diferentes colores.' : 'Si el estudiante tuviera además TEA o Dislexia, sugiere unir con líneas de colores.') + '\n\n' +
-
-        '   • ÍTEM V — Aplicación o Análisis Guiado: plantea un caso o problema.\n' +
-        '     Regla PIE: SEGMENTA el problema. En lugar de hacer una sola pregunta compleja, divídela en 3 pasos simples y consecutivos. Ejemplo:\n' +
-        '       Paso 1: Identifica los datos.\n' +
-        '       Paso 2: ¿Qué fórmula/concepto usas?\n' +
-        '       Paso 3: Resuelve.\n\n' +
-
-        '   • ÍTEM VI — Desarrollo con Andamiaje: 1 pregunta de desarrollo.\n' +
-        '     Regla PIE: Incluye "iniciadores de oraciones" (ej: "Yo creo que la causa principal fue _________ porque…"). ' + (ade === 'significativa' ? 'Como esta es Adecuación Significativa, PERMITE EXPLÍCITAMENTE que el alumno responda mediante un dibujo o esquema simple si lo prefiere.' : 'Mantén la exigencia conceptual del OA original (Adecuación de Acceso).') + '\n\n' +
+        // ── Construcción dinámica según los tipos que el profe eligió ──
+        (function() {
+            var counts = ctx.itemCounts || {};
+            // Mapeo: tipo del formulario → reglas PIE específicas
+            var REGLAS = {
+                alternativas: {
+                    titulo: 'Selección Múltiple Adaptada',
+                    descripcion: function(n) {
+                        return 'Genera ' + (n || 5) + ' preguntas. Regla PIE: reduce a SOLO 3 alternativas (A, B, C). Elimina dobles negaciones y distractores capciosos. Oraciones cortas y directas.';
+                    }
+                },
+                vf: {
+                    titulo: 'Verdadero o Falso Amigable',
+                    descripcion: function(n) {
+                        return 'Genera ' + (n || 4) + ' afirmaciones claras y literales (sin sarcasmos, sin lenguaje figurado). Regla PIE: NO exijas justificación de cada falsa; o bien pide que el estudiante elija UNA y justifique solo esa.';
+                    }
+                },
+                completar: {
+                    titulo: 'Completar con Apoyo Visual',
+                    descripcion: function(n) {
+                        return 'Párrafo breve con ' + (n || 4) + ' espacios en blanco. Regla PIE: incluye un "banco de palabras" ARRIBA del texto con las opciones (en tabla o caja claramente delimitada) para que el estudiante seleccione visualmente.';
+                    }
+                },
+                emparejar: {
+                    titulo: 'Términos Pareados Reducidos',
+                    descripcion: function(n) {
+                        return '2 columnas, MÁXIMO ' + Math.min(n || 4, 6) + ' conceptos. Regla PIE: descripciones directas. ' + (diag === 'TEA' || diag === 'Dislexia' ? 'IMPORTANTE diag ' + diag + ': sugiere unir con líneas de colores diferentes.' : 'Si el estudiante tuviera TEA o Dislexia, sugiere unir con líneas de colores.');
+                    }
+                },
+                caso: {
+                    titulo: 'Análisis de Caso Guiado',
+                    descripcion: function(n) {
+                        return 'Plantea ' + (n || 1) + ' caso(s) o problema(s). Regla PIE: SEGMENTA en 3 pasos consecutivos. Paso 1: identifica datos. Paso 2: ¿qué concepto/fórmula usar? Paso 3: resuelve.';
+                    }
+                },
+                desarrollo: {
+                    titulo: 'Desarrollo con Andamiaje',
+                    descripcion: function(n) {
+                        return (n || 1) + ' pregunta(s) de desarrollo. Regla PIE: incluye "iniciadores de oraciones" (ej: "Yo creo que la causa fue ______ porque…"). ' + (ade === 'significativa' ? 'Adecuación Significativa: permite EXPLÍCITAMENTE responder con dibujo o esquema simple si el alumno lo prefiere.' : 'Adecuación de Acceso: mantén exigencia conceptual del OA.');
+                    }
+                },
+                corta: {
+                    titulo: 'Respuesta Corta Guiada',
+                    descripcion: function(n) {
+                        return (n || 4) + ' preguntas de respuesta corta (1-2 líneas). Regla PIE: oraciones simples como pregunta, con palabra clave en <strong>negrita</strong>. Incluye 1-2 ejemplos de respuesta esperada al inicio para que el estudiante entienda el formato.';
+                    }
+                }
+            };
+            // Orden de aparición (mismo orden estándar pedagógico)
+            var ORDEN = ['alternativas','vf','completar','emparejar','corta','caso','desarrollo'];
+            var roman = ['I','II','III','IV','V','VI','VII'];
+            var bloque = '';
+            var idx = 0;
+            ORDEN.forEach(function(tipo) {
+                var cantidad = counts[tipo] || 0;
+                if (cantidad <= 0) return;
+                var regla = REGLAS[tipo];
+                if (!regla) return;
+                bloque += '   • ÍTEM ' + roman[idx] + ' — ' + regla.titulo + ': ' + regla.descripcion(cantidad) + '\n\n';
+                idx++;
+            });
+            // Fallback: si no se eligió ningún tipo (raro), generar solo SM
+            if (!bloque) {
+                bloque = '   • ÍTEM I — Selección Múltiple Adaptada: 5 preguntas. Regla PIE: 3 alternativas (A, B, C), sin distractores capciosos.\n\n';
+            }
+            return 'Genera EXACTAMENTE los siguientes ítems adaptados (solo los que se listan, NO agregues más tipos):\n\n' + bloque;
+        })() +
 
         '3) PAUTA DE CORRECCIÓN DIFERENCIADA (al final del documento, en una sección "Para el docente / PIE"):\n' +
         '   • Entrega las RESPUESTAS EXACTAS para los ítems I a V.\n' +
@@ -4553,8 +4600,8 @@
         '\nGenera ahora SOLO el cuerpo HTML del documento siguiendo EXACTAMENTE esta estructura: ' +
         '(1) Encabezado institucional con título "EVALUACIÓN DIFERENCIADA"; ' +
         '(2) Sección "Orientaciones PIE para el docente"; ' +
-        '(3) Sección "Instrumento adaptado para el estudiante" con los 6 ítems numerados I a VI según las reglas PIE indicadas; ' +
-        '(4) Sección "Pauta de corrección diferenciada (uso del docente / PIE)" con respuestas exactas y rúbrica del ítem VI. ' +
+        '(3) Sección "Instrumento adaptado para el estudiante" con SOLO los ítems listados arriba (NO agregues más tipos de ítem, respeta exactamente los tipos que el profe eligió); ' +
+        '(4) Sección "Pauta de corrección diferenciada (uso del docente / PIE)" con respuestas exactas y, si hubo ítems de desarrollo, una rúbrica de 3 niveles (Logrado / Medianamente logrado / Por lograr). ' +
         'NO incluyas Tabla de Especificaciones tipo prueba sumativa estándar (ese instrumento no aplica para evaluaciones diferenciadas).';
     }
 
@@ -4848,7 +4895,7 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         tipo: 'raw',
-                        datos: { prompt: prompt, maxTokens: 8192, temperature: 0.7 }
+                        datos: { prompt: prompt, maxTokens: 32768, temperature: 0.7 }
                     })
                 })
                 .then(function(res) {
@@ -5017,7 +5064,7 @@
             var promptPIE = _promptDiferenciada(ctxPIE);
             var body = JSON.stringify({
                 tipo: 'raw',
-                datos: { prompt: promptPIE, maxTokens: 8192, temperature: 0.7 }
+                datos: { prompt: promptPIE, maxTokens: 16384, temperature: 0.7 }
             });
 
             fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: body })
