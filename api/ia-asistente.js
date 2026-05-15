@@ -4,8 +4,15 @@
  * Variables de entorno requeridas: GEMINI_API_KEY
  */
 
-const GEMINI_MODEL = 'gemini-2.0-flash';
-const GEMINI_URL   = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
+const GEMINI_MODEL_DEFAULT = 'gemini-2.5-flash';
+const GEMINI_MODELOS_PERMITIDOS = [
+  'gemini-2.5-flash',
+  'gemini-2.5-flash-lite',
+  'gemini-2.5-pro'
+];
+function _geminiUrl(modelo) {
+  return `https://generativelanguage.googleapis.com/v1beta/models/${modelo}:generateContent`;
+}
 
 // ── NEE: tips pedagógicos por diagnóstico ────────────────────
 const NEE_TIPS = {
@@ -586,21 +593,40 @@ export default async function handler(req, res) {
   const { tipo, datos } = req.body || {};
   if (!tipo) return res.status(400).json({ error: 'Parámetro tipo requerido' });
 
-  const prompt = buildPrompt(tipo, datos || {});
+  // tipo === 'raw' permite al cliente enviar un prompt ya construido (para flujos
+  // donde el contexto pedagógico se arma en el frontend). NUNCA exponer la API key.
+  let prompt;
+  if (tipo === 'raw' && datos && typeof datos.prompt === 'string' && datos.prompt.length > 0) {
+    prompt = datos.prompt;
+  } else {
+    prompt = buildPrompt(tipo, datos || {});
+  }
 
   // Config dinámica según tipo:
   // - refinar: doc completo modificado → más tokens, menor temperatura
   // - PAES: estímulos largos + tabla de especificaciones → más tokens
+  // - raw: el cliente puede pedir maxTokens custom
   const isRefinar = tipo === 'refinar';
   const isPAES    = (datos || {}).formato === 'paes';
+  const isRaw     = tipo === 'raw';
+  const rawMax    = (isRaw && datos && Number.isInteger(datos.maxTokens)) ? Math.min(datos.maxTokens, 65536) : null;
+  const rawTemp   = (isRaw && datos && typeof datos.temperature === 'number') ? datos.temperature : null;
   const genCfg = isRefinar
     ? { maxOutputTokens: 8192, temperature: 0.45, topP: 0.85 }
     : isPAES
       ? { maxOutputTokens: 8192, temperature: 0.65, topP: 0.9 }
-      : { maxOutputTokens: 3072, temperature: 0.72, topP: 0.9 };
+      : isRaw
+        ? { maxOutputTokens: rawMax || 8192, temperature: rawTemp != null ? rawTemp : 0.7, topP: 0.9 }
+        : { maxOutputTokens: 3072, temperature: 0.72, topP: 0.9 };
+
+  // Modelo a usar (el cliente puede sugerir, pero validamos contra allowlist)
+  const modeloPedido = (datos && datos.modelo) ? String(datos.modelo) : '';
+  const modeloUsado  = GEMINI_MODELOS_PERMITIDOS.indexOf(modeloPedido) !== -1
+                       ? modeloPedido
+                       : GEMINI_MODEL_DEFAULT;
 
   try {
-    const r = await fetch(`${GEMINI_URL}?key=${apiKey}`, {
+    const r = await fetch(`${_geminiUrl(modeloUsado)}?key=${apiKey}`, {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

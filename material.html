@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex,nofollow,noarchive,nosnippet,noimageindex">
+    <meta name="googlebot" content="noindex,nofollow,noarchive">
     
   <!-- Favicon Click&Clase -->
   <link rel="icon" type="image/svg+xml" href="/assets/img/favicon.svg">
@@ -4833,55 +4835,37 @@
         setIAStatus('loading', '<span class=\"ia-spinner\">&#9696;</span> Cargando configuraci\u00f3n...');
         document.getElementById('btnIA').disabled = true;
 
-        _cargarConfigIA()
-            .then(function(config) {
-                if (!config || !config.keys || !config.keys.length) {
-                    setIAStatus('error', '&#10007; No hay API Keys configuradas. Contacta al administrador.');
-                    document.getElementById('btnIA').disabled = false;
-                    return;
-                }
-                // Elegir una key al azar del pool
-                var keys = config.keys;
-                var apiKey = keys[Math.floor(Math.random() * keys.length)];
-                // Modelos deprecados — reemplazar automáticamente por gemini-2.5-flash
-var _MODELOS_DEPRECADOS = ['gemini-2.5-flash-preview-04-17','gemini-2.0-flash','gemini-2.0-flash-lite','gemini-1.5-flash'];
-var _modeloGuardado = config.modelo || '';
-if (!_modeloGuardado || _MODELOS_DEPRECADOS.indexOf(_modeloGuardado) !== -1) _modeloGuardado = 'gemini-2.5-flash';
-var modelo = _modeloGuardado;
-
-                var url = 'https://generativelanguage.googleapis.com/v1beta/models/' + modelo + ':generateContent?key=' + apiKey;
-                var body = JSON.stringify({
-                    contents: [{ parts: [{ text: prompt }] }],
-                    generationConfig: { temperature: 0.7, maxOutputTokens: 65536 }
-                });
-
-                setIAStatus('loading', '<span class=\"ia-spinner\">&#9696;</span> Generando, espera un momento...');
-
-                return fetch(url, {
+        // SEGURIDAD: ya no leemos API keys desde Firestore. La generación
+        // pasa por /api/ia-asistente (Vercel serverless) que tiene la key
+        // en variables de entorno y nunca la expone al cliente.
+        setIAStatus('loading', '<span class=\"ia-spinner\">&#9696;</span> Generando, espera un momento...');
+        document.getElementById('btnIA').disabled = true;
+        Promise.resolve()
+            .then(function() {
+                return fetch('/api/ia-asistente', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: body
+                    body: JSON.stringify({
+                        tipo: 'raw',
+                        datos: { prompt: prompt, maxTokens: 65536, temperature: 0.7 }
+                    })
                 })
                 .then(function(res) { return res.json(); })
                 .then(function(data) {
                     document.getElementById('btnIA').disabled = false;
                     if (data.error) {
-                        var msg = data.error.message || JSON.stringify(data.error);
+                        var msg = (typeof data.error === 'string') ? data.error
+                                  : (data.error.message || JSON.stringify(data.error));
                         var hint = '';
-                        if (msg.indexOf('RESOURCE_EXHAUSTED') !== -1 || msg.indexOf('quota') !== -1) {
-                            hint = '<br><br>&#128161; <strong>Cuota agotada en esta key.</strong> El sistema intentar\u00e1 con otra key en el siguiente intento.';
-                        } else if (msg.indexOf('API_KEY_INVALID') !== -1 || msg.indexOf('invalid') !== -1) {
-                            hint = '<br><br>&#128161; Revisa las API Keys en el panel de administraci\u00f3n.';
+                        if (/RESOURCE_EXHAUSTED|quota/i.test(msg)) {
+                            hint = '<br><br>&#128161; <strong>Cuota de la IA agotada.</strong> Intenta de nuevo m\u00e1s tarde o pide al admin revisar la configuraci\u00f3n.';
+                        } else if (/API_KEY_INVALID|invalid|no configurada/i.test(msg)) {
+                            hint = '<br><br>&#128161; La API key del servicio est\u00e1 mal configurada en el servidor. Avisa al administrador.';
                         }
-                        setIAStatus('error', '&#10007; Error de la API: ' + msg + hint);
+                        setIAStatus('error', '&#10007; Error de la IA: ' + msg + hint);
                         return;
                     }
-                    var candidate = data.candidates && data.candidates[0];
-                    if (candidate && candidate.finishReason === 'SAFETY') {
-                        setIAStatus('error', '&#10007; Contenido bloqueado por filtros de seguridad de Google. Reformula el contenido del documento.');
-                        return;
-                    }
-                    var text = candidate && candidate.content && candidate.content.parts && candidate.content.parts[0] && candidate.content.parts[0].text;
+                    var text = data.resultado || '';
                     if (!text) {
                         setIAStatus('error', '&#10007; La IA no devolvi\u00f3 contenido. Intenta de nuevo.');
                         return;
@@ -4992,7 +4976,8 @@ var modelo = _modeloGuardado;
             return { ctx: ctxPIE, adecuacion: adecuacion };
         }
 
-        var url = 'https://generativelanguage.googleapis.com/v1beta/models/' + opts.modelo + ':generateContent?key=' + opts.apiKey;
+        // SEGURIDAD: ya no usamos opts.apiKey/opts.modelo directos. Vamos al endpoint.
+        var url = '/api/ia-asistente';
         var preview = document.getElementById('docPreview');
 
         // Generar secuencialmente cada versión PIE para no saturar la API
@@ -5010,19 +4995,19 @@ var modelo = _modeloGuardado;
             var adecuacion = built.adecuacion;
             var promptPIE = _promptDiferenciada(ctxPIE);
             var body = JSON.stringify({
-                contents: [{ parts: [{ text: promptPIE }] }],
-                generationConfig: { temperature: 0.7, maxOutputTokens: 65536 }
+                tipo: 'raw',
+                datos: { prompt: promptPIE, maxTokens: 65536, temperature: 0.7 }
             });
 
             fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: body })
                 .then(function(res){ return res.json(); })
                 .then(function(data){
                     if (data.error) {
-                        setIAStatus('error', '&#10007; Falló la versión PIE para ' + diag + ': ' + (data.error.message || ''));
+                        var emsg = (typeof data.error === 'string') ? data.error : (data.error.message || '');
+                        setIAStatus('error', '&#10007; Falló la versión PIE para ' + diag + ': ' + emsg);
                         return;
                     }
-                    var cand = data.candidates && data.candidates[0];
-                    var text = cand && cand.content && cand.content.parts && cand.content.parts[0] && cand.content.parts[0].text;
+                    var text = data.resultado || '';
                     if (!text) { setIAStatus('error', '&#10007; La IA no devolvió la versión PIE para ' + diag + '.'); return; }
                     text = text.replace(/^```html\s*/i, '').replace(/^```\s*/i, '').replace(/\s*```\s*$/i, '').trim();
                     var mBody = text.match(/<body[^>]*>([\s\S]*?)<\/body>/i);

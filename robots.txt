@@ -1,0 +1,24 @@
+# Click&Clase — robots.txt
+# Páginas internas privadas (panel docente, admin, biblioteca, etc.)
+# nunca deben aparecer en buscadores.
+
+User-agent: *
+Disallow: /admin.html
+Disallow: /admin
+Disallow: /dashboard.html
+Disallow: /dashboard-profesor.html
+Disallow: /material.html
+Disallow: /planificacion.html
+Disallow: /biblioteca.html
+Disallow: /evaluaciones.html
+Disallow: /ranking.html
+Disallow: /setup.html
+Disallow: /preview-guia.html
+Disallow: /api/
+
+# Páginas públicas
+Allow: /index.html
+Allow: /login.html
+Allow: /pricing.html
+
+Sitemap: https://clickyclase.cl/sitemap.xml

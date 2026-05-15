@@ -151,14 +151,22 @@ var ELDB = (function() {
 
     listar: function(filtros) {
       filtros = filtros || {};
-      // Evitamos índices compuestos: traemos activos y filtramos en cliente.
-      return EL_DB.collection(EL_COLLECTIONS.PLANIFICACIONES).where('activo', '==', true).get()
+      // SEGURIDAD: las reglas estrictas requieren que la query filtre por uid
+      // del autor (a menos que sea admin). Si pasaron uid o profesor (email),
+      // intentamos resolver el uid del usuario actual cuando aplica.
+      var miUid = (typeof ELAuth !== 'undefined' && ELAuth.user && ELAuth.user.uid) ? ELAuth.user.uid : null;
+      var filtroUid = filtros.uid || (filtros.profesor && miUid ? miUid : null);
+      var coll = EL_DB.collection(EL_COLLECTIONS.PLANIFICACIONES);
+      var query = filtroUid ? coll.where('uid', '==', filtroUid) : coll.where('activo', '==', true);
+      return query.get()
         .then(function(snap) {
           var items = [];
           snap.forEach(function(doc) { items.push(Object.assign({ id: doc.id }, doc.data())); });
+          // Filtros adicionales en cliente
           var eq = function(a, b) { return String(a || '').trim().toLowerCase() === String(b || '').trim().toLowerCase(); };
-          if (filtros.profesor)    items = items.filter(function(p) { return eq(p.email, filtros.profesor) || (p.uid && p.uid === filtros.profesor); });
-          if (filtros.uid)         items = items.filter(function(p) { return p.uid === filtros.uid; });
+          // Si filtramos por uid en server, igual respetamos el flag activo en cliente
+          if (filtroUid) items = items.filter(function(p) { return p.activo !== false; });
+          if (filtros.profesor && !filtroUid) items = items.filter(function(p) { return eq(p.email, filtros.profesor); });
           if (filtros.modulo)      items = items.filter(function(p) { return p.modulo === filtros.modulo; });
           if (filtros.asignatura)  items = items.filter(function(p) { return eq(p.asignatura, filtros.asignatura); });
           if (filtros.mes) {
