@@ -4237,6 +4237,69 @@
      * Voz de Jefe de UTP / Experto en Evaluación. Ítems con cantidades dinámicas
      * según lo configurado por el docente + tabla de especificaciones + pauta + rúbrica.
      */
+    /**
+     * Calcula la distribución EXACTA de puntaje por tipo de ítem usando pesos
+     * de dificultad cognitiva. Garantiza que la suma sea exactamente puntajeTotal.
+     * Pesos: SM/VF/Completar/Pareados = 1 (recordar/comprender),
+     *        Aplicación = 2, Caso = 3, Desarrollo = 4 (analizar/evaluar/crear).
+     * Retorna: { sm:{n,total,porItem}, vf:..., ..., resumen, porSeccion[] }
+     */
+    function _distribuirPuntaje(counts, puntajeTotal) {
+        var pesos = { sm:1, vf:1, completar:1, emparejar:1, aplicacion:2, caso:3, desarrollo:4 };
+        var n = {
+            sm: counts.sm||0, vf: counts.vf||0, completar: counts.completar||0,
+            emparejar: counts.emparejar||0, aplicacion: counts.aplicacion||0,
+            caso: counts.caso||0, desarrollo: counts.desarrollo||0
+        };
+        // Unidades ponderadas totales
+        var unidadesPonderadas = 0;
+        var ordenTipos = ['sm','vf','completar','emparejar','aplicacion','caso','desarrollo'];
+        ordenTipos.forEach(function(k){ unidadesPonderadas += n[k] * pesos[k]; });
+        if (unidadesPonderadas === 0) {
+            return { sumaTotal: 0, porSeccion: {}, resumen: '(sin ítems)' };
+        }
+        // Puntaje por unidad ponderada (entero, recortando)
+        var puntoBase = Math.max(1, Math.floor(puntajeTotal / unidadesPonderadas));
+        // Calcular puntaje por tipo
+        var porTipo = {};
+        var sumaParcial = 0;
+        ordenTipos.forEach(function(k) {
+            if (n[k] === 0) { porTipo[k] = { n:0, porItem:0, total:0 }; return; }
+            var pi = puntoBase * pesos[k];   // puntaje por ítem en este tipo
+            var total = pi * n[k];
+            porTipo[k] = { n: n[k], porItem: pi, total: total };
+            sumaParcial += total;
+        });
+        // Diferencia para llegar al total exacto → la sumamos al último tipo no vacío
+        var dif = puntajeTotal - sumaParcial;
+        if (dif !== 0) {
+            // Buscar el tipo con MÁS peso que tenga items, agregarle la diferencia al puntaje del ÚLTIMO ítem
+            var candidatos = ordenTipos.filter(function(k){ return n[k] > 0; }).sort(function(a,b){ return pesos[b]-pesos[a]; });
+            if (candidatos.length) {
+                var k = candidatos[0];
+                porTipo[k].total += dif;
+                // La diferencia queda como "ajuste" en el último ítem de ese tipo
+                porTipo[k].ajusteUltimoItem = dif;
+            }
+        }
+        // Suma final (debería ser exactamente puntajeTotal)
+        var sumaTotal = 0;
+        ordenTipos.forEach(function(k){ sumaTotal += porTipo[k].total; });
+        // Resumen legible para meter en el prompt
+        var LABEL = { sm:'Selección Múltiple', vf:'Verdadero/Falso', completar:'Completar',
+                      emparejar:'Términos pareados', aplicacion:'Aplicación', caso:'Análisis de caso',
+                      desarrollo:'Desarrollo / Argumentación' };
+        var lineas = [];
+        ordenTipos.forEach(function(k) {
+            if (n[k] === 0) return;
+            var p = porTipo[k];
+            var extra = (p.ajusteUltimoItem ? ' (último ítem: ' + (p.porItem + p.ajusteUltimoItem) + ' pts para que sume exacto)' : '');
+            lineas.push('   • ' + LABEL[k] + ': ' + p.n + ' ítems × ' + p.porItem + ' pts = ' + p.total + ' pts' + extra);
+        });
+        var resumen = lineas.join('\n');
+        return { sumaTotal: sumaTotal, porTipo: porTipo, resumen: resumen };
+    }
+
     function _promptPrueba(ctx) {
         var counts = ctx.itemCounts || {};
         var nSM   = counts.sm   || 0;
@@ -4249,6 +4312,9 @@
         var totalItems = nSM + nVF + nCom + nPar + nApl + nCas + nDes;
         var nAlt = ctx.cantAlternativas || 4;
         var letrasAlt = ['A','B','C','D','E'].slice(0, nAlt).join(', ');
+        // Distribución exacta de puntaje calculada por la plataforma
+        var distrPts = _distribuirPuntaje(counts, ctx.puntaje || 100);
+        function _pts(tipo) { return (distrPts.porTipo[tipo] || {porItem:0, total:0}); }
 
         // Bloque de preguntas/ejercicios literales obligatorios (si el profesor los pegó)
         var refsLiteral = '';
@@ -4263,48 +4329,59 @@
         var idx = 1;
         function nrom(i) { return ['I','II','III','IV','V','VI','VII'][i-1] || ('I'.repeat(i)); }
 
+        function _ptsLabel(tipo) {
+            var p = _pts(tipo);
+            return '(' + p.total + ' pts total · ' + p.porItem + ' pts c/u' + (p.ajusteUltimoItem ? ' · último: ' + (p.porItem + p.ajusteUltimoItem) + ' pts' : '') + ')';
+        }
         if (nSM > 0) {
-            secciones += '   <h3>Ítem ' + nrom(idx++) + ': Selección Múltiple (Recordar/Comprender) (__/X pts)</h3>\n' +
+            secciones += '   <h3>Ítem ' + nrom(idx++) + ': Selección Múltiple (Recordar/Comprender) ' + _ptsLabel('sm') + '</h3>\n' +
             '   - Genera ' + nSM + ' preguntas, cada una con ' + nAlt + ' alternativas etiquetadas ' + letrasAlt + '.\n' +
+            '   - PUNTAJE: cada pregunta vale ' + _pts('sm').porItem + ' pts' + (_pts('sm').ajusteUltimoItem ? ' (excepto la última que vale ' + (_pts('sm').porItem + _pts('sm').ajusteUltimoItem) + ' pts para que el total cierre exacto)' : '') + '. Anótalo explícito al lado de cada pregunta: "Pregunta N. (' + _pts('sm').porItem + ' pts)".\n' +
             '   - Los distractores deben ser plausibles y basados en errores comunes que cometen los estudiantes.\n' +
             '   - PROHIBIDO usar "Todas las anteriores", "Ninguna de las anteriores", "A y B", etc.\n' +
-            '   - Usa <ol> para las preguntas y formato A) B) C)... para las alternativas (con tantas letras como alternativas tenga cada pregunta).\n\n';
+            '   - Usa <ol> para las preguntas y formato A) B) C)... para las alternativas.\n\n';
         }
         if (nVF > 0) {
-            secciones += '   <h3>Ítem ' + nrom(idx++) + ': Verdadero o Falso (Comprender) (__/X pts)</h3>\n' +
+            secciones += '   <h3>Ítem ' + nrom(idx++) + ': Verdadero o Falso (Comprender) ' + _ptsLabel('vf') + '</h3>\n' +
             '   - Genera ' + nVF + ' afirmaciones numeradas.\n' +
+            '   - PUNTAJE: cada afirmación vale ' + _pts('vf').porItem + ' pts' + (_pts('vf').ajusteUltimoItem ? ' (última: ' + (_pts('vf').porItem + _pts('vf').ajusteUltimoItem) + ' pts)' : '') + '. Inclúyelo en el enunciado de cada una.\n' +
             '   - Incluye explícitamente al inicio del ítem la instrucción: "Marca V o F. JUSTIFICA con una oración cada afirmación que consideres falsa".\n' +
             '   - Deja un espacio (línea horizontal o "______") después de cada afirmación para la justificación.\n\n';
         }
         if (nCom > 0) {
-            secciones += '   <h3>Ítem ' + nrom(idx++) + ': Completar (Recordar) (__/X pts)</h3>\n' +
+            secciones += '   <h3>Ítem ' + nrom(idx++) + ': Completar (Recordar) ' + _ptsLabel('completar') + '</h3>\n' +
             '   - Redacta un párrafo breve y coherente sobre el tema con exactamente ' + nCom + ' espacios en blanco marcados como "_____ (1)", "_____ (2)", etc.\n' +
+            '   - PUNTAJE: cada espacio vale ' + _pts('completar').porItem + ' pts. Indícalo junto al título del ítem.\n' +
             '   - Los espacios deben corresponder a conceptos clave del tema, no a palabras triviales.\n' +
             '   - Debajo del párrafo, deja una lista numerada del 1 al ' + nCom + ' para que el estudiante escriba el concepto faltante.\n\n';
         }
         if (nPar > 0) {
             var defB = nPar + 2;
-            secciones += '   <h3>Ítem ' + nrom(idx++) + ': Términos Pareados (Comprender/Relacionar) (__/X pts)</h3>\n' +
+            secciones += '   <h3>Ítem ' + nrom(idx++) + ': Términos Pareados (Comprender/Relacionar) ' + _ptsLabel('emparejar') + '</h3>\n' +
             '   - Crea una <table> de 2 columnas: Columna A con ' + nPar + ' conceptos clave (numerados 1-' + nPar + ') y Columna B con ' + defB + ' definiciones (etiquetadas a, b, c, ...).\n' +
+            '   - PUNTAJE: cada par correcto vale ' + _pts('emparejar').porItem + ' pts. Anota el puntaje total del ítem (' + _pts('emparejar').total + ' pts) en el encabezado.\n' +
             '   - La Columna B DEBE tener 2 opciones más que la A para evitar que el estudiante responda por simple descarte.\n' +
-            '   - Las 2 definiciones distractoras deben ser conceptualmente cercanas pero claramente incorrectas para los conceptos de la Columna A.\n\n';
+            '   - Las 2 definiciones distractoras deben ser conceptualmente cercanas pero claramente incorrectas.\n\n';
         }
         if (nApl > 0) {
-            secciones += '   <h3>Ítem ' + nrom(idx++) + ': Aplicación (Aplicar) (__/X pts)</h3>\n' +
+            secciones += '   <h3>Ítem ' + nrom(idx++) + ': Aplicación (Aplicar) ' + _ptsLabel('aplicacion') + '</h3>\n' +
             '   - Plantea ' + nApl + ' ejercicio(s) práctico(s) directo(s), adecuados a la asignatura "' + ctx.modNombre + '" y al tema "' + (ctx.contenido || 'el contenido indicado') + '".\n' +
+            '   - PUNTAJE: cada ejercicio vale ' + _pts('aplicacion').porItem + ' pts. Indícalo al inicio de cada uno.\n' +
             '   - Puede ser un problema de cálculo, análisis paso a paso, clasificación, interpretación de gráfico/esquema descrito, etc.\n' +
             '   - Indica claramente qué se pide y deja espacio para el desarrollo.\n\n';
         }
         if (nCas > 0) {
             var preguntasCaso = Math.max(2, Math.min(4, nCas + 1));
-            secciones += '   <h3>Ítem ' + nrom(idx++) + ': Análisis de Caso (Analizar) (__/X pts)</h3>\n' +
-            '   - Redacta un caso ficticio, situación problema o fragmento de texto fuente de 1 a 2 párrafos de extensión, contextualizado al tema.\n' +
-            '   - Si el docente solicitó ' + nCas + ' ítems de caso, puedes presentar ' + nCas + ' caso(s) breve(s) o un caso único con ' + nCas + ' preguntas de análisis basadas ESTRICTAMENTE en esa lectura (no preguntas generales del tema).\n' +
+            secciones += '   <h3>Ítem ' + nrom(idx++) + ': Análisis de Caso (Analizar) ' + _ptsLabel('caso') + '</h3>\n' +
+            '   - Redacta un caso ficticio, situación problema o fragmento de texto fuente de 1 a 2 párrafos.\n' +
+            '   - PUNTAJE: cada pregunta de análisis vale ' + _pts('caso').porItem + ' pts (total ítem: ' + _pts('caso').total + ' pts).\n' +
+            '   - Si el docente solicitó ' + nCas + ' ítems de caso, puedes presentar ' + nCas + ' caso(s) breve(s) o un caso único con ' + nCas + ' preguntas de análisis basadas ESTRICTAMENTE en esa lectura.\n' +
             '   - Las preguntas deben requerir descomponer, comparar, relacionar o inferir desde el caso.\n\n';
         }
         if (nDes > 0) {
-            secciones += '   <h3>Ítem ' + nrom(idx++) + ': Desarrollo y Argumentación (Evaluar/Crear) (__/X pts)</h3>\n' +
-            '   - Formula ' + nDes + ' pregunta(s) abierta(s) de alta demanda cognitiva donde el estudiante deba asumir una postura, fundamentar una respuesta compleja o proponer una solución.\n' +
+            secciones += '   <h3>Ítem ' + nrom(idx++) + ': Desarrollo y Argumentación (Evaluar/Crear) ' + _ptsLabel('desarrollo') + '</h3>\n' +
+            '   - Formula ' + nDes + ' pregunta(s) abierta(s) de alta demanda cognitiva.\n' +
+            '   - PUNTAJE: cada pregunta vale ' + _pts('desarrollo').porItem + ' pts' + (_pts('desarrollo').ajusteUltimoItem ? ' (última: ' + (_pts('desarrollo').porItem + _pts('desarrollo').ajusteUltimoItem) + ' pts)' : '') + '. Anótalo en el enunciado.\n' +
             '   - La consigna debe pedir explícitamente argumentar/justificar/proponer.\n\n';
         }
 
@@ -4326,7 +4403,18 @@
         '- Tema Específico: ' + (ctx.contenido || '(no especificado)') + '\n' +
         '- Cantidad EXACTA de preguntas del instrumento: ' + totalItems + ' preguntas. Esta cifra es OBLIGATORIA: la suma de los ítems generados debe ser EXACTAMENTE ' + totalItems + '.\n' +
         '- Cantidad de alternativas para los ítems de Selección Múltiple: ' + nAlt + ' (' + letrasAlt + ').\n' +
-        '- Puntaje total objetivo: ' + ctx.puntaje + ' puntos (distribúyelos coherentemente entre los ítems definidos abajo).\n\n' +
+        '- PUNTAJE TOTAL OBLIGATORIO: ' + ctx.puntaje + ' puntos. La suma de TODOS los ítems debe ser EXACTAMENTE ' + ctx.puntaje + '. Esto es innegociable.\n' +
+        '\n' +
+        'DISTRIBUCIÓN OFICIAL DEL PUNTAJE (pre-calculada por la plataforma — usar TAL CUAL):\n' +
+        distrPts.resumen + '\n' +
+        '   TOTAL: ' + distrPts.sumaTotal + ' pts (debe coincidir con el puntaje objetivo de ' + ctx.puntaje + ' pts)\n' +
+        '\n' +
+        'INSTRUCCIONES DE PUNTAJE — CUMPLIR SIN EXCEPCIÓN:\n' +
+        '1. En el encabezado de CADA ítem (h3), incluye el puntaje total del ítem entre paréntesis tal como aparece arriba.\n' +
+        '2. Junto al enunciado de CADA pregunta, indica entre paréntesis su puntaje individual. Ej: "1. (' + (_pts('sm').porItem || 2) + ' pts) ¿Cuál es..."\n' +
+        '3. La Tabla de Especificaciones (ver sección Profesor) debe tener una columna "Puntaje" donde la suma SEA EXACTAMENTE ' + ctx.puntaje + '.\n' +
+        '4. Al final de la prueba (antes de la Versión Profesor), agrega un párrafo: "PUNTAJE TOTAL DE LA PRUEBA: ' + ctx.puntaje + ' pts.".\n' +
+        '5. Si hay un ítem con "ajuste" (último ítem con +/- 1-2 pts para que cuadre), respétalo exactamente como se indica en la distribución oficial.\n\n' +
 
         'ESTRUCTURA OBLIGATORIA DEL DOCUMENTO (en este ORDEN EXACTO):\n' +
         'El documento se entrega como UN SOLO archivo con DOS secciones claramente diferenciadas. Las preguntas se redactan UNA SOLA VEZ (en la Versión Estudiante). La Versión Profesor referencia esas preguntas por número, sin volver a escribirlas.\n\n' +
@@ -4361,7 +4449,9 @@
         '3. <h2>Tabla de Especificaciones</h2>\n' +
         '   - Genera una <table> con estas columnas exactas:\n' +
         '     "N° de pregunta | Tipo de Ítem | Habilidad cognitiva | Contenido | Puntaje".\n' +
-        '   - Una fila por CADA pregunta del instrumento (exactamente ' + totalItems + ' filas). El puntaje total debe sumar ' + ctx.puntaje + '.\n\n' +
+        '   - Una fila por CADA pregunta del instrumento (exactamente ' + totalItems + ' filas).\n' +
+        '   - La columna Puntaje DEBE coincidir con el puntaje individual indicado en cada pregunta de la Versión Estudiante.\n' +
+        '   - Al final de la tabla, agrega una fila TOTAL con la suma. La suma DEBE SER EXACTAMENTE ' + ctx.puntaje + ' pts. Si no suma, revisa fila por fila y corrige antes de entregar.\n\n' +
 
         '4. <h2>Pauta de Corrección</h2>\n' +
         '   - <h3>Respuestas — Ítems objetivos</h3>: entrega las respuestas exactas para todos los ítems con respuesta única (Selección Múltiple, V/F, Completar, Pareados, Aplicación cuando aplique), referenciándolas por su número (ej: "1. C", "2. V", "3. F — Justificación correcta: ..."). Para V/F incluye la justificación correcta de las afirmaciones falsas.\n' +
