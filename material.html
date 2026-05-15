@@ -5077,11 +5077,6 @@
                     document.getElementById('btnIA').disabled = false;
                     setIAStatus('error', '&#10007; Error de conexi\u00f3n: ' + err.message);
                 });
-            })
-            .catch(function(err) {
-                document.getElementById('btnIA').disabled = false;
-                setIAStatus('error', '&#10007; No se pudo cargar la configuraci\u00f3n IA: ' + err.message);
-            });
     }
     /**
      * Genera UNA O VARIAS versiones PIE (Evaluación Diferenciada) ANEXAS a una prueba
