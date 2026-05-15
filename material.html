@@ -1941,8 +1941,8 @@
             <div class="seccion-mat">
                 <h2><span>&#128196;</span> Documento Generado</h2>
                 <div class="doc-actions">
-                    <button class="btn-accion btn-imprimir" onclick="window.print()">Imprimir / Guardar PDF</button>
-                    <button class="btn-accion" onclick="descargarDoc()" style="background:linear-gradient(135deg,rgba(37,99,235,.3),rgba(59,130,246,.2));border-color:rgba(59,130,246,.5);color:#93c5fd;" title="Descargar como documento de Word (.doc)">⬇ Descargar Word</button>
+                    <button class="btn-accion" onclick="descargarPDF()" style="background:linear-gradient(135deg,rgba(220,38,38,.3),rgba(239,68,68,.2));border-color:rgba(239,68,68,.5);color:#fca5a5;" title="Descargar como PDF (vía diálogo de impresión del navegador)">⬇ Descargar PDF</button>
+                    <button class="btn-accion" onclick="descargarDoc()" style="background:linear-gradient(135deg,rgba(37,99,235,.3),rgba(59,130,246,.2));border-color:rgba(59,130,246,.5);color:#93c5fd;" title="Descargar como documento de Word (.doc) — logos embebidos">⬇ Descargar Word</button>
                     <button class="btn-accion btn-copiar-doc" onclick="copiarDocumento()">Copiar texto completo</button>
                     <button class="btn-accion btn-nuevo" onclick="nuevoDocumento()">Crear otro documento</button>
                     <button class="btn-accion" onclick="abrirRefinarIA()" style="background:linear-gradient(135deg,rgba(167,139,250,.3),rgba(124,58,237,.25));border-color:rgba(167,139,250,.5);color:#c4b5fd;" title="Pide a la IA que modifique este documento sin regenerarlo">🪄 Refinar con IA</button>
@@ -5772,30 +5772,115 @@
      * Descarga el documento generado como archivo de Word (.doc).
      * Word abre HTML con extensión .doc nativamente, sin necesidad de librería ZIP.
      */
-    function descargarDoc() {
-        var preview = document.getElementById('docPreview');
-        if (!preview || !(preview.innerHTML || '').trim()) {
-            showToast('Genera primero un documento para descargarlo.', 'warn');
-            return;
-        }
-        var titulo = (document.querySelector('#docPreview .doc-titulo-bar') || {}).textContent
-                  || (document.querySelector('#docPreview .doc-tipo') || {}).textContent
-                  || 'Documento Click&Clase';
-        titulo = (titulo || '').toString().trim().slice(0, 80) || 'Documento';
+    // ============================================================
+    //  Helpers compartidos por descarga Word y PDF
+    // ============================================================
 
-        // Estilos embebidos optimizados para impresión Word (A4, márgenes, encabezado).
-        var styles = '' +
+    /**
+     * Convierte una <img> a dataURL base64 inline (vía canvas).
+     * Garantiza que el logo aparezca en Word/PDF aunque se reenvíe por email.
+     * Devuelve una promesa que resuelve cuando todas las imágenes se han embebido.
+     */
+    function _embedearImagenesBase64(rootEl) {
+        var imgs = rootEl.querySelectorAll('img');
+        var promesas = [];
+        imgs.forEach(function(img) {
+            var src = img.getAttribute('src') || '';
+            if (!src || src.indexOf('data:') === 0) return;
+            promesas.push(new Promise(function(resolve) {
+                var nuevo = new Image();
+                nuevo.crossOrigin = 'anonymous';
+                nuevo.onload = function() {
+                    try {
+                        var w = nuevo.naturalWidth || 256;
+                        var h = nuevo.naturalHeight || 256;
+                        var canvas = document.createElement('canvas');
+                        canvas.width = w; canvas.height = h;
+                        var ctx = canvas.getContext('2d');
+                        ctx.drawImage(nuevo, 0, 0);
+                        var dataUrl = canvas.toDataURL('image/png');
+                        img.setAttribute('src', dataUrl);
+                    } catch (e) { /* tainted canvas o cors fail */ }
+                    resolve();
+                };
+                nuevo.onerror = function() { resolve(); };
+                try {
+                    nuevo.src = new URL(src, window.location.href).href;
+                } catch (_) { resolve(); }
+            }));
+        });
+        return Promise.all(promesas);
+    }
+
+    /**
+     * Limpia el body de cabezales/tablas de metadata que la IA haya inyectado
+     * dentro de la respuesta, evitando duplicaciones con nuestro header oficial.
+     */
+    function _limpiarBodyIA(rootEl) {
+        // 1) Eliminar bloques que parezcan "cabezal institucional" duplicado
+        //    (encabezados con "COLEGIO" o "LICEO" en mayúsculas + 1-3 líneas)
+        var paragrafos = rootEl.querySelectorAll('p, div');
+        paragrafos.forEach(function(p) {
+            // Si ya está dentro de nuestro header oficial, no tocar
+            if (p.closest('.doc-header-inst') || p.closest('.doc-titulo-bar') || p.closest('table.doc-meta')) return;
+            var txt = (p.textContent || '').trim();
+            if (!txt || txt.length > 200) return;
+            // Detectar patrones tipo "COLEGIO XYZ — DEPARTAMENTO DE BIOLOGIA"
+            var pat = /^(LICEO|COLEGIO|ESCUELA|INSTITUTO)\b[^\n]{0,150}$/i;
+            if (pat.test(txt) && p.parentElement && p.parentElement.children.length <= 5) {
+                p.remove();
+            }
+        });
+        // 2) Eliminar tablas de metadata que la IA haya hecho con headers tipo
+        //    "Nombre del estudiante" / "Fecha" / "Puntaje" (duplican doc-meta)
+        var tablas = rootEl.querySelectorAll('table');
+        tablas.forEach(function(t) {
+            if (t.classList.contains('doc-meta')) return;
+            var th = t.querySelectorAll('th, td');
+            if (th.length < 4 || th.length > 16) return;
+            var headers = [];
+            for (var i = 0; i < Math.min(th.length, 16); i++) {
+                headers.push((th[i].textContent || '').toLowerCase().trim());
+            }
+            var unidos = headers.join('|');
+            var triggers = ['nombre','estudiante','curso','profesor','fecha','puntaje','nota','duraci'];
+            var hits = triggers.filter(function(t){ return unidos.indexOf(t) !== -1; }).length;
+            if (hits >= 3) {
+                t.remove();
+            }
+        });
+        // 3) Quitar h1/h2 sueltos con título igual al tipo de documento (duplica el titulo-bar)
+        var tipoBar = rootEl.querySelector('.doc-titulo-bar');
+        var tipoTxt = tipoBar ? (tipoBar.textContent || '').toLowerCase().trim() : '';
+        if (tipoTxt) {
+            rootEl.querySelectorAll('h1, h2').forEach(function(h) {
+                if (h.closest('.doc-header-inst') || h.closest('.doc-titulo-bar')) return;
+                var ht = (h.textContent || '').toLowerCase().trim();
+                if (ht && (ht === tipoTxt || (ht.length < 80 && tipoTxt.indexOf(ht) !== -1))) {
+                    h.remove();
+                }
+            });
+        }
+        return rootEl;
+    }
+
+    /**
+     * Devuelve el CSS común optimizado para impresión (Word y PDF).
+     */
+    function _estilosImpresion() {
+        return '' +
         '<style>' +
         '@page { size: A4; margin: 2cm; }' +
         'body { font-family: "Segoe UI", Calibri, Arial, sans-serif; font-size: 11pt; color: #1a1a2e; line-height: 1.55; }' +
-        'h1 { font-size: 16pt; color: #1e2a44; border-bottom: 2px solid #6C5CE7; padding-bottom: 4pt; }' +
-        'h2 { font-size: 13pt; color: #6C5CE7; border-left: 3pt solid #6C5CE7; padding-left: 6pt; margin-top: 14pt; }' +
-        'h3 { font-size: 11.5pt; color: #2d3436; margin-top: 10pt; }' +
+        'h1 { font-size: 16pt; color: #1e2a44; border-bottom: 2px solid #6C5CE7; padding-bottom: 4pt; page-break-after: avoid; }' +
+        'h2 { font-size: 13pt; color: #6C5CE7; border-left: 3pt solid #6C5CE7; padding-left: 6pt; margin-top: 14pt; page-break-after: avoid; }' +
+        'h3 { font-size: 11.5pt; color: #2d3436; margin-top: 10pt; page-break-after: avoid; }' +
         'p, li, td, th { font-size: 10.5pt; }' +
-        'table { width: 100%; border-collapse: collapse; margin: 8pt 0; }' +
+        'table { width: 100%; border-collapse: collapse; margin: 8pt 0; page-break-inside: avoid; }' +
         'th { background: #6C5CE7; color: #fff; padding: 5pt 7pt; text-align: left; font-size: 10pt; }' +
         'td { border: 1pt solid #c8cdd2; padding: 4pt 7pt; }' +
-        '.doc-header-inst { display: table; width: 100%; margin-bottom: 8pt; border-bottom: 1pt solid #c8cdd2; padding-bottom: 6pt; }' +
+        'img { max-width: 100%; height: auto; }' +
+        '.doc-header-inst { display: table; width: 100%; margin-bottom: 8pt; border-bottom: 1pt solid #c8cdd2; padding-bottom: 6pt; page-break-after: avoid; }' +
         '.doc-header-inst .doc-logo-wrap, .doc-header-inst .doc-inst-text, .doc-header-inst .doc-spacer { display: table-cell; vertical-align: middle; }' +
         '.doc-header-inst .doc-logo-wrap { width: 80pt; }' +
         '.doc-header-inst .doc-logo { max-width: 70pt; max-height: 70pt; }' +
@@ -5803,9 +5888,11 @@
         '.doc-header-inst .doc-liceo { font-family: Georgia, "Times New Roman", serif; font-size: 16pt; font-weight: 700; color: #4a5560; }' +
         '.doc-header-inst .doc-tipo { font-size: 10pt; font-weight: 600; color: #6b7480; letter-spacing: 1pt; text-transform: uppercase; margin-top: 2pt; }' +
         '.doc-header-inst .doc-spacer { width: 80pt; }' +
-        '.doc-titulo-bar { background: #1e2a44; color: #fff; text-align: center; font-weight: 700; font-size: 12pt; letter-spacing: 1pt; padding: 6pt 10pt; margin: 6pt 0; text-transform: uppercase; }' +
+        '.doc-titulo-bar { background: #1e2a44; color: #fff; text-align: center; font-weight: 700; font-size: 12pt; letter-spacing: 1pt; padding: 6pt 10pt; margin: 6pt 0; text-transform: uppercase; page-break-after: avoid; }' +
+        'table.doc-meta { page-break-inside: avoid; }' +
         'table.doc-meta th { background: #fff; color: #1e2a44; text-transform: uppercase; font-size: 8.5pt; border: 1pt solid #4a5560; }' +
         'table.doc-meta td { background: #fff; border: 1pt solid #4a5560; }' +
+        '.recuadro-importante, .recuadro, .recuadro-seguridad { page-break-inside: avoid; }' +
         '.recuadro-importante { background: #fff3e0; border-left: 3pt solid #ff9800; padding: 6pt 9pt; margin: 8pt 0; }' +
         '.recuadro { background: #f0f4ff; border-left: 3pt solid #6C5CE7; padding: 6pt 9pt; margin: 8pt 0; }' +
         '.recuadro-seguridad { background: #ffebee; border-left: 3pt solid #c62828; padding: 6pt 9pt; margin: 8pt 0; }' +
@@ -5815,7 +5902,9 @@
         '.doc-version-tag { display: inline-block; margin: 0 0 8pt 0; padding: 3pt 9pt; background: #dcfce7; color: #166534; border: 1pt solid #16a34a; border-radius: 999pt; font-size: 9pt; font-weight: 700; letter-spacing: .5pt; text-transform: uppercase; }' +
         '.doc-version-tag--prof { background: #ede7f6; color: #4527a0; border-color: #6C5CE7; }' +
         '.page-break { page-break-before: always; mso-special-character: line-break; height: 0; border: none; margin: 0; }' +
-        /* Fórmulas matemáticas — se ven bien en Word */
+        'pre, blockquote { page-break-inside: avoid; }' +
+        'li { page-break-inside: avoid; }' +
+        /* Fórmulas matemáticas — se ven bien en Word y PDF */
         '.frac { display: inline-table; vertical-align: middle; text-align: center; margin: 0 2pt; }' +
         '.frac .num { display: table-row; }' +
         '.frac .num > * { display: table-cell; border-bottom: 1pt solid #1a1a2e; padding: 0 3pt 1pt; }' +
@@ -5828,54 +5917,122 @@
         'table.mat-sistema td { border: none !important; padding: 1pt 5pt; background: transparent !important; }' +
         'sup, sub { font-size: 75%; line-height: 0; }' +
         '</style>';
+    }
 
-        // ── Preparar el clon para exportación ──
+    /**
+     * Prepara el clon del docPreview limpio y con imágenes embebidas en base64.
+     * Devuelve Promise<HTMLElement> listo para serializar a Word o PDF.
+     */
+    function _prepararCloneExport() {
+        var preview = document.getElementById('docPreview');
+        if (!preview || !(preview.innerHTML || '').trim()) return Promise.reject(new Error('vacío'));
         var clone = preview.cloneNode(true);
-        // 1) Logos como URL absoluta (Word los recupera mejor)
-        clone.querySelectorAll('img').forEach(function(img) {
-            try {
-                var abs = new URL(img.getAttribute('src') || '', window.location.href).href;
-                img.setAttribute('src', abs);
-            } catch (e) { /* ignore */ }
-        });
-        // 2) MathJax: reemplazar containers SVG/CHTML por su LaTeX original (más limpio en Word)
+
+        // Reemplazar MathJax containers por su LaTeX original (más limpio en Word/PDF)
         clone.querySelectorAll('mjx-container').forEach(function(mjx) {
             var latex = '';
-            // MathJax 3 deja el código fuente accesible vía atributo o nodo hermano
             var prev = mjx.previousElementSibling;
             if (prev && prev.tagName && prev.tagName.toLowerCase() === 'script' && /math\/tex/i.test(prev.getAttribute('type') || '')) {
                 latex = prev.textContent || '';
             }
             if (!latex) latex = mjx.getAttribute('aria-label') || mjx.textContent || '';
-            // Limpiar LaTeX para que se vea legible: quitar \(\), \[\], $$ y $
             latex = String(latex).replace(/^\s*[$\\][\(\[]\s*/, '').replace(/\s*[\\][\)\]]\s*$/, '').replace(/^\$+|\$+$/g, '').trim();
-            var isDisplay = (mjx.getAttribute('display') === 'true') || mjx.matches && mjx.matches('[jax][display]');
+            var isDisplay = (mjx.getAttribute('display') === 'true') || (mjx.matches && mjx.matches('[jax][display]'));
             var rep = document.createElement(isDisplay ? 'p' : 'span');
             if (isDisplay) rep.setAttribute('class', 'math-display');
             rep.textContent = latex;
             mjx.parentNode.replaceChild(rep, mjx);
         });
-        // 3) Eliminar scripts type=math/tex sueltos que ya no son útiles en Word
         clone.querySelectorAll('script[type^="math/tex"]').forEach(function(s){ s.remove(); });
 
-        var head = '<head><meta charset="utf-8"><title>' + titulo.replace(/[<>"]/g, '') + '</title>' + styles + '</head>';
-        var body = '<body>' + clone.innerHTML + '</body>';
-        var html = '<!DOCTYPE html><html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">' + head + body + '</html>';
+        // Limpiar duplicaciones inyectadas por la IA
+        _limpiarBodyIA(clone);
 
-        var blob = new Blob(['\ufeff', html], { type: 'application/msword' });
-        var url = URL.createObjectURL(blob);
-        var fname = titulo.replace(/[^a-zA-Z0-9_\-\u00C0-\u017F\s]/g, '').replace(/\s+/g, '_').slice(0, 60) || 'documento';
-        var a = document.createElement('a');
-        a.href = url;
-        a.download = fname + '.doc';
-        document.body.appendChild(a);
-        a.click();
-        setTimeout(function(){
-            URL.revokeObjectURL(url);
-            if (a.parentNode) a.parentNode.removeChild(a);
-        }, 200);
-        showToast('Documento descargado en formato Word (.doc).', 'success');
-        try { if (typeof ELDB !== 'undefined' && ELDB.actividad) ELDB.actividad.log('descargar_word', { titulo: titulo }); } catch (e) {}
+        // Embebér imágenes (logos) como base64 — async
+        return _embedearImagenesBase64(clone).then(function() { return clone; });
+    }
+
+    function _tituloExport() {
+        var titulo = (document.querySelector('#docPreview .doc-titulo-bar') || {}).textContent
+                  || (document.querySelector('#docPreview .doc-tipo') || {}).textContent
+                  || 'Documento Click&Clase';
+        return (titulo || '').toString().trim().slice(0, 80) || 'Documento';
+    }
+
+    function _nombreArchivoExport() {
+        var t = _tituloExport();
+        return t.replace(/[^a-zA-Z0-9_\-À-ſ\s]/g, '').replace(/\s+/g, '_').slice(0, 60) || 'documento';
+    }
+
+    function descargarDoc() {
+        var preview = document.getElementById('docPreview');
+        if (!preview || !(preview.innerHTML || '').trim()) {
+            showToast('Genera primero un documento para descargarlo.', 'warn');
+            return;
+        }
+        var titulo = _tituloExport();
+        showToast('Preparando documento Word...', 'info');
+
+        _prepararCloneExport().then(function(clone) {
+            var head = '<head><meta charset="utf-8"><title>' + titulo.replace(/[<>"]/g, '') + '</title>' + _estilosImpresion() + '</head>';
+            var body = '<body>' + clone.innerHTML + '</body>';
+            var html = '<!DOCTYPE html><html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">' + head + body + '</html>';
+            var blob = new Blob(['\ufeff', html], { type: 'application/msword' });
+            var url = URL.createObjectURL(blob);
+            var fname = _nombreArchivoExport();
+            var a = document.createElement('a');
+            a.href = url;
+            a.download = fname + '.doc';
+            document.body.appendChild(a);
+            a.click();
+            setTimeout(function(){
+                URL.revokeObjectURL(url);
+                if (a.parentNode) a.parentNode.removeChild(a);
+            }, 200);
+            showToast('Documento descargado en formato Word (.doc).', 'success');
+            try { if (typeof ELDB !== 'undefined' && ELDB.actividad) ELDB.actividad.log('descargar_word', { titulo: titulo }); } catch (e) {}
+        }).catch(function(err) {
+            showToast('Error preparando el documento: ' + (err && err.message || 'desconocido'), 'error');
+        });
+    }
+
+    /**
+     * Descarga el documento como PDF usando window.print() en una ventana nueva
+     * con stylesheet de impresion. El usuario elige "Guardar como PDF" en el
+     * dialogo de impresion del navegador. Sin dependencias externas.
+     */
+    function descargarPDF() {
+        var preview = document.getElementById('docPreview');
+        if (!preview || !(preview.innerHTML || '').trim()) {
+            showToast('Genera primero un documento para descargarlo.', 'warn');
+            return;
+        }
+        var titulo = _tituloExport();
+        showToast('Preparando PDF...', 'info');
+
+        _prepararCloneExport().then(function(clone) {
+            var w = window.open('', '_blank', 'width=900,height=1100');
+            if (!w) {
+                showToast('Tu navegador bloqueo la ventana. Permiti pop-ups para descargar PDF.', 'warn');
+                return;
+            }
+            var head = '<head><meta charset="utf-8"><title>' + titulo.replace(/[<>"]/g, '') + '</title>' + _estilosImpresion() + '</head>';
+            var instrucciones = '<div style="background:#1e2a44;color:#fff;padding:14px 20px;margin:0 0 16px 0;border-radius:8px;font-family:Segoe UI,Arial,sans-serif;font-size:12pt;text-align:center" class="no-print">' +
+                'Se abrira el dialogo de impresion. Elegi <strong>"Guardar como PDF"</strong> como destino y haz clic en <strong>Guardar</strong>.' +
+                '</div>' +
+                '<style>@media print { .no-print { display:none !important; } }</style>';
+            var body = '<body>' + instrucciones + clone.innerHTML + '</body>';
+            w.document.open();
+            w.document.write('<!DOCTYPE html><html>' + head + body + '</html>');
+            w.document.close();
+            setTimeout(function() {
+                try { w.focus(); w.print(); }
+                catch (e) { showToast('No se pudo abrir el dialogo de impresion: ' + e.message, 'error'); }
+            }, 600);
+            try { if (typeof ELDB !== 'undefined' && ELDB.actividad) ELDB.actividad.log('descargar_word', { titulo: titulo, formato: 'pdf' }); } catch (e) {}
+        }).catch(function(err) {
+            showToast('Error preparando el PDF: ' + (err && err.message || 'desconocido'), 'error');
+        });
     }
 
     function mostrarToast(msg) { showToast(msg, 'info'); }
