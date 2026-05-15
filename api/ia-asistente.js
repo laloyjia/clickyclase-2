@@ -587,8 +587,21 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST')   return res.status(405).json({ error: 'Método no permitido' });
 
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) return res.status(500).json({ error: 'GEMINI_API_KEY no configurada en Vercel' });
+  // Pool de API keys: aceptamos GEMINI_API_KEY como key única o lista separada
+  // por coma. También leemos GEMINI_API_KEYS (plural) si existe.
+  const _rawKeys = (process.env.GEMINI_API_KEYS || process.env.GEMINI_API_KEY || '').trim();
+  const apiKeys = _rawKeys
+    .split(',')
+    .map(k => k.trim())
+    .filter(k => k.length > 10); // descarta entradas inválidas/vacías
+  if (apiKeys.length === 0) {
+    return res.status(500).json({ error: 'GEMINI_API_KEY no configurada en Vercel' });
+  }
+  // Mezclar el orden para distribuir carga entre todas las keys disponibles
+  const apiKeysShuffled = apiKeys
+    .map(k => ({ k, r: Math.random() }))
+    .sort((a, b) => a.r - b.r)
+    .map(x => x.k);
 
   const { tipo, datos } = req.body || {};
   if (!tipo) return res.status(400).json({ error: 'Parámetro tipo requerido' });
@@ -625,29 +638,61 @@ export default async function handler(req, res) {
                        ? modeloPedido
                        : GEMINI_MODEL_DEFAULT;
 
-  try {
-    const r = await fetch(`${_geminiUrl(modeloUsado)}?key=${apiKey}`, {
-      method:  'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: genCfg,
-        safetySettings: [
-          { category: 'HARM_CATEGORY_HARASSMENT',        threshold: 'BLOCK_NONE' },
-          { category: 'HARM_CATEGORY_HATE_SPEECH',       threshold: 'BLOCK_NONE' },
-          { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_NONE' }
-        ]
-      })
-    });
+  // Reintentar con cada key del pool. Si una falla por cuota agotada o
+  // por key inválida, pasamos a la siguiente automáticamente.
+  let ultimoError = 'Sin keys disponibles';
+  for (let intento = 0; intento < apiKeysShuffled.length; intento++) {
+    const apiKey = apiKeysShuffled[intento];
+    try {
+      const r = await fetch(`${_geminiUrl(modeloUsado)}?key=${apiKey}`, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: genCfg,
+          safetySettings: [
+            { category: 'HARM_CATEGORY_HARASSMENT',        threshold: 'BLOCK_NONE' },
+            { category: 'HARM_CATEGORY_HATE_SPEECH',       threshold: 'BLOCK_NONE' },
+            { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_NONE' }
+          ]
+        })
+      });
 
-    const data = await r.json();
-    if (data.error) return res.status(502).json({ error: data.error.message });
+      const data = await r.json();
 
-    const texto = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-    if (!texto) return res.status(502).json({ error: 'La IA no devolvió respuesta' });
+      // Errores específicos que justifican intentar con otra key
+      if (data.error) {
+        const errMsg = data.error.message || JSON.stringify(data.error);
+        const isQuota   = /RESOURCE_EXHAUSTED|quota|rate limit/i.test(errMsg);
+        const isInvalid = /API_KEY_INVALID|API key not valid|PERMISSION_DENIED/i.test(errMsg);
+        if ((isQuota || isInvalid) && intento < apiKeysShuffled.length - 1) {
+          ultimoError = errMsg;
+          continue; // probar siguiente key
+        }
+        return res.status(502).json({
+          error: errMsg + (apiKeysShuffled.length > 1 ? ` (probadas ${intento + 1}/${apiKeysShuffled.length} keys)` : '')
+        });
+      }
 
-    return res.status(200).json({ resultado: texto });
-  } catch (e) {
-    return res.status(500).json({ error: 'Error conectando con la IA: ' + e.message });
+      const texto = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+      if (!texto) {
+        // A veces Gemini bloquea por safety y no devuelve texto
+        const finishReason = data.candidates?.[0]?.finishReason;
+        return res.status(502).json({
+          error: finishReason === 'SAFETY'
+            ? 'La IA bloqueó la respuesta por filtros de seguridad. Reformula el contenido del documento.'
+            : 'La IA no devolvió respuesta'
+        });
+      }
+      return res.status(200).json({ resultado: texto, keysProbadas: intento + 1 });
+    } catch (e) {
+      ultimoError = e.message;
+      if (intento < apiKeysShuffled.length - 1) continue;
+      return res.status(500).json({ error: 'Error conectando con la IA: ' + e.message });
+    }
   }
+  // Si llegamos aquí es que todas las keys fallaron
+  return res.status(502).json({
+    error: 'Todas las API keys del pool están con cuota agotada o inválidas. Último error: ' + ultimoError
+  });
 }

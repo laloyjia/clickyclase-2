@@ -1835,7 +1835,7 @@
         var prompt = _construirPromptMBE(user, isTP);
 
         // SEGURIDAD: ya no leemos API keys desde Firestore. Vamos al endpoint serverless.
-        fetch('/api/ia-asistente', {
+        fetch(window.IA_ENDPOINT || '/api/ia-asistente', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -2529,7 +2529,7 @@
         var prompt = _construirPromptMBE(user, isTP);
 
         // SEGURIDAD: ya no leemos API keys desde Firestore. Vamos al endpoint serverless.
-        fetch('/api/ia-asistente', {
+        fetch(window.IA_ENDPOINT || '/api/ia-asistente', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({

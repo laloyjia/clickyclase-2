@@ -4842,7 +4842,7 @@
         document.getElementById('btnIA').disabled = true;
         Promise.resolve()
             .then(function() {
-                return fetch('/api/ia-asistente', {
+                return fetch(window.IA_ENDPOINT || '/api/ia-asistente', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -4977,7 +4977,7 @@
         }
 
         // SEGURIDAD: ya no usamos opts.apiKey/opts.modelo directos. Vamos al endpoint.
-        var url = '/api/ia-asistente';
+        var url = window.IA_ENDPOINT || '/api/ia-asistente';
         var preview = document.getElementById('docPreview');
 
         // Generar secuencialmente cada versión PIE para no saturar la API
@@ -5565,7 +5565,7 @@
         _refinarSetStatus('⏳ La IA está modificando el documento…', '#a5b4fc');
 
         // Llamada al endpoint
-        fetch('/api/ia-asistente', {
+        fetch(window.IA_ENDPOINT || '/api/ia-asistente', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
