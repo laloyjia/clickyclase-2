@@ -20,7 +20,8 @@ window.CURRICULA_PLAN_COMUN = window.CURRICULA_PLAN_COMUN || {};
 CURRICULA_PLAN_COMUN['ed-fisica'] = {
   nombre: 'Educación Física y Salud',
   sigla:  'EDF',
-  niveles: ['1B','2B','3B','4B','5B','6B','7B','8B','1M','2M','3M','4M'],
+  niveles: ['1B','2B','3B','4B','5B','6B','7B','8B','1M','2M'],
+  // 3M-4M: Ed-Física FG vive como electivos HC (ver `electivos` abajo).
   unidades: {
     '1B': ['Habilidades motrices básicas','Juegos libres','Higiene'],
     '2B': ['Destrezas locomotoras','Juegos cooperativos','Vida activa'],
@@ -32,8 +33,7 @@ CURRICULA_PLAN_COMUN['ed-fisica'] = {
     '8B': ['Planificación de actividad física','Deportes alternativos','Vida saludable'],
     '1M': ['Capacidades físicas','Deporte y salud','Vida activa adolescente'],
     '2M': ['Entrenamiento personalizado','Deportes de conjunto','Bienestar integral'],
-    '3M': ['Plan de actividad física','Deportes de aventura','Salud y rendimiento'],
-    '4M': ['Proyecto de vida activa','Liderazgo deportivo','Actividad física para la vida']
+    // 3M-4M: Ed-Física FG vive como electivos HC (ver `electivos` abajo).
   },
   // ───────────────────────────────────────────────────────────────────────────
   //  OAs — schema: { codigo: 'OA1', eje: '...', descripcion: '...' }
@@ -157,8 +157,7 @@ CURRICULA_PLAN_COMUN['ed-fisica'] = {
       { codigo: 'OA4', eje: 'Vida activa y saludable', descripcion: 'Practicar regularmente una variedad de actividades físicas alternativas y/o deportivas en diferentes entornos, aplicando conductas de autocuidado, seguridad y primeros auxilios, como: realizar al menos 30 minutos diarios de actividades físicas de su interés; promover campañas para evitar el consumo de drogas, tabaco y alcohol; aplicar maniobras básicas de primeros auxilios en situaciones de riesgo; dirigir y ejecutar un calentamiento de manera grupal; hidratarse con agua de forma permanente.' },
       { codigo: 'OA5', eje: 'Responsabilidad personal y social en el deporte y la actividad física', descripcion: 'Participar, liderar y promover una variedad de actividades físicas y/o deportivas de su interés y que se desarrollen en su comunidad escolar y/o en su entorno; por ejemplo: sugerir estrategias grupales para organizar actividades físicas y/o deportivas; demostrar distintos estilos de liderazgo en la promoción de una vida activa; proponer y crear una variedad de actividades físicas y deportivas para desarrollar los planes para promover una vida activa en su comunidad; fomentar y crear estrategias para adherir a la práctica de actividad física permanente.' }
     ],
-    '3M': [ /* FG no obligatorio en 3°-4°M; ver electivos abajo */ ],
-    '4M': [ /* FG no obligatorio en 3°-4°M; ver electivos abajo */ ]
+    // 3M-4M: solo via electivos HC (ver `electivos` abajo).
   },
   actitudes:   [],  // hereda de _comun
   habilidades: ['Habilidades motrices','Vida activa y saludable','Seguridad, juego limpio y liderazgo'],
