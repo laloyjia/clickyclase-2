@@ -1,0 +1,1877 @@
+Programa de Estudio Ciencias para la Ciudadanía 3° o 4° medio   Módulo Tecnología y Sociedad
+
+
+
+
+                                              Módulo
+                                        Tecnología y Sociedad
+
+
+
+
+Unidad de Currículum y Evaluación                                                   243
+Ministerio de Educación, febrero 2021
+Programa de Estudio Ciencias para la Ciudadanía 3° o 4° medio                                                       Módulo Tecnología y Sociedad
+
+
+
+
+Panorama semestral del módulo
+
+                              UNIDAD 1                                                              UNIDAD 2
+           Innovación tecnológica: ¿Hasta dónde llegaremos?                   Proyectos tecnológicos: Diseño, alcances e implicancias
+
+                      OBJETIVOS DE APRENDIZAJE                                               OBJETIVOS DE APRENDIZAJE
+ OA 2. Explicar, basados en investigaciones y modelos, cómo los          OA 1. Diseñar proyectos tecnológicos que permitan resolver
+ avances tecnológicos (en robótica, telecomunicaciones, astronomía,      problemas personales y/o locales de diversos ámbitos de la vida
+ física cuántica, entre otros) han permitido al ser humano ampliar sus   (como vivienda y transporte, entre otros).
+ capacidades sensoriales y su comprensión de fenómenos                   OA 3. Evaluar alcances y limitaciones de la tecnología y sus
+ relacionados con la materia, los seres vivos y el entorno.              aplicaciones, argumentando riesgos y beneficios desde una
+ OA 3. Evaluar alcances y limitaciones de la tecnología y sus            perspectiva de salud, ética, social, económica y ambiental.
+ aplicaciones, argumentando riesgos y beneficios desde una               OA b. Planificar y desarrollar investigaciones que permitan recoger
+ perspectiva de salud, ética, social, económica y ambiental.             evidencias y contrastar hipótesis, con apoyo de herramientas
+ OA a. Formular preguntas y problemas sobre tópicos científicos de       tecnológicas y matemáticas.
+ interés, a partir de la observación de fenómenos y/o la exploración     OA d. Analizar las relaciones entre las partes de un sistema en
+ de diversas fuentes.                                                    fenómenos y problemas de interés, a partir de tablas, gráficos,
+ OA b. Planificar y desarrollar investigaciones que permitan recoger     diagramas y modelos.
+ evidencias y contrastar hipótesis, con apoyo de herramientas            OA e. Construir, usar y comunicar argumentos científicos.
+ tecnológicas y matemáticas.                                             OA g. Diseñar proyectos para encontrar soluciones a problemas,
+ OA c. Describir patrones, tendencias y relaciones entre datos,          usando la imaginación y la creatividad.
+ información y variables.                                                OA i. Analizar críticamente implicancias sociales, económicas,
+ OA e. Construir, usar y comunicar argumentos científicos.               éticas y ambientales de problemas relacionados con controversias
+ OA f. Desarrollar y usar modelos basados en evidencia, para predecir    públicas que involucran ciencia y tecnología.
+ y explicar mecanismos y fenómenos naturales.
+ OA i. Analizar críticamente implicancias sociales, económicas, éticas
+ y ambientales de problemas relacionados con controversias públicas
+ que involucran ciencia y tecnología.
+
+
+
+
+Unidad de Currículum y Evaluación                                                              244
+Ministerio de Educación, febrero 2021
+Programa de Estudio Ciencias para la Ciudadanía 3° o 4° medio                                                     Módulo Tecnología y Sociedad
+
+
+
+
+                                  ACTITUDES                                                        ACTITUDES
+ •    Valorar las TIC como una oportunidad para informarse,           •   Pensar con perseverancia y proactividad para encontrar
+      investigar, socializar, comunicarse y participar como               soluciones innovadoras a los problemas.
+      ciudadano.                                                      •   Trabajar colaborativamente en la generación, desarrollo y
+ •    Trabajar colaborativamente en la generación, desarrollo y           gestión de proyectos y la resolución de problemas,
+      gestión de proyectos y la resolución de problemas, integrando       integrando las diferentes ideas y puntos de vista.
+      las diferentes ideas y puntos de vista.                         •   Interesarse por las posibilidades que ofrece la tecnología para
+ •    Participar asumiendo posturas razonadas en distintos ámbitos:       el desarrollo intelectual, personal y social del individuo.
+      cultural, social, político y medioambiental, entre otros.
+
+                                Tiempo estimado                                                Tiempo estimado
+                                   10 semanas                                                     9 semanas
+
+
+
+
+Unidad de Currículum y Evaluación                                                           245
+Ministerio de Educación, febrero 2021
+Programa de Estudio Ciencias para la Ciudadanía 3° o 4° medio   Módulo Tecnología y Sociedad
+                                                                                    Unidad 1
+
+
+
+
+Unidad de Currículum y Evaluación                                                   246
+Ministerio de Educación, febrero 2021
+Programa de Estudio Ciencias para la Ciudadanía 3° o 4° medio                       Módulo Tecnología y Sociedad
+                                                                                                        Unidad 1
+
+
+
+
+Unidad 1:
+Innovación tecnológica: ¿Hasta dónde llegaremos?
+
+ PROPÓSITO
+
+ Que los estudiantes reflexionen y debatan sobre los beneficios, alcances y limitaciones de los avances
+ tecnológicos en la sociedad. A su vez, que se formulen preguntas cómo ¿De qué manera las culturas
+ han desarrollado tecnologías a través del tiempo? ¿Cuál es la relación entre el desarrollo científico y los
+ avances tecnológicos? ¿Cuáles son los alcances y limitaciones de las tecnologías? ¿Cuál es el rol de la
+ ciudadanía en el desarrollo científico-tecnológico? ¿Qué rol tiene Chile en el desarrollo de tecnológico
+ global?
+
+
+
+                                             OBJETIVOS DE APRENDIZAJE
+
+  OA 2. Explicar, basados en investigaciones y modelos, cómo los avances tecnológicos (en robótica,
+  telecomunicaciones, astronomía, física cuántica, entre otros) han permitido al ser humano ampliar
+  sus capacidades sensoriales y su comprensión de fenómenos relacionados con la materia, los seres
+  vivos y el entorno.
+  OA 3. Evaluar alcances y limitaciones de la tecnología y sus aplicaciones, argumentando riesgos y
+  beneficios desde una perspectiva de salud, ética, social, económica y ambiental.
+  OA a. Formular preguntas y problemas sobre tópicos científicos de interés, a partir de la observación
+  de fenómenos y/o la exploración de diversas fuentes.
+  OA b. Planificar y desarrollar investigaciones que permitan recoger evidencias y contrastar hipótesis,
+  con apoyo de herramientas tecnológicas y matemáticas.
+  OA c. Describir patrones, tendencias y relaciones entre datos, información y variables.
+ OA d. Analizar las relaciones entre las partes de un sistema en fenómenos y problemas de interés, a
+ partir de tablas, gráficos, diagramas y modelos.
+  OA e. Construir, usar y comunicar argumentos científicos.
+  OA f. Desarrollar y usar modelos basados en evidencia, para predecir y explicar mecanismos y
+  fenómenos naturales.
+  OA i. Analizar críticamente implicancias sociales, económicas, éticas y ambientales de problemas
+  relacionados con controversias públicas que involucran ciencia y tecnología.
+
+
+
+
+Unidad de Currículum y Evaluación                                                                       247
+Ministerio de Educación, febrero 2021
+Programa de Estudio Ciencias para la Ciudadanía 3° o 4° medio                    Módulo Tecnología y Sociedad
+                                                                                                     Unidad 1
+
+
+
+
+Actividad 1. ¿Cómo ampliamos nuestra comprensión de la naturaleza y la vida con
+el uso de tecnologías?
+
+
+PROPÓSITO
+
+Que los estudiantes reflexionen sobre la ampliación de la percepción humana en el estudio de fenómenos
+en la naturaleza, por medio del desarrollo científico-tecnológico.
+
+
+ OBJETIVOS DE APRENDIZAJE
+ OA 2
+ Explicar, basados en investigaciones y modelos, cómo los avances tecnológicos (en robótica,
+ telecomunicaciones, astronomía, física cuántica, entre otros) han permitido al ser humano ampliar sus
+ capacidades sensoriales y su comprensión de fenómenos relacionados con la materia, los seres vivos y
+ el entorno.
+ OA a
+ Formular preguntas y problemas sobre tópicos científicos de interés, a partir de la observación de
+ fenómenos y/o la exploración de diversas fuentes.
+ OA b
+ Planificar y desarrollar investigaciones que permitan recoger evidencias y contrastar hipótesis, con
+ apoyo de herramientas tecnológicas y matemáticas.
+ OA d
+ Analizar las relaciones entre las partes de un sistema en fenómenos y problemas de interés, a partir de
+ tablas, gráficos, diagramas y modelos.
+ OA e
+ Construir, usar y comunicar argumentos científicos.
+ OA f
+ Desarrollar y usar modelos basados en evidencia, para predecir y explicar mecanismos y fenómenos
+ naturales.
+
+
+
+ACTITUD
+• Participar asumiendo posturas razonadas en distintos ámbitos: cultural, social, político y
+   medioambiental, entre otros.
+
+DURACIÓN
+4 horas pedagógicas
+
+
+
+
+Unidad de Currículum y Evaluación                                                                    248
+Ministerio de Educación, febrero 2021
+Programa de Estudio Ciencias para la Ciudadanía 3° o 4° medio                            Módulo Tecnología y Sociedad
+                                                                                                             Unidad 1
+
+
+
+
+DESARROLLO
+
+     Activando
+     ➢ Observan las siguientes imágenes y reflexionan guiados por las preguntas posteriores:
+
+
+                                                           1                                                   2
+
+
+
+
+                                                           3                                                   4
+
+
+
+
+                                                           5                                                   6
+
+
+
+
+     1. ¿Qué preguntas les surgen al observar las imágenes? Conversen en parejas.
+     2. ¿Por qué el ser humano ha recurrido al desarrollo de nuevas
+        tecnologías?                                                              Conexión interdisciplinar:
+                                                                                  Filosofía
+     3. ¿Con qué campo laboral o área de estudio relacionarían las                OA 5 (4° Medio)
+
+        imágenes observadas?
+     4. ¿Cómo el desarrollo tecnológico ha permitido al ser humano ampliar sus capacidades sensoriales
+        y su comprensión de fenómenos naturales y de la vida?
+     5. ¿El rol de las tecnologías es solamente favorecer una mayor comprensión de los fenómenos que
+        ocurren en el mundo? Argumenten brevemente.
+
+ Observaciones al docente
+ • Es probable que existan imágenes que los estudiantes no entiendan. Por eso, hay que considerar que la
+    imagen 1 corresponde a radiotelescopios; la imagen 2 representa un satélite artificial alrededor de la Tierra;
+    la imagen 3 es un avanzado microscopio electrónico; la imagen 4 hace alusión a la robótica; la imagen 5
+    corresponde a supercomputadores; la imagen 6 hace alusión a las telecomunicaciones.
+ • Es un oportuno momento para mencionar el impacto que ha tenido el desarrollo y el uso del internet en las
+    diversas culturas y esferas de la vida, considerando sus beneficios y limitaciones.
+
+
+
+
+Unidad de Currículum y Evaluación                                                                              249
+Ministerio de Educación, febrero 2021
+Programa de Estudio Ciencias para la Ciudadanía 3° o 4° medio                          Módulo Tecnología y Sociedad
+                                                                                                           Unidad 1
+
+
+
+
+     Relacionando
+
+     ➢ Los estudiantes reflexionan acerca de la relación entre la construcción del conocimiento científico
+       a lo largo de la historia y el desarrollo de tecnologías.
+
+ Observaciones al docente
+ •  No es recomendable dedicar mucho tiempo a esta parte de la actividad, pues la profundización se realizará en
+    la etapa siguiente.
+ •  Hace 500 años, en pleno Renacimiento en Europa, se creía que el planeta Tierra estaba compuesto por agua,
+    fuego, tierra y aire, los que estaban sujetos a continuas transformaciones, mientras que afuera de la Tierra
+    todo estaba compuesto de un material perfecto, incorruptible y regular. Fue con el apoyo de tecnologías como
+    el telescopio que, poco a poco, fuimos cambiando nuestra interpretación de la naturaleza de la Tierra y el
+    cosmos, cuyas reflexiones sistematizadas nos permitieron conocer que la naturaleza de la Tierra es igual a la
+    del resto del cosmos, siendo un hito en los inicios de la ciencia moderna.
+
+
+Investigando avances científicos-tecnológicos
+
+     ➢ Los estudiantes, en trabajo colaborativo, buscan información acerca de avances científico-
+       tecnológicos que han permitido al ser humano ampliar sus capacidades sensoriales y comprensión
+       de fenómenos, para lo cual seleccionan una tecnología actual aplicada en telecomunicaciones,
+       medicina, astrofísica, robótica, entre otros, considerando:
+     -    Conocimientos científicos implicados en el desarrollo de la tecnología en estudio.
+
+     -    Funcionamiento de la tecnología investigada en el área o campo de estudio seleccionado.
+
+     -    Relación entre el artefacto y (órganos de los) sentidos cuya capacidad se aumentó.
+     -    Alcances éticos, sociales y ambientales de la tecnología en estudio.
+     ➢ Presentan su investigación, basados en la elaboración de modelos y/o material de divulgación para
+       la ciudadanía, enfatizando la relación entre Ciencia, Tecnología, Sociedad y Ambiente.
+
+ Observaciones al docente
+ • Para que la actividad sea más significativa en la modalidad técnico-profesional, se sugiere que investiguen
+    avances científicos-tecnológicos de cada especialidad, profundizando en la importancia de conocer el
+    funcionamiento de máquinas, equipos, instrumentos y utensilios de la especialidad de acuerdo a los manuales
+    de funcionamiento de los fabricantes.
+ • Se sugiere elaborar una rúbrica para la evaluación de las presentaciones y modelos, considerando la auto y
+    coevaluación junto con la evaluación del docente.
+
+
+
+
+Unidad de Currículum y Evaluación                                                                          250
+Ministerio de Educación, febrero 2021
+Programa de Estudio Ciencias para la Ciudadanía 3° o 4° medio                           Módulo Tecnología y Sociedad
+                                                                                                            Unidad 1
+
+
+
+
+ Observaciones al docente
+ Se puede usar los siguientes indicadores, entre otros, para evaluar formativamente:
+ • Formulan preguntas y problemas sobre innovaciones tecnológicas usadas en diversas áreas, culturas y épocas.
+ • Planifican y desarrollan investigaciones sobre avances tecnológicos en áreas como en robótica,
+     telecomunicaciones, astronomía, física cuántica, entre otros.
+ • Relacionan innovaciones tecnológicas con contextos y motivaciones para su diseño.
+ • Desarrollan y usan modelos para explicar cómo la tecnología ha permitido ampliar capacidades sensoriales del
+     ser humano.
+
+
+
+
+RECURSOS Y SITIOS WEB
+
+                           •    Ciencia e innovación con impacto global. Congreso futuro 2017
+                           https://www.curriculumnacional.cl/link/https://www.youtube.com/watch?v
+                           =e_3xvbp2nc4
+                           •    ¿Superará la inteligencia artificial a la inteligencia biológica? Congreso
+                                futuro
+                           https://www.curriculumnacional.cl/link/https://www.youtube.com/watch?v
+                           =bujtk67qgay
+                           •    Inteligencia humana vs inteligencia artificial. Congreso futuro 2018
+                           https://www.curriculumnacional.cl/link/https://www.youtube.com/watch?v
+                           =ebpwmrbcf0e
+                           •    Los temas bajo la educación CTS:
+                           https://www.curriculumnacional.cl/link/https://www.oei.es/historico/salact
+                           si/uvalle/gdd_capitulo4.htm
+                           •    Ciencia y tecnología
+                           https://www.curriculumnacional.cl/link/https://culturacientifica.com/2017/
+                           01/19/ciencia-y-tecnologia/
+
+
+
+
+Unidad de Currículum y Evaluación                                                                           251
+Ministerio de Educación, febrero 2021
+Programa de Estudio Ciencias para la Ciudadanía 3° o 4° medio                   Módulo Tecnología y Sociedad
+                                                                                                    Unidad 1
+
+
+
+
+Actividad 2. Tecnologías: ¿dónde y por qué han aparecido?
+
+
+PROPÓSITO
+
+Se espera que los estudiantes reflexionen y tomen conciencia de que el ser humano, históricamente, ha
+desarrollado tecnologías guiados por diversas necesidades y motivaciones.
+
+
+                                              OBJETIVOS DE APRENDIZAJE
+ OA 2
+ Explicar, basados en investigaciones y modelos, cómo los avances tecnológicos (en robótica,
+ telecomunicaciones, astronomía, física cuántica, entre otros) han permitido al ser humano ampliar sus
+ capacidades sensoriales y su comprensión de fenómenos relacionados con la materia, los seres vivos y
+ el entorno.
+ OA 3
+ Evaluar alcances y limitaciones de la tecnología y sus aplicaciones, argumentando riesgos y beneficios
+ desde una perspectiva de salud, ética, social, económica y ambiental.
+ OA c
+ Describir patrones, tendencias y relaciones entre datos, información y variables.
+ OA b
+ Planificar y desarrollar investigaciones que permitan recoger evidencias y contrastar hipótesis, con
+ apoyo de herramientas tecnológicas y matemáticas.
+
+
+
+ACTITUD
+•  Valorar las TIC como una oportunidad para informarse, investigar, socializar, comunicarse y
+   participar como ciudadano.
+
+DURACIÓN
+4 horas pedagógicas
+
+
+
+
+Unidad de Currículum y Evaluación                                                                   252
+Ministerio de Educación, febrero 2021
+Programa de Estudio Ciencias para la Ciudadanía 3° o 4° medio                           Módulo Tecnología y Sociedad
+                                                                                                            Unidad 1
+
+
+
+
+DESARROLLO
+
+Activando saberes
+    ➢ Reflexionan a partir de las siguientes imágenes, guiados por las preguntas
+
+
+
+
+ Observaciones al docente
+ Las imágenes muestran objetos tecnológicos como un teléfono celular (y conectividad con redes sociales),
+ ollas de cerámica, artefactos electrodomésticos, una bicicleta (algo antigua) y canastos de material textil.
+
+
+ 1.    ¿Qué aspectos comunes tienen los objetos de las imágenes?
+ 2.    ¿Conocen la historia sobre el desarrollo de alguna de las tecnologías de la imagen? Describan.
+ 3.    ¿En qué se parecen las tecnologías de hoy con las de hace 10, 20 o 30 años?
+ 4.    ¿Cómo usaron tecnologías nuestros abuelos?
+ 5.    ¿En qué medida la tecnología es sinónimo de moderno?
+ 6.    ¿Cuáles fueron las primeras tecnologías de la humanidad?
+ 7.    ¿Están implicadas las ciencias en la construcción de tecnologías en las diversas épocas? Expliquen
+       brevemente.
+
+➢ Antes de continuar, plantean una hipótesis acerca de la evolución y/o el impacto del desarrollo de
+  tecnologías en la sociedad.
+
+ Observaciones al docente
+ Es importante que activen sus conocimientos previos sobre el concepto de tecnología, con énfasis en cómo el ser
+ humano, a partir de necesidades y motivaciones, ha diseñado tecnologías para facilitarse la vida.
+ • En esta parte, también podría orientarlos con preguntas como: ¿Qué relación existe entre la artesanía y la
+      tecnología? ¿Cuáles son las tecnologías de uso común en Chile? ¿Serán las mismas que en otros lugares del
+      mundo?
+
+
+
+
+Unidad de Currículum y Evaluación                                                                           253
+Ministerio de Educación, febrero 2021
+Programa de Estudio Ciencias para la Ciudadanía 3° o 4° medio                          Módulo Tecnología y Sociedad
+                                                                                                           Unidad 1
+
+
+
+
+ •    Existe una tendencia en creer que antiguamente no había tecnologías o que todo lo tecnológico implica que
+      sea electrónico. Esto es falso, pues el desarrollo tecnológico comenzó en las culturas ancestrales de los
+      diversos lugares del mundo.
+ •    Podría preguntar también: ¿Qué relación existe entre creatividad y desarrollo tecnológico?
+ •    Dado que es una etapa de activación, se sugiere mantener el control del tiempo para focalizar más en las
+      próximas etapas.
+ •    Para que la actividad sea más significativa en la modalidad técnico-profesional, se sugiere concentrar la
+      pregunta en cada especialidad; por ejemplo: ¿Cómo se trabajaba? ¿Cómo se desarrollaba x actividad? ¿Cómo
+      se producía hace 10, 20 o 30 años?
+
+
+     Interpretando
+     ➢ Observan el siguiente gráfico acerca del desarrollo de tecnologías a lo largo de la historia y
+         responden algunas preguntas:
+
+
+                 Evolución del
+             desarrollo tecnológico
+
+
+
+
+1.   ¿El gráfico quiere decir que antes del año 50 a.C. no hubo desarrollo de tecnologías? ¿Qué opinas al
+     respecto?
+2.   ¿Las tecnologías se diseñaron solo a partir del año 35 a.C.?         Conexión interdisciplinar:
+     Justifica.                                                           Ciencias de la Salud
+                                                                          OA 5 (3° o 4° Medio)
+3.   ¿Cómo interpretas que la infografía muestre solamente avances Física
+                                                                          OA 4, OA 5 (3° o 4° Medio)
+     tecnológicos en ingeniería, medicina, física e información y         Química
+     computación?                                                         OA 1, OA 6 (3° o 4° Medio)
+                                                                          Biología de los Ecosistemas
+4.   ¿Cuáles pueden ser las razones de que, a partir de 1950, OA 4 (3° o 4° Medio)
+                                                                          Biología Celular y Molecular
+     aumentara el desarrollo de tecnologías?                              OA 7 (3° o 4° Medio)
+5.   ¿Cómo proyectarías la línea del gráfico después del 2050?
+
+ Observaciones al docente
+ • Conviene establecer alguna relación entre el avance científico y la innovación tecnológica y, en el caso de la
+    modalidad técnico-profesional, dar ejemplos de qué avances hay en cada área y cuáles son las últimas
+    innovaciones tecnológicas que se está desarrollando.
+ • Aunque el gráfico no alude a ello, haga visible la relación entre la construcción del conocimiento científico
+    basado en el “método científico” en Europa (desde el año 1700) y el desarrollo de tecnologías. Aproveche de
+    comentar que el método científico se fue diversificando en el tiempo, dependiendo del objeto y área de
+    estudio, por lo cual hoy no cabe hablar de “el método científico”, sino más bien de los “métodos científicos”,
+
+
+
+Unidad de Currículum y Evaluación                                                                          254
+Ministerio de Educación, febrero 2021
+Programa de Estudio Ciencias para la Ciudadanía 3° o 4° medio                            Módulo Tecnología y Sociedad
+                                                                                                             Unidad 1
+
+
+
+
+      que tienen aspectos comunes y distintos y que han llevado también al desarrollo de tecnologías más
+      específicas.
+ •    Es importante que tengan claro que el gráfico es una representación parcial de la información disponible hoy,
+      por lo que no es una verdad absoluta, pero permite hacernos una idea general del aumento del desarrollo
+      tecnológico en la historia.
+
+
+Investigando
+
+ Observaciones al docente
+ • En esta etapa, se debe guiar a los estudiantes a investigar acerca de tecnologías según épocas (Antigua, Media,
+    Moderna y Contemporánea) o áreas (ciencias, medicina, artes, transporte, educación, informática, industrias,
+    militar, entre otras) y compartan sus hallazgos entre grupos. También se sugiere considerar la tecnología
+    asociada a culturas de nuestros pueblos originarios o la desarrollada en Chile u otro país de relevancia en el
+    curso.
+ • Es una oportuna instancia para que los alumnos trabajen por afinidad en sus áreas de interés o especialidad
+    como, por ejemplo, tecnologías asociadas a la automatización, electrónica, mecánica, biotecnología,
+    nanotecnología, sostenibilidad, entre otras.
+ • Además, los puede orientar en una reflexión sobre patentes y propiedad intelectual.
+
+
+     ➢ Los alumnos buscan información sobre la evolución de las tecnologías, para lo cual:
+       - Estudian tecnologías representativas desde las culturas
+           ancestrales hasta las más modernas, incluida la necesidad Conexión interdisciplinar:
+                                                                        Ciencias de la Salud
+           o motivación para su diseño, función, contexto, alcances y OA 5 (3° o 4°)
+                                                                        Física
+           limitaciones asociados al desarrollo y su aplicación.        OA 4, OA 5 (3° o 4°)
+       - Organizan la información y la presentan con un software.       Química
+                                                                        OA 1, OA 6 (3° o 4°)
+       - Socializan sus hallazgos entre pares.                          Biología de los Ecosistemas
+                                                                        OA 4 (3° o 4°)
+       - Reflexionan a partir de preguntas como: ¿Cómo ha sido el Biología Celular y Molecular
+           desarrollo de tecnologías en Chile en el área de estudio que OA 7 (3° o 4°)
+           investigaron? ¿Somos diseñadores o consumidores de tecnologías? ¿Cuál es el desafío de Chile
+           en materia tecnológica?
+
+     ➢ Contrastan sus resultados con la hipótesis planteada en la parte I.
+
+ Observaciones al docente
+ Se puede usar los siguientes indicadores, entre otros, para evaluar formativamente:
+ • Analizan alcances y limitaciones asociados al desarrollo y la aplicación de tecnologías en diversos contextos.
+ • Analizan críticamente el rol de la ciudadanía en la adopción y el uso de tecnologías en diversos ámbitos de
+     la vida.
+ • Analizan controversias públicas sobre tecnología y sociedad, considerando implicancias sociales,
+     económicas, éticas y ambientales.
+
+
+
+
+Unidad de Currículum y Evaluación                                                                            255
+Ministerio de Educación, febrero 2021
+Programa de Estudio Ciencias para la Ciudadanía 3° o 4° medio                        Módulo Tecnología y Sociedad
+                                                                                                         Unidad 1
+
+
+
+
+RECURSOS Y SITIOS WEB
+
+                           •    Los temas bajo la educación CTS:
+                                https://www.curriculumnacional.cl/link/https://www.oei.es/historico/salacts
+                                i/uvalle/gdd_capitulo4.htm
+                           •    La ciencia y la tecnología como procesos sociales. Lo que la educación
+                                científica no debería olvidar.
+                                https://www.curriculumnacional.cl/link/https://www.oei.es/historico/salacts
+                                i/nunez03.htm
+                           •    El desarrollo tecnológico en la historia:
+                                https://www.curriculumnacional.cl/link/http://www.scielo.org.pe/scielo.php
+                                ?script=sci_arttext&pid=S1016-913X2007000200001
+
+
+
+
+Unidad de Currículum y Evaluación                                                                        256
+Ministerio de Educación, febrero 2021
+Programa de Estudio Ciencias para la Ciudadanía 3° o 4° medio                   Módulo Tecnología y Sociedad
+                                                                                                    Unidad 1
+
+
+
+
+Actividad 3. Drones, realidad virtual, 5G: ¿para qué y hasta dónde?
+PROPÓSITO
+
+Se espera que los estudiantes reflexionen y analicen los riesgos y beneficios asociados a la adopción de
+tecnologías y el rol de la ciudadanía.
+
+                                              OBJETIVOS DE APRENDIZAJE
+ OA 3
+ Evaluar alcances y limitaciones de la tecnología y sus aplicaciones, argumentando riesgos y beneficios
+ desde una perspectiva de salud, ética, social, económica y ambiental.
+ OA a
+ Formular preguntas y problemas sobre tópicos científicos de interés, a partir de la observación de
+ fenómenos y/o la exploración de diversas fuentes.
+ OA i
+ Analizar críticamente implicancias sociales, económicas, éticas y ambientales de problemas
+ relacionados con controversias públicas que involucran ciencia y tecnología.
+
+
+
+ACTITUDES
+• Participar asumiendo posturas razonadas en distintos ámbitos: cultural, social, político y
+   medioambiental, entre otros.
+• Valorar las TIC como una oportunidad para informarse, investigar, socializar, comunicarse y
+   participar como ciudadano.
+
+DURACIÓN
+4 horas pedagógicas
+
+
+
+
+Unidad de Currículum y Evaluación                                                                   257
+Ministerio de Educación, febrero 2021
+Programa de Estudio Ciencias para la Ciudadanía 3° o 4° medio                       Módulo Tecnología y Sociedad
+                                                                                                        Unidad 1
+
+
+
+
+DESARROLLO
+
+Imaginando
+
+      ➢ Escuchan o leen las siguientes preguntas y, en parejas, responden algunas:
+
+
+
+
+ 1.     ¿Qué sentimientos y pensamiento te evocan las preguntas?
+ 2.     ¿Hay alguna pregunta que te haya interesado más? ¿Por qué?
+ 3.     ¿Será posible que lo que plantea cada pregunta se vuelva realidad en el futuro? Explica tres razones.
+ 4.     ¿Qué tecnologías imaginas que habrá en 30, 60 y 100 años más, si el planeta Tierra aún es habitable?
+
+
+Sensibilizando
+
+      ➢ Reflexionan a partir del video “Inteligencia Artificial” de National Geographic, mediante las
+        siguientes preguntas:
+      1. ¿Qué aspectos te llamaron más la atención?
+      2. ¿Qué mensaje quieren traspasar?
+      3. ¿Cuáles son los beneficios de la inteligencia artificial en la sociedad actualmente?
+      4. ¿Por qué existen riesgos asociados a la adopción de la inteligencia artificial?
+      5. ¿Llegará la inteligencia artificial a reemplazar al ser humano?
+      6. ¿Qué implicaría para un trabajador ser reemplazado por una máquina? Piensa en beneficios y
+          riesgos para la empresa y para el trabajador.
+      7. ¿Podrían las tecnologías llegar a “controlar” al ser humano en los próximos años?
+      8. ¿Y si nosotros fuésemos inteligencia artificial avanzada y aún no percibamos a nuestro
+          diseñador?
+
+
+
+
+Unidad de Currículum y Evaluación                                                                       258
+Ministerio de Educación, febrero 2021
+Programa de Estudio Ciencias para la Ciudadanía 3° o 4° medio                                Módulo Tecnología y Sociedad
+                                                                                                                 Unidad 1
+
+
+
+
+ Observaciones al docente
+ • Busque el video en Youtube. Se recomienda descargarlo antes de la clase, frente a cualquier eventualidad con
+    el estado de internet.
+ • En esta parte también podría sugerir que vean en su tiempo libre el video “Inteligencia Artificial – IBM”,
+    disponible en el canal de Youtube del Discovery Channel.
+ • Al hablar sobre los potenciales riesgos de la inteligencia artificial, podría sugerirles que lean “Los mayores
+    peligros      del     uso     indebido      de      la    inteligencia       artificial”,   disponible    en:
+    https://www.curriculumnacional.cl/link/https://elpais.com/tecnologia/2018/02/23/actualidad/1519384458
+    _653400.html
+ • Para favorecer la imaginación y reflexionar críticamente acerca de la relación ser humano-robots, podría ver
+    juntos o recomendarles la película “Matrix”, disponible en internet. También podrían reflexionar sobre el
+    fenómeno de Frankenstein con la frase “Tú eres mi creador, pero yo soy tu amo”. (Mary Shelley)
+
+
+Analizando alcances y limitaciones
+
+     ➢ Observan imágenes que representan algunas innovaciones tecnológicas actuales en diversas áreas
+       y después responden a algunos desafíos:
+
+
+
+
+                                                                                                                       1.
+
+
+
+
+                                                                Indaguen los potenciales usos de las tecnologías que
+aparecen en las imágenes.
+2. ¿Dónde y cómo se construye las tecnologías en estudio?
+3. ¿Cuáles son las implicancias éticas, sociales, económicas y ambientales de construir y usar las
+tecnologías en estudio?
+4. Construyan una tabla con los beneficios y riesgos de cada una de las tecnologías en estudio.
+
+
+
+
+Unidad de Currículum y Evaluación                                                                                259
+Ministerio de Educación, febrero 2021
+Programa de Estudio Ciencias para la Ciudadanía 3° o 4° medio                                               Módulo Tecnología y Sociedad
+                                                                                                                                Unidad 1
+
+
+
+
+ Observaciones al docente
+ • Permita que elijan y analicen otras tecnologías actuales de interés; pueden relacionarse con su especialidad,
+    su futuro académico o laboral.
+ • Evite traspasar una imagen peyorativa de las tecnologías, que son muy útiles cuando se emplean al servicio
+    del bienestar, la salud y el cuidado de las personas y el ambiente.
+ • No obstante, es una oportuna instancia para problematizar algunos casos; por ejemplo: el uso y desarrollo de
+    tecnologías en las guerras; el excesivo uso de los teléfonos celulares en la actualidad, que nos ha llevado a la
+    paradoja estar hiperconectados virtualmente, pero desconectados en el mundo de lo presencial; el excesivo
+    uso de videojuegos, cuya adicción ya fue declarada enfermedad por la Organización Mundial de la Salud, entre
+    otros.
+ • Para mediar la reflexión sobre potenciales riesgos de algunas tecnologías, puede apoyarse de las siguientes
+    lecturas:
+    -    Riesgos en el empleo de tecnologías inmersivas:
+     https://www.curriculumnacional.cl/link/https://www.ciospain.es/industria-y-utilities/riesgos-en-el-empleo-
+    de-tecnologias-inmersivas
+    -    Las redes inalámbricas globales de 5G ponen en peligro los pronósticos meteorológicos:
+         https://www.curriculumnacional.cl/link/https://www.investigacionyciencia.es/noticias/las-redes-
+         inalmbricas-globales-de-5g-ponen-en-peligro-los-pronsticos-meteorolgicos-17453
+
+
+Reflexión colectiva y conversatorio
+                                                                                                           Conexión interdisciplinar:
+                                                                                                           Filosofía
+     ➢ Reflexionan sobre el rol de la participación ciudadana en la adopción                               OA 5 (4°)
+       de nuevas tecnologías desde una perspectiva de salud, ética, social,                                Lengua y Literatura
+                                                                                                           OA 6 (3°) o OA 5 (4°)
+       económica y ambiental, a partir del siguiente texto:
+
+     ¿Por qué deberíamos aceptar sin objeciones el escenario que plantean los entusiastas ingenuos de la
+     tecnología? ¿Deberíamos asumir que el desarrollo tecnológico no puede hacerse de otro modo? ¿Tenemos
+     que adecuarnos a un modo de vida sobre el que no hemos podido emitir opinión alguna? Dar sentido a la
+     técnica significa construir significado e intervenir en el rumbo del desarrollo tecnológico. Necesitamos
+     nuevos criterios para que el sentido de la técnica pueda incorporarse a la cultura y para que podamos
+     decidir, nada menos, sobre nuestra forma de vida. Nuevos criterios de desarrollo que nos permitan discutir
+     sobre lo que es deseable y lo que no, que revinculen socialmente los ámbitos de la creación técnica con la
+     vida de los usuarios. Buscar la honestidad tecnológica supone legitimar los modos de desarrollo para que
+     el sentido de la técnica no anule aspectos esenciales en nuestra construcción como seres humanos.
+  (Fuente: https://www.curriculumnacional.cl/link/https://www.oei.es/historico/divulgacioncientifica/?dar-sentido-a-la-tecnica-pueden-ser-
+                                                          honestas-las-tecnologias)
+
+ Observaciones al docente
+ • Es natural que, en esta etapa, haya distintos puntos de vista sobre el diseño y el uso de tecnologías en la
+    actualidad. Es muy importante favorecer un ambiente de respeto y empatía.
+ • Puede plantear otras preguntas para guiar la reflexión; por ejemplo: ¿Existen innovaciones tecnológicas
+    que no sean necesarias en la actualidad? ¿Cuál sería el rol de las tecnologías en una sociedad que viviera
+    en equilibrio en todos los aspectos de la vida?
+ • Es importante enfatizar en el rol de la participación ciudadana en la adopción de tecnologías. Se recomienda
+    invitarlos desde ya a asumir una responsabilidad activa frente al conjunto de tecnologías que se usan en el
+
+
+
+Unidad de Currículum y Evaluación                                                                                                  260
+Ministerio de Educación, febrero 2021
+Programa de Estudio Ciencias para la Ciudadanía 3° o 4° medio                           Módulo Tecnología y Sociedad
+                                                                                                            Unidad 1
+
+
+
+
+      hogar, establecimiento, barrio, comuna, región y país, tomando medidas con base en evidencias desde una
+      perspectiva social, ética y ambiental.
+
+
+ Observaciones al docente
+ Se puede usar los siguientes indicadores, entre otros, para evaluar formativamente:
+ • Argumentan sobre el rol de las tecnologías en el estudio de fenómenos relacionados con la materia, los
+     seres vivos y el entorno, evaluando sus implicancias sociales, económicas, éticas y ambientales.
+ • Evalúan beneficios y riesgos de aplicaciones tecnológicas, considerando salud, ética, sociedad, economía
+     y ambiente.
+ • Analizan críticamente el rol de la ciudadanía en la adopción y el uso de tecnologías en diversos ámbitos
+     de la vida.
+ • Analizan controversias públicas sobre tecnología y sociedad, considerando implicancias sociales,
+     económicas, éticas y ambientales.
+
+
+
+RECURSOS Y SITIOS WEB
+
+                           •    Los temas bajo la educación CTS:
+                                https://www.curriculumnacional.cl/link/https://www.oei.es/historico/salactsi
+                                /uvalle/gdd_capitulo4.htm
+                           •    Un mundo cyborg. Congreso futuro 2018
+                                https://www.curriculumnacional.cl/link/https://congresofuturo.cl/
+                           •    Ciencia e innovación con impacto global. Congreso futuro 2017
+                                https://www.curriculumnacional.cl/link/https://congresofuturo.cl/
+                           •    ¿Superará la inteligencia artificial a la inteligencia biológica? Congreso futuro
+                                https://www.curriculumnacional.cl/link/https://congresofuturo.cl/
+                           •    Inteligencia humana vs inteligencia artificial. Congreso futuro 2018
+                                https://www.curriculumnacional.cl/link/https://congresofuturo.cl/
+                           •    Hacia una conciencia artificial. Congreso futuro 2019
+                                https://www.curriculumnacional.cl/link/https://congresofuturo.cl/
+                           •    El Estado de la Ciencia - Principales Indicadores de Ciencia y Tecnología -
+                                Iberoamericanos / Interamericanos 2018:
+                                https://www.curriculumnacional.cl/link/https://www.oei.es/historico/divulga
+                                cioncientifica/?el-estado-de-la-ciencia-principales-indicadores-de-ciencia-y-
+                                tecnologia
+
+
+
+
+Unidad de Currículum y Evaluación                                                                           261
+Ministerio de Educación, febrero 2021
+Programa de Estudio Ciencias para la Ciudadanía 3° o 4° medio                    Módulo Tecnología y Sociedad
+                                                                                                     Unidad 1
+
+
+
+
+Actividad 4. ¿Y si ponemos las tecnologías al servicio de los Objetivos de
+Desarrollo Sostenible?
+
+PROPÓSITO
+
+Se espera que los estudiantes reflexionen y analicen los riesgos y beneficios asociados a la adopción de
+tecnologías y el rol de la ciudadanía.
+
+                                              OBJETIVOS DE APRENDIZAJE
+ OA 3
+ Evaluar alcances y limitaciones de la tecnología y sus aplicaciones, argumentando riesgos y beneficios
+ desde una perspectiva de salud, ética, social, económica y ambiental.
+ OA i
+ Analizar críticamente implicancias sociales, económicas, éticas y ambientales de problemas
+ relacionados con controversias públicas que involucran ciencia y tecnología.
+ OA e
+ Construir, usar y comunicar argumentos científicos.
+ OA d
+ Analizar las relaciones entre las partes de un sistema en fenómenos y problemas de interés, a partir de
+ tablas, gráficos, diagramas y modelos.
+
+
+
+ACTITUDES
+•  Trabajar colaborativamente en la generación, desarrollo y gestión de proyectos y la resolución de
+   problemas, integrando las diferentes ideas y puntos de vista.
+•  Participar asumiendo posturas razonadas en distintos ámbitos: cultural, social, político y
+   medioambiental, entre otros.
+
+
+DURACIÓN
+4 horas pedagógicas
+
+
+
+
+Unidad de Currículum y Evaluación                                                                    262
+Ministerio de Educación, febrero 2021
+Programa de Estudio Ciencias para la Ciudadanía 3° o 4° medio                                             Módulo Tecnología y Sociedad
+                                                                                                                              Unidad 1
+
+
+
+
+DESARROLLO
+
+     1. Sensibilizando
+
+ Observaciones al docente
+ Si ya abordaron el módulo de Ambiente y Sostenibilidad, la etapa de sensibilización debiese ser más fácil. De lo
+ contrario, además del texto propuesto, se sugiere invitarlos a ver una película como “Antes de que sea tarde”, de
+ National Geographic, disponible en
+  https://www.curriculumnacional.cl/link/https://www.ngenespanol.com/el-mundo/leonardo-dicaprio-antes-que-
+ sea-tarde-cambio-climatico/
+
+
+     ➢ Leen el siguiente texto sobre la emergencia planetaria y después responden algunas preguntas:
+
+     Lo sabemos. Lo hemos leído y escuchado numerosas veces de voces expertas. Estamos viviendo una
+     situación de auténtica emergencia planetaria (Bybee, 1991), caracterizada por un conjunto de problemas
+     estrechamente vinculados y que se potencian mutuamente (Duarte, 2006), como consecuencia, entre
+     otros, de un enorme crecimiento económico y demográfico: desde el agotamiento de recursos
+     fundamentales hasta una contaminación sin fronteras que está contribuyendo a la degradación de todos
+     los ecosistemas, a una pérdida creciente de biodiversidad y diversidad cultural que amenaza con un cambio
+     climático cuyas consecuencias, que empiezan a ser visibles, pueden conducir al colapso de nuestras
+     civilizaciones (Diamond, 2005). Sin olvidar los crecientes desequilibrios que contribuyen a que miles de
+     millones de personas vivan hoy en condiciones de insoportable miseria y que están potenciando numerosos
+     conflictos y violencias. Por ello, desde la comunidad científica se ha planteado la necesidad de convertir el
+     siglo XXI en el siglo del medioambiente, orientando los esfuerzos hacia la resolución de los problemas
+     socioambientales que amenazan nuestra supervivencia.
+           (Fuente: https://www.curriculumnacional.cl/link/https://www.oei.es/historico/divulgacioncientifica/opinion0084.htm)
+
+          1.   ¿Cuál piensas que es el propósito del texto?
+          2.   ¿Qué preguntas y sentimientos te evoca lo leído?
+          3.   ¿Te sientes parte de la emergencia planetaria aludida? ¿Por qué?
+          4.   ¿Cómo se relaciona el texto con las actividades anteriores de la unidad?
+          5.   ¿Qué sentido tiene innovar tecnológicamente si estamos en una crisis ambiental mundial?
+          6.   ¿Qué tipo de tecnologías resguardan el cuidado de la naturaleza en la actualidad?
+
+
+
+
+Unidad de Currículum y Evaluación                                                                                                263
+Ministerio de Educación, febrero 2021
+Programa de Estudio Ciencias para la Ciudadanía 3° o 4° medio                                            Módulo Tecnología y Sociedad
+                                                                                                                             Unidad 1
+
+
+
+
+     A.          Reflexionando
+
+     ➢ Observan la siguiente imagen sobre los Objetivos de Desarrollo Sostenible (ODS) y reflexionan
+       colectivamente, guiados por las preguntas posteriores:
+
+
+
+
+          (Fuente: Ministerio del Medio Ambiente. https://www.curriculumnacional.cl/link/https://www.youtube.com/watch?v=Jc5p8dN6csI)
+
+
+
+     1. ¿Cómo se relaciona el texto estudiado en la etapa anterior con los ODS?
+     2. ¿Por qué es urgente el logro de los ODS?
+     3. ¿Qué tecnologías actuales impiden el logro de los ODS? Argumenten brevemente.
+     4. Las tecnologías de uso común en la sociedad, ¿están contribuyendo a conseguir los ODS? ¿Por
+        qué?
+     5. ¿Cuáles de los ODS están estrechamente relacionados con el diseño o el uso de tecnologías? ¿Por
+        qué?
+     6. ¿Cómo podrías, desde tu futura ocupación laboral, poner tecnologías al servicio de las ODS?
+     7. ¿Cuál debiese ser el rol de la ciudadanía para que las tecnologías actuales y futuras favorecieran
+        el logro de los ODS?
+
+ Observaciones al docente
+ • Invítelos a indagar brevemente con sus celulares, tables o computadores sobre datos y alcances implicados en
+    cada ODS o lléveles información resumida al respecto; está en la siguiente página de la ONU:
+    https://www.curriculumnacional.cl/link/https://www.un.org/sustainabledevelopment/es/objetivos-de-
+    desarrollo-sostenible/
+
+
+
+
+Unidad de Currículum y Evaluación                                                                                              264
+Ministerio de Educación, febrero 2021
+Programa de Estudio Ciencias para la Ciudadanía 3° o 4° medio                                      Módulo Tecnología y Sociedad
+                                                                                                                       Unidad 1
+
+
+
+
+     B.          Evaluando tecnologías
+
+     ➢ Reflexionan sobre la relación entre tecnologías y ODS mediante la dinámica grupal “Café del
+       Mundo”, para lo cual:
+     - Responden las siguientes preguntas:
+           1. ¿Cómo podrían contribuir las tecnologías que uso actualmente a conseguir el ODS en
+               discusión en esta mesa? ¿Estoy dispuesto a ayudar?
+           2. ¿Qué tecnologías de uso común actuales debiesen modificarse de inmediato para lograr
+               el ODS en estudio?
+           3. ¿Qué tecnologías inventarías para favorecer el ODS en discusión?
+
+     -       Socializan sus respuestas por mesas de trabajo.
+
+ Observaciones al docente
+ - La dinámica propuesta es muy efectiva y hay varios videos en Youtube para orientarse, como “Café
+    Conversación, una metodología para generar futuro compartido”.
+ - Para favorecer una correcta dinámica del “café del mundo”, conviene orientarlos con lo siguiente:
+        o Organizan 6 mesas de trabajo con 6 a 7 estudiantes.
+        o A cada grupo se le asigna un ODS diferente al de los otros grupos.
+        o Cada grupo tiene 10 minutos en total para dialogar y responder las preguntas 1, 2 y 3 para el ODS; las
+            sintetiza un responsable de la mesa en un cuadro como el siguiente:
+
+     ODS           Turno               Pregunta 1                          Pregunta 2                       Pregunta 3
+                              ¿Cómo podrían contribuir las       ¿Qué tecnologías de uso común           ¿Qué tecnologías
+                            tecnologías que uso actualmente     actuales debiesen modificarse de     inventarías para favorecer
+                                  a conseguir el ODS?             inmediato para lograr el ODS?               el ODS?
+   Ejemplo:          1
+                     2
+    ODS 2            3
+   “Hambre           4
+     cero”           5
+                     6
+
+         -    Al cabo de 10 minutos, luego de un aviso (campana, timbre o música), todos se cambian a mesas diferentes
+              para hacer el mismo ejercicio, pero con otro ODS y compañeros distintos. La única regla es que una mesa
+              no tenga más de 7 alumnos. La excepción será para el encargado de mesa, quien quedará en su mesa de
+              origen y nuevamente redactará las respuestas de otros compañeros. Así se desarrolla la dinámica, con los
+              respectivos cambios cada 10 minutos, hasta el final.
+         -    Tras el recorrido de los jóvenes por las 6 mesas de trabajo, cada responsable de mesa presentará en 3
+              minutos las distintas respuestas que hubo para cada pregunta.
+
+
+     ➢ Los estudiantes evalúan las tecnologías a y b propuestas más adelante, guiados por las siguientes
+        preguntas:
+     1. ¿Cuál es el objetivo de la tecnología en estudio?
+
+
+Unidad de Currículum y Evaluación                                                                                      265
+Ministerio de Educación, febrero 2021
+Programa de Estudio Ciencias para la Ciudadanía 3° o 4° medio                      Módulo Tecnología y Sociedad
+                                                                                                       Unidad 1
+
+
+
+
+     2.   ¿Es viable en tu contexto local? ¿Por qué?
+     3.   ¿Qué preguntas y sentimientos te surgen tras observar las imágenes?
+     4.   ¿Cuáles son los alcances éticos, sociales y ambientales del diseño y uso de esa tecnología?
+     5.   ¿Favorece el logro de los ODS? Argumenten brevemente.
+
+
+     a. Casas ecológicas
+
+
+
+
+     b. Energía renovable y limpia
+
+
+
+
+Unidad de Currículum y Evaluación                                                                       266
+Ministerio de Educación, febrero 2021
+Programa de Estudio Ciencias para la Ciudadanía 3° o 4° medio                            Módulo Tecnología y Sociedad
+                                                                                                             Unidad 1
+
+
+
+
+ Observaciones al docente
+ • Para complementar la idea de las casas ecológicas, podría sugerir que, en su tiempo libre, vean algún
+    documental o películas en español disponibles en YouTube sobre las “EarthShip” (Nave Tierra) del arquitecto
+    sustentable Michael Reynolds o de las “Tiny house” (Casa pequeña), e incluso sobre los alcances y viabilidad
+    de las ecoaldeas; según la Unesco, actualmente existen alrededor de 15.000 activas en el mundo.
+ • Es una oportuna instancia para promover su compromiso y creatividad, por ejemplo, a partir de la siguiente
+    pregunta: Si hay miles de ecoaldeas funcionando en la actualidad, ¿será posible diseñar eco-ciudades, eco-
+    regiones y un eco-país?
+ • También puede sugerirles indagar y ver algunos videos disponibles en Youtube sobre la permacultura, área
+    interdisciplinar que, entre otros, se propone desarrollar tecnologías que favorezcan el desarrollo de
+    asentamientos humanos sustentables.
+ • Invíteles a reflexionar sobre por qué las propuestas y proyectos de energía renovable y limpia debiesen ser
+    una prioridad en educación y políticas públicas si queremos contribuir a mitigar el cambio climático. La matriz
+    energética chilena depende hoy, en gran medida, de combustibles fósiles que contaminan la naturaleza. Por
+    esto, incentívelos a que, independientemente del área laboral que vayan a seguir, prioricen la adopción y/o
+    generación de las energías renovables, y las prácticas que resguarden el cuidado del medioambiente y la
+    salud de las personas.
+ • Aproveche el tema para hablar también de otras tecnologías, como las integradas en el hogar “Domótica” y
+    sus potencialidades con relación a la eficiencia energética. Hay diversas infografías en internet.
+
+
+
+
+Unidad de Currículum y Evaluación                                                                            267
+Ministerio de Educación, febrero 2021
+Programa de Estudio Ciencias para la Ciudadanía 3° o 4° medio               Módulo Tecnología y Sociedad
+                                                                                                Unidad 1
+
+
+
+
+     ➢ Los estudiantes observan la siguiente infografía sobre biomimética y responden las preguntas
+       posteriores.
+
+
+
+
+Unidad de Currículum y Evaluación                                                               268
+Ministerio de Educación, febrero 2021
+Programa de Estudio Ciencias para la Ciudadanía 3° o 4° medio                               Módulo Tecnología y Sociedad
+                                                                                                                Unidad 1
+
+
+
+
+     1. ¿Qué preguntas te surgen tras la lectura?
+     2. ¿Qué otros ejemplos de biomimética conoces?
+     3. ¿Parten las tecnologías actuales de la observación de patrones en la naturaleza? Explica.
+     4. Las tecnologías de culturas originarias, ¿se diseñaron con base
+                                                                         Conexión interdisciplinar:
+        en lo que actualmente llamamos biomimética? Justifiquen.
+                                                                         Filosofía
+     5. ¿La biomimética implica necesariamente el cuidado de la OA 5 (4°)
+        naturaleza? Argumenten brevemente.                               Lengua y Literatura
+                                                                         OA 6 (3°) o OA 5 (4°)
+     6. ¿Cómo podría la biomimética contribuir al logro de los ODS?
+     7. Si tuvieras todas las condiciones para liderar una innovación tecnológica, ¿cuál sería tu
+        biomimética? ¿Por qué?
+
+ Observaciones al docente
+ Se puede usar los siguientes indicadores, entre otros, para evaluar formativamente:
+ •   Evalúan beneficios y riesgos de aplicaciones tecnológicas, considerando salud, ética, sociedad, economía
+     y ambiente.
+ •   Analizan críticamente el rol de la ciudadanía en la adopción y el uso de tecnologías en diversos ámbitos
+     de la vida.
+ •   Analizan controversias públicas sobre tecnología y sociedad, considerando implicancias sociales,
+     económicas, éticas y ambientales.
+
+
+
+Recursos y sitios web
+
+                                •       Objetivos de Desarrollo Sostenible. Ministerio del Medio Ambiente.
+                                        https://www.curriculumnacional.cl/link/https://www.youtube.com
+                                        /watch?v=Jc5p8dN6csI
+                                •       Nuevas tecnologías sustentables para territorios mapuche.
+                                        Ministerio del Medio Ambiente.
+                                        https://www.curriculumnacional.cl/link/https://www.youtube.com
+                                        /watch?v=d49qmhVKSQ8
+                                •       Políticas de ciencia, tecnología, e innovación sustentable e inclusiva
+                                        en América Latina. Unesco.
+                                        https://www.curriculumnacional.cl/link/http://www.unesco.org/ne
+                                        w/fileadmin/MULTIMEDIA/FIELD/Montevideo/pdf/PolicyPapersCIL
+                                        AC-InnovacionEmpresarial.pdf
+                                •       Ciencia, tecnología e innovación para el desarrollo sostenible.
+                                        Unesco
+                                        https://www.curriculumnacional.cl/link/http://www.unesco.org/ne
+                                        w/es/office-in-montevideo/ciencias-naturales/ciencia-tecnologia-e-
+                                        innovacion/
+
+
+
+
+Unidad de Currículum y Evaluación                                                                                269
+Ministerio de Educación, febrero 2021
+Programa de Estudio Ciencias para la Ciudadanía 3° o 4° medio                            Módulo Tecnología y Sociedad
+                                                                                                             Unidad 1
+
+
+
+
+Evaluación Unidad 1. ¿Hasta dónde llegaremos con las tecnologías?
+
+
+ OBJETIVOS DE APRENDIZAJE                       INDICADORES DE EVALUACIÓN
+ OA 3 Evaluar alcances y limitaciones de la        • Formulan preguntas y problemas sobre
+ tecnología y sus aplicaciones, argumentando          innovaciones tecnológicas usadas en diversas
+ riesgos y beneficios desde una perspectiva           áreas, culturas y épocas.
+ de salud, ética, social, económica y              • Argumentan sobre el rol de las tecnologías en el
+ ambiental.                                           estudio de fenómenos relacionados con la
+ OA a. Formular preguntas y problemas sobre           materia, los seres vivos y el entorno, y evalúan
+ tópicos científicos de interés, a partir de la       sus implicancias sociales, económicas, éticas y
+ observación de fenómenos y/o la exploración          ambientales.
+ de diversas fuentes.                              • Analizan críticamente el rol de la ciudadanía en
+ OA e. Construir, usar y comunicar                    la adopción y el uso de tecnologías en diversos
+ argumentos científicos.                              ámbitos de la vida.
+                                                   • Analizan controversias públicas sobre tecnología
+                                                      y sociedad, considerando implicancias sociales,
+                                                      económicas, éticas y ambientales.
+
+DURACIÓN
+4 horas pedagógicas
+
+
+
+DESARROLLO
+
+Recordemos un poco
+   ➢ Según los conocimientos desarrollados en la unidad, elaboran un mapa mental para responder la
+       pregunta: ¿Qué nos ha motivado y sigue motivando a desarrollar tecnología?
+
+ Observaciones al docente
+ Un mapa mental es una representación física de la imagen que la persona se forma acerca del significado de un
+ conocimiento. Se puede representar una misma información de muchas maneras, ya que refleja la organización
+ cognitiva individual o grupal, dependiendo de la forma en que captaron los conceptos o conocimientos. Es una
+ estrategia que permite desarrollar también la creatividad. El mapa mental es un diagrama que organiza una idea o
+ concepto central, rodeado por ramas conectadas a otras ideas o tópicos asociados. Y cada uno de ellos, a su vez, se
+ considera como central de otras ramas.
+ Para realizarlo, se requiere uso de vocabulario preciso (técnico o científico), colores, imágenes y, eventualmente,
+ software si se prefiere.
+ Para usar este recurso como evaluación formativa durante esta actividad, se sugiere establecer criterios de
+ construcción y posterior evaluación como:
+ − Conceptos clave
+ − Jerarquía de conceptos e ideas
+
+
+
+Unidad de Currículum y Evaluación                                                                            270
+Ministerio de Educación, febrero 2021
+Programa de Estudio Ciencias para la Ciudadanía 3° o 4° medio                               Módulo Tecnología y Sociedad
+                                                                                                                Unidad 1
+
+
+
+
+ −    Uso de ejemplos
+ −    Interrelaciones
+
+ Referencias:
+ Frías, B. S. L. y Kleen, E. M. H. (2005). Evaluación del aprendizaje: alternativas y nuevos desarrollos. MAD.
+ https://www.curriculumnacional.cl/link/http://www.inspiration.com/visual-learning/mind-mapping
+ https://www.curriculumnacional.cl/link/https://trabajoypersonal.com/que-es-un-mapa-mental/
+
+
+     Columna de opinión
+     ➢ De acuerdo con lo aprendido durante la unidad, redactan una columna de opinión relacionada con
+       la siguiente interrogante: ¿Hasta dónde llegaremos con la tecnología?
+
+ Observaciones al docente
+ La columna de opinión debe incluir los siguientes elementos:
+     -   Presentación del tema (una introducción sobre lo que se va a hablar).
+     -   Opinión u apreciación sobre el tema (se informa y analiza en forma breve y mediante un lenguaje personal,
+         apoyándose en argumentos; la condición subjetiva es la característica más relevante de sus escritos).
+     -   Cierre (rematar de una manera entretenida o con una buena conclusión que deje al lector satisfecho con la
+         columna).
+     -   Una extensión aproximadamente entre 1000-1500 palabras.
+     -   Lenguaje y vocabulario científico apropiado.
+     -   Citar al menos tres fuentes confiables con autor, mediante formato APA, por ejemplo.
+
+ Para que la actividad sea más significativa en la modalidad técnico-profesional, se sugiere que redacten la columna
+ de opinión a partir de su especialidad o futuro campo laboral, ampliando la pregunta a: ¿Cuánto más podemos
+ avanzar en el trabajo con la tecnología en el futuro?
+
+
+
+
+Unidad de Currículum y Evaluación                                                                                271
+Ministerio de Educación, febrero 2021
+Programa de Estudio Ciencias para la Ciudadanía 3° o 4° medio   Módulo Tecnología y Sociedad
+                                                                                    Unidad 1
+
+
+
+
+Unidad de Currículum y Evaluación                                                   272
+Ministerio de Educación, febrero 2021
+Programa de Estudio Ciencias para la Ciudadanía 3° o 4° medio              Módulo Ambiente y Sostenibilidad
+                                                                                                  Unidad 2
+
+
+
+
+Unidad 2:
+Proyectos tecnológicos: diseño, alcances e
+implicancias
+
+ PROPÓSITO
+
+ Se espera que los estudiantes diseñen proyectos tecnológicos con base científica, a partir de problemas
+ de su contexto local, considerando alcances y limitaciones. Pueden guiarse con preguntas como: ¿Qué
+ problemas que afecten a las personas, la sociedad y el ambiente podrían resolverse con tecnología?
+ ¿Cuáles son los alcances y limitaciones para diseñar e implementar proyectos tecnológicos en diversos
+ contextos? ¿Cuál es el rol de la participación ciudadana en el desarrollo y la aplicación de proyectos
+ tecnológicos?
+
+                                              OBJETIVOS DE APRENDIZAJE
+
+  OA 1. Diseñar proyectos tecnológicos que permitan resolver problemas personales y/o locales de
+  diversos ámbitos de la vida (como vivienda y transporte, entre otros).
+
+  OA 3. Evaluar alcances y limitaciones de la tecnología y sus aplicaciones, argumentando riesgos y
+  beneficios desde una perspectiva de salud, ética, social, económica y ambiental.
+
+  OA b. Planificar y desarrollar investigaciones que permitan recoger evidencias y contrastar hipótesis,
+  con apoyo de herramientas tecnológicas y matemáticas.
+
+  OA d. Analizar las relaciones entre las partes de un sistema en fenómenos y problemas de interés, a
+  partir de tablas, gráficos, diagramas y modelos.
+
+  OA e. Construir, usar y comunicar argumentos científicos.
+
+  OA g. Diseñar proyectos para encontrar soluciones a problemas, usando la imaginación y la creatividad.
+
+  OA i. Analizar críticamente implicancias sociales, económicas, éticas y ambientales de problemas
+  relacionados con controversias públicas que involucran ciencia y tecnología.
+
+
+
+
+Unidad de Currículum y Evaluación                                                                     273
+Ministerio de Educación, febrero 2021
+Programa de Estudio Ciencias para la Ciudadanía 3° o 4° medio                        Módulo Ambiente y Sostenibilidad
+                                                                                                            Unidad 2
+
+
+
+
+Observación al docente
+
+Para la presente unidad, se sugiere tener presente que:
+• La estructuración de las actividades responde a una lógica de desarrollo y niveles de desempeño de unidades
+   metodológicas; es decir, una secuencia de pasos que permiten cubrir metas y logros, pasando por un proceso
+   de testeo y análisis de factibilidad, posibilidades y planificación.
+• Las unidades metodológicas permiten incorporar tópicos, temas, asignaturas o ejes que las refuercen o
+   profundicen, al seleccionar el tema de trabajo de forma disciplinar o interdisciplinar.
+• Se recomienda incorporar con fuerza los tópicos de CTSA (ciencia, tecnología, sociedad y ambiente). Reflexione
+   sobre las relaciones naturales entre estas áreas en la convergencia de un proyecto; es decir, un proyecto con
+   factibilidad en un área ambiental beneficiará naturalmente a la sociedad y puede usar la tecnología y la ciencia.
+   Por ello, se aconseja un apoyo entre profesores de diversas áreas si surge la oportunidad de trabajar
+   colaborativamente en beneficio de los alumnos.
+
+
+
+
+Unidad de Currículum y Evaluación                                                                               274
+Ministerio de Educación, febrero 2021
+Programa de Estudio Ciencias para la Ciudadanía 3° o 4° medio               Módulo Ambiente y Sostenibilidad
+                                                                                                   Unidad 2
+
+
+
+Actividad 1. Planteando problema e identificando necesidades
+
+PROPÓSITO
+
+Se espera que los estudiantes observen su entorno e identifiquen un problema que podría solucionarse
+mediante un proyecto tecnológico.
+
+
+
+ OBJETIVOS DE APRENDIZAJE
+ OA 1
+ Diseñar proyectos tecnológicos que permitan resolver problemas personales y/o locales de diversos
+ ámbitos de la vida (como vivienda y transporte, entre otros).
+ OA 3
+ Evaluar alcances y limitaciones de la tecnología y sus aplicaciones, argumentando riesgos y beneficios
+ desde una perspectiva de salud, ética, social, económica y ambiental.
+ OA d
+ Analizar las relaciones entre las partes de un sistema en fenómenos y problemas de interés, a partir
+ de tablas, gráficos, diagramas y modelos.
+ OA e
+ Construir, usar y comunicar argumentos científicos.
+
+
+
+ACTITUDES
+•  Trabajar colaborativamente en la generación, desarrollo y gestión de proyectos y la resolución de
+   problemas, integrando las diferentes ideas y puntos de vista.
+•  Interesarse por las posibilidades que ofrece la tecnología para el desarrollo intelectual, personal
+   y social del individuo.
+
+
+
+
+Unidad de Currículum y Evaluación                                                                      275
+Ministerio de Educación, febrero 2021
+Programa de Estudio Ciencias para la Ciudadanía 3° o 4° medio                       Módulo Ambiente y Sostenibilidad
+                                                                                                           Unidad 2
+
+
+
+DURACIÓN
+4 horas pedagógicas
+
+
+DESARROLLO
+➢ A partir de sus conocimientos previos, discuten acerca de los pasos necesarios para llevar a cabo
+  un proyecto tecnológico que responda a problemas de las personas, la sociedad o el ambiente.
+➢ Pueden hacer una lluvia de ideas y registrar las instancias discutidas.
+
+Observaciones al docente
+Puede ser útil considerar que la asignatura de Tecnología de años anteriores se orientó a elaborar proyectos
+tecnológicos de la siguiente manera:
+
+
+
+
+En esta unidad, debido al tiempo disponible y a la naturaleza de los proyectos de los jóvenes, se sugiere llegar
+hasta su planificación y justificación y la elaboración de un prototipo. Si se cuenta con más tiempo gracias a una
+coordinación interdisciplinaria y/o alineada con el proyecto educativo del establecimiento, entonces se sugiere
+que elaboren la solución y se evalúe cómo funciona para resolver el problema identificado.
+
+
+
+
+➢ A fin de iniciar el proceso de un proyecto tecnológico, reflexionan acerca de problemas en su
+  contexto local que afectan las personas, la sociedad y el ambiente, empleando la lluvia de ideas
+  anterior como orientación.
+
+➢ Inician el registro del proyecto en una bitácora.
+
+
+Unidad de Currículum y Evaluación                                                                              276
+Ministerio de Educación, febrero 2021
+Programa de Estudio Ciencias para la Ciudadanía 3° o 4° medio                        Módulo Ambiente y Sostenibilidad
+                                                                                                            Unidad 2
+
+
+
+
+ Observaciones al docente
+ Cabe explicarles cómo usar una bitácora a lo largo del proceso. Deben reflexionar sobre sus procesos
+ personales al elaborar una investigación científica o proyecto tecnológico. Las dudas y los errores
+ son oportunidades de aprendizaje. La bitácora permite, además, la autoevaluación y el desarrollo
+ de la metacognición.
+ Se invita a considerar ideas como las contenidas en:
+ https://www.curriculumnacional.cl/link/http://ww2.educarchile.cl/UserFiles/P0001/File/red-lab-
+ sur/2015/materiales_apoyo/bitacora-educativa.pdf
+
+➢ De manera colaborativa, investigan:
+                                                                           Conexión interdisciplinar:
+     − ¿Qué problemas afectan a las personas, la sociedad                  Matemática
+        y el ambiente en mi contexto local (por ejemplo:                   OA b, OA c, OA e, OA f, OA 1, OA 2, OA
+                                                                           3 (3° Medio)
+        curso, comunidad escolar o barrio)?                                Lengua y Literatura
+                                                                           OA 6 (3° Medio) o OA 5 (4° Medio)
+     − ¿Qué necesidades o elementos se debe atender                        Historia,    Geografía   y    Ciencias
+                                                                           Sociales
+        para lograr mayor bienestar y cuidado del                          OA 7 (Mundo Global)
+        ambiente?
+
+
+   Observaciones al docente
+   Podrían identificar problemas como:
+    Afectados        Problema
+    Ambiente         Contaminación o depósitos de desechos en algún ecosistema cercano al establecimiento,
+                     como río, laguna, bosque, entre otros.
+                     Depósito de desechos.
+    Sociedad         Falta de espacios verdes o de recreación.
+                     Comunicación en algún barrio.
+                     Necesidad de que los turistas de la localidad respetan la cultura local y el entorno.
+                     Transporte de personas.
+    Personas         Consumo de alimentos contaminados.
+                     Mala alimentación.
+                     Red de apoyo para personas mayores que viven solas.
+                     Organización del día a día.
+   Hay que guiarlos para que precisen algunos temas de su elección y reformulen el problema, identificando las
+   variables involucradas. Por ejemplo: La comunidad no tiene acceso a alimentos orgánicos. Las variables en este
+   caso son la disponibilidad y el acceso a alimentos orgánicos.
+   El problema elegido guiará el proyecto en toda la unidad, por lo que todas las actividades y evaluación se
+   vincularán con él.
+   Se sugiere que usen organizadores gráficos para analizar los problemas de la localidad y sus posibles soluciones.
+
+
+
+➢ En acuerdo con el equipo de trabajo, seleccionan un problema y lo precisan, identificando variables
+  que se relacionan con él.
+
+
+
+Unidad de Currículum y Evaluación                                                                               277
+Ministerio de Educación, febrero 2021
+Programa de Estudio Ciencias para la Ciudadanía 3° o 4° medio                    Módulo Ambiente y Sostenibilidad
+                                                                                                        Unidad 2
+
+
+
+ Observaciones al docente
+ Se sugiere emplear algunos medios tecnológicos disponibles para que diseñen y entiendan los diagramas de
+ Venn, como:
+ https://www.curriculumnacional.cl/link/https://support.office.com/es-es/article/crear-un-diagrama-de-venn-
+ d746a2ce-ed61-47a7-93fe-7c101940839d                                                                       ;
+ https://www.curriculumnacional.cl/link/https://creately.com/es/creador-de-diagramas-venn-online
+
+
+➢ Luego reflexionan acerca de la relación entre la ciencia y la tecnología y cómo permiten resolver
+  problemas en conjunto.
+
+➢ Responden preguntas como:
+     − ¿Qué problemas se podría resolver mediante la tecnología?
+     − ¿Cómo se relacionan la ciencia y la tecnología en el diseño de un proyecto tecnológico?
+
+➢ Para contextualizar el problema y perspectivas relacionadas, plantean y anotan algunas preguntas
+  al respecto.
+
+ Observaciones al docente
+ Formular diversas preguntas en torno al problema les permitirá considerar aspectos y perspectivas para saber
+ qué investigar y proponer una solución, idealmente sin impacto en el ambiente y que ayude a mejorar el
+ equilibrio entre las personas, la sociedad y el ambiente. Se los debe orientar a evitar que se focalicen en
+ soluciones inviables.
+
+
+
+➢ Finalmente, en esta etapa plantean modos de resolver el problema con soluciones reales y posibles
+  de implementar. Para esto, se basan en conocimientos previos y exploran información relacionada
+  con el problema y la posible solución.
+➢ Determinan qué producto o servicio deben crear para aportar la solución.
+➢ Para evaluar su proceso, responden en su bitácora: ¿Cuál es la tarea? ¿Cuál es la meta? ¿Qué
+  debemos hacer para lograrla?
+
+ Observaciones al docente
+ Se puede usar los siguientes indicadores, entre otros, para evaluar formativamente:
+ •   Analizan problemas que afecten a las personas, la sociedad y el ambiente en su contexto local, en que
+     proyectos tecnológicos puedan ser parte de la solución.
+ •   Investigan conocimientos científicos y tecnológicos relacionados con problemas de diversos ámbitos de
+     la vida (como vivienda y transporte, entre otros) en su contexto local.
+ •   Proponen soluciones a problemas de su contexto local mediante proyectos tecnológicos, aplicando
+     conocimientos científicos.
+
+
+
+
+Unidad de Currículum y Evaluación                                                                           278
+Ministerio de Educación, febrero 2021
+Programa de Estudio Ciencias para la Ciudadanía 3° o 4° medio               Módulo Ambiente y Sostenibilidad
+                                                                                                   Unidad 2
+
+
+
+Actividad 2. Investigando antecedentes de la posible solución
+PROPÓSITO
+
+Se pretende que los estudiantes reflexionen acerca de la relación entre ciencia y tecnología, y valoren
+la importancia de indagar en áreas del saber relacionadas con su proyecto para elaborar un marco
+teórico que sustente la propuesta de solución planteada.
+
+                                            OBJETIVOS DE APRENDIZAJE
+ OA 1
+ Diseñar proyectos tecnológicos que permitan resolver problemas personales y/o locales de diversos
+ ámbitos de la vida (como vivienda y transporte, entre otros).
+ OA 3
+ Evaluar alcances y limitaciones de la tecnología y sus aplicaciones, argumentando riesgos y beneficios
+ desde una perspectiva de salud, ética, social, económica y ambiental.
+ OA b
+ Planificar y desarrollar investigaciones que permitan recoger evidencias y contrastar hipótesis, con
+ apoyo de herramientas tecnológicas y matemáticas.
+ OA e
+ Construir, usar y comunicar argumentos científicos.
+
+
+
+ACTITUDES
+• Pensar con perseverancia y proactividad para encontrar soluciones innovadoras a los problemas.
+• Trabajar colaborativamente en la generación, desarrollo y gestión de proyectos y la resolución de
+   problemas, integrando las diferentes ideas y puntos de vista.
+
+DURACIÓN
+4 horas pedagógicas
+
+
+
+
+Unidad de Currículum y Evaluación                                                                      279
+Ministerio de Educación, febrero 2021
+Programa de Estudio Ciencias para la Ciudadanía 3° o 4° medio                   Módulo Ambiente y Sostenibilidad
+                                                                                                       Unidad 2
+
+
+
+DESARROLLO
+
+Profundizan en el problema y la solución planteada mediante un análisis crítico de la situación con
+mirada sistémica. Para ello:
+
+➢ Elaboran un diagrama (con cajas y flechas), donde vinculan el            Conexión interdisciplinar:
+                                                                           Matemática
+  problema con sus variables en todas sus dimensiones.                     OA b, OA c, OA e, OA f, OA 1, OA 2,
+                                                                           OA 3 (3° Medio)
+➢ Incorporan la solución planteada al diagrama y analizan sus              Lengua y Literatura
+                                                                           OA 6 (3° Medio) o OA 5 (4° Medio)
+  posibles impactos en las variables.                                      Historia, Geografía y Ciencias
+                                                                           Sociales
+➢ Determinan qué elementos del sistema son los más relevantes,             OA 7 (Mundo Global)
+                                                                           Artes Visuales
+  por lo que deberán aumentar sus conocimientos teóricos al                OA 3, OA 7 (3° o 4° Medio)
+  respecto.
+➢ Determinan la lista de elementos a investigar para formar el marco teórico de su proyecto.
+➢ Responden preguntas como:
+  − ¿Qué conocimientos son clave para fundamentar mi proyecto?
+  − ¿Cuáles podrían ser las diversas implicancias de la solución planteada?
+  − ¿Qué conocimientos permitirían mejorar el proyecto en cuanto a sus implicancias y sus
+     alcances?
+
+➢ Buscan información científica y/o tecnológica al respecto en fuentes confiables.
+➢ Registran sus hallazgos y modifican el diagrama elaborado anteriormente.
+
+ Observaciones al docente
+ Se sugiere promover la integración disciplinaria para que el conocimiento científico y tecnológico los ayude a
+ entender el problema y proponer una solución. Es una oportunidad para movilizar motivaciones e intereses
+ personales o profesionales, y de poner en práctica la creatividad, la comunicación y el trabajo colaborativo.
+
+
+➢ Evalúan su proceso: en su bitácora, responden: ¿Qué información, recursos y herramientas
+  tenemos para enfrentar la tarea? ¿Cuáles necesitamos?
+
+ Observaciones al docente
+ Se puede usar los siguientes indicadores, entre otros, para evaluar formativamente:
+ • Proponen soluciones a problemas de su contexto local mediante proyectos tecnológicos, aplicando
+     conocimientos científicos.
+ • Evalúan variables relacionadas con el cuidado de la salud y el ambiente al diseñar un proyecto tecnológico.
+
+
+
+
+Unidad de Currículum y Evaluación                                                                          280
+Ministerio de Educación, febrero 2021
+Programa de Estudio Ciencias para la Ciudadanía 3° o 4° medio               Módulo Ambiente y Sostenibilidad
+                                                                                                   Unidad 2
+
+
+
+Actividad 3. Evaluando la posible solución
+
+PROPÓSITO
+
+Se pretende cuestionar las soluciones planteadas por los estudiantes mediante la evaluación de sus
+impactos, alcances y limitaciones en contexto. Se promueve asimismo que las cuestionen desde un
+punto de vista ético.
+
+                                      OBJETIVOS DE APRENDIZAJE
+ OA 1
+ Diseñar proyectos tecnológicos que permitan resolver problemas personales y/o locales de diversos
+ ámbitos de la vida (como vivienda y transporte, entre otros).
+ OA 3
+ Evaluar alcances y limitaciones de la tecnología y sus aplicaciones, argumentando riesgos y beneficios
+ desde una perspectiva de salud, ética, social, económica y ambiental.
+ OA d
+ Analizar las relaciones entre las partes de un sistema en fenómenos y problemas de interés, a partir
+ de tablas, gráficos, diagramas y modelos.
+ OA e
+ Construir, usar y comunicar argumentos científicos.
+ OA i
+ Analizar críticamente implicancias sociales, económicas, éticas y ambientales de problemas
+ relacionados con controversias públicas que involucran ciencia y tecnología.
+
+
+
+ACTITUDES
+• Pensar con perseverancia y proactividad para encontrar soluciones innovadoras a los problemas.
+• Trabajar colaborativamente en la generación, desarrollo y gestión de proyectos y la resolución de
+   problemas, integrando las diferentes ideas y puntos de vista.
+
+
+
+DURACIÓN
+3 horas pedagógicas
+
+
+
+
+Unidad de Currículum y Evaluación                                                                      281
+Ministerio de Educación, febrero 2021
+Programa de Estudio Ciencias para la Ciudadanía 3° o 4° medio                   Módulo Ambiente y Sostenibilidad
+                                                                                                       Unidad 2
+
+
+
+DESARROLLO                                                                      Conexión interdisciplinar:
+                                                                                Matemática
+Dialogan sobre los estados de avance de sus proyectos.                          OA b, OA c, OA e, OA f, OA 1, OA 2,
+                                                                                OA 3 (3° Medio)
+                                                                                Lengua y Literatura
+➢ Tras investigar y profundizar en el problema y la solución, evalúan           OA 6 (3° Medio) o OA 5 (4° Medio)
+                                                                                Historia, Geografía y Ciencias
+  su proyecto y la solución que proponen. Para esto, se focalizan en:           Sociales
+                                                                                OA 7 (Mundo Global)
+  1. La ética y los derechos                                                    Artes Visuales
+  2. Las diversas implicancias (salud, social, ambiental, entre otras)          OA 3, OA 7 (3° o 4° Medio)
+                                                                                Ciencias de la Salud
+  3. Los riesgos y beneficios                                                   OA 5 (3° o 4°)
+  4. Los alcances y limitaciones
+
+➢ Responden preguntas como:
+  − ¿En qué medida la ciencia y la tecnología ayudan a solucionar problemas que afectan a las
+     personas, la sociedad y/o el ambiente?
+  − ¿Cuáles son las diversas implicancias de la solución planteada?
+  − ¿Qué alcances y limitaciones tiene mi proyecto?
+  − ¿Para qué o quiénes presenta mi proyecto riesgos y/o beneficios?
+  − ¿En qué medida este proyecto impacta en la salud de las personas y el ambiente?
+
+➢ Analizan los posibles impactos de la solución con la ayuda del diagrama elaborado en la actividad
+  2.
+
+➢ Evalúan su proceso y responden en su bitácora: ¿Cómo vamos? ¿Qué hemos aprendido? ¿Qué nos
+  falta?
+
+ Observaciones al docente
+ Se puede usar los siguientes indicadores, entre otros, para evaluar formativamente:
+ • Evalúan variables relacionadas con el cuidado de la salud y el ambiente al diseñar un proyecto
+     tecnológico.
+ • Evalúan riesgos y beneficios de proyectos tecnológicos, analizando implicancias de salud, ética, social,
+     económica y ambiental.
+ • Evalúan alcances y limitaciones de diseñar e implementar proyectos tecnológicos en diversos contextos.
+
+
+
+
+Unidad de Currículum y Evaluación                                                                            282
+Ministerio de Educación, febrero 2021
+Programa de Estudio Ciencias para la Ciudadanía 3° o 4° medio               Módulo Ambiente y Sostenibilidad
+                                                                                                   Unidad 2
+
+
+
+Actividad 4. Planificando las etapas del proyecto
+
+
+PROPÓSITO
+
+Se invita a los estudiantes a dimensionar la magnitud del proyecto en tareas, recursos y tiempos. Deben
+organizar todos los detalles operativos; se promueve el trabajo colaborativo.
+
+                                            OBJETIVOS DE APRENDIZAJE
+ OA 1
+ Diseñar proyectos tecnológicos que permitan resolver problemas personales y/o locales de diversos
+ ámbitos de la vida (como vivienda y transporte, entre otros).
+ OA 3
+ Evaluar alcances y limitaciones de la tecnología y sus aplicaciones, argumentando riesgos y
+ beneficios desde una perspectiva de salud, ética, social, económica y ambiental.
+ OA e
+ Construir, usar y comunicar argumentos científicos.
+ OA g
+ Diseñar proyectos para encontrar soluciones a problemas, usando la imaginación y la creatividad.
+
+
+
+ACTITUDES
+• Pensar con perseverancia y proactividad para encontrar soluciones innovadoras a los problemas.
+• Trabajar colaborativamente en la generación, desarrollo y gestión de proyectos y la resolución de
+   problemas, integrando las diferentes ideas y puntos de vista.
+
+DURACIÓN
+3 horas pedagógicas
+
+
+
+
+Unidad de Currículum y Evaluación                                                                      283
+Ministerio de Educación, febrero 2021
+Programa de Estudio Ciencias para la Ciudadanía 3° o 4° medio                    Módulo Ambiente y Sostenibilidad
+                                                                                                        Unidad 2
+
+
+
+DESARROLLO
+
+ Observaciones al docente
+ En esta sección podrían trabajar con algunos recursos digitales para incorporar estrategias de planificación de
+ proyecto, como:
+       • Sitios con sugerencias sobre diseño y formato de cartas Gantt:
+           https://www.curriculumnacional.cl/link/https://es.smartsheet.com/blog/donde-puede-encontrar-las-
+           mejores-plantillas-del-diagrama-de-gantt
+           https://www.curriculumnacional.cl/link/https://modelo-carta.com/gantt/
+       • Sitios de discusión sobre la utilidad de la carta Gantt:
+           https://www.curriculumnacional.cl/link/https://www.valorexperto.com/blog/una-carta-gantt-
+           recomendable-una-planificar-proyecto/
+           https://www.curriculumnacional.cl/link/https://www.valorexperto.com/blog/una-carta-gantt-
+           recomendable-una-planificar-proyecto/
+ Es aconsejable trabajar estrategias de organización del proyecto en diversos entornos, que otorguen diversidad
+ en el proceso de la planificación de los procesos y potencien otro tipo de habilidades en los jóvenes.
+
+
+    ➢ Planifican aspectos operativos del proyecto:
+          o los pasos necesarios para generar su solución
+          o el reparto de tareas y responsables
+          o los recursos y materiales necesarios
+          o costos
+          o lugar de trabajo
+          o documentos y autorizaciones
+          o tiempos estimados de ejecución
+
+    ➢ Elaboran una carta Gantt u otro método de estimación de               Conexión interdisciplinar:
+      tiempos.                                                              Matemáticas
+                                                                            OA b, OA c, OA e, OA f, OA 1, OA 2,
+                                                                            OA 3 (3° Medio)
+    ➢ Luego validan el proyecto con personas afectadas por el               Artes Visuales
+                                                                            OA 3, OA 7 (3° o 4° Medio)
+      problema identificado: elaboran una breve encuesta para
+      determinar si la solución propuesta es viable en términos
+      de aceptación social. Incluyen preguntas como:
+          − ¿Considera que el proyecto resuelve un aspecto relevante para la comunidad? ¿Por
+             qué?
+          − ¿Qué opina de la solución que aporta el proyecto? ¿Funcionaría?
+          − ¿Participaría activamente en el proyecto?
+
+    ➢ Seleccionan público objetivo de la encuesta y la aplican.
+    ➢ Analizan los resultados de la encuesta y registran los hallazgos.
+    ➢ Evalúan su proceso y responden en su bitácora: ¿Cómo lo hicimos? ¿Cómo mejoraríamos el
+      proceso?
+
+
+
+
+Unidad de Currículum y Evaluación                                                                            284
+Ministerio de Educación, febrero 2021
+Programa de Estudio Ciencias para la Ciudadanía 3° o 4° medio                    Módulo Ambiente y Sostenibilidad
+                                                                                                        Unidad 2
+
+
+
+ Observaciones al docente
+ Se sugiere guiarlos para que elaboren un prototipo, maqueta o proyección del producto o servicio pensado. Es una
+ manera de concretar el proyecto sin llegar a realizarlo.
+
+
+ Observaciones al docente
+ Se puede usar el siguiente indicador, entre otros, para evaluar formativamente:
+ • Argumentan el rol de la participación ciudadana en el desarrollo y la aplicación de proyectos tecnológicos.
+
+
+
+
+Unidad de Currículum y Evaluación                                                                           285
+Ministerio de Educación, febrero 2021
+Programa de Estudio Ciencias para la Ciudadanía 3° o 4° medio                      Módulo Ambiente y Sostenibilidad
+                                                                                                          Unidad 2
+
+
+
+Evaluación Unidad 2. Divulgación e informe del proyecto tecnológico
+
+            OBJETIVOS DE APRENDIZAJE                                INDICADORES DE EVALUACIÓN
+ OA 1. Diseñar proyectos tecnológicos que •                     Evalúan riesgos y beneficios de proyectos
+ permitan resolver problemas personales y/o                     tecnológicos, analizando implicancias de
+ locales de diversos ámbitos de la vida (como                   salud, ética, social, económica y ambiental.
+ vivienda y transporte, entre otros).               •           Evalúan alcances y limitaciones de diseñar e
+ OA 3. Evaluar alcances y limitaciones de la                    implementar proyectos tecnológicos en
+ tecnología y sus aplicaciones, argumentando                    diversos contextos.
+ riesgos y beneficios desde una perspectiva de •                Argumentan sobre el rol de la participación
+ salud, ética, social, económica y ambiental.                   ciudadana en el desarrollo y la aplicación de
+ OA d. Analizar las relaciones entre las partes de              proyectos tecnológicos.
+ un sistema en fenómenos y problemas de
+ interés, a partir de tablas, gráficos, diagramas y
+ modelos.
+ OA e. Construir, usar y comunicar argumentos
+ científicos.
+ OA g. Diseñar proyectos para encontrar
+ soluciones a problemas, usando la imaginación y
+ la creatividad.
+ OA i. Analizar críticamente implicancias sociales,
+ económicas, éticas y ambientales de problemas
+ relacionados con controversias públicas que
+ involucran ciencia y tecnología.
+
+DURACIÓN
+4 horas pedagógicas
+
+
+
+
+Unidad de Currículum y Evaluación                                                                             286
+Ministerio de Educación, febrero 2021
+Programa de Estudio Ciencias para la Ciudadanía 3° o 4° medio                                  Módulo Ambiente y Sostenibilidad
+                                                                                                                      Unidad 2
+
+
+
+
+   Observación al docente
+   Como instancia de evaluación, se sugiere organizar una feria científica donde expongan sus proyectos
+   tecnológicos. Eso permite fortalecer la comunidad escolar y su relación con el medio. Profesores y
+   directivos podrían ser evaluadores de los proyectos a partir de criterios de originalidad e impactos sociales
+   y ambientales.
+
+
+DESARROLLO
+Aprendiendo de otras instancias
+La siguiente imagen muestra un escenario tentativo para organizar una feria científica; a partir de ella,
+reflexionan con las siguientes preguntas:
+      • ¿Qué ventajas y desventajas tiene el flujo de organización de la imagen?
+      • ¿Se adapta este modelo a las condiciones de mi comunidad/escuela o espacio seleccionado
+          para mostrar mis resultados de trabajo?
+      • ¿Qué modificaciones y/o adaptaciones harían?
+
+           Imagen 1: Propuesta de organización de feria.
+
+
+
+
+                                  (Fuente: Organización de la Feria de Ciencia y Tecnología)
+
+
+
+
+Unidad de Currículum y Evaluación                                                                                         287
+Ministerio de Educación, febrero 2021
+Programa de Estudio Ciencias para la Ciudadanía 3° o 4° medio                       Módulo Ambiente y Sostenibilidad
+                                                                                                           Unidad 2
+
+
+
+Planificando la feria
+Para organizar el trabajo previo a la feria, completan una tabla como la siguiente, considerando que la
+pueden modificar según las necesidades del contexto:
+                    Tabla 1: Actividades previas a la feria de presentación de proyectos
+                  Hito                    Responsable de la      Recursos    Cumplimiento de      Observaciones
+                                               tarea            implicados      la tarea
+ Coordinación del espacio físico a                                            Sí        No
+ usar
+ Tiempos para cada actividad                                                  Sí        No
+ Diseño de afiches publicitarios                                              Sí        No
+ Eventos previos de socialización                                             Sí        No
+ Expositores y su material listo                                              Sí        No
+ Otros recursos adicionales
+
+
+Reflexionan sobre preguntas y asuntos como:
+     • ¿Hay otros aspectos que considerar antes del montaje? ¿Cuáles?
+     • Hacen una lista para cotejar las actividades previas a la exposición, que incluyan aspectos
+         logísticos y los recursos que necesiten.
+
+Informe del proyecto y su presentación
+    ➢ Elaboran un formato de presentación que contemple:
+     • Una presentación interactiva o digital para explicar su propuesta de trabajo.
+     • Diseños de trabajo para promover su idea.
+     • Encuestas de satisfacción del público con el que interactúan en la feria.
+    ➢ Es importante finalizar la actividad con una jornada de reflexión sobre el trabajo realizado, en
+       la cual se formalice las ideas mediante un FODA (fortalezas, oportunidades, debilidades y
+       amenazas). Conviene usar tablas en papelógrafos para compartir ideas.
+
+Criterios de evaluación
+Se sugiere aplicar rúbricas y criterios relacionados con habilidades del siglo XXI de Pensamiento creativo
+e innovación, Pensamiento crítico, y Trabajo colaborativo, como también de Diseño del proyecto y
+Presentación del trabajo (ver Anexo 2).
+
+ Observaciones al docente
+ Se sugiere socializar materiales previos a esta etapa, como:
+       • Material para encuestas:
+           https://www.curriculumnacional.cl/link/http://www.woccu.org/documents/Tool10(sp)
+       • Elementos para diseñar material de socialización en la divulgación del proyecto:
+           https://www.curriculumnacional.cl/link/https://www.canva.com/es_mx/crear/folletos/
+           https://www.curriculumnacional.cl/link/http://galeon.com/applesucks/triptico.pdf
+           https://www.curriculumnacional.cl/link/https://es.venngage.com/blog/como-hacer-un-triptico/
+
+
+
+
+Unidad de Currículum y Evaluación                                                                              288
+Ministerio de Educación, febrero 2021
+

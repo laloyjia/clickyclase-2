@@ -20,22 +20,14 @@ window.CURRICULA_PLAN_COMUN = window.CURRICULA_PLAN_COMUN || {};
 CURRICULA_PLAN_COMUN['biologia'] = {
   nombre: 'Biología',
   sigla:  'BIO',
-  niveles: ['1M','2M','3M','4M'],
+  niveles: ['1M','2M'],   // 3M-4M solo via electivos HC (ver `electivos`)
   // 1M-2M forman parte de Ciencias Naturales (ver ciencias.js) — aquí se
   // mantiene la referencia para planificación por asignatura separada cuando
-  // el establecimiento así lo organice. 3M-4M son Formación General FG (DS 193/2019).
+  // el establecimiento así lo organice.
   unidades: {
-    '1M': ['Célula y sus procesos','Organismos y ambiente','Herencia y reproducción'],
-    '2M': ['Genética molecular','Evolución','Ecosistemas y biodiversidad'],
-    '3M': ['Fisiología humana','Neurociencia básica','Biotecnología'],
-    '4M': ['Ecología y sustentabilidad','Biología molecular avanzada','Biotecnología y ética']
+    '1M': ['Sexualidad y reproducción humana','Tabaco, alcohol y drogas','Variabilidad y herencia','Organismos y ambiente'],
+    '2M': ['Coordinación y regulación: sistema nervioso y hormonal','Salud, comportamiento y enfermedades','Genética molecular y biotecnología','Evolución y biodiversidad']
   },
-  // ───────────────────────────────────────────────────────────────────────────
-  //  OAs — schema: { codigo: 'OA1', eje: '...', descripcion: '...' }
-  //  TODO: insertar OAs oficiales al subir Bases Curriculares (DS 369/2015 para
-  //  1M-2M CN y DS 193/2019 para 3M-4M FG). Formato-ejemplo:
-  //    { codigo:'OA1', eje:'Biología', descripcion:'Explicar...' }
-  // ───────────────────────────────────────────────────────────────────────────
   oas: {
     '1M': [ /* Biología 1°M — DS 1264/2016 (Bases CN 7°-2°M, eje Biología). Numeración Mineduc original preservada para trazabilidad. Ver ciencias.js. */
       { codigo: 'OA1', eje: 'Biología', descripcion: 'Explicar, basándose en evidencias, que los fósiles: se forman a partir de restos de animales y plantas; se forman en rocas sedimentarias; se ubican de acuerdo a su antigüedad en los estratos de la Tierra.' },
@@ -57,8 +49,8 @@ CURRICULA_PLAN_COMUN['biologia'] = {
       { codigo: 'OA7', eje: 'Biología', descripcion: 'Desarrollar una explicación científica, basada en evidencias, sobre los procesos de herencia genética en plantas y animales, aplicando los principios básicos de la herencia propuestos por Mendel.' },
       { codigo: 'OA8', eje: 'Biología', descripcion: 'Investigar y explicar las aplicaciones que han surgido a raíz de la manipulación genética para generar alimentos, detergentes, vestuario, fármacos u otras, y evaluar sus implicancias éticas y sociales.' }
     ],
-    '3M': [ /* TODO: OAs Biología 3°M FG DS 193/2019 */ ],
-    '4M': [ /* TODO: OAs Biología 4°M FG DS 193/2019 */ ]
+    // 3M y 4M no existen como asignatura FG separada en DS 193/2019.
+    // Los OAs viven en los electivos HC (ver `electivos` abajo).
   },
   actitudes:   [],  // hereda de _comun
   habilidades: ['Observar y plantear preguntas', 'Planificar y conducir una investigación', 'Procesar, analizar e interpretar evidencia', 'Evaluar y comunicar'],
@@ -226,6 +218,79 @@ CURRICULA_PLAN_COMUN['biologia'] = {
         'Trabajar con empatía y respeto en el contexto de la diversidad, eliminando toda expresión de prejuicio y discriminación.',
         'Pensar con autorreflexión y autonomía para gestionar el propio aprendizaje, identificando capacidades, fortalezas y aspectos por mejorar.',
         'Trabajar colaborativamente en la generación, desarrollo y gestión de proyectos y la resolución de problemas, integrando las diferentes ideas y puntos de vista.'
+      ]
+    },
+
+    // ════════════════════════════════════════════════════════════════
+    //  CIENCIAS DE LA SALUD — Programa de Estudio Mineduc 3°-4° Medio HC
+    //  DS 193/2019 — Aprobado por Mineduc, febrero 2021
+    // ════════════════════════════════════════════════════════════════
+    'ciencias-de-la-salud': {
+      nombre:  'Ciencias de la Salud',
+      sigla:   'CSA',
+      tramo:   'media',
+      niveles: ['3M', '4M'],
+      decreto: 'DS 193/2019 — Programa de Estudio Mineduc, febrero 2021',
+
+      unidades: {
+        '3M': [
+          'Salud, sociedad y estilos de vida',
+          'Problemas en salud pública',
+          'Genética y Salud',
+          'Ciencia y tecnología al servicio de la salud'
+        ],
+        '4M': [
+          'Salud, sociedad y estilos de vida',
+          'Problemas en salud pública',
+          'Genética y Salud',
+          'Ciencia y tecnología al servicio de la salud'
+        ]
+      },
+
+      oasPorUnidad: {
+        'Salud, sociedad y estilos de vida':              ['OA3', 'OA4'],
+        'Problemas en salud pública':                     ['OA1'],
+        'Genética y Salud':                                ['OA2'],
+        'Ciencia y tecnología al servicio de la salud':   ['OA5']
+      },
+
+      oas: {
+        '3M': [
+          { codigo: 'OA1', eje: 'Conocimiento y comprensión', descripcion: 'Analizar desde una perspectiva sistémica problemáticas complejas en materia de salud pública que afectan a la sociedad a escala local y global, tales como transmisión de infecciones, consumo de drogas, infecciones de transmisión sexual, desequilibrios alimentarios y enfermedades profesionales/laborales.' },
+          { codigo: 'OA2', eje: 'Conocimiento y comprensión', descripcion: 'Explicar cómo la interacción entre genoma y ambiente determina patologías y condiciones de la salud humana.' },
+          { codigo: 'OA3', eje: 'Conocimiento y comprensión', descripcion: 'Analizar relaciones causales entre los estilos de vida y la salud humana integral a través de sus efectos sobre el metabolismo, la energética celular, la fisiología y la conducta.' },
+          { codigo: 'OA4', eje: 'Conocimiento y comprensión', descripcion: 'Investigar y comunicar la relación entre la calidad del aire, las aguas y los suelos con la salud humana, así como los mecanismos biológicos subyacentes.' },
+          { codigo: 'OA5', eje: 'Conocimiento y comprensión', descripcion: 'Evaluar cómo el desarrollo científico y tecnológico, a través de innovaciones en biotecnología, nanomedicina, medicina nuclear, imagenología, farmacología, entre otras, influyen en la calidad de vida de las personas.' }
+        ],
+        '4M': [
+          { codigo: 'OA1', eje: 'Conocimiento y comprensión', descripcion: 'Analizar desde una perspectiva sistémica problemáticas complejas en materia de salud pública que afectan a la sociedad a escala local y global, tales como transmisión de infecciones, consumo de drogas, infecciones de transmisión sexual, desequilibrios alimentarios y enfermedades profesionales/laborales.' },
+          { codigo: 'OA2', eje: 'Conocimiento y comprensión', descripcion: 'Explicar cómo la interacción entre genoma y ambiente determina patologías y condiciones de la salud humana.' },
+          { codigo: 'OA3', eje: 'Conocimiento y comprensión', descripcion: 'Analizar relaciones causales entre los estilos de vida y la salud humana integral a través de sus efectos sobre el metabolismo, la energética celular, la fisiología y la conducta.' },
+          { codigo: 'OA4', eje: 'Conocimiento y comprensión', descripcion: 'Investigar y comunicar la relación entre la calidad del aire, las aguas y los suelos con la salud humana, así como los mecanismos biológicos subyacentes.' },
+          { codigo: 'OA5', eje: 'Conocimiento y comprensión', descripcion: 'Evaluar cómo el desarrollo científico y tecnológico, a través de innovaciones en biotecnología, nanomedicina, medicina nuclear, imagenología, farmacología, entre otras, influyen en la calidad de vida de las personas.' }
+        ]
+      },
+
+      habilidades: [
+        { codigo: 'OAa', eje: 'Planificar y conducir investigación',  descripcion: 'Formular preguntas y problemas sobre tópicos científicos de interés, a partir de la observación de fenómenos y/o la exploración de diversas fuentes.' },
+        { codigo: 'OAb', eje: 'Planificar y conducir investigación',  descripcion: 'Planificar y desarrollar investigaciones que permitan recoger evidencias y contrastar hipótesis, con apoyo de herramientas tecnológicas y matemáticas.' },
+        { codigo: 'OAc', eje: 'Analizar e interpretar datos',         descripcion: 'Describir patrones, tendencias y relaciones entre datos, información y variables.' },
+        { codigo: 'OAd', eje: 'Analizar e interpretar datos',         descripcion: 'Analizar las relaciones entre las partes de un sistema en fenómenos y problemas de interés, a partir de tablas, gráficos, diagramas y modelos.' },
+        { codigo: 'OAe', eje: 'Construir explicaciones y soluciones', descripcion: 'Construir, usar y comunicar argumentos científicos.' },
+        { codigo: 'OAf', eje: 'Construir explicaciones y soluciones', descripcion: 'Desarrollar y usar modelos basados en evidencia, para predecir y explicar mecanismos y fenómenos naturales.' },
+        { codigo: 'OAg', eje: 'Construir explicaciones y soluciones', descripcion: 'Diseñar proyectos para encontrar soluciones a problemas, usando la imaginación y la creatividad.' },
+        { codigo: 'OAh', eje: 'Evaluar',                              descripcion: 'Evaluar la validez de información proveniente de diversas fuentes, distinguiendo entre evidencia científica e interpretación, y analizar sus alcances y limitaciones.' },
+        { codigo: 'OAi', eje: 'Evaluar',                              descripcion: 'Analizar críticamente implicancias sociales, económicas, éticas y ambientales de problemas relacionados con controversias públicas que involucran ciencia y tecnología.' }
+      ],
+
+      actitudes: [
+        'Pensar con perseverancia y proactividad para encontrar soluciones innovadoras a los problemas.',
+        'Trabajar con responsabilidad y liderazgo en la realización de las tareas colaborativas y en función del bienestar común.',
+        'Pensar con consciencia, reconociendo que los errores ofrecen oportunidades para el aprendizaje.',
+        'Interesarse por las posibilidades que ofrece la tecnología para el desarrollo intelectual, personal y social del individuo.',
+        'Trabajar con empatía y respeto en el contexto de la diversidad, eliminando toda expresión de prejuicio y discriminación.',
+        'Pensar con autorreflexión y autonomía para gestionar el propio aprendizaje, identificando capacidades, fortalezas y aspectos por mejorar.',
+        'Actuar de acuerdo con los principios de la ética en el uso de la información y de la tecnología.'
       ]
     }
   }

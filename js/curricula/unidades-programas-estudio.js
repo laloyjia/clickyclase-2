@@ -247,8 +247,9 @@ window.UNIDADES_PROGRAMAS_ESTUDIO = {
   },
 
   // ── BIOLOGÍA, FÍSICA, QUÍMICA (1°-2° medio) ────────────────────
-  // Comparten la división de Ciencias Naturales 1M-2M (Programas de Estudio
-  // unificados). Cada eje tiene 4 unidades dentro del Programa Ciencias.
+  // 1M-2M: ejes de Ciencias Naturales (DS 369/2015).
+  // 3M-4M NO tienen FG separada — viven como electivos HC (ver biologia.js,
+  // fisica.js, quimica.js → campo `electivos`).
   'biologia': {
     '1M': [
       'Unidad 1: Sexualidad y reproducción humana',
@@ -289,6 +290,31 @@ window.UNIDADES_PROGRAMAS_ESTUDIO = {
       'Unidad 2: Ácido-base y soluciones',
       'Unidad 3: Termoquímica y cinética',
       'Unidad 4: Compuestos del carbono y polímeros'
+    ]
+  },
+
+  // ── CIENCIAS PARA LA CIUDADANÍA (3°-4° medio FG) ─────────────
+  // Asignatura modular: 4 módulos × 2 unidades = 8 unidades electivas
+  'ciencias-ciudadania': {
+    '3M': [
+      'Unidad 1 (Bienestar y Salud): Salud humana y medicina',
+      'Unidad 2 (Bienestar y Salud): Prevención de infecciones',
+      'Unidad 1 (Seguridad, Prevención y Autocuidado): Riesgos socionaturales en nuestros territorios',
+      'Unidad 2 (Seguridad, Prevención y Autocuidado): Amenazas y riesgos cerca de nosotros',
+      'Unidad 1 (Ambiente y Sostenibilidad): Cambio climático como desafío urgente',
+      'Unidad 2 (Ambiente y Sostenibilidad): Consumo sostenible y protección ambiental',
+      'Unidad 1 (Tecnología y Sociedad): Innovación tecnológica',
+      'Unidad 2 (Tecnología y Sociedad): Proyectos tecnológicos'
+    ],
+    '4M': [
+      'Unidad 1 (Bienestar y Salud): Salud humana y medicina',
+      'Unidad 2 (Bienestar y Salud): Prevención de infecciones',
+      'Unidad 1 (Seguridad, Prevención y Autocuidado): Riesgos socionaturales en nuestros territorios',
+      'Unidad 2 (Seguridad, Prevención y Autocuidado): Amenazas y riesgos cerca de nosotros',
+      'Unidad 1 (Ambiente y Sostenibilidad): Cambio climático como desafío urgente',
+      'Unidad 2 (Ambiente y Sostenibilidad): Consumo sostenible y protección ambiental',
+      'Unidad 1 (Tecnología y Sociedad): Innovación tecnológica',
+      'Unidad 2 (Tecnología y Sociedad): Proyectos tecnológicos'
     ]
   },
 
