@@ -20,10 +20,7 @@ window.CURRICULA_PLAN_COMUN = window.CURRICULA_PLAN_COMUN || {};
 CURRICULA_PLAN_COMUN['historia'] = {
   nombre: 'Historia, Geografía y Ciencias Sociales',
   sigla:  'HIS',
-  niveles: ['1B','2B','3B','4B','5B','6B','7B','8B','1M','2M'],
-  // 3M-4M: Historia FG fue reemplazada por Educación Ciudadana en DS 193/2019.
-  // Electivos HC relacionados: Chile y la región latinoamericana, Mundo Global,
-  // Comprensión histórica del presente.
+  niveles: ['1B','2B','3B','4B','5B','6B','7B','8B','1M','2M','3M','4M'],
   oas: {
     '1B': [
       { codigo: 'OA1',  eje: 'Historia',             descripcion: 'Nombrar y secuenciar días de la semana y meses del año, utilizando calendarios, e identificar el año en curso.' },
