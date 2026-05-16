@@ -282,51 +282,216 @@ CURRICULA_PLAN_COMUN['matematica'] = {
         { codigo: 'OA4', eje: 'Probabilidad y Estadística', descripcion: 'Resolver problemas acerca de rectas y circunferencias en el plano, mediante su representación analítica, de forma manuscrita y con uso de herramientas tecnológicas. Programa de Estudio Matemática 4° Medio Formación General Visión global del año UNIDAD NIDAD NIDAD NIDAD a toma de decisiones La toma de decisiones en situaciones Modelamiento matemático Geometría con en situaciones de financieras y para describir y predecir coordenadas incerteza económicas Objetivos de Aprendizaje Objetivos de Aprendizaje Objetivos de Aprendizaje Objetivos de Aprendizaje OA 2: Fundamentar OA 1: Fundamentar OA 3: Construir modelos de OA 4: Resolver decisiones en decisiones en el situaciones o fenómenos de problemas acerca de situaciones de ámbito financiero y crecimiento, decrecimiento rectas y incerteza, a partir del económico personal o y periódicos que involucren circunferencias en el análisis crítico de datos comunitario, a partir funciones potencia de plano, mediante su estadísticos y con base de modelos que exponente entero y representación en los modelos consideren tasas de trigonométricas sen(x) y analítica, de forma binomial y normal. interés e índices cos(x), de forma manuscrita y con uso económicos. manuscrita, con uso de de herramientas OA c. Tomar decisiones herramientas tecnológicas y tecnológicas. fundamentadas en OA d. Argumentar, promoviendo la búsqueda, evidencia estadística utilizando lenguaje OA d. Argumentar, selección, contrastación y y/o en la evaluación de simbólico y diferentes utilizando lenguaje verificación de información resultados obtenidos a representaciones, para simbólico y diferentes en ambientes digitales y partir de un modelo justificar la veracidad o representaciones, para redes sociales. probabilístico. falsedad de una justificar la veracidad o conjetura, y evaluar el OA e. Construir modelos, falsedad de una OA f. Evaluar modelos alcance y los límites de realizando conexiones entre conjetura, y evaluar el para estudiar un los argumentos variables para predecir alcance y los límites de fenómeno, analizando utilizados. posibles escenarios de los argumentos críticamente las solución a un problema, y utilizados. simplificaciones OA f. Evaluar modelos tomar decisiones OA e. Construir requeridas y realizando para estudiar un fundamentadas. modelos realizando conexiones entre fenómeno, analizando variables para predecir críticamente las OA f. Evaluar modelos para conexiones entre posibles escenarios de simplificaciones estudiar un fenómeno, variables para predecir solución a un requeridas y analizando críticamente las posibles escenarios de problema, y tomar considerando las simplificaciones requeridas solución a un decisiones limitaciones de y considerando las problema, y tomar fundamentadas. aquellos. limitaciones de aquellos. decisiones fundamentadas' }
     ]
   },
-  // ── Electivos 3°–4° Medio ────────────────────────────────
+  // ── Electivos del Plan Diferenciado HC (3°-4° Medio) ─────
+  //  DS 193/2019 — Programas de Estudio Mineduc, febrero 2021
+  // ────────────────────────────────────────────────────────────────────
   electivos: {
+
+    // ════════════════════════════════════════════════════════════════
+    //  GEOMETRÍA 3D — PENDIENTE: subir Programa de Estudio Mineduc
+    //  Esta entrada queda como placeholder visible. Cuando el docente
+    //  proporcione el PDF se completará con OAs, unidades y mapeo.
+    // ════════════════════════════════════════════════════════════════
     'geometria3d': {
-      nombre: 'Geometría 3D',
-      sigla: 'GEO3D',
-      oas: [
-        { codigo: 'OA1', eje: 'General', descripcion: 'Argumentar acerca de la validez de soluciones a situaciones que involucren isometrías y homotecias en el plano, haciendo uso de vectores y de representaciones digitales. OA a. Construir y evaluar estrategias de manera colaborativa al resolver problemas no rutinarios. OA g. Elaborar representaciones, tanto en forma manual como digital, y justificar cómo una misma' },
-        { codigo: 'OA2', eje: 'General', descripcion: 'Resolver problemas que involucren puntos, rectas y planos en el espacio 3D, haciendo uso de vectores e incluyendo representaciones digitales. OA b. Resolver problemas que impliquen variar algunos parámetros en el modelo utilizado y observar cómo eso influye en los resultados obtenidos' },
-        { codigo: 'OA3', eje: 'General', descripcion: 'Resolver problemas que involucren relaciones entre figuras 3D y 2D en las que intervengan vistas, cortes, proyecciones en el plano o la inscripción de figuras 3D en otras figuras tridimensionales. OA a. Construir y evaluar estrategias de manera colaborativa al resolver problemas no rutinarios. OA g. Elaborar representaciones, tanto en forma manual como digital, y justificar cómo una misma' },
-        { codigo: 'OA4', eje: 'General', descripcion: 'Formular y verificar conjeturas acerca de la forma, área y volumen de figuras 3D generadas por rotación o traslación de figuras planas en el espacio, incluyendo el uso de herramientas tecnológicas digitales. OA a. Construir y evaluar estrategias de manera colaborativa al resolver problemas no rutinarios' },
-        { codigo: 'OA5', eje: 'General', descripcion: 'Diseñar propuestas y resolver problemas educacional o en el entorno– podríamos que relacionados con perspectiva, proyección paralela y intervenir para mejorar la vida comunitaria en central, puntos de fuga y elevaciones, tanto en arte como los ámbitos cultural y físico? en arquitectura, diseño o construcción, aplicando • ¿Qué necesitan los miembros de la comunidad' }
-      ]
+      nombre:  'Geometría 3D',
+      sigla:   'GEO3D',
+      tramo:   'media',
+      niveles: ['3M', '4M'],
+      decreto: 'DS 193/2019 — Pendiente carga de Programa de Estudio',
+      unidades: { '3M': [], '4M': [] },
+      oas:      { '3M': [], '4M': [] },
+      habilidades: [],
+      actitudes:   [],
+      _pendiente: 'Subir PDF Programa de Estudio Geometría 3D para completar OAs y unidades.'
     },
-    'limites': {
-      nombre: 'Límites, derivadas e integrales',
-      sigla: 'LIMI',
-      oas: [
-        { codigo: 'OA1', eje: 'General', descripcion: 'Utilizar diversas formas de representación acerca de la resultante de la composición de funciones y la existencia de la función inversa de una función dada. OA b. Resolver problemas que impliquen variar algunos parámetros en el modelo utilizado y observar cómo eso influye en los resultados obtenidos' },
-        { codigo: 'OA2', eje: 'General', descripcion: 'Argumentar acerca de la existencia de límites de funciones en el infinito y en un punto para determinar convergencia y continuidad en contextos matemáticos, de las ciencias y de la vida diaria, en forma manuscrita y utilizando herramientas tecnológicas digitales. OA d. Argumentar, utilizando lenguaje simbólico y diferentes representaciones, para justificar la' },
-        { codigo: 'OA3', eje: 'General', descripcion: 'Modelar situaciones o fenómenos que involucren rapidez instantánea de cambio y evaluar la necesidad eventual de ajustar el modelo obtenido. OA a. Construir y evaluar estrategias de manera colaborativa al resolver problemas no rutinarios. OA d. Argumentar, utilizando lenguaje simbólico y diferentes representaciones, para justificar la' },
-        { codigo: 'OA4', eje: 'General', descripcion: 'Resolver problemas que involucren crecimiento o decrecimiento, concavidad, puntos máximos, mínimos o de inflexión de una función, a partir del cálculo de la primera y segunda derivada, en forma manuscrita y utilizando herramientas tecnológicas digitales. OA a. Construir y evaluar estrategias de manera colaborativa al resolver problemas no rutinarios' },
-        { codigo: 'OA5', eje: 'General', descripcion: 'Modelar situaciones o fenómenos que involucren el concepto de integral como área bajo la curva en contextos matemáticos, de las ciencias y de la vida diaria, en forma manuscrita y utilizando herramientas tecnológicas digitales, y evaluar la necesidad eventual de ajustar el modelo obtenido' }
-      ]
+
+    // ════════════════════════════════════════════════════════════════
+    //  LÍMITES, DERIVADAS E INTEGRALES (Cálculo)
+    //  DS 193/2019 — Programa de Estudio Mineduc, febrero 2021
+    // ════════════════════════════════════════════════════════════════
+    'limites-derivadas-integrales': {
+      nombre:  'Límites, Derivadas e Integrales',
+      sigla:   'LIMI',
+      tramo:   'media',
+      niveles: ['3M', '4M'],
+      decreto: 'DS 193/2019 — Programa de Estudio Mineduc, febrero 2021',
+
+      unidades: {
+        '3M': [
+          'Representar y modelar situaciones de cambio por medio de funciones',
+          'Reconocer un patrón infinito y la noción de límite',
+          'Modelar situaciones de cambio con derivadas',
+          'Comprender la integral como proceso de reversibilidad y cálculo de áreas'
+        ],
+        '4M': [
+          'Representar y modelar situaciones de cambio por medio de funciones',
+          'Reconocer un patrón infinito y la noción de límite',
+          'Modelar situaciones de cambio con derivadas',
+          'Comprender la integral como proceso de reversibilidad y cálculo de áreas'
+        ]
+      },
+
+      oasPorUnidad: {
+        'Representar y modelar situaciones de cambio por medio de funciones':           ['OA1'],
+        'Reconocer un patrón infinito y la noción de límite':                           ['OA2'],
+        'Modelar situaciones de cambio con derivadas':                                  ['OA3', 'OA4'],
+        'Comprender la integral como proceso de reversibilidad y cálculo de áreas':     ['OA5']
+      },
+
+      oas: {
+        '3M': [
+          { codigo: 'OA1', eje: 'Conocimiento y comprensión', descripcion: 'Utilizar diversas formas de representación acerca de la resultante de la composición de funciones y la existencia de la función inversa de una función dada.' },
+          { codigo: 'OA2', eje: 'Conocimiento y comprensión', descripcion: 'Argumentar acerca de la existencia de límites de funciones en el infinito y en un punto para determinar convergencia y continuidad en contextos matemáticos, de las ciencias y de la vida diaria, en forma manuscrita y utilizando herramientas tecnológicas digitales.' },
+          { codigo: 'OA3', eje: 'Conocimiento y comprensión', descripcion: 'Modelar situaciones o fenómenos que involucren rapidez instantánea de cambio y evaluar la necesidad eventual de ajustar el modelo obtenido.' },
+          { codigo: 'OA4', eje: 'Conocimiento y comprensión', descripcion: 'Resolver problemas que involucren crecimiento o decrecimiento, concavidad, puntos máximos o de inflexión de una función, a partir del cálculo de la primera y segunda derivada, en forma manuscrita y utilizando herramientas tecnológicas digitales.' },
+          { codigo: 'OA5', eje: 'Conocimiento y comprensión', descripcion: 'Modelar situaciones o fenómenos que involucren el concepto de integral como área bajo la curva en contextos matemáticos, de las ciencias y de la vida diaria, en forma manuscrita y utilizando herramientas tecnológicas digitales, y evaluar la necesidad eventual de ajustar el modelo obtenido.' }
+        ],
+        '4M': [
+          { codigo: 'OA1', eje: 'Conocimiento y comprensión', descripcion: 'Utilizar diversas formas de representación acerca de la resultante de la composición de funciones y la existencia de la función inversa de una función dada.' },
+          { codigo: 'OA2', eje: 'Conocimiento y comprensión', descripcion: 'Argumentar acerca de la existencia de límites de funciones en el infinito y en un punto para determinar convergencia y continuidad en contextos matemáticos, de las ciencias y de la vida diaria, en forma manuscrita y utilizando herramientas tecnológicas digitales.' },
+          { codigo: 'OA3', eje: 'Conocimiento y comprensión', descripcion: 'Modelar situaciones o fenómenos que involucren rapidez instantánea de cambio y evaluar la necesidad eventual de ajustar el modelo obtenido.' },
+          { codigo: 'OA4', eje: 'Conocimiento y comprensión', descripcion: 'Resolver problemas que involucren crecimiento o decrecimiento, concavidad, puntos máximos o de inflexión de una función, a partir del cálculo de la primera y segunda derivada, en forma manuscrita y utilizando herramientas tecnológicas digitales.' },
+          { codigo: 'OA5', eje: 'Conocimiento y comprensión', descripcion: 'Modelar situaciones o fenómenos que involucren el concepto de integral como área bajo la curva en contextos matemáticos, de las ciencias y de la vida diaria, en forma manuscrita y utilizando herramientas tecnológicas digitales, y evaluar la necesidad eventual de ajustar el modelo obtenido.' }
+        ]
+      },
+
+      habilidades: _habilidadesMatHC(),
+      actitudes:   _actitudesMatHC()
     },
-    'probabilidades': {
-      nombre: 'Probabilidades y estadística descriptiva e inferencial',
-      sigla: 'PROB',
-      oas: [
-        { codigo: 'OA1', eje: 'General', descripcion: 'Argumentar y comunicar decisiones a partir del análisis crítico de información presente en histogramas, polígonos de frecuencia, frecuencia acumulada, diagramas de cajón y nube de puntos, incluyendo el uso de herramientas digitales. OA c. Tomar decisiones fundamentadas en evidencia estadística y/o en la evaluación de resultados' },
-        { codigo: 'OA2', eje: 'General', descripcion: 'Resolver problemas que involucren los conceptos de media muestral, desviación estándar, varianza, coeficiente de variación y correlación muestral entre dos variables, tanto de forma manuscrita como haciendo uso de herramientas tecnológicas digitales. OA b. Resolver problemas que impliquen variar algunos parámetros en el modelo utilizado y observar' },
-        { codigo: 'OA3', eje: 'General', descripcion: 'Modelar fenómenos o situaciones cotidianas del individuales? ámbito científico y del ámbito social, que requieran el cálculo de probabilidades y la aplicación de las distribuciones binomial y normal' },
-        { codigo: 'OA4', eje: 'General', descripcion: 'Argumentar inferencias acerca de una estimación de la media parámetros (media y varianza) o características poblacional, con desviación estándar de una población, a partir de datos de una conocida, por medio de intervalos de muestra aleatoria, bajo el supuesto de confianza' }
-      ]
+
+    // ════════════════════════════════════════════════════════════════
+    //  PROBABILIDADES Y ESTADÍSTICA DESCRIPTIVA E INFERENCIAL
+    //  DS 193/2019 — Programa de Estudio Mineduc, febrero 2021
+    // ════════════════════════════════════════════════════════════════
+    'probabilidades-estadistica': {
+      nombre:  'Probabilidades y Estadística Descriptiva e Inferencial',
+      sigla:   'PROB',
+      tramo:   'media',
+      niveles: ['3M', '4M'],
+      decreto: 'DS 193/2019 — Programa de Estudio Mineduc, febrero 2021',
+
+      unidades: {
+        '3M': [
+          '¿Qué dicen los gráficos? Análisis crítico de la información',
+          'Comprender la media muestral, las medidas de dispersión y la correlación',
+          'Modelaje de fenómenos mediante las probabilidades y las distribuciones binomial o normal',
+          'Hacer inferencia estadística'
+        ],
+        '4M': [
+          '¿Qué dicen los gráficos? Análisis crítico de la información',
+          'Comprender la media muestral, las medidas de dispersión y la correlación',
+          'Modelaje de fenómenos mediante las probabilidades y las distribuciones binomial o normal',
+          'Hacer inferencia estadística'
+        ]
+      },
+
+      oasPorUnidad: {
+        '¿Qué dicen los gráficos? Análisis crítico de la información':                                       ['OA1'],
+        'Comprender la media muestral, las medidas de dispersión y la correlación':                          ['OA2'],
+        'Modelaje de fenómenos mediante las probabilidades y las distribuciones binomial o normal':         ['OA3'],
+        'Hacer inferencia estadística':                                                                       ['OA4']
+      },
+
+      oas: {
+        '3M': [
+          { codigo: 'OA1', eje: 'Conocimiento y comprensión', descripcion: 'Argumentar y comunicar decisiones a partir del análisis crítico de información presente en histogramas, polígonos de frecuencia, frecuencia acumulada, diagramas de cajón y nube de puntos, incluyendo el uso de herramientas digitales.' },
+          { codigo: 'OA2', eje: 'Conocimiento y comprensión', descripcion: 'Resolver problemas que involucren los conceptos de media muestral, desviación estándar, varianza, coeficiente de variación y correlación muestral entre dos variables, tanto de forma manuscrita como haciendo uso de herramientas tecnológicas digitales.' },
+          { codigo: 'OA3', eje: 'Conocimiento y comprensión', descripcion: 'Modelar fenómenos o situaciones cotidianas del ámbito científico y del ámbito social, que requieran el cálculo de probabilidades y la aplicación de las distribuciones binomial y normal.' },
+          { codigo: 'OA4', eje: 'Conocimiento y comprensión', descripcion: 'Argumentar inferencias acerca de parámetros (media y varianza) o características de una población, a partir de datos de una muestra aleatoria, bajo el supuesto de normalidad y aplicando procedimientos con base en intervalos de confianza o pruebas de hipótesis.' }
+        ],
+        '4M': [
+          { codigo: 'OA1', eje: 'Conocimiento y comprensión', descripcion: 'Argumentar y comunicar decisiones a partir del análisis crítico de información presente en histogramas, polígonos de frecuencia, frecuencia acumulada, diagramas de cajón y nube de puntos, incluyendo el uso de herramientas digitales.' },
+          { codigo: 'OA2', eje: 'Conocimiento y comprensión', descripcion: 'Resolver problemas que involucren los conceptos de media muestral, desviación estándar, varianza, coeficiente de variación y correlación muestral entre dos variables, tanto de forma manuscrita como haciendo uso de herramientas tecnológicas digitales.' },
+          { codigo: 'OA3', eje: 'Conocimiento y comprensión', descripcion: 'Modelar fenómenos o situaciones cotidianas del ámbito científico y del ámbito social, que requieran el cálculo de probabilidades y la aplicación de las distribuciones binomial y normal.' },
+          { codigo: 'OA4', eje: 'Conocimiento y comprensión', descripcion: 'Argumentar inferencias acerca de parámetros (media y varianza) o características de una población, a partir de datos de una muestra aleatoria, bajo el supuesto de normalidad y aplicando procedimientos con base en intervalos de confianza o pruebas de hipótesis.' }
+        ]
+      },
+
+      habilidades: _habilidadesMatHC(),
+      actitudes:   _actitudesMatHC()
     },
-    'computacional': {
-      nombre: 'Pensamiento computacional y programación',
-      sigla: 'COMP',
-      oas: [
-        { codigo: 'OA1', eje: 'General', descripcion: 'Aplicar conceptos de Ciencias de la Computación –abstracción, organización lógica de datos, análisis de soluciones alternativas y generalización– al crear el código de una solución computacional. OA a. Construir y evaluar estrategias de manera colaborativa al resolver problemas no rutinarios. OA d. Argumentar, utilizando lenguaje simbólico y diferentes representaciones para justificar la' },
-        { codigo: 'OA3', eje: 'General', descripcion: 'Desarrollar y programar algoritmos para ejecutar procedimientos matemáticos, realizar cálculos y obtener términos definidos por una regla o patrón. OA g. Elaborar representaciones, tanto en forma manual como digital, y justificar cómo una misma información puede ser utilizada según el tipo de representación' },
-        { codigo: 'OA4', eje: 'General', descripcion: 'Crear aplicaciones y realizar análisis mediante procesadores simbólicos, de geometría dinámica y de análisis estadístico. OA d. Argumentar, utilizando lenguaje simbólico y diferentes representaciones para justificar la veracidad o falsedad de una conjetura, y evaluar el alcance y los límites de los argumentos utilizados' },
-        { codigo: 'OA5', eje: 'General', descripcion: 'Desarrollar aplicaciones para dispositivos móviles y para dispositivos provistos de sensores y mecanismos de control. OA j. Desarrollar un trabajo colaborativo en línea para discusión y resolución de tareas matemáticas, usando herramientas electrónicas de productividad, entornos virtuales y redes sociales' },
-        { codigo: 'OA6', eje: 'General', descripcion: 'Utilizar la tecnología digital y la información personal y privada que esta contiene de una forma creativa, respetuosa y responsable. OA j. Desarrollar un trabajo colaborativo en línea para discusión y resolución de tareas matemáticas, usando herramientas electrónicas de productividad, entornos virtuales y redes sociales' }
-      ]
+
+    // ════════════════════════════════════════════════════════════════
+    //  PENSAMIENTO COMPUTACIONAL Y PROGRAMACIÓN
+    //  DS 193/2019 — Programa de Estudio Mineduc, febrero 2021
+    // ════════════════════════════════════════════════════════════════
+    'pensamiento-computacional': {
+      nombre:  'Pensamiento Computacional y Programación',
+      sigla:   'PCP',
+      tramo:   'media',
+      niveles: ['3M', '4M'],
+      decreto: 'DS 193/2019 — Programa de Estudio Mineduc, febrero 2021',
+
+      unidades: {
+        '3M': [
+          'La escritura como medio para comunicar y almacenar la información',
+          'La resolución de problemas y las máquinas',
+          'Ayuda de la computadora en problemas geométricos y estadísticos',
+          'Elaboración de Apps para dispositivos electrónicos móviles'
+        ],
+        '4M': [
+          'La escritura como medio para comunicar y almacenar la información',
+          'La resolución de problemas y las máquinas',
+          'Ayuda de la computadora en problemas geométricos y estadísticos',
+          'Elaboración de Apps para dispositivos electrónicos móviles'
+        ]
+      },
+
+      oasPorUnidad: {
+        'La escritura como medio para comunicar y almacenar la información':           ['OA1'],
+        'La resolución de problemas y las máquinas':                                   ['OA2', 'OA3'],
+        'Ayuda de la computadora en problemas geométricos y estadísticos':             ['OA4'],
+        'Elaboración de Apps para dispositivos electrónicos móviles':                  ['OA5']
+      },
+
+      oas: {
+        '3M': [
+          { codigo: 'OA1', eje: 'Conocimiento y comprensión', descripcion: 'Aplicar conceptos de Ciencias de la Computación —abstracción, organización lógica de datos, análisis de soluciones alternativas y generalización— al crear el código de una solución computacional.' },
+          { codigo: 'OA2', eje: 'Conocimiento y comprensión', descripcion: 'Representar diferente tipo de datos en una variedad de formas, considerando su uso en diversas situaciones cotidianas y científicas.' },
+          { codigo: 'OA3', eje: 'Conocimiento y comprensión', descripcion: 'Desarrollar y programar algoritmos para ejecutar procedimientos matemáticos, realizar cálculos y obtener términos definidos por una regla o patrón.' },
+          { codigo: 'OA4', eje: 'Conocimiento y comprensión', descripcion: 'Crear aplicaciones y realizar análisis mediante procesadores simbólicos, de geometría dinámica y de análisis estadístico.' },
+          { codigo: 'OA5', eje: 'Conocimiento y comprensión', descripcion: 'Desarrollar aplicaciones para dispositivos móviles y para dispositivos provistos de sensores y mecanismos de control.' }
+        ],
+        '4M': [
+          { codigo: 'OA1', eje: 'Conocimiento y comprensión', descripcion: 'Aplicar conceptos de Ciencias de la Computación —abstracción, organización lógica de datos, análisis de soluciones alternativas y generalización— al crear el código de una solución computacional.' },
+          { codigo: 'OA2', eje: 'Conocimiento y comprensión', descripcion: 'Representar diferente tipo de datos en una variedad de formas, considerando su uso en diversas situaciones cotidianas y científicas.' },
+          { codigo: 'OA3', eje: 'Conocimiento y comprensión', descripcion: 'Desarrollar y programar algoritmos para ejecutar procedimientos matemáticos, realizar cálculos y obtener términos definidos por una regla o patrón.' },
+          { codigo: 'OA4', eje: 'Conocimiento y comprensión', descripcion: 'Crear aplicaciones y realizar análisis mediante procesadores simbólicos, de geometría dinámica y de análisis estadístico.' },
+          { codigo: 'OA5', eje: 'Conocimiento y comprensión', descripcion: 'Desarrollar aplicaciones para dispositivos móviles y para dispositivos provistos de sensores y mecanismos de control.' }
+        ]
+      },
+
+      habilidades: _habilidadesMatHC(),
+      actitudes:   _actitudesMatHC()
     }
   }
 };
 
+// ── Helpers internos: OAH (habilidades) y actitudes comunes a Matemática HC ─
+function _habilidadesMatHC() {
+  return [
+    { codigo: 'OAa', eje: 'Construir y evaluar estrategias', descripcion: 'Construir y evaluar estrategias de manera colaborativa al resolver problemas no rutinarios.' },
+    { codigo: 'OAb', eje: 'Resolver problemas',              descripcion: 'Resolver problemas que impliquen variar algunos parámetros en el modelo utilizado y observar cómo eso influye en los resultados obtenidos.' },
+    { codigo: 'OAc', eje: 'Tomar decisiones',                descripcion: 'Tomar decisiones fundamentadas en evidencia estadística y/o en la evaluación de resultados obtenidos a partir de un modelo probabilístico.' },
+    { codigo: 'OAd', eje: 'Argumentar',                      descripcion: 'Argumentar, utilizando lenguaje simbólico y diferentes representaciones, para justificar la veracidad o falsedad de una conjetura, y evaluar el alcance y los límites de los argumentos utilizados.' },
+    { codigo: 'OAe', eje: 'Construir modelos',               descripcion: 'Construir modelos, realizando conexiones entre variables para predecir posibles escenarios de solución a un problema, y tomar decisiones fundamentadas.' },
+    { codigo: 'OAf', eje: 'Evaluar modelos',                 descripcion: 'Evaluar modelos para estudiar un fenómeno, analizando críticamente las simplificaciones requeridas y considerando las limitaciones de aquellos.' },
+    { codigo: 'OAg', eje: 'Elaborar representaciones',       descripcion: 'Elaborar representaciones, tanto en forma manual como digital, y justificar cómo una misma información puede ser utilizada según el tipo de representación.' },
+    { codigo: 'OAh', eje: 'Lenguaje matemático',             descripcion: 'Usar lenguaje matemático para comunicar o describir relaciones, ideas, conceptos y soluciones a otros.' },
+    { codigo: 'OAi', eje: 'Trabajo con información web',     descripcion: 'Buscar, seleccionar, manejar y producir información matemática/cuantitativa confiable a través de la web.' },
+    { codigo: 'OAj', eje: 'Trabajo colaborativo digital',    descripcion: 'Desarrollar un trabajo colaborativo en línea para discusión y resolución de tareas matemáticas, usando herramientas electrónicas de productividad, entornos virtuales y redes sociales.' },
+    { codigo: 'OAk', eje: 'Impacto tecnológico',             descripcion: 'Analizar y evaluar el impacto de las tecnologías digitales en contextos sociales, económicos y culturales.' }
+  ];
+}
+
+function _actitudesMatHC() {
+  return [
+    'Pensar con perseverancia y proactividad para encontrar soluciones innovadoras a los problemas.',
+    'Trabajar con autonomía y proactividad en trabajos colaborativos e individuales.',
+    'Trabajar con responsabilidad y liderazgo en la realización de las tareas colaborativas y en función del logro de metas comunes.',
+    'Interesarse por las posibilidades que ofrece la tecnología para el desarrollo intelectual, personal y social del individuo.',
+    'Pensar con conciencia, reconociendo que los errores ofrecen oportunidades para el aprendizaje.',
+    'Aprovechar las herramientas disponibles para aprender y resolver problemas.',
+    'Trabajar colaborativamente en la generación, desarrollo y gestión de proyectos y la resolución de problemas, integrando las diferentes ideas y puntos de vista.'
+  ];
+}
