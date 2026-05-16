@@ -7,6 +7,8 @@
  * MATEMÁTICA BÁSICA: 184 OAs (1°-8° básico)
  * LENGUAJE MEDIA   : 50 OAs (1°-4° medio)
  * MATEMÁTICA MEDIA : 36 OAs (1°-4° medio)
+ * ORIENTACIÓN BÁSICA: 74 OAs (1°-8° básico) — D.S. 2960/2012 + BC 2013
+ * ORIENTACIÓN MEDIA : 40 OAs (1°-4° medio) — BC Orientación Media
  */
 
 var CURRICULA_CHILE = (function() {
@@ -561,12 +563,84 @@ var CURRICULA_CHILE = (function() {
         nombre: 'Inglés',
         sigla:  'ING',
         color:  '#0ea5e9',
-        niveles: ['5B','6B','7B','8B'],
+        niveles: ['1B','2B','3B','4B','5B','6B','7B','8B'],
         unidades: {
+          '1B': ['In My classroom','My family and me','What\'s the weather like today?','Happy birthday!'],
+          '2B': ['At the zoo','My house','My city','Food & Celebrations'],
+          '3B': ['My clothes','Animals and nature','My home','Food and celebrations'],
+          '4B': ['How do you feel?','My city and transport','Sports and habits','Celebrations and climate'],
           '5B': ['Hello!: Greetings','My Family and Friends','My Daily Routine'],
           '6B': ['My World','Food and Health','Free Time Activities'],
           '7B': ['My Community','Travel and Adventure','Technology in my Life'],
           '8B': ['Changes in our World','Global Issues','Future Perspectives']
+        },
+        oas: {
+          '1B': [
+            {codigo:"OA1",eje:"Comprensión Oral",desc:"Comprender textos leídos por un adulto o en formato audiovisual, muy breves y simples, con un patrón que se repite, como rimas y chants, cuentos y canciones."},
+            {codigo:"OA2",eje:"Comprensión Oral",desc:"Comprender textos orales relacionados con temas conocidos con funciones básicas: información personal, familia, clima y animales, juguetes y celebraciones (varía por unidad)."},
+            {codigo:"OA3",eje:"Comprensión Oral",desc:"Demostrar comprensión de textos orales: identificando personajes, objetos y animales; siguiendo instrucciones simples; identificando palabras, expresiones de uso muy frecuente y vocabulario aprendido; identificando sonidos propios del inglés."},
+            {codigo:"OA4",eje:"Comprensión Oral",desc:"Escuchar textos orales y aplicar estrategias para apoyar la comprensión; por ejemplo: hacer conexiones con conocimientos previos; relacionar el texto con imágenes."},
+            {codigo:"OA5",eje:"Comprensión Oral",desc:"Reaccionar a lo escuchado, estableciendo relaciones con experiencias personales y/o expresando preferencias u opiniones por medio de palabras, dibujos, mímicas y acciones."},
+            {codigo:"OA6",eje:"Comprensión Lectura",desc:"Seguir la lectura y comprender textos como cuentos, rimas, chants, listas, instrucciones, tarjetas de saludo y textos informativos, identificando personajes, palabras conocidas, vocabulario aprendido y expresiones de uso muy frecuente."},
+            {codigo:"OA7",eje:"Comprensión Lectura",desc:"Seguir la lectura y demostrar comprensión de textos relacionados con temas conocidos, con funciones y vocabulario que varían por unidad."},
+            {codigo:"OA8",eje:"Comprensión Lectura",desc:"Seguir la lectura y aplicar estrategias para apoyar la comprensión; por ejemplo: establecer relaciones con conocimientos previos; relacionar el texto con las imágenes; jugar a leer a otros y dibujar de acuerdo a lo leído."},
+            {codigo:"OA9",eje:"Comprensión Lectura",desc:"Reaccionar a lo leído, estableciendo relaciones con experiencias personales y/o expresando preferencias y opiniones por medio de dibujos y palabras."},
+            {codigo:"OA10",eje:"Expresión Oral",desc:"Reproducir chants, rimas y canciones muy breves y simples para familiarizarse con los sonidos propios del inglés."},
+            {codigo:"OA11",eje:"Expresión Oral",desc:"Participar en interacciones de la clase y exposiciones muy breves y simples, acerca de temas conocidos o de otras asignaturas, usando apoyo del docente, objetos, gestos e imágenes; usando el vocabulario aprendido y expresiones de uso muy frecuente (Good morning; thank you; My name is...)."},
+            {codigo:"OA12",eje:"Expresión Oral",desc:"Expresarse oralmente con el apoyo del docente para saludar, presentarse, describir objetos y animales, expresar posesiones, gustos y cantidades, con funciones que varían por unidad."},
+            {codigo:"OA13",eje:"Expresión Escrita",desc:"Experimentar con la escritura de palabras (trazar, copiar o completar) cuya ortografía tenga alta correspondencia con el español, acerca de temas conocidos o de otras asignaturas, de acuerdo a un modelo."},
+            {codigo:"OA14",eje:"Expresión Escrita",desc:"Escribir, con apoyo de imágenes y tarjetas de palabras, sobre temas conocidos identificando y describiendo objetos, animales, personas y acciones, con funciones que varían por unidad."}
+          ],
+          '2B': [
+            {codigo:"OA1",eje:"Comprensión Oral",desc:"Comprender textos leídos por un adulto o en formato audiovisual, breves y simples, como rimas y chants, canciones, cuentos y diálogos."},
+            {codigo:"OA2",eje:"Comprensión Oral",desc:"Comprender textos orales relacionados con temas conocidos con funciones básicas, con variaciones por unidad (la escuela/animales, la casa, ocupaciones/ciudad, comida/celebraciones)."},
+            {codigo:"OA3",eje:"Comprensión Oral",desc:"Demostrar comprensión de textos orales: identificando personajes, objetos y animales; siguiendo instrucciones simples; identificando palabras, expresiones de uso frecuente y vocabulario aprendido; identificando sonidos propios del inglés."},
+            {codigo:"OA4",eje:"Comprensión Oral",desc:"Escuchar textos orales y aplicar estrategias para apoyar la comprensión; por ejemplo: hacer predicciones; hacer conexiones con conocimientos previos; relacionar el texto con imágenes; focalizar la atención en palabras clave."},
+            {codigo:"OA5",eje:"Comprensión Oral",desc:"Reaccionar a lo escuchado, estableciendo relaciones con experiencias personales y/o expresando preferencias, sentimientos u opiniones, por medio de dibujos, mímicas, dramatizaciones y palabras o frases escritas."},
+            {codigo:"OA6",eje:"Comprensión Lectura",desc:"Leer y demostrar comprensión de textos como cuentos, rimas, chants, tarjetas de saludo, instrucciones y textos informativos, identificando ideas generales, personajes y acciones, vocabulario aprendido y expresiones de uso muy frecuente."},
+            {codigo:"OA7",eje:"Comprensión Lectura",desc:"Leer y demostrar comprensión de textos relacionados con temas conocidos, con funciones y vocabulario que varían por unidad (la escuela/animales, la casa, ocupaciones/ciudad, comida/celebraciones)."},
+            {codigo:"OA8",eje:"Comprensión Lectura",desc:"Leer y aplicar estrategias para apoyar la comprensión; por ejemplo: hacer predicciones; establecer relaciones con conocimientos previos; relacionar el texto con las imágenes; releer o leer a otros en voz alta; dibujar o recontar con ayuda."},
+            {codigo:"OA9",eje:"Comprensión Lectura",desc:"Reaccionar a lo leído, estableciendo relaciones con experiencias personales y/o expresando preferencias, sentimientos u opiniones por medio de ilustraciones, dramatizaciones y palabras o frases escritas."},
+            {codigo:"OA10",eje:"Expresión Oral",desc:"Reproducir chants, rimas y diálogos muy breves y simples para familiarizarse con los sonidos propios del inglés e identificar los sonidos /w/, /th/, /s/-/z/ en particular, con variaciones por unidad."},
+            {codigo:"OA11",eje:"Expresión Oral",desc:"Participar en diálogos, interacciones de la clase y exposiciones muy breves y simples, acerca de temas conocidos o de otras asignaturas, usando apoyo del docente, objetos, gestos e imágenes; usando vocabulario aprendido y expresiones de uso muy frecuente (How do you say...? I'm...)."},
+            {codigo:"OA12",eje:"Expresión Oral",desc:"Expresarse oralmente con el apoyo del docente para compartir información personal, expresar habilidad, sentimientos y posesión, identificar y describir animales y objetos, describir acciones que ocurren al momento de hablar, con variaciones por unidad."},
+            {codigo:"OA13",eje:"Expresión Escrita",desc:"Escribir (por ejemplo: copiar o completar) palabras y oraciones simples de acuerdo a un modelo, acerca de temas conocidos o de otras asignaturas."},
+            {codigo:"OA14",eje:"Expresión Escrita",desc:"Escribir, sobre la base de imágenes, identificando animales, acciones, objetos y partes de la casa, ocupaciones, lugares, comida; expresando sentimientos y cantidades en números hasta el veinte; describiendo ubicación de objetos y acciones, con variaciones por unidad."}
+          ],
+          '3B': [
+            {codigo:"OA1",eje:"Comprensión Oral",desc:"Comprender textos leídos por un adulto o en formato audiovisual, como rimas y chants, canciones, cuentos, diálogos y textos informativos."},
+            {codigo:"OA2",eje:"Comprensión Oral",desc:"Comprender textos orales relacionados con temas conocidos con funciones que varían por unidad (ropa/información personal, animales/naturaleza, la casa, comida/celebraciones)."},
+            {codigo:"OA3",eje:"Comprensión Oral",desc:"Demostrar comprensión de textos orales: identificando personajes, objetos y animales; siguiendo instrucciones; identificando palabras, expresiones de uso frecuente y vocabulario aprendido; identificando sonidos propios del inglés."},
+            {codigo:"OA4",eje:"Comprensión Oral",desc:"Escuchar textos orales y aplicar estrategias para apoyar la comprensión; por ejemplo: hacer predicciones sobre la base de conocimientos previos; relacionar texto con imágenes; focalizar atención en palabras clave; visualizar diferentes aspectos del texto; verificar predicciones."},
+            {codigo:"OA5",eje:"Comprensión Oral",desc:"Reaccionar a lo escuchado estableciendo relaciones con experiencias personales y/o expresando preferencias, sentimientos u opiniones, por medio de ilustraciones, mímica, dramatizaciones y frases u oraciones escritas."},
+            {codigo:"OA6",eje:"Comprensión Lectura",desc:"Leer y demostrar comprensión de textos como cuentos, rimas, chants, canciones, invitaciones, tarjetas de saludo, menús, instrucciones, diálogos y textos informativos, en formato digital o impreso, identificando ideas generales, información explícita y vocabulario aprendido."},
+            {codigo:"OA7",eje:"Comprensión Lectura",desc:"Leer y demostrar comprensión de textos relacionados con temas conocidos, con funciones y vocabulario que varían por unidad (ropa, animales/naturaleza, la casa, comida/celebraciones)."},
+            {codigo:"OA8",eje:"Comprensión Lectura",desc:"Leer y aplicar estrategias para apoyar la comprensión; por ejemplo: hacer predicciones; establecer relaciones con conocimientos previos; visualizar diferentes aspectos del texto; releer, leer a otros en voz alta; recontar con ayuda; verificar predicciones."},
+            {codigo:"OA9",eje:"Comprensión Lectura",desc:"Reaccionar a lo leído estableciendo relaciones con experiencias personales y/o expresando preferencias, sentimientos u opiniones, por medio de ilustraciones, dramatizaciones y palabras y frases escritas."},
+            {codigo:"OA10",eje:"Expresión Oral",desc:"Reproducir chants, canciones, rimas y diálogos muy breves y simples para familiarizarse con los sonidos propios del inglés e identificar los sonidos /s/, /z/, /sh/, /ch/ en particular, con variaciones por unidad."},
+            {codigo:"OA11",eje:"Expresión Oral",desc:"Participar en diálogos, interacciones de la clase y exposiciones breves y simples, acerca de temas conocidos o de otras asignaturas, usando el apoyo de objetos, gestos e imágenes; usando vocabulario aprendido y expresiones de uso frecuente."},
+            {codigo:"OA12",eje:"Expresión Oral",desc:"Expresarse oralmente (en diálogos o exposiciones preparadas) para describir ropa, animales, la casa, comida; expresar preferencias, posesiones y cantidades; describir acciones que ocurren al momento de hablar, con variaciones por unidad."},
+            {codigo:"OA13",eje:"Expresión Escrita",desc:"Escribir (completar o responder preguntas), de acuerdo a un modelo y con apoyo de imágenes y vocabulario dado, textos tales como oraciones, listas y descripciones breves acerca de temas conocidos o de otras asignaturas."},
+            {codigo:"OA14",eje:"Expresión Escrita",desc:"Escribir, sobre la base de imágenes y con funciones que varían por unidad, para identificar y describir ropa, animales y naturaleza, partes de la casa, comida; expresar sentimientos, posesiones y acciones en tiempo presente."},
+            {codigo:"OA15",eje:"Expresión Escrita",desc:"Planificar, escribir, revisar y publicar textos muy breves y simples recurriendo a apoyo del docente, de imágenes, organizadores gráficos, modelos, diccionario de imágenes y herramientas como el procesador de textos."}
+          ],
+          '4B': [
+            {codigo:"OA1",eje:"Comprensión Oral",desc:"Comprender textos leídos por un adulto o en formato audiovisual, como poemas, chants y canciones, cuentos, diálogos y textos informativos."},
+            {codigo:"OA2",eje:"Comprensión Oral",desc:"Comprender textos orales relacionados con temas conocidos con funciones que varían por unidad (la clase/salud, la ciudad/transportes, deportes/hábitos, celebraciones/clima)."},
+            {codigo:"OA3",eje:"Comprensión Oral",desc:"Demostrar comprensión de textos orales, identificando ideas generales e información explícita relacionada con personajes, objetos, lugares y fechas; palabras de vocabulario aprendido y expresiones de uso frecuente; sonidos del inglés como /h/, /j/, /sh/, /ch/ que varían por unidad."},
+            {codigo:"OA4",eje:"Comprensión Oral",desc:"Escuchar textos orales y aplicar estrategias para apoyar la comprensión; por ejemplo: hacer predicciones sobre la base de conocimientos previos; relacionar el texto con imágenes; focalizar la atención en palabras clave; visualizar diferentes aspectos del texto; verificar predicciones."},
+            {codigo:"OA5",eje:"Comprensión Oral",desc:"Reaccionar a lo escuchado, estableciendo relaciones con experiencias personales y/o expresando preferencias, sentimientos u opiniones por medio de ilustraciones, acciones, dramatizaciones y frases u oraciones escritas."},
+            {codigo:"OA6",eje:"Comprensión Lectura",desc:"Leer y demostrar comprensión de textos como cuentos, poemas, chants, canciones, invitaciones, menús, recetas, instrucciones, e-mails, diálogos y textos informativos, en formato digital o impreso, identificando ideas generales, información explícita y vocabulario aprendido."},
+            {codigo:"OA7",eje:"Comprensión Lectura",desc:"Leer y demostrar comprensión de textos relacionados con temas conocidos con funciones que varían por unidad (la clase/salud, la ciudad/transportes, deportes/hábitos, celebraciones/clima)."},
+            {codigo:"OA8",eje:"Comprensión Lectura",desc:"Leer y aplicar estrategias para apoyar la comprensión; por ejemplo: hacer predicciones; establecer relaciones con conocimientos previos; visualizar diferentes aspectos del texto; releer, recontar con ayuda; verificar predicciones."},
+            {codigo:"OA9",eje:"Comprensión Lectura",desc:"Reaccionar a lo leído, estableciendo relaciones con experiencias personales y/o expresando preferencias, sentimientos u opiniones, por medio de ilustraciones, dramatizaciones y palabras y frases escritas."},
+            {codigo:"OA10",eje:"Expresión Oral",desc:"Reproducir chants, canciones, rimas, poemas y diálogos breves y simples para familiarizarse con los sonidos del inglés e identificar los sonidos /h/, /j/, /sh/, /ch/ en particular, con variaciones por unidad."},
+            {codigo:"OA11",eje:"Expresión Oral",desc:"Participar en diálogos, interacciones de la clase y exposiciones breves y simples acerca de temas conocidos o de otras asignaturas, usando el apoyo de objetos, gestos e imágenes; usando vocabulario aprendido y expresiones de uso frecuente (You're welcome; When's your birthday?)."},
+            {codigo:"OA12",eje:"Expresión Oral",desc:"Expresarse oralmente (en diálogos o exposiciones preparadas) para dar consejos y sugerencias, indicar direcciones, hablar de rutinas y hábitos, expresar preferencias y posesiones; con funciones que varían por unidad."},
+            {codigo:"OA13",eje:"Expresión Escrita",desc:"Escribir (completar o responder preguntas), de acuerdo a un modelo y con apoyo de imágenes y vocabulario dado, textos tales como oraciones, invitaciones y diálogos de tres o cuatro intercambios acerca de temas conocidos o de otras asignaturas."},
+            {codigo:"OA14",eje:"Expresión Escrita",desc:"Escribir, sobre la base de imágenes y funciones que varían por unidad, para expresar información sobre la salud, la ciudad, deportes y hábitos, celebraciones y clima; usando el vocabulario y expresiones de uso frecuente aprendidos."},
+            {codigo:"OA15",eje:"Expresión Escrita",desc:"Planificar, escribir, revisar y publicar textos muy breves y simples recurriendo a apoyo del docente, de imágenes, organizadores gráficos, modelos, diccionario de imágenes y herramientas como el procesador de textos, para demostrar conocimiento y uso del vocabulario y expresiones de uso frecuente aprendidos."}
+          ]
         }
       },
       {
@@ -591,14 +665,103 @@ var CURRICULA_CHILE = (function() {
         color:  '#14b8a6',
         niveles: ['1B','2B','3B','4B','5B','6B','7B','8B'],
         unidades: {
-          '1B': ['Yo y los demás','Emociones','Convivencia escolar'],
-          '2B': ['Identidad personal','Habilidades sociales','Valores'],
-          '3B': ['Autoconocimiento','Resolución de conflictos','Ciudadanía'],
-          '4B': ['Proyecto de vida básico','Habilidades para el aprendizaje','Participación'],
-          '5B': ['Adolescencia','Toma de decisiones','Salud mental básica'],
-          '6B': ['Orientación vocacional inicial','Habilidades del siglo XXI','Prevención'],
-          '7B': ['Identidad y proyecto de vida','Orientación vocacional','Comunidad'],
-          '8B': ['Transición a educación media','Opciones de futuro','Vida y ciudadanía']
+          '1B': ['Grupos de pertenencia y afecto','Emociones y resolución de conflictos'],
+          '2B': ['Grupos de pertenencia y afecto','Emociones y resolución de conflictos'],
+          '3B': ['Autoconocimiento y afectividad','Emociones y resolución de conflictos'],
+          '4B': ['Autoconocimiento y convivencia','Emociones, afectividad y pubertad'],
+          '5B': ['Autoestima y valoración personal','Emociones y resolución de conflictos','Afectividad y autocuidado','Prevención y vida saludable'],
+          '6B': ['Autoestima y valoración personal','Emociones y resolución de conflictos','Afectividad y autocuidado','Prevención y vida saludable'],
+          '7B': ['Crecimiento personal','Bienestar y autocuidado','Relaciones interpersonales','Pertenencia y participación democrática','Gestión y proyección del aprendizaje'],
+          '8B': ['Crecimiento personal','Bienestar y autocuidado','Relaciones interpersonales','Pertenencia y participación democrática','Gestión y proyección del aprendizaje']
+        },
+        oas: {
+          '1B': [
+            {codigo:"OA1",eje:"Crecimiento Personal",desc:"Observar, describir y valorar sus características personales, sus habilidades e intereses."},
+            {codigo:"OA2",eje:"Crecimiento Personal",desc:"Identificar emociones experimentadas por ellos y por los demás y distinguir diversas formas de expresarlas."},
+            {codigo:"OA3",eje:"Crecimiento Personal",desc:"Observar, describir y valorar las expresiones de afecto y cariño que dan y reciben en los ámbitos familiar, escolar y social."},
+            {codigo:"OA4",eje:"Crecimiento Personal",desc:"Identificar y practicar, en forma guiada, conductas protectoras y de autocuidado (higiene, descanso, alimentación, resguardo del cuerpo e intimidad)."},
+            {codigo:"OA5",eje:"Relaciones Interpersonales",desc:"Manifestar actitudes de solidaridad y respeto que favorezcan la convivencia (buen trato, escucha, compartir con pares)."},
+            {codigo:"OA6",eje:"Relaciones Interpersonales",desc:"Identificar conflictos que surgen entre pares y practicar formas de solucionarlos (escuchar al otro, ponerse en su lugar, buscar un acuerdo)."},
+            {codigo:"OA7",eje:"Participación y Pertenencia",desc:"Reconocer, describir y valorar sus grupos de pertenencia (familia, curso, pares) y participar activamente en ellos."},
+            {codigo:"OA8",eje:"Trabajo Escolar",desc:"Practicar hábitos y actitudes que favorezcan el proceso de aprendizaje (útiles escolares, orden, identificar nuevos aprendizajes)."}
+          ],
+          '2B': [
+            {codigo:"OA1",eje:"Crecimiento Personal",desc:"Observar, describir y valorar sus características personales, sus habilidades e intereses."},
+            {codigo:"OA2",eje:"Crecimiento Personal",desc:"Identificar emociones experimentadas por ellos y por los demás y distinguir diversas formas de expresarlas."},
+            {codigo:"OA3",eje:"Crecimiento Personal",desc:"Observar, describir y valorar las expresiones de afecto y cariño que dan y reciben en los ámbitos familiar, escolar y social."},
+            {codigo:"OA4",eje:"Crecimiento Personal",desc:"Identificar y practicar, en forma guiada, conductas protectoras y de autocuidado (higiene, descanso, alimentación, resguardo del cuerpo e intimidad)."},
+            {codigo:"OA5",eje:"Relaciones Interpersonales",desc:"Manifestar actitudes de solidaridad y respeto que favorezcan la convivencia (buen trato, escucha, compartir con pares)."},
+            {codigo:"OA6",eje:"Relaciones Interpersonales",desc:"Identificar conflictos que surgen entre pares y practicar formas de solucionarlos (escuchar al otro, ponerse en su lugar, buscar un acuerdo)."},
+            {codigo:"OA7",eje:"Participación y Pertenencia",desc:"Reconocer, describir y valorar sus grupos de pertenencia (familia, curso, pares) y participar activamente en ellos."},
+            {codigo:"OA8",eje:"Trabajo Escolar",desc:"Practicar hábitos y actitudes que favorezcan el proceso de aprendizaje (útiles escolares, orden, identificar nuevos aprendizajes)."}
+          ],
+          '3B': [
+            {codigo:"OA1",eje:"Crecimiento Personal",desc:"Observar, describir y valorar sus características, habilidades y fortalezas, y proponerse acciones concretas para superarse."},
+            {codigo:"OA2",eje:"Crecimiento Personal",desc:"Identificar y aceptar sus propias emociones y las de los demás, y practicar estrategias personales de manejo emocional."},
+            {codigo:"OA3",eje:"Crecimiento Personal",desc:"Reconocer y valorar la sexualidad como expresión de amor, vínculo e intimidad entre dos personas y como gestora de su propia vida."},
+            {codigo:"OA4",eje:"Crecimiento Personal",desc:"Identificar y practicar en forma autónoma conductas protectoras y de autocuidado (higiene, descanso, alimentación, resguardo del cuerpo, prevención de drogas)."},
+            {codigo:"OA5",eje:"Relaciones Interpersonales",desc:"Manifestar actitudes de solidaridad y respeto que favorezcan la convivencia (empatía, buen trato, no discriminación, respetar ambiente de aprendizaje)."},
+            {codigo:"OA6",eje:"Relaciones Interpersonales",desc:"Resolver conflictos entre pares en forma guiada y aplicar estrategias diversas de resolución de problemas."},
+            {codigo:"OA7",eje:"Participación y Pertenencia",desc:"Participar en forma guiada en la comunidad escolar y en la organización del curso (proponer iniciativas, asumir responsabilidades, respetar derechos)."},
+            {codigo:"OA8",eje:"Trabajo Escolar",desc:"Manifestar hábitos y actitudes de esfuerzo e interés que favorezcan el aprendizaje (puntualidad, organización, honestidad, curiosidad intelectual)."}
+          ],
+          '4B': [
+            {codigo:"OA1",eje:"Crecimiento Personal",desc:"Observar, describir y valorar sus características, habilidades y fortalezas, y proponerse acciones concretas para superarse."},
+            {codigo:"OA2",eje:"Crecimiento Personal",desc:"Identificar y aceptar sus propias emociones y practicar estrategias de manejo emocional (esperar, escuchar al otro, considerar su impacto en los demás)."},
+            {codigo:"OA3",eje:"Crecimiento Personal",desc:"Reconocer y valorar la sexualidad como expresión de amor, vínculo e intimidad entre dos personas y como gestora de su propia vida."},
+            {codigo:"OA4",eje:"Crecimiento Personal",desc:"Reconocer y valorar el proceso de desarrollo afectivo y sexual, describiendo los cambios físicos y afectivos que ocurren en la pubertad."},
+            {codigo:"OA5",eje:"Crecimiento Personal",desc:"Identificar y practicar en forma autónoma conductas protectoras y de autocuidado (higiene, descanso, intimidad, prevención de drogas y abuso)."},
+            {codigo:"OA6",eje:"Relaciones Interpersonales",desc:"Manifestar actitudes de solidaridad y respeto que favorezcan la convivencia (empatía, buen trato, no violencia, no discriminación)."},
+            {codigo:"OA7",eje:"Relaciones Interpersonales",desc:"Resolver conflictos entre pares en forma guiada y aplicar estrategias diversas de resolución de problemas."},
+            {codigo:"OA8",eje:"Participación y Pertenencia",desc:"Participar en forma guiada en la comunidad escolar y en la organización del curso mediante diálogo y toma de decisiones democráticas."},
+            {codigo:"OA9",eje:"Trabajo Escolar",desc:"Manifestar hábitos y actitudes de esfuerzo e interés que favorezcan el aprendizaje (puntualidad, organización, honestidad, curiosidad intelectual)."}
+          ],
+          '5B': [
+            {codigo:"OA1",eje:"Crecimiento Personal",desc:"Demostrar una valoración positiva de sí mismo reconociendo habilidades, fortalezas y aspectos que requiera superar."},
+            {codigo:"OA2",eje:"Crecimiento Personal",desc:"Distinguir y describir emociones y reconocer y practicar formas apropiadas de expresarlas, considerando su impacto en sí mismo y en otros."},
+            {codigo:"OA3",eje:"Crecimiento Personal",desc:"Reconocer y valorar el proceso de desarrollo afectivo y sexual y los cambios físicos, afectivos y sociales de la pubertad."},
+            {codigo:"OA4",eje:"Crecimiento Personal",desc:"Practicar en forma autónoma conductas protectoras y de autocuidado (intimidad, redes sociales, fuentes de información confiables, comunicación familiar)."},
+            {codigo:"OA5",eje:"Crecimiento Personal",desc:"Reconocer causas y consecuencias del consumo de drogas (tabaco, alcohol, marihuana), identificar factores preventivos y proponer estrategias de enfrentamiento."},
+            {codigo:"OA6",eje:"Relaciones Interpersonales",desc:"Manifestar actitudes de solidaridad y respeto que favorezcan la convivencia (empatía, buen trato, rechazo a la violencia y la discriminación)."},
+            {codigo:"OA7",eje:"Relaciones Interpersonales",desc:"Resolver conflictos de convivencia en forma autónoma, seleccionando y aplicando diversas estrategias de resolución de problemas."},
+            {codigo:"OA8",eje:"Participación y Pertenencia",desc:"Participar activa y colaborativamente en la comunidad escolar y en la organización del curso mediante diálogo y toma de decisiones democráticas."},
+            {codigo:"OA9",eje:"Trabajo Escolar",desc:"Practicar en forma autónoma y perseverante hábitos y actitudes que favorezcan el aprendizaje (metas, organización del tiempo, trabajo colaborativo, honestidad)."}
+          ],
+          '6B': [
+            {codigo:"OA1",eje:"Crecimiento Personal",desc:"Demostrar una valoración positiva de sí mismo reconociendo habilidades, fortalezas y aspectos que requiera superar."},
+            {codigo:"OA2",eje:"Crecimiento Personal",desc:"Distinguir y describir emociones y reconocer y practicar formas apropiadas de expresarlas, considerando su impacto en sí mismo y en otros."},
+            {codigo:"OA3",eje:"Crecimiento Personal",desc:"Reconocer y valorar el proceso de desarrollo afectivo y sexual y los cambios físicos, afectivos y sociales de la pubertad."},
+            {codigo:"OA4",eje:"Crecimiento Personal",desc:"Practicar en forma autónoma conductas protectoras y de autocuidado (intimidad, redes sociales, fuentes de información confiables, comunicación familiar)."},
+            {codigo:"OA5",eje:"Crecimiento Personal",desc:"Reconocer causas y consecuencias del consumo de drogas (tabaco, alcohol, marihuana), identificar factores preventivos y proponer estrategias de enfrentamiento."},
+            {codigo:"OA6",eje:"Relaciones Interpersonales",desc:"Manifestar actitudes de solidaridad y respeto que favorezcan la convivencia (empatía, buen trato, rechazo a la violencia y la discriminación)."},
+            {codigo:"OA7",eje:"Relaciones Interpersonales",desc:"Resolver conflictos de convivencia en forma autónoma, seleccionando y aplicando diversas estrategias de resolución de problemas."},
+            {codigo:"OA8",eje:"Participación y Pertenencia",desc:"Participar activa y colaborativamente en la comunidad escolar y en la organización del curso mediante diálogo y toma de decisiones democráticas."},
+            {codigo:"OA9",eje:"Trabajo Escolar",desc:"Practicar en forma autónoma y perseverante hábitos y actitudes que favorezcan el aprendizaje (metas, organización del tiempo, trabajo colaborativo, honestidad)."}
+          ],
+          '7B': [
+            {codigo:"OA1",eje:"Crecimiento Personal",desc:"Construir representaciones positivas de sí mismos incorporando características, motivaciones, intereses y capacidades, considerando los cambios de la adolescencia."},
+            {codigo:"OA2",eje:"Crecimiento Personal",desc:"Analizar la importancia de integrar las dimensiones de la sexualidad, el cuidado del cuerpo y la intimidad, discriminando formas de relacionarse con respeto."},
+            {codigo:"OA3",eje:"Bienestar y Autocuidado",desc:"Identificar situaciones que expongan a adolescentes a riesgos (sustancias nocivas, conductas sexuales riesgosas, violencia) y desarrollar estrategias de protección."},
+            {codigo:"OA4",eje:"Bienestar y Autocuidado",desc:"Integrar acciones cotidianas que favorezcan el bienestar y la vida saludable en el plano personal y en la comunidad escolar."},
+            {codigo:"OA5",eje:"Relaciones Interpersonales",desc:"Analizar sus relaciones atendiendo a principios de igualdad, dignidad, inclusión y no discriminación, y reconocer su impacto en el bienestar de las personas."},
+            {codigo:"OA6",eje:"Relaciones Interpersonales",desc:"Resolver conflictos y desacuerdos a través del diálogo, la escucha empática y la búsqueda de soluciones respetuosas y sin violencia."},
+            {codigo:"OA7",eje:"Pertenencia y Participación",desc:"Reconocer intereses y necesidades compartidas con su grupo de pertenencia y colaborar para alcanzar metas comunes valorando el trabajo en equipo."},
+            {codigo:"OA8",eje:"Pertenencia y Participación",desc:"Elaborar acuerdos para fines compartidos utilizando espacios de participación democrática como Consejo de Curso, respetando la diversidad de opiniones."},
+            {codigo:"OA9",eje:"Gestión del Aprendizaje",desc:"Reconocer sus intereses, motivaciones y capacidades, comprendiendo la relevancia del aprendizaje escolar para elaborar sus proyectos personales."},
+            {codigo:"OA10",eje:"Gestión del Aprendizaje",desc:"Gestionar de manera autónoma su proceso de aprendizaje mediante el establecimiento de metas progresivas, monitoreo de logros y redefinición de acciones."}
+          ],
+          '8B': [
+            {codigo:"OA1",eje:"Crecimiento Personal",desc:"Construir representaciones positivas de sí mismos incorporando características, motivaciones, intereses y capacidades, considerando los cambios de la adolescencia."},
+            {codigo:"OA2",eje:"Crecimiento Personal",desc:"Analizar la importancia de integrar las dimensiones de la sexualidad, el cuidado del cuerpo y la intimidad, discriminando formas de relacionarse con respeto."},
+            {codigo:"OA3",eje:"Bienestar y Autocuidado",desc:"Identificar situaciones que expongan a adolescentes a riesgos (sustancias nocivas, conductas sexuales riesgosas, violencia) y desarrollar estrategias de protección."},
+            {codigo:"OA4",eje:"Bienestar y Autocuidado",desc:"Integrar acciones cotidianas que favorezcan el bienestar y la vida saludable en el plano personal y en la comunidad escolar."},
+            {codigo:"OA5",eje:"Relaciones Interpersonales",desc:"Analizar sus relaciones atendiendo a principios de igualdad, dignidad, inclusión y no discriminación, y reconocer su impacto en el bienestar de las personas."},
+            {codigo:"OA6",eje:"Relaciones Interpersonales",desc:"Resolver conflictos y desacuerdos a través del diálogo, la escucha empática y la búsqueda de soluciones respetuosas y sin violencia."},
+            {codigo:"OA7",eje:"Pertenencia y Participación",desc:"Reconocer intereses y necesidades compartidas con su grupo de pertenencia y colaborar para alcanzar metas comunes valorando el trabajo en equipo."},
+            {codigo:"OA8",eje:"Pertenencia y Participación",desc:"Elaborar acuerdos para fines compartidos utilizando espacios de participación democrática como Consejo de Curso, respetando la diversidad de opiniones."},
+            {codigo:"OA9",eje:"Gestión del Aprendizaje",desc:"Reconocer sus intereses, motivaciones y capacidades, comprendiendo la relevancia del aprendizaje escolar para elaborar sus proyectos personales."},
+            {codigo:"OA10",eje:"Gestión del Aprendizaje",desc:"Gestionar de manera autónoma su proceso de aprendizaje mediante el establecimiento de metas progresivas, monitoreo de logros y redefinición de acciones."}
+          ]
         }
       }
     ]
@@ -847,10 +1010,60 @@ var CURRICULA_CHILE = (function() {
         color:  '#14b8a6',
         niveles: ['1M','2M','3M','4M'],
         unidades: {
-          '1M': ['Identidad y autoconocimiento','Proyecto de vida','Habilidades socioemocionales'],
-          '2M': ['Orientación vocacional','Mundo del trabajo','Salud mental adolescente'],
-          '3M': ['Decisiones de futuro','Ciudadanía activa','Bienestar y resiliencia'],
-          '4M': ['Proyecto de vida adulta','Transición a educación superior','Ciudadanía']
+          '1M': ['Crecimiento personal','Bienestar y autocuidado','Relaciones interpersonales','Pertenencia y participación democrática','Gestión y proyección del aprendizaje'],
+          '2M': ['Crecimiento personal','Bienestar y autocuidado','Relaciones interpersonales','Pertenencia y participación democrática','Gestión y proyección del aprendizaje'],
+          '3M': ['Crecimiento personal','Bienestar y autocuidado','Relaciones interpersonales','Pertenencia y participación democrática','Gestión y proyección del aprendizaje'],
+          '4M': ['Crecimiento personal','Bienestar y autocuidado','Relaciones interpersonales','Pertenencia y participación democrática','Gestión y proyección del aprendizaje']
+        },
+        oas: {
+          '1M': [
+            {codigo:"OA1",eje:"Crecimiento Personal",desc:"Comparar distintas alternativas posibles de sus proyectos de vida considerando intereses, condiciones, capacidades y cómo las propias decisiones influyen en su realización."},
+            {codigo:"OA2",eje:"Crecimiento Personal",desc:"Analizar temáticas relacionadas con la sexualidad y los vínculos afectivos en función de valores como el respeto, la responsabilidad y el cuidado de sí mismo y de los demás."},
+            {codigo:"OA3",eje:"Bienestar y Autocuidado",desc:"Evaluar situaciones de riesgo relacionadas con consumo de sustancias, conductas sexuales riesgosas y violencia, e identificar y recurrir a redes de apoyo disponibles."},
+            {codigo:"OA4",eje:"Bienestar y Autocuidado",desc:"Promover y llevar a cabo acciones que favorezcan la vida saludable a nivel personal y social, manifestando interés ante problemas de salud en su entorno."},
+            {codigo:"OA5",eje:"Relaciones Interpersonales",desc:"Promover relaciones interpersonales constructivas, presenciales y virtuales, considerando principios de igualdad, dignidad, inclusión y no discriminación."},
+            {codigo:"OA6",eje:"Relaciones Interpersonales",desc:"Discriminar alternativas para la resolución de conflictos en un marco de derechos, promoviendo acuerdos que beneficien a todas las personas involucradas."},
+            {codigo:"OA7",eje:"Pertenencia y Participación",desc:"Evaluar instancias de participación en el entorno social e institucional cercano donde puedan contribuir a la resolución de problemáticas como sujetos de derecho."},
+            {codigo:"OA8",eje:"Pertenencia y Participación",desc:"Desarrollar iniciativas orientadas a promover el respeto, la justicia, el buen trato y el bien común en el curso y la comunidad."},
+            {codigo:"OA9",eje:"Gestión del Aprendizaje",desc:"Contrastar posibles caminos en el desarrollo del proyecto de vida considerando opciones laborales y académicas, y reconociendo habilidades e intereses propios."},
+            {codigo:"OA10",eje:"Gestión del Aprendizaje",desc:"Diseñar aspectos del proyecto de vida considerando habilidades, motivaciones, metas personales y opciones académicas y laborales disponibles."}
+          ],
+          '2M': [
+            {codigo:"OA1",eje:"Crecimiento Personal",desc:"Comparar distintas alternativas posibles de sus proyectos de vida considerando intereses, condiciones, capacidades y cómo las propias decisiones influyen en su realización."},
+            {codigo:"OA2",eje:"Crecimiento Personal",desc:"Analizar temáticas relacionadas con la sexualidad y los vínculos afectivos en función de valores como el respeto, la responsabilidad y el cuidado de sí mismo y de los demás."},
+            {codigo:"OA3",eje:"Bienestar y Autocuidado",desc:"Evaluar situaciones de riesgo relacionadas con consumo de sustancias, conductas sexuales riesgosas y violencia, e identificar y recurrir a redes de apoyo disponibles."},
+            {codigo:"OA4",eje:"Bienestar y Autocuidado",desc:"Promover y llevar a cabo acciones que favorezcan la vida saludable a nivel personal y social, manifestando interés ante problemas de salud en su entorno."},
+            {codigo:"OA5",eje:"Relaciones Interpersonales",desc:"Promover relaciones interpersonales constructivas, presenciales y virtuales, considerando principios de igualdad, dignidad, inclusión y no discriminación."},
+            {codigo:"OA6",eje:"Relaciones Interpersonales",desc:"Discriminar alternativas para la resolución de conflictos en un marco de derechos, promoviendo acuerdos que beneficien a todas las personas involucradas."},
+            {codigo:"OA7",eje:"Pertenencia y Participación",desc:"Evaluar instancias de participación en el entorno social e institucional cercano donde puedan contribuir a la resolución de problemáticas como sujetos de derecho."},
+            {codigo:"OA8",eje:"Pertenencia y Participación",desc:"Desarrollar iniciativas orientadas a promover el respeto, la justicia, el buen trato y el bien común en el curso y la comunidad."},
+            {codigo:"OA9",eje:"Gestión del Aprendizaje",desc:"Contrastar posibles caminos en el desarrollo del proyecto de vida considerando opciones laborales y académicas, y reconociendo habilidades e intereses propios."},
+            {codigo:"OA10",eje:"Gestión del Aprendizaje",desc:"Diseñar aspectos del proyecto de vida considerando habilidades, motivaciones, metas personales y opciones académicas y laborales disponibles."}
+          ],
+          '3M': [
+            {codigo:"OA1",eje:"Crecimiento Personal",desc:"Reflexionar sobre la construcción de la propia identidad y el proyecto de vida en el contexto de la transición a la adultez, reconociendo sus fortalezas y desafíos."},
+            {codigo:"OA2",eje:"Crecimiento Personal",desc:"Analizar la vivencia de la sexualidad y los vínculos afectivos desde una perspectiva de derechos, respeto mutuo y responsabilidad personal."},
+            {codigo:"OA3",eje:"Bienestar y Autocuidado",desc:"Evaluar factores de protección y riesgo en su entorno personal y social, identificando estrategias para promover el bienestar personal y colectivo."},
+            {codigo:"OA4",eje:"Bienestar y Autocuidado",desc:"Llevar a cabo acciones que favorezcan estilos de vida saludable, la integridad personal y el cuidado responsable del entorno."},
+            {codigo:"OA5",eje:"Relaciones Interpersonales",desc:"Analizar dinámicas relacionales en distintos contextos, promoviendo relaciones basadas en el respeto, la empatía y la no violencia."},
+            {codigo:"OA6",eje:"Relaciones Interpersonales",desc:"Aplicar estrategias de resolución de conflictos que promuevan el diálogo, la escucha activa y acuerdos justos para las personas involucradas."},
+            {codigo:"OA7",eje:"Pertenencia y Participación",desc:"Reconocer y ejercer su rol como sujeto de derecho en instancias de participación ciudadana y democrática dentro y fuera del establecimiento."},
+            {codigo:"OA8",eje:"Pertenencia y Participación",desc:"Desarrollar proyectos colectivos orientados a la mejora de la convivencia y el bien común en la comunidad escolar y local."},
+            {codigo:"OA9",eje:"Gestión del Aprendizaje",desc:"Explorar opciones de continuación de estudios y trayectorias laborales, vinculándolas con sus propias capacidades, intereses y valores."},
+            {codigo:"OA10",eje:"Gestión del Aprendizaje",desc:"Gestionar su proceso de aprendizaje de manera autónoma, estableciendo metas, evaluando logros y ajustando sus estrategias de estudio."}
+          ],
+          '4M': [
+            {codigo:"OA1",eje:"Crecimiento Personal",desc:"Elaborar una visión integrada de sí mismo como base para la transición a la vida adulta, considerando el proyecto de vida en sus distintas dimensiones."},
+            {codigo:"OA2",eje:"Crecimiento Personal",desc:"Analizar la vivencia de la sexualidad, los vínculos afectivos y la identidad con énfasis en la responsabilidad, el respeto y el bienestar propio y ajeno."},
+            {codigo:"OA3",eje:"Bienestar y Autocuidado",desc:"Evaluar críticamente los factores que inciden en el bienestar personal y social, y diseñar estrategias para afrontar situaciones de riesgo en la vida adulta."},
+            {codigo:"OA4",eje:"Bienestar y Autocuidado",desc:"Promover estilos de vida saludable en la comunidad, integrando hábitos de autocuidado sostenibles y responsabilidad hacia el entorno social y natural."},
+            {codigo:"OA5",eje:"Relaciones Interpersonales",desc:"Analizar críticamente dinámicas de poder y género en las relaciones interpersonales, promoviendo vínculos basados en la igualdad y el respeto mutuo."},
+            {codigo:"OA6",eje:"Relaciones Interpersonales",desc:"Aplicar de manera autónoma estrategias avanzadas de resolución de conflictos que promuevan la justicia, la empatía y el bien común."},
+            {codigo:"OA7",eje:"Pertenencia y Participación",desc:"Ejercer una ciudadanía activa, participando en instancias democráticas y contribuyendo a la construcción de comunidades más justas e inclusivas."},
+            {codigo:"OA8",eje:"Pertenencia y Participación",desc:"Liderar o participar en proyectos de impacto social que reflejen sus valores cívicos y compromiso con el bien común en la comunidad."},
+            {codigo:"OA9",eje:"Gestión del Aprendizaje",desc:"Diseñar su proyecto de continuación de estudios o trayectoria laboral, tomando decisiones fundamentadas en sus habilidades, intereses y valores."},
+            {codigo:"OA10",eje:"Gestión del Aprendizaje",desc:"Consolidar hábitos de aprendizaje autónomo y reflexivo que le permitan continuar aprendiendo a lo largo de la vida en distintos contextos."}
+          ]
         }
       },
       {
@@ -864,13 +1077,31 @@ var CURRICULA_CHILE = (function() {
         }
       },
       {
-        nombre: 'Tecnología e Informática',
+        nombre: 'Educación Tecnológica',
         sigla:  'TEC',
         color:  '#64748b',
         niveles: ['1M','2M'],
         unidades: {
-          '1M': ['Pensamiento computacional','Programación básica (Python/Scratch)','Tecnología y sociedad'],
-          '2M': ['Desarrollo de proyectos digitales','Ciberseguridad básica','Emprendimiento tecnológico']
+          '1M': ['Desarrollo e implementación de un servicio','Evolución e impacto de una solución'],
+          '2M': ['Mejorando el uso de los recursos','Oportunidades y desafíos de la tecnología en la actualidad']
+        },
+        oas: {
+          '1M': [
+            {codigo:"OA1",eje:"Resolución de Problemas Tecnológicos",desc:"Identificar oportunidades o necesidades personales, grupales o locales que impliquen la creación de un servicio, utilizando recursos digitales u otros medios."},
+            {codigo:"OA2",eje:"Resolución de Problemas Tecnológicos",desc:"Desarrollar un servicio que implique la utilización de recursos digitales u otros medios, considerando aspectos éticos, sus potenciales impactos y normas de cuidado y seguridad."},
+            {codigo:"OA3",eje:"Resolución de Problemas Tecnológicos",desc:"Evaluar el servicio desarrollado considerando criterios propios, técnicos y valóricos, y proponer mejoras asociadas tanto a los procesos como al producto final."},
+            {codigo:"OA4",eje:"Resolución de Problemas Tecnológicos",desc:"Comunicar el diseño, la planificación u otros procesos del desarrollo de un servicio, utilizando herramientas TIC, considerando diferentes tipos de objetivos y audiencias y teniendo en cuenta aspectos éticos."},
+            {codigo:"OA5",eje:"Tecnología, Ambiente y Sociedad",desc:"Analizar las formas en que los productos tecnológicos y los entornos evolucionan, caracterizando los diversos factores que influyen en ese cambio."},
+            {codigo:"OA6",eje:"Tecnología, Ambiente y Sociedad",desc:"Inferir, basándose en la evolución de los productos tecnológicos y los entornos, los efectos positivos o negativos que estos han tenido en la sociedad."}
+          ],
+          '2M': [
+            {codigo:"OA1",eje:"Resolución de Problemas Tecnológicos",desc:"Identificar necesidades que impliquen la reducción de efectos perjudiciales relacionados con el uso de recursos energéticos y materiales en una perspectiva de sustentabilidad."},
+            {codigo:"OA2",eje:"Resolución de Problemas Tecnológicos",desc:"Proponer soluciones que apunten a resolver necesidades de reducción de efectos perjudiciales relacionados con el uso de recursos energéticos y materiales en una perspectiva de sustentabilidad, utilizando herramientas TIC colaborativas de producción, edición, publicación y comunicación."},
+            {codigo:"OA3",eje:"Resolución de Problemas Tecnológicos",desc:"Evaluar las propuestas de soluciones que apunten a resolver necesidades de reducción de efectos perjudiciales relacionados con el uso de recursos energéticos y materiales, considerando aspectos o dilemas éticos, legales, económicos, ambientales y sociales."},
+            {codigo:"OA4",eje:"Resolución de Problemas Tecnológicos",desc:"Comunicar propuestas de soluciones para reducir los efectos perjudiciales proyectando posibles escenarios de cambio y sus impactos, utilizando herramientas TIC, considerando diferentes tipos de objetivos y audiencias, teniendo en cuenta aspectos éticos y aplicando normas de cuidado y seguridad."},
+            {codigo:"OA5",eje:"Tecnología, Ambiente y Sociedad",desc:"Evaluar críticamente cómo las innovaciones tecnológicas actuales afectan a la sociedad y al ambiente, considerando criterios éticos, económicos, ambientales y sociales."},
+            {codigo:"OA6",eje:"Tecnología, Ambiente y Sociedad",desc:"Proyectar escenarios de posibles impactos positivos y/o negativos de las innovaciones tecnológicas actuales en ámbitos personales, sociales, ambientales, legales, económicos u otros."}
+          ]
         }
       }
     ]
@@ -903,13 +1134,54 @@ var CURRICULA_CHILE = (function() {
         oas:    [{codigo:"OA1",desc:"Producir diversos géneros escritos y audiovisuales para desarrollar y comunicar sus interpretaciones"}, {codigo:"OA2",desc:"Producir textos pertenecientes a diversos géneros discursivos de la literatura que den cuenta de sus"}, {codigo:"OA3",desc:"Contribuir con sus comentarios, sugerencias, interpretaciones y críticas a los procesos de lectura"}, {codigo:"OA4",desc:"Revisar y reescribir sus propias producciones (escritas, orales o audiovisuales), a la luz de los"}, {codigo:"OA5",desc:"De las obras leídas"}, {codigo:"OA6",desc:"Producir textos y otras producciones que den cuenta de sus reflexiones sobre sí mismos y sobre"}]
       }
     ],
+    historia: [
+      {
+        key:    "cla",
+        nombre: "Chile y la Región Latinoamericana",
+        nivel:  "3° o 4° Medio electivo",
+        ejes:   ["Conocimiento y comprensión","Habilidades","Actitudes"],
+        unidades: ['Evaluación crítica de los procesos políticos de la historia reciente latinoamericana','Los desafíos medioambientales en América Latina','Diagnosticando el presente de los pueblos indígenas en Chile y América Latina','Economía, sociedad y cultura: los grandes desafíos en el siglo XXI'],
+        oas:    [
+          {codigo:"OA1",desc:"Analizar procesos sociales y culturales recientes de Chile y América Latina tales como migraciones, cambios demográficos y urbanización, considerando avances y desafíos comunes en materia de equidad, diversidad e interculturalidad."},
+          {codigo:"OA2",desc:"Explicar procesos comunes de los Estados latinoamericanos en la historia política reciente, incluyendo la relación entre el poder civil y las fuerzas armadas, transiciones, la defensa y promoción de los derechos humanos y el fortalecimiento de las democracias."},
+          {codigo:"OA3",desc:"Investigar cómo en América Latina los Estados responden a desafíos económicos y sociales, como pobreza, desigualdad, crecimiento económico, desarrollo social y diversificación de la matriz productiva, aplicando conceptos de la economía e información de fuentes e indicadores económicos (PIB, distribución del ingreso, empleo y producción, entre otros)."},
+          {codigo:"OA4",desc:"Analizar, a partir de distintas interpretaciones y perspectivas, el presente de distintos pueblos indígenas de Chile y Latinoamérica, considerando su cultura, los procesos históricos recientes y los avances y desafíos en su relación con los Estados nacionales de la región."},
+          {codigo:"OA5",desc:"Evaluar, a partir de la investigación, el estado del medioambiente en Chile y América Latina, incluyendo efectos de distintas actividades humanas y acciones emprendidas por los Estados de la región para avanzar en sustentabilidad."},
+          {codigo:"OA6",desc:"Analizar las oportunidades que ofrece a los Estados de América Latina la integración y la cooperación internacional, examinando la conformación de bloques económicos y los tratados y acuerdos en materia de economía, derechos humanos, educación, género, salud y ciencia."},
+          {codigo:"OA7",desc:"Participar en forma colaborativa en el diseño de propuestas para dar solución a problemas presentes a nivel local relacionadas con temas abordados en el nivel."}
+        ]
+      },
+      {
+        key:    "mug",
+        nombre: "Mundo Global",
+        nivel:  "3° o 4° Medio electivo",
+        ejes:   ["Conocimiento y comprensión","Habilidades","Actitudes"],
+        unidades: ['Los desafíos de los procesos migratorios para el Estado-nación','Los conflictos internacionales y su impacto en la economía','Las decisiones económicas, los actores y el cambio climático','Cambio climático y desastres socio-naturales'],
+        oas:    [
+          {codigo:"OA1",desc:"Analizar procesos migratorios contemporáneos en distintas regiones del mundo considerando múltiples causas, principales características, impactos en la sociedad de origen y de destino, y los desafíos para las sociedades y los Estados nacionales."},
+          {codigo:"OA2",desc:"Investigar algunos aspectos de la economía global actual como cambios en la producción y en el mercado del trabajo, el rol del comercio mundial y del mercado financiero, y nuevas formas de consumo, aplicando conceptos de la economía (escasez, oferta y demanda, precio, balanza comercial, entre otros)."},
+          {codigo:"OA3",desc:"Explicar el cambio climático como fenómeno global, incluyendo controversias sobre sus múltiples causas, los grados de responsabilidad de distintos actores y sus principales consecuencias para la población."},
+          {codigo:"OA4",desc:"Analizar, por medio de la investigación, desastres socionaturales, considerando amenazas naturales, el papel de la sociedad y el Estado en la prevención y gestión del riesgo, factores que inciden en la vulnerabilidad de la población y avances de Chile y otros países en la materia."},
+          {codigo:"OA5",desc:"Explicar, por medio de la investigación, transformaciones del Estado-nación en la actualidad, en relación con aspectos como la ciudadanía en un mundo cada vez más interconectado, la internacionalización de la economía y la relación con otros Estados y organismos intergubernamentales."},
+          {codigo:"OA6",desc:"Analizar algunos conflictos internacionales que involucran a Estados nacionales, sociedades o grupos, explicando sus contextos, posibilidades de resolución y aplicando conceptos de la ciencia política como poder, soberanía, ideología, derechos humanos, opinión pública entre otros."},
+          {codigo:"OA7",desc:"Participar en forma colaborativa en el diseño de propuestas para dar solución a problemas presentes a nivel local relacionadas con temas abordados en el nivel."}
+        ]
+      }
+    ],
     matematica: [
       {
         key:    "geo3d",
-        nombre: "geo3d",
-        nivel:  "3° y 4° Medio electivo",
+        nombre: "Geometría 3D",
+        nivel:  "3° o 4° Medio electivo",
         ejes:   ["Geometría Espacial"],
-        oas:    [{codigo:"OA1",desc:"Argumentar OA 2. Resolver"}, {codigo:"OA2",desc:"Resolver problemas que involucren puntos, rectas y planos en el espacio 3D, haciendo uso de"}, {codigo:"OA4",desc:"Formular y OA 3. Resolver"}, {codigo:"OA5",desc:"Diseñar"}]
+        unidades: ['Representación vectorial de situaciones y fenómenos','Generación de cuerpos utilizando patrones geométricos','Rectas y planos en el espacio','Los objetos con sus caras y perspectivas'],
+        oas:    [
+          {codigo:"OA1",desc:"Argumentar acerca de la validez de soluciones a situaciones que involucren isometrías y homotecias en el plano, haciendo uso de vectores y de representaciones digitales."},
+          {codigo:"OA2",desc:"Resolver problemas que involucren puntos, rectas y planos en el espacio 3D, haciendo uso de vectores e incluyendo representaciones digitales."},
+          {codigo:"OA3",desc:"Resolver problemas que involucren relaciones entre figuras 3D y 2D en las que intervengan vistas, cortes, proyecciones en el plano o la inscripción de figuras 3D en otras figuras tridimensionales."},
+          {codigo:"OA4",desc:"Formular y verificar conjeturas acerca de la forma, área y volumen de figuras 3D generadas por rotación o traslación de figuras planas en el espacio, incluyendo el uso de herramientas tecnológicas digitales."},
+          {codigo:"OA5",desc:"Diseñar propuestas y resolver problemas relacionados con perspectiva, proyección paralela y central, puntos de fuga y elevaciones, tanto en arte como en arquitectura, diseño o construcción, aplicando conceptos y procedimientos de la geometría 3D."}
+        ]
       },
       {
         key:    "calculo",
