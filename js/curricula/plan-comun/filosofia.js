@@ -133,6 +133,40 @@ CURRICULA_PLAN_COMUN['filosofia'] = {
           {codigo:'OA5', eje:'Conocimiento y comprensión', descripcion:'Formular una tesis filosófica con respecto a un problema relevante para su contexto, a partir de una investigación sobre diversas perspectivas filosóficas presentes en la historia de la filosofía.'}
         ]
       }
+    },
+    'estetica': {
+      nombre:  'Estética',
+      sigla:   'EST',
+      tramo:   'media',
+      niveles: ['3M', '4M'],
+      unidades: {
+        '3M': ['Lo bello, el arte y la experiencia estética','Apreciación estética y juicio crítico','Diversidad cultural y producciones artísticas contemporáneas','Diálogo filosófico-estético'],
+        '4M': ['Lo bello, el arte y la experiencia estética','Apreciación estética y juicio crítico','Diversidad cultural y producciones artísticas contemporáneas','Diálogo filosófico-estético']
+      },
+      oas: {
+        '3M': [
+          {codigo:'OAa', eje:'Habilidades', descripcion:'Formular preguntas significativas para su vida a partir del análisis de conceptos y teorías filosóficas, poniendo en duda aquello que aparece como "cierto" o "dado" y proyectando diversas respuestas posibles.'},
+          {codigo:'OAb', eje:'Habilidades', descripcion:'Analizar y fundamentar problemas presentes en textos filosóficos, considerando sus supuestos, conceptos, métodos de razonamiento e implicancias en la vida cotidiana.'},
+          {codigo:'OAc', eje:'Habilidades', descripcion:'Participar en diálogos sobre grandes problemas de la filosofía pertinentes para sus contextos, sostenidos a partir de argumentos de los distintos participantes, utilizando métodos de razonamiento filosófico y valorando la controversia y la diversidad como factores fundamentales para el desarrollo del pensamiento.'},
+          {codigo:'OAd', eje:'Habilidades', descripcion:'Elaborar visiones personales respecto de problemas filosóficos a partir de las perspectivas de diversos filósofos, siendo capaces tanto de reconstruir sus fundamentos como de cuestionarlos y plantear nuevos puntos de vista.'},
+          {codigo:'OA1', eje:'Conocimiento y comprensión', descripcion:'Reflexionar acerca de las características de la experiencia estética en distintos ámbitos de su vida cotidiana, considerando su relación con el arte, la naturaleza, los medios y las tecnologías.'},
+          {codigo:'OA2', eje:'Conocimiento y comprensión', descripcion:'Comparar diversas concepciones filosóficas sobre lo bello, lo sublime, el gusto y la experiencia estética, considerando autores y obras representativas de distintas épocas y culturas.'},
+          {codigo:'OA3', eje:'Conocimiento y comprensión', descripcion:'Analizar críticamente producciones artísticas y manifestaciones culturales del presente, aplicando categorías y conceptos de la estética filosófica (representación, mímesis, expresión, originalidad, autenticidad, entre otras).'},
+          {codigo:'OA4', eje:'Conocimiento y comprensión', descripcion:'Elaborar juicios estéticos fundamentados sobre obras de arte y manifestaciones culturales, considerando criterios filosóficos, contextos históricos y la diversidad cultural propia y de otros pueblos.'},
+          {codigo:'OA5', eje:'Conocimiento y comprensión', descripcion:'Investigar problemas estéticos contemporáneos (la belleza en la era digital, el rol del arte en la sociedad, la frontera entre arte y no-arte) tomando posición crítica desde diversas corrientes filosóficas.'}
+        ],
+        '4M': [
+          {codigo:'OAa', eje:'Habilidades', descripcion:'Formular preguntas significativas para su vida a partir del análisis de conceptos y teorías filosóficas, poniendo en duda aquello que aparece como "cierto" o "dado" y proyectando diversas respuestas posibles.'},
+          {codigo:'OAb', eje:'Habilidades', descripcion:'Analizar y fundamentar problemas presentes en textos filosóficos, considerando sus supuestos, conceptos, métodos de razonamiento e implicancias en la vida cotidiana.'},
+          {codigo:'OAc', eje:'Habilidades', descripcion:'Participar en diálogos sobre grandes problemas de la filosofía pertinentes para sus contextos, sostenidos a partir de argumentos de los distintos participantes, utilizando métodos de razonamiento filosófico y valorando la controversia y la diversidad como factores fundamentales para el desarrollo del pensamiento.'},
+          {codigo:'OAd', eje:'Habilidades', descripcion:'Elaborar visiones personales respecto de problemas filosóficos a partir de las perspectivas de diversos filósofos, siendo capaces tanto de reconstruir sus fundamentos como de cuestionarlos y plantear nuevos puntos de vista.'},
+          {codigo:'OA1', eje:'Conocimiento y comprensión', descripcion:'Reflexionar acerca de las características de la experiencia estética en distintos ámbitos de su vida cotidiana, considerando su relación con el arte, la naturaleza, los medios y las tecnologías.'},
+          {codigo:'OA2', eje:'Conocimiento y comprensión', descripcion:'Comparar diversas concepciones filosóficas sobre lo bello, lo sublime, el gusto y la experiencia estética, considerando autores y obras representativas de distintas épocas y culturas.'},
+          {codigo:'OA3', eje:'Conocimiento y comprensión', descripcion:'Analizar críticamente producciones artísticas y manifestaciones culturales del presente, aplicando categorías y conceptos de la estética filosófica (representación, mímesis, expresión, originalidad, autenticidad, entre otras).'},
+          {codigo:'OA4', eje:'Conocimiento y comprensión', descripcion:'Elaborar juicios estéticos fundamentados sobre obras de arte y manifestaciones culturales, considerando criterios filosóficos, contextos históricos y la diversidad cultural propia y de otros pueblos.'},
+          {codigo:'OA5', eje:'Conocimiento y comprensión', descripcion:'Investigar problemas estéticos contemporáneos (la belleza en la era digital, el rol del arte en la sociedad, la frontera entre arte y no-arte) tomando posición crítica desde diversas corrientes filosóficas.'}
+        ]
+      }
     }
   }
 };

@@ -293,3 +293,77 @@ CURRICULA_PLAN_COMUN['historia'] = {
   };
 })();
 
+
+(function buildOasGTS() {
+  var OAS_GTS = [
+    { codigo:'OA1', eje:'Conocimiento y comprensión', descripcion:'Analizar críticamente las dinámicas que se producen entre la población y los recursos en el territorio, considerando demanda, escasez, conflicto y sostenibilidad, a distintas escalas geográficas (local, regional, global).' },
+    { codigo:'OA2', eje:'Conocimiento y comprensión', descripcion:'Explicar la conformación de paisajes y territorios a partir de la interacción de factores físico-naturales y humanos, comprendiendo conceptos como geografía física, regionalización y representación geográfica, e integrando herramientas como SIG y cartografía.' },
+    { codigo:'OA3', eje:'Conocimiento y comprensión', descripcion:'Evaluar los problemas socioambientales actuales (cambio climático, contaminación, pérdida de biodiversidad, gestión del agua y residuos), incluyendo sus dimensiones políticas, económicas y éticas, así como acciones individuales y colectivas que pueden contribuir a su solución.' },
+    { codigo:'OA4', eje:'Conocimiento y comprensión', descripcion:'Analizar amenazas y desastres socionaturales en el territorio considerando las vulnerabilidades de la población, los mecanismos institucionales de prevención y gestión del riesgo y el rol de la ciudadanía organizada.' },
+    { codigo:'OA5', eje:'Conocimiento y comprensión', descripcion:'Explicar dinámicas demográficas, migratorias y urbanas en distintas escalas, considerando movilidad, crecimiento de las ciudades, exclusión social, derecho a la ciudad y políticas de planificación territorial.' },
+    { codigo:'OA6', eje:'Conocimiento y comprensión', descripcion:'Investigar conflictos territoriales contemporáneos en Chile y otras regiones del mundo (uso del suelo, pueblos originarios, fronteras, recursos naturales), identificando actores, intereses, dimensiones éticas y propuestas de solución.' },
+    { codigo:'OA7', eje:'Conocimiento y comprensión', descripcion:'Participar en forma colaborativa en el diseño de propuestas para abordar problemas socioambientales presentes en su entorno local, integrando enfoques de sostenibilidad y de derechos humanos.' },
+    { codigo:'OAa', eje:'Habilidades — Investigación', descripcion:'Investigar sobre la realidad considerando: formulación de preguntas o problemas de investigación a partir de la observación de fenómenos; levantamiento de información a partir de métodos y técnicas propias de historia, geografía, economía y otras ciencias sociales; análisis crítico de las evidencias y evaluación de su validez, considerando su uso ético para respaldar opiniones; definición del marco teórico, del estado de la cuestión y de los conceptos disciplinares del tema a investigar; análisis de las propias conclusiones en relación con los supuestos iniciales.' },
+    { codigo:'OAb', eje:'Habilidades — Pensamiento crítico', descripcion:'Hacer conexiones entre fenómenos, acontecimientos y/o procesos de la realidad considerando conceptos como multidimensionalidad, multicausalidad y multiescalaridad, temporalidad, y variables y patrones.' },
+    { codigo:'OAc', eje:'Habilidades — Pensamiento crítico', descripcion:'Elaborar interpretaciones y argumentos, basados en fuentes variadas y pertinentes, haciendo uso ético de la información.' },
+    { codigo:'OAd', eje:'Habilidades — Pensamiento crítico', descripcion:'Analizar interpretaciones y perspectivas de diversas fuentes, considerando propósito, intencionalidad, enfoque y contexto del autor, y las preguntas que intenta responder.' },
+    { codigo:'OAe', eje:'Habilidades — Pensamiento crítico', descripcion:'Evaluar la validez de las propias interpretaciones sobre acontecimientos, fenómenos y procesos estudiados, a través del diálogo y el uso de fuentes.' },
+    { codigo:'OAf', eje:'Habilidades — Pensamiento crítico', descripcion:'Elaborar juicios éticos de manera rigurosa y basados en conocimiento disciplinar sobre hitos, fenómenos, procesos, ideas, acciones de personas, entre otros.' },
+    { codigo:'OAg', eje:'Habilidades — Comunicación', descripcion:'Comunicar explicaciones, conclusiones u opiniones fundamentadas haciendo uso de lenguaje, las normas y convenciones de la disciplina.' }
+  ];
+  CURRICULA_PLAN_COMUN['geografia-territorio'] = {
+    nombre: 'Geografía, Territorio y Desafíos Socioambientales',
+    sigla:  'GTS',
+    tramo:  'media',
+    niveles: ['3M','4M'],
+    unidades: {
+      '3M': ['Población, recursos y sostenibilidad','Paisajes y representaciones del territorio','Problemas socioambientales y cambio climático','Conflictos territoriales y propuestas locales'],
+      '4M': ['Población, recursos y sostenibilidad','Paisajes y representaciones del territorio','Problemas socioambientales y cambio climático','Conflictos territoriales y propuestas locales']
+    },
+    oas: { '3M': OAS_GTS, '4M': OAS_GTS },
+    actitudes: [
+      'Trabajar con responsabilidad y liderazgo en la realización de las tareas colaborativas y en función del logro de metas comunes.',
+      'Pensar con flexibilidad para reelaborar las propias ideas, puntos de vista y creencias.',
+      'Trabajar con empatía y respeto en el contexto de la diversidad, eliminando toda expresión de prejuicio y discriminación.',
+      'Participar asumiendo posturas razonadas en distintos ámbitos: cultural, social, político, medioambiental, entre otros.',
+      'Actuar de acuerdo con los principios de la ética en el uso de la información y de la tecnología, respetando la propiedad intelectual y la privacidad de las personas.'
+    ]
+  };
+})();
+
+(function buildOasECS() {
+  var OAS_ECS = [
+    { codigo:'OA1', eje:'Conocimiento y comprensión', descripcion:'Analizar problemas económicos contemporáneos (escasez, desigualdad, desempleo, inflación) considerando sus impactos en la calidad de vida de las personas y aplicando conceptos como oferta y demanda, precio, mercado, política fiscal y monetaria.' },
+    { codigo:'OA2', eje:'Conocimiento y comprensión', descripcion:'Investigar la organización del trabajo en la sociedad actual, considerando transformaciones tecnológicas, flexibilidad laboral, brechas de género y derechos laborales, evaluando sus efectos sobre la cohesión social.' },
+    { codigo:'OA3', eje:'Conocimiento y comprensión', descripcion:'Explicar el rol del Estado y del mercado en la economía, contrastando distintas perspectivas teóricas (liberal, keynesiana, social de mercado) y analizando las funciones de las políticas públicas en bienestar, regulación y redistribución.' },
+    { codigo:'OA4', eje:'Conocimiento y comprensión', descripcion:'Evaluar el impacto del comercio internacional, los tratados, la integración regional y la globalización en la economía y la sociedad chilenas, considerando oportunidades y riesgos.' },
+    { codigo:'OA5', eje:'Conocimiento y comprensión', descripcion:'Analizar la economía personal y familiar, integrando conceptos de presupuesto, ahorro, crédito y endeudamiento, y comprendiendo el sistema financiero y de protección al consumidor.' },
+    { codigo:'OA6', eje:'Conocimiento y comprensión', descripcion:'Investigar las dimensiones éticas de la actividad económica (sostenibilidad, responsabilidad social, economía circular, economía solidaria), contrastando casos y perspectivas presentes en Chile y otras regiones del mundo.' },
+    { codigo:'OA7', eje:'Conocimiento y comprensión', descripcion:'Participar en forma colaborativa en el diseño de propuestas para abordar problemas económicos y sociales presentes en su entorno local, integrando criterios de bien común y justicia social.' },
+    { codigo:'OAa', eje:'Habilidades — Investigación', descripcion:'Investigar sobre la realidad considerando: formulación de preguntas o problemas de investigación a partir de la observación de fenómenos; levantamiento de información a partir de métodos y técnicas propias de historia, geografía, economía y otras ciencias sociales; análisis crítico de las evidencias y evaluación de su validez, considerando su uso ético para respaldar opiniones; definición del marco teórico, del estado de la cuestión y de los conceptos disciplinares del tema a investigar; análisis de las propias conclusiones en relación con los supuestos iniciales.' },
+    { codigo:'OAb', eje:'Habilidades — Pensamiento crítico', descripcion:'Hacer conexiones entre fenómenos, acontecimientos y/o procesos de la realidad considerando conceptos como multidimensionalidad, multicausalidad y multiescalaridad, temporalidad, y variables y patrones.' },
+    { codigo:'OAc', eje:'Habilidades — Pensamiento crítico', descripcion:'Elaborar interpretaciones y argumentos, basados en fuentes variadas y pertinentes, haciendo uso ético de la información.' },
+    { codigo:'OAd', eje:'Habilidades — Pensamiento crítico', descripcion:'Analizar interpretaciones y perspectivas de diversas fuentes, considerando propósito, intencionalidad, enfoque y contexto del autor, y las preguntas que intenta responder.' },
+    { codigo:'OAe', eje:'Habilidades — Pensamiento crítico', descripcion:'Evaluar la validez de las propias interpretaciones sobre acontecimientos, fenómenos y procesos estudiados, a través del diálogo y el uso de fuentes.' },
+    { codigo:'OAf', eje:'Habilidades — Pensamiento crítico', descripcion:'Elaborar juicios éticos de manera rigurosa y basados en conocimiento disciplinar sobre hitos, fenómenos, procesos, ideas, acciones de personas, entre otros.' },
+    { codigo:'OAg', eje:'Habilidades — Comunicación', descripcion:'Comunicar explicaciones, conclusiones u opiniones fundamentadas haciendo uso de lenguaje, las normas y convenciones de la disciplina.' }
+  ];
+  CURRICULA_PLAN_COMUN['economia-sociedad'] = {
+    nombre: 'Economía y Sociedad',
+    sigla:  'ECS',
+    tramo:  'media',
+    niveles: ['3M','4M'],
+    unidades: {
+      '3M': ['Problemas económicos y desigualdad','Trabajo, tecnología y derechos','Estado, mercado y políticas públicas','Globalización, ética y economía personal'],
+      '4M': ['Problemas económicos y desigualdad','Trabajo, tecnología y derechos','Estado, mercado y políticas públicas','Globalización, ética y economía personal']
+    },
+    oas: { '3M': OAS_ECS, '4M': OAS_ECS },
+    actitudes: [
+      'Trabajar con responsabilidad y liderazgo en la realización de las tareas colaborativas y en función del logro de metas comunes.',
+      'Pensar con flexibilidad para reelaborar las propias ideas, puntos de vista y creencias.',
+      'Trabajar con empatía y respeto en el contexto de la diversidad, eliminando toda expresión de prejuicio y discriminación.',
+      'Participar asumiendo posturas razonadas en distintos ámbitos: cultural, social, político, medioambiental, entre otros.',
+      'Actuar de acuerdo con los principios de la ética en el uso de la información y de la tecnología, respetando la propiedad intelectual y la privacidad de las personas.'
+    ]
+  };
+})();

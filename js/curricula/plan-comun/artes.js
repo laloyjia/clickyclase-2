@@ -211,3 +211,73 @@ CURRICULA_PLAN_COMUN['artes'] = {
     habilidades: ['Expresar y crear','Apreciar y responder','Comunicar y difundir']
   };
 })();
+
+(function buildOasDAR() {
+  var OAS_DAR = [
+    {codigo:'OA1', eje:'Expresar y crear', descripcion:'Crear proyectos de diseño y arquitectura considerando un público objetivo, propósitos comunicativos y/o funcionales, contextos culturales y restricciones materiales, ambientales y económicas.'},
+    {codigo:'OA2', eje:'Expresar y crear', descripcion:'Experimentar con diversos materiales, herramientas, soportes y procedimientos de diseño y arquitectura (boceto, maqueta, modelado 2D/3D, prototipos), integrando innovación, sustentabilidad y ergonomía.'},
+    {codigo:'OA3', eje:'Expresar y crear', descripcion:'Aplicar elementos del lenguaje visual (forma, color, textura, espacio, proporción, composición) y principios del diseño (jerarquía, ritmo, equilibrio, contraste, función) en sus proyectos personales y colaborativos.'},
+    {codigo:'OA4', eje:'Apreciar y responder', descripcion:'Analizar obras y proyectos de diseño y arquitectura de distintas épocas y contextos, relacionando sus aspectos formales, funcionales, simbólicos, tecnológicos y socioculturales.'},
+    {codigo:'OA5', eje:'Apreciar y responder', descripcion:'Argumentar juicios estéticos y funcionales sobre obras de diseño y arquitectura, considerando aportes a la calidad de vida, identidad cultural, sustentabilidad y accesibilidad.'},
+    {codigo:'OA6', eje:'Apreciar y responder', descripcion:'Evaluar críticamente procesos y resultados de proyectos propios y de sus pares, considerando relaciones entre intenciones, decisiones y resultados, y proponiendo mejoras.'},
+    {codigo:'OA7', eje:'Comunicar y difundir', descripcion:'Relacionar, a partir de investigaciones, las habilidades y conocimientos del diseño y la arquitectura con diferentes contextos laborales, profesionales y de desarrollo personal.'}
+  ];
+  CURRICULA_PLAN_COMUN['diseno-arquitectura'] = {
+    nombre: 'Diseño y Arquitectura',
+    sigla:  'DAR',
+    tramo:  'media',
+    niveles: ['3M','4M'],
+    unidades: {
+      '3M': ['Diseño y necesidades humanas','Lenguaje visual y procesos creativos','Arquitectura, contexto y sustentabilidad','Proyectos colaborativos de diseño y arquitectura'],
+      '4M': ['Diseño y necesidades humanas','Lenguaje visual y procesos creativos','Arquitectura, contexto y sustentabilidad','Proyectos colaborativos de diseño y arquitectura']
+    },
+    oas: { '3M': OAS_DAR, '4M': OAS_DAR },
+    actitudes: [
+      'Pensar con perseverancia y proactividad para encontrar soluciones innovadoras a los problemas.',
+      'Demostrar disposición a desarrollar su creatividad, experimentando, imaginando y pensando divergentemente.',
+      'Trabajar con autonomía y proactividad en trabajos personales y colaborativos para alcanzar las metas propuestas.',
+      'Trabajar colaborativamente en la generación, desarrollo y gestión de proyectos y la resolución de problemas, integrando las diferentes ideas y puntos de vista.',
+      'Pensar con flexibilidad para reelaborar las propias ideas, puntos de vista y creencias.',
+      'Tomar decisiones que conduzcan a la creación, innovación y trasformación de las personas y de la sociedad.',
+      'Trabajar con empatía y respeto en el contexto de la diversidad, eliminando toda expresión de prejuicio y discriminación.',
+      'Valorar las TIC como una oportunidad para informarse, investigar, socializar, comunicarse y participar como ciudadano.',
+      'Actuar de acuerdo con los principios de la ética en el uso de la información y de la tecnología, respetando la propiedad intelectual y la privacidad de las personas.'
+    ],
+    habilidades: ['Expresar y crear','Apreciar y responder','Comunicar y difundir']
+  };
+})();
+
+(function buildOasESC() {
+  var OAS_ESC = [
+    {codigo:'OA1', eje:'Expresar y crear', descripcion:'Crear escenas y proyectos escénicos (teatrales y/o de danza) en forma personal y colaborativa, considerando temas, públicos, espacios y propósitos comunicativos.'},
+    {codigo:'OA2', eje:'Expresar y crear', descripcion:'Experimentar con recursos expresivos del cuerpo, la voz, el movimiento, el espacio escénico, el ritmo y la dramaturgia, integrando estilos y técnicas de teatro y danza de diferentes tradiciones.'},
+    {codigo:'OA3', eje:'Expresar y crear', descripcion:'Aplicar elementos técnicos y narrativos de las artes escénicas (conflicto, personajes, acciones, espacio, tiempo, iluminación, sonido, vestuario, escenografía) en proyectos colectivos.'},
+    {codigo:'OA4', eje:'Apreciar y responder', descripcion:'Analizar montajes escénicos de teatro y danza de diferentes épocas y procedencias, relacionando los lenguajes artísticos, los elementos simbólicos y los contextos socioculturales.'},
+    {codigo:'OA5', eje:'Apreciar y responder', descripcion:'Argumentar juicios estéticos sobre obras escénicas a partir de análisis estéticos, interpretaciones personales y referentes teóricos sobre teatro y danza.'},
+    {codigo:'OA6', eje:'Apreciar y responder', descripcion:'Evaluar críticamente procesos y resultados de creaciones escénicas propias y de sus pares, considerando relaciones entre intenciones expresivas, decisiones técnicas y reacciones del público.'},
+    {codigo:'OA7', eje:'Comunicar y difundir', descripcion:'Relacionar, a partir de investigaciones, las habilidades y conocimientos de las artes escénicas con diferentes contextos laborales, profesionales y de desarrollo personal.'}
+  ];
+  CURRICULA_PLAN_COMUN['artes-escenicas'] = {
+    nombre: 'Artes Escénicas (Teatro y Danza)',
+    sigla:  'ESC',
+    tramo:  'media',
+    niveles: ['3M','4M'],
+    unidades: {
+      '3M': ['Cuerpo, voz y movimiento','Dramaturgia y composición escénica','Análisis y apreciación de montajes','Proyectos escénicos colaborativos'],
+      '4M': ['Cuerpo, voz y movimiento','Dramaturgia y composición escénica','Análisis y apreciación de montajes','Proyectos escénicos colaborativos']
+    },
+    oas: { '3M': OAS_ESC, '4M': OAS_ESC },
+    actitudes: [
+      'Pensar con perseverancia y proactividad para encontrar soluciones innovadoras a los problemas.',
+      'Demostrar disposición a desarrollar su creatividad, experimentando, imaginando y pensando divergentemente.',
+      'Trabajar con autonomía y proactividad en trabajos personales y colaborativos para alcanzar las metas propuestas.',
+      'Trabajar colaborativamente en la generación, desarrollo y gestión de proyectos y la resolución de problemas, integrando las diferentes ideas y puntos de vista.',
+      'Pensar con flexibilidad para reelaborar las propias ideas, puntos de vista y creencias.',
+      'Tomar decisiones que conduzcan a la creación, innovación y trasformación de las personas y de la sociedad.',
+      'Trabajar con empatía y respeto en el contexto de la diversidad, eliminando toda expresión de prejuicio y discriminación.',
+      'Valorar las TIC como una oportunidad para informarse, investigar, socializar, comunicarse y participar como ciudadano.',
+      'Actuar de acuerdo con los principios de la ética en el uso de la información y de la tecnología, respetando la propiedad intelectual y la privacidad de las personas.'
+    ],
+    habilidades: ['Expresar y crear','Apreciar y responder','Comunicar y difundir']
+  };
+})();
