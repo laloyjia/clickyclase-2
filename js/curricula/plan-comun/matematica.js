@@ -288,21 +288,79 @@ CURRICULA_PLAN_COMUN['matematica'] = {
   electivos: {
 
     // ════════════════════════════════════════════════════════════════
-    //  GEOMETRÍA 3D — PENDIENTE: subir Programa de Estudio Mineduc
-    //  Esta entrada queda como placeholder visible. Cuando el docente
-    //  proporcione el PDF se completará con OAs, unidades y mapeo.
+    //  GEOMETRÍA 3D — DS 193/2019, Programa de Estudio Mineduc (febrero 2021)
+    //  5 OAs de conocimiento + 8 habilidades (a-h) + 4 habilidades digitales (i-l)
+    //  4 unidades: vectores en el plano, rectas y planos en 3D, generación de
+    //  cuerpos por rotación/traslación, vistas/proyecciones/perspectiva.
     // ════════════════════════════════════════════════════════════════
     'geometria3d': {
       nombre:  'Geometría 3D',
       sigla:   'GEO3D',
       tramo:   'media',
       niveles: ['3M', '4M'],
-      decreto: 'DS 193/2019 — Pendiente carga de Programa de Estudio',
-      unidades: { '3M': [], '4M': [] },
-      oas:      { '3M': [], '4M': [] },
-      habilidades: [],
-      actitudes:   [],
-      _pendiente: 'Subir PDF Programa de Estudio Geometría 3D para completar OAs y unidades.'
+      decreto: 'DS 193/2019',
+      unidades: {
+        '3M': [
+          'Representación vectorial de situaciones y fenómenos',
+          'Rectas y planos en el espacio',
+          'Generación de cuerpos utilizando patrones geométricos',
+          'Los objetos con sus caras y perspectivas'
+        ],
+        '4M': [
+          'Representación vectorial de situaciones y fenómenos',
+          'Rectas y planos en el espacio',
+          'Generación de cuerpos utilizando patrones geométricos',
+          'Los objetos con sus caras y perspectivas'
+        ]
+      },
+      oas: {
+        '3M': [
+          { codigo: 'OA1', eje: 'Conocimiento y comprensión', descripcion: 'Argumentar acerca de la validez de soluciones a situaciones que involucren isometrías y homotecias en el plano, haciendo uso de vectores y de representaciones digitales.' },
+          { codigo: 'OA2', eje: 'Conocimiento y comprensión', descripcion: 'Resolver problemas que involucren puntos, rectas y planos en el espacio 3D, haciendo uso de vectores e incluyendo representaciones digitales.' },
+          { codigo: 'OA3', eje: 'Conocimiento y comprensión', descripcion: 'Resolver problemas que involucren relaciones entre figuras 3D y 2D en las que intervengan vistas, cortes, proyecciones en el plano o la inscripción de figuras 3D en otras figuras tridimensionales.' },
+          { codigo: 'OA4', eje: 'Conocimiento y comprensión', descripcion: 'Formular y verificar conjeturas acerca de la forma, área y volumen de figuras 3D generadas por rotación o traslación de figuras planas en el espacio, incluyendo el uso de herramientas tecnológicas digitales.' },
+          { codigo: 'OA5', eje: 'Conocimiento y comprensión', descripcion: 'Diseñar propuestas y resolver problemas relacionados con perspectiva, proyección paralela y central, puntos de fuga y elevaciones, tanto en arte como en arquitectura, diseño o construcción, aplicando conceptos y procedimientos de la geometría 3D.' },
+          { codigo: 'OAa', eje: 'Habilidades — Resolver problemas', descripcion: 'Construir y evaluar estrategias de manera colaborativa al resolver problemas no rutinarios.' },
+          { codigo: 'OAb', eje: 'Habilidades — Resolver problemas', descripcion: 'Resolver problemas que impliquen variar algunos parámetros en el modelo utilizado y observar cómo eso influye en los resultados obtenidos.' },
+          { codigo: 'OAc', eje: 'Habilidades — Argumentar y comunicar', descripcion: 'Tomar decisiones fundamentadas en evidencia estadística y/o en la evaluación de resultados obtenidos a partir de un modelo probabilístico.' },
+          { codigo: 'OAd', eje: 'Habilidades — Argumentar y comunicar', descripcion: 'Argumentar, utilizando lenguaje simbólico y diferentes representaciones, para justificar la veracidad o falsedad de una conjetura, y evaluar el alcance y los límites de los argumentos utilizados.' },
+          { codigo: 'OAe', eje: 'Habilidades — Modelar', descripcion: 'Construir modelos realizando conexiones entre variables para predecir posibles escenarios de solución a un problema, y tomar decisiones fundamentadas.' },
+          { codigo: 'OAf', eje: 'Habilidades — Modelar', descripcion: 'Evaluar modelos para estudiar un fenómeno, analizando críticamente las simplificaciones requeridas y considerando las limitaciones de aquellos.' },
+          { codigo: 'OAg', eje: 'Habilidades — Representar', descripcion: 'Elaborar representaciones, tanto en forma manual como digital, y justificar cómo una misma información puede ser utilizada según el tipo de representación.' },
+          { codigo: 'OAh', eje: 'Habilidades — Representar', descripcion: 'Evaluar diferentes representaciones, de acuerdo a su pertinencia con el problema a solucionar.' },
+          { codigo: 'OAi', eje: 'Habilidades digitales', descripcion: 'Buscar, seleccionar, manejar y producir información matemática/cuantitativa confiable a través de la web.' },
+          { codigo: 'OAj', eje: 'Habilidades digitales', descripcion: 'Desarrollar un trabajo colaborativo en línea para discusión y resolución de tareas matemáticas, usando herramientas electrónicas de productividad, entornos virtuales y redes sociales.' },
+          { codigo: 'OAk', eje: 'Habilidades digitales', descripcion: 'Analizar y evaluar el impacto de las tecnologías digitales en contextos sociales, económicos y culturales.' },
+          { codigo: 'OAl', eje: 'Habilidades digitales', descripcion: 'Conocer tanto los derechos propios como los de los otros, y aplicar estrategias de protección de la información en ambientes digitales.' }
+        ],
+        '4M': [
+          { codigo: 'OA1', eje: 'Conocimiento y comprensión', descripcion: 'Argumentar acerca de la validez de soluciones a situaciones que involucren isometrías y homotecias en el plano, haciendo uso de vectores y de representaciones digitales.' },
+          { codigo: 'OA2', eje: 'Conocimiento y comprensión', descripcion: 'Resolver problemas que involucren puntos, rectas y planos en el espacio 3D, haciendo uso de vectores e incluyendo representaciones digitales.' },
+          { codigo: 'OA3', eje: 'Conocimiento y comprensión', descripcion: 'Resolver problemas que involucren relaciones entre figuras 3D y 2D en las que intervengan vistas, cortes, proyecciones en el plano o la inscripción de figuras 3D en otras figuras tridimensionales.' },
+          { codigo: 'OA4', eje: 'Conocimiento y comprensión', descripcion: 'Formular y verificar conjeturas acerca de la forma, área y volumen de figuras 3D generadas por rotación o traslación de figuras planas en el espacio, incluyendo el uso de herramientas tecnológicas digitales.' },
+          { codigo: 'OA5', eje: 'Conocimiento y comprensión', descripcion: 'Diseñar propuestas y resolver problemas relacionados con perspectiva, proyección paralela y central, puntos de fuga y elevaciones, tanto en arte como en arquitectura, diseño o construcción, aplicando conceptos y procedimientos de la geometría 3D.' },
+          { codigo: 'OAa', eje: 'Habilidades — Resolver problemas', descripcion: 'Construir y evaluar estrategias de manera colaborativa al resolver problemas no rutinarios.' },
+          { codigo: 'OAb', eje: 'Habilidades — Resolver problemas', descripcion: 'Resolver problemas que impliquen variar algunos parámetros en el modelo utilizado y observar cómo eso influye en los resultados obtenidos.' },
+          { codigo: 'OAc', eje: 'Habilidades — Argumentar y comunicar', descripcion: 'Tomar decisiones fundamentadas en evidencia estadística y/o en la evaluación de resultados obtenidos a partir de un modelo probabilístico.' },
+          { codigo: 'OAd', eje: 'Habilidades — Argumentar y comunicar', descripcion: 'Argumentar, utilizando lenguaje simbólico y diferentes representaciones, para justificar la veracidad o falsedad de una conjetura, y evaluar el alcance y los límites de los argumentos utilizados.' },
+          { codigo: 'OAe', eje: 'Habilidades — Modelar', descripcion: 'Construir modelos realizando conexiones entre variables para predecir posibles escenarios de solución a un problema, y tomar decisiones fundamentadas.' },
+          { codigo: 'OAf', eje: 'Habilidades — Modelar', descripcion: 'Evaluar modelos para estudiar un fenómeno, analizando críticamente las simplificaciones requeridas y considerando las limitaciones de aquellos.' },
+          { codigo: 'OAg', eje: 'Habilidades — Representar', descripcion: 'Elaborar representaciones, tanto en forma manual como digital, y justificar cómo una misma información puede ser utilizada según el tipo de representación.' },
+          { codigo: 'OAh', eje: 'Habilidades — Representar', descripcion: 'Evaluar diferentes representaciones, de acuerdo a su pertinencia con el problema a solucionar.' },
+          { codigo: 'OAi', eje: 'Habilidades digitales', descripcion: 'Buscar, seleccionar, manejar y producir información matemática/cuantitativa confiable a través de la web.' },
+          { codigo: 'OAj', eje: 'Habilidades digitales', descripcion: 'Desarrollar un trabajo colaborativo en línea para discusión y resolución de tareas matemáticas, usando herramientas electrónicas de productividad, entornos virtuales y redes sociales.' },
+          { codigo: 'OAk', eje: 'Habilidades digitales', descripcion: 'Analizar y evaluar el impacto de las tecnologías digitales en contextos sociales, económicos y culturales.' },
+          { codigo: 'OAl', eje: 'Habilidades digitales', descripcion: 'Conocer tanto los derechos propios como los de los otros, y aplicar estrategias de protección de la información en ambientes digitales.' }
+        ]
+      },
+      habilidades: ['Resolver problemas','Argumentar y comunicar','Modelar','Representar','Habilidades digitales'],
+      actitudes: [
+        'Aprovechar las herramientas disponibles para aprender y resolver problemas.',
+        'Trabajar colaborativamente en la generación, desarrollo y gestión de proyectos y la resolución de problemas.',
+        'Pensar con perseverancia y proactividad para encontrar soluciones innovadoras a los problemas.',
+        'Pensar con conciencia, reconociendo que los errores ofrecen oportunidades para el aprendizaje.',
+        'Trabajar con responsabilidad y liderazgo en la realización de tareas colaborativas y en función del logro de metas comunes.'
+      ]
     },
 
     // ════════════════════════════════════════════════════════════════
