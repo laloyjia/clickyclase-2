@@ -1413,6 +1413,120 @@ var CURRICULA_CHILE = (function() {
       return [];
     },
 
+    // ─────────────────────────────────────────────────────────────────
+    //  ELECTIVOS HC 3°M-4°M (Plan Diferenciado, DS 193/2019)
+    //
+    //  Hay dos patrones de almacenamiento:
+    //    A) NESTED  — CURRICULA_PLAN_COMUN[parent].electivos[key]
+    //         (matematica, lenguaje, biologia, fisica, quimica, musica,
+    //          filosofia, ed-fisica)
+    //    B) TOP-LVL — CURRICULA_PLAN_COMUN[key]
+    //         (historia → chile-latam, mundo-global, geografia-territorio,
+    //          economia-sociedad ; artes → artes-hc, diseno-arquitectura,
+    //          artes-escenicas)
+    //
+    //  Para distinguirlos sin colisión usamos una "key compuesta":
+    //    · nested → 'parent:local'   ej: 'matematica:geometria3d'
+    //    · top    → 'top'            ej: 'chile-latam'
+    // ─────────────────────────────────────────────────────────────────
+    _ELECTIVOS_TOP_PARENT: {
+      'chile-latam'         : 'historia',
+      'mundo-global'        : 'historia',
+      'geografia-territorio': 'historia',
+      'economia-sociedad'   : 'historia',
+      'artes-hc'            : 'artes',
+      'diseno-arquitectura' : 'artes',
+      'artes-escenicas'     : 'artes'
+    },
+
+    /**
+     * Lista los electivos HC disponibles para una asignatura padre.
+     * @param {string} asigSigla - sigla de la asignatura padre (MAT, HIS, BIO, …)
+     * @returns {Array<{key,nombre,sigla,niveles}>}
+     */
+    getElectivosHC: function(asigSigla) {
+      if (typeof window === 'undefined' || !window.CURRICULA_PLAN_COMUN) return [];
+      var PC = window.CURRICULA_PLAN_COMUN;
+      var self = this;
+      var keyPadre = self._siglaToPlanComunKey(asigSigla);
+      var result = [];
+
+      // Patrón A — nested electivos en el objeto padre
+      if (PC[keyPadre] && PC[keyPadre].electivos && typeof PC[keyPadre].electivos === 'object') {
+        Object.keys(PC[keyPadre].electivos).forEach(function(elKey) {
+          var el = PC[keyPadre].electivos[elKey];
+          if (!el || typeof el !== 'object' || !el.nombre) return;
+          result.push({
+            key:     keyPadre + ':' + elKey,
+            nombre:  el.nombre,
+            sigla:   el.sigla || elKey.toUpperCase(),
+            niveles: el.niveles || ['3M','4M']
+          });
+        });
+      }
+
+      // Patrón B — entradas top-level que pertenecen a este padre
+      Object.keys(self._ELECTIVOS_TOP_PARENT).forEach(function(elKey) {
+        if (self._ELECTIVOS_TOP_PARENT[elKey] !== keyPadre) return;
+        if (!PC[elKey] || !PC[elKey].nombre) return;
+        result.push({
+          key:     elKey,
+          nombre:  PC[elKey].nombre,
+          sigla:   PC[elKey].sigla || elKey.toUpperCase(),
+          niveles: PC[elKey].niveles || ['3M','4M']
+        });
+      });
+
+      return result;
+    },
+
+    /**
+     * Devuelve OAs de un electivo HC por su key compuesta.
+     * @param {string} key - 'parent:local' (nested) o 'top-key' (top-level)
+     * @param {string} nivel - '3M' o '4M'
+     */
+    getOAsByKey: function(key, nivel) {
+      if (typeof window === 'undefined' || !window.CURRICULA_PLAN_COMUN) return [];
+      if (!key || !nivel) return [];
+      var PC = window.CURRICULA_PLAN_COMUN;
+      var src = null;
+      if (key.indexOf(':') !== -1) {
+        var parts = key.split(':');
+        var p = PC[parts[0]];
+        if (p && p.electivos && p.electivos[parts[1]]) src = p.electivos[parts[1]];
+      } else if (PC[key]) {
+        src = PC[key];
+      }
+      if (!src || !src.oas || !Array.isArray(src.oas[nivel])) return [];
+      return src.oas[nivel].map(function(o){
+        return {
+          codigo:      o.codigo,
+          descripcion: o.descripcion || o.desc || '',
+          desc:        o.desc || o.descripcion || '',
+          eje:         o.eje || 'General'
+        };
+      });
+    },
+
+    /**
+     * Devuelve unidades de un electivo HC por su key compuesta.
+     */
+    getUnidadesByKey: function(key, nivel) {
+      if (typeof window === 'undefined' || !window.CURRICULA_PLAN_COMUN) return [];
+      if (!key || !nivel) return [];
+      var PC = window.CURRICULA_PLAN_COMUN;
+      var src = null;
+      if (key.indexOf(':') !== -1) {
+        var parts = key.split(':');
+        var p = PC[parts[0]];
+        if (p && p.electivos && p.electivos[parts[1]]) src = p.electivos[parts[1]];
+      } else if (PC[key]) {
+        src = PC[key];
+      }
+      if (!src || !src.unidades || !src.unidades[nivel]) return [];
+      return src.unidades[nivel];
+    },
+
     // getActitudes(asigSigla, nivelOtramo) — delega en getPlanComunActitudes si existe
     getActitudes: function(asigSigla, nivelOtramo) {
       if (typeof window !== 'undefined' && typeof window.getPlanComunActitudes === 'function') {
@@ -1512,6 +1626,132 @@ var CURRICULA_CHILE = (function() {
       var key = _resolveEspKey(sectorKey);
       if (!key) return [];
       var sec = this.especialidades[key];
+      if (!sec) return [];
+      var mods = [];
+      (sec.especialidades || []).forEach(function(esp) {
+        (esp.modulos || []).forEach(function(m) { mods.push(m); });
+      });
+      return mods;
+    },
+
+    getAllNiveles: function() {
+      return ['1B','2B','3B','4B','5B','6B','7B','8B','1M','2M','3M','4M'];
+    },
+
+    getNivelLabel: function(nivel) {
+      var map = {
+        '1B':'1° Básico','2B':'2° Básico','3B':'3° Básico','4B':'4° Básico',
+        '5B':'5° Básico','6B':'6° Básico','7B':'7° Básico','8B':'8° Básico',
+        '1M':'1° Medio','2M':'2° Medio','3M':'3° Medio','4M':'4° Medio'
+      };
+      return map[nivel] || nivel;
+    },
+
+    // Retorna array [{key, nombre, sector, color}] para poblar selectores TP.
+    // Solo incluye especialidades con datos cargados (CURRICULA_FULL presente);
+    // si CURRICULA_FULL no está cargado, retorna todo el catálogo igual (para
+    // que selectores de admin sigan funcionando aún sin datos reales).
+    getEspecialidades: function() {
+      var CF = (typeof window !== 'undefined' && window.CURRICULA_FULL) || null;
+      return Object.keys(TP_CATALOG).map(function(key) {
+        var meta = TP_CATALOG[key];
+        return {
+          key:       key,
+          nombre:    meta.nombre,
+          sector:    meta.sector,
+          color:     meta.color,
+          hasData:   !!(CF && CF[meta.fullKey])
+        };
+      });
+    },
+
+    // Normaliza una clave de especialidad (maneja alias legacy como "automotriz")
+    resolveEspKey: function(key) { return _resolveEspKey(key); },
+
+    // Retorna un objeto compatible con MODULOS[] para un módulo TP por espKey y num
+    getModuloCompat: function(espKey, modNum) {
+      espKey = _resolveEspKey(espKey) || espKey;
+      var ceEstandar = {
+        'C1': { texto: 'Aplica procedimientos técnicos según normativa vigente y especificaciones del fabricante.', oag: ['A'] },
+        'C2': { texto: 'Usa correctamente herramientas e instrumentos de medición adecuados para el trabajo técnico.', oag: ['C'] },
+        'C3': { texto: 'Cumple estrictamente con las normas de seguridad laboral y prevención de riesgos en el área de trabajo.', oag: ['K'] },
+        'C4': { texto: 'Documenta y registra con precisión los trabajos realizados, completando informes técnicos.', oag: ['B'] },
+        'C5': { texto: 'Trabaja con responsabilidad, orden, limpieza y respeto en el puesto de trabajo y con sus compañeros.', oag: ['D'] }
+      };
+
+      var mods = this.getModulos(espKey);
+      var m = null;
+      for (var i = 0; i < mods.length; i++) {
+        if (mods[i].num === modNum) { m = mods[i]; break; }
+      }
+      if (!m) return null;
+
+      var oas = {};
+      var aes = {};
+      (m.aes || []).forEach(function(ae) {
+        var key = 'OA' + ae.num;
+        var textoCompleto = ae.texto || ae.nombre;
+        oas[key] = textoCompleto;
+        aes[key] = { texto: textoCompleto, ces: ceEstandar };
+      });
+
+      return {
+        num:    m.num,
+        nombre: m.nombre,
+        horas:  m.horas,
+        oas:    oas,
+        aes:    aes,
+        _fromCurricula: true,
+        _espKey: espKey
+      };
+    },
+
+    // Busca un módulo en TODAS las especialidades por su número (num).
+    // Útil cuando user.especialidad está vacío pero se conoce el número de módulo.
+    // Retorna objeto compatible con MODULOS[] o null.
+    getModuloCompatByNum: function(modNum) {
+      var esps = this.getEspecialidades();
+      for (var i = 0; i < esps.length; i++) {
+        var result = this.getModuloCompat(esps[i].key, modNum);
+        if (result) return result;
+      }
+      return null;
+    },
+
+    // Retorna todos los módulos de todas las especialidades (para listado general TP)
+    getAllModulos: function() {
+      var all = [];
+      var seen = {};
+      var esps = this.getEspecialidades();
+      for (var i = 0; i < esps.length; i++) {
+        var mods = this.getModulos(esps[i].key);
+        for (var j = 0; j < mods.length; j++) {
+          var key = esps[i].key + '_' + mods[j].num;
+          if (!seen[key]) {
+            seen[key] = true;
+            all.push({ espKey: esps[i].key, espNombre: esps[i].nombre, mod: mods[j] });
+          }
+        }
+      }
+      return all;
+    }
+  };
+
+  // `especialidades` se resuelve dinámicamente vía getter para capturar
+  // cargas diferidas de window.CURRICULA_FULL.  Fallback a objeto plano en
+  // entornos que no soporten defineProperty (muy improbable en targets).
+  try {
+    Object.defineProperty(api, 'especialidades', {
+      enumerable: true,
+      configurable: false,
+      get: function() { return _buildEspecialidades(); }
+    });
+  } catch (e) {
+    api.especialidades = _buildEspecialidades();
+  }
+
+  return api;
+})();
       if (!sec) return [];
       var mods = [];
       (sec.especialidades || []).forEach(function(esp) {
