@@ -43,9 +43,35 @@
 <script src="js/curricula/tp/datos-electronica.js"></script>
 <script src="js/curricula/tp/datos-administracion.js"></script>
 <script src="js/curricula/tp/datos-contabilidad.js"></script>
-<script src="js/curricula/tp/datos-ventas.js"></script>
 <script src="js/curricula/tp/datos-grafica.js"></script>
 <script src="js/curricula/tp/datos-construccion.js"></script>
+<script src="js/curricula/tp/datos-metalurgia-extractiva.js"></script>
+<script src="js/curricula/tp/datos-mantenimiento-aeronaves.js"></script>
+<script src="js/curricula/tp/datos-tripulacion-naves.js"></script>
+<script src="js/curricula/tp/datos-muebles-madera.js"></script>
+<script src="js/curricula/tp/datos-quimica-industrial.js"></script>
+<script src="js/curricula/tp/datos-atencion-enfermeria.js"></script>
+<script src="js/curricula/tp/datos-agropecuaria.js"></script>
+<script src="js/curricula/tp/datos-elaboracion-alimentos.js"></script>
+<script src="js/curricula/tp/datos-construcciones-metalicas.js"></script>
+<script src="js/curricula/tp/datos-instalaciones-sanitarias.js"></script>
+<script src="js/curricula/tp/datos-montaje-industrial.js"></script>
+<script src="js/curricula/tp/datos-telecomunicaciones.js"></script>
+<script src="js/curricula/tp/datos-dibujo-tecnico.js"></script>
+<script src="js/curricula/tp/datos-gastronomia.js"></script>
+<script src="js/curricula/tp/datos-servicios-hoteleros.js"></script>
+<script src="js/curricula/tp/datos-servicios-turismo.js"></script>
+<script src="js/curricula/tp/datos-forestal.js"></script>
+<script src="js/curricula/tp/datos-acuicultura.js"></script>
+<script src="js/curricula/tp/datos-operacion-portuaria.js"></script>
+<script src="js/curricula/tp/datos-pesqueria.js"></script>
+<script src="js/curricula/tp/datos-asistencia-geologia.js"></script>
+<script src="js/curricula/tp/datos-explotacion-minera.js"></script>
+<script src="js/curricula/tp/datos-atencion-parvulos.js"></script>
+<script src="js/curricula/tp/datos-refrigeracion-climatizacion.js"></script>
+<script src="js/curricula/tp/datos-conectividad-redes.js"></script>
+<script src="js/curricula/tp/datos-programacion.js"></script>
+<script src="js/curricula/tp/datos-vestuario-confeccion.js"></script>
 <script src="js/curricula-chile.js"></script>
 
 <style>
@@ -165,6 +191,7 @@ tr:hover td{background:rgba(99,102,241,.05)}
       <span id="sbCntLiceos" style="margin-left:auto;background:rgba(245,158,11,.2);color:var(--gold);font-size:.68rem;padding:1px 7px;border-radius:10px;font-weight:700"></span>
     </div>
     <div class="nav-item" data-sec="codigos" onclick="showSec(this,'codigos')">🔑 Códigos de Acceso</div>
+    <div class="nav-item" data-sec="comunicados" onclick="showSec(this,'comunicados')">📣 Comunicados</div>
 
     <div class="nav-section">Contenido</div>
     <div class="nav-item" data-sec="gemini" onclick="showSec(this,'gemini')">🤖 Configuración IA</div>
@@ -377,6 +404,31 @@ tr:hover td{background:rgba(99,102,241,.05)}
           <table><thead><tr><th>Código</th><th>Rol</th><th>Curso</th><th>Estado</th><th>Fecha</th><th></th></tr></thead>
           <tbody id="codigosTbody"><tr><td colspan="6" style="text-align:center;color:var(--muted)">Cargando…</td></tr></tbody></table>
         </div>
+      </div>
+    </section>
+
+    <!-- COMUNICADOS -->
+    <section id="sec-comunicados" class="tab-section" style="display:none">
+      <div class="page-header"><h1>📣 Comunicados</h1><p>Envía avisos a todos los profesores: capacitaciones, novedades o mensajes generales. Aparecen en su panel apenas ingresan a la plataforma.</p></div>
+      <div class="card">
+        <h3>Nuevo comunicado</h3>
+        <div class="form-grid">
+          <div class="form-group"><label>Tipo de aviso</label>
+            <select id="comTipo">
+              <option value="capacitacion">🎓 Capacitación</option>
+              <option value="avance">🚀 Novedad / Avance</option>
+              <option value="general">📌 General</option>
+            </select>
+          </div>
+          <div class="form-group" style="grid-column:1/-1"><label>Título</label><input id="comTitulo" placeholder="Ej: Capacitación sobre el generador de pruebas SIMCE"></div>
+        </div>
+        <div class="form-group"><label>Mensaje</label><textarea id="comMensaje" rows="4" placeholder="Escribe el contenido del comunicado…"></textarea></div>
+        <button class="btn btn-primary" onclick="crearComunicado()" style="margin-top:8px">📤 Publicar comunicado</button>
+        <div id="comNotif" class="notif"></div>
+      </div>
+      <div class="card">
+        <h3>📋 Comunicados publicados</h3>
+        <div id="comLista"><p style="color:var(--muted);text-align:center">Cargando…</p></div>
       </div>
     </section>
 
@@ -717,6 +769,10 @@ tr:hover td{background:rgba(99,102,241,.05)}
           <input type="checkbox" id="ppPAES">
           <span>🎓 <strong>Formato PAES</strong> — pruebas/eval/guías en estructura oficial PAES (5 alternativas, estímulos, especificaciones).</span>
         </label>
+        <label style="display:flex;align-items:center;gap:8px;font-size:.85rem;cursor:pointer;padding:8px 12px;background:rgba(74,222,128,.06);border:1px solid rgba(74,222,128,.18);border-radius:8px">
+          <input type="checkbox" id="ppSIMCE">
+          <span>📊 <strong>Formato SIMCE</strong> — pruebas/eval/guías en estructura SIMCE (4 alternativas, estándares de aprendizaje, niveles de habilidad).</span>
+        </label>
         <label style="display:flex;align-items:center;gap:8px;font-size:.85rem;cursor:pointer;padding:8px 12px;background:rgba(34,211,238,.06);border:1px solid rgba(34,211,238,.18);border-radius:8px">
           <input type="checkbox" id="ppMarzano">
           <span>🧠 <strong>Taxonomía Marzano</strong> — habilita el uso de la taxonomía Marzano para este docente.</span>
@@ -856,7 +912,7 @@ tr:hover td{background:rgba(99,102,241,.05)}
 
 <script>
 var allUsers=[], allMats=[], allPlans=[], allRecursos=[], allLiceos=[];
-var wData={tipo:null,asignaturas:[],niveles:[],especialidad:'',modulos:[],cursos:[],liceos:[],liceoPrincipal:'',permisos:{planificar:true,crearMaterial:true}};
+var wData={tipo:null,asignaturas:[],niveles:[],especialidad:'',mencion:'',modulos:[],cursos:[],liceos:[],liceoPrincipal:'',permisos:{planificar:true,crearMaterial:true}};
 var editingUid=null;
 var _rCurrentTab='tp';
 var _liceosLoaded=false;
@@ -934,6 +990,54 @@ function showSec(el,id){
   if(id==='gemini'){cargarConfigIA();}
   if(id==='liceos'){_liceosLoaded=true;loadLiceos();}
   if(id==='actividad'){cargarActividad();}
+  if(id==='comunicados'){loadComunicados();}
+}
+
+// ============================================================
+//  COMUNICADOS — avisos del admin a los profesores
+// ============================================================
+function _comEsc(s){ return String(s==null?'':s).replace(/[<>&]/g,function(c){return {'<':'&lt;','>':'&gt;','&':'&amp;'}[c];}); }
+
+function crearComunicado(){
+  var tipo=document.getElementById('comTipo').value;
+  var titulo=(document.getElementById('comTitulo').value||'').trim();
+  var mensaje=(document.getElementById('comMensaje').value||'').trim();
+  var n=document.getElementById('comNotif');
+  if(!titulo||!mensaje){ n.textContent='⚠ Completa el título y el mensaje.'; n.style.color='#fbbf24'; return; }
+  if(!window.EL_DB){ n.textContent='❌ Base de datos no disponible.'; n.style.color='#f87171'; return; }
+  var doc={ tipo:tipo, titulo:titulo, mensaje:mensaje, activo:true, creadoEn:new Date().toISOString(), autorNombre:'Administración' };
+  EL_DB.collection('anuncios').add(doc).then(function(){
+    n.textContent='✅ Comunicado publicado. Los profesores lo verán al ingresar.'; n.style.color='#34d399';
+    document.getElementById('comTitulo').value=''; document.getElementById('comMensaje').value='';
+    loadComunicados();
+  }).catch(function(e){ n.textContent='❌ '+(e&&e.message||e); n.style.color='#f87171'; });
+}
+
+function loadComunicados(){
+  var box=document.getElementById('comLista');
+  if(!box||!window.EL_DB) return;
+  EL_DB.collection('anuncios').get().then(function(snap){
+    var items=[]; snap.forEach(function(d){ var a=d.data()||{}; a._id=d.id; items.push(a); });
+    items.sort(function(x,y){ return String(y.creadoEn||'').localeCompare(String(x.creadoEn||'')); });
+    if(!items.length){ box.innerHTML='<p style="color:var(--muted);text-align:center">Aún no hay comunicados publicados.</p>'; return; }
+    box.innerHTML=items.map(function(a){
+      return '<div style="padding:11px 13px;border:1px solid var(--border);border-radius:8px;margin-bottom:8px">'+
+        '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">'+
+          '<strong>'+_comEsc(a.titulo||'')+'</strong>'+
+          '<span style="font-size:.68rem;color:var(--muted);text-transform:uppercase">'+_comEsc(a.tipo||'')+'</span>'+
+          '<span style="margin-left:auto;font-size:.72rem;color:var(--muted)">'+String(a.creadoEn||'').slice(0,10)+'</span>'+
+          '<button class="btn btn-sm" onclick="eliminarComunicado(\''+a._id+'\')" style="background:rgba(239,68,68,.15);color:#f87171;border:1px solid rgba(239,68,68,.3)">Eliminar</button>'+
+        '</div>'+
+        '<div style="font-size:.84rem;color:var(--muted);margin-top:5px;white-space:pre-wrap">'+_comEsc(a.mensaje||'')+'</div>'+
+      '</div>';
+    }).join('');
+  }).catch(function(){ box.innerHTML='<p style="color:#f87171;text-align:center">Error al cargar los comunicados.</p>'; });
+}
+
+function eliminarComunicado(id){
+  if(!id||!window.EL_DB) return;
+  if(!confirm('¿Eliminar este comunicado? Dejará de verse en el panel de los profesores.')) return;
+  EL_DB.collection('anuncios').doc(id).delete().then(loadComunicados).catch(function(){});
 }
 
 // ============================================================
@@ -1548,7 +1652,7 @@ function filtrarProfs(){
 
 // WIZARD
 function abrirWizard(){
-  wData={tipo:null,tipos:[],asignaturas:[],niveles:[],especialidad:'',modulos:[],cursos:[],liceos:[],liceoPrincipal:'',permisos:{planificar:true,crearMaterial:true},formatoPAES:false,taxonomiaMarzano:false};
+  wData={tipo:null,tipos:[],asignaturas:[],niveles:[],especialidad:'',mencion:'',modulos:[],cursos:[],liceos:[],liceoPrincipal:'',permisos:{planificar:true,crearMaterial:true},formatoPAES:false,formatoSIMCE:false,taxonomiaMarzano:false};
   ['pNombre','pEmail','pPass'].forEach(function(id){document.getElementById(id).value='';});
   document.querySelectorAll('.tipo-card').forEach(function(c){c.classList.remove('selected');});
   document.querySelectorAll('.wstep').forEach(function(s){s.className='wstep';});
@@ -1627,6 +1731,10 @@ function buildStep3(){
         '<input type="checkbox" id="wPAES"'+(wData.formatoPAES?' checked':'')+' onchange="wData.formatoPAES=this.checked">'+
         '<span>🎓 <strong>Formato PAES</strong> — habilita generar pruebas, evaluaciones y guías en estructura oficial PAES (5 alternativas, estímulos, tabla de especificaciones).</span>'+
       '</label>'+
+      '<label style="display:flex;align-items:center;gap:8px;font-size:.85rem;cursor:pointer;padding:8px 12px;background:rgba(74,222,128,.06);border:1px solid rgba(74,222,128,.18);border-radius:8px">'+
+        '<input type="checkbox" id="wSIMCE"'+(wData.formatoSIMCE?' checked':'')+' onchange="wData.formatoSIMCE=this.checked">'+
+        '<span>📊 <strong>Formato SIMCE</strong> — habilita generar pruebas, evaluaciones y guías en estructura SIMCE (4 alternativas, estándares de aprendizaje, niveles de habilidad).</span>'+
+      '</label>'+
       '<label style="display:flex;align-items:center;gap:8px;font-size:.85rem;cursor:pointer;padding:8px 12px;background:rgba(34,211,238,.06);border:1px solid rgba(34,211,238,.18);border-radius:8px">'+
         '<input type="checkbox" id="wMarzano"'+(wData.taxonomiaMarzano?' checked':'')+' onchange="wData.taxonomiaMarzano=this.checked">'+
         '<span>🧠 <strong>Taxonomía Marzano</strong> — habilita el uso de la taxonomía Marzano (Recuperación, Comprensión, Análisis, Utilización) para este docente.</span>'+
@@ -1677,10 +1785,7 @@ function buildStep3(){
   // Especialidad y módulos TP, solo si aplica
   if(tipos.indexOf('tecnico')!==-1){
     espBlock+='<h3 style="margin-bottom:12px;margin-top:8px">⚙️ Especialidad EMTP</h3><div class="form-group"><label>Especialidad</label><select id="espSel" onchange="loadMods()"><option value="">-- Selecciona --</option>';
-    CURRICULA_CHILE.getEspecialidades().forEach(function(e){
-      var sel = (wData.especialidad===e.key)?' selected':'';
-      espBlock+='<option value="'+e.key+'"'+sel+'>'+e.nombre+' ('+e.sector+')</option>';
-    });
+    espBlock += _buildEspecialidadOptgroups(wData.especialidad);
     espBlock+='</select></div><div id="modsBox" style="margin-top:12px"></div>';
   }
   // Si el wizard no tiene ningún bloque (caso defensivo), avisar
@@ -1780,13 +1885,93 @@ function setLiceoPrincipal(slug,targetState){
 }
 
 function loadMods(){
-  var key=document.getElementById('espSel').value;wData.especialidad=key;wData.modulos=[];
-  var box=document.getElementById('modsBox');if(!key){box.innerHTML='';return;}
-  var mods=CURRICULA_CHILE.getModulos(key);
-  var html='<h3 style="margin-bottom:8px">Módulos asignados</h3><div class="multi-select-box">';
-  mods.forEach(function(m){html+='<label><input type="checkbox" value="'+m.num+'" onchange="tgMod(this)">'+m.num+' – '+m.nombre+'</label>';});
-  html+='</div>';box.innerHTML=html;
+  var key=document.getElementById('espSel').value;
+  wData.especialidad=key;wData.modulos=[];wData.mencion='';
+  _renderModsUI('wData');
 }
+
+// Re-renderiza el selector de mención (si la especialidad tiene menciones) y la
+// lista de módulos filtrada a: comunes + los de la mención elegida.
+// scope = 'wData' (crear profesor) o 'pp' (editar profesor).
+function _renderModsUI(scope){
+  var st  = (scope==='pp') ? _ppData : wData;
+  var box = document.getElementById(scope==='pp' ? 'ppModsBox' : 'modsBox');
+  if(!box) return;
+  var key = st.especialidad;
+  if(!key){ box.innerHTML=''; return; }
+  var data = (window.CURRICULA_FULL && window.CURRICULA_FULL[key]) || null;
+  var menciones = (data && data.menciones) || null;
+  var html='';
+  if(menciones && menciones.length){
+    if(!st.mencion || menciones.indexOf(st.mencion)===-1) st.mencion=menciones[0];
+    html+='<div class="form-group" style="margin-bottom:14px"><label>Mención de la especialidad</label>';
+    html+='<select onchange="onMencionChange(\''+scope+'\',this.value)">';
+    menciones.forEach(function(mn){
+      html+='<option value="'+mn+'"'+(mn===st.mencion?' selected':'')+'>'+mn+'</option>';
+    });
+    html+='</select></div>';
+  } else {
+    st.mencion='';
+  }
+  var out=[];
+  if(data && data.modulos){
+    Object.keys(data.modulos).forEach(function(mk){
+      var m=data.modulos[mk];
+      if(st.mencion && m.mencion && m.mencion!==st.mencion) return;
+      out.push(m);
+    });
+  }
+  if(!out.length && typeof CURRICULA_CHILE!=='undefined') out=CURRICULA_CHILE.getModulos(key)||[];
+  var tg = (scope==='pp') ? 'ppTgMod' : 'tgMod';
+  html+='<h3 style="margin-bottom:8px">Módulos asignados</h3><div class="multi-select-box">';
+  out.forEach(function(m){
+    var chk=st.modulos.indexOf(m.num)!==-1?' checked':'';
+    html+='<label><input type="checkbox" value="'+m.num+'" onchange="'+tg+'(this)"'+chk+'>'+m.num+' – '+m.nombre+'</label>';
+  });
+  html+='</div>';
+  box.innerHTML=html;
+}
+
+// Cambio de mención: limpia los módulos elegidos y vuelve a filtrar.
+function onMencionChange(scope,val){
+  var st=(scope==='pp')?_ppData:wData;
+  st.mencion=val;
+  st.modulos=[];
+  _renderModsUI(scope);
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// Helper: genera HTML con <optgroup> agrupando especialidades TP
+// por sector económico MINEDUC. Reemplaza la lista plana de 40 items
+// por 15 grupos navegables.
+// ═══════════════════════════════════════════════════════════════════
+function _buildEspecialidadOptgroups(selectedKey) {
+  var esps = CURRICULA_CHILE.getEspecialidades() || [];
+  // Filtrar el legacy 'construccion' (genérica) que duplica el sector
+  esps = esps.filter(function(e){ return e.key !== 'construccion'; });
+  // Agrupar por sector
+  var bySec = {};
+  esps.forEach(function(e) {
+    var sec = e.sector || 'Otros';
+    if (!bySec[sec]) bySec[sec] = [];
+    bySec[sec].push(e);
+  });
+  // Ordenar sectores y especialidades alfabéticamente
+  var sectores = Object.keys(bySec).sort(function(a,b){ return a.localeCompare(b,'es'); });
+  var html = '';
+  sectores.forEach(function(sec) {
+    html += '<optgroup label="✨ ' + sec + '">';
+    bySec[sec].sort(function(a,b){ return a.nombre.localeCompare(b.nombre,'es'); })
+              .forEach(function(e) {
+      var sel = (selectedKey === e.key) ? ' selected' : '';
+      html += '<option value="' + e.key + '"' + sel + '>' + e.nombre + '</option>';
+    });
+    html += '</optgroup>';
+  });
+  return html;
+}
+window._buildEspecialidadOptgroups = _buildEspecialidadOptgroups;
+
 function tgAsig(cb){if(cb.checked){if(wData.asignaturas.indexOf(cb.value)===-1)wData.asignaturas.push(cb.value);}else{wData.asignaturas=wData.asignaturas.filter(function(a){return a!==cb.value;});}}
 function tgNiv(cb){if(cb.checked){if(wData.niveles.indexOf(cb.value)===-1)wData.niveles.push(cb.value);}else{wData.niveles=wData.niveles.filter(function(n){return n!==cb.value;});}}
 function tgMod(cb){if(cb.checked){if(wData.modulos.indexOf(cb.value)===-1)wData.modulos.push(cb.value);}else{wData.modulos=wData.modulos.filter(function(m){return m!==cb.value;});}}
@@ -1823,7 +2008,7 @@ function crearProfesor(){
   btn.disabled=true;btn.innerHTML='<span class="spinner"></span> Creando…';
   var tiposArr=(wData.tipos&&wData.tipos.length)?wData.tipos:(wData.tipo?[wData.tipo]:[]);
   // tipoProfesor (string legacy) = primer tipo; tiposProfesor (array nuevo) = todos
-  ELAuth.adminCrearProfesor({nombre:document.getElementById('pNombre').value.trim(),email:document.getElementById('pEmail').value.trim(),password:document.getElementById('pPass').value,tipoProfesor:tiposArr[0]||'',tiposProfesor:tiposArr,asignaturas:wData.asignaturas,especialidad:wData.especialidad,modulos:wData.modulos,niveles:wData.niveles,cursos:wData.cursos,liceos:wData.liceos,liceoPrincipal:wData.liceoPrincipal,permisos:wData.permisos,formatoPAES:!!wData.formatoPAES,taxonomiaMarzano:!!wData.taxonomiaMarzano})
+  ELAuth.adminCrearProfesor({nombre:document.getElementById('pNombre').value.trim(),email:document.getElementById('pEmail').value.trim(),password:document.getElementById('pPass').value,tipoProfesor:tiposArr[0]||'',tiposProfesor:tiposArr,asignaturas:wData.asignaturas,especialidad:wData.especialidad,mencion:wData.mencion,modulos:wData.modulos,niveles:wData.niveles,cursos:wData.cursos,liceos:wData.liceos,liceoPrincipal:wData.liceoPrincipal,permisos:wData.permisos,formatoPAES:!!wData.formatoPAES,formatoSIMCE:!!wData.formatoSIMCE,taxonomiaMarzano:!!wData.taxonomiaMarzano})
   .then(function(){
     notif('wNotif','✅ Profesor creado. Puede ingresar con su correo y contraseña desde cualquier dispositivo.','ok');
     loadData();btn.disabled=false;btn.innerHTML='✅ Crear Profesor';
@@ -1995,7 +2180,7 @@ function guardarRecurso(){
 // ══════════════════════════════════════════════════════════════
 //  EDITAR PERMISOS DE PROFESOR
 // ══════════════════════════════════════════════════════════════
-var _ppData = {tipo:'',asignaturas:[],niveles:[],especialidad:'',modulos:[]};
+var _ppData = {tipo:'',asignaturas:[],niveles:[],especialidad:'',mencion:'',modulos:[]};
 
 function editarPermisos(uid) {
   var prof = allUsers.find(function(u){ return u.uid === uid; });
@@ -2008,6 +2193,7 @@ function editarPermisos(uid) {
     asignaturas: (prof.asignaturas || []).slice(),
     niveles:     (prof.niveles     || []).slice(),
     especialidad: prof.especialidad || '',
+    mencion:     prof.mencion || '',
     modulos:     (prof.modulos     || []).slice()
   };
   document.getElementById('ppTipo').value = _ppData.tipo;
@@ -2016,6 +2202,7 @@ function editarPermisos(uid) {
   document.getElementById('ppPermPlan').checked = prof.permisos ? prof.permisos.planificar !== false : true;
   document.getElementById('ppPermMat').checked  = prof.permisos ? prof.permisos.crearMaterial !== false : true;
   document.getElementById('ppPAES').checked     = !!prof.formatoPAES;
+  document.getElementById('ppSIMCE').checked    = !!prof.formatoSIMCE;
   document.getElementById('ppMarzano').checked  = !!prof.taxonomiaMarzano;
   document.getElementById('modalPermProf').classList.add('open');
 }
@@ -2057,10 +2244,7 @@ function ppBuildAsig() {
   } else if (_ppData.tipo === 'tecnico') {
     html += '<div class="form-group" style="margin-bottom:14px"><label>Especialidad EMTP</label>';
     html += '<select id="ppEspSel" onchange="ppLoadMods()"><option value="">— Selecciona —</option>';
-    CURRICULA_CHILE.getEspecialidades().forEach(function(e) {
-      var sel = _ppData.especialidad === e.key ? 'selected' : '';
-      html += '<option value="'+e.key+'" '+sel+'>'+e.nombre+' ('+e.sector+')</option>';
-    });
+    html += _buildEspecialidadOptgroups(_ppData.especialidad);
     html += '</select></div>';
     html += '<div id="ppModsBox"></div>';
     html += '<h4 style="margin:14px 0 8px;font-size:.85rem;color:var(--muted)">Niveles</h4>';
@@ -2080,17 +2264,13 @@ function ppBuildAsig() {
 function ppLoadMods() {
   var sel = document.getElementById('ppEspSel');
   if (!sel) return;
-  _ppData.especialidad = sel.value;
-  var box = document.getElementById('ppModsBox');
-  if (!_ppData.especialidad) { box.innerHTML = ''; return; }
-  var mods = CURRICULA_CHILE.getModulos(_ppData.especialidad);
-  var html = '<h4 style="margin-bottom:8px;font-size:.85rem;color:var(--muted)">Módulos asignados</h4><div class="multi-select-box">';
-  mods.forEach(function(m) {
-    var chk = _ppData.modulos.indexOf(m.num) !== -1 ? 'checked' : '';
-    html += '<label><input type="checkbox" value="'+m.num+'" onchange="ppTgMod(this)" '+chk+'>'+m.num+' – '+m.nombre+'</label>';
-  });
-  html += '</div>';
-  box.innerHTML = html;
+  // Si cambió la especialidad, reinicia módulos y mención
+  if (sel.value !== _ppData.especialidad) {
+    _ppData.especialidad = sel.value;
+    _ppData.modulos = [];
+    _ppData.mencion = '';
+  }
+  _renderModsUI('pp');
 }
 
 function ppTgAsig(cb) { if(cb.checked){if(_ppData.asignaturas.indexOf(cb.value)===-1)_ppData.asignaturas.push(cb.value);}else{_ppData.asignaturas=_ppData.asignaturas.filter(function(a){return a!==cb.value;});}}
@@ -2107,6 +2287,7 @@ function guardarPermisos() {
     asignaturas:  _ppData.asignaturas,
     niveles:      _ppData.niveles,
     especialidad: _ppData.especialidad,
+    mencion:      _ppData.mencion,
     modulos:      _ppData.modulos,
     cursos:       document.getElementById('ppCursos').value.split(',').map(function(s){return s.trim();}).filter(Boolean),
     permisos: {
@@ -2114,6 +2295,7 @@ function guardarPermisos() {
       crearMaterial: document.getElementById('ppPermMat').checked
     },
     formatoPAES:      document.getElementById('ppPAES').checked,
+    formatoSIMCE:     document.getElementById('ppSIMCE').checked,
     taxonomiaMarzano: document.getElementById('ppMarzano').checked
   };
   ELDB.usuarios.actualizar(uid, datos)

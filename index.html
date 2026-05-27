@@ -25,7 +25,7 @@
   <meta name="twitter:description" content="Click&Clase ayuda a docentes chilenos a crear material educativo, evaluaciones y planificaciones alineadas al currículo Mineduc y al Marco para la Buena Enseñanza. IA integrada.">
   <meta name="twitter:image" content="https://clickyclase.cl/assets/img/og-image.png">
 <title>Click&Clase — La plataforma educativa alineada al Mineduc</title>
-<meta name="description" content="Click&Clase ayuda a colegios y docentes chilenos a crear material educativo, evaluaciones y planificaciones alineadas al currículo Mineduc y al Marco para la Buena Enseñanza. Con IA integrada y gamificación para alumnos.">
+<meta name="description" content="Click&Clase ayuda a colegios y docentes chilenos a crear material educativo, evaluaciones y planificaciones alineadas al currículo Mineduc y al Marco para la Buena Enseñanza. Con IA integrada y formatos de evaluación PAES y SIMCE.">
 <meta name="theme-color" content="#0b0d1e">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -112,13 +112,13 @@
   }
   .nav-land .links a:hover { color: #fff; }
   .nav-land .btn-cta {
-    padding: .55rem 1.1rem; border-radius: 10px;
-    background: linear-gradient(135deg,#7c3aed,#6d28d9);
-    color: #fff; font-weight: 700; font-size: .88rem;
-    box-shadow: 0 8px 20px -8px rgba(124,58,237,.7);
+    padding: .55rem 1.15rem; border-radius: 10px;
+    background: linear-gradient(135deg,#fcd34d,#f59e0b);
+    color: #1c1206; font-weight: 800; font-size: .88rem;
+    box-shadow: 0 8px 20px -8px rgba(245,158,11,.7);
     transition: transform .15s, box-shadow .2s;
   }
-  .nav-land .btn-cta:hover { transform: translateY(-1px); box-shadow: 0 12px 24px -8px rgba(124,58,237,.85); }
+  .nav-land .btn-cta:hover { transform: translateY(-1px); box-shadow: 0 12px 26px -8px rgba(245,158,11,.9); }
   .nav-land .btn-outline {
     padding: .5rem 1rem; border-radius: 10px;
     border: 1px solid rgba(148,163,184,.25); color: #e2e8f0;
@@ -186,19 +186,36 @@
     transition: transform .15s, box-shadow .2s, background .2s;
     display: inline-flex; align-items: center; gap: .5rem;
   }
+  /* CTA principal — color cálido de acción (psicología: el ámbar avanza,
+     contrasta con la paleta fría y concentra la atención de compra) */
   .btn-primary {
-    background: linear-gradient(135deg, #7c3aed, #5b21b6);
-    color: #fff;
-    box-shadow: 0 16px 36px -12px rgba(124,58,237,.75);
+    position: relative; overflow: hidden;
+    background: linear-gradient(135deg, #fcd34d 0%, #f59e0b 55%, #f97316 100%);
+    color: #1c1206;
+    box-shadow: 0 18px 40px -12px rgba(245,158,11,.62), inset 0 0 0 1px rgba(255,255,255,.25);
   }
-  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 22px 44px -12px rgba(124,58,237,.9); }
+  .btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 26px 54px -12px rgba(245,158,11,.82), inset 0 0 0 1px rgba(255,255,255,.35);
+  }
+  .btn-primary::after {
+    content: ''; position: absolute; top: 0; bottom: 0; left: -130%; width: 55%;
+    background: linear-gradient(100deg, transparent, rgba(255,255,255,.6), transparent);
+    transform: skewX(-22deg); animation: shimmer 4.2s infinite;
+  }
+  @keyframes shimmer { 0%,60%{left:-130%;} 80%,100%{left:150%;} }
   .btn-secondary {
     background: rgba(255,255,255,.06);
     color: #fff;
     border: 1px solid rgba(148,163,184,.25);
   }
-  .btn-secondary:hover { background: rgba(255,255,255,.10); border-color: rgba(124,58,237,.45); }
+  .btn-secondary:hover { transform: translateY(-2px); background: rgba(255,255,255,.10); border-color: rgba(251,191,36,.5); }
 
+  .hero-microcopy {
+    font-size: .85rem; color: #cbd5e1; margin: -.4rem 0 1rem;
+    display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: center;
+  }
+  .hero-microcopy .sep { width: 4px; height: 4px; border-radius: 50%; background: #475569; }
   .hero-trust {
     display: flex; justify-content: center; gap: 24px; flex-wrap: wrap;
     font-size: .82rem; color: #64748b; margin-top: .6rem;
@@ -391,16 +408,17 @@
   }
   .plan:hover { transform: translateY(-4px); border-color: rgba(124,58,237,.45); }
   .plan.featured {
-    border-color: rgba(124,58,237,.5);
-    box-shadow: 0 24px 64px -20px rgba(124,58,237,.45);
-    transform: scale(1.02);
+    border-color: rgba(251,191,36,.55);
+    box-shadow: 0 24px 64px -20px rgba(245,158,11,.4), inset 0 0 0 1px rgba(251,191,36,.12);
+    transform: scale(1.03);
   }
+  .plan.featured:hover { transform: scale(1.03) translateY(-4px); border-color: rgba(251,191,36,.8); }
   .plan .badge-pop {
-    position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
-    background: linear-gradient(135deg,#f472b6,#7c3aed);
-    color: #fff; font-weight: 800; font-size: .72rem; letter-spacing: .1em;
-    text-transform: uppercase; padding: .3rem .9rem; border-radius: 999px;
-    box-shadow: 0 8px 16px -6px rgba(244,114,182,.6);
+    position: absolute; top: -13px; left: 50%; transform: translateX(-50%);
+    background: linear-gradient(135deg,#fcd34d,#f59e0b);
+    color: #1c1206; font-weight: 800; font-size: .72rem; letter-spacing: .1em;
+    text-transform: uppercase; padding: .34rem 1rem; border-radius: 999px; white-space: nowrap;
+    box-shadow: 0 8px 18px -6px rgba(245,158,11,.7);
   }
   .plan h3 { margin: 0 0 .4rem; font-size: 1.2rem; }
   .plan .desc { color: #94a3b8; font-size: .88rem; margin-bottom: 1rem; min-height: 40px; }
@@ -421,10 +439,32 @@
     transition: background .2s, border-color .2s;
   }
   .plan.featured .btn-plan {
-    background: linear-gradient(135deg,#7c3aed,#5b21b6);
-    box-shadow: 0 14px 28px -10px rgba(124,58,237,.7);
+    background: linear-gradient(135deg,#fcd34d,#f59e0b);
+    color: #1c1206; border-color: transparent; font-weight: 800;
+    box-shadow: 0 14px 30px -10px rgba(245,158,11,.7);
   }
+  .plan.featured .btn-plan:hover { background: linear-gradient(135deg,#fde68a,#f59e0b); border-color: transparent; }
   .plan .btn-plan:hover { background: rgba(124,58,237,.18); border-color: rgba(124,58,237,.5); }
+
+  /* ─── Anclaje de precio ─── */
+  .price-anchor {
+    text-align: center; max-width: 540px; margin: 0 auto 2rem;
+    font-size: .98rem; color: #cbd5e1;
+  }
+  .price-anchor b { color: #fcd34d; }
+
+  /* ─── Franja de garantía (reversión de riesgo) ─── */
+  .guarantee {
+    display: flex; flex-wrap: wrap; gap: 14px 28px; justify-content: center;
+    max-width: 820px; margin: 1.8rem auto 0; padding: 1.1rem 1.4rem;
+    background: linear-gradient(135deg, rgba(52,211,153,.09), rgba(34,211,238,.05));
+    border: 1px solid rgba(52,211,153,.24); border-radius: 16px;
+  }
+  .guarantee span {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: .88rem; color: #e2e8f0; font-weight: 600;
+  }
+  .guarantee span .gi { color: #34d399; font-size: 1.1rem; }
 
   /* ─── Final CTA ─── */
   .final-cta {
@@ -465,7 +505,36 @@
     -webkit-text-fill-color: transparent;
   }
   .stat-cell .l { color: #94a3b8; font-size: .82rem; }
+
+  /* ─── Scroll reveal (revelado suave al entrar en viewport) ─── */
+  .js-anim .reveal { opacity: 0; transform: translateY(30px); }
+  .reveal { transition: opacity .75s cubic-bezier(.22,1,.36,1), transform .75s cubic-bezier(.22,1,.36,1); }
+  .reveal.in { opacity: 1; transform: none; }
+  .benefits .reveal:nth-child(2), .testimonials .reveal:nth-child(2),
+  .pricing-teaser .reveal:nth-child(2) { transition-delay: .10s; }
+  .benefits .reveal:nth-child(3), .testimonials .reveal:nth-child(3) { transition-delay: .20s; }
+  .benefits .reveal:nth-child(4) { transition-delay: .30s; }
+  .benefits .reveal:nth-child(5) { transition-delay: .40s; }
+  .benefits .reveal:nth-child(6) { transition-delay: .50s; }
+  @media (prefers-reduced-motion: reduce) {
+    .js-anim .reveal { opacity: 1 !important; transform: none !important; }
+    .btn-primary::after { animation: none; }
+  }
+
+  /* ─── Microinteracciones — pulido ultra profesional ─── */
+  .benefit, .quote, .feature-visual, .stat-cell { transition: transform .25s cubic-bezier(.22,1,.36,1), border-color .25s, box-shadow .25s; }
+  .benefit:hover { box-shadow: 0 22px 48px -22px rgba(124,58,237,.55); }
+  .quote:hover { transform: translateY(-4px); border-color: rgba(124,58,237,.3); box-shadow: 0 22px 48px -24px rgba(0,0,0,.7); }
+  .feature-visual:hover { transform: translateY(-3px); box-shadow: 0 30px 60px -22px rgba(124,58,237,.4); }
+  .btn-hero { will-change: transform; }
+  .btn-plan { transition: background .2s, border-color .2s, transform .15s, box-shadow .2s; }
+  .plan:not(.featured) .btn-plan:hover { transform: translateY(-1px); }
+  /* La franja superior de cada beneficio reacciona al hover */
+  .benefit::before { transition: height .25s; }
+  .benefit:hover::before { height: 5px; }
 </style>
+<!-- Marca para activar el revelado en scroll sin parpadeo (FOUC) -->
+<script>document.documentElement.className += ' js-anim';</script>
 </head>
 <body>
 
@@ -483,31 +552,38 @@
     <span>Click&Clase</span>
   </a>
   <div class="links">
+    <a href="#como-funciona" class="link-md">Cómo funciona</a>
     <a href="#features" class="link-md">Características</a>
     <a href="#pricing" class="link-md">Precios</a>
     <a href="#para-quien" class="link-md">Para quién es</a>
     <a href="login.html" class="btn-outline">Iniciar sesión</a>
+    <a href="pricing.html" class="btn-cta">Empieza hoy</a>
   </div>
 </nav>
 
 <!-- HERO -->
 <section class="hero container">
-  <span class="chip"><span class="dot"></span> Nuevo · IA Gemini integrada para docentes</span>
+  <span class="chip"><span class="dot"></span> IA Gemini integrada · Precio de lanzamiento 2026</span>
   <h1>
     Enseñar con el currículo <span class="grad">Mineduc</span> nunca<br>
     había sido tan <span class="grad">simple</span>.
   </h1>
   <p class="lead">
-    Click&Clase es la plataforma que combina generador de material con IA, evaluaciones alineadas a Bloom, planificaciones semestrales y gamificación para alumnos. Todo en un solo lugar, pensado para colegios chilenos.
+    Click&Clase combina generador de material con IA, evaluaciones en formato PAES y SIMCE, planificaciones semestrales y biblioteca de recursos. Con el currículo Mineduc completo: Plan Común 1°B a 4°M, electivos de Plan Diferenciado HC y 40 especialidades Técnico-Profesionales.
   </p>
   <div class="hero-ctas">
     <a href="pricing.html" class="btn-hero btn-primary">
-      Ver planes <span>→</span>
+      Empieza hoy <span>→</span>
     </a>
-    <a href="#features" class="btn-hero btn-secondary">
-      Ver características
+    <a href="#como-funciona" class="btn-hero btn-secondary">
+      Ver cómo funciona
     </a>
   </div>
+  <p class="hero-microcopy">
+    <span>Sin permanencia</span><span class="sep"></span>
+    <span>Cancela cuando quieras</span><span class="sep"></span>
+    <span>Precio de lanzamiento garantizado</span>
+  </p>
   <div class="hero-trust">
     <span>✓ Alineado al MBE</span>
     <span>✓ Currículum EMTP Mineduc</span>
@@ -544,9 +620,9 @@
 
   <!-- Launch-phase transparency bar -->
   <div class="stats-bar">
-    <div class="stat-cell"><div class="n">2026</div><div class="l">recién lanzado</div></div>
-    <div class="stat-cell"><div class="n">9</div><div class="l">especialidades EMTP</div></div>
-    <div class="stat-cell"><div class="n">MBE</div><div class="l">como base pedagógica</div></div>
+    <div class="stat-cell"><div class="n">1°B–4°M</div><div class="l">currículo completo</div></div>
+    <div class="stat-cell"><div class="n">40</div><div class="l">especialidades EMTP</div></div>
+    <div class="stat-cell"><div class="n">PAES+SIMCE</div><div class="l">formatos de evaluación</div></div>
     <div class="stat-cell"><div class="n">🇨🇱</div><div class="l">hecho en Chile</div></div>
   </div>
 
@@ -555,41 +631,248 @@
   </p>
 </section>
 
+<!-- CÓMO FUNCIONA — DEMO ANIMADA -->
+<section class="section" id="como-funciona">
+  <div class="section-head reveal">
+    <span class="kicker">Cómo funciona</span>
+    <h2>De la idea al documento en 3 pasos</h2>
+    <p>Elige qué quieres crear y mira el flujo completo: del currículo Mineduc al documento listo para descargar.</p>
+  </div>
+
+  <style>
+    .demo-wrap{max-width:780px;margin:0 auto;}
+    .demo-tabs{display:flex;justify-content:center;gap:10px;margin-bottom:18px;flex-wrap:wrap;}
+    .demo-tab{
+      cursor:pointer;font-size:.88rem;font-weight:700;padding:10px 20px;border-radius:12px;
+      border:1px solid rgba(148,163,184,.2);background:rgba(255,255,255,.03);color:#94a3b8;
+      transition:all .2s;
+    }
+    .demo-tab:hover{color:#e2e8f0;border-color:rgba(124,58,237,.4);}
+    .demo-tab.active{
+      background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;border-color:transparent;
+      box-shadow:0 8px 20px -8px rgba(124,58,237,.7);
+    }
+    .demo-panel{display:none;}
+    .demo-panel.active{display:block;}
+    .demo-screen{background:#0f172a;border:1px solid rgba(124,58,237,.28);border-radius:18px;overflow:hidden;box-shadow:0 24px 60px -20px rgba(124,58,237,.35);}
+    .demo-topbar{display:flex;align-items:center;gap:6px;padding:11px 16px;background:rgba(124,58,237,.10);border-bottom:1px solid rgba(124,58,237,.18);}
+    .demo-topbar i{width:11px;height:11px;border-radius:50%;display:block;}
+    .demo-topbar i:nth-child(1){background:#f87171;}
+    .demo-topbar i:nth-child(2){background:#fbbf24;}
+    .demo-topbar i:nth-child(3){background:#34d399;}
+    .demo-url{margin-left:12px;font-size:.72rem;color:#94a3b8;background:rgba(255,255,255,.05);padding:4px 12px;border-radius:6px;}
+    .demo-stage{position:relative;height:350px;overflow:hidden;}
+    .demo-step{position:absolute;inset:0;padding:26px 30px;display:flex;flex-direction:column;gap:12px;opacity:0;}
+    /* La animación solo corre cuando el panel está activo */
+    .demo-panel.active .demo-step{animation:demoCycle 12s infinite;}
+    .demo-panel.active .demo-step:nth-child(1){animation-delay:0s;}
+    .demo-panel.active .demo-step:nth-child(2){animation-delay:4s;}
+    .demo-panel.active .demo-step:nth-child(3){animation-delay:8s;}
+    @keyframes demoCycle{0%,2%{opacity:0;transform:translateY(14px);}6%,30%{opacity:1;transform:translateY(0);}33%,100%{opacity:0;transform:translateY(-14px);}}
+    .demo-badge{align-self:flex-start;font-size:.71rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:5px 12px;border-radius:20px;background:rgba(124,58,237,.18);color:#c4b5fd;border:1px solid rgba(124,58,237,.3);}
+    .demo-h{font-size:1.12rem;font-weight:800;color:#f1f5f9;}
+    .demo-field{display:flex;align-items:center;gap:10px;padding:10px 14px;background:rgba(255,255,255,.04);border:1px solid rgba(148,163,184,.16);border-radius:10px;font-size:.85rem;color:#cbd5e1;}
+    .demo-field .fl{color:#64748b;font-size:.73rem;min-width:80px;}
+    .demo-field .fv{color:#f1f5f9;font-weight:600;}
+    .demo-field.pick{border-color:rgba(124,58,237,.5);background:rgba(124,58,237,.08);}
+    .demo-chk{width:18px;height:18px;border-radius:5px;flex-shrink:0;background:#34d399;display:flex;align-items:center;justify-content:center;color:#06281b;font-size:.7rem;font-weight:900;}
+    .demo-ai{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:15px;height:100%;text-align:center;}
+    .demo-spinner{width:52px;height:52px;border-radius:50%;border:4px solid rgba(124,58,237,.2);border-top-color:#a78bfa;animation:demoSpin 1s linear infinite;}
+    @keyframes demoSpin{to{transform:rotate(360deg);}}
+    .demo-aitext{color:#cbd5e1;font-size:.9rem;}
+    .demo-aitext b{color:#a78bfa;}
+    .demo-progress{width:240px;height:7px;border-radius:4px;background:rgba(148,163,184,.14);overflow:hidden;}
+    .demo-panel.active .demo-progress i{animation:demoFill 12s ease-in-out infinite;animation-delay:4s;}
+    .demo-progress i{display:block;height:100%;width:0;border-radius:4px;background:linear-gradient(90deg,#7c3aed,#22d3ee);}
+    @keyframes demoFill{0%,5%{width:0;}25%{width:100%;}33%,100%{width:100%;}}
+    .demo-doc{background:#fff;border-radius:10px;padding:18px 22px;flex:1;overflow:hidden;box-shadow:0 8px 24px -8px rgba(0,0,0,.4);}
+    .demo-doc .dt{font-size:.93rem;font-weight:800;color:#1e293b;margin-bottom:3px;}
+    .demo-doc .ds{font-size:.7rem;color:#64748b;margin-bottom:11px;}
+    .demo-line{height:8px;border-radius:3px;background:#e2e8f0;margin-bottom:7px;}
+    .demo-line.w90{width:90%;}.demo-line.w70{width:70%;}.demo-line.w80{width:80%;}.demo-line.w60{width:60%;}
+    .demo-line.acc{background:#c4b5fd;width:44%;height:11px;margin-bottom:11px;}
+    .demo-doc-foot{display:flex;gap:8px;margin-top:11px;flex-wrap:wrap;}
+    .demo-pill{font-size:.66rem;font-weight:700;padding:4px 10px;border-radius:14px;background:#ede9fe;color:#6d28d9;}
+    .demo-steplabels{display:flex;justify-content:center;gap:8px;margin-top:18px;flex-wrap:wrap;}
+    .demo-sl{font-size:.78rem;color:#94a3b8;padding:6px 14px;border-radius:20px;border:1px solid rgba(148,163,184,.18);}
+    .demo-sl b{color:#a78bfa;}
+    .demo-note{text-align:center;color:#64748b;font-size:.78rem;margin-top:14px;}
+    .demo-row2{display:flex;gap:10px;}
+    .demo-row2 .demo-field{flex:1;}
+    @media(max-width:560px){.demo-stage{height:400px;}.demo-row2{flex-direction:column;}}
+  </style>
+
+  <div class="demo-wrap container">
+    <!-- Pestañas -->
+    <div class="demo-tabs">
+      <div class="demo-tab active" data-demo="material" onclick="cambiarDemo('material')">📝 Crear Material</div>
+      <div class="demo-tab" data-demo="planificacion" onclick="cambiarDemo('planificacion')">📅 Crear Planificación</div>
+    </div>
+
+    <!--
+      DEMO ANIMADA (CSS puro, sin archivo de video).
+      Para reemplazar un panel por un video/GIF real grabado de la plataforma,
+      sustituye el bloque de pantalla (demo-screen) de ese panel por:
+        <video src="assets/demo-material.mp4" autoplay muted loop playsinline style="width:100%;border-radius:18px"></video>
+      o por:  <img src="assets/demo-material.gif" alt="Demo" style="width:100%;border-radius:18px">
+    -->
+
+    <!-- ===== PANEL 1: MATERIAL ===== -->
+    <div class="demo-panel active" id="demo-material">
+      <div class="demo-screen">
+        <div class="demo-topbar">
+          <i></i><i></i><i></i>
+          <span class="demo-url">clickyclase.cl · Generador de Material</span>
+        </div>
+        <div class="demo-stage">
+          <div class="demo-step">
+            <span class="demo-badge">Paso 1 · Elige el currículo</span>
+            <div class="demo-h">¿Qué vas a enseñar?</div>
+            <div class="demo-field"><span class="fl">Asignatura</span><span class="fv">Matemática</span></div>
+            <div class="demo-row2">
+              <div class="demo-field"><span class="fl">Nivel</span><span class="fv">3° Medio</span></div>
+              <div class="demo-field pick"><span class="fl">Electivo HC</span><span class="fv">🎯 Geometría 3D</span></div>
+            </div>
+            <div class="demo-field"><span class="demo-chk">✓</span><span>OA2 — Resolver problemas con puntos, rectas y planos en el espacio 3D</span></div>
+            <div class="demo-field"><span class="fl">Tipo / Formato</span><span class="fv">Prueba · Formato PAES</span></div>
+          </div>
+          <div class="demo-step">
+            <span class="demo-badge">Paso 2 · La IA trabaja</span>
+            <div class="demo-ai">
+              <div class="demo-spinner"></div>
+              <div class="demo-aitext">Generando <b>prueba en formato PAES</b><br>alineada a los OA Mineduc seleccionados…</div>
+              <div class="demo-progress"><i></i></div>
+            </div>
+          </div>
+          <div class="demo-step">
+            <span class="demo-badge">Paso 3 · Documento listo</span>
+            <div class="demo-h">✅ Tu prueba está lista</div>
+            <div class="demo-doc">
+              <div class="dt">Prueba de Matemática — Geometría 3D</div>
+              <div class="ds">3° Medio · 15 ítems · Formato PAES · Alineada a OA2</div>
+              <div class="demo-line acc"></div>
+              <div class="demo-line w90"></div>
+              <div class="demo-line w80"></div>
+              <div class="demo-line w70"></div>
+              <div class="demo-doc-foot">
+                <span class="demo-pill">📄 Descargar PDF</span>
+                <span class="demo-pill">📝 Exportar Word</span>
+                <span class="demo-pill">📚 Publicar a biblioteca</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="demo-steplabels">
+        <span class="demo-sl"><b>1.</b> Eliges asignatura, nivel, OA y formato</span>
+        <span class="demo-sl"><b>2.</b> La IA genera el material</span>
+        <span class="demo-sl"><b>3.</b> Descargas o publicas</span>
+      </div>
+    </div>
+
+    <!-- ===== PANEL 2: PLANIFICACIÓN ===== -->
+    <div class="demo-panel" id="demo-planificacion">
+      <div class="demo-screen">
+        <div class="demo-topbar">
+          <i></i><i></i><i></i>
+          <span class="demo-url">clickyclase.cl · Planificador de Clases</span>
+        </div>
+        <div class="demo-stage">
+          <div class="demo-step">
+            <span class="demo-badge">Paso 1 · Configura el período</span>
+            <div class="demo-h">¿Qué vas a planificar?</div>
+            <div class="demo-row2">
+              <div class="demo-field"><span class="fl">Asignatura</span><span class="fv">Historia</span></div>
+              <div class="demo-field"><span class="fl">Nivel</span><span class="fv">1° Medio</span></div>
+            </div>
+            <div class="demo-field pick"><span class="fl">Unidad</span><span class="fv">Crisis del orden liberal y las guerras mundiales</span></div>
+            <div class="demo-field"><span class="demo-chk">✓</span><span>OA cubiertos: OA1, OA3, OA8 — 3 objetivos del nivel</span></div>
+            <div class="demo-field"><span class="fl">Duración</span><span class="fv">8 semanas · 6 horas pedagógicas</span></div>
+          </div>
+          <div class="demo-step">
+            <span class="demo-badge">Paso 2 · La IA organiza</span>
+            <div class="demo-ai">
+              <div class="demo-spinner"></div>
+              <div class="demo-aitext">Distribuyendo <b>OA, actividades y evaluación</b><br>a lo largo de las semanas del período…</div>
+              <div class="demo-progress"><i></i></div>
+            </div>
+          </div>
+          <div class="demo-step">
+            <span class="demo-badge">Paso 3 · Planificación lista</span>
+            <div class="demo-h">✅ Tu planificación está lista</div>
+            <div class="demo-doc">
+              <div class="dt">Planificación — Historia · 1° Medio</div>
+              <div class="ds">Unidad 1 · 8 semanas · Alineada al Marco para la Buena Enseñanza</div>
+              <div class="demo-line acc"></div>
+              <div class="demo-line w90"></div>
+              <div class="demo-line w80"></div>
+              <div class="demo-line w60"></div>
+              <div class="demo-doc-foot">
+                <span class="demo-pill">📄 Descargar PDF</span>
+                <span class="demo-pill">📝 Exportar Word</span>
+                <span class="demo-pill">🏫 Presentar a UTP</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="demo-steplabels">
+        <span class="demo-sl"><b>1.</b> Eliges asignatura, nivel y unidad</span>
+        <span class="demo-sl"><b>2.</b> La IA distribuye OA y horas</span>
+        <span class="demo-sl"><b>3.</b> Exportas para UTP</span>
+      </div>
+    </div>
+
+    <p class="demo-note">Demo ilustrativa del flujo real de la plataforma.</p>
+  </div>
+
+  <script>
+    function cambiarDemo(cual){
+      document.querySelectorAll('.demo-tab').forEach(function(t){
+        t.classList.toggle('active', t.getAttribute('data-demo') === cual);
+      });
+      document.querySelectorAll('.demo-panel').forEach(function(p){
+        p.classList.toggle('active', p.id === 'demo-' + cual);
+      });
+    }
+  </script>
+</section>
+
 <!-- BENEFICIOS -->
 <section class="section">
-  <div class="section-head">
+  <div class="section-head reveal">
     <span class="kicker">¿Por qué Click&Clase?</span>
     <h2>Todo lo que un docente necesita, en un solo lugar</h2>
     <p>Alineado al currículo Mineduc, con IA que entiende de OA, AE, CE y Bloom. Sin hojas sueltas ni pérdidas de tiempo.</p>
   </div>
 
   <div class="benefits container">
-    <div class="benefit" style="--c1:#7c3aed;--c2:#a78bfa">
+    <div class="benefit reveal" style="--c1:#7c3aed;--c2:#a78bfa">
       <div class="ico">🤖</div>
       <h3>IA que habla tu idioma</h3>
       <p>Genera guías, pruebas, controles y planificaciones usando la terminología exacta del currículo Mineduc y las actitudes transversales del Marco para la Buena Enseñanza.</p>
     </div>
-    <div class="benefit" style="--c1:#22d3ee;--c2:#06b6d4">
+    <div class="benefit reveal" style="--c1:#22d3ee;--c2:#06b6d4">
       <div class="ico">🎯</div>
-      <h3>100% alineado Mineduc</h3>
-      <p>Básica, Plan Común y Técnico-Profesional. OA, AE, CE y OAG integrados y listos para imprimir.</p>
+      <h3>Currículo Mineduc completo</h3>
+      <p>Plan Común de 1°B a 4°M, electivos del Plan Diferenciado HC y 40 especialidades Técnico-Profesionales. OA, AE, CE, OAG y unidades oficiales integrados.</p>
     </div>
-    <div class="benefit" style="--c1:#34d399;--c2:#10b981">
-      <div class="ico">🎮</div>
-      <h3>Gamificación real</h3>
-      <p>XP, niveles, badges y rankings que hacen que los estudiantes quieran rendir evaluaciones.</p>
+    <div class="benefit reveal" style="--c1:#34d399;--c2:#10b981">
+      <div class="ico">📝</div>
+      <h3>Formatos PAES y SIMCE</h3>
+      <p>Genera pruebas y ensayos con la estructura oficial PAES (5 alternativas, estímulos) o SIMCE (4 alternativas, estándares de aprendizaje), listos para entrenar a tus estudiantes.</p>
     </div>
-    <div class="benefit" style="--c1:#f472b6;--c2:#ec4899">
-      <div class="ico">📊</div>
-      <h3>Dashboards claros</h3>
-      <p>Métricas por curso, nivel y estudiante. Sabes al instante dónde reforzar.</p>
+    <div class="benefit reveal" style="--c1:#f472b6;--c2:#ec4899">
+      <div class="ico">📅</div>
+      <h3>Planificaciones semestrales</h3>
+      <p>Organiza tu semestre alineado a OA, AE y CE. Distribución automática de horas por unidad y exportación a Word o PDF lista para presentar a UTP.</p>
     </div>
-    <div class="benefit" style="--c1:#fbbf24;--c2:#f59e0b">
+    <div class="benefit reveal" style="--c1:#fbbf24;--c2:#f59e0b">
       <div class="ico">📚</div>
       <h3>Biblioteca compartida</h3>
       <p>Publica tu material y lo ven tus estudiantes al instante. Cero imprenta, cero WhatsApp.</p>
     </div>
-    <div class="benefit" style="--c1:#818cf8;--c2:#6366f1">
+    <div class="benefit reveal" style="--c1:#818cf8;--c2:#6366f1">
       <div class="ico">💛</div>
       <h3>Valores</h3>
       <p>Actitudes transversales del Marco para la Buena Enseñanza integradas de forma natural en cada material: responsabilidad, respeto, trabajo colaborativo, pensamiento crítico.</p>
@@ -599,7 +882,7 @@
 
 <!-- FEATURES -->
 <section class="section" id="features">
-  <div class="section-head">
+  <div class="section-head reveal">
     <span class="kicker">Características</span>
     <h2>Tres módulos que transforman la sala de clases</h2>
     <p>Material, evaluaciones y planificaciones. Sincronizados con el perfil de cada docente.</p>
@@ -608,16 +891,16 @@
   <div class="features container">
 
     <!-- Feature 1 -->
-    <div class="feature">
+    <div class="feature reveal">
       <div class="feature-text">
         <span class="tag">Módulo 1</span>
         <h3>Generador de Material con IA</h3>
         <p class="desc">Crea guías, apuntes, fichas, pruebas y controles en minutos. La IA se adapta al nivel, la dificultad y los OA que selecciones.</p>
         <ul class="bullets">
           <li>6 tipos de documento: guía, apunte, ficha, ejercicios, prueba y control</li>
-          <li>Integración con Gemini (API gratuita de Google AI Studio)</li>
-          <li>Publica directo a la biblioteca del curso</li>
-          <li>Imprime o exporta a PDF con un clic</li>
+          <li>Formatos PAES y SIMCE con la estructura oficial de cada prueba</li>
+          <li>Plan Común, electivos HC y 40 especialidades Técnico-Profesionales</li>
+          <li>Integración con Gemini · publica a la biblioteca o exporta a PDF/Word</li>
         </ul>
       </div>
       <div class="feature-visual">
@@ -631,30 +914,30 @@
     </div>
 
     <!-- Feature 2 -->
-    <div class="feature reverse">
+    <div class="feature reverse reveal">
       <div class="feature-visual">
         <div class="v-ico">🎯</div>
-        <div class="v-title">Evaluación TP · Electrónica · OA1</div>
-        <div class="v-row ok"><span class="dot"></span> Temporizador circular <span class="v-meta">SVG</span></div>
-        <div class="v-row ok"><span class="dot"></span> Banco de preguntas por Bloom <span class="v-meta">6 niveles</span></div>
-        <div class="v-row ok"><span class="dot"></span> Nota automática escala 1–7 <span class="v-meta">Chile</span></div>
-        <div class="v-row"><span class="dot"></span> XP y badges al aprobar <span class="v-meta">gamificación</span></div>
+        <div class="v-title">Evaluación · Formato PAES · Matemática</div>
+        <div class="v-row ok"><span class="dot"></span> Estructura oficial PAES y SIMCE <span class="v-meta">2 formatos</span></div>
+        <div class="v-row ok"><span class="dot"></span> Ítems por niveles de Bloom <span class="v-meta">6 niveles</span></div>
+        <div class="v-row ok"><span class="dot"></span> Clave de respuestas y tabla de especificaciones <span class="v-meta">auto</span></div>
+        <div class="v-row"><span class="dot"></span> Justificación de cada ítem <span class="v-meta">IA</span></div>
       </div>
       <div class="feature-text">
         <span class="tag">Módulo 2</span>
-        <h3>Evaluaciones gamificadas</h3>
-        <p class="desc">Los estudiantes rinden evaluaciones interactivas con temporizador, nota automática y recompensas que motivan a seguir aprendiendo.</p>
+        <h3>Evaluaciones PAES y SIMCE</h3>
+        <p class="desc">Genera pruebas, evaluaciones y guías de entrenamiento con la estructura oficial de las pruebas estandarizadas chilenas.</p>
         <ul class="bullets">
-          <li>Preguntas en 6 niveles cognitivos de Bloom</li>
-          <li>Temporizador inteligente con pausa al cambiar de pestaña</li>
-          <li>Sistema de XP, niveles, badges y ranking por curso</li>
-          <li>Reporte de rendimiento para el docente</li>
+          <li>Formato PAES: 5 alternativas, estímulos y tabla de especificaciones</li>
+          <li>Formato SIMCE: 4 alternativas y estándares de aprendizaje</li>
+          <li>Ítems distribuidos en 6 niveles cognitivos de Bloom</li>
+          <li>Clave de respuestas y justificación de cada ítem incluidas</li>
         </ul>
       </div>
     </div>
 
     <!-- Feature 3 -->
-    <div class="feature">
+    <div class="feature reveal">
       <div class="feature-text">
         <span class="tag">Módulo 3</span>
         <h3>Planificaciones semestrales</h3>
@@ -681,14 +964,14 @@
 
 <!-- PARA QUIÉN ES -->
 <section class="section" id="para-quien">
-  <div class="section-head">
+  <div class="section-head reveal">
     <span class="kicker">¿Para quién es?</span>
     <h2>Pensado para tres realidades del aula chilena</h2>
     <p>Click&Clase nace para resolver problemas concretos de docentes y equipos directivos en Educación Media Técnico-Profesional. Si te identificas con alguno de estos perfiles, te va a servir.</p>
   </div>
 
   <div class="testimonials container">
-    <div class="quote">
+    <div class="quote reveal">
       <div class="stars" style="color:#a78bfa;letter-spacing:0;font-size:1.6rem">👩‍🏫</div>
       <p><b style="color:#f1f5f9">Docente EMTP</b> que pasa fines de semana armando guías en Word y planificaciones en plantillas distintas para cada colegio. Click&Clase entrega planificaciones alineadas al MBE, OAs y AEs Mineduc ya cargados, y exporta a Word/PDF/LIRMI en un click.</p>
       <div class="who">
@@ -700,7 +983,7 @@
       </div>
     </div>
 
-    <div class="quote">
+    <div class="quote reveal">
       <div class="stars" style="color:#a78bfa;letter-spacing:0;font-size:1.6rem">🧑‍💻</div>
       <p><b style="color:#f1f5f9">Docente que quiere usar IA con criterio pedagógico</b>, no solo "pídele a ChatGPT". El plan Full integra Gemini para generar guías, rúbricas y evaluaciones segmentadas por niveles de Bloom y por especialidad EMTP — con tu API key personal.</p>
       <div class="who">
@@ -712,7 +995,7 @@
       </div>
     </div>
 
-    <div class="quote">
+    <div class="quote reveal">
       <div class="stars" style="color:#a78bfa;letter-spacing:0;font-size:1.6rem">🏫</div>
       <p><b style="color:#f1f5f9">UTP o coordinación TP</b> que necesita centralizar planificaciones de varios docentes con una sola factura institucional. El Pack 5+1 entrega 6 cuentas docentes por el precio de 5, con onboarding acompañado.</p>
       <div class="who">
@@ -728,11 +1011,15 @@
 
 <!-- PRICING TEASER -->
 <section class="section" id="pricing">
-  <div class="section-head">
+  <div class="section-head reveal">
     <span class="kicker">Planes</span>
     <h2>Dos planes pensados para tu aula</h2>
     <p>Elige la mensualidad o aprovecha la <b style="color:#f9a8d4">promoción anual de lanzamiento</b> con hasta 56% de descuento. <b>4 tarifas + 2 promociones colegio</b>.</p>
   </div>
+
+  <p class="price-anchor">
+    Desde <b>$10.000 al mes</b> — menos de lo que gastas en un café a la semana — por dejar de perder tus fines de semana armando guías y planificaciones.
+  </p>
 
   <div class="pricing-teaser container" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); max-width: 820px;">
     <div class="plan">
@@ -766,6 +1053,13 @@
     </div>
   </div>
 
+  <div class="guarantee container">
+    <span><span class="gi">✓</span> Sin permanencia ni contratos</span>
+    <span><span class="gi">✓</span> Cancela cuando quieras</span>
+    <span><span class="gi">✓</span> Pago seguro con Webpay</span>
+    <span><span class="gi">✓</span> Soporte directo por WhatsApp</span>
+  </div>
+
   <div style="max-width:820px;margin:1.6rem auto 0;display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:.8rem">
     <div style="padding:1rem 1.2rem;border-radius:14px;background:linear-gradient(135deg,rgba(244,114,182,.1),rgba(124,58,237,.08));border:1px dashed rgba(244,114,182,.35);text-align:center;color:#f9a8d4;font-size:.9rem;font-weight:600">
       💎 <b style="color:#fbbf24">Pack 5+1 Planif anual</b><br>
@@ -790,7 +1084,7 @@
   <h2>Sé parte del grupo fundador.</h2>
   <p>Click&Clase está recién empezando. Si te suscribes ahora, tu feedback moldea la plataforma y aseguras el precio de lanzamiento.</p>
   <div class="hero-ctas" style="margin-bottom:.9rem">
-    <a href="pricing.html" class="btn-hero btn-primary">Ver planes <span>→</span></a>
+    <a href="pricing.html" class="btn-hero btn-primary">Empieza hoy <span>→</span></a>
     <a href="login.html" class="btn-hero btn-secondary">Ya tengo cuenta</a>
   </div>
   <div style="display:flex;gap:.9rem;justify-content:center;flex-wrap:wrap">
@@ -839,6 +1133,26 @@
     });
   }
 </script>
+
+<!-- Revelado suave de secciones al hacer scroll -->
+<script>
+  (function () {
+    var els = document.querySelectorAll('.reveal');
+    if (!els.length) return;
+    if (!('IntersectionObserver' in window)) {
+      els.forEach(function (e) { e.classList.add('in'); });
+      return;
+    }
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (en.isIntersecting) {
+          en.target.classList.add('in');
+          io.unobserve(en.target);
+        }
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -8% 0px' });
+    els.forEach(function (e) { io.observe(e); });
+  })();
+</script>
 </body>
 </html>
-     

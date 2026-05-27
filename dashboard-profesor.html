@@ -43,9 +43,35 @@
 <script src="js/curricula/tp/datos-electronica.js"></script>
 <script src="js/curricula/tp/datos-administracion.js"></script>
 <script src="js/curricula/tp/datos-contabilidad.js"></script>
-<script src="js/curricula/tp/datos-ventas.js"></script>
 <script src="js/curricula/tp/datos-grafica.js"></script>
 <script src="js/curricula/tp/datos-construccion.js"></script>
+<script src="js/curricula/tp/datos-metalurgia-extractiva.js"></script>
+<script src="js/curricula/tp/datos-mantenimiento-aeronaves.js"></script>
+<script src="js/curricula/tp/datos-tripulacion-naves.js"></script>
+<script src="js/curricula/tp/datos-muebles-madera.js"></script>
+<script src="js/curricula/tp/datos-quimica-industrial.js"></script>
+<script src="js/curricula/tp/datos-atencion-enfermeria.js"></script>
+<script src="js/curricula/tp/datos-agropecuaria.js"></script>
+<script src="js/curricula/tp/datos-elaboracion-alimentos.js"></script>
+<script src="js/curricula/tp/datos-construcciones-metalicas.js"></script>
+<script src="js/curricula/tp/datos-instalaciones-sanitarias.js"></script>
+<script src="js/curricula/tp/datos-montaje-industrial.js"></script>
+<script src="js/curricula/tp/datos-telecomunicaciones.js"></script>
+<script src="js/curricula/tp/datos-dibujo-tecnico.js"></script>
+<script src="js/curricula/tp/datos-gastronomia.js"></script>
+<script src="js/curricula/tp/datos-servicios-hoteleros.js"></script>
+<script src="js/curricula/tp/datos-servicios-turismo.js"></script>
+<script src="js/curricula/tp/datos-forestal.js"></script>
+<script src="js/curricula/tp/datos-acuicultura.js"></script>
+<script src="js/curricula/tp/datos-operacion-portuaria.js"></script>
+<script src="js/curricula/tp/datos-pesqueria.js"></script>
+<script src="js/curricula/tp/datos-asistencia-geologia.js"></script>
+<script src="js/curricula/tp/datos-explotacion-minera.js"></script>
+<script src="js/curricula/tp/datos-atencion-parvulos.js"></script>
+<script src="js/curricula/tp/datos-refrigeracion-climatizacion.js"></script>
+<script src="js/curricula/tp/datos-conectividad-redes.js"></script>
+<script src="js/curricula/tp/datos-programacion.js"></script>
+<script src="js/curricula/tp/datos-vestuario-confeccion.js"></script>
 <script src="js/curricula-chile.js"></script>
 <script src="js/ia-client.js"></script>
 
@@ -480,6 +506,18 @@
         </div>
       </div>
 
+      <!-- ═══════════ AVISOS / COMUNICADOS ═══════════ -->
+      <div id="avisosCard" class="card-pro" style="margin-bottom:20px;display:none;border:1px solid rgba(251,191,36,.28)">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+          <h3 style="font-size:1.05rem;font-weight:800;display:flex;align-items:center;gap:8px;margin:0">
+            📣 Avisos
+            <span id="avisosBadge" style="display:none;background:#ef4444;color:#fff;font-size:.7rem;font-weight:800;padding:1px 8px;border-radius:10px"></span>
+          </h3>
+          <button id="btnAvisosLeidos" onclick="marcarAvisosLeidos()" class="btn-pro ghost" style="margin-left:auto;padding:6px 12px;font-size:.76rem;display:none">✓ Marcar todo como leído</button>
+        </div>
+        <div id="avisosList" style="display:grid;gap:10px"></div>
+      </div>
+
       <!-- Stats animadas -->
       <div class="stats-row" id="statsRow">
         <div class="stat-pro s-teal">
@@ -540,6 +578,11 @@
             <div class="qc-icon">🗂️</div>
             <div class="qc-title">Mis módulos</div>
             <div class="qc-sub">Asignaturas y módulos a cargo</div>
+          </a>
+          <a class="quick-card qc-emerald" href="listas-curso.html">
+            <div class="qc-icon">📒</div>
+            <div class="qc-title">Libro de clases</div>
+            <div class="qc-sub">Nómina y notas de tus cursos</div>
           </a>
         </div>
       </div>
@@ -849,6 +892,9 @@
     // ── Resumen del día/semana (banner asistente) ──
     cargarResumenDia();
 
+    // ── Avisos / comunicados del administrador ──
+    cargarAvisos();
+
     // ── Sidebar drawer (mobile) ──
     if (window.ELUI && window.ELUI.bindSidebarDrawer) {
       window.ELUI.bindSidebarDrawer({ sidebarSelector: '#sidebarProf', hambSelector: '.btn-hamb' });
@@ -909,6 +955,66 @@
       '</div>';
     }).join('') + '</div>';
   }
+
+  // ═══════════════════════════════════════════════════════════════
+  //  AVISOS / COMUNICADOS — comunicados publicados por el administrador
+  // ═══════════════════════════════════════════════════════════════
+  var _avisosIds = [];
+  function _avEsc(s){ return String(s==null?'':s).replace(/[<>&]/g,function(c){return {'<':'&lt;','>':'&gt;','&':'&amp;'}[c];}); }
+  function _avBadge(tipo){
+    var m = { capacitacion:['🎓 Capacitación','#6366f1'], avance:['🚀 Novedad','#22c55e'],
+              bienvenida:['👋 Bienvenida','#f59e0b'], general:['📌 General','#64748b'] };
+    var t = m[tipo] || m.general;
+    return '<span style="font-size:.64rem;font-weight:800;padding:2px 8px;border-radius:8px;background:'+t[1]+'22;color:'+t[1]+';border:1px solid '+t[1]+'66">'+t[0]+'</span>';
+  }
+  function _avRender(a, leido){
+    var fecha = String(a.creadoEn||'').slice(0,10);
+    return '<div class="aviso-item" style="padding:12px 14px;border-radius:10px;background:'+(leido?'rgba(255,255,255,.03)':'rgba(251,191,36,.07)')+';border:1px solid '+(leido?'var(--border)':'rgba(251,191,36,.32)')+'">'+
+      '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px">'+
+        _avBadge(a.tipo)+
+        '<strong style="font-size:.92rem">'+_avEsc(a.titulo||'Aviso')+'</strong>'+
+        (leido?'':'<span style="width:7px;height:7px;border-radius:50%;background:#ef4444;display:inline-block"></span>')+
+        (fecha?'<span style="margin-left:auto;font-size:.72rem;color:var(--muted)">'+fecha+'</span>':'')+
+      '</div>'+
+      '<div style="font-size:.85rem;color:var(--muted);line-height:1.55;white-space:pre-wrap">'+_avEsc(a.mensaje||'')+'</div>'+
+    '</div>';
+  }
+  function cargarAvisos(){
+    var card=document.getElementById('avisosCard');
+    var list=document.getElementById('avisosList');
+    if(!card||!list||!window.EL_DB||!_profeUser) return;
+    EL_DB.collection('anuncios').get().then(function(snap){
+      var items=[];
+      snap.forEach(function(d){ var a=d.data()||{}; if(a.activo!==false){ a._id=d.id; items.push(a); } });
+      items.sort(function(x,y){ return String(y.creadoEn||'').localeCompare(String(x.creadoEn||'')); });
+      _avisosIds = items.map(function(a){ return a._id; });
+      var leidos = _profeUser.anunciosLeidos || [];
+      var noLeidos = items.filter(function(a){ return leidos.indexOf(a._id)===-1; }).length;
+      var html='';
+      if(_profeUser.primerIngreso){
+        html += _avRender({tipo:'bienvenida',titulo:'¡Te damos la bienvenida a Click&Clase!',
+          mensaje:'Tu cuenta docente ya está activa. Desde este panel puedes crear material y planificaciones alineados al currículo Mineduc.\n\n¿Dudas o sugerencias? Escríbenos a soporte.learn0@gmail.com',creadoEn:''}, true);
+      }
+      if(!items.length && !_profeUser.primerIngreso){ card.style.display='none'; return; }
+      items.forEach(function(a){ html += _avRender(a, leidos.indexOf(a._id)!==-1); });
+      list.innerHTML = html;
+      var badge=document.getElementById('avisosBadge');
+      var btn=document.getElementById('btnAvisosLeidos');
+      if(noLeidos>0){ if(badge){badge.textContent=noLeidos;badge.style.display='';} if(btn)btn.style.display=''; }
+      else { if(badge)badge.style.display='none'; if(btn)btn.style.display='none'; }
+      card.style.display='';
+    }).catch(function(){ card.style.display='none'; });
+  }
+  function marcarAvisosLeidos(){
+    if(!_profeUser||!_profeUser.uid||!window.EL_DB||!_avisosIds.length) return;
+    EL_DB.collection('usuarios').doc(_profeUser.uid).update({ anunciosLeidos: _avisosIds.slice() })
+      .then(function(){
+        _profeUser.anunciosLeidos = _avisosIds.slice();
+        cargarAvisos();
+        toast('Avisos marcados como leídos.','success');
+      }).catch(function(e){ toast('No se pudo actualizar: '+(e&&e.message||e),'error'); });
+  }
+  window.marcarAvisosLeidos = marcarAvisosLeidos;
 
   // ═══════════════════════════════════════════════════════════════
   //  RESUMEN DEL DÍA / SEMANA — banner asistente

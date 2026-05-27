@@ -158,6 +158,48 @@ service cloud.firestore {
       allow read, write: if isAdmin();
     }
 
+    // ── anuncios (comunicados de admin a profesores) ───────────
+    // Lectura: cualquier autenticado (los profesores ven los comunicados).
+    // Creación/edición/borrado: solo admin.
+    match /anuncios/{anuncioId} {
+      allow read: if isSignedIn();
+      allow create, update, delete: if isAdmin();
+    }
+
+    // ── listas_curso (nóminas de estudiantes por curso) ────────
+    // Cada doc pertenece a un profesor (profesorUid). Lo lee y edita
+    // su dueño o un admin.
+    match /listas_curso/{listaId} {
+      allow read:   if isAdmin() ||
+        (isSignedIn() && resource.data.profesorUid == request.auth.uid);
+      allow create: if isAdmin() ||
+        (isProfesor() && request.resource.data.profesorUid == request.auth.uid);
+      allow update, delete: if isAdmin() ||
+        (isProfesor() && resource.data.profesorUid == request.auth.uid);
+    }
+
+    // ── notas_curso (libro de calificaciones por curso) ────────
+    // Mismo criterio que listas_curso: dueño (profesorUid) o admin.
+    match /notas_curso/{notasId} {
+      allow read:   if isAdmin() ||
+        (isSignedIn() && resource.data.profesorUid == request.auth.uid);
+      allow create: if isAdmin() ||
+        (isProfesor() && request.resource.data.profesorUid == request.auth.uid);
+      allow update, delete: if isAdmin() ||
+        (isProfesor() && resource.data.profesorUid == request.auth.uid);
+    }
+
+    // ── asistencia_curso (registro de asistencia diaria) ───────
+    // Mismo criterio que listas_curso/notas_curso: dueño o admin.
+    match /asistencia_curso/{asisId} {
+      allow read:   if isAdmin() ||
+        (isSignedIn() && resource.data.profesorUid == request.auth.uid);
+      allow create: if isAdmin() ||
+        (isProfesor() && request.resource.data.profesorUid == request.auth.uid);
+      allow update, delete: if isAdmin() ||
+        (isProfesor() && resource.data.profesorUid == request.auth.uid);
+    }
+
     // ── Default deny: cualquier ruta no listada arriba se bloquea ──
     match /{document=**} {
       allow read, write: if false;
