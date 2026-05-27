@@ -21,6 +21,18 @@ CURRICULA_PLAN_COMUN['historia'] = {
   nombre: 'Historia, Geografía y Ciencias Sociales',
   sigla:  'HIS',
   niveles: ['1B','2B','3B','4B','5B','6B','7B','8B','1M','2M','3M','4M'],
+  unidades: {
+    '1B': ['Mi historia y la de mi familia','La vida en sociedad','Mi entorno geográfico','Convivencia y normas'],
+    '2B': ['Pueblos originarios de Chile','Vida en sociedad y tradiciones','Cómo nos relacionamos con el entorno','Bien común y trabajo en comunidad'],
+    '3B': ['Civilizaciones griega y romana','Legado de las civilizaciones clásicas','Continentes, océanos y zonas climáticas','Trabajo, recursos y vida en comunidad'],
+    '4B': ['Civilizaciones precolombinas (mayas, aztecas, incas)','Descubrimiento y conquista de América','Continentes, hemisferios y ubicación','Derechos, deberes y diversidad'],
+    '5B': ['Conquista de Chile y América','Colonia en Chile y América','Diversidad geográfica de Chile','Estado, democracia y organización política'],
+    '6B': ['Independencia y conformación de la República','Sociedad chilena del siglo XIX','Geografía y población de Chile','Vida democrática y derechos humanos'],
+    '7B': ['La Tierra: nuestro hogar común (geografía)','Civilizaciones de la Antigüedad: Egipto, Grecia y Roma','La Edad Media en Europa y el mundo americano','Inicios de la Modernidad: humanismo y descubrimientos'],
+    '8B': ['Era Moderna: humanismo, reforma y nuevos descubrimientos','Formación de la sociedad colonial americana','Conformación del Estado-nación en Chile y América','Configuración del mundo contemporáneo'],
+    '1M': ['Crisis del orden liberal y las guerras mundiales','Mundo de posguerra: Guerra Fría y derechos humanos','Chile en el siglo XX: del Estado de bienestar a la dictadura','Transición a la democracia y Chile actual'],
+    '2M': ['Estado, mercado y estructuras económicas','Bienestar, desarrollo y políticas sociales','Globalización y diversidad cultural','Ciudadanía y democracia en el Chile actual']
+  },
   oas: {
     '1B': [
       { codigo: 'OA1',  eje: 'Historia',             descripcion: 'Nombrar y secuenciar días de la semana y meses del año, utilizando calendarios, e identificar el año en curso.' },

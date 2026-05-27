@@ -603,6 +603,12 @@
 
             <!-- ── Flujo TP: Módulo → OA → AE → CE ── -->
             <div id="sec-tp-obj">
+                <div class="campo" id="campoMencion" style="display:none">
+                    <label>Mención <span style="font-size:.72rem;color:var(--text-muted);font-weight:400">(de tu especialidad)</span></label>
+                    <select id="selectMencion" onchange="filtrarModulos()">
+                    </select>
+                    <div style="font-size:.72rem;color:var(--text-muted);margin-top:4px">Tu especialidad tiene menciones. Elige la tuya para ver los módulos comunes y los específicos de esa mención.</div>
+                </div>
                 <div class="campo">
                     <label>Modulo</label>
                     <select id="selectModulo" onchange="cargarOA()">
@@ -855,10 +861,36 @@
     <script src="js/curricula/tp/datos-electricidad.js"></script>
     <script src="js/curricula/tp/datos-grafica.js"></script>
     <script src="js/curricula/tp/datos-contabilidad.js"></script>
-    <script src="js/curricula/tp/datos-ventas.js"></script>
     <script src="js/curricula/tp/datos-administracion.js"></script>
     <!-- Construcción (plantilla): -->
     <script src="js/curricula/tp/datos-construccion.js"></script>
+<script src="js/curricula/tp/datos-metalurgia-extractiva.js"></script>
+<script src="js/curricula/tp/datos-mantenimiento-aeronaves.js"></script>
+<script src="js/curricula/tp/datos-tripulacion-naves.js"></script>
+<script src="js/curricula/tp/datos-muebles-madera.js"></script>
+<script src="js/curricula/tp/datos-quimica-industrial.js"></script>
+<script src="js/curricula/tp/datos-atencion-enfermeria.js"></script>
+<script src="js/curricula/tp/datos-agropecuaria.js"></script>
+<script src="js/curricula/tp/datos-elaboracion-alimentos.js"></script>
+<script src="js/curricula/tp/datos-construcciones-metalicas.js"></script>
+<script src="js/curricula/tp/datos-instalaciones-sanitarias.js"></script>
+<script src="js/curricula/tp/datos-montaje-industrial.js"></script>
+<script src="js/curricula/tp/datos-telecomunicaciones.js"></script>
+<script src="js/curricula/tp/datos-dibujo-tecnico.js"></script>
+<script src="js/curricula/tp/datos-gastronomia.js"></script>
+<script src="js/curricula/tp/datos-servicios-hoteleros.js"></script>
+<script src="js/curricula/tp/datos-servicios-turismo.js"></script>
+<script src="js/curricula/tp/datos-forestal.js"></script>
+<script src="js/curricula/tp/datos-acuicultura.js"></script>
+<script src="js/curricula/tp/datos-operacion-portuaria.js"></script>
+<script src="js/curricula/tp/datos-pesqueria.js"></script>
+<script src="js/curricula/tp/datos-asistencia-geologia.js"></script>
+<script src="js/curricula/tp/datos-explotacion-minera.js"></script>
+<script src="js/curricula/tp/datos-atencion-parvulos.js"></script>
+<script src="js/curricula/tp/datos-refrigeracion-climatizacion.js"></script>
+<script src="js/curricula/tp/datos-conectividad-redes.js"></script>
+<script src="js/curricula/tp/datos-programacion.js"></script>
+<script src="js/curricula/tp/datos-vestuario-confeccion.js"></script>
     <script>
     // MODULOS y OAG_DEFINICIONES disponibles vía CURRICULA_FULL['electronica']
     // Para otras especialidades: getCurriculaModulos(user.especialidad)
@@ -982,6 +1014,20 @@
 
     function initCurriculo(user) {
         // Mostrar barra de contexto del profesor
+        // ── Deduplicar asignaturas: básica y media usan a veces nombres
+        //    distintos para la misma asignatura (Lengua y Literatura vs
+        //    Lenguaje y Comunicación, etc.). Normalizamos al canónico.
+        if (user.asignaturas && user.asignaturas.length &&
+            typeof CURRICULA_CHILE !== 'undefined' &&
+            typeof CURRICULA_CHILE.nombreAsignaturaCanonico === 'function') {
+            var _vistas = {};
+            user.asignaturas = user.asignaturas.reduce(function(acc, a) {
+                var canon = CURRICULA_CHILE.nombreAsignaturaCanonico(a);
+                if (!_vistas[canon]) { _vistas[canon] = true; acc.push(canon); }
+                return acc;
+            }, []);
+        }
+
         var tipos = { basica: '📚 Educación Básica', media: '🎓 Plan Común', tecnico: '⚙️ Técnico-Profesional' };
         var ctxBar = document.getElementById('contextoBar');
         if (ctxBar) {
@@ -1020,7 +1066,8 @@
             if (campoAsig) campoAsig.style.display = 'none';
             if (secTP)  secTP.style.display  = '';
             if (secReg) secReg.style.display = 'none';
-            // Pre-cargar módulos siempre (nivel es orientativo, no filtrante)
+            // Pre-cargar selector de mención (si la especialidad tiene) y módulos
+            actualizarMencion();
             filtrarModulos();
         } else {
             if (campoAsig) campoAsig.style.display = '';
@@ -1292,6 +1339,34 @@
         _setBadge('badgeNEE', n);
     }
 
+    // Muestra el selector de mención sólo si la especialidad del profesor
+    // tiene menciones definidas en CURRICULA_FULL. Lo deja en la primera mención.
+    function actualizarMencion() {
+        var campo = document.getElementById('campoMencion');
+        var sel   = document.getElementById('selectMencion');
+        if (!campo || !sel) return;
+        var user   = _planifUser || {};
+        var espKey = (user.especialidad || '').toLowerCase();
+        var data   = (window.CURRICULA_FULL && window.CURRICULA_FULL[espKey]) || null;
+        var menciones = (data && data.menciones) || null;
+        if (!menciones || !menciones.length) {
+            campo.style.display = 'none';
+            sel.innerHTML = '';
+            return;
+        }
+        // Valor inicial: lo ya elegido, o la mención asignada al profesor por el admin.
+        var previa = sel.value || (user.mencion || '');
+        sel.innerHTML = '';
+        menciones.forEach(function(mn) {
+            var opt = document.createElement('option');
+            opt.value = mn;
+            opt.textContent = mn;
+            sel.appendChild(opt);
+        });
+        if (previa && menciones.indexOf(previa) !== -1) sel.value = previa;
+        campo.style.display = '';
+    }
+
     function filtrarModulos() {
         var nivel = document.getElementById('selectCurso').value;
         var user  = _planifUser || {};
@@ -1321,9 +1396,15 @@
             ? getCurriculaModulos(espKey)
             : (typeof MODULOS !== 'undefined' ? MODULOS : {});
 
+        // Mención seleccionada: si la especialidad tiene menciones, se muestran
+        // los módulos comunes (sin mención) + los de la mención elegida.
+        var selMencionEl = document.getElementById('selectMencion');
+        var selMencion   = selMencionEl ? selMencionEl.value : '';
+
         if (modulosFull && Object.keys(modulosFull).length > 0) {
             Object.keys(modulosFull).forEach(function(key) {
                 var m = modulosFull[key];
+                if (selMencion && m.mencion && m.mencion !== selMencion) return;
                 if (asignadosMods.length === 0 || asignadosMods.indexOf(m.num) !== -1) {
                     addOpt(m.num, m.nombre, m.horas, m.nivel);
                     added++;

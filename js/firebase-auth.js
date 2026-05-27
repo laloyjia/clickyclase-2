@@ -303,6 +303,7 @@ var ELAuth = (function() {
         tipoProfesor:    data.tipoProfesor || (_tipos[0] || ''),  // legacy string (primer tipo)
         tiposProfesor:   _tipos,                                  // nuevo array multi-tipo
         especialidad:    data.especialidad || '',
+        mencion:         data.mencion      || '',  // mención de la especialidad TP (si aplica)
         asignaturas:     data.asignaturas  || [],
         niveles:         data.niveles      || [],
         modulos:         data.modulos      || [],
@@ -312,6 +313,7 @@ var ELAuth = (function() {
         liceoPrincipal:  data.liceoPrincipal || (Array.isArray(data.liceos) && data.liceos.length ? data.liceos[0] : ''),
         permisos:        data.permisos     || { planificar: true, crearMaterial: true },
         formatoPAES:     !!data.formatoPAES,        // habilita formato PAES en pruebas/eval/guías
+        formatoSIMCE:    !!data.formatoSIMCE,       // habilita formato SIMCE en pruebas/eval/guías
         taxonomiaMarzano:!!data.taxonomiaMarzano,   // habilita taxonomía Marzano (además de Bloom)
         xp:              0,
         nivel:           1,

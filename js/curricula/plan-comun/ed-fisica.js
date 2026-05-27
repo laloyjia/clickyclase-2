@@ -157,8 +157,20 @@ CURRICULA_PLAN_COMUN['ed-fisica'] = {
       { codigo: 'OA4', eje: 'Vida activa y saludable', descripcion: 'Practicar regularmente una variedad de actividades físicas alternativas y/o deportivas en diferentes entornos, aplicando conductas de autocuidado, seguridad y primeros auxilios, como: realizar al menos 30 minutos diarios de actividades físicas de su interés; promover campañas para evitar el consumo de drogas, tabaco y alcohol; aplicar maniobras básicas de primeros auxilios en situaciones de riesgo; dirigir y ejecutar un calentamiento de manera grupal; hidratarse con agua de forma permanente.' },
       { codigo: 'OA5', eje: 'Responsabilidad personal y social en el deporte y la actividad física', descripcion: 'Participar, liderar y promover una variedad de actividades físicas y/o deportivas de su interés y que se desarrollen en su comunidad escolar y/o en su entorno; por ejemplo: sugerir estrategias grupales para organizar actividades físicas y/o deportivas; demostrar distintos estilos de liderazgo en la promoción de una vida activa; proponer y crear una variedad de actividades físicas y deportivas para desarrollar los planes para promover una vida activa en su comunidad; fomentar y crear estrategias para adherir a la práctica de actividad física permanente.' }
     ],
-    '3M': [ /* FG no obligatorio en 3°-4°M; ver electivos abajo */ ],
-    '4M': [ /* FG no obligatorio en 3°-4°M; ver electivos abajo */ ]
+    '3M': [
+      { codigo: 'OA1', eje: 'Vida Activa Saludable', descripcion: 'Diseñar, ejecutar y evaluar un plan personal de actividad física saludable que integre las dimensiones física, mental, social y emocional, considerando intereses, necesidades, contextos y aspectos éticos.' },
+      { codigo: 'OA2', eje: 'Vida Activa Saludable', descripcion: 'Promover, en su comunidad educativa y entorno, prácticas que fomenten estilos de vida activos y saludables, considerando los principios del aprendizaje colaborativo, inclusivo y de equidad de género.' },
+      { codigo: 'OA3', eje: 'Vida Activa Saludable', descripcion: 'Aplicar estrategias para autorregular su esfuerzo físico, prevenir lesiones y mejorar su bienestar integral durante la práctica de actividad física, deportiva o recreativa.' },
+      { codigo: 'OA4', eje: 'Vida Activa Saludable', descripcion: 'Evaluar críticamente los factores que inciden en una vida activa y saludable (sedentarismo, alimentación, descanso, estrés, uso de pantallas), proponiendo acciones para superarlos.' },
+      { codigo: 'OA5', eje: 'Vida Activa Saludable', descripcion: 'Diseñar y liderar proyectos comunitarios que promuevan la actividad física, el deporte y la recreación en su entorno escolar y social, considerando la sustentabilidad ambiental e inclusión.' }
+    ],
+    '4M': [
+      { codigo: 'OA1', eje: 'Vida Activa Saludable', descripcion: 'Diseñar, ejecutar y evaluar un plan personal de actividad física saludable que integre las dimensiones física, mental, social y emocional, considerando intereses, necesidades, contextos y aspectos éticos.' },
+      { codigo: 'OA2', eje: 'Vida Activa Saludable', descripcion: 'Promover, en su comunidad educativa y entorno, prácticas que fomenten estilos de vida activos y saludables, considerando los principios del aprendizaje colaborativo, inclusivo y de equidad de género.' },
+      { codigo: 'OA3', eje: 'Vida Activa Saludable', descripcion: 'Aplicar estrategias para autorregular su esfuerzo físico, prevenir lesiones y mejorar su bienestar integral durante la práctica de actividad física, deportiva o recreativa.' },
+      { codigo: 'OA4', eje: 'Vida Activa Saludable', descripcion: 'Evaluar críticamente los factores que inciden en una vida activa y saludable (sedentarismo, alimentación, descanso, estrés, uso de pantallas), proponiendo acciones para superarlos.' },
+      { codigo: 'OA5', eje: 'Vida Activa Saludable', descripcion: 'Diseñar y liderar proyectos comunitarios que promuevan la actividad física, el deporte y la recreación en su entorno escolar y social, considerando la sustentabilidad ambiental e inclusión.' }
+    ]
   },
   actitudes:   [],  // hereda de _comun
   habilidades: ['Habilidades motrices','Vida activa y saludable','Seguridad, juego limpio y liderazgo'],

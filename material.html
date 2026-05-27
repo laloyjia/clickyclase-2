@@ -1497,6 +1497,27 @@
                 </div>
             </div>
 
+            <!-- Electivo HC: visible sólo si 3M/4M y la asignatura tiene electivos -->
+            <div class="campo-row" id="campoElectivoHC" style="display:none">
+                <div class="campo" style="grid-column:1/-1">
+                    <label>Plan diferenciado HC <span style="font-size:.72rem;color:var(--text-muted);font-weight:400">(opcional — sólo 3°M y 4°M)</span></label>
+                    <select id="selectElectivoHC" onchange="onCambioElectivoHCMat()">
+                        <option value="">📘 Formación General (Plan Común)</option>
+                    </select>
+                    <div style="font-size:.72rem;color:var(--text-muted);margin-top:4px">Selecciona un electivo del Plan Diferenciado para generar material con OAs específicos del DS 193/2019.</div>
+                </div>
+            </div>
+
+            <!-- Mención: aparece sólo si la especialidad TP tiene menciones -->
+            <div class="campo-row" id="campoMencion" style="display:none">
+                <div class="campo" style="grid-column:1/-1">
+                    <label>Mención <span style="font-size:.72rem;color:var(--text-muted);font-weight:400">(de tu especialidad)</span></label>
+                    <select id="selectMencion" onchange="filtrarModulos()">
+                    </select>
+                    <div style="font-size:.72rem;color:var(--text-muted);margin-top:4px">Tu especialidad tiene menciones. Elige la tuya para ver los módulos comunes y los específicos de esa mención.</div>
+                </div>
+            </div>
+
             <div class="campo-row">
                 <div class="campo">
                     <label>Curso / Nivel</label>
@@ -1644,6 +1665,16 @@
                         <select id="selFormatoMaterial" onchange="onCambioFormatoMaterial()">
                             <option value="estandar">Estándar</option>
                             <option value="paes">PAES (5 alternativas, estímulos, tabla de especificaciones)</option>
+                            <option value="simce">SIMCE (4 alternativas, estándares de aprendizaje)</option>
+                        </select>
+                    </div>
+                    <div class="campo" id="capPruebaSIMCEBox" style="display:none">
+                        <label>📊 Prueba SIMCE</label>
+                        <select id="selPruebaSIMCE">
+                            <option value="lectura">Comprensión de Lectura</option>
+                            <option value="matematica">Matemática</option>
+                            <option value="ciencias">Ciencias Naturales</option>
+                            <option value="historia">Historia, Geografía y Cs. Sociales</option>
                         </select>
                     </div>
                     <div class="campo" id="capCompPAESBox" style="display:none">
@@ -2022,9 +2053,35 @@
     <script src="js/curricula/tp/datos-electricidad.js"></script>
     <script src="js/curricula/tp/datos-grafica.js"></script>
     <script src="js/curricula/tp/datos-contabilidad.js"></script>
-    <script src="js/curricula/tp/datos-ventas.js"></script>
     <script src="js/curricula/tp/datos-administracion.js"></script>
     <script src="js/curricula/tp/datos-construccion.js"></script>
+<script src="js/curricula/tp/datos-metalurgia-extractiva.js"></script>
+<script src="js/curricula/tp/datos-mantenimiento-aeronaves.js"></script>
+<script src="js/curricula/tp/datos-tripulacion-naves.js"></script>
+<script src="js/curricula/tp/datos-muebles-madera.js"></script>
+<script src="js/curricula/tp/datos-quimica-industrial.js"></script>
+<script src="js/curricula/tp/datos-atencion-enfermeria.js"></script>
+<script src="js/curricula/tp/datos-agropecuaria.js"></script>
+<script src="js/curricula/tp/datos-elaboracion-alimentos.js"></script>
+<script src="js/curricula/tp/datos-construcciones-metalicas.js"></script>
+<script src="js/curricula/tp/datos-instalaciones-sanitarias.js"></script>
+<script src="js/curricula/tp/datos-montaje-industrial.js"></script>
+<script src="js/curricula/tp/datos-telecomunicaciones.js"></script>
+<script src="js/curricula/tp/datos-dibujo-tecnico.js"></script>
+<script src="js/curricula/tp/datos-gastronomia.js"></script>
+<script src="js/curricula/tp/datos-servicios-hoteleros.js"></script>
+<script src="js/curricula/tp/datos-servicios-turismo.js"></script>
+<script src="js/curricula/tp/datos-forestal.js"></script>
+<script src="js/curricula/tp/datos-acuicultura.js"></script>
+<script src="js/curricula/tp/datos-operacion-portuaria.js"></script>
+<script src="js/curricula/tp/datos-pesqueria.js"></script>
+<script src="js/curricula/tp/datos-asistencia-geologia.js"></script>
+<script src="js/curricula/tp/datos-explotacion-minera.js"></script>
+<script src="js/curricula/tp/datos-atencion-parvulos.js"></script>
+<script src="js/curricula/tp/datos-refrigeracion-climatizacion.js"></script>
+<script src="js/curricula/tp/datos-conectividad-redes.js"></script>
+<script src="js/curricula/tp/datos-programacion.js"></script>
+<script src="js/curricula/tp/datos-vestuario-confeccion.js"></script>
     <script>
     // Variable para tipo de documento seleccionado
     var tipoDocSeleccionado = '';
@@ -2278,6 +2335,20 @@
             u.asignaturas = [u.especialidad];
         }
 
+        // Deduplicar asignaturas: básica y media usan a veces nombres
+        // distintos para la misma asignatura (Lengua y Literatura vs
+        // Lenguaje y Comunicación, etc.). Normalizamos al canónico.
+        if (u.tipoProfesor !== 'tecnico' && u.asignaturas && u.asignaturas.length &&
+            typeof CURRICULA_CHILE !== 'undefined' &&
+            typeof CURRICULA_CHILE.nombreAsignaturaCanonico === 'function') {
+            var _vistas = {};
+            u.asignaturas = u.asignaturas.reduce(function(acc, a) {
+                var canon = CURRICULA_CHILE.nombreAsignaturaCanonico(a);
+                if (!_vistas[canon]) { _vistas[canon] = true; acc.push(canon); }
+                return acc;
+            }, []);
+        }
+
         // Mostrar barra de contexto del profesor
         var tipos = { basica: '📚 Educación Básica', media: '🎓 Plan Común', tecnico: '⚙️ Técnico-Profesional' };
         var ctxBar = document.getElementById('contextoBar');
@@ -2358,6 +2429,7 @@
             if (campoMod)   campoMod.style.display   = '';
             if (secTP)      secTP.style.display       = '';
             if (secReg)     secReg.style.display      = 'none';
+            actualizarMencion();
             filtrarModulos();
         } else {
             if (campoAsig) campoAsig.style.display = '';
@@ -2430,18 +2502,38 @@
         if (!row) return;
 
         var tipoAplicaPAES = (window.tipoDocSeleccionado || '');
-        // El selector de Formato PAES solo aplica a prueba/evaluacion/guia
-        var puedePAES = !!u.formatoPAES && ['prueba','evaluacion','guia'].indexOf(tipoAplicaPAES) !== -1;
+        var tiposCompatibles = ['prueba','evaluacion','guia'].indexOf(tipoAplicaPAES) !== -1;
+        // Los formatos PAES y SIMCE solo aplican a prueba/evaluacion/guia
+        var puedePAES  = !!u.formatoPAES  && tiposCompatibles;
+        var puedeSIMCE = !!u.formatoSIMCE && tiposCompatibles;
         // Taxonomía Marzano aplica a cualquier tipo que admita taxonomía (todos excepto control quizá)
         var puedeMarzano = !!u.taxonomiaMarzano;
 
-        if (fmtBox) fmtBox.style.display  = puedePAES    ? '' : 'none';
+        // El box de Formato se muestra si tiene PAES o SIMCE
+        if (fmtBox) fmtBox.style.display  = (puedePAES || puedeSIMCE) ? '' : 'none';
         if (taxBox) taxBox.style.display  = puedeMarzano ? '' : 'none';
-        // El selector de competencia PAES solo se muestra si formato='paes'
+
+        // Ocultar/mostrar opciones del selector de formato según permisos del profe
         var selFmt = document.getElementById('selFormatoMaterial');
+        if (selFmt) {
+            Array.prototype.forEach.call(selFmt.options, function(opt) {
+                if (opt.value === 'paes')  { opt.hidden = !puedePAES;  opt.disabled = !puedePAES; }
+                if (opt.value === 'simce') { opt.hidden = !puedeSIMCE; opt.disabled = !puedeSIMCE; }
+            });
+            // Si la opción seleccionada quedó oculta, volver a 'estandar'
+            var optSel = selFmt.options[selFmt.selectedIndex];
+            if (optSel && optSel.hidden) selFmt.value = 'estandar';
+        }
         var formatoSel = selFmt ? selFmt.value : 'estandar';
+
+        // El selector de competencia PAES solo se muestra si formato='paes'
         var mostrarComp = (puedePAES && formatoSel === 'paes');
         if (compBox) compBox.style.display = mostrarComp ? '' : 'none';
+
+        // El selector de prueba SIMCE solo se muestra si formato='simce'
+        var simceBox = document.getElementById('capPruebaSIMCEBox');
+        var mostrarSimce = (puedeSIMCE && formatoSel === 'simce');
+        if (simceBox) simceBox.style.display = mostrarSimce ? '' : 'none';
 
         // Filtrar opciones del selector según las asignaturas del profe
         var selComp = document.getElementById('selCompPAES');
@@ -2477,7 +2569,7 @@
             }
         }
 
-        var algunoVisible = (puedePAES || puedeMarzano);
+        var algunoVisible = (puedePAES || puedeSIMCE || puedeMarzano);
         row.style.display = algunoVisible ? '' : 'none';
     }
 
@@ -2491,8 +2583,51 @@
         if (user.tipoProfesor === 'tecnico') {
             filtrarModulos();
         } else {
+            actualizarElectivosHCMat();
             cargarOAsRegularMat();
         }
+    }
+
+    function onCambioElectivoHCMat() {
+        cargarOAsRegularMat();
+    }
+
+    // Muestra/puebla selector de electivos HC sólo cuando aplica (3M/4M con electivos cargados)
+    function actualizarElectivosHCMat() {
+        var campo = document.getElementById('campoElectivoHC');
+        var sel   = document.getElementById('selectElectivoHC');
+        if (!campo || !sel) return;
+        var asigNombre = document.getElementById('selectAsignatura') ? document.getElementById('selectAsignatura').value : '';
+        var nivelRaw   = document.getElementById('selectCurso') ? document.getElementById('selectCurso').value : '';
+        var sigla      = _resolveAsigSiglaMat(asigNombre);
+
+        if ((nivelRaw !== '3M' && nivelRaw !== '4M') || !sigla ||
+            typeof CURRICULA_CHILE === 'undefined' ||
+            typeof CURRICULA_CHILE.getElectivosHC !== 'function') {
+            campo.style.display = 'none';
+            sel.value = '';
+            return;
+        }
+        var electivos = (CURRICULA_CHILE.getElectivosHC(sigla) || []).filter(function(e) {
+            if (e.niveles && e.niveles.indexOf(nivelRaw) === -1) return false;
+            var oas = CURRICULA_CHILE.getOAsByKey(e.key, nivelRaw) || [];
+            return oas.length > 0;
+        });
+        if (!electivos.length) {
+            campo.style.display = 'none';
+            sel.value = '';
+            return;
+        }
+        var prev = sel.value;
+        sel.innerHTML = '<option value="">📘 Formación General (Plan Común)</option>';
+        electivos.forEach(function(e) {
+            var opt = document.createElement('option');
+            opt.value = e.key;
+            opt.textContent = '🎯 ' + e.sigla + ' — ' + e.nombre;
+            sel.appendChild(opt);
+        });
+        sel.value = electivos.some(function(e){return e.key === prev;}) ? prev : '';
+        campo.style.display = '';
     }
 
     function cargarOAsRegularMat() {
@@ -2501,16 +2636,23 @@
         var asigNombre = document.getElementById('selectAsignatura') ? document.getElementById('selectAsignatura').value : '';
         var nivel      = document.getElementById('selectCurso') ? document.getElementById('selectCurso').value : '';
         var sigla      = _resolveAsigSiglaMat(asigNombre);
+        var electivoKey = document.getElementById('selectElectivoHC')
+            ? document.getElementById('selectElectivoHC').value : '';
 
-        // Resetear unidades y contador cada vez que cambia asig/nivel
-        cargarUnidadesRegularMat(sigla, nivel);
+        // Resetear unidades y contador cada vez que cambia asig/nivel/electivo
+        cargarUnidadesRegularMat(sigla, nivel, electivoKey);
         actualizarBadgeOAMat();
 
         if (!sigla || !nivel || typeof CURRICULA_CHILE === 'undefined') {
             container.innerHTML = '<span style="color:var(--text-muted);font-size:0.85rem">Selecciona asignatura y nivel.</span>';
             return;
         }
-        var oas = CURRICULA_CHILE.getOAs(sigla, nivel);
+        var oas;
+        if (electivoKey && typeof CURRICULA_CHILE.getOAsByKey === 'function') {
+            oas = CURRICULA_CHILE.getOAsByKey(electivoKey, nivel);
+        } else {
+            oas = CURRICULA_CHILE.getOAs(sigla, nivel);
+        }
         if (!oas || !oas.length) {
             container.innerHTML = '<span style="color:var(--text-muted);font-size:0.85rem">Sin OA para esta combinación.</span>';
             return;
@@ -2536,7 +2678,7 @@
     // ─────────────────────────────────────────────────────────────────────
     var TIEMPO_SUG_DEFAULT_MAT = '8 a 9 semanas';
 
-    function cargarUnidadesRegularMat(sigla, nivel) {
+    function cargarUnidadesRegularMat(sigla, nivel, electivoKey) {
         var sel = document.getElementById('selectUnidadReg');
         if (!sel) return;
         sel.innerHTML = '<option value="">-- Selecciona una unidad oficial --</option>';
@@ -2548,9 +2690,14 @@
         if (hint)     { hint.style.display = 'none'; }
 
         if (!sigla || !nivel || typeof CURRICULA_CHILE === 'undefined') return;
-        var unidades = (typeof CURRICULA_CHILE.getUnidades === 'function')
-            ? CURRICULA_CHILE.getUnidades(sigla, nivel)
-            : [];
+        var unidades;
+        if (electivoKey && typeof CURRICULA_CHILE.getUnidadesByKey === 'function') {
+            unidades = CURRICULA_CHILE.getUnidadesByKey(electivoKey, nivel);
+        } else {
+            unidades = (typeof CURRICULA_CHILE.getUnidades === 'function')
+                ? CURRICULA_CHILE.getUnidades(sigla, nivel)
+                : [];
+        }
         if (!unidades || !unidades.length) {
             var optManual = document.createElement('option');
             optManual.value = '__custom__';
@@ -2642,6 +2789,34 @@
         _setBadgeMat('badgeValores', n);
     }
 
+    // Muestra el selector de mención sólo si la especialidad del profesor
+    // tiene menciones definidas en CURRICULA_FULL. Lo deja en la primera mención.
+    function actualizarMencion() {
+        var campo = document.getElementById('campoMencion');
+        var sel   = document.getElementById('selectMencion');
+        if (!campo || !sel) return;
+        var user   = _matUser || {};
+        var espKey = (user.especialidad || '').toLowerCase();
+        var data   = (window.CURRICULA_FULL && window.CURRICULA_FULL[espKey]) || null;
+        var menciones = (data && data.menciones) || null;
+        if (!menciones || !menciones.length) {
+            campo.style.display = 'none';
+            sel.innerHTML = '';
+            return;
+        }
+        // Valor inicial: lo ya elegido, o la mención asignada al profesor por el admin.
+        var previa = sel.value || (user.mencion || '');
+        sel.innerHTML = '';
+        menciones.forEach(function(mn) {
+            var opt = document.createElement('option');
+            opt.value = mn;
+            opt.textContent = mn;
+            sel.appendChild(opt);
+        });
+        if (previa && menciones.indexOf(previa) !== -1) sel.value = previa;
+        campo.style.display = '';
+    }
+
     function filtrarModulos() {
         var user = _matUser || {};
         var sel  = document.getElementById('selectModulo');
@@ -2670,9 +2845,15 @@
             ? getCurriculaModulos(espKey)
             : (typeof MODULOS !== 'undefined' ? MODULOS : {});
 
+        // Mención seleccionada: si la especialidad tiene menciones, se muestran
+        // los módulos comunes (sin mención) + los de la mención elegida.
+        var selMencionEl = document.getElementById('selectMencion');
+        var selMencion   = selMencionEl ? selMencionEl.value : '';
+
         if (modulosFull && Object.keys(modulosFull).length > 0) {
             Object.keys(modulosFull).forEach(function(key) {
                 var m = modulosFull[key];
+                if (selMencion && m.mencion && m.mencion !== selMencion) return;
                 if (asignadosMods.length === 0 || asignadosMods.indexOf(m.num) !== -1) {
                     addOpt(m.num, m.nombre, m.horas, m.nivel);
                     added++;
@@ -4813,6 +4994,10 @@
         if (ctx && ctx.formatoActivo === 'paes' && ['prueba','evaluacion','guia'].indexOf(tipo) !== -1) {
             return _promptPAES(tipo, ctx);
         }
+        // Atajo SIMCE (solo para tipos compatibles)
+        if (ctx && ctx.formatoActivo === 'simce' && ['prueba','evaluacion','guia'].indexOf(tipo) !== -1) {
+            return _promptSIMCE(tipo, ctx);
+        }
         if (tipo === 'guia')         return _promptGuia(ctx);
         if (tipo === 'apunte')       return _promptApunte(ctx);
         if (tipo === 'evaluacion')   return _promptEvaluacion(ctx);
@@ -4879,6 +5064,70 @@
         '5. <h2>CLAVE DE RESPUESTAS</h2>: tabla compacta con N° y letra correcta.\n' +
         '6. <h2>TABLA DE ESPECIFICACIONES</h2>: columnas <strong>N°</strong>, <strong>Eje PAES</strong>, <strong>Habilidad</strong>, <strong>Dificultad (F/M/D)</strong>, <strong>OA Mineduc</strong>, <strong>Nivel cognitivo</strong>.\n' +
         '7. <h2>JUSTIFICACIÓN / RESOLUCIÓN</h2>: para cada ítem, breve justificación de la clave correcta (1–3 líneas).\n\n' +
+        'IMPORTANTE: Devuelve SOLO HTML del cuerpo (no <html>, <head>, <body>, ni marcadores de código).\n' +
+        'Usa <h1> para el título, <h2> para secciones, <p>, <ol>/<ul>, <table>, <strong>. Mantén el documento legible y listo para imprimir.\n' +
+        _promptFormatoHTML() +
+        '\nGenera ahora el documento completo:';
+      return instrucciones;
+    }
+
+
+    // ─────────────────────────────────────────────────────────
+    //  PROMPT SIMCE — pruebas, evaluaciones, guías de entrenamiento
+    //  Agencia de Calidad de la Educación (Chile).
+    //  Pruebas: lectura, matematica, ciencias, historia.
+    //  Niveles habituales: 4°B, 6°B, 8°B, 2°M.
+    // ─────────────────────────────────────────────────────────
+    var SIMCE_INFO = {
+      lectura:    { nombre:'Comprensión de Lectura', ejes:'Localizar información / Relacionar e interpretar / Reflexionar sobre el texto', instr:'Textos literarios (cuentos, fábulas, poemas) y no literarios (noticias, infografías, instructivos, afiches). Cada texto con 4-8 preguntas asociadas.' },
+      matematica: { nombre:'Matemática', ejes:'Números y operaciones / Patrones y álgebra / Geometría / Medición / Datos y probabilidades', instr:'Contextos cotidianos chilenos con tablas y gráficos. Habilidades: resolver problemas, representar, modelar y argumentar.' },
+      ciencias:   { nombre:'Ciencias Naturales', ejes:'Ciencias de la Vida / Ciencias Físicas y Químicas / Ciencias de la Tierra y el Universo', instr:'Estímulos científicos: experimentos, tablas de datos, gráficos, esquemas. Habilidades de investigación científica: observar, predecir, interpretar evidencia, concluir.' },
+      historia:   { nombre:'Historia, Geografía y Cs. Sociales', ejes:'Historia / Geografía / Formación Ciudadana / Economía', instr:'Fuentes variadas: mapas, líneas de tiempo, documentos, imágenes, gráficos. Habilidades: pensamiento temporal y espacial, análisis de fuentes, pensamiento crítico.' }
+    };
+    function _promptSIMCE(tipo, ctx) {
+      var pruebaKey = (ctx.pruebaSimce || 'lectura').toLowerCase();
+      var prueba    = SIMCE_INFO[pruebaKey] || SIMCE_INFO.lectura;
+      var nItems    = ctx.cantPreg || 15;
+      var tipoLabel = { prueba:'PRUEBA SIMCE', evaluacion:'EVALUACIÓN TIPO SIMCE', guia:'GUÍA DE ENTRENAMIENTO SIMCE' }[tipo] || 'INSTRUMENTO SIMCE';
+      var taxLine = '';
+      if (ctx.taxonomia === 'marzano') {
+        taxLine = '\nNIVELES COGNITIVOS A APLICAR: Recuperación, Comprensión, Análisis, Utilización del Conocimiento. Distribuye los ítems en estos niveles.';
+      } else if (ctx.bloomNames) {
+        taxLine = '\nNIVELES COGNITIVOS A APLICAR: ' + ctx.bloomNames + '.';
+      }
+      var instrucciones =
+        'Eres especialista en evaluación SIMCE (Agencia de Calidad de la Educación, Chile). Construyes ítems alineados con el formato oficial de las pruebas SIMCE y los Estándares de Aprendizaje del Mineduc.\n' +
+        'Prueba SIMCE: ' + prueba.nombre + '\n' +
+        'Ejes a cubrir: ' + prueba.ejes + '\n' +
+        'Formato obligatorio: ' + prueba.instr + ' Cada ítem de selección múltiple con 4 alternativas (A-D), solo una correcta.\n' +
+        'No se descuenta puntaje por respuestas incorrectas. Los ítems deben permitir clasificar el desempeño en los niveles de los Estándares de Aprendizaje: Insuficiente, Elemental y Adecuado.' + taxLine + '\n\n' +
+        '── DATOS DEL DOCUMENTO ──\n' +
+        'Institución: ' + (ctx.nombreInst || '_____') + '\n' +
+        'Profesor(a): ' + (ctx.profesor || '_____') + '\n' +
+        'Asignatura/Módulo: ' + (ctx.modNombre || '_____') + '\n' +
+        'Curso/Nivel: ' + (ctx.cursoTexto || '_____') + '\n' +
+        (ctx.contenido ? 'Contenido específico: ' + ctx.contenido + '\n' : '') +
+        (ctx.oaTexto   ? '\nOA(s) Mineduc:\n' + ctx.oaTexto + '\n' : '') +
+        (ctx.valoresStr ? '\nValores institucionales a incorporar (cuando sea natural): ' + ctx.valoresStr + '\n' : '') +
+        (ctx.materialReferencia ? '\nMaterial / referencia literal a incluir tal cual:\n' + ctx.materialReferencia + '\n' : '') +
+        '\nTotal de ítems requeridos: ' + nItems +
+        '\nDificultad: ' + (ctx.difTexto || ctx.dificultad || 'intermedio') +
+        '\n\n── ESTRUCTURA OBLIGATORIA DEL DOCUMENTO HTML ──\n' +
+        '1. Encabezado institucional + datos del estudiante (nombre, curso, fecha).\n' +
+        '2. INSTRUCCIONES GENERALES (cómo marcar respuestas, no se descuenta puntaje, tiempo sugerido).\n' +
+        (pruebaKey === 'lectura'
+          ? '3. Para cada texto: bloque <h2>TEXTO N — [título / tipo: literario o no literario]</h2> con texto de 200-400 palabras adecuado al nivel, luego sus 4-8 preguntas. Incluir al menos un texto literario y uno no literario. Repetir hasta sumar ' + nItems + ' ítems.\n'
+          : pruebaKey === 'ciencias'
+            ? '3. Al menos 2 estímulos científicos (experimento, tabla de datos, gráfico, esquema): <h2>ESTÍMULO N — [título]</h2> con descripción >=100 palabras, luego sus preguntas (3-5 por estímulo).\n'
+            : pruebaKey === 'historia'
+              ? '3. Fuentes variadas (mapas, líneas de tiempo, documentos, imágenes descritas, gráficos): <h2>FUENTE N — [tipo / referencia]</h2> con descripción 80-250 palabras, luego sus preguntas (2-5).\n'
+              : '3. Distribuir ítems entre los ejes mencionados. Al menos un tercio con contexto/estímulo (tabla, gráfico, situación cotidiana chilena).\n'
+        ) +
+        '4. Cada ítem de selección múltiple: enunciado claro y adecuado al nivel + 4 alternativas A) B) C) D). Distractores plausibles (errores conceptuales típicos del nivel).\n' +
+        '5. Incluir 1-2 preguntas de respuesta abierta/construida al final (excepto en Matemática, donde son de desarrollo): <h3>PREGUNTA DE DESARROLLO</h3> con espacio para responder.\n' +
+        '6. <h2>CLAVE DE RESPUESTAS</h2>: tabla compacta con N° y letra correcta.\n' +
+        '7. <h2>TABLA DE ESPECIFICACIONES</h2>: columnas <strong>N°</strong>, <strong>Eje SIMCE</strong>, <strong>Habilidad</strong>, <strong>Dificultad (F/M/D)</strong>, <strong>OA Mineduc</strong>, <strong>Nivel de logro esperado (Insuficiente/Elemental/Adecuado)</strong>.\n' +
+        '8. <h2>JUSTIFICACIÓN / RESOLUCIÓN</h2>: para cada ítem, breve justificación de la clave correcta (1-3 líneas).\n\n' +
         'IMPORTANTE: Devuelve SOLO HTML del cuerpo (no <html>, <head>, <body>, ni marcadores de código).\n' +
         'Usa <h1> para el título, <h2> para secciones, <p>, <ol>/<ul>, <table>, <strong>. Mantén el documento legible y listo para imprimir.\n' +
         _promptFormatoHTML() +
@@ -4987,9 +5236,14 @@
         // Se activan según permisos del profe + lo que eligió en los selectores.
         var _selFormato = document.getElementById('selFormatoMaterial');
         var _selCompPAES = document.getElementById('selCompPAES');
+        var _selPruebaSIMCE = document.getElementById('selPruebaSIMCE');
         var _selTax     = document.getElementById('selTaxonomia');
-        var _formatoActivo = (user.formatoPAES && _selFormato && _selFormato.value === 'paes') ? 'paes' : 'estandar';
+        var _formatoSel = _selFormato ? _selFormato.value : 'estandar';
+        var _formatoActivo = 'estandar';
+        if (user.formatoPAES  && _formatoSel === 'paes')  _formatoActivo = 'paes';
+        if (user.formatoSIMCE && _formatoSel === 'simce') _formatoActivo = 'simce';
         var _competenciaPaes = _selCompPAES ? (_selCompPAES.value || 'lectora') : 'lectora';
+        var _pruebaSimce = _selPruebaSIMCE ? (_selPruebaSIMCE.value || 'lectura') : 'lectura';
         var _taxonomia  = (user.taxonomiaMarzano && _selTax && _selTax.value === 'marzano') ? 'marzano' : 'bloom';
 
         // Si la taxonomía elegida es Marzano, reemplazar los nombres Bloom por niveles Marzano correspondientes
@@ -5033,9 +5287,10 @@
             pieDiagnostico:   pieDiagnostico,
             pieAdecuacion:    pieAdecuacion,
             pieObservaciones: pieObservaciones,
-            // ── Nuevos: capacidades PAES / Marzano ──
-            formatoActivo:    _formatoActivo,     // 'paes' | 'estandar'
+            // ── Nuevos: capacidades PAES / SIMCE / Marzano ──
+            formatoActivo:    _formatoActivo,     // 'paes' | 'simce' | 'estandar'
             competenciaPaes:  _competenciaPaes,   // 'lectora' | 'm1' | 'm2' | 'ciencias' | 'historia'
+            pruebaSimce:      _pruebaSimce,       // 'lectura' | 'matematica' | 'ciencias' | 'historia'
             taxonomia:        _taxonomia          // 'bloom' | 'marzano'
         };
 
@@ -5967,7 +6222,7 @@
         'h2 { font-size: 13pt; color: #6C5CE7; border-left: 3pt solid #6C5CE7; padding-left: 6pt; margin-top: 14pt; page-break-after: avoid; }' +
         'h3 { font-size: 11.5pt; color: #2d3436; margin-top: 10pt; page-break-after: avoid; }' +
         'p, li, td, th { font-size: 10.5pt; }' +
-        'table { width: 100%; border-collapse: collapse; margin: 8pt 0; page-break-inside: avoid; }' +
+        'table { width: 100%; border-collapse: collapse; margin: 8pt 0; }' +
         'th { background: #6C5CE7; color: #fff; padding: 5pt 7pt; text-align: left; font-size: 10pt; }' +
         'td { border: 1pt solid #c8cdd2; padding: 4pt 7pt; }' +
         'img { max-width: 100%; height: auto; }' +
@@ -5994,14 +6249,13 @@
         '.doc-version-tag--prof { background: #ede7f6; color: #4527a0; border-color: #6C5CE7; }' +
         '.page-break { page-break-before: always; mso-special-character: line-break; height: 0; border: none; margin: 0; }' +
         'pre, blockquote { page-break-inside: avoid; }' +
-        'li { page-break-inside: avoid; }' +
+        'li { orphans: 2; widows: 2; }' +
+        'p { orphans: 2; widows: 2; margin: 5pt 0; }' +
         /* Fórmulas matemáticas — se ven bien en Word y PDF */
-        '.frac { display: inline-table; vertical-align: middle; text-align: center; margin: 0 2pt; }' +
-        '.frac .num { display: table-row; }' +
-        '.frac .num > * { display: table-cell; border-bottom: 1pt solid #1a1a2e; padding: 0 3pt 1pt; }' +
-        '.frac .den { display: table-row; }' +
-        '.frac .den > * { display: table-cell; padding: 1pt 3pt 0; }' +
-        '.sqrt-root { display: inline; }' +
+        '.frac { display: inline-block; vertical-align: middle; text-align: center; line-height: 1.1; margin: 0 2pt; }' +
+        '.frac .num { display: block; border-bottom: 1pt solid #1a1a2e; padding: 0 3pt 1pt; }' +
+        '.frac .den { display: block; padding: 1pt 3pt 0; }' +
+        '.sqrt-root { display: inline-block; vertical-align: middle; }' +
         '.sqrt-root .rad { border-top: 1pt solid #1a1a2e; padding: 0 2pt; margin-left: 1pt; }' +
         '.math-display { display: block; text-align: center; font-size: 12pt; margin: 6pt 0; padding: 5pt 8pt; background: #f6f4ff; border-left: 3pt solid #6C5CE7; }' +
         'table.mat-sistema { display: inline-table; border: none; border-left: 1.5pt solid #1a1a2e; padding-left: 4pt; margin: 0 4pt; }' +
@@ -6180,10 +6434,15 @@
         var asigGuardar = isTPGuardar
             ? (currentUserData.especialidad || '')
             : (document.getElementById('selectAsignatura') ? document.getElementById('selectAsignatura').value : (currentUserData.asignaturas && currentUserData.asignaturas[0]) || '');
+        // Electivo HC del Plan Diferenciado (sólo aplica básica/media en 3M-4M)
+        var electivoHCGuardar = isTPGuardar
+            ? ''
+            : (document.getElementById('selectElectivoHC') ? document.getElementById('selectElectivoHC').value : '');
         Object.assign(entrada, {
             uid:         currentUserData.uid || '',
             email:       currentUserData.email || '',
             asignatura:  asigGuardar,
+            electivoHC:  electivoHCGuardar || '',
             especialidad:currentUserData.especialidad || '',
             tipoProfesor:currentUserData.tipoProfesor || ''
         });
@@ -6522,4 +6781,3 @@
     <script src="js/recommendations.js"></script>
 </body>
 </html>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   

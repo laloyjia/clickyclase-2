@@ -38,3 +38,6 @@ yarn-error.log
 pdf-text/
 pdf-text-new/
 extract-unidades.py
+
+# Artefacto Windows (nombre reservado, no es un archivo válido)
+nul

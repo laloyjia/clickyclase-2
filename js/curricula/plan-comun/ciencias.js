@@ -22,6 +22,18 @@ CURRICULA_PLAN_COMUN['ciencias'] = {
   sigla:  'CN',
   niveles: ['1B','2B','3B','4B','5B','6B','7B','8B','1M','2M'],
   // Ejes: Ciencias de la Vida · Ciencias Físicas y Químicas · Ciencias de la Tierra y el Universo
+  unidades: {
+    '1B': ['Los seres vivos y su entorno','Mi cuerpo y los cinco sentidos','Materiales y sus propiedades','El tiempo atmosférico y el Sol'],
+    '2B': ['Animales y sus características','Hábitos saludables','La luz y el sonido','Cambios en la Tierra y la naturaleza'],
+    '3B': ['Plantas y sus partes','Sistema esquelético y muscular','La materia y sus estados','Suelo, agua y aire'],
+    '4B': ['Cadenas alimenticias y ecosistemas','Sistemas digestivo, respiratorio y circulatorio','Luz, sonido y calor','Sistema solar y movimientos de la Tierra'],
+    '5B': ['Hábitos para una vida saludable (sistemas del cuerpo)','Materia y energía: cambios químicos y físicos','Ecosistemas y sus componentes','La Tierra y el Universo'],
+    '6B': ['Microorganismos y sistema inmune','Reproducción humana y desarrollo','Electricidad y circuitos','Capas de la Tierra y movimientos'],
+    '7B': ['Sexualidad, salud y desarrollo humano','Nutrientes y sistema digestivo','Estructura atómica y modelo','Tierra dinámica y biósfera'],
+    '8B': ['Función reproductora y herencia','Estructura atómica y enlace químico','Fuerza, movimiento y energía','Cambio climático y desafíos ambientales'],
+    '1M': ['Biología: ecosistemas, evolución y biodiversidad','Física: ondas, sonido y luz','Astronomía y el Universo','Química: reacciones y enlaces'],
+    '2M': ['Biología: sistema nervioso, reproducción y herencia','Física: movimiento, fuerza y energía','Cosmología y leyes de Kepler','Química: soluciones y compuestos del carbono']
+  },
   oas: {
     '1B': [
       { codigo: 'OA1',  eje: 'Ciencias de la Vida',                   descripcion: 'Reconocer y observar, por medio de la exploración, que los seres vivos crecen, responden a estímulos del medio, se reproducen y necesitan agua, alimento y aire para vivir, comparándolos con las cosas no vivas.' },

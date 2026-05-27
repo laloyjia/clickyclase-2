@@ -1215,23 +1215,80 @@ var CURRICULA_CHILE = (function() {
   //  mantener compatibilidad con usuarios que tengan guardada la
   //  especialidad con el nombre antiguo (ej: "automotriz").
   // ════════════════════════════════════════════════════════════
+  // Catálogo MINEDUC — 35 especialidades TP oficiales (DS 452/2013 + DS 41/2018)
+  // organizadas en 15 sectores económicos. Las que tienen contenido cargado
+  // marcan datos en CURRICULA_FULL; el resto son placeholders estructurales.
   var TP_CATALOG = {
-    'electricidad':        { nombre: 'Electricidad',           sigla: 'EL',  sector: 'Electricidad',             color: '#f59e0b', fullKey: 'electricidad' },
-    'mecanica-automotriz': { nombre: 'Mecánica Automotriz',    sigla: 'MA',  sector: 'Mecánica',                 color: '#ef4444', fullKey: 'mecanica-automotriz' },
-    'mecanica-industrial': { nombre: 'Mecánica Industrial',    sigla: 'MI',  sector: 'Mecánica',                 color: '#f97316', fullKey: 'mecanica-industrial' },
-    'electronica':         { nombre: 'Electrónica',            sigla: 'EN',  sector: 'Electricidad',             color: '#10b981', fullKey: 'electronica' },
-    'administracion':      { nombre: 'Administración',         sigla: 'ADM', sector: 'Administración y Comercio',color: '#3b82f6', fullKey: 'administracion' },
-    'contabilidad':        { nombre: 'Contabilidad',           sigla: 'CO',  sector: 'Administración y Comercio',color: '#8b5cf6', fullKey: 'contabilidad' },
-    'ventas':              { nombre: 'Ventas y Marketing',     sigla: 'VE',  sector: 'Administración y Comercio',color: '#14b8a6', fullKey: 'ventas' },
-    'grafica':             { nombre: 'Gráfica',                sigla: 'GR',  sector: 'Gráfica',                  color: '#ec4899', fullKey: 'grafica' },
-    'construccion':        { nombre: 'Construcción',           sigla: 'CONST',sector:'Construcción',             color: '#92400e', fullKey: 'construccion' }
+    // Catálogo MINEDUC — 35 especialidades EMTP oficiales del Decreto N° 452/2013,
+    // organizadas en los 15 sectores económicos oficiales.
+    // 1) Administración (2)
+    'administracion':            { nombre: 'Administración', sigla: 'ADM', sector: 'Administración', color: '#3b82f6', fullKey: 'administracion' },
+    'contabilidad':              { nombre: 'Contabilidad', sigla: 'CO', sector: 'Administración', color: '#8b5cf6', fullKey: 'contabilidad' },
+    // 2) Agropecuario (1)
+    'agropecuaria':              { nombre: 'Agropecuaria', sigla: 'AGRO', sector: 'Agropecuario', color: '#65a30d', fullKey: 'agropecuaria' },
+    // 3) Alimentación (2)
+    'elaboracion-alimentos':     { nombre: 'Elaboración Industrial de Alimentos', sigla: 'EIA', sector: 'Alimentación', color: '#84cc16', fullKey: 'elaboracion-alimentos' },
+    'gastronomia':               { nombre: 'Gastronomía', sigla: 'GAS', sector: 'Alimentación', color: '#f43f5e', fullKey: 'gastronomia' },
+    // 4) Confección (1)
+    'vestuario-confeccion':      { nombre: 'Vestuario y Confección Textil', sigla: 'VCT', sector: 'Confección', color: '#f472b6', fullKey: 'vestuario-confeccion' },
+    // 5) Construcción (4)
+    'construccion':              { nombre: 'Construcción', sigla: 'CONST', sector: 'Construcción', color: '#92400e', fullKey: 'construccion' },
+    'instalaciones-sanitarias':  { nombre: 'Instalaciones Sanitarias', sigla: 'IS', sector: 'Construcción', color: '#0ea5e9', fullKey: 'instalaciones-sanitarias' },
+    'montaje-industrial':        { nombre: 'Montaje Industrial', sigla: 'MIND', sector: 'Construcción', color: '#737373', fullKey: 'montaje-industrial' },
+    'refrigeracion-climatizacion':{ nombre: 'Refrigeración y Climatización', sigla: 'RC', sector: 'Construcción', color: '#22d3ee', fullKey: 'refrigeracion-climatizacion' },
+    // 6) Electricidad (2)
+    'electricidad':              { nombre: 'Electricidad', sigla: 'EL', sector: 'Electricidad', color: '#f59e0b', fullKey: 'electricidad' },
+    'electronica':               { nombre: 'Electrónica', sigla: 'EN', sector: 'Electricidad', color: '#10b981', fullKey: 'electronica' },
+    // 7) Gráfico (2)
+    'grafica':                   { nombre: 'Gráfica', sigla: 'GR', sector: 'Gráfico', color: '#ec4899', fullKey: 'grafica' },
+    'dibujo-tecnico':            { nombre: 'Dibujo Técnico', sigla: 'DT', sector: 'Gráfico', color: '#db2777', fullKey: 'dibujo-tecnico' },
+    // 8) Hotelería y Turismo (2)
+    'servicios-turismo':         { nombre: 'Servicios de Turismo', sigla: 'ST', sector: 'Hotelería y Turismo', color: '#be185d', fullKey: 'servicios-turismo' },
+    'servicios-hoteleros':       { nombre: 'Servicios de Hotelería', sigla: 'SH', sector: 'Hotelería y Turismo', color: '#e11d48', fullKey: 'servicios-hoteleros' },
+    // 9) Maderero (2)
+    'forestal':                  { nombre: 'Forestal', sigla: 'FOR', sector: 'Maderero', color: '#15803d', fullKey: 'forestal' },
+    'muebles-madera':            { nombre: 'Muebles y Terminaciones en Madera', sigla: 'MTM', sector: 'Maderero', color: '#a16207', fullKey: 'muebles-madera' },
+    // 10) Marítimo (4)
+    'acuicultura':               { nombre: 'Acuicultura', sigla: 'ACU', sector: 'Marítimo', color: '#0891b2', fullKey: 'acuicultura' },
+    'operacion-portuaria':       { nombre: 'Operaciones Portuarias', sigla: 'OP', sector: 'Marítimo', color: '#0e7490', fullKey: 'operacion-portuaria' },
+    'pesqueria':                 { nombre: 'Pesquería', sigla: 'PES', sector: 'Marítimo', color: '#155e75', fullKey: 'pesqueria' },
+    'tripulacion-naves':         { nombre: 'Tripulación de Naves Mercantes y Especiales', sigla: 'TNM', sector: 'Marítimo', color: '#0c4a6e', fullKey: 'tripulacion-naves' },
+    // 11) Metalmecánica (4)
+    'mecanica-industrial':       { nombre: 'Mecánica Industrial', sigla: 'MI', sector: 'Metalmecánica', color: '#f97316', fullKey: 'mecanica-industrial' },
+    'construcciones-metalicas':  { nombre: 'Construcciones Metálicas', sigla: 'CMET', sector: 'Metalmecánica', color: '#78716c', fullKey: 'construcciones-metalicas' },
+    'mecanica-automotriz':       { nombre: 'Mecánica Automotriz', sigla: 'MA', sector: 'Metalmecánica', color: '#ef4444', fullKey: 'mecanica-automotriz' },
+    'mantenimiento-aeronaves':   { nombre: 'Mecánica de Mantenimiento de Aeronaves', sigla: 'MMA', sector: 'Metalmecánica', color: '#0284c7', fullKey: 'mantenimiento-aeronaves' },
+    // 12) Minero (3)
+    'explotacion-minera':        { nombre: 'Explotación Minera', sigla: 'EM', sector: 'Minero', color: '#713f12', fullKey: 'explotacion-minera' },
+    'metalurgia-extractiva':     { nombre: 'Metalurgia Extractiva', sigla: 'MX', sector: 'Minero', color: '#854d0e', fullKey: 'metalurgia-extractiva' },
+    'asistencia-geologia':       { nombre: 'Asistencia en Geología', sigla: 'AGEO', sector: 'Minero', color: '#a16207', fullKey: 'asistencia-geologia' },
+    // 13) Química e Industria (1)
+    'quimica-industrial':        { nombre: 'Química Industrial', sigla: 'QUI', sector: 'Química e Industria', color: '#15803d', fullKey: 'quimica-industrial' },
+    // 14) Salud y Educación (2)
+    'atencion-enfermeria':       { nombre: 'Atención de Enfermería', sigla: 'AE', sector: 'Salud y Educación', color: '#d946ef', fullKey: 'atencion-enfermeria' },
+    'atencion-parvulos':         { nombre: 'Atención de Párvulos', sigla: 'AP', sector: 'Salud y Educación', color: '#c026d3', fullKey: 'atencion-parvulos' },
+    // 15) Tecnología y Comunicaciones (3)
+    'conectividad-redes':        { nombre: 'Conectividad y Redes', sigla: 'CR', sector: 'Tecnología y Comunicaciones', color: '#2563eb', fullKey: 'conectividad-redes' },
+    'programacion':              { nombre: 'Programación', sigla: 'PROG', sector: 'Tecnología y Comunicaciones', color: '#1d4ed8', fullKey: 'programacion' },
+    'telecomunicaciones':        { nombre: 'Telecomunicaciones', sigla: 'TEL', sector: 'Tecnología y Comunicaciones', color: '#06b6d4', fullKey: 'telecomunicaciones' }
   };
 
   // Alias para retrocompatibilidad con valores ya guardados en Firestore
   var TP_ALIASES = {
-    'automotriz': 'mecanica-automotriz',
-    'mecanica':   'mecanica-industrial',
-    'industrial': 'mecanica-industrial'
+    'automotriz':                 'mecanica-automotriz',
+    'mecanica':                   'mecanica-industrial',
+    'industrial':                 'mecanica-industrial',
+    // Unificación: especialidades que pasaron a ser menciones o cambiaron de nombre.
+    'edificacion':                'construccion',
+    'terminaciones-construccion': 'construccion',
+    'atencion-adulto-mayor':      'atencion-enfermeria',
+    'logistica':                  'administracion',
+    'productos-madera':           'muebles-madera',
+    'operacion-plantas-quimicas': 'quimica-industrial',
+    // Especialidades retiradas del currículo en la reforma DS 452/2013.
+    'secretariado':               'administracion',
+    'ventas':                     'administracion',
+    'tejido':                     'vestuario-confeccion'
   };
 
   function _resolveEspKey(key) {
@@ -1413,116 +1470,96 @@ var CURRICULA_CHILE = (function() {
       return [];
     },
 
-    // ─────────────────────────────────────────────────────────────────
-    //  ELECTIVOS HC 3°M-4°M (Plan Diferenciado, DS 193/2019)
-    //
-    //  Hay dos patrones de almacenamiento:
-    //    A) NESTED  — CURRICULA_PLAN_COMUN[parent].electivos[key]
-    //         (matematica, lenguaje, biologia, fisica, quimica, musica,
-    //          filosofia, ed-fisica)
-    //    B) TOP-LVL — CURRICULA_PLAN_COMUN[key]
-    //         (historia → chile-latam, mundo-global, geografia-territorio,
-    //          economia-sociedad ; artes → artes-hc, diseno-arquitectura,
-    //          artes-escenicas)
-    //
-    //  Para distinguirlos sin colisión usamos una "key compuesta":
-    //    · nested → 'parent:local'   ej: 'matematica:geometria3d'
-    //    · top    → 'top'            ej: 'chile-latam'
-    // ─────────────────────────────────────────────────────────────────
-    _ELECTIVOS_TOP_PARENT: {
-      'chile-latam'         : 'historia',
-      'mundo-global'        : 'historia',
-      'geografia-territorio': 'historia',
-      'economia-sociedad'   : 'historia',
-      'artes-hc'            : 'artes',
-      'diseno-arquitectura' : 'artes',
-      'artes-escenicas'     : 'artes'
+    _NOMBRE_CANONICO: {
+      'lenguaje y comunicación':'Lenguaje y Comunicación','lenguaje y comunicacion':'Lenguaje y Comunicación','lengua y literatura':'Lenguaje y Comunicación',
+      'tecnología':'Tecnología','tecnologia':'Tecnología','educación tecnológica':'Tecnología','educacion tecnologica':'Tecnología',
+      'orientación':'Orientación','orientacion':'Orientación','orientación y bienestar':'Orientación','orientacion y bienestar':'Orientación',
+      'historia, geografía y cs':'Historia, Geografía y CS','historia, geografia y cs':'Historia, Geografía y CS','historia, geografía y ciencias sociales':'Historia, Geografía y CS',
+      'matemática':'Matemática','matematica':'Matemática',
+      'ciencias naturales':'Ciencias Naturales',
+      'biología':'Biología','biologia':'Biología',
+      'física':'Física','fisica':'Física',
+      'química':'Química','quimica':'Química',
+      'inglés':'Inglés','ingles':'Inglés',
+      'educación física':'Educación Física','educacion fisica':'Educación Física','educación física y salud':'Educación Física',
+      'artes visuales':'Artes Visuales','música':'Música','musica':'Música',
+      'filosofía':'Filosofía','filosofia':'Filosofía',
+      'educación ciudadana':'Educación Ciudadana','educacion ciudadana':'Educación Ciudadana',
+      'ciencias para la ciudadanía':'Ciencias para la Ciudadanía','ciencias para la ciudadania':'Ciencias para la Ciudadanía'
     },
 
-    /**
-     * Lista los electivos HC disponibles para una asignatura padre.
-     * @param {string} asigSigla - sigla de la asignatura padre (MAT, HIS, BIO, …)
-     * @returns {Array<{key,nombre,sigla,niveles}>}
-     */
+    nombreAsignaturaCanonico: function(nombre) {
+      if (!nombre) return nombre;
+      var k = String(nombre).trim().toLowerCase();
+      return this._NOMBRE_CANONICO[k] || nombre;
+    },
+
+    getAsignaturasUnificadas: function(tramos) {
+      if (!tramos || !tramos.length) tramos = ['basica','media'];
+      var self = this; var seen = {}; var out = [];
+      tramos.forEach(function(t) {
+        var lista = self.getAsignaturas(t) || [];
+        lista.forEach(function(a) {
+          var canon = self.nombreAsignaturaCanonico(a.nombre);
+          if (seen[canon]) {
+            (a.niveles || []).forEach(function(n) { if (seen[canon].niveles.indexOf(n) === -1) seen[canon].niveles.push(n); });
+            return;
+          }
+          var entry = { nombre: canon, sigla: a.sigla, color: a.color, niveles: (a.niveles || []).slice() };
+          seen[canon] = entry; out.push(entry);
+        });
+      });
+      var ORDER = ['1B','2B','3B','4B','5B','6B','7B','8B','1M','2M','3M','4M'];
+      out.forEach(function(e) { e.niveles.sort(function(a,b){ return ORDER.indexOf(a) - ORDER.indexOf(b); }); });
+      return out;
+    },
+
+    _ELECTIVOS_TOP_PARENT: {
+      'chile-latam':'historia','mundo-global':'historia','geografia-territorio':'historia','economia-sociedad':'historia',
+      'artes-hc':'artes','diseno-arquitectura':'artes','artes-escenicas':'artes'
+    },
+
     getElectivosHC: function(asigSigla) {
       if (typeof window === 'undefined' || !window.CURRICULA_PLAN_COMUN) return [];
-      var PC = window.CURRICULA_PLAN_COMUN;
-      var self = this;
-      var keyPadre = self._siglaToPlanComunKey(asigSigla);
-      var result = [];
-
-      // Patrón A — nested electivos en el objeto padre
+      var PC = window.CURRICULA_PLAN_COMUN; var self = this;
+      var keyPadre = self._siglaToPlanComunKey(asigSigla); var result = [];
       if (PC[keyPadre] && PC[keyPadre].electivos && typeof PC[keyPadre].electivos === 'object') {
         Object.keys(PC[keyPadre].electivos).forEach(function(elKey) {
           var el = PC[keyPadre].electivos[elKey];
           if (!el || typeof el !== 'object' || !el.nombre) return;
-          result.push({
-            key:     keyPadre + ':' + elKey,
-            nombre:  el.nombre,
-            sigla:   el.sigla || elKey.toUpperCase(),
-            niveles: el.niveles || ['3M','4M']
-          });
+          result.push({ key: keyPadre+':'+elKey, nombre: el.nombre, sigla: el.sigla || elKey.toUpperCase(), niveles: el.niveles || ['3M','4M'] });
         });
       }
-
-      // Patrón B — entradas top-level que pertenecen a este padre
       Object.keys(self._ELECTIVOS_TOP_PARENT).forEach(function(elKey) {
         if (self._ELECTIVOS_TOP_PARENT[elKey] !== keyPadre) return;
         if (!PC[elKey] || !PC[elKey].nombre) return;
-        result.push({
-          key:     elKey,
-          nombre:  PC[elKey].nombre,
-          sigla:   PC[elKey].sigla || elKey.toUpperCase(),
-          niveles: PC[elKey].niveles || ['3M','4M']
-        });
+        result.push({ key: elKey, nombre: PC[elKey].nombre, sigla: PC[elKey].sigla || elKey.toUpperCase(), niveles: PC[elKey].niveles || ['3M','4M'] });
       });
-
       return result;
     },
 
-    /**
-     * Devuelve OAs de un electivo HC por su key compuesta.
-     * @param {string} key - 'parent:local' (nested) o 'top-key' (top-level)
-     * @param {string} nivel - '3M' o '4M'
-     */
     getOAsByKey: function(key, nivel) {
       if (typeof window === 'undefined' || !window.CURRICULA_PLAN_COMUN) return [];
       if (!key || !nivel) return [];
-      var PC = window.CURRICULA_PLAN_COMUN;
-      var src = null;
+      var PC = window.CURRICULA_PLAN_COMUN; var src = null;
       if (key.indexOf(':') !== -1) {
-        var parts = key.split(':');
-        var p = PC[parts[0]];
+        var parts = key.split(':'); var p = PC[parts[0]];
         if (p && p.electivos && p.electivos[parts[1]]) src = p.electivos[parts[1]];
-      } else if (PC[key]) {
-        src = PC[key];
-      }
+      } else if (PC[key]) { src = PC[key]; }
       if (!src || !src.oas || !Array.isArray(src.oas[nivel])) return [];
       return src.oas[nivel].map(function(o){
-        return {
-          codigo:      o.codigo,
-          descripcion: o.descripcion || o.desc || '',
-          desc:        o.desc || o.descripcion || '',
-          eje:         o.eje || 'General'
-        };
+        return { codigo: o.codigo, descripcion: o.descripcion || o.desc || '', desc: o.desc || o.descripcion || '', eje: o.eje || 'General' };
       });
     },
 
-    /**
-     * Devuelve unidades de un electivo HC por su key compuesta.
-     */
     getUnidadesByKey: function(key, nivel) {
       if (typeof window === 'undefined' || !window.CURRICULA_PLAN_COMUN) return [];
       if (!key || !nivel) return [];
-      var PC = window.CURRICULA_PLAN_COMUN;
-      var src = null;
+      var PC = window.CURRICULA_PLAN_COMUN; var src = null;
       if (key.indexOf(':') !== -1) {
-        var parts = key.split(':');
-        var p = PC[parts[0]];
+        var parts = key.split(':'); var p = PC[parts[0]];
         if (p && p.electivos && p.electivos[parts[1]]) src = p.electivos[parts[1]];
-      } else if (PC[key]) {
-        src = PC[key];
-      }
+      } else if (PC[key]) { src = PC[key]; }
       if (!src || !src.unidades || !src.unidades[nivel]) return [];
       return src.unidades[nivel];
     },
@@ -1626,132 +1663,6 @@ var CURRICULA_CHILE = (function() {
       var key = _resolveEspKey(sectorKey);
       if (!key) return [];
       var sec = this.especialidades[key];
-      if (!sec) return [];
-      var mods = [];
-      (sec.especialidades || []).forEach(function(esp) {
-        (esp.modulos || []).forEach(function(m) { mods.push(m); });
-      });
-      return mods;
-    },
-
-    getAllNiveles: function() {
-      return ['1B','2B','3B','4B','5B','6B','7B','8B','1M','2M','3M','4M'];
-    },
-
-    getNivelLabel: function(nivel) {
-      var map = {
-        '1B':'1° Básico','2B':'2° Básico','3B':'3° Básico','4B':'4° Básico',
-        '5B':'5° Básico','6B':'6° Básico','7B':'7° Básico','8B':'8° Básico',
-        '1M':'1° Medio','2M':'2° Medio','3M':'3° Medio','4M':'4° Medio'
-      };
-      return map[nivel] || nivel;
-    },
-
-    // Retorna array [{key, nombre, sector, color}] para poblar selectores TP.
-    // Solo incluye especialidades con datos cargados (CURRICULA_FULL presente);
-    // si CURRICULA_FULL no está cargado, retorna todo el catálogo igual (para
-    // que selectores de admin sigan funcionando aún sin datos reales).
-    getEspecialidades: function() {
-      var CF = (typeof window !== 'undefined' && window.CURRICULA_FULL) || null;
-      return Object.keys(TP_CATALOG).map(function(key) {
-        var meta = TP_CATALOG[key];
-        return {
-          key:       key,
-          nombre:    meta.nombre,
-          sector:    meta.sector,
-          color:     meta.color,
-          hasData:   !!(CF && CF[meta.fullKey])
-        };
-      });
-    },
-
-    // Normaliza una clave de especialidad (maneja alias legacy como "automotriz")
-    resolveEspKey: function(key) { return _resolveEspKey(key); },
-
-    // Retorna un objeto compatible con MODULOS[] para un módulo TP por espKey y num
-    getModuloCompat: function(espKey, modNum) {
-      espKey = _resolveEspKey(espKey) || espKey;
-      var ceEstandar = {
-        'C1': { texto: 'Aplica procedimientos técnicos según normativa vigente y especificaciones del fabricante.', oag: ['A'] },
-        'C2': { texto: 'Usa correctamente herramientas e instrumentos de medición adecuados para el trabajo técnico.', oag: ['C'] },
-        'C3': { texto: 'Cumple estrictamente con las normas de seguridad laboral y prevención de riesgos en el área de trabajo.', oag: ['K'] },
-        'C4': { texto: 'Documenta y registra con precisión los trabajos realizados, completando informes técnicos.', oag: ['B'] },
-        'C5': { texto: 'Trabaja con responsabilidad, orden, limpieza y respeto en el puesto de trabajo y con sus compañeros.', oag: ['D'] }
-      };
-
-      var mods = this.getModulos(espKey);
-      var m = null;
-      for (var i = 0; i < mods.length; i++) {
-        if (mods[i].num === modNum) { m = mods[i]; break; }
-      }
-      if (!m) return null;
-
-      var oas = {};
-      var aes = {};
-      (m.aes || []).forEach(function(ae) {
-        var key = 'OA' + ae.num;
-        var textoCompleto = ae.texto || ae.nombre;
-        oas[key] = textoCompleto;
-        aes[key] = { texto: textoCompleto, ces: ceEstandar };
-      });
-
-      return {
-        num:    m.num,
-        nombre: m.nombre,
-        horas:  m.horas,
-        oas:    oas,
-        aes:    aes,
-        _fromCurricula: true,
-        _espKey: espKey
-      };
-    },
-
-    // Busca un módulo en TODAS las especialidades por su número (num).
-    // Útil cuando user.especialidad está vacío pero se conoce el número de módulo.
-    // Retorna objeto compatible con MODULOS[] o null.
-    getModuloCompatByNum: function(modNum) {
-      var esps = this.getEspecialidades();
-      for (var i = 0; i < esps.length; i++) {
-        var result = this.getModuloCompat(esps[i].key, modNum);
-        if (result) return result;
-      }
-      return null;
-    },
-
-    // Retorna todos los módulos de todas las especialidades (para listado general TP)
-    getAllModulos: function() {
-      var all = [];
-      var seen = {};
-      var esps = this.getEspecialidades();
-      for (var i = 0; i < esps.length; i++) {
-        var mods = this.getModulos(esps[i].key);
-        for (var j = 0; j < mods.length; j++) {
-          var key = esps[i].key + '_' + mods[j].num;
-          if (!seen[key]) {
-            seen[key] = true;
-            all.push({ espKey: esps[i].key, espNombre: esps[i].nombre, mod: mods[j] });
-          }
-        }
-      }
-      return all;
-    }
-  };
-
-  // `especialidades` se resuelve dinámicamente vía getter para capturar
-  // cargas diferidas de window.CURRICULA_FULL.  Fallback a objeto plano en
-  // entornos que no soporten defineProperty (muy improbable en targets).
-  try {
-    Object.defineProperty(api, 'especialidades', {
-      enumerable: true,
-      configurable: false,
-      get: function() { return _buildEspecialidades(); }
-    });
-  } catch (e) {
-    api.especialidades = _buildEspecialidades();
-  }
-
-  return api;
-})();
       if (!sec) return [];
       var mods = [];
       (sec.especialidades || []).forEach(function(esp) {
