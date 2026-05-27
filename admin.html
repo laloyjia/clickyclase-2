@@ -35,6 +35,8 @@
 <script src="js/firebase-config.js"></script>
 <script src="js/firebase-auth.js"></script>
 <script src="js/firebase-db.js"></script>
+<script src="js/presencia-logger.js"></script>
+<script>document.addEventListener('DOMContentLoaded',function(){ if(window.ELPresencia) ELPresencia.start('Panel admin'); });</script>
 <script src="js/colegios.js"></script>
 <!-- Datos curriculares TP por especialidad — cargan ANTES de curricula-chile.js -->
 <script src="js/curricula/tp/datos-electricidad.js"></script>
@@ -203,6 +205,10 @@ tr:hover td{background:rgba(99,102,241,.05)}
     <div class="nav-item" data-sec="planificaciones" onclick="showSec(this,'planificaciones')">
       <span>📅</span> Planificaciones
       <span id="sbCntPlans" style="margin-left:auto;background:rgba(16,185,129,.15);color:var(--green);font-size:.68rem;padding:1px 7px;border-radius:10px;font-weight:700"></span>
+    </div>
+    <div class="nav-item" data-sec="monitoreo" onclick="showSec(this,'monitoreo')">
+      <span>🟢</span> Monitoreo en vivo
+      <span id="sbCntOnline" style="margin-left:auto;background:rgba(34,197,94,.18);color:#86efac;font-size:.68rem;padding:1px 7px;border-radius:10px;font-weight:700"></span>
     </div>
     <div class="nav-item" data-sec="actividad" onclick="showSec(this,'actividad')">
       <span>📊</span> Registro de Actividad
@@ -461,6 +467,86 @@ tr:hover td{background:rgba(99,102,241,.05)}
           <tbody id="plansTbody"><tr><td colspan="6" style="text-align:center;color:var(--muted)">Cargando…</td></tr></tbody></table>
         </div>
       </div>
+    </section>
+
+    <!-- ═══════════════════ MONITOREO EN VIVO ═══════════════════ -->
+    <section id="sec-monitoreo" class="tab-section" style="display:none">
+      <div class="page-header">
+        <h1>🟢 Monitoreo en vivo</h1>
+        <p>Quién está conectado en este momento y qué eventos están ocurriendo en la plataforma — se actualiza solo.</p>
+      </div>
+
+      <!-- Stats arriba -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:20px">
+        <div class="card" style="padding:16px;text-align:center;border:1px solid rgba(34,197,94,.3)">
+          <div style="font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-weight:600">🟢 Online ahora</div>
+          <div id="monOnlineCount" style="font-size:2rem;font-weight:800;color:#86efac;margin-top:4px">0</div>
+        </div>
+        <div class="card" style="padding:16px;text-align:center">
+          <div style="font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-weight:600">Eventos últimos 5 min</div>
+          <div id="monEvt5min" style="font-size:2rem;font-weight:800;color:var(--cyan);margin-top:4px">0</div>
+        </div>
+        <div class="card" style="padding:16px;text-align:center">
+          <div style="font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-weight:600">Generaciones hoy</div>
+          <div id="monGenHoy" style="font-size:2rem;font-weight:800;color:#fbbf24;margin-top:4px">0</div>
+        </div>
+      </div>
+
+      <!-- ── Online ahora ── -->
+      <div class="card" style="margin-bottom:20px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+          <h3 style="margin:0;display:flex;align-items:center;gap:8px">
+            <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#22c55e;box-shadow:0 0 0 3px rgba(34,197,94,.25);animation:monPulse 2s infinite"></span>
+            Profesores online ahora
+          </h3>
+          <span style="font-size:.72rem;color:var(--muted);margin-left:auto">Latido cada 30 s · online = activo en los últimos 2 min</span>
+        </div>
+        <div id="monOnlineList" style="display:grid;gap:8px"></div>
+      </div>
+
+      <!-- ── Feed de eventos en vivo ── -->
+      <div class="card">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+          <h3 style="margin:0">📡 Feed de eventos en vivo</h3>
+          <select id="monFiltroTipo" onchange="aplicarFiltroFeed()" style="margin-left:auto;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:6px 10px;color:var(--text);font-size:.78rem">
+            <option value="">Todos los tipos</option>
+            <option value="login">Logins</option>
+            <option value="logout">Logouts</option>
+            <option value="generar_">Generaciones (material/planificación)</option>
+            <option value="guardar_">Guardados (libro de clases)</option>
+            <option value="descargar_">Descargas</option>
+            <option value="admin_">Eventos admin</option>
+          </select>
+          <span style="font-size:.72rem;color:var(--muted)">últimos 100 eventos</span>
+        </div>
+        <div id="monFeedList" style="display:grid;gap:6px;max-height:520px;overflow-y:auto"></div>
+      </div>
+
+      <style>
+        @keyframes monPulse {
+          0%   { box-shadow: 0 0 0 0 rgba(34,197,94,.55); }
+          70%  { box-shadow: 0 0 0 10px rgba(34,197,94,0); }
+          100% { box-shadow: 0 0 0 0 rgba(34,197,94,0); }
+        }
+        .mon-row {
+          display:flex; align-items:center; gap:10px; padding:10px 12px;
+          background:var(--surface2); border-radius:8px; border:1px solid var(--border);
+          font-size:.85rem;
+        }
+        .mon-row.entrando { animation: monEnter .6s ease-out; }
+        @keyframes monEnter {
+          from { transform: translateX(-12px); opacity: 0; background: rgba(34,197,94,.18); }
+          to   { transform: translateX(0); opacity: 1; }
+        }
+        .mon-dot {
+          width:8px; height:8px; border-radius:50%; flex-shrink:0;
+        }
+        .mon-tipo-badge {
+          font-size:.68rem; font-weight:700; padding:2px 8px; border-radius:6px;
+          background:rgba(99,102,241,.15); color:#a5b4fc; white-space:nowrap;
+        }
+        .mon-when { font-size:.72rem; color:var(--muted); margin-left:auto; white-space:nowrap; }
+      </style>
     </section>
 
     <!-- REGISTRO DE ACTIVIDAD (audit log) -->
@@ -991,6 +1077,7 @@ function showSec(el,id){
   if(id==='liceos'){_liceosLoaded=true;loadLiceos();}
   if(id==='actividad'){cargarActividad();}
   if(id==='comunicados'){loadComunicados();}
+  if(id==='monitoreo'){iniciarMonitoreo();}
 }
 
 // ============================================================
@@ -1038,6 +1125,192 @@ function eliminarComunicado(id){
   if(!id||!window.EL_DB) return;
   if(!confirm('¿Eliminar este comunicado? Dejará de verse en el panel de los profesores.')) return;
   EL_DB.collection('anuncios').doc(id).delete().then(loadComunicados).catch(function(){});
+}
+
+// ════════════════════════════════════════════════════════════════
+//  MONITOREO EN VIVO — usuarios online + feed de eventos
+//  Usa onSnapshot (polling 8s) sobre usuarios y actividad.
+// ════════════════════════════════════════════════════════════════
+var _monUnsubOnline = null;
+var _monUnsubFeed   = null;
+var _monStarted     = false;
+var _monFeedCache   = [];        // ids ya renderizados (para animar entrantes)
+var _monFiltroTipo  = '';
+
+function _monEsc(s){ return String(s==null?'':s).replace(/[<>&]/g,function(c){return {'<':'&lt;','>':'&gt;','&':'&amp;'}[c];}); }
+
+function _monHaceCuanto(tsNum){
+  if(!tsNum) return '';
+  var d = Math.max(0, Date.now() - Number(tsNum));
+  var s = Math.floor(d/1000);
+  if(s < 60)        return 'hace '+s+' s';
+  var m = Math.floor(s/60);
+  if(m < 60)        return 'hace '+m+' min';
+  var h = Math.floor(m/60);
+  if(h < 24)        return 'hace '+h+' h';
+  return 'hace '+Math.floor(h/24)+' d';
+}
+function _monParseTs(u){
+  // Soporta tsNum, lastSeenNum, o lastSeen ISO
+  if(u.tsNum)        return Number(u.tsNum);
+  if(u.lastSeenNum)  return Number(u.lastSeenNum);
+  if(u.lastSeen)     return Date.parse(u.lastSeen);
+  if(u.ts)           return Date.parse(u.ts);
+  return 0;
+}
+function _monColorTipo(tipo){
+  if(!tipo) return ['rgba(99,102,241,.15)','#a5b4fc'];
+  if(tipo.indexOf('login_fallido')===0||tipo.indexOf('alerta_')===0) return ['rgba(248,113,113,.18)','#fca5a5'];
+  if(tipo.indexOf('login')===0)                                       return ['rgba(34,197,94,.18)','#86efac'];
+  if(tipo.indexOf('logout')===0)                                      return ['rgba(148,163,184,.22)','#cbd5e1'];
+  if(tipo.indexOf('generar_')===0)                                    return ['rgba(251,191,36,.18)','#fcd34d'];
+  if(tipo.indexOf('crear_planificacion')===0||tipo.indexOf('editar_planificacion')===0)
+                                                                       return ['rgba(34,211,238,.18)','#67e8f9'];
+  if(tipo.indexOf('descargar_')===0)                                  return ['rgba(244,114,182,.18)','#f9a8d4'];
+  if(tipo.indexOf('admin_')===0)                                      return ['rgba(168,85,247,.18)','#d8b4fe'];
+  if(tipo.indexOf('guardar_')===0)                                    return ['rgba(16,185,129,.18)','#6ee7b7'];
+  return ['rgba(99,102,241,.15)','#a5b4fc'];
+}
+function _monTipoLabel(e){
+  if(e.tipoLabel) return e.tipoLabel;
+  if(typeof ELDB!=='undefined' && ELDB.actividad && ELDB.actividad.TIPOS && ELDB.actividad.TIPOS[e.tipo])
+    return ELDB.actividad.TIPOS[e.tipo];
+  return e.tipo || 'evento';
+}
+function _monDetalles(e){
+  var m = e.meta || e.detalles || {};
+  var parts = [];
+  if(m.asignatura)  parts.push(m.asignatura);
+  if(m.curso)       parts.push(m.curso);
+  if(m.tipoDoc)     parts.push(m.tipoDoc);
+  if(m.tipoNombre)  parts.push(m.tipoNombre);
+  if(m.titulo)      parts.push('"'+String(m.titulo).slice(0,40)+'"');
+  return parts.join(' · ');
+}
+
+function iniciarMonitoreo(){
+  if(_monStarted) return;
+  _monStarted = true;
+  if(!window.EL_DB){
+    document.getElementById('monOnlineList').innerHTML = '<p style="color:#f87171">Base de datos no disponible.</p>';
+    return;
+  }
+
+  // ── 1. Usuarios online (lastSeen últimos 2 min) ──
+  _monUnsubOnline = EL_DB.collection('usuarios').onSnapshot(function(snap){
+    var ahora = Date.now();
+    var UMBRAL = 2*60*1000;
+    var onlines = [];
+    snap.forEach(function(d){
+      var u = d.data() || {};
+      u._id = d.id;
+      var ts = _monParseTs(u);
+      if(ts && (ahora - ts) <= UMBRAL){
+        u._tsNum = ts;
+        onlines.push(u);
+      }
+    });
+    onlines.sort(function(a,b){ return b._tsNum - a._tsNum; });
+
+    document.getElementById('monOnlineCount').textContent = onlines.length;
+    var badge = document.getElementById('sbCntOnline');
+    if(badge) badge.textContent = onlines.length || '';
+
+    var list = document.getElementById('monOnlineList');
+    if(!onlines.length){
+      list.innerHTML = '<div style="padding:24px;text-align:center;color:var(--muted)">😴 Nadie conectado en este momento.</div>';
+      return;
+    }
+    list.innerHTML = onlines.map(function(u){
+      var nombre = u.nombre || u.displayName || (u.email||'').split('@')[0] || 'Usuario';
+      var pag    = u.currentPageLabel || (u.currentPage ? u.currentPage.replace(/\.html$/,'') : '—');
+      var rolBg  = u.role==='admin' ? 'rgba(168,85,247,.18)' : 'rgba(34,197,94,.18)';
+      var rolFg  = u.role==='admin' ? '#d8b4fe' : '#86efac';
+      return '<div class="mon-row">'+
+        '<span class="mon-dot" style="background:#22c55e;box-shadow:0 0 0 3px rgba(34,197,94,.25)"></span>'+
+        '<div style="display:flex;flex-direction:column;gap:2px;min-width:0">'+
+          '<strong style="font-size:.9rem">'+_monEsc(nombre)+'</strong>'+
+          '<span style="font-size:.72rem;color:var(--muted)">'+_monEsc(u.email||'')+'</span>'+
+        '</div>'+
+        '<span style="font-size:.68rem;font-weight:700;padding:2px 8px;border-radius:6px;background:'+rolBg+';color:'+rolFg+';text-transform:uppercase">'+_monEsc(u.role||'usuario')+'</span>'+
+        '<span style="font-size:.78rem;color:#cbd5e1;background:var(--surface);padding:3px 9px;border-radius:6px;border:1px solid var(--border)">📄 '+_monEsc(pag)+'</span>'+
+        '<span class="mon-when">'+_monHaceCuanto(u._tsNum)+'</span>'+
+      '</div>';
+    }).join('');
+  });
+
+  // ── 2. Feed de eventos (últimos 100 ordenados por tsNum desc) ──
+  _monUnsubFeed = EL_DB.collection('actividad').orderBy('tsNum','desc').limit(100).onSnapshot(function(snap){
+    var items = [];
+    snap.forEach(function(d){ var e = d.data() || {}; e._id = d.id; items.push(e); });
+    _renderMonFeed(items);
+  });
+}
+
+function _renderMonFeed(items){
+  // Stats
+  var ahora = Date.now();
+  var hace5 = ahora - 5*60*1000;
+  var inicioHoy = new Date(); inicioHoy.setHours(0,0,0,0);
+  var hoyNum = inicioHoy.getTime();
+  var n5min=0, nGenHoy=0;
+  items.forEach(function(e){
+    var t = e.tsNum || (e.ts ? Date.parse(e.ts) : 0);
+    if(t >= hace5)  n5min++;
+    if(t >= hoyNum && String(e.tipo||'').indexOf('generar_')===0) nGenHoy++;
+  });
+  document.getElementById('monEvt5min').textContent  = n5min;
+  document.getElementById('monGenHoy').textContent   = nGenHoy;
+
+  // Filtrar
+  var filtrados = items;
+  if(_monFiltroTipo){
+    if(_monFiltroTipo.slice(-1)==='_'){
+      filtrados = items.filter(function(e){ return String(e.tipo||'').indexOf(_monFiltroTipo)===0; });
+    } else {
+      filtrados = items.filter(function(e){ return e.tipo===_monFiltroTipo; });
+    }
+  }
+
+  var list = document.getElementById('monFeedList');
+  if(!filtrados.length){
+    list.innerHTML = '<div style="padding:24px;text-align:center;color:var(--muted)">📭 Sin eventos para este filtro.</div>';
+    _monFeedCache = [];
+    return;
+  }
+
+  var nuevos = {};
+  filtrados.forEach(function(e){ nuevos[e._id] = 1; });
+
+  list.innerHTML = filtrados.map(function(e){
+    var c = _monColorTipo(e.tipo);
+    var tipoLabel = _monTipoLabel(e);
+    var detalles  = _monDetalles(e);
+    var quien     = e.userNombre || e.nombre || (e.userEmail||e.email||'').split('@')[0] || 'Anónimo';
+    var esNuevo   = _monFeedCache.length && (_monFeedCache.indexOf(e._id)===-1);
+    var ts = e.tsNum || (e.ts ? Date.parse(e.ts) : 0);
+    return '<div class="mon-row'+(esNuevo?' entrando':'')+'">'+
+      '<span class="mon-tipo-badge" style="background:'+c[0]+';color:'+c[1]+'">'+_monEsc(tipoLabel)+'</span>'+
+      '<strong style="font-size:.85rem">'+_monEsc(quien)+'</strong>'+
+      (detalles ? '<span style="font-size:.78rem;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+_monEsc(detalles)+'</span>' : '')+
+      '<span class="mon-when">'+_monHaceCuanto(ts)+'</span>'+
+    '</div>';
+  }).join('');
+
+  _monFeedCache = Object.keys(nuevos);
+}
+
+function aplicarFiltroFeed(){
+  var sel = document.getElementById('monFiltroTipo');
+  _monFiltroTipo = sel ? sel.value : '';
+  // Forzamos re-render con la caché actual
+  if(_monUnsubFeed && window.EL_DB){
+    EL_DB.collection('actividad').orderBy('tsNum','desc').limit(100).get().then(function(snap){
+      var items = [];
+      snap.forEach(function(d){ var e=d.data()||{}; e._id=d.id; items.push(e); });
+      _renderMonFeed(items);
+    });
+  }
 }
 
 // ============================================================

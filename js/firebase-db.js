@@ -613,7 +613,11 @@ var ELDB = (function() {
     'admin_cambiar_apikey':        'Admin: cambi\u00f3 API key IA',
     'visita_pagina':               'Visit\u00f3 p\u00e1gina',
     'alerta_seguridad':            'Alerta de seguridad',
-    'sistema_purga':               'Sistema: purga autom\u00e1tica'
+    'sistema_purga':               'Sistema: purga autom\u00e1tica',
+    'guardar_nomina':              'Guard\u00f3 n\u00f3mina de curso',
+    'guardar_notas':               'Guard\u00f3 libro de notas',
+    'guardar_asistencia':          'Guard\u00f3 asistencia',
+    'refinar_material_ia':         'Refin\u00f3 material con IA'
   };
 
   var actividad = {

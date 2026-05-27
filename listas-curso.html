@@ -184,6 +184,8 @@
 <script src="js/firebase-config.js"></script>
 <script src="js/firebase-auth.js"></script>
 <script src="js/firebase-db.js"></script>
+<script src="js/presencia-logger.js"></script>
+<script>document.addEventListener('DOMContentLoaded',function(){ if(window.ELPresencia) ELPresencia.start('Libro de clases'); });</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 
@@ -373,6 +375,7 @@
       estudiantes:_lista, actualizadoEn:new Date().toISOString()
     }).then(function(){
       setDirtyN(false); setStatus('statusN','✓ Nómina guardada.','#34d399'); btn.disabled=false;
+      try { if (typeof ELDB!=='undefined' && ELDB.actividad) ELDB.actividad.log('guardar_nomina',{curso:_curso, estudiantes:_lista.length}); } catch (e) {}
       renderNotas();
     }).catch(function(e){ setStatus('statusN','Error al guardar: '+((e&&e.message)||e),'#f87171'); btn.disabled=false; });
   };
@@ -493,6 +496,7 @@
       evaluaciones:_evals, notas:_notas, actualizadoEn:new Date().toISOString()
     }).then(function(){
       setDirtyG(false); setStatus('statusG','✓ Notas guardadas.','#34d399'); btn.disabled=false;
+      try { if (typeof ELDB!=='undefined' && ELDB.actividad) ELDB.actividad.log('guardar_notas',{curso:_curso, evaluaciones:_evals.length, semestre:_sem}); } catch (e) {}
     }).catch(function(e){ setStatus('statusG','Error al guardar: '+((e&&e.message)||e),'#f87171'); btn.disabled=false; });
   };
 
@@ -609,6 +613,7 @@
       registros:_asis, actualizadoEn:new Date().toISOString()
     }).then(function(){
       setDirtyA(false); setStatus('statusA','✓ Asistencia guardada.','#34d399'); btn.disabled=false;
+      try { if (typeof ELDB!=='undefined' && ELDB.actividad) ELDB.actividad.log('guardar_asistencia',{curso:_curso, dias:Object.keys(_asis||{}).length}); } catch (e) {}
     }).catch(function(e){ setStatus('statusA','Error al guardar: '+((e&&e.message)||e),'#f87171'); btn.disabled=false; });
   };
 
