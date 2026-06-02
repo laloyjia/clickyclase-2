@@ -531,18 +531,23 @@ CURRICULA_FULL['electronica'] = {
 
 },
 
-  // ── Objetivos de Aprendizaje Genéricos ──────────────────────
+  // ── Objetivos de Aprendizaje Genéricos (OAG) ─────────────────
+  // Definiciones OFICIALES Mineduc (Decreto Supremo de Educación)
+  // aplicables a todas las especialidades TP/EMTP. No modificar.
   oag: {
-  'A': 'Analizar información técnica de diversas fuentes para sustentar decisiones y procedimientos en el trabajo electrónico.',
-  'B': 'Aplicar correctamente procedimientos, técnicas y protocolos en el trabajo con equipos y sistemas electrónicos.',
-  'C': 'Usar herramientas, instrumentos y equipos con destreza y seguridad, considerando las especificaciones técnicas.',
-  'D': 'Planificar y organizar el trabajo técnico con eficiencia, estableciendo prioridades y recursos necesarios.',
-  'F': 'Cumplir con las normas de seguridad laboral y prevención de riesgos en todos los procedimientos técnicos.',
-  'H': 'Comunicar en forma clara y técnica los procesos, resultados y procedimientos realizados (oral y escrito).',
-  'I': 'Proponer mejoras, adaptaciones o innovaciones en sistemas o procesos electrónicos con perspectiva de eficiencia.',
-  'J': 'Emprender iniciativas útiles para el lugar de trabajo, actuando con proactividad y responsabilidad profesional.',
-  'K': 'Aplicar rigurosamente las normas de seguridad y verificar condiciones de riesgo antes y durante el trabajo.'
-}
+    'A': 'Comunicarse oralmente y por escrito con claridad, utilizando registros de habla y de escritura pertinentes a la situación laboral y a la relación con los interlocutores.',
+    'B': 'Leer y utilizar distintos tipos de textos relacionados con el trabajo, tales como especificaciones técnicas, normativas diversas, legislación laboral, así como noticias y artículos que enriquezcan su experiencia laboral.',
+    'C': 'Realizar las tareas de manera prolija, cumpliendo plazos establecidos y estándares de calidad, y buscando alternativas y soluciones cuando se presentan problemas pertinentes a las funciones desempeñadas.',
+    'D': 'Trabajar eficazmente en equipo, coordinando acciones con otros in situ o a distancia, solicitando y prestando cooperación para el buen cumplimiento de sus tareas habituales o emergentes.',
+    'E': 'Tratar con respeto a subordinados, superiores, colegas, clientes, personas con discapacidades, sin hacer distinciones de género, de clase social, de etnias u otras.',
+        'F': 'Respetar y solicitar respeto de deberes y derechos laborales establecidos, así como de aquellas normas culturales internas de la organización que influyen positivamente en el sentido de pertenencia y en la motivación laboral.',
+    'G': 'Participar en diversas situaciones de aprendizaje, formales e informales, y calificarse para desarrollar mejor su trabajo actual o bien para asumir nuevas tareas o puestos de trabajo, en una perspectiva de formación permanente.',
+    'H': 'Manejar tecnologías de la información y comunicación para obtener y procesar información pertinente al trabajo, así como para comunicar resultados, instrucciones e ideas.',
+    'I': 'Utilizar eficientemente los insumos para los procesos productivos y disponer cuidadosamente los desechos, en una perspectiva de eficiencia energética y cuidado ambiental.',
+    'J': 'Emprender iniciativas útiles en los lugares de trabajo y/o proyectos propios, aplicando principios básicos de gestión financiera y administración para generarles viabilidad.',
+    'K': 'Prevenir situaciones de riesgo y enfermedades ocupacionales, evaluando las condiciones del entorno del trabajo y utilizando los elementos de protección personal según la normativa correspondiente.',
+    'L': 'Tomar decisiones financieras bien informadas, con proyección a mediano y largo plazo, respecto del ahorro, especialmente del ahorro previsional, de los seguros, y de los riesgos y oportunidades del endeudamiento crediticio, así como de la inversión.'
+  }
 
 };
 
