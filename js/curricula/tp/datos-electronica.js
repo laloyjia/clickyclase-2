@@ -334,7 +334,7 @@ CURRICULA_FULL['electronica'] = {
 
   'EN7': {
     num: 'EN7',
-    nombre: 'OPERACIÓN Y PROGRAMACIÓN DE EQUIPOS DE CONTROL ELECTRICO INDUSTRIAL',
+    nombre: 'Operación y programación de equipos de control eléctrico industrial',
     nivel: '4M',
     horas: 152,
     oas: {
@@ -342,39 +342,38 @@ CURRICULA_FULL['electronica'] = {
     },
     aes: {
       'OA1': {
-        texto: 'Configura y programa un PLC para el control de procesos industriales básicos, de acuerdo a requerimientos y especificaciones técnicas.',
+        texto: 'Opera sistemas de control eléctrico semiautomático, de acuerdo a requerimientos del equipo, considerando la normativa eléctrica vigente.',
         ces: {
-          '1.1': { texto: 'Identifica la arquitectura del PLC (CPU, módulos E/S, rack, fuente de poder) y sus periféricos, reconociendo la función de cada elemento según manuales del fabricante.', oag: ['B'] },
-          '1.2': { texto: 'Selecciona el lenguaje de programación apropiado (Ladder, FBD, ST) según los requerimientos del proceso, considerando norma IEC 61131-3.', oag: ['B'] },
-          '1.3': { texto: 'Programa secuencias de control lógico utilizando contactos, bobinas, temporizadores y contadores, verificando el cumplimiento de los requerimientos del proceso.', oag: ['B'] },
-          '1.4': { texto: 'Carga y prueba el programa en el PLC, verificando el correcto funcionamiento mediante simulación y ejecución real, respetando normas de seguridad.', oag: ['K'] }
+          '1.1': { texto: 'Busca información en manuales acerca del funcionamiento de sistemas de control semiautomáticos, la estructura y especificaciones técnicas de operación.', oag: ['B', 'H'] },
+          '1.2': { texto: 'Selecciona los dispositivos y componentes utilizados en el control eléctrico semiautomáticos, de acuerdo a los requerimientos del proyecto y especificaciones técnicas.', oag: ['B'] },
+          '1.3': { texto: 'Monta equipos de control eléctrico, utilizados en diversos procesos industriales, de acuerdo a planos y requerimientos propios del proyecto.', oag: ['B'] },
+          '1.4': { texto: 'Cambia los parámetros en circuitos eléctricos semiautomáticos, según requerimientos operacionales del equipo o planta y la normativa eléctrica vigente.', oag: ['B', 'C'] },
+          '1.5': { texto: 'Realiza pruebas de funcionamiento, haciendo uso de instrumentos, aplicando medidas de seguridad personal.', oag: ['K'] }
         }
       },
       'OA2': {
-        texto: 'Conecta y configura sensores y actuadores a sistemas de control con PLC, según proyecto y especificaciones técnicas.',
+        texto: 'Modifica circuitos de control eléctrico, según requerimientos operacionales de la planta y la normativa eléctrica vigente.',
         ces: {
-          '2.1': { texto: 'Identifica y selecciona sensores (inductivos, capacitivos, ópticos, de temperatura) y actuadores (motores, electroválvulas, variadores) según requerimientos del proceso.', oag: ['B'] },
-          '2.2': { texto: 'Cablea y configura las entradas y salidas del PLC, respetando la normativa eléctrica, ambiental y de seguridad industrial.', oag: ['C'] },
-          '2.3': { texto: 'Verifica señales de entrada y salida del sistema de control, empleando instrumentos de medición y software de monitoreo.', oag: ['K'] },
-          '2.4': { texto: 'Elabora informes técnicos referidos a la instalación y configuración del sistema de automatización, comunicando en forma clara y precisa los trabajos realizados.', oag: ['A'] }
+          '2.1': { texto: 'Selecciona los dispositivos y componentes utilizados en el control eléctrico automático, de acuerdo a los requerimientos del proyecto y especificaciones técnicas.', oag: ['B'] },
+          '2.2': { texto: 'Monta equipos de control eléctrico automáticos, utilizados en diversos procesos industriales, de acuerdo a planos y requerimientos propios del proyecto.', oag: ['B'] },
+          '2.3': { texto: 'Regula parámetros en circuitos eléctricos automáticos, considerando los tipos de sensores conectados, según requerimientos operacionales de la planta, respetando normativas vigentes.', oag: ['B'] }
         }
       },
       'OA3': {
-        texto: 'Opera y diagnostica fallas en sistemas de automatización industrial con PLC, de acuerdo a especificaciones técnicas y protocolos establecidos.',
+        texto: 'Conecta y programa equipos de control eléctrico, utilizados para el arranque y protección de procesos y maquinarias según requerimientos del proyecto.',
         ces: {
-          '3.1': { texto: 'Opera el sistema de automatización, monitoreando variables del proceso mediante la interfaz HMI o software SCADA básico, según protocolos establecidos.', oag: ['B'] },
-          '3.2': { texto: 'Diagnostica fallas en el sistema PLC y en los elementos periféricos, aplicando metodologías sistemáticas de detección de averías.', oag: ['B'] },
-          '3.3': { texto: 'Modifica o ajusta el programa del PLC para corregir fallas o mejorar el desempeño del proceso, respetando procedimientos de cambio documentados.', oag: ['B'] },
-          '3.4': { texto: 'Realiza pruebas de funcionamiento del sistema de automatización completo, aplicando protocolos de puesta en marcha y verificando parámetros de seguridad.', oag: ['B'] }
+          '3.1': { texto: 'Interviene sistemas de partida suave e inversión de giro para máquinas industriales, previendo situaciones de riesgo.', oag: ['K'] },
+          '3.2': { texto: 'Opera sistemas de control eléctrico programable, configurando equipos y sistemas de control de potencia, según requerimientos del proyecto e información técnica.', oag: ['B'] },
+          '3.3': { texto: 'Conecta, programa y modifica sistemas de control eléctrico según requerimientos del proceso, basándose en las especificaciones técnicas de cada fabricante.', oag: ['B'] }
         }
       },
       'OA4': {
-        texto: 'Documenta y evalúa proyectos de automatización con PLC, comunicando resultados técnicos en forma clara, precisa y fundamentada.',
+        texto: 'Arma tableros de control y de fuerza considerando las características de los equipos y dispositivos industriales a modificar o programar, según planos y normativas vigentes.',
         ces: {
-          '4.1': { texto: 'Elabora informe técnico del sistema de automatización programado, incluyendo descripción funcional, diagrama de conexiones, programa comentado y resultados de pruebas.', oag: ['A'] },
-          '4.2': { texto: 'Registra y justifica las modificaciones realizadas al programa del PLC durante el proceso de puesta en marcha, manteniendo trazabilidad del desarrollo.', oag: ['H'] },
-          '4.3': { texto: 'Evalúa el desempeño del sistema de automatización en relación a los requerimientos originales, identificando logros, limitaciones y propuestas de mejora.', oag: ['B'] },
-          '4.4': { texto: 'Presenta el sistema de automatización implementado ante pares o personal técnico, fundamentando las decisiones de programación y configuración adoptadas.', oag: ['H'] }
+          '4.1': { texto: 'Monta dispositivos y equipos electrónicos en tableros de control y de fuerza para máquinas industriales, siguiendo planos eléctricos, previendo situaciones de riesgo, haciendo uso correcto de herramientas, respetando la normativa vigente.', oag: ['K'] },
+          '4.2': { texto: 'Conecta los equipos y sistemas de control y de potencia, según requerimientos de cada equipo siguiendo instrucciones y de manuales técnicos.', oag: ['B'] },
+          '4.3': { texto: 'Configura y programa los equipos y sistemas de control y de potencia, según requerimientos del proyecto.', oag: ['B'] },
+          '4.5': { texto: 'Verifica el funcionamiento y puesta en marcha de tableros de control y de fuerza, haciendo uso de herramientas e instrumentos adecuados durante la revisión, respetando procedimientos establecidos para estas tareas.', oag: ['B'] }
         }
       }
     }
