@@ -2,120 +2,26 @@
 // DATOS CURRICULARES — Especialidad Ventas
 // Archivo: js/curricula/tp/datos-ventas.js
 //
-// Técnicas de venta, servicio al cliente y marketing
+// Estado: ESPECIALIDAD RETIRADA DEL CURRÍCULO MINEDUC (Reforma DS 452/2013).
+// Ventas pasó a ser una mención dentro de Administración.
+// Este archivo se mantiene como placeholder para retrocompatibilidad
+// de datos guardados antiguamente en Firestore con clave 'ventas'.
 //
-// Estado: PENDIENTE DE CARGA
-// Los módulos se agregan de a uno según programa Mineduc.
+// El alias 'ventas' → 'administracion' está declarado en
+// js/curricula-chile.js (TP_ALIASES). La función _resolveEspKey()
+// resuelve automáticamente el redireccionamiento.
 //
-// Estructura de cada módulo:
-//   num    → código oficial (ej. VE1)
-//   nombre → nombre completo del módulo
-//   nivel  → '3M' o '4M'
-//   horas  → horas pedagógicas según programa
-//   oas    → Objetivos de Aprendizaje  { 'OA1': 'texto...' }
-//   aes    → Aprendizajes Esperados    { 'OA1': { texto, ces: {} } }
+// NO se carga este archivo desde ningún HTML.
+// Si necesitas eliminarlo definitivamente, hazlo manualmente desde
+// el sistema de archivos.
 // =============================================
 
 window.CURRICULA_FULL = window.CURRICULA_FULL || {};
 
+// Entrada vacía solo por compatibilidad con código que asume que la clave existe.
+// El verdadero contenido vive en CURRICULA_FULL['administracion'] vía alias.
 CURRICULA_FULL['ventas'] = {
-
-  modulos: {
-
-    // ══════════════════════════════════════════════════════
-    // 3° MEDIO — Módulos pendientes de carga
-    // ══════════════════════════════════════════════════════
-    // 'VE1': {
-    //   num: 'VE1',
-    //   nombre: '— Pendiente —',
-    //   nivel: '3M',
-    //   horas: 0,
-    //   oas: {},
-    //   aes: {}
-    // },
-    // 'VE2': {
-    //   num: 'VE2',
-    //   nombre: '— Pendiente —',
-    //   nivel: '3M',
-    //   horas: 0,
-    //   oas: {},
-    //   aes: {}
-    // },
-    // 'VE3': {
-    //   num: 'VE3',
-    //   nombre: '— Pendiente —',
-    //   nivel: '3M',
-    //   horas: 0,
-    //   oas: {},
-    //   aes: {}
-    // },
-    // 'VE4': {
-    //   num: 'VE4',
-    //   nombre: '— Pendiente —',
-    //   nivel: '3M',
-    //   horas: 0,
-    //   oas: {},
-    //   aes: {}
-    // },
-
-    // ══════════════════════════════════════════════════════
-    // 4° MEDIO — Módulos pendientes de carga
-    // ══════════════════════════════════════════════════════
-    // 'VE5': {
-    //   num: 'VE5',
-    //   nombre: '— Pendiente —',
-    //   nivel: '4M',
-    //   horas: 0,
-    //   oas: {},
-    //   aes: {}
-    // },
-    // 'VE6': {
-    //   num: 'VE6',
-    //   nombre: '— Pendiente —',
-    //   nivel: '4M',
-    //   horas: 0,
-    //   oas: {},
-    //   aes: {}
-    // },
-    // 'VE7': {
-    //   num: 'VE7',
-    //   nombre: '— Pendiente —',
-    //   nivel: '4M',
-    //   horas: 0,
-    //   oas: {},
-    //   aes: {}
-    // },
-    // 'VE8': {
-    //   num: 'VE8',
-    //   nombre: '— Pendiente —',
-    //   nivel: '4M',
-    //   horas: 0,
-    //   oas: {},
-    //   aes: {}
-    // },
-    // 'VE9': {
-    //   num: 'VE9',
-    //   nombre: '— Pendiente —',
-    //   nivel: '4M',
-    //   horas: 0,
-    //   oas: {},
-    //   aes: {}
-    // },
-
-  },
-
-  // ── Objetivos de Aprendizaje Genéricos ──────────────────
-  // Completar con los OAG específicos de la especialidad
-  oag: {
-    'A': 'Analizar información técnica de diversas fuentes para sustentar decisiones en el trabajo.',
-    'B': 'Aplicar correctamente procedimientos, técnicas y protocolos de la especialidad.',
-    'C': 'Usar herramientas, instrumentos y equipos con destreza y seguridad.',
-    'D': 'Planificar y organizar el trabajo técnico con eficiencia.',
-    'F': 'Cumplir con las normas de seguridad laboral y prevención de riesgos.',
-    'H': 'Comunicar en forma clara y técnica los procesos y resultados realizados.',
-    'I': 'Proponer mejoras e innovaciones con perspectiva de eficiencia.',
-    'J': 'Emprender iniciativas útiles con proactividad y responsabilidad profesional.',
-    'K': 'Verificar condiciones de riesgo y aplicar normas de seguridad.'
-  }
-
+  _alias: 'administracion',
+  _retirado: 'DS 452/2013',
+  modulos: {}
 };
