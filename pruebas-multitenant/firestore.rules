@@ -1,0 +1,105 @@
+rules_version = '2';
+
+// ─────────────────────────────────────────────────────────────
+//  Click&Clase — Reglas multi-tenant (Fase 0) · ENTORNO DE PRUEBA
+//  Modelo: /organizaciones/{orgId}/...  → aislamiento por colegio
+//
+//  Idea central: para tocar datos de un colegio, debes tener un
+//  documento de membresía en ESE colegio. Un docente del Colegio B
+//  no tiene membresía en el Colegio A → queda bloqueado. Así el
+//  aislamiento entre colegios es automático.
+//
+//  Dato sensible (diagnóstico NEE): vive en un documento aparte
+//  (/clinico/...) porque Firestore no puede ocultar campos sueltos.
+// ─────────────────────────────────────────────────────────────
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    // Ruta al documento de membresía del usuario dentro del colegio
+    function memberPath(orgId) {
+      return /databases/$(database)/documents/organizaciones/$(orgId)/miembros/$(request.auth.uid);
+    }
+
+    // ¿El usuario pertenece a este colegio?  (= aislamiento por tenant)
+    function isMember(orgId) {
+      return signedIn() && exists(memberPath(orgId));
+    }
+
+    // Rol del usuario dentro del colegio
+    function rol(orgId) {
+      return get(memberPath(orgId)).data.rol;
+    }
+
+    // ¿El usuario tiene alguno de estos roles en el colegio?
+    function hasRole(orgId, roles) {
+      return isMember(orgId) && (rol(orgId) in roles);
+    }
+
+    // ───────────── COLEGIO (tenant) ─────────────
+    match /organizaciones/{orgId} {
+
+      // Configuración del colegio (lineamientos, plantillas, branding)
+      allow read:  if isMember(orgId);
+      allow write: if hasRole(orgId, ['org_admin']);
+
+      // ── Membresías: quién pertenece y con qué rol ──
+      match /miembros/{uid} {
+        allow read:  if isMember(orgId) &&
+                        (request.auth.uid == uid ||
+                         hasRole(orgId, ['org_admin', 'coordinador']));
+        allow write: if hasRole(orgId, ['org_admin']);
+      }
+
+      // ── Estudiante: ficha central única ──
+      match /estudiantes/{estId} {
+
+        // Ficha base (nombre, curso): cualquier miembro del colegio
+        allow read:  if isMember(orgId);
+        allow write: if hasRole(orgId, ['org_admin', 'pie_encargada']);
+
+        // Adecuaciones de aula: las VE todo el equipo (el profesor las aplica),
+        // pero solo el PIE las edita.
+        match /adecuaciones/{docId} {
+          allow read:  if isMember(orgId);
+          allow write: if hasRole(orgId, ['pie_educadora', 'pie_encargada']);
+        }
+
+        // Diagnóstico clínico NEE — DATO SENSIBLE.
+        // NO lo ve el profesor ni convivencia. Solo PIE, apoyo y dirección.
+        match /clinico/{docId} {
+          allow read:  if hasRole(orgId, ['pie_educadora', 'pie_encargada', 'apoyo', 'org_admin']);
+          allow write: if hasRole(orgId, ['pie_educadora', 'pie_encargada']);
+        }
+
+        // Notas y asistencia
+        match /notas/{docId} {
+          allow read:  if hasRole(orgId, ['profesor', 'coordinador', 'org_admin', 'pie_encargada', 'apoyo']);
+          allow write: if hasRole(orgId, ['profesor', 'org_admin']);
+        }
+      }
+
+      // ── Material generado con IA ──
+      match /materiales/{matId} {
+        allow read:   if isMember(orgId);
+        // Crear: solo roles que producen material, y el autor debe ser uno mismo
+        allow create: if hasRole(orgId, ['profesor', 'coordinador', 'convivencia',
+                                          'apoyo', 'pie_educadora', 'pie_encargada']) &&
+                         request.resource.data.autorUid == request.auth.uid;
+        // Editar/borrar: el autor, o gestión del colegio
+        allow update, delete: if isMember(orgId) &&
+                                 (resource.data.autorUid == request.auth.uid ||
+                                  hasRole(orgId, ['org_admin', 'coordinador']));
+      }
+    }
+
+    // Todo lo demás: denegado por defecto
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

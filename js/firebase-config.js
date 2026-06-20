@@ -1,7 +1,7 @@
 /**
  * firebase-config.js
  * Click&Clase — Configuración Firebase
- * Proyecto: electrolearn-prod
+ * Proyecto: clickyclase-2  (entorno de pruebas multi-tenant)
  *
  * IMPORTANTE: EL_DB ya NO usa el SDK de Firestore (que da "client is offline").
  * EL_DB es inicializado en firebase-rest.js via Firestore REST API (HTTPS puro).
@@ -12,12 +12,13 @@
 //  Configuración del proyecto Firebase
 // ─────────────────────────────────────────────────────────────
 var FIREBASE_CONFIG = {
-  apiKey:            "AIzaSyBnF5NyEVijpds9EnEC5XiiYl31tvJ4Y5M",
-  authDomain:        "electrolearn-prod.firebaseapp.com",
-  projectId:         "electrolearn-prod",
-  storageBucket:     "electrolearn-prod.firebasestorage.app",
-  messagingSenderId: "537489844804",
-  appId:             "1:537489844804:web:cf468785e90aeed3362a11"
+  apiKey:            "AIzaSyAUMwXA0q42GKS0oAWiUig_pvtO1yS7zT4",
+  authDomain:        "clickyclase-2.firebaseapp.com",
+  projectId:         "clickyclase-2",
+  storageBucket:     "clickyclase-2.firebasestorage.app",
+  messagingSenderId: "685852076415",
+  appId:             "1:685852076415:web:5e68097d7c43395e05924a",
+  measurementId:     "G-JJJMXEJYYC"
 };
 
 // ─────────────────────────────────────────────────────────────

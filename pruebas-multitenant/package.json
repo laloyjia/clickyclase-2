@@ -1,0 +1,13 @@
+{
+  "name": "pruebas-multitenant",
+  "version": "1.0.0",
+  "description": "Pruebas locales de aislamiento por colegio y matriz de permisos (Click&Clase Fase 0)",
+  "type": "module",
+  "scripts": {
+    "test": "node permisos.test.mjs"
+  },
+  "devDependencies": {
+    "@firebase/rules-unit-testing": "^4.0.1",
+    "firebase": "^11.0.0"
+  }
+}
