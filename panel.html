@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel por roles — Click&Clase</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0">
+<style>
+:root{
+  --primary:#6C5CE7;--primary-light:#A29BFE;--secondary:#00CEC9;--accent:#FD79A8;
+  --dark:#0a0a1a;--dark2:#12122a;--text:#E8E8F0;--muted:#9090B0;
+  --success:#00B894;--danger:#FF6B6B;--warning:#FDCB6E;
+  --glass:rgba(255,255,255,0.05);--glass-2:rgba(255,255,255,0.08);--glass-border:rgba(255,255,255,0.10);
+  --radius:14px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',sans-serif;background:radial-gradient(1200px 600px at 80% -10%,rgba(108,92,231,.25),transparent),radial-gradient(900px 500px at -10% 110%,rgba(0,206,201,.15),transparent),var(--dark);color:var(--text);min-height:100vh}
+.material-symbols-outlined{font-size:20px;line-height:1;vertical-align:middle}
+a{color:inherit;text-decoration:none}
+
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px 24px;border-bottom:1px solid var(--glass-border);background:rgba(10,10,26,.6);backdrop-filter:blur(12px);position:sticky;top:0;z-index:10;flex-wrap:wrap}
+.brand{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:20px;background:linear-gradient(135deg,var(--primary-light),var(--secondary));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.demo-tag{font-size:11px;color:var(--warning);border:1px solid rgba(253,203,110,.35);background:rgba(253,203,110,.10);padding:3px 9px;border-radius:999px;margin-left:10px;vertical-align:middle}
+.switcher{display:flex;align-items:center;gap:10px}
+.switcher label{font-size:13px;color:var(--muted)}
+select{font-family:'Inter',sans-serif;font-size:14px;color:var(--text);background:var(--dark2);border:1px solid var(--glass-border);border-radius:10px;padding:9px 14px;min-width:230px;cursor:pointer}
+
+.shell{display:flex;min-height:calc(100vh - 65px)}
+.sidebar{width:248px;flex-shrink:0;border-right:1px solid var(--glass-border);background:var(--glass);backdrop-filter:blur(8px);padding:18px 12px}
+.side-role{display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:var(--radius);background:var(--glass-2);margin-bottom:16px}
+.side-role .ico{width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.side-role .nm{font-size:13px;font-weight:600;line-height:1.2}
+.side-role .sc{font-size:11px;color:var(--muted);margin-top:2px}
+.nav-item{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:11px;font-size:13.5px;color:var(--muted);cursor:pointer;margin-bottom:2px;border-left:3px solid transparent;transition:.15s}
+.nav-item:hover{background:var(--glass-2);color:var(--text)}
+.nav-item.active{color:var(--text);background:var(--glass-2);font-weight:600}
+
+.main{flex:1;min-width:0;padding:24px 28px}
+.head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:22px;flex-wrap:wrap}
+.head h1{font-family:'Space Grotesk',sans-serif;font-size:24px;font-weight:600}
+.head .scope{font-size:13px;color:var(--muted);margin-top:4px}
+.badge{display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:600;padding:8px 14px;border-radius:999px}
+.avatar{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:13px}
+
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-bottom:22px}
+.kpi{background:var(--glass);border:1px solid var(--glass-border);border-radius:var(--radius);padding:16px 18px}
+.kpi .l{font-size:12.5px;color:var(--muted)}
+.kpi .v{font-family:'Space Grotesk',sans-serif;font-size:26px;font-weight:700;margin-top:6px;background:linear-gradient(135deg,var(--primary-light),var(--secondary));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+
+.card{background:var(--glass);border:1px solid var(--glass-border);border-radius:var(--radius);padding:18px 20px;margin-bottom:18px}
+.card h3{font-size:14.5px;font-weight:600;margin-bottom:14px;display:flex;align-items:center;gap:9px}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;font-size:11px;color:var(--muted);font-weight:500;text-transform:uppercase;letter-spacing:.05em;padding:6px 10px}
+td{font-size:13.5px;padding:11px 10px;border-top:1px solid var(--glass-border)}
+.tag{font-size:11.5px;font-weight:600;padding:3px 11px;border-radius:999px;white-space:nowrap}
+.row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 0;border-top:1px solid var(--glass-border);font-size:13.5px}
+.row:first-child{border-top:none}
+.row .sub{color:var(--muted);font-size:12.5px}
+.chip{display:inline-flex;align-items:center;gap:8px;font-size:13px;padding:10px 14px;border-radius:11px;background:var(--glass-2);border:1px solid var(--glass-border);margin:0 8px 8px 0;cursor:pointer;transition:.15s}
+.chip:hover{border-color:var(--primary-light);background:rgba(108,92,231,.12)}
+.stud{display:flex;align-items:center;gap:12px;padding:11px 0;border-top:1px solid var(--glass-border)}
+.stud:first-child{border-top:none}
+.stud .ini{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0}
+.note{font-size:13.5px;color:var(--muted);line-height:1.7}
+.foot{font-size:12px;color:var(--muted);text-align:center;padding:20px;border-top:1px solid var(--glass-border);margin-top:10px}
+@media(max-width:760px){.sidebar{display:none}.main{padding:18px}}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div><span class="brand">Click&Clase</span><span class="demo-tag">Prototipo · modo demostración</span></div>
+  <div class="switcher">
+    <label for="roleSel">Ver como:</label>
+    <select id="roleSel"></select>
+  </div>
+</div>
+
+<div class="shell">
+  <aside class="sidebar">
+    <div class="side-role" id="sideRole"></div>
+    <nav id="nav"></nav>
+  </aside>
+  <main class="main">
+    <div class="head">
+      <div><h1 id="hTitle"></h1><div class="scope" id="hScope"></div></div>
+      <span class="badge" id="hBadge"></span>
+    </div>
+    <div class="kpis" id="kpis"></div>
+    <div id="panels"></div>
+    <div class="foot">Vista de demostración. Los datos son de ejemplo. La próxima etapa conecta cada rol con el login real y la base de datos de clickyclase-2.</div>
+  </main>
+</div>
+
+<script>
+function ic(n){return '<span class="material-symbols-outlined">'+n+'</span>';}
+const TONE={success:'--success',warning:'--warning',danger:'--danger',info:'--secondary'};
+function tag(txt,t){var c='var('+(TONE[t]||'--secondary')+')';return '<span class="tag" style="color:'+c+';background:'+c.replace('var(','rgba(').replace(')',',0.14)').replace('--success','0,184,148').replace('--warning','253,203,110').replace('--danger','255,107,107').replace('--secondary','0,206,201')+'">'+txt+'</span>';}
+
+const ROLES=[
+ {id:'admin',label:'Administrador general',ico:'public',ramp:'#A29BFE',scope:'Plataforma · todos los colegios',
+  nav:[['dashboard','Resumen'],['apartment','Colegios'],['credit_card','Suscripciones'],['smart_toy','Uso de IA'],['support','Soporte'],['settings','Configuración']],
+  kpis:[['Colegios activos','12'],['Docentes','480'],['Material IA (mes)','9.340'],['Uso de IA','71%']],
+  panels:[
+   {k:'table',t:'Colegios',ti:'apartment',cols:['Colegio','Plan','Docentes','Estado'],rows:[
+    ['Liceo San Mateo','Dedicado','38',{p:'Activo',c:'success'}],['Colegio Andes','Pro','21',{p:'Activo',c:'success'}],
+    ['Escuela El Roble','Pro','12',{p:'Prueba',c:'info'}],['Colegio Aurora','Básico','9',{p:'Por renovar',c:'warning'}]]},
+   {k:'list',t:'Actividad de la plataforma',ti:'bolt',items:[
+    ['Nuevo colegio creado','Liceo San Mateo · hace 2 h'],['Pico de uso de IA','1.200 generaciones hoy'],['Soporte','3 tickets abiertos']]}]},
+ {id:'director',label:'Director',ico:'school',ramp:'#6C5CE7',scope:'Colegio Ejemplo · vista institucional',
+  nav:[['dashboard','Resumen'],['groups','Personal'],['person','Estudiantes'],['category','Áreas'],['calendar_month','Calendario'],['description','Lineamientos / PEI'],['settings','Configuración']],
+  kpis:[['Docentes','38'],['Estudiantes','720'],['Estudiantes PIE','64'],['Material (mes)','312']],
+  panels:[
+   {k:'table',t:'Áreas del colegio',ti:'category',cols:['Área','Encargado','Integrantes','Estado'],rows:[
+    ['Académica (UTP)','R. Soto','24',{p:'Activa',c:'success'}],['Ambiente / Convivencia','M. Lagos','4',{p:'Activa',c:'success'}],
+    ['Apoyo psicosocial','P. Díaz','3',{p:'Activa',c:'success'}],['PIE','C. Rojas','7',{p:'Activa',c:'success'}]]},
+   {k:'list',t:'Gestión pendiente',ti:'pending_actions',items:[
+    ['2 invitaciones de docentes','por aprobar'],['Lineamientos PEI','sin actualizar este año'],['Calendario institucional','1 evento por confirmar']]}]},
+ {id:'utp',label:'Encargado UTP',ico:'fact_check',ramp:'#6C5CE7',scope:'Área académica · supervisión',
+  nav:[['dashboard','Resumen'],['groups','Profesores'],['description','Planificaciones'],['checklist','Cobertura curricular'],['calendar_month','Calendario'],['table_chart','Notas']],
+  kpis:[['Profesores','24'],['Planif. por revisar','7'],['Cobertura','82%'],['Eval. / semana','15']],
+  panels:[
+   {k:'table',t:'Planificaciones recientes',ti:'description',cols:['Profesor','Curso','Asignatura','Estado'],rows:[
+    ['J. Fuentes','5°A','Matemática',{p:'Revisar',c:'warning'}],['A. Méndez','8°B','Lenguaje',{p:'Aprobada',c:'success'}],
+    ['L. Cortés','2°A','Ciencias',{p:'Revisar',c:'warning'}]]},
+   {k:'note',t:'Cobertura curricular por nivel',ti:'checklist',text:'Básica 88% · Media 76%. Tres unidades atrasadas en II medio según el programa nacional.'}]},
+ {id:'profesor',label:'Profesor',ico:'person',ramp:'#00CEC9',scope:'Mis cursos · trabajo diario',
+  nav:[['home','Inicio'],['smart_toy','Generar material (IA)'],['groups','Mis cursos'],['calendar_month','Calendario'],['table_chart','Notas y asistencia'],['chat','Anotaciones'],['menu_book','Biblioteca']],
+  kpis:[['Mis cursos','5'],['Material generado','28'],['Próx. evaluaciones','3'],['Promedio','5,8']],
+  panels:[
+   {k:'chips',t:'Generar material con IA',ti:'smart_toy',items:[['description','Planificación'],['assignment','Guía de trabajo'],['quiz','Prueba'],['checklist','Rúbrica'],['extension','Material PIE']]},
+   {k:'table',t:'Mis cursos',ti:'groups',cols:['Curso','Estudiantes','Próxima clase'],rows:[
+    ['5°A Matemática','32','Lun 08:00'],['6°B Matemática','30','Lun 10:00'],['7°A Matemática','28','Mar 11:30']]}]},
+ {id:'amb_enc',label:'Encargado de ambiente',ico:'volunteer_activism',ramp:'#FDCB6E',scope:'Convivencia escolar · gestión',
+  nav:[['dashboard','Resumen'],['folder','Casos'],['alt_route','Planes de acción'],['event','Actividades'],['menu_book','Reglamento interno'],['groups','Equipo']],
+  kpis:[['Casos activos','9'],['Planes de acción','5'],['Actividades','4'],['Índice de clima','78']],
+  panels:[
+   {k:'table',t:'Casos activos',ti:'folder',cols:['Curso / Estudiante','Tipo','Responsable','Estado'],rows:[
+    ['7°B · grupo','Convivencia','M. Lagos',{p:'En curso',c:'info'}],['4°A · E. Pérez','Conducta','J. Soto',{p:'Seguimiento',c:'warning'}],
+    ['2°A · grupo','Prevención','M. Lagos',{p:'En curso',c:'info'}]]},
+   {k:'chips',t:'Generar con IA (según reglamento)',ti:'smart_toy',items:[['lightbulb','Idea de convivencia'],['event','Actividad'],['alt_route','Plan de acción']]}]},
+ {id:'aps_enc',label:'Encargado de apoyo psicosocial',ico:'health_and_safety',ramp:'#00CEC9',scope:'Dupla psicosocial · gestión',
+  nav:[['dashboard','Resumen'],['folder','Casos'],['call_split','Derivaciones'],['description','Informes'],['lightbulb','Estrategias'],['groups','Equipo']],
+  kpis:[['Casos (equipo)','22'],['Derivaciones','6'],['Informes pend.','4'],['Profesionales','3']],
+  panels:[
+   {k:'table',t:'Casos del equipo',ti:'folder',cols:['Estudiante','Profesional','Motivo','Estado'],rows:[
+    ['M. Rivas','P. Díaz','Ausentismo',{p:'Activo',c:'info'}],['T. Núñez','S. Vega','Vulnerabilidad',{p:'Derivado',c:'warning'}],
+    ['K. Soto','P. Díaz','Emocional',{p:'Activo',c:'info'}]]},
+   {k:'chips',t:'Plantillas e IA',ti:'smart_toy',items:[['description','Informe psicosocial'],['lightbulb','Estrategia de apoyo'],['call_split','Derivación']]}]},
+ {id:'pie_enc',label:'Encargada PIE',ico:'accessible',ramp:'#FD79A8',scope:'Programa de Integración · gestión',
+  nav:[['dashboard','Resumen'],['groups','Estudiantes PIE'],['diversity_1','Educadoras'],['description','PACI / Informes'],['fact_check','Evaluaciones'],['category','Niveles']],
+  kpis:[['Estudiantes PIE','64'],['Educadoras','6'],['PACI vigentes','58'],['Informes pend.','9']],
+  panels:[
+   {k:'table',t:'Educadoras y carga',ti:'diversity_1',cols:['Educadora','Cursos','Estudiantes','Informes'],rows:[
+    ['C. Rojas','4','12',{p:'2 pend.',c:'warning'}],['V. Pinto','3','10',{p:'Al día',c:'success'}],
+    ['D. Salas','4','14',{p:'3 pend.',c:'warning'}]]},
+   {k:'note',t:'Control de gestión por nivel',ti:'insights',text:'Pre-básica 9 · Básica 41 · Media 14 estudiantes con PIE. Adecuaciones aplicadas según Decreto 83.'}]},
+ {id:'pie_edu',label:'Educadora PIE',ico:'psychology',ramp:'#FD79A8',scope:'Mis cursos y estudiantes asignados',
+  nav:[['home','Inicio'],['groups','Mis cursos'],['person','Mis estudiantes'],['smart_toy','Actividades (IA)'],['description','Informes (IA)'],['extension','Adecuaciones']],
+  kpis:[['Mis cursos','4'],['Mis estudiantes','12'],['Informes por hacer','3'],['Actividades (IA)','19']],
+  panels:[
+   {k:'stud',t:'Carpeta por estudiante',ti:'folder_shared',items:[
+    ['Juan Pérez','5°A','TEA 1'],['Sofía Díaz','6°B','TDAH'],['Mateo Soto','4°A','Dislexia']]},
+   {k:'chips',t:'Generar con IA',ti:'smart_toy',items:[['smart_toy','Actividad según diagnóstico'],['description','Informe PIE'],['extension','Adecuación de aula']]}]},
+ {id:'aps_prof',label:'Profesional de apoyo psicosocial',ico:'favorite',ramp:'#00CEC9',scope:'Mis casos asignados',
+  nav:[['home','Inicio'],['folder','Mis casos'],['monitoring','Intervenciones'],['description','Informes (IA)'],['lightbulb','Estrategias']],
+  kpis:[['Mis casos','8'],['Intervenciones (mes)','23'],['Informes por hacer','2']],
+  panels:[
+   {k:'table',t:'Mis casos',ti:'folder',cols:['Estudiante','Motivo','Última interv.','Estado'],rows:[
+    ['M. Rivas','Ausentismo','12 jun',{p:'Activo',c:'info'}],['K. Soto','Emocional','15 jun',{p:'Activo',c:'info'}],
+    ['L. Vera','Familiar','09 jun',{p:'Seguimiento',c:'warning'}]]},
+   {k:'chips',t:'Generar con IA',ti:'smart_toy',items:[['description','Informe psicosocial'],['monitoring','Registro de intervención'],['lightbulb','Estrategia']]}]},
+ {id:'amb_prof',label:'Profesional de ambiente',ico:'mood',ramp:'#FDCB6E',scope:'Actividades y casos asignados',
+  nav:[['home','Inicio'],['event','Actividades'],['visibility','Casos de seguimiento'],['edit_note','Registro'],['menu_book','Reglamento']],
+  kpis:[['Actividades asignadas','6'],['Casos de seguimiento','4'],['Registros (mes)','17']],
+  panels:[
+   {k:'table',t:'Actividades asignadas',ti:'event',cols:['Actividad','Curso','Fecha','Estado'],rows:[
+    ['Taller convivencia','7°B','24 jun',{p:'Programada',c:'info'}],['Mediación','4°A','21 jun',{p:'Hoy',c:'warning'}],
+    ['Recreo dirigido','2°A','25 jun',{p:'Programada',c:'info'}]]},
+   {k:'chips',t:'Generar con IA',ti:'smart_toy',items:[['alt_route','Plan de acción'],['event','Actividad de convivencia'],['edit_note','Registro']]}]}
+];
+
+function rgba(hex,a){var n=parseInt(hex.slice(1),16);return 'rgba('+((n>>16)&255)+','+((n>>8)&255)+','+(n&255)+','+a+')';}
+function inits(name){return name.split(' ').map(function(w){return w[0]}).join('').slice(0,2);}
+
+function panelHTML(p,ramp){
+ var h='<div class="card"><h3>'+ic(p.ti)+p.t+'</h3>';
+ if(p.k==='table'){
+  h+='<table><thead><tr>'+p.cols.map(function(c){return '<th>'+c+'</th>'}).join('')+'</tr></thead><tbody>';
+  h+=p.rows.map(function(r){return '<tr>'+r.map(function(c){return '<td>'+(typeof c==='object'?tag(c.p,c.c):c)+'</td>'}).join('')+'</tr>'}).join('');
+  h+='</tbody></table>';
+ }else if(p.k==='list'){
+  h+=p.items.map(function(it){return '<div class="row"><span>'+it[0]+'</span><span class="sub">'+it[1]+'</span></div>'}).join('');
+ }else if(p.k==='chips'){
+  h+='<div>'+p.items.map(function(it){return '<span class="chip">'+ic(it[0])+it[1]+'</span>'}).join('')+'</div>';
+ }else if(p.k==='stud'){
+  h+=p.items.map(function(it){return '<div class="stud"><span class="ini" style="background:'+rgba(ramp,.18)+';color:'+ramp+'">'+inits(it[0])+'</span><div style="flex:1"><div>'+it[0]+'</div><div class="sub">'+it[1]+'</div></div><span class="tag" style="background:'+rgba(ramp,.16)+';color:'+ramp+'">'+it[2]+'</span></div>'}).join('');
+ }else if(p.k==='note'){
+  h+='<div class="note">'+p.text+'</div>';
+ }
+ return h+'</div>';
+}
+
+var active='admin';
+function render(){
+ var r=ROLES.find(function(x){return x.id===active});var ramp=r.ramp;
+ document.getElementById('sideRole').innerHTML='<span class="ico" style="background:'+rgba(ramp,.18)+';color:'+ramp+'">'+ic(r.ico)+'</span><div><div class="nm">'+r.label+'</div><div class="sc">Colegio Ejemplo</div></div>';
+ document.getElementById('nav').innerHTML=r.nav.map(function(n,i){return '<div class="nav-item'+(i===0?' active':'')+'" style="'+(i===0?'border-left-color:'+ramp:'')+'">'+ic(n[0])+'<span>'+n[1]+'</span></div>'}).join('');
+ document.getElementById('hTitle').textContent=r.label;
+ document.getElementById('hScope').textContent=r.scope;
+ document.getElementById('hBadge').innerHTML=ic(r.ico)+r.label;
+ document.getElementById('hBadge').style.background=rgba(ramp,.16);
+ document.getElementById('hBadge').style.color=ramp;
+ document.getElementById('kpis').innerHTML=r.kpis.map(function(k){return '<div class="kpi"><div class="l">'+k[0]+'</div><div class="v">'+k[1]+'</div></div>'}).join('');
+ document.getElementById('panels').innerHTML=r.panels.map(function(p){return panelHTML(p,ramp)}).join('');
+}
+var sel=document.getElementById('roleSel');
+sel.innerHTML=ROLES.map(function(r){return '<option value="'+r.id+'">'+r.label+'</option>'}).join('');
+sel.addEventListener('change',function(){active=sel.value;render();});
+render();
+</script>
+</body>
+</html>
