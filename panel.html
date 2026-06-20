@@ -72,7 +72,7 @@ td{font-size:13.5px;padding:11px 10px;border-top:1px solid var(--glass-border)}
 <body>
 
 <div class="topbar">
-  <div><span class="brand">Click&Clase</span><span class="demo-tag">Prototipo · modo demostración</span></div>
+  <div><a href="acceso-demo.html" style="color:var(--muted);font-size:13px;margin-right:14px"><span class="material-symbols-outlined" style="font-size:16px;vertical-align:-3px">arrow_back</span> Roles</a><span class="brand">Click&Clase</span><span class="demo-tag">Prototipo · modo demostración</span></div>
   <div class="switcher">
     <label for="roleSel">Ver como:</label>
     <select id="roleSel"></select>
@@ -123,6 +123,8 @@ const ROLES=[
   nav:[['dashboard','Resumen'],['groups','Profesores'],['description','Planificaciones'],['checklist','Cobertura curricular'],['calendar_month','Calendario'],['table_chart','Notas']],
   kpis:[['Profesores','24'],['Planif. por revisar','7'],['Cobertura','82%'],['Eval. / semana','15']],
   panels:[
+   {k:'table',t:'Mi equipo · monitoreo de profesores',ti:'groups',cols:['Profesor','Cursos','Material (mes)','Últ. actividad'],rows:[
+    ['J. Fuentes','3','12','Hoy 09:20'],['A. Méndez','4','18',{p:'Hace 3 días',c:'warning'}],['L. Cortés','2','7','Ayer']]},
    {k:'table',t:'Planificaciones recientes',ti:'description',cols:['Profesor','Curso','Asignatura','Estado'],rows:[
     ['J. Fuentes','5°A','Matemática',{p:'Revisar',c:'warning'}],['A. Méndez','8°B','Lenguaje',{p:'Aprobada',c:'success'}],
     ['L. Cortés','2°A','Ciencias',{p:'Revisar',c:'warning'}]]},
@@ -138,6 +140,8 @@ const ROLES=[
   nav:[['dashboard','Resumen'],['folder','Casos'],['alt_route','Planes de acción'],['event','Actividades'],['menu_book','Reglamento interno'],['groups','Equipo']],
   kpis:[['Casos activos','9'],['Planes de acción','5'],['Actividades','4'],['Índice de clima','78']],
   panels:[
+   {k:'table',t:'Mi equipo · profesionales de ambiente',ti:'groups',cols:['Profesional','Actividades','Casos','Estado'],rows:[
+    ['J. Soto','4','3',{p:'Activo',c:'success'}],['R. Pérez','2','1',{p:'Activo',c:'success'}]]},
    {k:'table',t:'Casos activos',ti:'folder',cols:['Curso / Estudiante','Tipo','Responsable','Estado'],rows:[
     ['7°B · grupo','Convivencia','M. Lagos',{p:'En curso',c:'info'}],['4°A · E. Pérez','Conducta','J. Soto',{p:'Seguimiento',c:'warning'}],
     ['2°A · grupo','Prevención','M. Lagos',{p:'En curso',c:'info'}]]},
@@ -146,6 +150,8 @@ const ROLES=[
   nav:[['dashboard','Resumen'],['folder','Casos'],['call_split','Derivaciones'],['description','Informes'],['lightbulb','Estrategias'],['groups','Equipo']],
   kpis:[['Casos (equipo)','22'],['Derivaciones','6'],['Informes pend.','4'],['Profesionales','3']],
   panels:[
+   {k:'table',t:'Mi equipo · dupla psicosocial',ti:'groups',cols:['Profesional','Casos','Intervenciones','Estado'],rows:[
+    ['P. Díaz','8','23',{p:'Activo',c:'success'}],['S. Vega','7','19',{p:'Activo',c:'success'}],['Vacante','—','—',{p:'1 cupo',c:'warning'}]]},
    {k:'table',t:'Casos del equipo',ti:'folder',cols:['Estudiante','Profesional','Motivo','Estado'],rows:[
     ['M. Rivas','P. Díaz','Ausentismo',{p:'Activo',c:'info'}],['T. Núñez','S. Vega','Vulnerabilidad',{p:'Derivado',c:'warning'}],
     ['K. Soto','P. Díaz','Emocional',{p:'Activo',c:'info'}]]},
@@ -204,7 +210,9 @@ function panelHTML(p,ramp){
  return h+'</div>';
 }
 
-var active='admin';
+var _params=new URLSearchParams(location.search);
+var active=_params.get('rol')||'admin';
+if(!ROLES.find(function(x){return x.id===active}))active='admin';
 function render(){
  var r=ROLES.find(function(x){return x.id===active});var ramp=r.ramp;
  document.getElementById('sideRole').innerHTML='<span class="ico" style="background:'+rgba(ramp,.18)+';color:'+ramp+'">'+ic(r.ico)+'</span><div><div class="nm">'+r.label+'</div><div class="sc">Colegio Ejemplo</div></div>';
@@ -219,7 +227,8 @@ function render(){
 }
 var sel=document.getElementById('roleSel');
 sel.innerHTML=ROLES.map(function(r){return '<option value="'+r.id+'">'+r.label+'</option>'}).join('');
-sel.addEventListener('change',function(){active=sel.value;render();});
+sel.value=active;
+sel.addEventListener('change',function(){active=sel.value;history.replaceState(null,'','panel.html?rol='+active);render();});
 render();
 </script>
 </body>
