@@ -151,6 +151,12 @@ function panelHTML(p,ramp){
  return h+'</div>';
 }
 
+function calendarioColegioHTML(){
+ var rows=[]; try{rows=JSON.parse(localStorage.getItem('cc_calendario')||'[]');}catch(e){}
+ if(!rows.length)return '';
+ var items=rows.slice(0,8).map(function(r){return '<div class="row"><span class="material-symbols-outlined ic">event</span><div style="flex:1"><div>'+(r[1]||'')+'</div><div class="sub">'+(r[0]||'')+(r[2]?(' · '+r[2]):'')+'</div></div><span class="sub">'+(r[3]||'')+'</span></div>'}).join('');
+ return '<div class="card"><div class="sec-title"><span class="material-symbols-outlined" style="vertical-align:-4px;color:var(--primary)">calendar_month</span> Calendario del colegio</div>'+items+'</div>';
+}
 var _params=new URLSearchParams(location.search);
 var active=_params.get('rol')||'admin';
 if(!ROLES.find(function(x){return x.id===active}))active='admin';
@@ -164,7 +170,7 @@ function render(){
  document.getElementById('hBadge').style.background=rgba(ramp,.16);
  document.getElementById('hBadge').style.color=ramp;
  document.getElementById('kpis').innerHTML=r.kpis.map(function(k){return '<div class="kpi"><div class="l">'+k[0]+'</div><div class="v">'+k[1]+'</div></div>'}).join('');
- document.getElementById('panels').innerHTML=r.panels.map(function(p){return panelHTML(p,ramp)}).join('');
+ document.getElementById('panels').innerHTML=r.panels.map(function(p){return panelHTML(p,ramp)}).join('')+calendarioColegioHTML();
 }
 var sel=document.getElementById('roleSel');
 sel.innerHTML=ROLES.map(function(r){return '<option value="'+r.id+'">'+r.label+'</option>'}).join('');
