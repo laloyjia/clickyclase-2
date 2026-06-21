@@ -707,8 +707,17 @@ ELAuth.onUserReady(function(user) {
 });
 
 function redirectByRole(user) {
+  // ── Paneles nuevos por rol (clickyclase-2) ──
+  // Cada rol entra a su panel individual. El profesor (de colegio o
+  // independiente) comparte el panel de profesor.
+  var PANEL_ROLES = ['admin','director','utp','profesor','amb_enc','amb_prof','aps_enc','aps_prof','pie_enc','pie_edu'];
+  if (user && PANEL_ROLES.indexOf(user.role) !== -1) {
+    window.location.href = 'panel.html?rol=' + user.role;
+    return;
+  }
+
+  // ── Comportamiento anterior (respaldo) ──
   // SEGURIDAD: acceso a admin.html SOLO si el email está en la lista explícita.
-  // El campo role en Firestore no es suficiente — podría estar mal asignado.
   var admins = window.EL_ADMIN_EMAILS || (window.EL_ADMIN_EMAIL ? [window.EL_ADMIN_EMAIL] : []);
   if (admins.indexOf(user.email) !== -1) {
     window.location.href = 'admin.html';

@@ -1,0 +1,11 @@
+{
+  "name": "setup-usuarios",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "crear": "node crear-usuarios.mjs"
+  },
+  "dependencies": {
+    "firebase-admin": "^12.7.0"
+  }
+}
