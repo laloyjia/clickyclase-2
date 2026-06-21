@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel del Director — Click&Clase</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<link rel="stylesheet" href="css/panel.css">
+</head>
+<body>
+<div class="topbar">
+  <div><a href="acceso-demo.html" style="color:var(--muted);font-size:13px;margin-right:14px"><span class="material-symbols-outlined" style="font-size:16px;vertical-align:-3px">arrow_back</span> Roles</a><span class="brand">Click&Clase</span><span class="demo-tag">Panel Director · demo</span></div>
+  <div class="usr"><span class="av">DD</span><span style="font-size:13.5px">Director Demo</span><a class="salir" href="login.html">Salir</a></div>
+</div>
+
+<div class="shell">
+  <aside class="sidebar">
+    <div class="side-role"><span class="ico"><span class="material-symbols-outlined">school</span></span><div><div class="nm">Director</div><div class="sc">Colegio Ejemplo · RBD 12345-6</div></div></div>
+    <nav id="nav"></nav>
+  </aside>
+  <main class="main">
+
+    <!-- RESUMEN -->
+    <section class="sec active" id="sec-resumen">
+      <div class="h1">Resumen del colegio</div>
+      <div class="sub">Panel de datos · semestre 1, 2026</div>
+      <div class="kpis">
+        <div class="kpi"><div class="l">Personal total</div><div class="v">38</div></div>
+        <div class="kpi"><div class="l">Estudiantes</div><div class="v">720</div></div>
+        <div class="kpi"><div class="l">Estudiantes PIE</div><div class="v">64</div></div>
+        <div class="kpi"><div class="l">Asistencia prom.</div><div class="v">92%</div></div>
+        <div class="kpi"><div class="l">Cumplimiento áreas</div><div class="v">84%</div></div>
+        <div class="kpi"><div class="l">Documentos vigentes</div><div class="v">9/11</div></div>
+      </div>
+      <div class="grid2">
+        <div class="card"><h3><span class="material-symbols-outlined">notifications_active</span> Alertas de gestión</h3>
+          <div class="row"><span class="material-symbols-outlined ic" style="color:var(--danger)">gavel</span><div><b>3 contratos a plazo fijo</b> vencen este mes — revisar antes de que se transformen en indefinidos (Código del Trabajo).</div></div>
+          <div class="row"><span class="material-symbols-outlined ic" style="color:var(--warning)">assignment_late</span><div>Evaluación docente: 5 procesos pendientes de cierre.</div></div>
+          <div class="row"><span class="material-symbols-outlined ic" style="color:var(--warning)">description</span><div>Reglamento de Convivencia y PME por actualizar.</div></div>
+        </div>
+        <div class="card"><h3><span class="material-symbols-outlined">event_upcoming</span> Próximas actividades</h3>
+          <div class="row"><span class="material-symbols-outlined ic">groups</span><div>Consejo de profesores — <b>24 jun</b></div></div>
+          <div class="row"><span class="material-symbols-outlined ic">diversity_3</span><div>Reunión de apoderados — <b>28 jun</b></div></div>
+          <div class="row"><span class="material-symbols-outlined ic">flag</span><div>Cierre de semestre — <b>11 jul</b></div></div>
+        </div>
+      </div>
+      <div class="card"><h3><span class="material-symbols-outlined">trending_up</span> Asistencia mensual</h3><div class="chartbox"><canvas id="chAsist"></canvas></div></div>
+    </section>
+
+    <!-- PERSONAL -->
+    <section class="sec" id="sec-personal">
+      <div class="h1">Personal del colegio</div>
+      <div class="sub">Personal docente y asistentes de la educación</div>
+      <div class="kpis">
+        <div class="kpi"><div class="l">Docentes</div><div class="v">30</div></div>
+        <div class="kpi"><div class="l">Asistentes educación</div><div class="v">8</div></div>
+        <div class="kpi"><div class="l">Indefinido</div><div class="v">31</div></div>
+        <div class="kpi"><div class="l">Plazo fijo</div><div class="v">7</div></div>
+        <div class="kpi"><div class="l">Horas no lectivas</div><div class="v">35%</div></div>
+      </div>
+      <div class="card">
+        <div class="cardhead"><h3><span class="material-symbols-outlined">badge</span> Nómina de personal <span class="count" id="cnt-personal">0</span></h3>
+          <div class="tools">
+            <div class="search"><span class="material-symbols-outlined">search</span><input data-f="personal" placeholder="Buscar…"></div>
+            <button class="btn ghost sm" onclick="plantilla('personal')"><span class="material-symbols-outlined" style="font-size:16px">download</span> Plantilla</button>
+            <button class="btn sm" onclick="importar('personal')"><span class="material-symbols-outlined" style="font-size:16px">upload_file</span> Importar Excel</button>
+          </div>
+        </div>
+        <table><thead><tr><th>Nombre</th><th>Cargo</th><th>Área</th><th>Contrato</th><th>Horas (lect./no lect.)</th><th>Estado</th></tr></thead><tbody id="tb-personal"></tbody></table>
+      </div>
+      <div class="legal"><b>⚖ Estatuto Docente:</b> la proporción de horas no lectivas aumenta por la Ley 21.625 (meta 60/40). <b>Código del Trabajo / Ley 21.109:</b> un plazo fijo renovado más de una vez, o que supera un año continuo, se entiende indefinido — de ahí las alertas de vencimiento.</div>
+    </section>
+
+    <!-- ESTUDIANTES -->
+    <section class="sec" id="sec-estudiantes">
+      <div class="h1">Estudiantes</div>
+      <div class="sub">Resumen y estadística de la matrícula</div>
+      <div class="kpis">
+        <div class="kpi"><div class="l">Matrícula</div><div class="v">720</div></div>
+        <div class="kpi"><div class="l">Asistencia</div><div class="v">92%</div></div>
+        <div class="kpi"><div class="l">Promedio</div><div class="v">5,6</div></div>
+        <div class="kpi"><div class="l">Repitencia</div><div class="v">3,2%</div></div>
+        <div class="kpi"><div class="l">Prioritarios SEP</div><div class="v">41%</div></div>
+        <div class="kpi"><div class="l">PIE / NEE</div><div class="v">64</div></div>
+      </div>
+      <div class="grid2">
+        <div class="card"><h3><span class="material-symbols-outlined">bar_chart</span> Matrícula por nivel</h3><div class="chartbox"><canvas id="chMatricula"></canvas></div></div>
+        <div class="card"><h3><span class="material-symbols-outlined">school</span> Rendimiento por nivel</h3><div class="chartbox"><canvas id="chRend"></canvas></div></div>
+      </div>
+      <div class="card">
+        <div class="cardhead"><h3><span class="material-symbols-outlined">table_view</span> Detalle por curso <span class="count" id="cnt-estudiantes">0</span></h3>
+          <div class="tools">
+            <div class="search"><span class="material-symbols-outlined">search</span><input data-f="estudiantes" placeholder="Buscar curso…"></div>
+            <button class="btn ghost sm" onclick="plantilla('estudiantes')"><span class="material-symbols-outlined" style="font-size:16px">download</span> Plantilla</button>
+            <button class="btn sm" onclick="importar('estudiantes')"><span class="material-symbols-outlined" style="font-size:16px">upload_file</span> Importar Excel</button>
+          </div>
+        </div>
+        <table><thead><tr><th>Curso</th><th>Matrícula</th><th>Asistencia</th><th>Promedio</th><th>PIE</th></tr></thead><tbody id="tb-estudiantes"></tbody></table>
+      </div>
+      <div class="legal"><b>⚖ Datos sensibles:</b> rendimiento, asistencia, situación SEP y diagnósticos PIE son datos personales protegidos (Ley 19.628 y nueva Ley de Protección de Datos). Acceso por necesidad y registrado.</div>
+    </section>
+
+    <!-- AREAS -->
+    <section class="sec" id="sec-areas">
+      <div class="h1">Áreas — cumplimiento</div>
+      <div class="sub">Cumplimiento de las tareas asignadas a cada área</div>
+      <div class="grid2" id="areasGrid" style="margin-bottom:16px"></div>
+      <div class="card">
+        <div class="cardhead"><h3><span class="material-symbols-outlined">task_alt</span> Tareas asignadas <span class="count" id="cnt-areas">0</span></h3>
+          <div class="tools">
+            <div class="search"><span class="material-symbols-outlined">search</span><input data-f="areas" placeholder="Buscar…"></div>
+            <button class="btn ghost sm" onclick="plantilla('areas')"><span class="material-symbols-outlined" style="font-size:16px">download</span> Plantilla</button>
+            <button class="btn sm" onclick="importar('areas')"><span class="material-symbols-outlined" style="font-size:16px">upload_file</span> Importar Excel</button>
+          </div>
+        </div>
+        <table><thead><tr><th>Tarea</th><th>Área</th><th>Responsable</th><th>Plazo</th><th>Estado</th></tr></thead><tbody id="tb-areas"></tbody></table>
+      </div>
+    </section>
+
+    <!-- CALENDARIO -->
+    <section class="sec" id="sec-calendario">
+      <div class="h1">Calendario</div>
+      <div class="sub">Actividades del colegio y su cumplimiento · junio 2026</div>
+      <div class="kpis">
+        <div class="kpi"><div class="l">Actividades</div><div class="v">14</div></div>
+        <div class="kpi"><div class="l">Realizadas</div><div class="v">9</div></div>
+        <div class="kpi"><div class="l">Pendientes</div><div class="v">5</div></div>
+        <div class="kpi"><div class="l">Cumplimiento</div><div class="v">82%</div></div>
+      </div>
+      <div class="card"><h3><span class="material-symbols-outlined">calendar_month</span> Junio 2026</h3><div class="cal" id="calGrid"></div>
+        <div style="display:flex;gap:18px;margin-top:14px;font-size:12px;color:var(--muted)">
+          <span><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--success);vertical-align:middle;margin-right:5px"></span>Realizada</span>
+          <span><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--warning);vertical-align:middle;margin-right:5px"></span>Pendiente</span>
+        </div>
+      </div>
+      <div class="card">
+        <div class="cardhead"><h3><span class="material-symbols-outlined">event_note</span> Actividades del mes <span class="count" id="cnt-calendario">0</span></h3>
+          <div class="tools">
+            <div class="search"><span class="material-symbols-outlined">search</span><input data-f="calendario" placeholder="Buscar…"></div>
+            <button class="btn ghost sm" onclick="plantilla('calendario')"><span class="material-symbols-outlined" style="font-size:16px">download</span> Plantilla</button>
+            <button class="btn sm" onclick="importar('calendario')"><span class="material-symbols-outlined" style="font-size:16px">upload_file</span> Importar Excel</button>
+          </div>
+        </div>
+        <table><thead><tr><th>Día</th><th>Actividad</th><th>Tipo</th><th>Estado</th></tr></thead><tbody id="tb-calendario"></tbody></table>
+      </div>
+    </section>
+
+    <!-- LINEAMIENTOS / PEI -->
+    <section class="sec" id="sec-pei">
+      <div class="h1">Lineamientos / PEI</div>
+      <div class="sub">Documentos institucionales del colegio</div>
+      <div class="card">
+        <div class="cardhead"><h3><span class="material-symbols-outlined">folder_open</span> Documentos obligatorios <span class="count" id="cnt-pei">0</span></h3>
+          <div class="tools">
+            <div class="search"><span class="material-symbols-outlined">search</span><input data-f="pei" placeholder="Buscar…"></div>
+            <button class="btn ghost sm" onclick="plantilla('pei')"><span class="material-symbols-outlined" style="font-size:16px">download</span> Plantilla</button>
+            <button class="btn sm" onclick="importar('pei')"><span class="material-symbols-outlined" style="font-size:16px">upload_file</span> Importar Excel</button>
+          </div>
+        </div>
+        <div id="tb-pei"></div>
+      </div>
+      <div class="legal"><b>⚖ Documentos exigidos:</b> PEI, Reglamento Interno y de Convivencia (Ley 20.536), Reglamento de Evaluación (Decreto 67), PME, PISE, Plan de Gestión de la Convivencia, Plan de Formación Ciudadana, Plan de Sexualidad y Afectividad, y Plan de Apoyo a la Inclusión (Decreto 83). <b>Nota:</b> la importación por Excel carga el inventario y estado de los documentos; subir los archivos PDF requiere habilitar almacenamiento (paso siguiente).</div>
+    </section>
+
+    <!-- CONFIGURACION -->
+    <section class="sec" id="sec-config">
+      <div class="h1">Configuración</div>
+      <div class="sub">Datos del establecimiento y parámetros del sistema</div>
+      <div class="card"><h3><span class="material-symbols-outlined">apartment</span> Datos del establecimiento</h3>
+        <div class="frm">
+          <div class="fld"><label>Nombre del colegio</label><input value="Colegio Ejemplo"></div>
+          <div class="fld"><label>RBD</label><input value="12345-6"></div>
+          <div class="fld"><label>Dependencia</label><select><option>Particular subvencionado</option><option>Municipal / SLEP</option><option>Particular pagado</option><option>Administración delegada</option></select></div>
+          <div class="fld"><label>Jornada</label><select><option>Jornada Escolar Completa (JEC)</option><option>Sin JEC</option></select></div>
+          <div class="fld"><label>Director(a)</label><input value="Director Demo"></div>
+          <div class="fld"><label>Sostenedor</label><input value="Fundación Educacional Ejemplo"></div>
+        </div>
+      </div>
+      <div class="card"><h3><span class="material-symbols-outlined">calendar_today</span> Año escolar y evaluación</h3>
+        <div class="frm">
+          <div class="fld"><label>Régimen</label><select><option>Semestral</option><option>Trimestral</option></select></div>
+          <div class="fld"><label>Niveles que imparte</label><input value="Pre-Kínder a IV Medio"></div>
+          <div class="fld"><label>Escala de notas</label><input value="1,0 – 7,0"></div>
+          <div class="fld"><label>Nota de aprobación</label><input value="4,0"></div>
+        </div>
+      </div>
+      <div class="card"><h3><span class="material-symbols-outlined">palette</span> Marca e identidad</h3>
+        <div class="frm">
+          <div class="fld"><label>Logo del colegio</label><input type="file"></div>
+          <div class="fld"><label>Color institucional</label><input value="#6C5CE7"></div>
+        </div>
+      </div>
+      <div style="margin-top:10px"><button class="btn"><span class="material-symbols-outlined" style="font-size:18px">save</span> Guardar cambios</button> <button class="btn ghost" style="margin-left:8px"><span class="material-symbols-outlined" style="font-size:18px">group</span> Gestionar usuarios y roles</button></div>
+    </section>
+
+  </main>
+</div>
+
+<input type="file" id="fileImp" accept=".xlsx,.xls,.csv" style="display:none">
+<div id="toast"><span class="material-symbols-outlined" style="color:var(--success)">check_circle</span><span id="toastMsg"></span></div>
+
+<script>
+function ic(n){return '<span class="material-symbols-outlined">'+n+'</span>';}
+function inferTone(s){s=(''+s).toLowerCase();
+  if(/(falta|atrasad|vencid|cr[ií]tico|rechaz)/.test(s))return 'danger';
+  if(/(por actualizar|pendiente|vence|revisar|reemplazo)/.test(s))return 'warning';
+  if(/(vigente|activ|completad|al d[ií]a|aprobad|realizada|\bok\b)/.test(s))return 'success';
+  return 'info';}
+function tag(t){var c=inferTone(t);var rgb={success:'0,184,148',warning:'253,203,110',danger:'255,107,107',info:'0,206,201'}[c];var v='var(--'+(c==='info'?'secondary':c)+')';return '<span class="tag" style="color:'+v+';background:rgba('+rgb+',0.15)">'+t+'</span>';}
+
+var NAV=[['dashboard','Resumen','resumen'],['groups','Personal','personal'],['person','Estudiantes','estudiantes'],['category','Áreas','areas'],['calendar_month','Calendario','calendario'],['description','Lineamientos / PEI','pei'],['settings','Configuración','config']];
+document.getElementById('nav').innerHTML=NAV.map(function(n,i){return '<div class="nav-item'+(i===0?' active':'')+'" data-s="'+n[2]+'">'+ic(n[0])+'<span>'+n[1]+'</span></div>'}).join('');
+
+// ── Registro de tablas importables ──
+var REG={
+ personal:{headers:['Nombre','Cargo','Área','Contrato','Horas (lect./no lect.)','Estado'],statusIdx:5,rows:[
+   ['R. Soto','Jefe UTP','Académica','Indefinido','30 / 14','Activo'],
+   ['J. Fuentes','Profesor','Académica','Indefinido','38 / 6','Activo'],
+   ['A. Méndez','Profesora','Académica','Plazo fijo','30 / 6','Vence 30 jun'],
+   ['M. Lagos','Enc. Convivencia','Ambiente','Indefinido','38 / 14','Activo'],
+   ['P. Díaz','Psicólogo','Apoyo','Indefinido','44 / —','Activo'],
+   ['C. Rojas','Coord. PIE','PIE','Indefinido','38 / 14','Activo'],
+   ['V. Pinto','Educadora dif.','PIE','Plazo fijo','30 / 10','Vence 15 jul'],
+   ['S. Vega','Trab. social','Apoyo','Reemplazo','44 / —','Reemplazo']]},
+ estudiantes:{headers:['Curso','Matrícula','Asistencia','Promedio','PIE'],statusIdx:-1,rows:[
+   ['5°A','32','94%','5,8','3'],['5°B','30','91%','5,5','2'],['6°A','31','93%','5,6','4'],
+   ['7°A','28','90%','5,4','3'],['8°B','29','92%','5,7','2'],['I Medio A','34','89%','5,3','5']]},
+ areas:{headers:['Tarea','Área','Responsable','Plazo','Estado'],statusIdx:4,rows:[
+   ['Planificaciones semestre','Académica','R. Soto','30 jun','En curso'],
+   ['Plan de gestión convivencia','Ambiente','M. Lagos','28 jun','Atrasada'],
+   ['Informes psicosociales','Apoyo','P. Díaz','05 jul','En curso'],
+   ['Actualización PACI','PIE','C. Rojas','20 jun','Completada']]},
+ calendario:{headers:['Día','Actividad','Tipo','Estado'],statusIdx:3,rows:[
+   ['05 jun','Reunión de apoderados','Familias','Realizada'],
+   ['12 jun','Evaluación intermedia','Académico','Realizada'],
+   ['18 jun','Simulacro PISE','Seguridad','Realizada'],
+   ['24 jun','Consejo de profesores','Institucional','Pendiente'],
+   ['28 jun','Reunión de apoderados','Familias','Pendiente']]},
+ pei:{headers:['Documento','Versión / fecha','Estado'],statusIdx:2,rows:[
+   ['Proyecto Educativo Institucional (PEI)','v3 · mar 2026','Vigente'],
+   ['Reglamento Interno','v2 · 2025','Vigente'],
+   ['Reglamento de Convivencia Escolar','v1 · 2024','Por actualizar'],
+   ['Reglamento de Evaluación (Decreto 67)','v2 · 2025','Vigente'],
+   ['Plan de Mejoramiento Educativo (PME)','2025','Por actualizar'],
+   ['Plan Integral de Seguridad Escolar (PISE)','2026','Vigente'],
+   ['Plan de Gestión de la Convivencia','2026','Vigente'],
+   ['Plan de Formación Ciudadana','2026','Vigente'],
+   ['Plan de Sexualidad y Afectividad','—','Falta'],
+   ['Plan de Apoyo a la Inclusión (Decreto 83)','2026','Vigente']]}
+};
+
+function renderTable(key){
+ var cfg=REG[key], el=document.getElementById('tb-'+key);
+ if(key==='pei'){
+   el.innerHTML=cfg.rows.map(function(r){return '<div class="doc" data-txt="'+r.join(' ').toLowerCase()+'"><span class="di">'+ic('description')+'</span><div style="flex:1"><div class="dn">'+r[0]+'</div><div class="dm">'+(r[1]||'')+'</div></div>'+tag(r[2]||'')+'<button class="btn ghost sm" style="margin-left:12px">'+ic('upload')+'</button></div>'}).join('');
+ } else {
+   el.innerHTML=cfg.rows.map(function(r){return '<tr data-txt="'+r.join(' ').toLowerCase()+'">'+r.map(function(c,i){return '<td>'+(i===cfg.statusIdx?tag(c):c)+'</td>'}).join('')+'</tr>'}).join('');
+ }
+ var cnt=document.getElementById('cnt-'+key); if(cnt)cnt.textContent=cfg.rows.length;
+}
+Object.keys(REG).forEach(renderTable);
+
+// ── Buscador ──
+document.querySelectorAll('input[data-f]').forEach(function(inp){
+ inp.addEventListener('input',function(){
+   var q=inp.value.toLowerCase(), cont=document.getElementById('tb-'+inp.dataset.f);
+   cont.querySelectorAll('[data-txt]').forEach(function(row){row.style.display=row.dataset.txt.indexOf(q)!==-1?'':'none'});
+ });
+});
+
+// ── Importar Excel ──
+var _impKey=null;
+function importar(key){_impKey=key;var f=document.getElementById('fileImp');f.value='';f.click();}
+document.getElementById('fileImp').addEventListener('change',function(e){
+ var file=e.target.files&&e.target.files[0]; if(!file||!_impKey)return;
+ var reader=new FileReader();
+ reader.onload=function(ev){
+   try{
+     var data=new Uint8Array(ev.target.result);
+     var wb=XLSX.read(data,{type:'array'});
+     var ws=wb.Sheets[wb.SheetNames[0]];
+     var rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
+     rows=rows.filter(function(r){return r&&r.join('').trim()!==''});
+     if(rows.length<2){toast('El archivo no tiene filas de datos.','danger');return;}
+     var ncol=REG[_impKey].headers.length;
+     var nuevas=rows.slice(1).map(function(r){var o=[];for(var i=0;i<ncol;i++)o.push(r[i]!=null?String(r[i]):'');return o;});
+     REG[_impKey].rows=nuevas;
+     renderTable(_impKey);
+     toast(nuevas.length+' filas importadas correctamente.','success');
+   }catch(err){toast('No se pudo leer el archivo.','danger');}
+ };
+ reader.readAsArrayBuffer(file);
+});
+
+// ── Descargar plantilla ──
+function plantilla(key){
+ var ws=XLSX.utils.aoa_to_sheet([REG[key].headers]);
+ var wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,'Plantilla');
+ XLSX.writeFile(wb,'plantilla-'+key+'.xlsx');
+ toast('Plantilla descargada.','success');
+}
+
+// ── Toast ──
+var _tt;
+function toast(msg,tone){
+ var t=document.getElementById('toast');
+ t.style.borderLeftColor='var(--'+(tone==='danger'?'danger':'success')+')';
+ t.querySelector('.material-symbols-outlined').style.color='var(--'+(tone==='danger'?'danger':'success')+')';
+ t.querySelector('.material-symbols-outlined').textContent=tone==='danger'?'error':'check_circle';
+ document.getElementById('toastMsg').textContent=msg;
+ t.classList.add('show'); clearTimeout(_tt); _tt=setTimeout(function(){t.classList.remove('show')},3200);
+}
+
+// ── Navegación + charts ──
+var _charts={};
+function show(s){
+  document.querySelectorAll('.nav-item').forEach(function(x){x.classList.toggle('active',x.dataset.s===s)});
+  document.querySelectorAll('.sec').forEach(function(x){x.classList.toggle('active',x.id==='sec-'+s)});
+  if(s==='resumen')mkChart('chAsist','line',{labels:['Mar','Abr','May','Jun'],datasets:[{label:'Asistencia %',data:[90,91,93,92],borderColor:'#A29BFE',backgroundColor:'rgba(108,92,231,.15)',fill:true,tension:.35}]});
+  if(s==='estudiantes'){
+    mkChart('chMatricula','bar',{labels:['Pre-básica','Básica','Media'],datasets:[{label:'Estudiantes',data:[120,420,180],backgroundColor:'#6C5CE7'}]});
+    mkChart('chRend','bar',{labels:['Pre-básica','Básica','Media'],datasets:[{label:'Promedio',data:[6.1,5.7,5.4],backgroundColor:'#00CEC9'}]});
+  }
+}
+function mkChart(id,type,data){
+  if(_charts[id])return;
+  var el=document.getElementById(id);if(!el||typeof Chart==='undefined')return;
+  Chart.defaults.color='#6B7280';Chart.defaults.borderColor='#E6E9F1';Chart.defaults.font.family='Inter';
+  _charts[id]=new Chart(el,{type:type,data:data,options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}});
+}
+document.querySelectorAll('.nav-item').forEach(function(x){x.addEventListener('click',function(){show(x.dataset.s)})});
+
+// Areas (gráficos de cumplimiento)
+var AREAS=[['Académica (UTP)',88,'#6C5CE7'],['Convivencia / Ambiente',79,'#FDCB6E'],['Apoyo psicosocial',72,'#00CEC9'],['PIE / Ed. diferencial',91,'#FD79A8']];
+document.getElementById('areasGrid').innerHTML=AREAS.map(function(a){return '<div class="areacard"><div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:13.5px;font-weight:500">'+a[0]+'</span><span class="pct" style="color:'+a[2]+'">'+a[1]+'%</span></div><div class="prog"><i style="width:'+a[1]+'%;background:'+a[2]+'"></i></div></div>'}).join('');
+
+// Calendario junio 2026 (1 = lunes)
+var EVENTS={5:'success',12:'success',18:'success',24:'warning',28:'warning'};
+var cal='';['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'].forEach(function(d){cal+='<div class="dh">'+d+'</div>'});
+for(var i=0;i<30;i++){var day=i+1;var ev=EVENTS[day];cal+='<div class="d'+(ev?' ev':'')+'">'+day+(ev?'<span class="dot" style="background:var(--'+ev+')"></span>':'')+'</div>';}
+document.getElementById('calGrid').innerHTML=cal;
+
+show('resumen');
+</script>
+</body>
+</html>
