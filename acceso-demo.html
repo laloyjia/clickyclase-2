@@ -51,7 +51,7 @@ USERS.forEach(function(u){
  var html='<div class="rolecard"><div class="top"><span class="ico" style="background:'+rgba(u.ramp,.18)+';color:'+u.ramp+'"><span class="material-symbols-outlined">'+u.ico+'</span></span><div class="role">'+u.role+'</div></div>'+
   '<div class="desc">'+u.desc+'</div>'+
   '<div class="mail"><span>Correo de prueba</span>'+u.mail+'</div>'+
-  '<a class="btn-block" href="'+(u.id==='director'?'panel-director.html':'panel.html?rol='+u.id)+'"><span class="material-symbols-outlined" style="font-size:18px">login</span> Entrar al panel</a></div>';
+  '<a class="btn-block" href="'+(u.id==='director'?'panel-director.html':u.id==='utp'?'panel-utp.html':u.id==='amb_enc'?'panel-ambiente.html':u.id==='pie_enc'?'panel-pie.html':'panel.html?rol='+u.id)+'"><span class="material-symbols-outlined" style="font-size:18px">login</span> Entrar al panel</a></div>';
  document.getElementById(u.g).insertAdjacentHTML('beforeend',html);
 });
 </script>

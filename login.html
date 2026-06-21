@@ -710,12 +710,12 @@ function redirectByRole(user) {
   // ── Paneles nuevos por rol (clickyclase-2) ──
   // Cada rol entra a su panel individual. El profesor (de colegio o
   // independiente) comparte el panel de profesor.
-  // El Director tiene su panel completo dedicado
-  if (user && user.role === 'director') {
-    window.location.href = 'panel-director.html';
-    return;
-  }
-  var PANEL_ROLES = ['admin','utp','profesor','amb_enc','amb_prof','aps_enc','aps_prof','pie_enc','pie_edu'];
+  // Paneles completos dedicados
+  if (user && user.role === 'director') { window.location.href = 'panel-director.html'; return; }
+  if (user && user.role === 'utp')      { window.location.href = 'panel-utp.html' + (user.seg ? ('?seg=' + user.seg) : ''); return; }
+  if (user && user.role === 'amb_enc')  { window.location.href = 'panel-ambiente.html'; return; }
+  if (user && user.role === 'pie_enc')  { window.location.href = 'panel-pie.html'; return; }
+  var PANEL_ROLES = ['admin','profesor','amb_prof','aps_enc','aps_prof','pie_edu'];
   if (user && PANEL_ROLES.indexOf(user.role) !== -1) {
     window.location.href = 'panel.html?rol=' + user.role;
     return;

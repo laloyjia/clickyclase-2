@@ -30,7 +30,13 @@ const COLEGIO = 'colegio-demo';
 const USUARIOS = [
   { email: 'admin@clickyclase.cl',                nombre: 'Administrador General',        role: 'admin',     tipo: 'plataforma',    org: null },
   { email: 'director@colegio-demo.cl',            nombre: 'Director Demo',                role: 'director',  tipo: 'colegio',       org: COLEGIO },
-  { email: 'utp@colegio-demo.cl',                 nombre: 'Encargado UTP',                role: 'utp',       tipo: 'colegio',       org: COLEGIO },
+  { email: 'utp@colegio-demo.cl',                 nombre: 'Encargado UTP (todos)',        role: 'utp',       tipo: 'colegio',       org: COLEGIO },
+  // Encargados pedagógicos por ciclo — cada uno bloqueado a su segmento
+  { email: 'utp.prebasica@colegio-demo.cl',       nombre: 'Enc. Pedagógico Pre-básica',   role: 'utp', seg:'pre', tipo:'colegio', org: COLEGIO },
+  { email: 'utp.basica@colegio-demo.cl',          nombre: 'Enc. Pedagógico 1° a 6° básico',role:'utp', seg:'b16', tipo:'colegio', org: COLEGIO },
+  { email: 'utp.mediahc@colegio-demo.cl',         nombre: 'Enc. Pedagógico Media H-C',    role: 'utp', seg:'mhc', tipo:'colegio', org: COLEGIO },
+  { email: 'utp.formaciongeneral@colegio-demo.cl',nombre: 'Enc. Pedagógico Form. General',role: 'utp', seg:'mfg', tipo:'colegio', org: COLEGIO },
+  { email: 'utp.tp@colegio-demo.cl',              nombre: 'Enc. Pedagógico Téc. Profesional',role:'utp', seg:'tp', tipo:'colegio', org: COLEGIO },
   { email: 'profesor@colegio-demo.cl',            nombre: 'Profesor Demo',                role: 'profesor',  tipo: 'colegio',       org: COLEGIO },
   { email: 'ambiente@colegio-demo.cl',            nombre: 'Encargado de Ambiente',        role: 'amb_enc',   tipo: 'colegio',       org: COLEGIO },
   { email: 'ambiente.prof@colegio-demo.cl',       nombre: 'Profesional de Ambiente',      role: 'amb_prof',  tipo: 'colegio',       org: COLEGIO },
@@ -63,7 +69,7 @@ async function upsertUsuario(u) {
   const orgId = u.org || (u.tipo === 'independiente' ? 'personal-' + user.uid : null);
 
   // Custom claims (útiles luego para reglas y enrutamiento rápido)
-  await auth.setCustomUserClaims(user.uid, { rol: u.role, tipo: u.tipo, orgId: orgId });
+  await auth.setCustomUserClaims(user.uid, { rol: u.role, tipo: u.tipo, orgId: orgId, seg: u.seg || null });
 
   // Documento en Firestore (compatible con el sistema actual: campo "role")
   await db.collection('usuarios').doc(user.uid).set({
@@ -72,6 +78,7 @@ async function upsertUsuario(u) {
     role: u.role,
     tipo: u.tipo,
     orgId: orgId,
+    seg: u.seg || null,
     creadoEn: new Date().toISOString(),
   }, { merge: true });
 

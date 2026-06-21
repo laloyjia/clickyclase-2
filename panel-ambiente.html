@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel Convivencia / Ambiente — Click&Clase</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+<link rel="stylesheet" href="css/panel.css">
+</head>
+<body>
+<div class="topbar">
+  <div><a href="acceso-demo.html" style="color:var(--muted);font-size:13px;margin-right:14px"><span class="material-symbols-outlined" style="font-size:16px;vertical-align:-3px">arrow_back</span> Roles</a><span class="brand">Click&Clase</span><span class="demo-tag">Convivencia · demo</span></div>
+  <div class="usr"><span class="av">EA</span><span style="font-size:13.5px">Encargado de Ambiente</span><a class="salir" href="login.html">Salir</a></div>
+</div>
+
+<div class="shell">
+  <aside class="sidebar">
+    <div class="side-role"><span class="ico"><span class="material-symbols-outlined">volunteer_activism</span></span><div><div class="nm">Convivencia escolar</div><div class="sc">Colegio Ejemplo</div></div></div>
+    <nav id="nav"></nav>
+  </aside>
+  <main class="main">
+
+    <section class="sec active" id="sec-resumen">
+      <div class="h1">Resumen de convivencia</div>
+      <div class="sub">Gestión del clima y la convivencia escolar</div>
+      <div class="kpis">
+        <div class="kpi"><div class="l">Casos activos</div><div class="v">9</div></div>
+        <div class="kpi"><div class="l">Planes de acción</div><div class="v">5</div></div>
+        <div class="kpi"><div class="l">Actividades</div><div class="v">4</div></div>
+        <div class="kpi"><div class="l">Índice de clima</div><div class="v">78</div></div>
+      </div>
+      <div class="card"><h3><span class="material-symbols-outlined">notifications_active</span> Alertas</h3>
+        <div class="row" style="cursor:pointer" onclick="show('casos')"><span class="material-symbols-outlined ic" style="color:var(--danger)">priority_high</span><div style="flex:1"><b>1 caso crítico</b> requiere activar protocolo de actuación.</div><span class="material-symbols-outlined" style="color:var(--faint)">chevron_right</span></div>
+        <div class="row" style="cursor:pointer" onclick="show('planes')"><span class="material-symbols-outlined ic" style="color:var(--warning)">schedule</span><div style="flex:1">2 planes de acción con plazo esta semana.</div><span class="material-symbols-outlined" style="color:var(--faint)">chevron_right</span></div>
+        <div class="row" style="cursor:pointer" onclick="show('reglamento')"><span class="material-symbols-outlined ic" style="color:var(--warning)">description</span><div style="flex:1">Plan de Gestión de la Convivencia por actualizar.</div><span class="material-symbols-outlined" style="color:var(--faint)">chevron_right</span></div>
+      </div>
+      <div class="card"><div class="sec-title"><span class="material-symbols-outlined" style="vertical-align:-4px;color:var(--primary)">calendar_month</span> Calendario del colegio</div><div id="calColegio"></div></div>
+    </section>
+
+    <section class="sec" id="sec-casos">
+      <div class="h1">Casos de convivencia</div>
+      <div class="sub">Registro y seguimiento de casos</div>
+      <div class="card">
+        <div class="cardhead"><h3><span class="material-symbols-outlined">folder</span> Casos <span class="count" id="cnt-casos">0</span></h3>
+          <div class="tools"><div class="search"><span class="material-symbols-outlined">search</span><input data-f="casos" placeholder="Buscar…"></div>
+            <button class="btn ghost sm" onclick="plantilla('casos')"><span class="material-symbols-outlined" style="font-size:16px">download</span> Plantilla</button>
+            <button class="btn sm" onclick="importar('casos')"><span class="material-symbols-outlined" style="font-size:16px">upload_file</span> Importar</button></div>
+        </div>
+        <table><thead><tr><th>Curso / Estudiante</th><th>Tipo</th><th>Responsable</th><th>Fecha</th><th>Estado</th></tr></thead><tbody id="tb-casos"></tbody></table>
+      </div>
+      <div class="legal"><b>⚖ Ley 20.536 (violencia escolar):</b> todo establecimiento debe tener un Encargado de Convivencia y aplicar los <b>protocolos de actuación</b> ante hechos de violencia o acoso, dentro de los plazos del Reglamento Interno. Los registros son datos sensibles.</div>
+    </section>
+
+    <section class="sec" id="sec-planes">
+      <div class="h1">Planes de acción</div>
+      <div class="sub">Acciones asignadas por caso, según el reglamento</div>
+      <div class="card">
+        <div class="cardhead"><h3><span class="material-symbols-outlined">alt_route</span> Planes <span class="count" id="cnt-planes">0</span></h3>
+          <div class="tools"><div class="search"><span class="material-symbols-outlined">search</span><input data-f="planes" placeholder="Buscar…"></div>
+            <button class="btn ghost sm" onclick="plantilla('planes')"><span class="material-symbols-outlined" style="font-size:16px">download</span> Plantilla</button>
+            <button class="btn sm" onclick="importar('planes')"><span class="material-symbols-outlined" style="font-size:16px">upload_file</span> Importar</button></div>
+        </div>
+        <table><thead><tr><th>Caso</th><th>Acción</th><th>Responsable</th><th>Plazo</th><th>Estado</th></tr></thead><tbody id="tb-planes"></tbody></table>
+      </div>
+    </section>
+
+    <section class="sec" id="sec-actividades">
+      <div class="h1">Actividades de convivencia</div>
+      <div class="sub">Talleres, mediaciones y actividades preventivas</div>
+      <div class="card">
+        <div class="cardhead"><h3><span class="material-symbols-outlined">event</span> Actividades <span class="count" id="cnt-actividades">0</span></h3>
+          <div class="tools"><div class="search"><span class="material-symbols-outlined">search</span><input data-f="actividades" placeholder="Buscar…"></div>
+            <button class="btn ghost sm" onclick="plantilla('actividades')"><span class="material-symbols-outlined" style="font-size:16px">download</span> Plantilla</button>
+            <button class="btn sm" onclick="importar('actividades')"><span class="material-symbols-outlined" style="font-size:16px">upload_file</span> Importar</button></div>
+        </div>
+        <table><thead><tr><th>Día</th><th>Actividad</th><th>Curso</th><th>Estado</th></tr></thead><tbody id="tb-actividades"></tbody></table>
+      </div>
+    </section>
+
+    <section class="sec" id="sec-equipo">
+      <div class="h1">Mi equipo</div>
+      <div class="sub">Profesionales de ambiente a cargo</div>
+      <div class="card">
+        <div class="cardhead"><h3><span class="material-symbols-outlined">groups</span> Profesionales <span class="count" id="cnt-equipo">0</span></h3>
+          <div class="tools"><div class="search"><span class="material-symbols-outlined">search</span><input data-f="equipo" placeholder="Buscar…"></div></div>
+        </div>
+        <table><thead><tr><th>Profesional</th><th>Casos</th><th>Actividades</th><th>Estado</th></tr></thead><tbody id="tb-equipo"></tbody></table>
+      </div>
+    </section>
+
+    <section class="sec" id="sec-reglamento">
+      <div class="h1">Reglamento</div>
+      <div class="sub">Documentos de convivencia del colegio</div>
+      <div class="card">
+        <div class="cardhead"><h3><span class="material-symbols-outlined">menu_book</span> Documentos <span class="count" id="cnt-reglamento">0</span></h3>
+          <div class="tools"><div class="search"><span class="material-symbols-outlined">search</span><input data-f="reglamento" placeholder="Buscar…"></div>
+            <button class="btn sm" onclick="importar('reglamento')"><span class="material-symbols-outlined" style="font-size:16px">upload_file</span> Importar lista</button></div>
+        </div>
+        <div id="tb-reglamento"></div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<input type="file" id="fileImp" accept=".xlsx,.xls,.csv,.docx" style="display:none">
+<input type="file" id="fileDoc" style="display:none">
+<div id="toast"><span class="material-symbols-outlined" style="color:var(--success)">check_circle</span><span id="toastMsg"></span></div>
+
+<script>
+function ic(n){return '<span class="material-symbols-outlined">'+n+'</span>';}
+function inferTone(s){s=(''+s).toLowerCase();
+  if(/(falta|atrasad|vencid|cr[ií]tico|grave|rechaz)/.test(s))return 'danger';
+  if(/(por actualizar|pendiente|vence|revisar|seguimiento|abierto)/.test(s))return 'warning';
+  if(/(vigente|activ|al d[ií]a|cerrado|completad|realizada|resuelto|cargad)/.test(s))return 'success';
+  return 'info';}
+function tag(t){return '<span class="tag '+inferTone(t)+'">'+t+'</span>';}
+
+var REG={
+ casos:{headers:['Curso / Estudiante','Tipo','Responsable','Fecha','Estado'],statusIdx:4,rows:[
+   ['7°B · grupo','Conflicto entre pares','M. Lagos','12 jun','En seguimiento'],
+   ['4°A · E. Pérez','Conducta','J. Soto','15 jun','Crítico'],
+   ['2°A · grupo','Prevención','M. Lagos','10 jun','Resuelto'],
+   ['I°B · M. Rivas','Acoso escolar','M. Lagos','18 jun','Abierto']]},
+ planes:{headers:['Caso','Acción','Responsable','Plazo','Estado'],statusIdx:4,rows:[
+   ['Acoso I°B','Activar protocolo + entrevistas','M. Lagos','24 jun','Pendiente'],
+   ['Conducta 4°A','Mediación y compromiso','J. Soto','26 jun','En curso'],
+   ['Conflicto 7°B','Taller de convivencia','M. Lagos','20 jun','Completado']]},
+ actividades:{headers:['Día','Actividad','Curso','Estado'],statusIdx:3,rows:[
+   ['05 jun','Taller de buen trato','7°B','Realizada'],
+   ['21 jun','Mediación entre pares','4°A','Pendiente'],
+   ['25 jun','Recreos dirigidos','2°A','Pendiente']]},
+ equipo:{headers:['Profesional','Casos','Actividades','Estado'],statusIdx:3,rows:[
+   ['J. Soto','3','2','Activo'],['R. Pérez','2','1','Activo']]},
+ reglamento:{headers:['Documento','Versión / fecha','Estado'],statusIdx:2,rows:[
+   ['Reglamento Interno de Convivencia','v1 · 2024','Por actualizar'],
+   ['Plan de Gestión de la Convivencia','2026','Vigente'],
+   ['Protocolo de acoso escolar','2026','Vigente'],
+   ['Protocolo de maltrato','2025','Vigente'],
+   ['Protocolo de actuación frente a violencia','—','Falta']]}
+};
+
+function renderTable(key){
+ var cfg=REG[key], el=document.getElementById('tb-'+key);
+ if(key==='reglamento'){
+   el.innerHTML=cfg.rows.map(function(r,i){var sub=r[3]?('<span class="material-symbols-outlined" style="font-size:14px;vertical-align:-2px">attach_file</span> '+r[3]):(r[1]||'');return '<div class="doc" data-txt="'+r.join(' ').toLowerCase()+'"><span class="di">'+ic('description')+'</span><div style="flex:1"><div class="dn">'+r[0]+'</div><div class="dm">'+sub+'</div></div>'+tag(r[3]?'Cargado':(r[2]||''))+'<button class="btn ghost sm" style="margin-left:12px" title="Subir archivo" onclick="docUpload('+i+')">'+ic('upload')+'</button></div>'}).join('');
+ } else {
+   el.innerHTML=cfg.rows.map(function(r){return '<tr data-txt="'+r.join(' ').toLowerCase()+'">'+r.map(function(c,i){return '<td>'+(i===cfg.statusIdx?tag(c):c)+'</td>'}).join('')+'</tr>'}).join('');
+ }
+ var cnt=document.getElementById('cnt-'+key); if(cnt)cnt.textContent=cfg.rows.length;
+}
+Object.keys(REG).forEach(renderTable);
+
+document.addEventListener('input',function(e){var inp=e.target;if(!inp.dataset||!inp.dataset.f)return;var q=inp.value.toLowerCase(),cont=document.getElementById('tb-'+inp.dataset.f);cont.querySelectorAll('[data-txt]').forEach(function(r){r.style.display=r.dataset.txt.indexOf(q)!==-1?'':'none'});});
+
+var _impKey=null;
+function importar(k){_impKey=k;var f=document.getElementById('fileImp');f.value='';f.click();}
+function plantilla(k){var ws=XLSX.utils.aoa_to_sheet([REG[k].headers]);var wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Plantilla');XLSX.writeFile(wb,'plantilla-'+k+'.xlsx');toast('Plantilla descargada.','success');}
+function applyRows(rows){rows=rows.filter(function(r){return r&&r.join('').trim()!==''});if(rows.length<2){toast('Sin filas de datos.','danger');return;}var n=REG[_impKey].headers.length;REG[_impKey].rows=rows.slice(1).map(function(r){var o=[];for(var i=0;i<n;i++)o.push(r[i]!=null?String(r[i]):'');return o;});renderTable(_impKey);toast(REG[_impKey].rows.length+' filas importadas.','success');}
+document.getElementById('fileImp').addEventListener('change',function(e){var file=e.target.files&&e.target.files[0];if(!file||!_impKey)return;var ext=(file.name.split('.').pop()||'').toLowerCase(),rd=new FileReader();
+ if(ext==='docx'){rd.onload=function(ev){if(typeof mammoth==='undefined'){toast('Lector Word no disponible.','danger');return;}mammoth.extractRawText({arrayBuffer:ev.target.result}).then(function(res){var rows=res.value.split(/\r?\n/).filter(function(l){return l.trim()!==''}).map(function(l){return l.split(/\t|\s{2,}| - |;|\|/).map(function(c){return c.trim()})});if(rows.length)rows.unshift(REG[_impKey].headers);applyRows(rows);}).catch(function(){toast('No se pudo leer el Word.','danger');});};rd.readAsArrayBuffer(file);}
+ else{rd.onload=function(ev){try{var wb=XLSX.read(new Uint8Array(ev.target.result),{type:'array'});applyRows(XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,defval:''}));}catch(err){toast('No se pudo leer el archivo.','danger');}};rd.readAsArrayBuffer(file);}
+});
+
+var _docIdx=null;
+function docUpload(i){_docIdx=i;var f=document.getElementById('fileDoc');f.value='';f.click();}
+document.getElementById('fileDoc').addEventListener('change',function(e){var file=e.target.files&&e.target.files[0];if(file==null||_docIdx==null)return;REG.reglamento.rows[_docIdx][3]=file.name;renderTable('reglamento');toast('Documento "'+file.name+'" cargado.','success');_docIdx=null;});
+
+var _tt;function toast(msg,tone){var t=document.getElementById('toast');t.style.borderLeftColor='var(--'+(tone==='danger'?'danger':'success')+')';var i=t.querySelector('.material-symbols-outlined');i.style.color='var(--'+(tone==='danger'?'danger':'success')+')';i.textContent=tone==='danger'?'error':'check_circle';document.getElementById('toastMsg').textContent=msg;t.classList.add('show');clearTimeout(_tt);_tt=setTimeout(function(){t.classList.remove('show')},3000);}
+
+var NAV=[['dashboard','Resumen','resumen'],['folder','Casos','casos'],['alt_route','Planes de acción','planes'],['event','Actividades','actividades'],['groups','Mi equipo','equipo'],['menu_book','Reglamento','reglamento']];
+document.getElementById('nav').innerHTML=NAV.map(function(n,i){return '<div class="nav-item'+(i===0?' active':'')+'" data-s="'+n[2]+'">'+ic(n[0])+'<span>'+n[1]+'</span></div>'}).join('');
+function show(s){document.querySelectorAll('.nav-item').forEach(function(x){x.classList.toggle('active',x.dataset.s===s)});document.querySelectorAll('.sec').forEach(function(x){x.classList.toggle('active',x.id==='sec-'+s)});}
+document.querySelectorAll('.nav-item').forEach(function(x){x.addEventListener('click',function(){show(x.dataset.s)})});
+
+(function(){var rows=[];try{rows=JSON.parse(localStorage.getItem('cc_calendario')||'[]');}catch(e){}var el=document.getElementById('calColegio');if(!rows.length){el.innerHTML='<div class="sub" style="margin:0">Aún no hay calendario institucional cargado por dirección.</div>';return;}el.innerHTML=rows.slice(0,8).map(function(r){return '<div class="row"><span class="material-symbols-outlined ic">event</span><div style="flex:1"><div>'+(r[1]||'')+'</div><div class="sub">'+(r[0]||'')+(r[2]?(' · '+r[2]):'')+'</div></div><span class="sub">'+(r[3]||'')+'</span></div>'}).join('');})();
+</script>
+</body>
+</html>
