@@ -112,6 +112,23 @@
 <input type="file" id="fileDoc" style="display:none">
 <div id="toast"><span class="material-symbols-outlined" style="color:var(--success)">check_circle</span><span id="toastMsg"></span></div>
 
+<div class="overlay" id="planOverlay">
+  <div class="modal" style="max-width:680px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+      <h3 style="font-size:16px;font-weight:600;display:flex;align-items:center;gap:8px"><span class="material-symbols-outlined" style="color:var(--primary)">smart_toy</span> Plan de acción con IA</h3>
+      <span class="material-symbols-outlined" style="cursor:pointer;color:var(--muted)" onclick="cerrarPlan()">close</span>
+    </div>
+    <div id="planCaso" class="sub" style="margin-bottom:8px"></div>
+    <div id="planDocsNote" class="sub" style="margin-bottom:12px;font-size:12px"></div>
+    <button class="btn" id="btnGen" onclick="generarPlan()"><span class="material-symbols-outlined" style="font-size:18px">auto_awesome</span> Generar con IA</button>
+    <textarea id="planTxt" rows="13" placeholder="El plan generado aparecerá aquí, editable…" style="width:100%;margin-top:14px;font-family:'Inter',sans-serif;font-size:13px;line-height:1.6;color:var(--text);background:var(--surface);border:1px solid var(--border-2);border-radius:9px;padding:12px"></textarea>
+    <div style="display:flex;gap:10px;margin-top:14px;justify-content:flex-end;flex-wrap:wrap">
+      <button class="btn ghost" onclick="exportarWord()"><span class="material-symbols-outlined" style="font-size:18px">description</span> Exportar a Word</button>
+      <button class="btn" onclick="guardarPlan()"><span class="material-symbols-outlined" style="font-size:18px">save</span> Guardar como plan</button>
+    </div>
+  </div>
+</div>
+
 <script>
 function ic(n){return '<span class="material-symbols-outlined">'+n+'</span>';}
 function inferTone(s){s=(''+s).toLowerCase();
@@ -150,7 +167,7 @@ function renderTable(key){
  if(key==='reglamento'){
    el.innerHTML=cfg.rows.map(function(r,i){var sub=r[3]?('<span class="material-symbols-outlined" style="font-size:14px;vertical-align:-2px">attach_file</span> '+r[3]):(r[1]||'');return '<div class="doc" data-txt="'+r.join(' ').toLowerCase()+'"><span class="di">'+ic('description')+'</span><div style="flex:1"><div class="dn">'+r[0]+'</div><div class="dm">'+sub+'</div></div>'+tag(r[3]?'Cargado':(r[2]||''))+'<button class="btn ghost sm" style="margin-left:12px" title="Subir archivo" onclick="docUpload('+i+')">'+ic('upload')+'</button></div>'}).join('');
  } else {
-   el.innerHTML=cfg.rows.map(function(r){return '<tr data-txt="'+r.join(' ').toLowerCase()+'">'+r.map(function(c,i){return '<td>'+(i===cfg.statusIdx?tag(c):c)+'</td>'}).join('')+'</tr>'}).join('');
+   el.innerHTML=cfg.rows.map(function(r,j){var clk=(key==='casos')?' style="cursor:pointer" onclick="planIA('+j+')" title="Generar plan de acción con IA"':'';return '<tr data-txt="'+r.join(' ').toLowerCase()+'"'+clk+'>'+r.map(function(c,i){return '<td>'+(i===cfg.statusIdx?tag(c):c)+'</td>'}).join('')+'</tr>'}).join('');
  }
  var cnt=document.getElementById('cnt-'+key); if(cnt)cnt.textContent=cfg.rows.length;
 }
@@ -177,6 +194,40 @@ var NAV=[['dashboard','Resumen','resumen'],['folder','Casos','casos'],['alt_rout
 document.getElementById('nav').innerHTML=NAV.map(function(n,i){return '<div class="nav-item'+(i===0?' active':'')+'" data-s="'+n[2]+'">'+ic(n[0])+'<span>'+n[1]+'</span></div>'}).join('');
 function show(s){document.querySelectorAll('.nav-item').forEach(function(x){x.classList.toggle('active',x.dataset.s===s)});document.querySelectorAll('.sec').forEach(function(x){x.classList.toggle('active',x.id==='sec-'+s)});}
 document.querySelectorAll('.nav-item').forEach(function(x){x.addEventListener('click',function(){show(x.dataset.s)})});
+
+// ── IA: Plan de acción ──
+var LEYES='Normativa chilena de convivencia escolar a considerar: Ley 20.536 sobre violencia escolar (protocolos obligatorios y Encargado de Convivencia); Política Nacional de Convivencia Escolar (Mineduc); Ley 21.128 "Aula Segura" cuando aplique; enfoque de derechos del niño (Ley 21.430). Si hay estudiantes con NEE, considerar Decreto 83.';
+function docsInst(){var o={};try{o=JSON.parse(localStorage.getItem('cc_docs')||'{}');}catch(e){}var k=Object.keys(o);return {n:k.length,txt:k.map(function(x){return '### '+x+'\n'+o[x]}).join('\n\n')};}
+var _planCaso=null;
+function planIA(j){_planCaso=REG.casos.rows[j];
+ document.getElementById('planCaso').innerHTML='<b>Caso:</b> '+_planCaso[0]+' · '+_planCaso[1]+' · resp. '+_planCaso[2]+' · '+_planCaso[3];
+ var d=docsInst();
+ document.getElementById('planDocsNote').innerHTML=d.n?('<span class="material-symbols-outlined" style="font-size:14px;vertical-align:-2px;color:var(--success)">check_circle</span> La IA usará '+d.n+' documento(s) institucional(es) cargado(s) por dirección.'):'<span class="material-symbols-outlined" style="font-size:14px;vertical-align:-2px;color:var(--warning)">info</span> Sin documentos institucionales cargados (el director los sube en Lineamientos/PEI). La IA usará solo la normativa.';
+ document.getElementById('planTxt').value='';
+ document.getElementById('planOverlay').classList.add('show');
+}
+function cerrarPlan(){document.getElementById('planOverlay').classList.remove('show');}
+document.getElementById('planOverlay').addEventListener('click',function(e){if(e.target===this)cerrarPlan();});
+function buildPrompt(){var d=docsInst(),c=_planCaso;
+ return 'Eres un asesor experto en convivencia escolar en Chile. Redacta un PLAN DE ACCIÓN formal y aplicable para el siguiente caso, fundamentado en la normativa chilena y en los documentos institucionales del colegio.\n\n'+
+ 'CASO:\n- Curso/Estudiante: '+c[0]+'\n- Tipo: '+c[1]+'\n- Responsable: '+c[2]+'\n- Fecha: '+c[3]+'\n- Estado: '+c[4]+'\n\n'+
+ LEYES+'\n\n'+
+ (d.n?('DOCUMENTOS INSTITUCIONALES (úsalos como base — PEI, Reglamento Interno de Convivencia, protocolos):\n'+d.txt+'\n\n'):'No hay documentos institucionales cargados; básate en la normativa y buenas prácticas, e indica entre [corchetes] lo que el colegio debe completar según su reglamento.\n\n')+
+ 'ESTRUCTURA DE SALIDA:\n1. Identificación del caso\n2. Antecedentes y descripción\n3. Marco normativo e institucional aplicable\n4. Objetivos del plan\n5. Acciones (cada una con responsable y plazo)\n6. Seguimiento y evaluación\n7. Comunicación a la familia\n\nRedacta en español, tono profesional, listo para imprimir. No inventes datos; usa [corchetes] donde falte información.';
+}
+function generarPlan(){var b=document.getElementById('btnGen');b.disabled=true;var o=b.innerHTML;b.innerHTML='<span class="material-symbols-outlined" style="font-size:18px">hourglass_top</span> Generando…';
+ fetch('/api/ia-asistente',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({tipo:'raw',datos:{prompt:buildPrompt()}})})
+  .then(function(r){return r.json()}).then(function(d){if(d.error)throw new Error(d.error);document.getElementById('planTxt').value=d.resultado||'(respuesta vacía)';toast('Plan generado. Revísalo y edítalo.','success');})
+  .catch(function(err){toast('Error de IA: '+err.message,'danger');}).then(function(){b.disabled=false;b.innerHTML=o;});
+}
+function exportarWord(){var txt=document.getElementById('planTxt').value||'';if(!txt.trim()){toast('Primero genera o escribe el plan.','danger');return;}
+ var html='<h2>Plan de acción — '+(_planCaso?_planCaso[0]:'')+'</h2><pre style="font-family:Calibri,Arial;font-size:11pt;white-space:pre-wrap">'+txt.replace(/&/g,'&amp;').replace(/</g,'&lt;')+'</pre>';
+ var blob=new Blob(['<html xmlns:w="urn:schemas-microsoft-com:office:word"><head><meta charset="utf-8"></head><body>'+html+'</body></html>'],{type:'application/msword'});
+ var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='plan-accion.doc';a.click();toast('Exportado a Word.','success');
+}
+function guardarPlan(){var txt=document.getElementById('planTxt').value||'';if(!txt.trim()){toast('Primero genera el plan.','danger');return;}
+ var c=_planCaso;REG.planes.rows.unshift([c[0]+' · '+c[1],'Plan generado con IA',c[2],'—','Pendiente']);renderTable('planes');toast('Plan guardado en Planes de acción.','success');cerrarPlan();show('planes');
+}
 
 (function(){var rows=[];try{rows=JSON.parse(localStorage.getItem('cc_calendario')||'[]');}catch(e){}var el=document.getElementById('calColegio');if(!rows.length){el.innerHTML='<div class="sub" style="margin:0">Aún no hay calendario institucional cargado por dirección.</div>';return;}el.innerHTML=rows.slice(0,8).map(function(r){return '<div class="row"><span class="material-symbols-outlined ic">event</span><div style="flex:1"><div>'+(r[1]||'')+'</div><div class="sub">'+(r[0]||'')+(r[2]?(' · '+r[2]):'')+'</div></div><span class="sub">'+(r[3]||'')+'</span></div>'}).join('');})();
 </script>
