@@ -11,6 +11,12 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="js/firebase-rest.js"></script>
+<script src="js/firebase-config.js"></script>
+<script src="js/firebase-auth.js"></script>
+<script src="js/cc-store.js"></script>
 <link rel="stylesheet" href="css/panel.css">
 </head>
 <body>
@@ -371,9 +377,12 @@ function renderCal(){
    ? '<div class="hoybox"><span class="material-symbols-outlined" style="color:var(--primary)">today</span><div><b>Hoy, 20 jun:</b> '+h.act+' <span style="color:var(--muted)">· '+h.tipo+'</span></div></div>'
    : '<div class="hoybox"><span class="material-symbols-outlined" style="color:var(--muted)">event_available</span><div>Hoy, 20 jun · sin actividades programadas.</div></div>';
 }
-function persistCal(){try{localStorage.setItem('cc_calendario',JSON.stringify(REG.calendario.rows));}catch(e){}}
-(function loadCal(){try{var s=localStorage.getItem('cc_calendario');if(s){REG.calendario.rows=JSON.parse(s);renderTable('calendario');}}catch(e){}})();
-renderCal();
+function persistCal(){if(window.ccStore){ccStore.setCalendario(REG.calendario.rows);}else{try{localStorage.setItem('cc_calendario',JSON.stringify(REG.calendario.rows));}catch(e){}}}
+(function loadCal(){
+  try{var s=localStorage.getItem('cc_calendario');if(s)REG.calendario.rows=JSON.parse(s);}catch(e){}
+  renderTable('calendario'); renderCal();
+  if(window.ccStore){ccStore.getCalendario().then(function(rows){if(rows&&rows.length){REG.calendario.rows=rows;renderTable('calendario');renderCal();}}).catch(function(){});}
+})();
 
 // ── Subir documento (PEI) ──
 var _docIdx=null;
@@ -382,7 +391,7 @@ document.getElementById('fileDoc').addEventListener('change',function(e){
  var file=e.target.files&&e.target.files[0]; if(file==null||_docIdx==null)return;
  var idx=_docIdx, titulo=REG.pei.rows[idx][0], ext=(file.name.split('.').pop()||'').toLowerCase();
  REG.pei.rows[idx][3]=file.name; renderTable('pei'); _docIdx=null;
- function guarda(txt){try{var o=JSON.parse(localStorage.getItem('cc_docs')||'{}');o[titulo]=(txt||'').replace(/\s+/g,' ').slice(0,12000);localStorage.setItem('cc_docs',JSON.stringify(o));}catch(e){}}
+ function guarda(txt){var t=(txt||'').replace(/\s+/g,' ').slice(0,12000);if(window.ccStore){ccStore.setDocText(titulo,t);}else{try{var o=JSON.parse(localStorage.getItem('cc_docs')||'{}');o[titulo]=t;localStorage.setItem('cc_docs',JSON.stringify(o));}catch(e){}}}
  var rd=new FileReader();
  if(ext==='docx'&&typeof mammoth!=='undefined'){rd.onload=function(ev){mammoth.extractRawText({arrayBuffer:ev.target.result}).then(function(r){guarda(r.value);toast('Documento cargado y leído por la IA.','success');}).catch(function(){toast('Documento cargado (sin extraer texto).','success');});};rd.readAsArrayBuffer(file);}
  else if(ext==='txt'){rd.onload=function(ev){guarda(ev.target.result);toast('Documento cargado y leído por la IA.','success');};rd.readAsText(file);}
