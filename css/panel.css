@@ -208,3 +208,15 @@ tbody tr:hover{background:var(--surface-2)}
 [data-theme="dark"] .brand{color:var(--primary-light)}
 [data-theme="dark"] .legal{color:#d8c79a;background:#2a2210;border-color:#43391c}
 [data-theme="dark"] th{background:var(--surface-2)}
+
+/* ── Ordenar tablas ── */
+th{cursor:pointer;user-select:none}
+th[data-asc]::after{content:'▲';font-size:9px;margin-left:5px;color:var(--primary)}
+th[data-asc="0"]::after{content:'▼'}
+
+/* ── Menú lateral en móvil ── */
+.cc-burger{display:none}
+@media(max-width:820px){
+  .cc-burger{display:inline-flex;margin-right:8px}
+  .sidebar.cc-open{display:block;position:fixed;top:57px;left:0;bottom:0;width:240px;z-index:30;overflow:auto;box-shadow:var(--shadow-2)}
+}

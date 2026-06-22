@@ -45,8 +45,61 @@
     });
   }
 
+  // (14) Menú lateral en móvil — botón hamburguesa
+  function injectBurger() {
+    var bar = document.querySelector('.topbar'); var side = document.querySelector('.sidebar');
+    if (!bar || !side || document.getElementById('cc-burger')) return;
+    var b = document.createElement('button');
+    b.id = 'cc-burger'; b.className = 'cc-iconbtn cc-burger'; b.title = 'Menú';
+    b.innerHTML = '<span class="material-symbols-outlined">menu</span>';
+    b.addEventListener('click', function () { side.classList.toggle('cc-open'); });
+    var first = bar.firstElementChild;
+    if (first) first.insertBefore(b, first.firstChild); else bar.appendChild(b);
+    side.addEventListener('click', function (e) { if (e.target.closest && e.target.closest('.nav-item')) side.classList.remove('cc-open'); });
+  }
+
+  // (20) Ordenar tablas por columna (delegación: sobrevive a re-renders)
+  document.addEventListener('click', function (e) {
+    var th = e.target.closest && e.target.closest('th'); if (!th) return;
+    var table = th.closest('table'); if (!table) return;
+    var tbody = table.querySelector('tbody'); if (!tbody) return;
+    var idx = Array.prototype.indexOf.call(th.parentNode.children, th);
+    var asc = th.getAttribute('data-asc') !== '1';
+    Array.prototype.forEach.call(th.parentNode.children, function (x) { x.removeAttribute('data-asc'); });
+    th.setAttribute('data-asc', asc ? '1' : '0');
+    var rows = Array.prototype.slice.call(tbody.querySelectorAll('tr'));
+    rows.sort(function (a, b) {
+      var ta = (a.children[idx] ? a.children[idx].textContent : '').trim();
+      var tb = (b.children[idx] ? b.children[idx].textContent : '').trim();
+      var na = parseFloat(ta.replace(',', '.')), nb = parseFloat(tb.replace(',', '.'));
+      var cmp = (!isNaN(na) && !isNaN(nb)) ? (na - nb) : ta.localeCompare(tb, 'es');
+      return asc ? cmp : -cmp;
+    });
+    rows.forEach(function (r) { tbody.appendChild(r); });
+  });
+
+  // (15) Estados vacíos: placeholder amable cuando una tabla no tiene filas
+  function watchEmpty(tb) {
+    function check() {
+      var real = tb.querySelectorAll('tr:not(.cc-empty)').length;
+      var ph = tb.querySelector('tr.cc-empty');
+      if (real === 0 && !ph) {
+        var table = tb.closest('table');
+        var cols = table ? (table.querySelectorAll('thead th').length || 1) : 1;
+        var tr = document.createElement('tr'); tr.className = 'cc-empty';
+        tr.innerHTML = '<td colspan="' + cols + '" style="text-align:center;color:var(--muted);padding:22px"><span class="material-symbols-outlined" style="font-size:30px;opacity:.5;display:block;margin-bottom:6px">inbox</span>Sin registros aún.</td>';
+        tb.appendChild(tr);
+      } else if (real > 0 && ph) { ph.remove(); }
+    }
+    try { new MutationObserver(check).observe(tb, { childList: true }); } catch (e) {}
+    check();
+  }
+  function emptyStates() { document.querySelectorAll('tbody').forEach(watchEmpty); }
+
   window.addEventListener('load', function () {
     try { injectToggle(); } catch (e) {}
+    try { injectBurger(); } catch (e) {}
     try { injectExport(); } catch (e) {}
+    try { emptyStates(); } catch (e) {}
   });
 })();
