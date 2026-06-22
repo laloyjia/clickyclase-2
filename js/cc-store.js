@@ -65,5 +65,34 @@ var ccStore = (function () {
       return cfgDoc('documentos').set({ docsJson: JSON.stringify(docs), updatedAt: new Date().toISOString() }).catch(function () {});
     });
   }
-  return { getCalendario: getCalendario, setCalendario: setCalendario, getDocs: getDocs, setDocText: setDocText };
+  // ── Tablas de datos genéricas (casos, planes, estudiantes, etc.) ──
+  // Guarda en organizaciones/{org}/datos/{key} como { rowsJson }.
+  function getTabla(key) {
+    var lk = 'cc_t_' + key;
+    var local = lsGet(lk, 'null');
+    return _authReady().then(function (ok) {
+      if (!ok || typeof EL_DB === 'undefined') return local;
+      return EL_DB.collection('organizaciones').doc(ORG).collection('datos').doc(key).get().then(function (d) {
+        if (d.exists) { var v = d.data() || {}; if (v.rowsJson) { var rows = JSON.parse(v.rowsJson); lsSet(lk, rows); return rows; } }
+        return local;
+      }).catch(function () { return local; });
+    });
+  }
+  function setTabla(key, rows) {
+    lsSet('cc_t_' + key, rows);
+    return _authReady().then(function (ok) {
+      if (!ok || typeof EL_DB === 'undefined') return;
+      return EL_DB.collection('organizaciones').doc(ORG).collection('datos').doc(key).set({ rowsJson: JSON.stringify(rows), updatedAt: new Date().toISOString() }).catch(function () {});
+    });
+  }
+  // Hidrata todas las tablas de un objeto REG y persiste; helper para los paneles.
+  function hydrate(prefix, REG, renderTable) {
+    Object.keys(REG).forEach(function (k) {
+      getTabla(prefix + '_' + k).then(function (rows) {
+        if (rows && rows.length) { REG[k].rows = rows; try { renderTable(k); } catch (e) {} }
+      }).catch(function () {});
+    });
+  }
+
+  return { getCalendario: getCalendario, setCalendario: setCalendario, getDocs: getDocs, setDocText: setDocText, getTabla: getTabla, setTabla: setTabla, hydrate: hydrate };
 })();

@@ -159,13 +159,14 @@ function renderTable(key){
  var cnt=document.getElementById('cnt-'+key); if(cnt)cnt.textContent=cfg.rows.length;
 }
 Object.keys(REG).forEach(renderTable);
+if(window.ccStore)ccStore.hydrate('ambp',REG,renderTable);
 
 document.addEventListener('input',function(e){var inp=e.target;if(!inp.dataset||!inp.dataset.f)return;var q=inp.value.toLowerCase(),cont=document.getElementById('tb-'+inp.dataset.f);cont.querySelectorAll('[data-txt]').forEach(function(r){r.style.display=r.dataset.txt.indexOf(q)!==-1?'':'none'});});
 
 var _impKey=null;
 function importar(k){_impKey=k;var f=document.getElementById('fileImp');f.value='';f.click();}
 function plantilla(k){var ws=XLSX.utils.aoa_to_sheet([REG[k].headers]);var wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Plantilla');XLSX.writeFile(wb,'plantilla-'+k+'.xlsx');toast('Plantilla descargada.','success');}
-function applyRows(rows){rows=rows.filter(function(r){return r&&r.join('').trim()!==''});if(rows.length<2){toast('Sin filas de datos.','danger');return;}var n=REG[_impKey].headers.length;REG[_impKey].rows=rows.slice(1).map(function(r){var o=[];for(var i=0;i<n;i++)o.push(r[i]!=null?String(r[i]):'');return o;});renderTable(_impKey);toast(REG[_impKey].rows.length+' filas importadas.','success');}
+function applyRows(rows){rows=rows.filter(function(r){return r&&r.join('').trim()!==''});if(rows.length<2){toast('Sin filas de datos.','danger');return;}var n=REG[_impKey].headers.length;REG[_impKey].rows=rows.slice(1).map(function(r){var o=[];for(var i=0;i<n;i++)o.push(r[i]!=null?String(r[i]):'');return o;});renderTable(_impKey);if(window.ccStore)ccStore.setTabla('ambp_'+_impKey,REG[_impKey].rows);toast(REG[_impKey].rows.length+' filas importadas.','success');}
 document.getElementById('fileImp').addEventListener('change',function(e){var file=e.target.files&&e.target.files[0];if(!file||!_impKey)return;var rd=new FileReader();rd.onload=function(ev){try{var wb=XLSX.read(new Uint8Array(ev.target.result),{type:'array'});applyRows(XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,defval:''}));}catch(err){toast('No se pudo leer el archivo.','danger');}};rd.readAsArrayBuffer(file);});
 
 var _tt;function toast(msg,tone){var t=document.getElementById('toast');t.style.borderLeftColor='var(--'+(tone==='danger'?'danger':'success')+')';var i=t.querySelector('.material-symbols-outlined');i.style.color='var(--'+(tone==='danger'?'danger':'success')+')';i.textContent=tone==='danger'?'error':'check_circle';document.getElementById('toastMsg').textContent=msg;t.classList.add('show');clearTimeout(_tt);_tt=setTimeout(function(){t.classList.remove('show')},3000);}
