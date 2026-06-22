@@ -94,5 +94,24 @@ var ccStore = (function () {
     });
   }
 
-  return { getCalendario: getCalendario, setCalendario: setCalendario, getDocs: getDocs, setDocText: setDocText, getTabla: getTabla, setTabla: setTabla, hydrate: hydrate };
+  // ── Branding del colegio (color, nombre, logo) ──
+  function getBranding() {
+    var local = lsGet('cc_branding', 'null');
+    return _authReady().then(function (ok) {
+      if (!ok || typeof EL_DB === 'undefined') return local;
+      return EL_DB.collection('organizaciones').doc(ORG).collection('config').doc('branding').get().then(function (d) {
+        if (d.exists) { var v = d.data() || {}; lsSet('cc_branding', v); return v; }
+        return local;
+      }).catch(function () { return local; });
+    });
+  }
+  function setBranding(obj) {
+    lsSet('cc_branding', obj);
+    return _authReady().then(function (ok) {
+      if (!ok || typeof EL_DB === 'undefined') return;
+      return EL_DB.collection('organizaciones').doc(ORG).collection('config').doc('branding').set(obj).catch(function () {});
+    });
+  }
+
+  return { getCalendario: getCalendario, setCalendario: setCalendario, getDocs: getDocs, setDocText: setDocText, getTabla: getTabla, setTabla: setTabla, hydrate: hydrate, getBranding: getBranding, setBranding: setBranding };
 })();

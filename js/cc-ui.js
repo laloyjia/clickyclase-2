@@ -8,6 +8,12 @@
 (function () {
   // Aplicar tema guardado lo antes posible (evita parpadeo)
   try { var t = localStorage.getItem('cc_theme'); if (t === 'dark') document.documentElement.setAttribute('data-theme', 'dark'); } catch (e) {}
+  // Aplicar color institucional (branding) si está en caché
+  function applyBranding(br) {
+    if (!br) return;
+    if (br.color) { document.documentElement.style.setProperty('--primary', br.color); document.documentElement.style.setProperty('--primary-light', br.color); }
+  }
+  try { applyBranding(JSON.parse(localStorage.getItem('cc_branding') || 'null')); } catch (e) {}
 
   function isDark() { return document.documentElement.getAttribute('data-theme') === 'dark'; }
 
@@ -101,5 +107,6 @@
     try { injectBurger(); } catch (e) {}
     try { injectExport(); } catch (e) {}
     try { emptyStates(); } catch (e) {}
+    try { if (window.ccStore && ccStore.getBranding) ccStore.getBranding().then(applyBranding).catch(function () {}); } catch (e) {}
   });
 })();

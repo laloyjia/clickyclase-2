@@ -181,7 +181,7 @@
       <div class="sub">Datos del establecimiento y parámetros del sistema</div>
       <div class="card"><h3><span class="material-symbols-outlined">apartment</span> Datos del establecimiento</h3>
         <div class="frm">
-          <div class="fld"><label>Nombre del colegio</label><input value="Colegio Ejemplo"></div>
+          <div class="fld"><label>Nombre del colegio</label><input id="cfgNombre" value="Colegio Ejemplo"></div>
           <div class="fld"><label>RBD</label><input value="12345-6"></div>
           <div class="fld"><label>Dependencia</label><select><option>Particular subvencionado</option><option>Municipal / SLEP</option><option>Particular pagado</option><option>Administración delegada</option></select></div>
           <div class="fld"><label>Jornada</label><select><option>Jornada Escolar Completa (JEC)</option><option>Sin JEC</option></select></div>
@@ -200,7 +200,7 @@
       <div class="card"><h3><span class="material-symbols-outlined">palette</span> Marca e identidad</h3>
         <div class="frm">
           <div class="fld"><label>Logo del colegio</label><input type="file"></div>
-          <div class="fld"><label>Color institucional</label><input value="#6C5CE7"></div>
+          <div class="fld"><label>Color institucional</label><input id="cfgColor" type="color" value="#6C5CE7" style="height:42px;padding:4px"></div>
         </div>
       </div>
       <div style="margin-top:10px"><button class="btn" onclick="guardarConfig()"><span class="material-symbols-outlined" style="font-size:18px">save</span> Guardar cambios</button> <button class="btn ghost" style="margin-left:8px" onclick="toast('Próximamente: gestión de usuarios y roles del colegio.','success')"><span class="material-symbols-outlined" style="font-size:18px">group</span> Gestionar usuarios y roles</button></div>
@@ -405,7 +405,10 @@ document.getElementById('fileDoc').addEventListener('change',function(e){
 function guardarConfig(){
  var vals=[]; document.querySelectorAll('#sec-config input, #sec-config select').forEach(function(el){vals.push(el.value);});
  try{localStorage.setItem('cc_config',JSON.stringify(vals));}catch(e){}
- toast('Configuración guardada correctamente.','success');
+ var color=(document.getElementById('cfgColor')||{}).value||'', nombre=(document.getElementById('cfgNombre')||{}).value||'';
+ if(window.ccStore)ccStore.setBranding({color:color,nombre:nombre});
+ try{if(color){document.documentElement.style.setProperty('--primary',color);document.documentElement.style.setProperty('--primary-light',color);}}catch(e){}
+ toast('Configuración guardada. El color se aplicó a la plataforma.','success');
 }
 
 show('resumen');
