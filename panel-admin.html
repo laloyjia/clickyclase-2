@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel Administrador — Click&Clase</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0">
+<link rel="stylesheet" href="css/panel.css">
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="js/firebase-rest.js"></script>
+<script src="js/firebase-config.js"></script>
+<script src="js/firebase-auth.js"></script>
+<script src="js/firebase-db.js"></script>
+</head>
+<body>
+<div class="topbar">
+  <div><a href="acceso-demo.html" style="color:var(--muted);font-size:13px;margin-right:14px"><span class="material-symbols-outlined" style="font-size:16px;vertical-align:-3px">arrow_back</span> Roles</a><span class="brand">Click&Clase</span><span class="demo-tag">Administrador · plataforma</span></div>
+  <div class="usr"><span class="av">AD</span><span id="meEmail" style="font-size:13.5px">Administrador</span><a class="salir" href="#" onclick="salir();return false">Salir</a></div>
+</div>
+<div class="shell">
+  <aside class="sidebar">
+    <div class="side-role"><span class="ico"><span class="material-symbols-outlined">admin_panel_settings</span></span><div><div class="nm">Administrador</div><div class="sc">Plataforma Click&Clase</div></div></div>
+    <nav id="nav"></nav>
+  </aside>
+  <main class="main">
+    <div id="authMsg" style="display:none" class="card"><h3><span class="material-symbols-outlined">lock</span> Acceso restringido</h3><div class="sub" style="margin:0">Esta página es solo para administradores. Inicia sesión con una cuenta de administrador. <a href="login.html" style="color:var(--primary)">Ir al login →</a></div></div>
+
+    <div id="content" style="display:none">
+    <section class="sec active" id="sec-resumen">
+      <div class="h1">Resumen de plataforma</div><div class="sub">Vista global de Click&Clase</div>
+      <div class="kpis">
+        <div class="kpi"><div class="l">Usuarios</div><div class="v" id="kpiUsuarios">—</div></div>
+        <div class="kpi"><div class="l">Colegios</div><div class="v" id="kpiColegios">1</div></div>
+        <div class="kpi"><div class="l">API Keys IA</div><div class="v" id="kpiKeys">—</div></div>
+        <div class="kpi"><div class="l">Modelo IA</div><div class="v" id="kpiModelo" style="font-size:15px">—</div></div>
+      </div>
+      <div class="card"><h3><span class="material-symbols-outlined">bolt</span> Estado del sistema</h3>
+        <div class="row"><span class="material-symbols-outlined ic">database</span><div style="flex:1">Base de datos: <b id="estDb">verificando…</b></div></div>
+        <div class="row"><span class="material-symbols-outlined ic">smart_toy</span><div style="flex:1">Configuración IA: <b id="estIa">verificando…</b></div></div>
+      </div>
+    </section>
+
+    <section class="sec" id="sec-usuarios">
+      <div class="h1">Usuarios</div><div class="sub">Usuarios registrados en la plataforma</div>
+      <div class="card"><div class="cardhead"><h3><span class="material-symbols-outlined">group</span> Usuarios <span class="count" id="cnt-usuarios">0</span></h3>
+        <div class="tools"><div class="search"><span class="material-symbols-outlined">search</span><input id="buscarU" placeholder="Buscar…"></div>
+        <button class="btn ghost sm" onclick="cargarUsuarios()"><span class="material-symbols-outlined" style="font-size:16px">refresh</span> Actualizar</button></div></div>
+        <table><thead><tr><th>Correo</th><th>Rol</th><th>Tipo</th><th>Segmento</th><th>Organización</th></tr></thead><tbody id="tb-usuarios"><tr><td colspan="5" style="color:var(--muted)">Cargando…</td></tr></tbody></table>
+      </div>
+    </section>
+
+    <section class="sec" id="sec-colegios">
+      <div class="h1">Colegios</div><div class="sub">Establecimientos en la plataforma</div>
+      <div class="card"><div class="cardhead"><h3><span class="material-symbols-outlined">apartment</span> Colegios</h3></div>
+        <table><thead><tr><th>Colegio</th><th>Plan</th><th>Tipo</th><th>Estado</th></tr></thead><tbody>
+          <tr><td>Colegio Ejemplo (colegio-demo)</td><td>Dedicado</td><td>Multi-tenant</td><td><span class="tag success">Activo</span></td></tr>
+        </tbody></table>
+        <div class="sub" style="margin-top:12px">La gestión completa de colegios (crear, suspender, planes) se conecta a Firestore en la siguiente etapa.</div>
+      </div>
+    </section>
+
+    <section class="sec" id="sec-ia">
+      <div class="h1">Configuración IA — Gemini</div><div class="sub">API Keys del pool y modelo por defecto</div>
+      <div class="card"><h3><span class="material-symbols-outlined">key</span> API Keys del pool</h3>
+        <div class="sub">El sistema usa estas keys para generar material e informes. Agrega 2–3 para distribuir la cuota.</div>
+        <div id="listaKeys" style="margin:12px 0;display:flex;flex-direction:column;gap:8px"></div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end">
+          <div class="fld" style="flex:1;min-width:240px"><label>Nueva API Key (AIzaSy…)</label><input id="nuevaKey" type="password" placeholder="Pega aquí tu API Key de Google AI Studio"></div>
+          <button class="btn" onclick="addKey()"><span class="material-symbols-outlined" style="font-size:18px">add</span> Agregar key</button>
+        </div>
+      </div>
+      <div class="card"><h3><span class="material-symbols-outlined">tune</span> Modelo por defecto</h3>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end">
+          <div class="fld" style="flex:1;min-width:240px"><label>Modelo</label><select id="modeloSel"><option value="gemini-2.5-flash">Gemini 2.5 Flash — recomendado</option><option value="gemini-2.5-flash-lite">Gemini 2.5 Flash Lite — más ligero</option><option value="gemini-2.5-pro">Gemini 2.5 Pro — más potente</option></select></div>
+          <button class="btn" onclick="guardarModelo()"><span class="material-symbols-outlined" style="font-size:18px">save</span> Guardar modelo</button>
+        </div>
+      </div>
+      <div class="legal"><b>Nota de seguridad:</b> la clave se guarda en Firestore (<code>sistema/gemini</code>) y la usa el panel de admin. Para que el generador de IA la utilice de forma segura en producción, también debe estar como variable de entorno <code>GEMINI_API_KEY</code> en Vercel. La conexión directa serverless↔Firestore se habilita con una cuenta de servicio (siguiente etapa).</div>
+    </section>
+    </div>
+  </main>
+</div>
+<div id="toast"><span class="material-symbols-outlined" style="color:var(--success)">check_circle</span><span id="toastMsg"></span></div>
+<script>
+function ic(n){return '<span class="material-symbols-outlined">'+n+'</span>';}
+var _tt;function toast(msg,tone){var t=document.getElementById('toast');t.style.borderLeftColor='var(--'+(tone==='danger'?'danger':'success')+')';var i=t.querySelector('.material-symbols-outlined');i.style.color='var(--'+(tone==='danger'?'danger':'success')+')';i.textContent=tone==='danger'?'error':'check_circle';document.getElementById('toastMsg').textContent=msg;t.classList.add('show');clearTimeout(_tt);_tt=setTimeout(function(){t.classList.remove('show')},3200);}
+
+var NAV=[['dashboard','Resumen','resumen'],['group','Usuarios','usuarios'],['apartment','Colegios','colegios'],['smart_toy','Configuración IA','ia']];
+document.getElementById('nav').innerHTML=NAV.map(function(n,i){return '<div class="nav-item'+(i===0?' active':'')+'" data-s="'+n[2]+'">'+ic(n[0])+'<span>'+n[1]+'</span></div>'}).join('');
+function show(s){document.querySelectorAll('.nav-item').forEach(function(x){x.classList.toggle('active',x.dataset.s===s)});document.querySelectorAll('.sec').forEach(function(x){x.classList.toggle('active',x.id==='sec-'+s)});}
+document.querySelectorAll('.nav-item').forEach(function(x){x.addEventListener('click',function(){show(x.dataset.s)})});
+function salir(){try{ELAuth.logout();}catch(e){}window.location.href='login.html';}
+
+// ── Auth gate ──
+function esAdmin(u){if(!u)return false;if(u.role==='admin')return true;var L=window.EL_ADMIN_EMAILS||(window.EL_ADMIN_EMAIL?[window.EL_ADMIN_EMAIL]:[]);return L.indexOf(u.email)!==-1;}
+function iniciar(){
+ document.getElementById('content').style.display='block';
+ document.getElementById('authMsg').style.display='none';
+ cargarUsuarios(); cargarIA();
+ document.getElementById('estDb').textContent='conectada (clickyclase-2)';
+}
+if(typeof ELAuth!=='undefined'&&ELAuth.onUserReady){
+ ELAuth.onUserReady(function(u){
+   if(!esAdmin(u)){document.getElementById('authMsg').style.display='block';document.getElementById('content').style.display='none';return;}
+   document.getElementById('meEmail').textContent=u.email||'Administrador';
+   iniciar();
+ });
+} else { document.getElementById('authMsg').style.display='block'; }
+
+// ── Usuarios ──
+function cargarUsuarios(){
+ if(typeof EL_DB==='undefined')return;
+ EL_DB.collection('usuarios').get().then(function(snap){
+   var rows=(snap.docs||[]).map(function(d){var u=d.data()||{};return [u.email||d.id,u.role||'',u.tipo||'',u.seg||'—',u.orgId||'—'];});
+   document.getElementById('cnt-usuarios').textContent=rows.length;
+   document.getElementById('kpiUsuarios').textContent=rows.length;
+   var tb=document.getElementById('tb-usuarios');
+   tb.innerHTML=rows.length?rows.map(function(r){return '<tr data-txt="'+r.join(' ').toLowerCase()+'">'+'<td>'+r[0]+'</td><td><span class="tag info">'+r[1]+'</span></td><td>'+r[2]+'</td><td>'+r[3]+'</td><td>'+r[4]+'</td></tr>'}).join(''):'<tr><td colspan="5" style="color:var(--muted)">Sin usuarios.</td></tr>';
+ }).catch(function(e){document.getElementById('tb-usuarios').innerHTML='<tr><td colspan="5" style="color:var(--danger)">Error: '+e.message+'</td></tr>';});
+}
+document.getElementById('buscarU').addEventListener('input',function(){var q=this.value.toLowerCase();document.querySelectorAll('#tb-usuarios tr[data-txt]').forEach(function(r){r.style.display=r.dataset.txt.indexOf(q)!==-1?'':'none'});});
+
+// ── Configuración IA (Firestore sistema/gemini) ──
+var _ia={keys:[],modelo:'gemini-2.5-flash'};
+function cargarIA(){
+ if(typeof EL_DB==='undefined')return;
+ EL_DB.collection('sistema').doc('gemini').get().then(function(d){
+   if(d.exists){var v=d.data()||{};_ia.keys=v.keys||[];_ia.modelo=v.modelo||'gemini-2.5-flash';}
+   renderKeys();
+   var sel=document.getElementById('modeloSel');if(sel)sel.value=_ia.modelo;
+   document.getElementById('kpiModelo').textContent=_ia.modelo;
+   document.getElementById('estIa').textContent=_ia.keys.length?(_ia.keys.length+' key(s) configurada(s)'):'sin keys';
+ }).catch(function(e){document.getElementById('estIa').textContent='error: '+e.message;});
+}
+function renderKeys(){
+ var c=document.getElementById('listaKeys');
+ document.getElementById('kpiKeys').textContent=_ia.keys.length;
+ if(!_ia.keys.length){c.innerHTML='<div class="sub" style="margin:0;font-style:italic">No hay keys configuradas. Agrega al menos una.</div>';return;}
+ c.innerHTML=_ia.keys.map(function(k,i){var m=k.substring(0,8)+'••••••••••'+k.slice(-4);return '<div style="display:flex;align-items:center;gap:10px;background:var(--surface-2);border:1px solid var(--border);border-radius:9px;padding:9px 13px"><span style="font-family:monospace;font-size:.85rem;flex:1;color:var(--text)">'+m+'</span><span class="tag success">Key '+(i+1)+'</span><button class="btn ghost sm" onclick="delKey('+i+')">Eliminar</button></div>'}).join('');
+}
+function guardarIA(msg){return EL_DB.collection('sistema').doc('gemini').set(_ia).then(function(){toast(msg||'Guardado.','success');document.getElementById('kpiKeys').textContent=_ia.keys.length;document.getElementById('kpiModelo').textContent=_ia.modelo;document.getElementById('estIa').textContent=_ia.keys.length?(_ia.keys.length+' key(s) configurada(s)'):'sin keys';}).catch(function(e){toast('Error al guardar: '+e.message,'danger');});}
+function addKey(){var inp=document.getElementById('nuevaKey');var k=inp.value.trim();if(k.length<20){toast('Ingresa una API Key válida (AIzaSy…).','danger');return;}if(_ia.keys.indexOf(k)!==-1){toast('Esa key ya está en el pool.','danger');return;}_ia.keys.push(k);guardarIA('Key agregada.').then(function(){inp.value='';renderKeys();});}
+function delKey(i){_ia.keys.splice(i,1);guardarIA('Key eliminada.').then(renderKeys);}
+function guardarModelo(){_ia.modelo=document.getElementById('modeloSel').value;guardarIA('Modelo guardado: '+_ia.modelo);}
+</script>
+</body>
+</html>
