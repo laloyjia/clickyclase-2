@@ -4,12 +4,17 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Panel Convivencia / Ambiente — Click&Clase</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="js/firebase-rest.js"></script>
+<script src="js/firebase-config.js"></script>
+<script src="js/firebase-auth.js"></script>
+<script src="js/cc-store.js"></script>
 <link rel="stylesheet" href="css/panel.css">
 </head>
 <body>
@@ -17,14 +22,12 @@
   <div><a href="acceso-demo.html" style="color:var(--muted);font-size:13px;margin-right:14px"><span class="material-symbols-outlined" style="font-size:16px;vertical-align:-3px">arrow_back</span> Roles</a><span class="brand">Click&Clase</span><span class="demo-tag">Convivencia · demo</span></div>
   <div class="usr"><span class="av">EA</span><span style="font-size:13.5px">Encargado de Ambiente</span><a class="salir" href="login.html">Salir</a></div>
 </div>
-
 <div class="shell">
   <aside class="sidebar">
     <div class="side-role"><span class="ico"><span class="material-symbols-outlined">volunteer_activism</span></span><div><div class="nm">Convivencia escolar</div><div class="sc">Colegio Ejemplo</div></div></div>
     <nav id="nav"></nav>
   </aside>
   <main class="main">
-
     <section class="sec active" id="sec-resumen">
       <div class="h1">Resumen de convivencia</div>
       <div class="sub">Gestión del clima y la convivencia escolar</div>
@@ -44,7 +47,7 @@
 
     <section class="sec" id="sec-casos">
       <div class="h1">Casos de convivencia</div>
-      <div class="sub">Registro y seguimiento de casos</div>
+      <div class="sub">Registro y seguimiento · haz clic en un caso para generar su plan con IA</div>
       <div class="card">
         <div class="cardhead"><h3><span class="material-symbols-outlined">folder</span> Casos <span class="count" id="cnt-casos">0</span></h3>
           <div class="tools"><div class="search"><span class="material-symbols-outlined">search</span><input data-f="casos" placeholder="Buscar…"></div>
@@ -98,13 +101,11 @@
       <div class="sub">Documentos de convivencia del colegio</div>
       <div class="card">
         <div class="cardhead"><h3><span class="material-symbols-outlined">menu_book</span> Documentos <span class="count" id="cnt-reglamento">0</span></h3>
-          <div class="tools"><div class="search"><span class="material-symbols-outlined">search</span><input data-f="reglamento" placeholder="Buscar…"></div>
-            <button class="btn sm" onclick="importar('reglamento')"><span class="material-symbols-outlined" style="font-size:16px">upload_file</span> Importar lista</button></div>
+          <div class="tools"><div class="search"><span class="material-symbols-outlined">search</span><input data-f="reglamento" placeholder="Buscar…"></div></div>
         </div>
         <div id="tb-reglamento"></div>
       </div>
     </section>
-
   </main>
 </div>
 
@@ -190,11 +191,6 @@ document.getElementById('fileDoc').addEventListener('change',function(e){var fil
 
 var _tt;function toast(msg,tone){var t=document.getElementById('toast');t.style.borderLeftColor='var(--'+(tone==='danger'?'danger':'success')+')';var i=t.querySelector('.material-symbols-outlined');i.style.color='var(--'+(tone==='danger'?'danger':'success')+')';i.textContent=tone==='danger'?'error':'check_circle';document.getElementById('toastMsg').textContent=msg;t.classList.add('show');clearTimeout(_tt);_tt=setTimeout(function(){t.classList.remove('show')},3000);}
 
-var NAV=[['dashboard','Resumen','resumen'],['folder','Casos','casos'],['alt_route','Planes de acción','planes'],['event','Actividades','actividades'],['groups','Mi equipo','equipo'],['menu_book','Reglamento','reglamento']];
-document.getElementById('nav').innerHTML=NAV.map(function(n,i){return '<div class="nav-item'+(i===0?' active':'')+'" data-s="'+n[2]+'">'+ic(n[0])+'<span>'+n[1]+'</span></div>'}).join('');
-function show(s){document.querySelectorAll('.nav-item').forEach(function(x){x.classList.toggle('active',x.dataset.s===s)});document.querySelectorAll('.sec').forEach(function(x){x.classList.toggle('active',x.id==='sec-'+s)});}
-document.querySelectorAll('.nav-item').forEach(function(x){x.addEventListener('click',function(){show(x.dataset.s)})});
-
 // ── IA: Plan de acción ──
 var LEYES='Normativa chilena de convivencia escolar a considerar: Ley 20.536 sobre violencia escolar (protocolos obligatorios y Encargado de Convivencia); Política Nacional de Convivencia Escolar (Mineduc); Ley 21.128 "Aula Segura" cuando aplique; enfoque de derechos del niño (Ley 21.430). Si hay estudiantes con NEE, considerar Decreto 83.';
 function docsInst(){var o={};try{o=JSON.parse(localStorage.getItem('cc_docs')||'{}');}catch(e){}var k=Object.keys(o);return {n:k.length,txt:k.map(function(x){return '### '+x+'\n'+o[x]}).join('\n\n')};}
@@ -202,7 +198,7 @@ var _planCaso=null;
 function planIA(j){_planCaso=REG.casos.rows[j];
  document.getElementById('planCaso').innerHTML='<b>Caso:</b> '+_planCaso[0]+' · '+_planCaso[1]+' · resp. '+_planCaso[2]+' · '+_planCaso[3];
  var d=docsInst();
- document.getElementById('planDocsNote').innerHTML=d.n?('<span class="material-symbols-outlined" style="font-size:14px;vertical-align:-2px;color:var(--success)">check_circle</span> La IA usará '+d.n+' documento(s) institucional(es) cargado(s) por dirección.'):'<span class="material-symbols-outlined" style="font-size:14px;vertical-align:-2px;color:var(--warning)">info</span> Sin documentos institucionales cargados (el director los sube en Lineamientos/PEI). La IA usará solo la normativa.';
+ document.getElementById('planDocsNote').innerHTML=d.n?('<span class="material-symbols-outlined" style="font-size:14px;vertical-align:-2px;color:var(--success)">check_circle</span> La IA usará '+d.n+' documento(s) institucional(es) cargado(s) por dirección.'):'<span class="material-symbols-outlined" style="font-size:14px;vertical-align:-2px;color:var(--warning)">info</span> Sin documentos institucionales cargados; la IA usará solo la normativa.';
  document.getElementById('planTxt').value='';
  document.getElementById('planOverlay').classList.add('show');
 }
@@ -210,8 +206,7 @@ function cerrarPlan(){document.getElementById('planOverlay').classList.remove('s
 document.getElementById('planOverlay').addEventListener('click',function(e){if(e.target===this)cerrarPlan();});
 function buildPrompt(){var d=docsInst(),c=_planCaso;
  return 'Eres un asesor experto en convivencia escolar en Chile. Redacta un PLAN DE ACCIÓN formal y aplicable para el siguiente caso, fundamentado en la normativa chilena y en los documentos institucionales del colegio.\n\n'+
- 'CASO:\n- Curso/Estudiante: '+c[0]+'\n- Tipo: '+c[1]+'\n- Responsable: '+c[2]+'\n- Fecha: '+c[3]+'\n- Estado: '+c[4]+'\n\n'+
- LEYES+'\n\n'+
+ 'CASO:\n- Curso/Estudiante: '+c[0]+'\n- Tipo: '+c[1]+'\n- Responsable: '+c[2]+'\n- Fecha: '+c[3]+'\n- Estado: '+c[4]+'\n\n'+LEYES+'\n\n'+
  (d.n?('DOCUMENTOS INSTITUCIONALES (úsalos como base — PEI, Reglamento Interno de Convivencia, protocolos):\n'+d.txt+'\n\n'):'No hay documentos institucionales cargados; básate en la normativa y buenas prácticas, e indica entre [corchetes] lo que el colegio debe completar según su reglamento.\n\n')+
  'ESTRUCTURA DE SALIDA:\n1. Identificación del caso\n2. Antecedentes y descripción\n3. Marco normativo e institucional aplicable\n4. Objetivos del plan\n5. Acciones (cada una con responsable y plazo)\n6. Seguimiento y evaluación\n7. Comunicación a la familia\n\nRedacta en español, tono profesional, listo para imprimir. No inventes datos; usa [corchetes] donde falte información.';
 }
@@ -229,7 +224,18 @@ function guardarPlan(){var txt=document.getElementById('planTxt').value||'';if(!
  var c=_planCaso;REG.planes.rows.unshift([c[0]+' · '+c[1],'Plan generado con IA',c[2],'—','Pendiente']);renderTable('planes');toast('Plan guardado en Planes de acción.','success');cerrarPlan();show('planes');
 }
 
-(function(){var rows=[];try{rows=JSON.parse(localStorage.getItem('cc_calendario')||'[]');}catch(e){}var el=document.getElementById('calColegio');if(!rows.length){el.innerHTML='<div class="sub" style="margin:0">Aún no hay calendario institucional cargado por dirección.</div>';return;}el.innerHTML=rows.slice(0,8).map(function(r){return '<div class="row"><span class="material-symbols-outlined ic">event</span><div style="flex:1"><div>'+(r[1]||'')+'</div><div class="sub">'+(r[0]||'')+(r[2]?(' · '+r[2]):'')+'</div></div><span class="sub">'+(r[3]||'')+'</span></div>'}).join('');})();
+var NAV=[['dashboard','Resumen','resumen'],['folder','Casos','casos'],['alt_route','Planes de acción','planes'],['event','Actividades','actividades'],['groups','Mi equipo','equipo'],['menu_book','Reglamento','reglamento']];
+document.getElementById('nav').innerHTML=NAV.map(function(n,i){return '<div class="nav-item'+(i===0?' active':'')+'" data-s="'+n[2]+'">'+ic(n[0])+'<span>'+n[1]+'</span></div>'}).join('');
+function show(s){document.querySelectorAll('.nav-item').forEach(function(x){x.classList.toggle('active',x.dataset.s===s)});document.querySelectorAll('.sec').forEach(function(x){x.classList.toggle('active',x.id==='sec-'+s)});}
+document.querySelectorAll('.nav-item').forEach(function(x){x.addEventListener('click',function(){show(x.dataset.s)})});
+
+if(window.ccStore){ccStore.getDocs();}
+(function(){var el=document.getElementById('calColegio');
+ function render(rows){if(!el)return;if(!rows||!rows.length){el.innerHTML='<div class="sub" style="margin:0">Aún no hay calendario institucional cargado.</div>';return;}el.innerHTML=rows.slice(0,8).map(function(r){return '<div class="row"><span class="material-symbols-outlined ic">event</span><div style="flex:1"><div>'+(r[1]||'')+'</div><div class="sub">'+(r[0]||'')+(r[2]?(' · '+r[2]):'')+'</div></div><span class="sub">'+(r[3]||'')+'</span></div>'}).join('');}
+ var local=[];try{local=JSON.parse(localStorage.getItem('cc_calendario')||'[]');}catch(e){}
+ render(local);
+ if(window.ccStore){ccStore.getCalendario().then(render).catch(function(){});}
+})();
 </script>
 </body>
 </html>

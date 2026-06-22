@@ -8,10 +8,15 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0">
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="js/firebase-rest.js"></script>
+<script src="js/firebase-config.js"></script>
+<script src="js/firebase-auth.js"></script>
+<script src="js/cc-store.js"></script>
 <link rel="stylesheet" href="css/panel.css">
 </head>
 <body>
-
 <div class="topbar">
   <div><a href="acceso-demo.html" style="color:var(--muted);font-size:13px;margin-right:14px"><span class="material-symbols-outlined" style="font-size:16px;vertical-align:-3px">arrow_back</span> Roles</a><span class="brand">Click&Clase</span><span class="demo-tag">Prototipo · modo demostración</span></div>
   <div class="switcher">
@@ -19,7 +24,6 @@
     <select id="roleSel"></select>
   </div>
 </div>
-
 <div class="shell">
   <aside class="sidebar">
     <div class="side-role" id="sideRole"></div>
@@ -32,14 +36,14 @@
     </div>
     <div class="kpis" id="kpis"></div>
     <div id="panels"></div>
-    <div class="foot">Vista de demostración. Los datos son de ejemplo. La próxima etapa conecta cada rol con el login real y la base de datos de clickyclase-2.</div>
+    <div class="foot">Vista de demostración. Cada rol tiene además su panel dedicado.</div>
   </main>
 </div>
-
 <script>
 function ic(n){return '<span class="material-symbols-outlined">'+n+'</span>';}
-const TONE={success:'--success',warning:'--warning',danger:'--danger',info:'--secondary'};
-function tag(txt,t){var c='var('+(TONE[t]||'--secondary')+')';return '<span class="tag" style="color:'+c+';background:'+c.replace('var(','rgba(').replace(')',',0.14)').replace('--success','0,184,148').replace('--warning','253,203,110').replace('--danger','255,107,107').replace('--secondary','0,206,201')+'">'+txt+'</span>';}
+function tag(txt,t){return '<span class="tag '+t+'">'+txt+'</span>';}
+function rgba(hex,a){var n=parseInt(hex.slice(1),16);return 'rgba('+((n>>16)&255)+','+((n>>8)&255)+','+(n&255)+','+a+')';}
+function inits(name){return name.split(' ').map(function(w){return w[0]}).join('').slice(0,2);}
 
 const ROLES=[
  {id:'admin',label:'Administrador general',ico:'public',ramp:'#5B4BE0',scope:'Plataforma · todos los colegios',
@@ -57,84 +61,60 @@ const ROLES=[
   panels:[
    {k:'table',t:'Áreas del colegio',ti:'category',cols:['Área','Encargado','Integrantes','Estado'],rows:[
     ['Académica (UTP)','R. Soto','24',{p:'Activa',c:'success'}],['Ambiente / Convivencia','M. Lagos','4',{p:'Activa',c:'success'}],
-    ['Apoyo psicosocial','P. Díaz','3',{p:'Activa',c:'success'}],['PIE','C. Rojas','7',{p:'Activa',c:'success'}]]},
-   {k:'list',t:'Gestión pendiente',ti:'pending_actions',items:[
-    ['2 invitaciones de docentes','por aprobar'],['Lineamientos PEI','sin actualizar este año'],['Calendario institucional','1 evento por confirmar']]}]},
+    ['Apoyo psicosocial','P. Díaz','3',{p:'Activa',c:'success'}],['PIE','C. Rojas','7',{p:'Activa',c:'success'}]]}]},
  {id:'utp',label:'Encargado UTP',ico:'fact_check',ramp:'#5B4BE0',scope:'Área académica · supervisión',
   nav:[['dashboard','Resumen'],['groups','Profesores'],['description','Planificaciones'],['checklist','Cobertura curricular'],['calendar_month','Calendario'],['table_chart','Notas']],
   kpis:[['Profesores','24'],['Planif. por revisar','7'],['Cobertura','82%'],['Eval. / semana','15']],
   panels:[
-   {k:'table',t:'Mi equipo · monitoreo de profesores',ti:'groups',cols:['Profesor','Cursos','Material (mes)','Últ. actividad'],rows:[
-    ['J. Fuentes','3','12','Hoy 09:20'],['A. Méndez','4','18',{p:'Hace 3 días',c:'warning'}],['L. Cortés','2','7','Ayer']]},
    {k:'table',t:'Planificaciones recientes',ti:'description',cols:['Profesor','Curso','Asignatura','Estado'],rows:[
-    ['J. Fuentes','5°A','Matemática',{p:'Revisar',c:'warning'}],['A. Méndez','8°B','Lenguaje',{p:'Aprobada',c:'success'}],
-    ['L. Cortés','2°A','Ciencias',{p:'Revisar',c:'warning'}]]},
-   {k:'note',t:'Cobertura curricular por nivel',ti:'checklist',text:'Básica 88% · Media 76%. Tres unidades atrasadas en II medio según el programa nacional.'}]},
+    ['J. Fuentes','5°A','Matemática',{p:'Revisar',c:'warning'}],['A. Méndez','8°B','Lenguaje',{p:'Aprobada',c:'success'}]]}]},
  {id:'profesor',label:'Profesor',ico:'person',ramp:'#0F9E93',scope:'Mis cursos · trabajo diario',
   nav:[['home','Inicio'],['smart_toy','Generar material (IA)'],['groups','Mis cursos'],['calendar_month','Calendario'],['table_chart','Notas y asistencia'],['chat','Anotaciones'],['menu_book','Biblioteca']],
   kpis:[['Mis cursos','5'],['Material generado','28'],['Próx. evaluaciones','3'],['Promedio','5,8']],
   panels:[
-   {k:'chips',t:'Generar material con IA',ti:'smart_toy',items:[['description','Planificación'],['assignment','Guía de trabajo'],['quiz','Prueba'],['checklist','Rúbrica'],['extension','Material PIE']]},
+   {k:'chips',t:'Generar material con IA',ti:'smart_toy',items:[['description','Planificación'],['assignment','Guía de trabajo'],['quiz','Prueba'],['checklist','Rúbrica']]},
    {k:'table',t:'Mis cursos',ti:'groups',cols:['Curso','Estudiantes','Próxima clase'],rows:[
-    ['5°A Matemática','32','Lun 08:00'],['6°B Matemática','30','Lun 10:00'],['7°A Matemática','28','Mar 11:30']]}]},
+    ['5°A Matemática','32','Lun 08:00'],['6°B Matemática','30','Lun 10:00']]}]},
  {id:'amb_enc',label:'Encargado de ambiente',ico:'volunteer_activism',ramp:'#B45309',scope:'Convivencia escolar · gestión',
   nav:[['dashboard','Resumen'],['folder','Casos'],['alt_route','Planes de acción'],['event','Actividades'],['menu_book','Reglamento interno'],['groups','Equipo']],
   kpis:[['Casos activos','9'],['Planes de acción','5'],['Actividades','4'],['Índice de clima','78']],
   panels:[
-   {k:'table',t:'Mi equipo · profesionales de ambiente',ti:'groups',cols:['Profesional','Actividades','Casos','Estado'],rows:[
-    ['J. Soto','4','3',{p:'Activo',c:'success'}],['R. Pérez','2','1',{p:'Activo',c:'success'}]]},
    {k:'table',t:'Casos activos',ti:'folder',cols:['Curso / Estudiante','Tipo','Responsable','Estado'],rows:[
-    ['7°B · grupo','Convivencia','M. Lagos',{p:'En curso',c:'info'}],['4°A · E. Pérez','Conducta','J. Soto',{p:'Seguimiento',c:'warning'}],
-    ['2°A · grupo','Prevención','M. Lagos',{p:'En curso',c:'info'}]]},
-   {k:'chips',t:'Generar con IA (según reglamento)',ti:'smart_toy',items:[['lightbulb','Idea de convivencia'],['event','Actividad'],['alt_route','Plan de acción']]}]},
- {id:'aps_enc',label:'Encargado de apoyo psicosocial',ico:'health_and_safety',ramp:'#0F9E93',scope:'Dupla psicosocial · gestión',
-  nav:[['dashboard','Resumen'],['folder','Casos'],['call_split','Derivaciones'],['description','Informes'],['lightbulb','Estrategias'],['groups','Equipo']],
-  kpis:[['Casos (equipo)','22'],['Derivaciones','6'],['Informes pend.','4'],['Profesionales','3']],
-  panels:[
-   {k:'table',t:'Mi equipo · dupla psicosocial',ti:'groups',cols:['Profesional','Casos','Intervenciones','Estado'],rows:[
-    ['P. Díaz','8','23',{p:'Activo',c:'success'}],['S. Vega','7','19',{p:'Activo',c:'success'}],['Vacante','—','—',{p:'1 cupo',c:'warning'}]]},
-   {k:'table',t:'Casos del equipo',ti:'folder',cols:['Estudiante','Profesional','Motivo','Estado'],rows:[
-    ['M. Rivas','P. Díaz','Ausentismo',{p:'Activo',c:'info'}],['T. Núñez','S. Vega','Vulnerabilidad',{p:'Derivado',c:'warning'}],
-    ['K. Soto','P. Díaz','Emocional',{p:'Activo',c:'info'}]]},
-   {k:'chips',t:'Plantillas e IA',ti:'smart_toy',items:[['description','Informe psicosocial'],['lightbulb','Estrategia de apoyo'],['call_split','Derivación']]}]},
- {id:'pie_enc',label:'Encargada PIE',ico:'accessible',ramp:'#D6447E',scope:'Programa de Integración · gestión',
-  nav:[['dashboard','Resumen'],['groups','Estudiantes PIE'],['diversity_1','Educadoras'],['description','PACI / Informes'],['fact_check','Evaluaciones'],['category','Niveles']],
-  kpis:[['Estudiantes PIE','64'],['Educadoras','6'],['PACI vigentes','58'],['Informes pend.','9']],
-  panels:[
-   {k:'table',t:'Educadoras y carga',ti:'diversity_1',cols:['Educadora','Cursos','Estudiantes','Informes'],rows:[
-    ['C. Rojas','4','12',{p:'2 pend.',c:'warning'}],['V. Pinto','3','10',{p:'Al día',c:'success'}],
-    ['D. Salas','4','14',{p:'3 pend.',c:'warning'}]]},
-   {k:'note',t:'Control de gestión por nivel',ti:'insights',text:'Pre-básica 9 · Básica 41 · Media 14 estudiantes con PIE. Adecuaciones aplicadas según Decreto 83.'}]},
- {id:'pie_edu',label:'Educadora PIE',ico:'psychology',ramp:'#D6447E',scope:'Mis cursos y estudiantes asignados',
-  nav:[['home','Inicio'],['groups','Mis cursos'],['person','Mis estudiantes'],['smart_toy','Actividades (IA)'],['description','Informes (IA)'],['extension','Adecuaciones']],
-  kpis:[['Mis cursos','4'],['Mis estudiantes','12'],['Informes por hacer','3'],['Actividades (IA)','19']],
-  panels:[
-   {k:'stud',t:'Carpeta por estudiante',ti:'folder_shared',items:[
-    ['Juan Pérez','5°A','TEA 1'],['Sofía Díaz','6°B','TDAH'],['Mateo Soto','4°A','Dislexia']]},
-   {k:'chips',t:'Generar con IA',ti:'smart_toy',items:[['smart_toy','Actividad según diagnóstico'],['description','Informe PIE'],['extension','Adecuación de aula']]}]},
- {id:'aps_prof',label:'Profesional de apoyo psicosocial',ico:'favorite',ramp:'#0F9E93',scope:'Mis casos asignados',
-  nav:[['home','Inicio'],['folder','Mis casos'],['monitoring','Intervenciones'],['description','Informes (IA)'],['lightbulb','Estrategias']],
-  kpis:[['Mis casos','8'],['Intervenciones (mes)','23'],['Informes por hacer','2']],
-  panels:[
-   {k:'table',t:'Mis casos',ti:'folder',cols:['Estudiante','Motivo','Última interv.','Estado'],rows:[
-    ['M. Rivas','Ausentismo','12 jun',{p:'Activo',c:'info'}],['K. Soto','Emocional','15 jun',{p:'Activo',c:'info'}],
-    ['L. Vera','Familiar','09 jun',{p:'Seguimiento',c:'warning'}]]},
-   {k:'chips',t:'Generar con IA',ti:'smart_toy',items:[['description','Informe psicosocial'],['monitoring','Registro de intervención'],['lightbulb','Estrategia']]}]},
+    ['7°B · grupo','Convivencia','M. Lagos',{p:'En curso',c:'info'}],['4°A · E. Pérez','Conducta','J. Soto',{p:'Seguimiento',c:'warning'}]]}]},
  {id:'amb_prof',label:'Profesional de ambiente',ico:'mood',ramp:'#B45309',scope:'Actividades y casos asignados',
   nav:[['home','Inicio'],['event','Actividades'],['visibility','Casos de seguimiento'],['edit_note','Registro'],['menu_book','Reglamento']],
   kpis:[['Actividades asignadas','6'],['Casos de seguimiento','4'],['Registros (mes)','17']],
   panels:[
    {k:'table',t:'Actividades asignadas',ti:'event',cols:['Actividad','Curso','Fecha','Estado'],rows:[
-    ['Taller convivencia','7°B','24 jun',{p:'Programada',c:'info'}],['Mediación','4°A','21 jun',{p:'Hoy',c:'warning'}],
-    ['Recreo dirigido','2°A','25 jun',{p:'Programada',c:'info'}]]},
-   {k:'chips',t:'Generar con IA',ti:'smart_toy',items:[['alt_route','Plan de acción'],['event','Actividad de convivencia'],['edit_note','Registro']]}]}
+    ['Taller convivencia','7°B','24 jun',{p:'Programada',c:'info'}],['Mediación','4°A','21 jun',{p:'Hoy',c:'warning'}]]}]},
+ {id:'aps_enc',label:'Encargado de apoyo psicosocial',ico:'health_and_safety',ramp:'#0F9E93',scope:'Dupla psicosocial · gestión',
+  nav:[['dashboard','Resumen'],['folder','Casos'],['call_split','Derivaciones'],['description','Informes'],['lightbulb','Estrategias'],['groups','Equipo']],
+  kpis:[['Casos (equipo)','22'],['Derivaciones','6'],['Informes pend.','4'],['Profesionales','3']],
+  panels:[
+   {k:'table',t:'Casos del equipo',ti:'folder',cols:['Estudiante','Profesional','Motivo','Estado'],rows:[
+    ['M. Rivas','P. Díaz','Ausentismo',{p:'Activo',c:'info'}],['T. Núñez','S. Vega','Vulnerabilidad',{p:'Derivado',c:'warning'}]]}]},
+ {id:'aps_prof',label:'Profesional de apoyo psicosocial',ico:'favorite',ramp:'#0F9E93',scope:'Mis casos asignados',
+  nav:[['home','Inicio'],['folder','Mis casos'],['monitoring','Intervenciones'],['description','Informes (IA)'],['lightbulb','Estrategias']],
+  kpis:[['Mis casos','8'],['Intervenciones (mes)','23'],['Informes por hacer','2']],
+  panels:[
+   {k:'table',t:'Mis casos',ti:'folder',cols:['Estudiante','Motivo','Última interv.','Estado'],rows:[
+    ['M. Rivas','Ausentismo','12 jun',{p:'Activo',c:'info'}],['K. Soto','Emocional','15 jun',{p:'Activo',c:'info'}]]}]},
+ {id:'pie_enc',label:'Encargada PIE',ico:'accessible',ramp:'#D6447E',scope:'Programa de Integración · gestión',
+  nav:[['dashboard','Resumen'],['groups','Estudiantes PIE'],['diversity_1','Educadoras'],['description','PACI / Informes'],['fact_check','Evaluaciones'],['category','Niveles']],
+  kpis:[['Estudiantes PIE','64'],['Educadoras','6'],['PACI vigentes','58'],['Informes pend.','9']],
+  panels:[
+   {k:'table',t:'Educadoras y carga',ti:'diversity_1',cols:['Educadora','Cursos','Estudiantes','Informes'],rows:[
+    ['C. Rojas','4','12',{p:'2 pend.',c:'warning'}],['V. Pinto','3','10',{p:'Al día',c:'success'}]]}]},
+ {id:'pie_edu',label:'Educadora PIE',ico:'psychology',ramp:'#D6447E',scope:'Mis cursos y estudiantes asignados',
+  nav:[['home','Inicio'],['groups','Mis cursos'],['person','Mis estudiantes'],['smart_toy','Actividades (IA)'],['description','Informes (IA)'],['extension','Adecuaciones']],
+  kpis:[['Mis cursos','4'],['Mis estudiantes','12'],['Informes por hacer','3'],['Actividades (IA)','19']],
+  panels:[
+   {k:'stud',t:'Carpeta por estudiante',ti:'folder_shared',items:[
+    ['Juan Pérez','5°A','TEA 1'],['Sofía Díaz','6°B','TDAH'],['Mateo Soto','4°A','Dislexia']]}]}
 ];
 
-function rgba(hex,a){var n=parseInt(hex.slice(1),16);return 'rgba('+((n>>16)&255)+','+((n>>8)&255)+','+(n&255)+','+a+')';}
-function inits(name){return name.split(' ').map(function(w){return w[0]}).join('').slice(0,2);}
-
 function panelHTML(p,ramp){
- var h='<div class="card"><h3>'+ic(p.ti)+p.t+'</h3>';
+ var h='<div class="card"><div class="sec-title">'+ic(p.ti)+' '+p.t+'</div>';
  if(p.k==='table'){
   h+='<table><thead><tr>'+p.cols.map(function(c){return '<th>'+c+'</th>'}).join('')+'</tr></thead><tbody>';
   h+=p.rows.map(function(r){return '<tr>'+r.map(function(c){return '<td>'+(typeof c==='object'?tag(c.p,c.c):c)+'</td>'}).join('')+'</tr>'}).join('');
@@ -145,8 +125,6 @@ function panelHTML(p,ramp){
   h+='<div>'+p.items.map(function(it){return '<span class="chip">'+ic(it[0])+it[1]+'</span>'}).join('')+'</div>';
  }else if(p.k==='stud'){
   h+=p.items.map(function(it){return '<div class="stud"><span class="ini" style="background:'+rgba(ramp,.18)+';color:'+ramp+'">'+inits(it[0])+'</span><div style="flex:1"><div>'+it[0]+'</div><div class="sub">'+it[1]+'</div></div><span class="tag" style="background:'+rgba(ramp,.16)+';color:'+ramp+'">'+it[2]+'</span></div>'}).join('');
- }else if(p.k==='note'){
-  h+='<div class="note">'+p.text+'</div>';
  }
  return h+'</div>';
 }
@@ -157,6 +135,7 @@ function calendarioColegioHTML(){
  var items=rows.slice(0,8).map(function(r){return '<div class="row"><span class="material-symbols-outlined ic">event</span><div style="flex:1"><div>'+(r[1]||'')+'</div><div class="sub">'+(r[0]||'')+(r[2]?(' · '+r[2]):'')+'</div></div><span class="sub">'+(r[3]||'')+'</span></div>'}).join('');
  return '<div class="card"><div class="sec-title"><span class="material-symbols-outlined" style="vertical-align:-4px;color:var(--primary)">calendar_month</span> Calendario del colegio</div>'+items+'</div>';
 }
+
 var _params=new URLSearchParams(location.search);
 var active=_params.get('rol')||'admin';
 if(!ROLES.find(function(x){return x.id===active}))active='admin';
@@ -177,6 +156,7 @@ sel.innerHTML=ROLES.map(function(r){return '<option value="'+r.id+'">'+r.label+'
 sel.value=active;
 sel.addEventListener('change',function(){active=sel.value;history.replaceState(null,'','panel.html?rol='+active);render();});
 render();
+if(window.ccStore){ccStore.getCalendario().then(function(){render();}).catch(function(){});}
 </script>
 </body>
 </html>
