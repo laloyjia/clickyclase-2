@@ -44,7 +44,28 @@
     </section>
 
     <section class="sec" id="sec-usuarios">
-      <div class="h1">Usuarios</div><div class="sub">Usuarios registrados en la plataforma</div>
+      <div class="h1">Usuarios</div><div class="sub">Crea y administra todos los cargos del colegio</div>
+      <div class="card"><h3><span class="material-symbols-outlined">person_add</span> Crear cargo / usuario</h3>
+        <div class="frm">
+          <div class="fld"><label>Nombre</label><input id="nuNombre" placeholder="Nombre y apellido"></div>
+          <div class="fld"><label>Correo</label><input id="nuEmail" placeholder="persona@colegio-demo.cl"></div>
+          <div class="fld"><label>Cargo / rol</label><select id="nuRole">
+            <option value="director">Director</option>
+            <option value="utp">Encargado pedagógico (UTP)</option>
+            <option value="profesor">Profesor</option>
+            <option value="amb_enc">Encargado de ambiente</option>
+            <option value="amb_prof">Profesional de ambiente</option>
+            <option value="aps_enc">Encargado apoyo psicosocial</option>
+            <option value="aps_prof">Profesional apoyo psicosocial</option>
+            <option value="pie_enc">Encargada PIE</option>
+            <option value="pie_edu">Educadora PIE</option>
+            <option value="admin">Administrador</option>
+          </select></div>
+          <div class="fld"><label>Segmento (solo UTP)</label><select id="nuSeg"><option value="">— (no aplica)</option><option value="pre">Pre-básica</option><option value="b16">1° a 6° básico</option><option value="mhc">Media H-C</option><option value="mfg">Media Formación General</option><option value="tp">Técnico Profesional</option></select></div>
+          <div class="fld"><label>Contraseña inicial</label><input id="nuPass" value="Demo1234!"></div>
+        </div>
+        <div style="margin-top:14px"><button class="btn" id="btnCrear" onclick="crearUsuario()"><span class="material-symbols-outlined" style="font-size:18px">add</span> Crear usuario</button></div>
+      </div>
       <div class="card"><div class="cardhead"><h3><span class="material-symbols-outlined">group</span> Usuarios <span class="count" id="cnt-usuarios">0</span></h3>
         <div class="tools"><div class="search"><span class="material-symbols-outlined">search</span><input id="buscarU" placeholder="Buscar…"></div>
         <button class="btn ghost sm" onclick="cargarUsuarios()"><span class="material-symbols-outlined" style="font-size:16px">refresh</span> Actualizar</button></div></div>
@@ -122,6 +143,33 @@ function cargarUsuarios(){
  }).catch(function(e){document.getElementById('tb-usuarios').innerHTML='<tr><td colspan="5" style="color:var(--danger)">Error: '+e.message+'</td></tr>';});
 }
 document.getElementById('buscarU').addEventListener('input',function(){var q=this.value.toLowerCase();document.querySelectorAll('#tb-usuarios tr[data-txt]').forEach(function(r){r.style.display=r.dataset.txt.indexOf(q)!==-1?'':'none'});});
+
+// ── Crear usuario (cargo) — REST Identity Toolkit + doc en Firestore ──
+function crearUsuario(){
+ var nombre=document.getElementById('nuNombre').value.trim();
+ var email=document.getElementById('nuEmail').value.trim();
+ var role=document.getElementById('nuRole').value;
+ var seg=document.getElementById('nuSeg').value||null;
+ var pass=document.getElementById('nuPass').value;
+ if(!nombre||!email){toast('Completa nombre y correo.','danger');return;}
+ if((pass||'').length<6){toast('La contraseña debe tener al menos 6 caracteres.','danger');return;}
+ var orgId=(role==='admin')?null:'colegio-demo';
+ var tipo=(role==='admin')?'plataforma':'colegio';
+ var b=document.getElementById('btnCrear');b.disabled=true;var o=b.innerHTML;b.innerHTML='<span class="material-symbols-outlined" style="font-size:18px">hourglass_top</span> Creando…';
+ fetch('https://identitytoolkit.googleapis.com/v1/accounts:signUp?key='+FIREBASE_CONFIG.apiKey,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:email,password:pass,displayName:nombre,returnSecureToken:false})})
+  .then(function(r){return r.json()})
+  .then(function(res){
+    if(res.error){var m=res.error.message;if(m==='EMAIL_EXISTS')m='Ya existe una cuenta con ese correo.';throw new Error(m);}
+    var uid=res.localId;if(!uid)throw new Error('No se obtuvo UID.');
+    var perfil={email:email,nombre:nombre,role:role,tipo:tipo,orgId:orgId,seg:seg,activo:true,primerIngreso:false,creadoEn:new Date().toISOString()};
+    return EL_DB.collection('usuarios').doc(uid).set(perfil).then(function(){
+      if(orgId){return EL_DB.collection('organizaciones').doc(orgId).collection('miembros').doc(uid).set({rol:role,email:email,nombre:nombre,seg:seg}).catch(function(){});}
+    });
+  })
+  .then(function(){toast('Usuario creado: '+email,'success');document.getElementById('nuNombre').value='';document.getElementById('nuEmail').value='';cargarUsuarios();})
+  .catch(function(err){toast('Error: '+err.message,'danger');})
+  .then(function(){b.disabled=false;b.innerHTML=o;});
+}
 
 // ── Configuración IA (Firestore sistema/gemini) ──
 var _ia={keys:[],modelo:'gemini-2.5-flash'};
