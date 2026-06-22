@@ -102,11 +102,40 @@
   }
   function emptyStates() { document.querySelectorAll('tbody').forEach(watchEmpty); }
 
+  // Botón "Copiar" en los resultados de IA (textareas dentro de .modal)
+  function injectCopy() {
+    document.querySelectorAll('.modal textarea').forEach(function (ta) {
+      if (ta.dataset.ccCopy) return; ta.dataset.ccCopy = '1';
+      var b = document.createElement('button');
+      b.type = 'button'; b.className = 'btn ghost sm'; b.style.marginTop = '8px';
+      b.innerHTML = '<span class="material-symbols-outlined" style="font-size:16px">content_copy</span> Copiar texto';
+      b.addEventListener('click', function () {
+        try {
+          if (navigator.clipboard) navigator.clipboard.writeText(ta.value);
+          else { ta.select(); document.execCommand('copy'); }
+          b.innerHTML = '<span class="material-symbols-outlined" style="font-size:16px">check</span> Copiado';
+          setTimeout(function () { b.innerHTML = '<span class="material-symbols-outlined" style="font-size:16px">content_copy</span> Copiar texto'; }, 1500);
+        } catch (e) {}
+      });
+      ta.parentNode.insertBefore(b, ta.nextSibling);
+    });
+  }
+
+  // (17) Accesibilidad: navegar el menú con teclado (Enter/Espacio)
+  function a11y() {
+    document.querySelectorAll('.nav-item').forEach(function (n) { if (!n.getAttribute('tabindex')) n.setAttribute('tabindex', '0'); });
+    document.addEventListener('keydown', function (e) {
+      if ((e.key === 'Enter' || e.key === ' ') && e.target && e.target.classList && e.target.classList.contains('nav-item')) { e.preventDefault(); e.target.click(); }
+    });
+  }
+
   window.addEventListener('load', function () {
     try { injectToggle(); } catch (e) {}
     try { injectBurger(); } catch (e) {}
     try { injectExport(); } catch (e) {}
     try { emptyStates(); } catch (e) {}
+    try { injectCopy(); } catch (e) {}
+    try { a11y(); } catch (e) {}
     try { if (window.ccStore && ccStore.getBranding) ccStore.getBranding().then(applyBranding).catch(function () {}); } catch (e) {}
   });
 })();

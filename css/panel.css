@@ -215,6 +215,7 @@ th[data-asc]::after{content:'▲';font-size:9px;margin-left:5px;color:var(--prim
 th[data-asc="0"]::after{content:'▼'}
 
 /* ── Menú lateral en móvil ── */
+.nav-item:focus-visible,.btn:focus-visible,.cc-iconbtn:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--primary);outline-offset:2px}
 .cc-burger{display:none}
 @media(max-width:820px){
   .cc-burger{display:inline-flex;margin-right:8px}
