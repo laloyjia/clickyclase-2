@@ -11,6 +11,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>if(window.pdfjsLib)pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';</script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
 <script src="js/firebase-rest.js"></script>
@@ -398,7 +400,8 @@ document.getElementById('fileDoc').addEventListener('change',function(e){
  var rd=new FileReader();
  if(ext==='docx'&&typeof mammoth!=='undefined'){rd.onload=function(ev){mammoth.extractRawText({arrayBuffer:ev.target.result}).then(function(r){guarda(r.value);toast('Documento cargado y leído por la IA.','success');}).catch(function(){toast('Documento cargado (sin extraer texto).','success');});};rd.readAsArrayBuffer(file);}
  else if(ext==='txt'){rd.onload=function(ev){guarda(ev.target.result);toast('Documento cargado y leído por la IA.','success');};rd.readAsText(file);}
- else {toast('Documento "'+file.name+'" cargado. (PDF: lectura por IA se habilita luego.)','success');}
+ else if(ext==='pdf'&&typeof pdfjsLib!=='undefined'){toast('Leyendo PDF…','success');rd.onload=function(ev){pdfjsLib.getDocument({data:new Uint8Array(ev.target.result)}).promise.then(function(pdf){var text='';var ch=Promise.resolve();for(var i=1;i<=pdf.numPages;i++){(function(p){ch=ch.then(function(){return pdf.getPage(p)}).then(function(pg){return pg.getTextContent()}).then(function(tc){text+=tc.items.map(function(it){return it.str}).join(' ')+'\n';});})(i);}return ch.then(function(){return text;});}).then(function(t){guarda(t);toast('PDF leído por la IA ('+t.length+' caracteres).','success');}).catch(function(){toast('PDF cargado, pero no se pudo extraer texto.','danger');});};rd.readAsArrayBuffer(file);}
+ else {toast('Documento "'+file.name+'" cargado.','success');}
 });
 
 // ── Guardar configuración ──
