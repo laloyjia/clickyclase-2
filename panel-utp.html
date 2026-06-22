@@ -184,6 +184,7 @@ function renderAll(){
  renderResumen();
  ['profes','plan','eval','acomp','cob'].forEach(renderTbl);
  renderCalColegio();
+ if(window.ccStore){['profes','plan','eval','acomp'].forEach(function(k){ccStore.getTabla('utp_'+_seg+'_'+k).then(function(rows){if(rows&&rows.length){SEG[_seg][k]=rows;renderTbl(k);if(k==='plan')renderResumen();}}).catch(function(){});});}
 }
 function renderCalColegio(){
  var el=document.getElementById('calColegio'); if(!el)return;
@@ -200,7 +201,7 @@ document.addEventListener('input',function(e){var inp=e.target;if(!inp.dataset||
 var _impKey=null;
 function importar(k){_impKey=k;var f=document.getElementById('fileImp');f.value='';f.click();}
 function plantilla(k){var ws=XLSX.utils.aoa_to_sheet([TBL[k].headers]);var wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Plantilla');XLSX.writeFile(wb,'plantilla-'+k+'.xlsx');toast('Plantilla descargada.','success');}
-function applyRows(rows){rows=rows.filter(function(r){return r&&r.join('').trim()!==''});if(rows.length<2){toast('El archivo no tiene filas de datos.','danger');return;}var ncol=TBL[_impKey].headers.length;SEG[_seg][_impKey]=rows.slice(1).map(function(r){var o=[];for(var i=0;i<ncol;i++)o.push(r[i]!=null?String(r[i]):'');return o;});renderTbl(_impKey);if(_impKey==='plan')renderResumen();toast(SEG[_seg][_impKey].length+' filas importadas.','success');}
+function applyRows(rows){rows=rows.filter(function(r){return r&&r.join('').trim()!==''});if(rows.length<2){toast('El archivo no tiene filas de datos.','danger');return;}var ncol=TBL[_impKey].headers.length;SEG[_seg][_impKey]=rows.slice(1).map(function(r){var o=[];for(var i=0;i<ncol;i++)o.push(r[i]!=null?String(r[i]):'');return o;});renderTbl(_impKey);if(_impKey==='plan')renderResumen();if(window.ccStore)ccStore.setTabla('utp_'+_seg+'_'+_impKey,SEG[_seg][_impKey]);toast(SEG[_seg][_impKey].length+' filas importadas.','success');}
 document.getElementById('fileImp').addEventListener('change',function(e){var file=e.target.files&&e.target.files[0];if(!file||!_impKey)return;var ext=(file.name.split('.').pop()||'').toLowerCase(),reader=new FileReader();
  if(ext==='docx'){reader.onload=function(ev){if(typeof mammoth==='undefined'){toast('Lector de Word no disponible.','danger');return;}mammoth.extractRawText({arrayBuffer:ev.target.result}).then(function(res){var rows=res.value.split(/\r?\n/).filter(function(l){return l.trim()!==''}).map(function(l){return l.split(/\t|\s{2,}| - |;|\|/).map(function(c){return c.trim()})});if(rows.length)rows.unshift(TBL[_impKey].headers);applyRows(rows);}).catch(function(){toast('No se pudo leer el Word.','danger');});};reader.readAsArrayBuffer(file);}
  else{reader.onload=function(ev){try{var wb=XLSX.read(new Uint8Array(ev.target.result),{type:'array'});applyRows(XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,defval:''}));}catch(err){toast('No se pudo leer el archivo.','danger');}};reader.readAsArrayBuffer(file);}
@@ -209,7 +210,7 @@ var _tt;function toast(msg,tone){var t=document.getElementById('toast');t.style.
 var _revIdx=null;
 function revisar(i){_revIdx=i;var p=SEG[_seg].plan[i];document.getElementById('revBody').innerHTML='<div style="font-size:15px;font-weight:600;margin-bottom:4px">'+p[0]+'</div><div class="sub" style="margin-bottom:10px">'+p[1]+' · '+p[2]+'</div><div>Estado actual: '+tag(p[3])+'</div>';document.getElementById('revCom').value='';document.getElementById('revOverlay').classList.add('show');}
 function cerrarRev(){document.getElementById('revOverlay').classList.remove('show');_revIdx=null;}
-function decidir(estado){if(_revIdx==null)return;SEG[_seg].plan[_revIdx][3]=estado;renderTbl('plan');renderResumen();toast(estado==='Aprobada'?'Planificación aprobada.':'Cambios solicitados al docente.','success');cerrarRev();}
+function decidir(estado){if(_revIdx==null)return;SEG[_seg].plan[_revIdx][3]=estado;renderTbl('plan');renderResumen();if(window.ccStore)ccStore.setTabla('utp_'+_seg+'_plan',SEG[_seg].plan);toast(estado==='Aprobada'?'Planificación aprobada.':'Cambios solicitados al docente.','success');cerrarRev();}
 document.getElementById('revOverlay').addEventListener('click',function(e){if(e.target===this)cerrarRev();});
 var _params=new URLSearchParams(location.search);
 var _lock=_params.get('seg');

@@ -272,6 +272,7 @@ function renderTable(key){
  var cnt=document.getElementById('cnt-'+key); if(cnt)cnt.textContent=cfg.rows.length;
 }
 Object.keys(REG).forEach(renderTable);
+if(window.ccStore){['personal','estudiantes','areas','pei'].forEach(function(k){ccStore.getTabla('dir_'+k).then(function(rows){if(rows&&rows.length){REG[k].rows=rows;renderTable(k);}}).catch(function(){});});}
 
 // ── Buscador ──
 document.querySelectorAll('input[data-f]').forEach(function(inp){
@@ -291,6 +292,7 @@ function applyImportRows(rows){
  var nuevas=rows.slice(1).map(function(r){var o=[];for(var i=0;i<ncol;i++)o.push(r[i]!=null?String(r[i]):'');return o;});
  REG[_impKey].rows=nuevas; renderTable(_impKey);
  if(_impKey==='calendario'){renderCal(); persistCal();}
+ else if(window.ccStore){ccStore.setTabla('dir_'+_impKey,REG[_impKey].rows);}
  toast(nuevas.length+' filas importadas correctamente.','success');
 }
 document.getElementById('fileImp').addEventListener('change',function(e){
@@ -390,7 +392,7 @@ function docUpload(i){_docIdx=i;var f=document.getElementById('fileDoc');f.value
 document.getElementById('fileDoc').addEventListener('change',function(e){
  var file=e.target.files&&e.target.files[0]; if(file==null||_docIdx==null)return;
  var idx=_docIdx, titulo=REG.pei.rows[idx][0], ext=(file.name.split('.').pop()||'').toLowerCase();
- REG.pei.rows[idx][3]=file.name; renderTable('pei'); _docIdx=null;
+ REG.pei.rows[idx][3]=file.name; renderTable('pei'); if(window.ccStore)ccStore.setTabla('dir_pei',REG.pei.rows); _docIdx=null;
  function guarda(txt){var t=(txt||'').replace(/\s+/g,' ').slice(0,12000);if(window.ccStore){ccStore.setDocText(titulo,t);}else{try{var o=JSON.parse(localStorage.getItem('cc_docs')||'{}');o[titulo]=t;localStorage.setItem('cc_docs',JSON.stringify(o));}catch(e){}}}
  var rd=new FileReader();
  if(ext==='docx'&&typeof mammoth!=='undefined'){rd.onload=function(ev){mammoth.extractRawText({arrayBuffer:ev.target.result}).then(function(r){guarda(r.value);toast('Documento cargado y leído por la IA.','success');}).catch(function(){toast('Documento cargado (sin extraer texto).','success');});};rd.readAsArrayBuffer(file);}
