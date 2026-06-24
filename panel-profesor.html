@@ -51,8 +51,8 @@
       <div class="card">
         <div class="frm">
           <div class="fld"><label>Tipo de material</label><select id="matTipo"><option value="planificacion">Planificación</option><option value="guia">Guía de trabajo</option><option value="prueba">Prueba</option><option value="apunte">Apunte / Resumen</option></select></div>
-          <div class="fld"><label>Asignatura</label><input id="matAsig" placeholder="Ej. Matemática"></div>
-          <div class="fld"><label>Nivel / Curso</label><input id="matNivel" placeholder="Ej. 5° básico"></div>
+          <div class="fld"><label>Asignatura</label><select id="matAsig"><option value="">— Elige —</option><option>Lenguaje y Comunicación</option><option>Matemática</option><option>Ciencias Naturales</option><option>Historia, Geografía y Cs. Sociales</option><option>Inglés</option><option>Educación Física y Salud</option><option>Artes Visuales</option><option>Música</option><option>Tecnología</option><option>Orientación</option><option>Filosofía</option><option>Biología</option><option>Física</option><option>Química</option><option>Educación Ciudadana</option></select></div>
+          <div class="fld"><label>Nivel / Curso</label><select id="matNivel"><option value="">— Elige —</option><option>Pre-Kínder</option><option>Kínder</option><option>1° básico</option><option>2° básico</option><option>3° básico</option><option>4° básico</option><option>5° básico</option><option>6° básico</option><option>7° básico</option><option>8° básico</option><option>I medio</option><option>II medio</option><option>III medio</option><option>IV medio</option></select></div>
           <div class="fld"><label>Tema / Unidad</label><input id="matTema" placeholder="Ej. Fracciones"></div>
           <div class="fld" style="grid-column:1/-1"><label>Objetivo de aprendizaje (OA) — opcional</label><input id="matOA" placeholder="Pega aquí el OA del currículum si lo tienes"></div>
         </div>
@@ -118,7 +118,9 @@ var REG={
 };
 function renderTable(key){var cfg=REG[key],el=document.getElementById('tb-'+key);
  if(key==='biblioteca'){el.innerHTML=cfg.rows.map(function(r){return '<div class="doc" data-txt="'+r.join(' ').toLowerCase()+'"><span class="di">'+ic('description')+'</span><div style="flex:1"><div class="dn">'+r[0]+'</div><div class="dm">'+(r[1]||'')+'</div></div>'+tag(r[2]||'')+'</div>'}).join('');}
- else{el.innerHTML=cfg.rows.map(function(r){return '<tr data-txt="'+r.join(' ').toLowerCase()+'">'+r.map(function(c,i){return '<td>'+(i===cfg.statusIdx?tag(c):c)+'</td>'}).join('')+'</tr>'}).join('');}
+ else{el.innerHTML=cfg.rows.map(function(r){
+   if(key==='notas'){var n1=parseFloat((''+(r[1]||'')).replace(',','.')),n2=parseFloat((''+(r[2]||'')).replace(',','.'));if(!isNaN(n1)&&!isNaN(n2)){var prom=(n1+n2)/2;r[4]=prom<4?'En riesgo':(prom>=6?'Destacado':'Aprobado');}}
+   return '<tr data-txt="'+r.join(' ').toLowerCase()+'">'+r.map(function(c,i){return '<td>'+(i===cfg.statusIdx?tag(c):c)+'</td>'}).join('')+'</tr>'}).join('');}
  var cnt=document.getElementById('cnt-'+key);if(cnt)cnt.textContent=cfg.rows.length;}
 Object.keys(REG).forEach(renderTable);
 if(window.ccStore)ccStore.hydrate('prof',REG,renderTable);

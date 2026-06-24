@@ -1,0 +1,57 @@
+rules_version = '2';
+// Reglas de seguridad por rol — clickyclase-2
+// Cada rol accede solo a los datos de su área; el director supervisa todo
+// su colegio; el admin gestiona la plataforma. Pegar en Firestore → Reglas.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn(){ return request.auth != null; }
+    function tieneDoc(){ return exists(/databases/$(database)/documents/usuarios/$(request.auth.uid)); }
+    function rol(){ return get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data.role; }
+    function esRol(roles){ return signedIn() && tieneDoc() && (rol() in roles); }
+    function isAdmin(){ return esRol(['admin']); }
+
+    // Perfil de usuario: uno mismo o el admin
+    match /usuarios/{uid} {
+      allow read, write: if signedIn() && (request.auth.uid == uid || isAdmin());
+    }
+
+    // Configuración global de la plataforma (API keys de IA, etc.) — solo admin
+    match /sistema/{doc} {
+      allow read, write: if isAdmin();
+    }
+
+    match /organizaciones/{orgId} {
+
+      // Membresías del colegio
+      match /miembros/{uid} {
+        allow read:  if signedIn();
+        allow write: if esRol(['admin','director']);
+      }
+
+      // Config del colegio: calendario, documentos institucionales, branding.
+      // La leen todos los del colegio; la edita la dirección o el admin.
+      match /config/{doc} {
+        allow read:  if signedIn();
+        allow write: if esRol(['admin','director']);
+      }
+
+      // Datos por área — la clave del documento codifica el área.
+      match /datos/{tabla} {
+        allow read, write: if isAdmin() || esRol(['director'])
+          || (tabla.matches('dir_.*')   && esRol(['director']))
+          || (tabla.matches('utp_.*')   && esRol(['utp']))
+          || (tabla.matches('prof_.*')  && esRol(['profesor']))
+          || (tabla.matches('amb_.*')   && esRol(['amb_enc','amb_prof']))
+          || (tabla.matches('ambp_.*')  && esRol(['amb_prof','amb_enc']))
+          || (tabla.matches('aps_.*')   && esRol(['aps_enc','aps_prof']))
+          || (tabla.matches('apsp_.*')  && esRol(['aps_prof','aps_enc']))
+          || (tabla.matches('pie_.*')   && esRol(['pie_enc','pie_edu']))
+          || (tabla.matches('pieed_.*') && esRol(['pie_edu','pie_enc']));
+      }
+    }
+
+    // Todo lo demás: denegado
+    match /{document=**} { allow read, write: if false; }
+  }
+}
