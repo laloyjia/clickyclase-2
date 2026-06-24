@@ -712,7 +712,10 @@ function redirectByRole(user) {
   // independiente) comparte el panel de profesor.
   // Paneles completos dedicados por rol
   var DEST = {
-    admin:    'panel-admin.html',
+    admin:        'panel-admin.html',
+    admin_colegio:'panel-admin-colegio.html',
+    rector:       'panel-rector.html',
+    jefe_tp:      'panel-jefe-tp.html',
     director: 'panel-director.html',
     utp:      'panel-utp.html' + (user && user.seg ? ('?seg=' + user.seg) : ''),
     profesor: 'panel-profesor.html',

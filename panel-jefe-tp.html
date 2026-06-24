@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel Jefe de Especialidad TP — Click&Clase</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="js/firebase-rest.js"></script>
+<script src="js/firebase-config.js"></script>
+<script src="js/firebase-auth.js"></script>
+<script src="js/cc-store.js"></script>
+<link rel="stylesheet" href="css/panel.css">
+<script src="js/cc-ui.js"></script>
+</head>
+<body>
+<div class="topbar">
+  <div><a href="acceso-demo.html" style="color:var(--muted);font-size:13px;margin-right:14px"><span class="material-symbols-outlined" style="font-size:16px;vertical-align:-3px">arrow_back</span> Roles</a><span class="brand">Click&Clase</span><span class="demo-tag">Jefe Especialidad TP · demo</span></div>
+  <div class="usr"><span class="av">JT</span><span style="font-size:13.5px">Jefe de Especialidad TP</span><a class="salir" href="login.html">Salir</a></div>
+</div>
+<div class="shell">
+  <aside class="sidebar">
+    <div class="side-role"><span class="ico"><span class="material-symbols-outlined">construction</span></span><div><div class="nm">Jefe de Especialidad</div><div class="sc">Técnico Profesional</div></div></div>
+    <nav id="nav"></nav>
+  </aside>
+  <main class="main">
+    <section class="sec active" id="sec-resumen">
+      <div class="h1">Inicio — Técnico Profesional</div><div class="sub">Gestión de las especialidades TP del colegio</div>
+      <div class="kpis">
+        <div class="kpi"><div class="l">Especialidades</div><div class="v" id="kEsp">—</div></div>
+        <div class="kpi"><div class="l">Profesores TP</div><div class="v">8</div></div>
+        <div class="kpi"><div class="l">Módulos</div><div class="v">12</div></div>
+        <div class="kpi"><div class="l">Cursos III-IV</div><div class="v">4</div></div>
+      </div>
+      <div class="card"><div class="sec-title"><span class="material-symbols-outlined" style="vertical-align:-4px;color:var(--primary)">calendar_month</span> Calendario del colegio</div><div id="calColegio"></div></div>
+      <div class="legal" id="espHint">Cargando especialidades del colegio…</div>
+    </section>
+    <section class="sec" id="sec-especialidades">
+      <div class="h1">Especialidades</div><div class="sub">Especialidades que imparte el colegio</div>
+      <div class="card"><div class="cardhead"><h3><span class="material-symbols-outlined">workspace_premium</span> Especialidades <span class="count" id="cnt-especialidades">0</span></h3>
+        <div class="tools"><div class="search"><span class="material-symbols-outlined">search</span><input data-f="especialidades" placeholder="Buscar…"></div>
+          <button class="btn sm" onclick="importar('especialidades')"><span class="material-symbols-outlined" style="font-size:16px">upload_file</span> Importar</button></div></div>
+        <table><thead><tr><th>Especialidad</th><th>Profesores</th><th>Cursos</th><th>Estado</th></tr></thead><tbody id="tb-especialidades"></tbody></table>
+      </div>
+      <div class="legal"><b>⚖ Formación TP (Decreto 452):</b> cada especialidad sigue su perfil de egreso y módulos del Mineduc.</div>
+    </section>
+    <section class="sec" id="sec-profesores">
+      <div class="h1">Profesores TP</div><div class="sub">Docentes de las especialidades</div>
+      <div class="card"><div class="cardhead"><h3><span class="material-symbols-outlined">engineering</span> Profesores <span class="count" id="cnt-profesores">0</span></h3>
+        <div class="tools"><div class="search"><span class="material-symbols-outlined">search</span><input data-f="profesores" placeholder="Buscar…"></div>
+          <button class="btn sm" onclick="importar('profesores')"><span class="material-symbols-outlined" style="font-size:16px">upload_file</span> Importar</button></div></div>
+        <table><thead><tr><th>Profesor</th><th>Especialidad</th><th>Módulos</th><th>Estado</th></tr></thead><tbody id="tb-profesores"></tbody></table>
+      </div>
+    </section>
+    <section class="sec" id="sec-modulos">
+      <div class="h1">Módulos</div><div class="sub">Módulos por especialidad y nivel</div>
+      <div class="card"><div class="cardhead"><h3><span class="material-symbols-outlined">view_module</span> Módulos <span class="count" id="cnt-modulos">0</span></h3>
+        <div class="tools"><div class="search"><span class="material-symbols-outlined">search</span><input data-f="modulos" placeholder="Buscar…"></div>
+          <button class="btn ghost sm" onclick="plantilla('modulos')"><span class="material-symbols-outlined" style="font-size:16px">download</span> Plantilla</button>
+          <button class="btn sm" onclick="importar('modulos')"><span class="material-symbols-outlined" style="font-size:16px">upload_file</span> Importar</button></div></div>
+        <table><thead><tr><th>Módulo</th><th>Especialidad</th><th>Nivel</th><th>Estado</th></tr></thead><tbody id="tb-modulos"></tbody></table>
+      </div>
+    </section>
+  </main>
+</div>
+<input type="file" id="fileImp" accept=".xlsx,.xls,.csv" style="display:none">
+<div id="toast"><span class="material-symbols-outlined" style="color:var(--success)">check_circle</span><span id="toastMsg"></span></div>
+<script>
+function ic(n){return '<span class="material-symbols-outlined">'+n+'</span>';}
+function inferTone(s){s=(''+s).toLowerCase();if(/(falta|atrasad|sin|cerrad)/.test(s))return 'danger';if(/(pendiente|revisar)/.test(s))return 'warning';if(/(vigente|activ|al d[ií]a|completad)/.test(s))return 'success';return 'info';}
+function tag(t){return '<span class="tag '+inferTone(t)+'">'+t+'</span>';}
+var REG={
+ especialidades:{headers:['Especialidad','Profesores','Cursos','Estado'],statusIdx:3,rows:[
+   ['Electrónica','3','2','Activa'],['Administración','2','1','Activa'],['Gastronomía','3','1','Activa']]},
+ profesores:{headers:['Profesor','Especialidad','Módulos','Estado'],statusIdx:3,rows:[
+   ['R. Muñoz','Electrónica','3','Activo'],['E. Tapia','Administración','2','Activo'],['N. Silva','Gastronomía','2','Activo']]},
+ modulos:{headers:['Módulo','Especialidad','Nivel','Estado'],statusIdx:3,rows:[
+   ['Circuitos eléctricos','Electrónica','III medio','Vigente'],['Contabilidad básica','Administración','III medio','Vigente'],['Técnicas culinarias','Gastronomía','III medio','Vigente']]}
+};
+function renderTable(key){var cfg=REG[key],el=document.getElementById('tb-'+key);el.innerHTML=cfg.rows.map(function(r){return '<tr data-txt="'+r.join(' ').toLowerCase()+'">'+r.map(function(c,i){return '<td>'+(i===cfg.statusIdx?tag(c):c)+'</td>'}).join('')+'</tr>'}).join('');var cnt=document.getElementById('cnt-'+key);if(cnt)cnt.textContent=cfg.rows.length;}
+Object.keys(REG).forEach(renderTable);
+if(window.ccStore)ccStore.hydrate('tp',REG,renderTable);
+window.CC_REG=REG;window.CC_RENDER=renderTable;window.CC_PREFIX='tp';
+document.addEventListener('input',function(e){var inp=e.target;if(!inp.dataset||!inp.dataset.f)return;var q=inp.value.toLowerCase(),cont=document.getElementById('tb-'+inp.dataset.f);cont.querySelectorAll('[data-txt]').forEach(function(r){r.style.display=r.dataset.txt.indexOf(q)!==-1?'':'none'});});
+var _impKey=null;function importar(k){_impKey=k;var f=document.getElementById('fileImp');f.value='';f.click();}
+function plantilla(k){var ws=XLSX.utils.aoa_to_sheet([REG[k].headers]);var wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Plantilla');XLSX.writeFile(wb,'plantilla-'+k+'.xlsx');toast('Plantilla descargada.','success');}
+function applyRows(rows){rows=rows.filter(function(r){return r&&r.join('').trim()!==''});if(rows.length<2){toast('Sin filas.','danger');return;}var n=REG[_impKey].headers.length;REG[_impKey].rows=rows.slice(1).map(function(r){var o=[];for(var i=0;i<n;i++)o.push(r[i]!=null?String(r[i]):'');return o;});renderTable(_impKey);if(window.ccStore)ccStore.setTabla('tp_'+_impKey,REG[_impKey].rows);toast(REG[_impKey].rows.length+' filas importadas.','success');}
+document.getElementById('fileImp').addEventListener('change',function(e){var file=e.target.files&&e.target.files[0];if(!file||!_impKey)return;var rd=new FileReader();rd.onload=function(ev){try{var wb=XLSX.read(new Uint8Array(ev.target.result),{type:'array'});applyRows(XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,defval:''}));}catch(err){toast('No se pudo leer.','danger');}};rd.readAsArrayBuffer(file);});
+var _tt;function toast(msg,tone){var t=document.getElementById('toast');t.style.borderLeftColor='var(--'+(tone==='danger'?'danger':'success')+')';var i=t.querySelector('.material-symbols-outlined');i.style.color='var(--'+(tone==='danger'?'danger':'success')+')';i.textContent=tone==='danger'?'error':'check_circle';document.getElementById('toastMsg').textContent=msg;t.classList.add('show');clearTimeout(_tt);_tt=setTimeout(function(){t.classList.remove('show')},3000);}
+var NAV=[['dashboard','Inicio','resumen'],['workspace_premium','Especialidades','especialidades'],['engineering','Profesores TP','profesores'],['view_module','Módulos','modulos']];
+document.getElementById('nav').innerHTML=NAV.map(function(n,i){return '<div class="nav-item'+(i===0?' active':'')+'" data-s="'+n[2]+'">'+ic(n[0])+'<span>'+n[1]+'</span></div>'}).join('');
+function show(s){document.querySelectorAll('.nav-item').forEach(function(x){x.classList.toggle('active',x.dataset.s===s)});document.querySelectorAll('.sec').forEach(function(x){x.classList.toggle('active',x.id==='sec-'+s)});}
+document.querySelectorAll('.nav-item').forEach(function(x){x.addEventListener('click',function(){show(x.dataset.s)})});
+if(window.ccStore)ccStore.getConfig('academico').then(function(a){var esp=(a&&a.especialidades)||[];document.getElementById('kEsp').textContent=esp.length||REG.especialidades.rows.length;var h=document.getElementById('espHint');if(h&&esp.length)h.innerHTML='<b>Especialidades del colegio (definidas por admin):</b> '+esp.join(' · ');});
+(function(){var el=document.getElementById('calColegio');function render(rows){if(!el)return;if(!rows||!rows.length){el.innerHTML='<div class="sub" style="margin:0">Aún no hay calendario institucional cargado.</div>';return;}el.innerHTML=rows.slice(0,8).map(function(r){return '<div class="row"><span class="material-symbols-outlined ic">event</span><div style="flex:1"><div>'+(r[1]||'')+'</div><div class="sub">'+(r[0]||'')+(r[2]?(' · '+r[2]):'')+'</div></div><span class="sub">'+(r[3]||'')+'</span></div>'}).join('');}var local=[];try{local=JSON.parse(localStorage.getItem('cc_calendario')||'[]');}catch(e){}render(local);if(window.ccStore)ccStore.getCalendario().then(render).catch(function(){});})();
+</script>
+</body>
+</html>

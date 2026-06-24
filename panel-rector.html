@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel Rector — Click&Clase</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="js/firebase-rest.js"></script>
+<script src="js/firebase-config.js"></script>
+<script src="js/firebase-auth.js"></script>
+<script src="js/cc-store.js"></script>
+<link rel="stylesheet" href="css/panel.css">
+<script src="js/cc-ui.js"></script>
+</head>
+<body>
+<div class="topbar">
+  <div><a href="acceso-demo.html" style="color:var(--muted);font-size:13px;margin-right:14px"><span class="material-symbols-outlined" style="font-size:16px;vertical-align:-3px">arrow_back</span> Roles</a><span class="brand">Click&Clase</span><span class="demo-tag">Rector · demo</span></div>
+  <div class="usr"><span class="av">RE</span><span style="font-size:13.5px">Rector</span><a class="salir" href="login.html">Salir</a></div>
+</div>
+<div class="shell">
+  <aside class="sidebar">
+    <div class="side-role"><span class="ico"><span class="material-symbols-outlined">account_balance</span></span><div><div class="nm">Rector</div><div class="sc">Visión institucional</div></div></div>
+    <nav id="nav"></nav>
+  </aside>
+  <main class="main">
+    <section class="sec active" id="sec-resumen">
+      <div class="h1">Resumen institucional</div><div class="sub">Vista global del colegio</div>
+      <div class="kpis">
+        <div class="kpi"><div class="l">Personal</div><div class="v" id="kPers">—</div></div>
+        <div class="kpi"><div class="l">Cursos</div><div class="v" id="kCur">—</div></div>
+        <div class="kpi"><div class="l">Áreas</div><div class="v">4</div></div>
+        <div class="kpi"><div class="l">Asistencia prom.</div><div class="v">92%</div></div>
+      </div>
+      <div class="card"><h3><span class="material-symbols-outlined">notifications_active</span> Foco institucional</h3>
+        <div class="row" style="cursor:pointer" onclick="show('areas')"><span class="material-symbols-outlined ic" style="color:var(--warning)">flag</span><div style="flex:1">Revisar cumplimiento de las áreas del colegio.</div><span class="material-symbols-outlined" style="color:var(--faint)">chevron_right</span></div>
+        <div class="row" style="cursor:pointer" onclick="show('personal')"><span class="material-symbols-outlined ic">groups</span><div style="flex:1">Dotación docente y asistentes de la educación.</div><span class="material-symbols-outlined" style="color:var(--faint)">chevron_right</span></div>
+      </div>
+      <div class="card"><div class="sec-title"><span class="material-symbols-outlined" style="vertical-align:-4px;color:var(--primary)">calendar_month</span> Calendario del colegio</div><div id="calColegio"></div></div>
+    </section>
+    <section class="sec" id="sec-personal">
+      <div class="h1">Personal</div><div class="sub">Personal del colegio (compartido con dirección)</div>
+      <div class="card"><div class="cardhead"><h3><span class="material-symbols-outlined">badge</span> Personal <span class="count" id="cnt-personal">0</span></h3>
+        <div class="tools"><div class="search"><span class="material-symbols-outlined">search</span><input data-f="personal" placeholder="Buscar…"></div></div></div>
+        <table><thead><tr><th>Nombre</th><th>Cargo</th><th>Área</th><th>Contrato</th><th>Horas</th><th>Estado</th></tr></thead><tbody id="tb-personal"></tbody></table>
+      </div>
+    </section>
+    <section class="sec" id="sec-estudiantes">
+      <div class="h1">Estudiantes</div><div class="sub">Matrícula por curso</div>
+      <div class="card"><div class="cardhead"><h3><span class="material-symbols-outlined">person</span> Cursos <span class="count" id="cnt-estudiantes">0</span></h3>
+        <div class="tools"><div class="search"><span class="material-symbols-outlined">search</span><input data-f="estudiantes" placeholder="Buscar…"></div></div></div>
+        <table><thead><tr><th>Curso</th><th>Matrícula</th><th>Asistencia</th><th>Promedio</th><th>PIE</th></tr></thead><tbody id="tb-estudiantes"></tbody></table>
+      </div>
+    </section>
+    <section class="sec" id="sec-areas">
+      <div class="h1">Áreas</div><div class="sub">Cumplimiento de tareas por área</div>
+      <div class="card"><div class="cardhead"><h3><span class="material-symbols-outlined">task_alt</span> Tareas <span class="count" id="cnt-areas">0</span></h3>
+        <div class="tools"><div class="search"><span class="material-symbols-outlined">search</span><input data-f="areas" placeholder="Buscar…"></div></div></div>
+        <table><thead><tr><th>Tarea</th><th>Área</th><th>Responsable</th><th>Plazo</th><th>Estado</th></tr></thead><tbody id="tb-areas"></tbody></table>
+      </div>
+    </section>
+  </main>
+</div>
+<input type="file" id="fileImp" accept=".xlsx,.xls,.csv" style="display:none">
+<div id="toast"><span class="material-symbols-outlined" style="color:var(--success)">check_circle</span><span id="toastMsg"></span></div>
+<script>
+function ic(n){return '<span class="material-symbols-outlined">'+n+'</span>';}
+function inferTone(s){s=(''+s).toLowerCase();if(/(falta|atrasad|vencid|cr[ií]tico)/.test(s))return 'danger';if(/(pendiente|vence|revisar)/.test(s))return 'warning';if(/(vigente|activ|al d[ií]a|completad)/.test(s))return 'success';return 'info';}
+function tag(t){return '<span class="tag '+inferTone(t)+'">'+t+'</span>';}
+var REG={
+ personal:{headers:['Nombre','Cargo','Área','Contrato','Horas','Estado'],statusIdx:5,rows:[
+   ['R. Soto','Jefe UTP','Académica','Indefinido','30 / 14','Activo'],['J. Fuentes','Profesor','Académica','Indefinido','38 / 6','Activo'],['M. Lagos','Enc. Convivencia','Ambiente','Indefinido','38 / 14','Activo'],['C. Rojas','Coord. PIE','PIE','Indefinido','38 / 14','Activo']]},
+ estudiantes:{headers:['Curso','Matrícula','Asistencia','Promedio','PIE'],statusIdx:-1,rows:[
+   ['5°A','32','94%','5,8','3'],['6°A','31','93%','5,6','4'],['I Medio A','34','89%','5,3','5']]},
+ areas:{headers:['Tarea','Área','Responsable','Plazo','Estado'],statusIdx:4,rows:[
+   ['Planificaciones semestre','Académica','R. Soto','30 jun','En curso'],['Plan de convivencia','Ambiente','M. Lagos','28 jun','Atrasada'],['Actualización PACI','PIE','C. Rojas','20 jun','Completada']]}
+};
+function renderTable(key){var cfg=REG[key],el=document.getElementById('tb-'+key);el.innerHTML=cfg.rows.map(function(r){return '<tr data-txt="'+r.join(' ').toLowerCase()+'">'+r.map(function(c,i){return '<td>'+(i===cfg.statusIdx?tag(c):c)+'</td>'}).join('')+'</tr>'}).join('');var cnt=document.getElementById('cnt-'+key);if(cnt)cnt.textContent=cfg.rows.length;var p=document.getElementById('kPers');if(p)p.textContent=REG.personal.rows.length;var cu=document.getElementById('kCur');if(cu)cu.textContent=REG.estudiantes.rows.length;}
+Object.keys(REG).forEach(renderTable);
+if(window.ccStore)ccStore.hydrate('dir',REG,renderTable);
+window.CC_REG=REG;window.CC_RENDER=renderTable;window.CC_PREFIX='dir';
+document.addEventListener('input',function(e){var inp=e.target;if(!inp.dataset||!inp.dataset.f)return;var q=inp.value.toLowerCase(),cont=document.getElementById('tb-'+inp.dataset.f);cont.querySelectorAll('[data-txt]').forEach(function(r){r.style.display=r.dataset.txt.indexOf(q)!==-1?'':'none'});});
+var _tt;function toast(msg,tone){var t=document.getElementById('toast');t.style.borderLeftColor='var(--'+(tone==='danger'?'danger':'success')+')';var i=t.querySelector('.material-symbols-outlined');i.style.color='var(--'+(tone==='danger'?'danger':'success')+')';i.textContent=tone==='danger'?'error':'check_circle';document.getElementById('toastMsg').textContent=msg;t.classList.add('show');clearTimeout(_tt);_tt=setTimeout(function(){t.classList.remove('show')},3000);}
+var NAV=[['dashboard','Resumen','resumen'],['groups','Personal','personal'],['person','Estudiantes','estudiantes'],['task_alt','Áreas','areas']];
+document.getElementById('nav').innerHTML=NAV.map(function(n,i){return '<div class="nav-item'+(i===0?' active':'')+'" data-s="'+n[2]+'">'+ic(n[0])+'<span>'+n[1]+'</span></div>'}).join('');
+function show(s){document.querySelectorAll('.nav-item').forEach(function(x){x.classList.toggle('active',x.dataset.s===s)});document.querySelectorAll('.sec').forEach(function(x){x.classList.toggle('active',x.id==='sec-'+s)});}
+document.querySelectorAll('.nav-item').forEach(function(x){x.addEventListener('click',function(){show(x.dataset.s)})});
+(function(){var el=document.getElementById('calColegio');function render(rows){if(!el)return;if(!rows||!rows.length){el.innerHTML='<div class="sub" style="margin:0">Aún no hay calendario institucional cargado.</div>';return;}el.innerHTML=rows.slice(0,8).map(function(r){return '<div class="row"><span class="material-symbols-outlined ic">event</span><div style="flex:1"><div>'+(r[1]||'')+'</div><div class="sub">'+(r[0]||'')+(r[2]?(' · '+r[2]):'')+'</div></div><span class="sub">'+(r[3]||'')+'</span></div>'}).join('');}var local=[];try{local=JSON.parse(localStorage.getItem('cc_calendario')||'[]');}catch(e){}render(local);if(window.ccStore)ccStore.getCalendario().then(render).catch(function(){});})();
+</script>
+</body>
+</html>

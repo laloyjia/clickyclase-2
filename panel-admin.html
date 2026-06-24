@@ -75,12 +75,55 @@
     </section>
 
     <section class="sec" id="sec-colegios">
-      <div class="h1">Colegios</div><div class="sub">Establecimientos en la plataforma</div>
-      <div class="card"><div class="cardhead"><h3><span class="material-symbols-outlined">apartment</span> Colegios</h3></div>
-        <table><thead><tr><th>Colegio</th><th>Plan</th><th>Tipo</th><th>Estado</th></tr></thead><tbody>
-          <tr><td>Colegio Ejemplo (colegio-demo)</td><td>Dedicado</td><td>Multi-tenant</td><td><span class="tag success">Activo</span></td></tr>
-        </tbody></table>
-        <div class="sub" style="margin-top:12px">La gestión completa de colegios (crear, suspender, planes) se conecta a Firestore en la siguiente etapa.</div>
+      <div class="h1">Colegios</div><div class="sub">Crea y administra los establecimientos de la plataforma</div>
+      <div class="card"><div class="cardhead"><h3><span class="material-symbols-outlined">apartment</span> Colegios <span class="count" id="cnt-colegios">0</span></h3>
+        <div class="tools"><button class="btn" onclick="abrirWizard()"><span class="material-symbols-outlined" style="font-size:18px">add_business</span> Crear colegio</button></div></div>
+        <table><thead><tr><th>Colegio</th><th>RBD</th><th>Dependencia</th><th>Cargos creados</th></tr></thead><tbody id="tb-colegios"><tr><td colspan="4" style="color:var(--muted)">Sin colegios aún. Usa "Crear colegio".</td></tr></tbody></table>
+      </div>
+
+      <div class="card" id="wizard" style="display:none">
+        <div class="cardhead"><h3><span class="material-symbols-outlined">add_business</span> Nuevo colegio · <span id="wzStepLabel">Paso 1 de 4</span></h3>
+          <button class="btn ghost sm" onclick="cerrarWizard()">Cancelar</button></div>
+
+        <div class="wzstep" data-step="1">
+          <div class="frm">
+            <div class="fld"><label>Nombre del colegio</label><input id="wzNombre" placeholder="Ej. Liceo San Mateo"></div>
+            <div class="fld"><label>RBD</label><input id="wzRBD" placeholder="Ej. 12345-6"></div>
+            <div class="fld"><label>Dependencia</label><select id="wzDep"><option>Particular subvencionado</option><option>Municipal / SLEP</option><option>Particular pagado</option><option>Administración delegada</option></select></div>
+            <div class="fld"><label>Jornada</label><select id="wzJEC"><option>Jornada Escolar Completa (JEC)</option><option>Sin JEC</option></select></div>
+          </div>
+        </div>
+
+        <div class="wzstep" data-step="2" style="display:none">
+          <div class="sub">Marca los niveles que imparte el colegio e indica cuántos profesores tiene cada uno.</div>
+          <div id="wzSegmentos" style="display:flex;flex-direction:column;gap:12px;margin-top:8px"></div>
+        </div>
+
+        <div class="wzstep" data-step="3" style="display:none">
+          <div class="grid2">
+            <div class="card" style="margin:0"><h3><span class="material-symbols-outlined">menu_book</span> Asignaturas</h3><div class="sub">Una por línea.</div><textarea id="wzAsig" rows="8" style="width:100%;font-family:'Inter',sans-serif;font-size:13.5px;color:var(--text);background:var(--surface);border:1px solid var(--border-2);border-radius:9px;padding:10px"></textarea></div>
+            <div class="card" style="margin:0"><h3><span class="material-symbols-outlined">construction</span> Especialidades TP</h3><div class="sub">Una por línea (solo si imparte Técnico Profesional).</div><textarea id="wzEsp" rows="8" style="width:100%;font-family:'Inter',sans-serif;font-size:13.5px;color:var(--text);background:var(--surface);border:1px solid var(--border-2);border-radius:9px;padding:10px"></textarea></div>
+          </div>
+        </div>
+
+        <div class="wzstep" data-step="4" style="display:none">
+          <div class="sub">Asigna los cargos por correo. <b>Se crearán sus cuentas automáticamente</b> y quedarán asignadas a este colegio.</div>
+          <div class="frm" style="margin-top:8px">
+            <div class="fld"><label>Administrador del colegio</label><input id="wzAdmin" placeholder="admin.colegio@…"></div>
+            <div class="fld"><label>Director</label><input id="wzDir" placeholder="director@…"></div>
+            <div class="fld"><label>Rector</label><input id="wzRector" placeholder="rector@…"></div>
+            <div class="fld"><label>Contraseña inicial (todos)</label><input id="wzPass" value="Demo1234!"></div>
+            <div class="fld" style="grid-column:1/-1"><label>UTP / Encargados pedagógicos (un correo por línea)</label><textarea id="wzUTP" rows="3" style="width:100%;font-family:'Inter',sans-serif;font-size:13.5px;color:var(--text);background:var(--surface);border:1px solid var(--border-2);border-radius:9px;padding:8px"></textarea></div>
+            <div class="fld" style="grid-column:1/-1"><label>Jefes de especialidad TP (un correo por línea)</label><textarea id="wzJefes" rows="3" style="width:100%;font-family:'Inter',sans-serif;font-size:13.5px;color:var(--text);background:var(--surface);border:1px solid var(--border-2);border-radius:9px;padding:8px"></textarea></div>
+          </div>
+        </div>
+
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:16px">
+          <button class="btn ghost" id="wzPrev" onclick="wzStep(-1)" style="visibility:hidden"><span class="material-symbols-outlined" style="font-size:18px">arrow_back</span> Anterior</button>
+          <div><button class="btn" id="wzNext" onclick="wzStep(1)">Siguiente <span class="material-symbols-outlined" style="font-size:18px">arrow_forward</span></button>
+          <button class="btn" id="wzFin" onclick="crearColegio()" style="display:none"><span class="material-symbols-outlined" style="font-size:18px">check</span> Crear colegio</button></div>
+        </div>
+        <div id="wzMsg" class="sub" style="margin-top:10px"></div>
       </div>
     </section>
 
@@ -134,7 +177,7 @@ function esAdmin(u){if(!u)return false;if(u.role==='admin')return true;var L=win
 function iniciar(){
  document.getElementById('content').style.display='block';
  document.getElementById('authMsg').style.display='none';
- cargarUsuarios(); cargarIA(); cargarAcademico();
+ cargarUsuarios(); cargarIA(); cargarAcademico(); cargarColegios();
  document.getElementById('estDb').textContent='conectada (clickyclase-2)';
 }
 if(typeof ELAuth!=='undefined'&&ELAuth.onUserReady){
@@ -212,6 +255,43 @@ function guardarModelo(){_ia.modelo=document.getElementById('modeloSel').value;g
 var ACAD_DEF={niveles:['Pre-Kínder','Kínder','1° básico','2° básico','3° básico','4° básico','5° básico','6° básico','7° básico','8° básico','I medio','II medio','III medio','IV medio'],asignaturas:['Lenguaje y Comunicación','Matemática','Ciencias Naturales','Historia, Geografía y Cs. Sociales','Inglés','Educación Física y Salud','Artes Visuales','Música','Tecnología','Orientación','Biología','Física','Química','Filosofía','Educación Ciudadana']};
 function cargarAcademico(){ if(!window.ccStore)return; ccStore.getConfig('academico').then(function(o){ o=o||ACAD_DEF; document.getElementById('acNiveles').value=(o.niveles||ACAD_DEF.niveles).join('\n'); document.getElementById('acAsig').value=(o.asignaturas||ACAD_DEF.asignaturas).join('\n'); }).catch(function(){ document.getElementById('acNiveles').value=ACAD_DEF.niveles.join('\n'); document.getElementById('acAsig').value=ACAD_DEF.asignaturas.join('\n'); }); }
 function guardarAcademico(){ var niv=document.getElementById('acNiveles').value.split('\n').map(function(s){return s.trim()}).filter(Boolean); var asig=document.getElementById('acAsig').value.split('\n').map(function(s){return s.trim()}).filter(Boolean); if(window.ccStore)ccStore.setConfig('academico',{niveles:niv,asignaturas:asig}); toast('Académico del colegio guardado ('+asig.length+' asignaturas, '+niv.length+' niveles).','success'); }
+
+// ── Asistente de creación de colegios ──
+var SEGS=[['prebasica','Pre-básica',['Pre-Kínder','Kínder']],['basica','Básica (1° a 6°)',['1° básico','2° básico','3° básico','4° básico','5° básico','6° básico']],['mediahc','Media H-C (7° a IV)',['7° básico','8° básico','I medio','II medio','III medio','IV medio']],['fg','Formación General (I a IV)',['I medio','II medio','III medio','IV medio']],['tp','Técnico Profesional (III-IV)',['III medio','IV medio']]];
+var _wz=1;
+function renderSegmentos(){ document.getElementById('wzSegmentos').innerHTML=SEGS.map(function(s){return '<div style="display:flex;align-items:center;gap:12px"><label style="display:flex;align-items:center;gap:8px;min-width:260px;font-size:13.5px"><input type="checkbox" data-seg="'+s[0]+'"> '+s[1]+'</label><input type="number" min="0" value="0" data-segn="'+s[0]+'" style="width:90px;background:var(--surface);border:1px solid var(--border-2);border-radius:8px;padding:7px;color:var(--text)"> <span class="sub" style="margin:0">profesores</span></div>'}).join(''); }
+function abrirWizard(){ _wz=1; renderSegmentos(); document.getElementById('wzAsig').value=ACAD_DEF.asignaturas.join('\n'); document.getElementById('wzEsp').value=['Electricidad','Electrónica','Administración','Contabilidad','Gastronomía','Atención de Párvulos'].join('\n'); document.getElementById('wizard').style.display='block'; document.getElementById('wzMsg').textContent=''; showStep(); document.getElementById('wizard').scrollIntoView({behavior:'smooth'}); }
+function cerrarWizard(){ document.getElementById('wizard').style.display='none'; }
+function showStep(){ document.querySelectorAll('.wzstep').forEach(function(x){x.style.display=(+x.dataset.step===_wz)?'block':'none'}); document.getElementById('wzStepLabel').textContent='Paso '+_wz+' de 4'; document.getElementById('wzPrev').style.visibility=_wz>1?'visible':'hidden'; document.getElementById('wzNext').style.display=_wz<4?'inline-flex':'none'; document.getElementById('wzFin').style.display=_wz===4?'inline-flex':'none'; }
+function wzStep(d){ if(d>0&&_wz===1&&!document.getElementById('wzNombre').value.trim()){toast('Indica el nombre del colegio.','danger');return;} _wz=Math.min(4,Math.max(1,_wz+d)); showStep(); }
+function _slug(s){return (s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'').slice(0,40);}
+function _lineas(id){return (document.getElementById(id).value||'').split('\n').map(function(s){return s.trim()}).filter(Boolean);}
+function _crearCuenta(email,nombre,role,orgId,pass){
+ return fetch('https://identitytoolkit.googleapis.com/v1/accounts:signUp?key='+FIREBASE_CONFIG.apiKey,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:email,password:pass,displayName:nombre,returnSecureToken:false})})
+  .then(function(r){return r.json()}).then(function(res){ if(res.error){ if(res.error.message==='EMAIL_EXISTS')return null; throw new Error(res.error.message);} var uid=res.localId; var perfil={email:email,nombre:nombre,role:role,tipo:'colegio',orgId:orgId,activo:true,primerIngreso:false,creadoEn:new Date().toISOString()}; return EL_DB.collection('usuarios').doc(uid).set(perfil).then(function(){ return EL_DB.collection('organizaciones').doc(orgId).collection('miembros').doc(uid).set({rol:role,email:email,nombre:nombre}).catch(function(){}); }); });
+}
+function crearColegio(){
+ var nombre=document.getElementById('wzNombre').value.trim(); if(!nombre){toast('Falta el nombre del colegio.','danger');_wz=1;showStep();return;}
+ var rbd=document.getElementById('wzRBD').value.trim(); var id=_slug(rbd||nombre)||('colegio-'+Date.now());
+ var dep=document.getElementById('wzDep').value, jec=document.getElementById('wzJEC').value, pass=document.getElementById('wzPass').value||'Demo1234!';
+ var segmentos={}, niveles=[];
+ document.querySelectorAll('#wzSegmentos input[data-seg]').forEach(function(chk){ if(chk.checked){ var key=chk.dataset.seg; segmentos[key]=+(document.querySelector('#wzSegmentos input[data-segn="'+key+'"]').value)||0; var seg=SEGS.filter(function(s){return s[0]===key})[0]; if(seg)seg[2].forEach(function(nv){if(niveles.indexOf(nv)===-1)niveles.push(nv);}); } });
+ var asignaturas=_lineas('wzAsig'), especialidades=_lineas('wzEsp'), cargos=[];
+ var a=document.getElementById('wzAdmin').value.trim(); if(a)cargos.push([a,'Administrador de Colegio','admin_colegio']);
+ var dd=document.getElementById('wzDir').value.trim(); if(dd)cargos.push([dd,'Director','director']);
+ var rr=document.getElementById('wzRector').value.trim(); if(rr)cargos.push([rr,'Rector','rector']);
+ _lineas('wzUTP').forEach(function(e){cargos.push([e,'Encargado UTP','utp']);});
+ _lineas('wzJefes').forEach(function(e){cargos.push([e,'Jefe de Especialidad TP','jefe_tp']);});
+ var btn=document.getElementById('wzFin'); btn.disabled=true; var o=btn.innerHTML; btn.innerHTML='Creando…'; document.getElementById('wzMsg').textContent='Creando colegio y cuentas…';
+ var colegio={id:id,nombre:nombre,rbd:rbd,dependencia:dep,jec:jec,segmentos:segmentos};
+ EL_DB.collection('organizaciones').doc(id).collection('config').doc('colegio').set({json:JSON.stringify(colegio)})
+  .then(function(){ return EL_DB.collection('organizaciones').doc(id).collection('config').doc('academico').set({json:JSON.stringify({niveles:niveles,asignaturas:asignaturas,especialidades:especialidades})}); })
+  .then(function(){ return EL_DB.collection('sistema').doc('colegios').get().then(function(d){ var lista=(d.exists&&d.data().lista)?d.data().lista:[]; if(!lista.filter(function(c){return c.id===id}).length) lista.push({id:id,nombre:nombre,rbd:rbd,dependencia:dep,cargos:cargos.length}); return EL_DB.collection('sistema').doc('colegios').set({lista:lista}); }); })
+  .then(function(){ var chain=Promise.resolve(); cargos.forEach(function(c){ chain=chain.then(function(){ return _crearCuenta(c[0],c[1],c[2],id,pass).catch(function(){}); }); }); return chain; })
+  .then(function(){ toast('Colegio "'+nombre+'" creado con '+cargos.length+' cargo(s).','success'); btn.disabled=false; btn.innerHTML=o; cerrarWizard(); cargarColegios(); cargarUsuarios(); })
+  .catch(function(e){ toast('Error: '+e.message,'danger'); document.getElementById('wzMsg').textContent='Error: '+e.message; btn.disabled=false; btn.innerHTML=o; });
+}
+function cargarColegios(){ if(typeof EL_DB==='undefined')return; EL_DB.collection('sistema').doc('colegios').get().then(function(d){ var lista=(d.exists&&d.data().lista)?d.data().lista:[]; var tb=document.getElementById('tb-colegios'); var c=document.getElementById('cnt-colegios'); if(c)c.textContent=lista.length; if(tb)tb.innerHTML=lista.length?lista.map(function(x){return '<tr><td>'+x.nombre+' <span class="sub">('+x.id+')</span></td><td>'+(x.rbd||'—')+'</td><td>'+(x.dependencia||'—')+'</td><td>'+(x.cargos||0)+'</td></tr>'}).join(''):'<tr><td colspan="4" style="color:var(--muted)">Sin colegios aún.</td></tr>'; }).catch(function(){}); }
 </script>
 </body>
 </html>
