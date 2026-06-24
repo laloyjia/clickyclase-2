@@ -12,19 +12,31 @@
  *  con arreglos anidados.)
  */
 var ccStore = (function () {
-  var ORG = 'colegio-demo'; // colegio de prueba (multi-colegio real: leer del usuario)
+  var ORG = 'colegio-demo'; // se reemplaza por el colegio (orgId) del usuario logueado
 
   function _authReady() {
     return new Promise(function (res) {
+      // Preferir ELAuth: nos da el usuario con su orgId (colegio) ya cargado
+      if (typeof ELAuth !== 'undefined' && ELAuth.onUserReady) {
+        var done = false;
+        ELAuth.onUserReady(function (u) {
+          if (done) return; done = true;
+          if (u && u.orgId) {
+            try { var last = localStorage.getItem('cc_org'); if (last && last !== u.orgId) { Object.keys(localStorage).forEach(function (k) { if (/^cc_(calendario|docs|t_|cfg_|branding)/.test(k)) localStorage.removeItem(k); }); } localStorage.setItem('cc_org', u.orgId); } catch (e) {}
+            ORG = u.orgId;   // ← aislar por colegio del usuario
+          }
+          res(!!(window.EL_AUTH && window.EL_AUTH.currentUser));
+        });
+        setTimeout(function () { if (!done) { done = true; res(!!(window.EL_AUTH && window.EL_AUTH.currentUser)); } }, 5000);
+        return;
+      }
       if (typeof window.EL_AUTH === 'undefined') { res(false); return; }
       if (window.EL_AUTH.currentUser) { res(true); return; }
-      var done = false;
+      var d2 = false;
       try {
-        window.EL_AUTH.onAuthStateChanged(function (u) { if (done) return; done = true; res(!!u); });
+        window.EL_AUTH.onAuthStateChanged(function (u) { if (d2) return; d2 = true; res(!!u); });
       } catch (e) { res(false); return; }
-      setTimeout(function () {
-        if (!done) { done = true; res(!!(window.EL_AUTH && window.EL_AUTH.currentUser)); }
-      }, 4000);
+      setTimeout(function () { if (!d2) { d2 = true; res(!!(window.EL_AUTH && window.EL_AUTH.currentUser)); } }, 4000);
     });
   }
   function lsGet(k, def) { try { return JSON.parse(localStorage.getItem(k) || def); } catch (e) { try { return JSON.parse(def); } catch (_) { return null; } } }
