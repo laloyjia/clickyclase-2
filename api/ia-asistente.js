@@ -638,61 +638,63 @@ export default async function handler(req, res) {
                        ? modeloPedido
                        : GEMINI_MODEL_DEFAULT;
 
-  // Reintentar con cada key del pool. Si una falla por cuota agotada o
-  // por key inválida, pasamos a la siguiente automáticamente.
+  // Modelos a intentar: el pedido y, si es Flash, un respaldo más ligero
+  const modelosIntento = (modeloUsado === 'gemini-2.5-flash')
+    ? ['gemini-2.5-flash', 'gemini-2.5-flash-lite']
+    : [modeloUsado];
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+  async function llamarGemini(apiKey, modelo) {
+    const r = await fetch(`${_geminiUrl(modelo)}?key=${apiKey}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: genCfg,
+        safetySettings: [
+          { category: 'HARM_CATEGORY_HARASSMENT',        threshold: 'BLOCK_NONE' },
+          { category: 'HARM_CATEGORY_HATE_SPEECH',       threshold: 'BLOCK_NONE' },
+          { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_NONE' }
+        ]
+      })
+    });
+    return r.json();
+  }
+
   let ultimoError = 'Sin keys disponibles';
-  for (let intento = 0; intento < apiKeysShuffled.length; intento++) {
-    const apiKey = apiKeysShuffled[intento];
-    try {
-      const r = await fetch(`${_geminiUrl(modeloUsado)}?key=${apiKey}`, {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: genCfg,
-          safetySettings: [
-            { category: 'HARM_CATEGORY_HARASSMENT',        threshold: 'BLOCK_NONE' },
-            { category: 'HARM_CATEGORY_HATE_SPEECH',       threshold: 'BLOCK_NONE' },
-            { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_NONE' }
-          ]
-        })
-      });
+  for (let k = 0; k < apiKeysShuffled.length; k++) {
+    const apiKey = apiKeysShuffled[k];
+    let siguienteKey = false;
+    for (let m = 0; m < modelosIntento.length && !siguienteKey; m++) {
+      const modelo = modelosIntento[m];
+      for (let intento = 0; intento < 3; intento++) {
+        let data;
+        try { data = await llamarGemini(apiKey, modelo); }
+        catch (e) { ultimoError = e.message; if (intento < 2) { await sleep(1200); continue; } break; }
 
-      const data = await r.json();
-
-      // Errores específicos que justifican intentar con otra key
-      if (data.error) {
-        const errMsg = data.error.message || JSON.stringify(data.error);
-        const isQuota   = /RESOURCE_EXHAUSTED|quota|rate limit/i.test(errMsg);
-        const isInvalid = /API_KEY_INVALID|API key not valid|PERMISSION_DENIED/i.test(errMsg);
-        if ((isQuota || isInvalid) && intento < apiKeysShuffled.length - 1) {
+        if (data.error) {
+          const errMsg = data.error.message || JSON.stringify(data.error);
           ultimoError = errMsg;
-          continue; // probar siguiente key
+          const isQuota    = /RESOURCE_EXHAUSTED|quota|rate limit/i.test(errMsg);
+          const isInvalid  = /API_KEY_INVALID|API key not valid|PERMISSION_DENIED/i.test(errMsg);
+          const isOverload = /UNAVAILABLE|overloaded|high demand|try again later|temporarily|\b503\b/i.test(errMsg);
+          if (isInvalid || isQuota) { siguienteKey = true; break; }                 // cambiar de key
+          if (isOverload) { if (intento < 2) { await sleep(1500); continue; } break; } // reintentar / cambiar modelo
+          return res.status(502).json({ error: errMsg });                            // error no recuperable
         }
-        return res.status(502).json({
-          error: errMsg + (apiKeysShuffled.length > 1 ? ` (probadas ${intento + 1}/${apiKeysShuffled.length} keys)` : '')
-        });
-      }
 
-      const texto = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-      if (!texto) {
-        // A veces Gemini bloquea por safety y no devuelve texto
-        const finishReason = data.candidates?.[0]?.finishReason;
-        return res.status(502).json({
-          error: finishReason === 'SAFETY'
-            ? 'La IA bloqueó la respuesta por filtros de seguridad. Reformula el contenido del documento.'
-            : 'La IA no devolvió respuesta'
-        });
+        const texto = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+        if (!texto) {
+          const finishReason = data.candidates?.[0]?.finishReason;
+          if (finishReason === 'SAFETY') return res.status(502).json({ error: 'La IA bloqueó la respuesta por filtros de seguridad. Reformula el contenido.' });
+          if (intento < 2) { await sleep(1000); continue; }
+          break;
+        }
+        return res.status(200).json({ resultado: texto, modelo: modelo });
       }
-      return res.status(200).json({ resultado: texto, keysProbadas: intento + 1 });
-    } catch (e) {
-      ultimoError = e.message;
-      if (intento < apiKeysShuffled.length - 1) continue;
-      return res.status(500).json({ error: 'Error conectando con la IA: ' + e.message });
     }
   }
-  // Si llegamos aquí es que todas las keys fallaron
   return res.status(502).json({
-    error: 'Todas las API keys del pool están con cuota agotada o inválidas. Último error: ' + ultimoError
+    error: 'La IA está saturada en este momento (alta demanda). Espera unos segundos y reintenta. Detalle: ' + ultimoError
   });
 }
