@@ -160,6 +160,12 @@ var NAV=[['dashboard','Inicio','resumen'],['smart_toy','Generar material (IA)','
 document.getElementById('nav').innerHTML=NAV.map(function(n,i){return '<div class="nav-item'+(i===0?' active':'')+'" data-s="'+n[2]+'">'+ic(n[0])+'<span>'+n[1]+'</span></div>'}).join('');
 function show(s){document.querySelectorAll('.nav-item').forEach(function(x){x.classList.toggle('active',x.dataset.s===s)});document.querySelectorAll('.sec').forEach(function(x){x.classList.toggle('active',x.id==='sec-'+s)});}
 document.querySelectorAll('.nav-item').forEach(function(x){x.addEventListener('click',function(){show(x.dataset.s)})});
+
+// ── Asignaturas/niveles del profesor: catálogo del colegio (admin) + asignación del UTP ──
+function fillSelect(id,arr){var s=document.getElementById(id);if(!s||!arr||!arr.length)return;var cur=s.value;s.innerHTML='<option value="">— Elige —</option>'+arr.map(function(x){return '<option>'+x+'</option>'}).join('');if(cur)s.value=cur;}
+function cargarAsignaturas(){if(!window.ccStore)return;Promise.all([ccStore.getConfig('academico'),ccStore.getConfig('asignaciones')]).then(function(res){var acad=res[0]||{},asign=res[1]||{};var allA=acad.asignaturas||[],allN=acad.niveles||[];var email='';try{if(window.EL_AUTH&&EL_AUTH.currentUser)email=(EL_AUTH.currentUser.email||'');}catch(e){}var misA=allA,misN=allN;if(asign.rows&&email){for(var i=0;i<asign.rows.length;i++){var r=asign.rows[i];if((r[0]||'').toLowerCase().trim()===email.toLowerCase().trim()){var a=(r[1]||'').split(',').map(function(s){return s.trim()}).filter(Boolean);var n=(r[2]||'').split(',').map(function(s){return s.trim()}).filter(Boolean);if(a.length)misA=a;if(n.length)misN=n;break;}}}fillSelect('matAsig',misA);fillSelect('matNivel',misN);}).catch(function(){});}
+if(typeof ELAuth!=='undefined'&&ELAuth.onUserReady){ELAuth.onUserReady(function(){cargarAsignaturas();});}else{cargarAsignaturas();}
+
 (function(){var el=document.getElementById('calColegio');
  function render(rows){if(!el)return;if(!rows||!rows.length){el.innerHTML='<div class="sub" style="margin:0">Aún no hay calendario institucional cargado.</div>';return;}el.innerHTML=rows.slice(0,8).map(function(r){return '<div class="row"><span class="material-symbols-outlined ic">event</span><div style="flex:1"><div>'+(r[1]||'')+'</div><div class="sub">'+(r[0]||'')+(r[2]?(' · '+r[2]):'')+'</div></div><span class="sub">'+(r[3]||'')+'</span></div>'}).join('');}
  var local=[];try{local=JSON.parse(localStorage.getItem('cc_calendario')||'[]');}catch(e){}

@@ -94,6 +94,26 @@ var ccStore = (function () {
     });
   }
 
+  // ── Configuración arbitraria del colegio (academico, asignaciones, etc.) ──
+  function getConfig(name) {
+    var lk = 'cc_cfg_' + name;
+    var local = lsGet(lk, 'null');
+    return _authReady().then(function (ok) {
+      if (!ok || typeof EL_DB === 'undefined') return local;
+      return cfgDoc(name).get().then(function (d) {
+        if (d.exists) { var v = d.data() || {}; if (v.json) { var o = JSON.parse(v.json); lsSet(lk, o); return o; } }
+        return local;
+      }).catch(function () { return local; });
+    });
+  }
+  function setConfig(name, obj) {
+    lsSet('cc_cfg_' + name, obj);
+    return _authReady().then(function (ok) {
+      if (!ok || typeof EL_DB === 'undefined') return;
+      return cfgDoc(name).set({ json: JSON.stringify(obj), updatedAt: new Date().toISOString() }).catch(function () {});
+    });
+  }
+
   // ── Branding del colegio (color, nombre, logo) ──
   function getBranding() {
     var local = lsGet('cc_branding', 'null');
@@ -125,5 +145,5 @@ var ccStore = (function () {
     });
   }
 
-  return { getCalendario: getCalendario, setCalendario: setCalendario, getDocs: getDocs, setDocText: setDocText, getTabla: getTabla, setTabla: setTabla, hydrate: hydrate, getBranding: getBranding, setBranding: setBranding, guard: guard };
+  return { getCalendario: getCalendario, setCalendario: setCalendario, getDocs: getDocs, setDocText: setDocText, getTabla: getTabla, setTabla: setTabla, hydrate: hydrate, getBranding: getBranding, setBranding: setBranding, guard: guard, getConfig: getConfig, setConfig: setConfig };
 })();

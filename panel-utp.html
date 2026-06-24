@@ -50,6 +50,15 @@
         <table><thead><tr><th>Profesor</th><th>Curso</th><th>Asignatura</th><th>Última actividad</th><th>Estado</th></tr></thead><tbody id="tb-profes"></tbody></table>
       </div>
     </section>
+    <section class="sec" id="sec-asignar">
+      <div class="h1">Asignar a profesores</div><div class="sub">Asigna a cada profesor sus asignaturas y niveles. El profesor las verá al generar material.</div>
+      <div class="card"><div class="cardhead"><h3><span class="material-symbols-outlined">assignment_ind</span> Asignaciones <span class="count" id="cnt-asignar">0</span></h3>
+        <div class="tools"><button class="btn ghost sm" onclick="addAsig()"><span class="material-symbols-outlined" style="font-size:16px">add</span> Agregar profesor</button></div></div>
+        <table><thead><tr><th>Correo del profesor</th><th>Asignaturas (separadas por coma)</th><th>Niveles (coma)</th></tr></thead><tbody id="tb-asignar"></tbody></table>
+      </div>
+      <div class="legal" id="asigHint">Cargando asignaturas disponibles del colegio…</div>
+    </section>
+
     <section class="sec" id="sec-plan">
       <div class="h1">Planificaciones</div><div class="sub">Revisión y aprobación de las planificaciones del ciclo</div>
       <div class="card"><div class="cardhead"><h3><span class="material-symbols-outlined">description</span> Planificaciones <span class="count" id="cnt-plan">0</span></h3>
@@ -195,7 +204,7 @@ function renderCalColegio(){
  render(local);
  if(window.ccStore){ccStore.getCalendario().then(render).catch(function(){});}
 }
-var NAV=[['dashboard','Resumen','resumen'],['groups','Mis profesores','profes'],['description','Planificaciones','plan'],['checklist','Cobertura','cobertura'],['event_note','Evaluaciones','eval'],['visibility','Acompañamiento','acomp']];
+var NAV=[['dashboard','Resumen','resumen'],['groups','Mis profesores','profes'],['assignment_ind','Asignar profesores','asignar'],['description','Planificaciones','plan'],['checklist','Cobertura','cobertura'],['event_note','Evaluaciones','eval'],['visibility','Acompañamiento','acomp']];
 document.getElementById('nav').innerHTML=NAV.map(function(n,i){return '<div class="nav-item'+(i===0?' active':'')+'" data-s="'+n[2]+'">'+ic(n[0])+'<span>'+n[1]+'</span></div>'}).join('');
 function show(s){document.querySelectorAll('.nav-item').forEach(function(x){x.classList.toggle('active',x.dataset.s===s)});document.querySelectorAll('.sec').forEach(function(x){x.classList.toggle('active',x.id==='sec-'+s)});if(s==='cobertura')mkCob('chCob2');}
 document.querySelectorAll('.nav-item').forEach(function(x){x.addEventListener('click',function(){show(x.dataset.s)})});
@@ -224,6 +233,17 @@ else{ss.value=_seg;ss.addEventListener('change',function(){_seg=ss.value;renderA
 window.CC_REG={profes:{get rows(){return SEG[_seg].profes}},eval:{get rows(){return SEG[_seg].eval}},acomp:{get rows(){return SEG[_seg].acomp}}};
 window.CC_RENDER=renderTbl;
 window.CC_PREFIX='utp_'+_seg;
+
+// ── Asignación de asignaturas/niveles a cada profesor (config del colegio) ──
+var ASIG={rows:[]};
+function persistAsig(){if(window.ccStore)ccStore.setConfig('asignaciones',{rows:ASIG.rows});}
+function renderAsig(){var el=document.getElementById('tb-asignar');if(!el)return;el.innerHTML=ASIG.rows.map(function(r,i){return '<tr>'+[0,1,2].map(function(c){return '<td contenteditable="true" data-ag="'+i+'" data-agc="'+c+'" style="outline:none">'+(r[c]||'')+'</td>'}).join('')+'<td style="width:34px;text-align:center"><button onclick="delAsig('+i+')" title="Eliminar" style="background:none;border:none;color:var(--muted);cursor:pointer"><span class="material-symbols-outlined" style="font-size:17px">close</span></button></td></tr>'}).join('');var c=document.getElementById('cnt-asignar');if(c)c.textContent=ASIG.rows.length;}
+function addAsig(){ASIG.rows.push(['','','']);renderAsig();persistAsig();}
+function delAsig(i){ASIG.rows.splice(i,1);renderAsig();persistAsig();toast('Asignación eliminada.','success');}
+function cargarAsig(){if(!window.ccStore)return;ccStore.getConfig('asignaciones').then(function(o){ASIG.rows=(o&&o.rows)||[];renderAsig();}).catch(function(){});ccStore.getConfig('academico').then(function(a){var h=document.getElementById('asigHint');if(h&&a&&a.asignaturas&&a.asignaturas.length)h.innerHTML='<b>Asignaturas del colegio (definidas por admin):</b> '+a.asignaturas.join(' · ');}).catch(function(){});}
+document.addEventListener('focusout',function(e){var td=e.target;if(!td||!td.dataset||td.dataset.ag===undefined)return;var i=+td.dataset.ag,c=+td.dataset.agc;if(ASIG.rows[i]){ASIG.rows[i][c]=td.textContent.trim();persistAsig();}});
+cargarAsig();
+
 renderAll();
 </script>
 </body>
