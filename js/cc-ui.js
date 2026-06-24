@@ -129,6 +129,51 @@
     });
   }
 
+  // (21) Gestión en línea genérica (agregar / editar / eliminar) para tablas.
+  // Un panel la activa con: window.CC_REG = REG; window.CC_RENDER = renderTable; window.CC_PREFIX = 'amb';
+  function crud() {
+    if (typeof window.CC_REG === 'undefined' || typeof window.CC_RENDER !== 'function') return;
+    var REG = window.CC_REG, render = window.CC_RENDER, prefix = window.CC_PREFIX || '';
+    function persist(key) { if (window.ccStore) { try { ccStore.setTabla((window.CC_PREFIX || prefix) + '_' + key, REG[key].rows); } catch (e) {} } }
+    window.ccAdd = function (key) {
+      if (!REG[key]) return;
+      var n = (REG[key].headers && REG[key].headers.length) || (REG[key].rows[0] ? REG[key].rows[0].length : 3);
+      var row = []; for (var x = 0; x < n; x++) row.push(x === 0 ? '(nuevo)' : '');
+      REG[key].rows.push(row); render(key); persist(key);
+    };
+    window.ccDel = function (key, i) { if (!REG[key]) return; REG[key].rows.splice(i, 1); render(key); persist(key); };
+
+    function enhance() {
+      document.querySelectorAll('tbody[id^="tb-"]').forEach(function (tb) {
+        var key = tb.id.slice(3); if (!REG[key]) return;
+        Array.prototype.forEach.call(tb.querySelectorAll('tr'), function (tr, ri) {
+          if (tr.classList.contains('cc-empty') || tr.dataset.ccCrud) return;
+          tr.dataset.ccCrud = '1';
+          Array.prototype.forEach.call(tr.children, function (td, ci) {
+            td.setAttribute('contenteditable', 'true'); td.dataset.k = key; td.dataset.i = ri; td.dataset.c = ci; td.style.outline = 'none';
+          });
+          var del = document.createElement('td'); del.style.width = '34px'; del.style.textAlign = 'center';
+          del.innerHTML = '<button onclick="ccDel(\'' + key + '\',' + ri + ')" title="Eliminar fila" style="background:none;border:none;color:var(--muted);cursor:pointer"><span class="material-symbols-outlined" style="font-size:17px">close</span></button>';
+          tr.appendChild(del);
+        });
+        var card = tb.closest('.card'); var tools = card && card.querySelector('.cardhead .tools');
+        if (tools && !tools.querySelector('.cc-add')) {
+          var b = document.createElement('button'); b.className = 'btn ghost sm cc-add';
+          b.innerHTML = '<span class="material-symbols-outlined" style="font-size:16px">add</span> Agregar';
+          b.addEventListener('click', function () { window.ccAdd(key); });
+          tools.insertBefore(b, tools.firstChild);
+        }
+      });
+    }
+    document.addEventListener('focusout', function (e) {
+      var td = e.target; if (!td || !td.dataset || td.dataset.k === undefined) return;
+      var k = td.dataset.k, i = +td.dataset.i, c = +td.dataset.c;
+      if (REG[k] && REG[k].rows[i]) { REG[k].rows[i][c] = td.textContent.trim(); persist(k); }
+    });
+    enhance();
+    try { new MutationObserver(function () { enhance(); }).observe(document.querySelector('.main') || document.body, { childList: true, subtree: true }); } catch (e) {}
+  }
+
   window.addEventListener('load', function () {
     try { injectToggle(); } catch (e) {}
     try { injectBurger(); } catch (e) {}
@@ -136,6 +181,7 @@
     try { emptyStates(); } catch (e) {}
     try { injectCopy(); } catch (e) {}
     try { a11y(); } catch (e) {}
+    try { crud(); } catch (e) {}
     try { if (window.ccStore && ccStore.getBranding) ccStore.getBranding().then(applyBranding).catch(function () {}); } catch (e) {}
   });
 })();

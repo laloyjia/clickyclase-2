@@ -181,6 +181,7 @@ function mkCob(id){
  _charts[id]=new Chart(el,{type:'bar',data:{labels:d.cob.map(function(c){return c[0]}),datasets:[{data:d.cob.map(function(c){return c[1]}),backgroundColor:'#5B4BE0'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{max:100}}}});
 }
 function renderAll(){
+ window.CC_PREFIX='utp_'+_seg;
  document.getElementById('segScope').textContent=SEG[_seg].niv;
  renderResumen();
  ['profes','plan','eval','acomp','cob'].forEach(renderTbl);
@@ -219,6 +220,10 @@ var ss=document.getElementById('segSel');
 ss.innerHTML=SEG_ORDER.map(function(s){return '<option value="'+s[0]+'">'+s[1]+'</option>'}).join('');
 if(_lock&&SEG[_lock]){_seg=_lock;ss.style.display='none';document.querySelector('.switcher label').innerHTML='Ciclo asignado: <span style="color:var(--text);font-weight:600">'+SEG[_lock].label+'</span>';}
 else{ss.value=_seg;ss.addEventListener('change',function(){_seg=ss.value;renderAll();show('resumen');});}
+// CRUD (profes/eval/acomp; 'plan' se excluye para conservar el clic de revisión)
+window.CC_REG={profes:{get rows(){return SEG[_seg].profes}},eval:{get rows(){return SEG[_seg].eval}},acomp:{get rows(){return SEG[_seg].acomp}}};
+window.CC_RENDER=renderTbl;
+window.CC_PREFIX='utp_'+_seg;
 renderAll();
 </script>
 </body>

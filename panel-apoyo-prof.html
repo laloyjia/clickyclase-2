@@ -113,6 +113,7 @@ function renderTable(key){var cfg=REG[key],el=document.getElementById('tb-'+key)
  var cnt=document.getElementById('cnt-'+key);if(cnt)cnt.textContent=cfg.rows.length;}
 Object.keys(REG).forEach(renderTable);
 if(window.ccStore)ccStore.hydrate('apsp',REG,renderTable);
+window.CC_REG=REG;window.CC_RENDER=renderTable;window.CC_PREFIX='apsp';
 document.addEventListener('input',function(e){var inp=e.target;if(!inp.dataset||!inp.dataset.f)return;var q=inp.value.toLowerCase(),cont=document.getElementById('tb-'+inp.dataset.f);cont.querySelectorAll('[data-txt]').forEach(function(r){r.style.display=r.dataset.txt.indexOf(q)!==-1?'':'none'});});
 var _impKey=null;function importar(k){_impKey=k;var f=document.getElementById('fileImp');f.value='';f.click();}
 function plantilla(k){var ws=XLSX.utils.aoa_to_sheet([REG[k].headers]);var wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Plantilla');XLSX.writeFile(wb,'plantilla-'+k+'.xlsx');toast('Plantilla descargada.','success');}

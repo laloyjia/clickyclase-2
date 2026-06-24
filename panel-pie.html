@@ -164,6 +164,7 @@ function renderTable(key){
 }
 Object.keys(REG).forEach(renderTable);
 if(window.ccStore)ccStore.hydrate('pie',REG,renderTable);
+window.CC_REG=REG;window.CC_RENDER=renderTable;window.CC_PREFIX='pie';
 
 document.addEventListener('input',function(e){var inp=e.target;if(!inp.dataset||!inp.dataset.f)return;var q=inp.value.toLowerCase(),cont=document.getElementById('tb-'+inp.dataset.f);cont.querySelectorAll('[data-txt]').forEach(function(r){r.style.display=r.dataset.txt.indexOf(q)!==-1?'':'none'});});
 
