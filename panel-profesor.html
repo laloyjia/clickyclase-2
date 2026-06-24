@@ -68,7 +68,7 @@
     <section class="sec" id="sec-cursos">
       <div class="h1">Mis cursos</div><div class="sub">Cursos asignados</div>
       <div class="card"><div class="cardhead"><h3><span class="material-symbols-outlined">groups</span> Cursos <span class="count" id="cnt-cursos">0</span></h3>
-        <div class="tools"><div class="search"><span class="material-symbols-outlined">search</span><input data-f="cursos" placeholder="Buscar…"></div></div></div>
+        <div class="tools"><div class="search"><span class="material-symbols-outlined">search</span><input data-f="cursos" placeholder="Buscar…"></div><button class="btn ghost sm" onclick="profAgregar('cursos')"><span class="material-symbols-outlined" style="font-size:16px">add</span> Agregar</button></div></div>
         <table><thead><tr><th>Curso</th><th>Asignatura</th><th>Estudiantes</th><th>Próxima clase</th></tr></thead><tbody id="tb-cursos"></tbody></table>
       </div>
     </section>
@@ -78,6 +78,7 @@
       <div class="card"><div class="cardhead"><h3><span class="material-symbols-outlined">table_chart</span> Notas <span class="count" id="cnt-notas">0</span></h3>
         <div class="tools"><div class="search"><span class="material-symbols-outlined">search</span><input data-f="notas" placeholder="Buscar…"></div>
         <button class="btn ghost sm" onclick="plantilla('notas')"><span class="material-symbols-outlined" style="font-size:16px">download</span> Plantilla</button>
+        <button class="btn ghost sm" onclick="profAgregar('notas')"><span class="material-symbols-outlined" style="font-size:16px">add</span> Agregar</button>
         <button class="btn sm" onclick="importar('notas')"><span class="material-symbols-outlined" style="font-size:16px">upload_file</span> Importar</button></div></div>
         <table><thead><tr><th>Estudiante</th><th>Nota 1</th><th>Nota 2</th><th>Asistencia</th><th>Estado</th></tr></thead><tbody id="tb-notas"></tbody></table>
       </div>
@@ -86,7 +87,7 @@
     <section class="sec" id="sec-anotaciones">
       <div class="h1">Anotaciones</div><div class="sub">Registro de observaciones</div>
       <div class="card"><div class="cardhead"><h3><span class="material-symbols-outlined">chat</span> Anotaciones <span class="count" id="cnt-anotaciones">0</span></h3>
-        <div class="tools"><div class="search"><span class="material-symbols-outlined">search</span><input data-f="anotaciones" placeholder="Buscar…"></div></div></div>
+        <div class="tools"><div class="search"><span class="material-symbols-outlined">search</span><input data-f="anotaciones" placeholder="Buscar…"></div><button class="btn ghost sm" onclick="profAgregar('anotaciones')"><span class="material-symbols-outlined" style="font-size:16px">add</span> Agregar</button></div></div>
         <table><thead><tr><th>Fecha</th><th>Estudiante</th><th>Anotación</th><th>Tipo</th></tr></thead><tbody id="tb-anotaciones"></tbody></table>
       </div>
     </section>
@@ -117,13 +118,26 @@ var REG={
    ['Guía — Fracciones 5°A','Matemática · jun 2026','Guardado'],['Prueba — Geometría 6°B','Matemática · jun 2026','Guardado']]}
 };
 function renderTable(key){var cfg=REG[key],el=document.getElementById('tb-'+key);
- if(key==='biblioteca'){el.innerHTML=cfg.rows.map(function(r){return '<div class="doc" data-txt="'+r.join(' ').toLowerCase()+'"><span class="di">'+ic('description')+'</span><div style="flex:1"><div class="dn">'+r[0]+'</div><div class="dm">'+(r[1]||'')+'</div></div>'+tag(r[2]||'')+'</div>'}).join('');}
- else{el.innerHTML=cfg.rows.map(function(r){
+ if(key==='biblioteca'){el.innerHTML=cfg.rows.map(function(r,i){return '<div class="doc" data-txt="'+r.join(' ').toLowerCase()+'"><span class="di">'+ic('description')+'</span><div style="flex:1"><div class="dn">'+r[0]+'</div><div class="dm">'+(r[1]||'')+'</div></div>'+tag(r[2]||'')+'<button title="Eliminar" onclick="profDel(\'biblioteca\','+i+')" style="background:none;border:none;color:var(--muted);cursor:pointer;margin-left:10px"><span class="material-symbols-outlined" style="font-size:17px">close</span></button></div>'}).join('');}
+ else{el.innerHTML=cfg.rows.map(function(r,ri){
    if(key==='notas'){var n1=parseFloat((''+(r[1]||'')).replace(',','.')),n2=parseFloat((''+(r[2]||'')).replace(',','.'));if(!isNaN(n1)&&!isNaN(n2)){var prom=(n1+n2)/2;r[4]=prom<4?'En riesgo':(prom>=6?'Destacado':'Aprobado');}}
-   return '<tr data-txt="'+r.join(' ').toLowerCase()+'">'+r.map(function(c,i){return '<td>'+(i===cfg.statusIdx?tag(c):c)+'</td>'}).join('')+'</tr>'}).join('');}
+   var extra=(key==='anotaciones')?'<button title="Derivar a Convivencia" onclick="derivar('+ri+')" style="background:none;border:none;color:var(--primary);cursor:pointer;padding:2px"><span class="material-symbols-outlined" style="font-size:17px">forward</span></button>':'';
+   return '<tr data-txt="'+r.join(' ').toLowerCase()+'">'+r.map(function(c,ci){var st=ci===cfg.statusIdx?(';font-weight:600;color:var(--'+inferTone(c)+')'):'';return '<td contenteditable="true" data-k="'+key+'" data-i="'+ri+'" data-c="'+ci+'" style="outline:none'+st+'">'+c+'</td>'}).join('')+'<td style="width:60px;text-align:center;white-space:nowrap">'+extra+'<button title="Eliminar fila" onclick="profDel(\''+key+'\','+ri+')" style="background:none;border:none;color:var(--muted);cursor:pointer;padding:2px"><span class="material-symbols-outlined" style="font-size:17px">close</span></button></td></tr>'}).join('');}
  var cnt=document.getElementById('cnt-'+key);if(cnt)cnt.textContent=cfg.rows.length;}
 Object.keys(REG).forEach(renderTable);
 if(window.ccStore)ccStore.hydrate('prof',REG,renderTable);
+
+// ── Gestión manual: agregar / editar en línea / eliminar ──
+function profPersist(key){ if(window.ccStore)ccStore.setTabla('prof_'+key,REG[key].rows); }
+function profDel(key,i){ if(!REG[key])return; REG[key].rows.splice(i,1); renderTable(key); profPersist(key); }
+function profAgregar(key){ if(!REG[key])return; var n=REG[key].headers.length; var row=[]; for(var x=0;x<n;x++)row.push(x===0?'(nuevo)':''); REG[key].rows.push(row); renderTable(key); profPersist(key); toast('Fila agregada — edítala directamente.','success'); }
+document.addEventListener('focusout',function(e){ var td=e.target; if(!td||!td.dataset||td.dataset.k===undefined)return; var k=td.dataset.k,i=+td.dataset.i,c=+td.dataset.c; if(REG[k]&&REG[k].rows[i]){ REG[k].rows[i][c]=td.textContent.trim(); profPersist(k); } });
+
+// ── Derivar una anotación a Convivencia (crea un caso) ──
+function derivar(i){ var a=REG.anotaciones.rows[i]; if(!a)return; var caso=[(a[1]||'')+' ', 'Derivado por profesor', 'Convivencia', a[0]||'', 'Abierto'];
+ if(window.ccStore){ ccStore.getTabla('amb_casos').then(function(rows){ rows=rows||[]; rows.unshift(caso); return ccStore.setTabla('amb_casos',rows); }).then(function(){ toast('Anotación derivada a Convivencia.','success'); }).catch(function(){ toast('No se pudo derivar.','danger'); }); }
+ else { toast('Derivación registrada (local).','success'); }
+}
 document.addEventListener('input',function(e){var inp=e.target;if(!inp.dataset||!inp.dataset.f)return;var q=inp.value.toLowerCase(),cont=document.getElementById('tb-'+inp.dataset.f);cont.querySelectorAll('[data-txt]').forEach(function(r){r.style.display=r.dataset.txt.indexOf(q)!==-1?'':'none'});});
 var _impKey=null;function importar(k){_impKey=k;var f=document.getElementById('fileImp');f.value='';f.click();}
 function plantilla(k){var ws=XLSX.utils.aoa_to_sheet([REG[k].headers]);var wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Plantilla');XLSX.writeFile(wb,'plantilla-'+k+'.xlsx');toast('Plantilla descargada.','success');}
