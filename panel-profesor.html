@@ -145,9 +145,11 @@
         <div style="margin-top:12px"><label class="pflab">Tipos de ítem</label>
           <div id="evTipos" class="wplist pfce"></div>
         </div>
-        <label style="display:flex;align-items:center;gap:8px;margin-top:12px;font-size:13.5px;cursor:pointer"><input type="checkbox" id="evPIE" onchange="document.getElementById('evNEEbox').style.display=this.checked?'block':'none'"> Generar también versión adaptada PIE (según NEE)</label>
-        <div id="evNEEbox" style="display:none;margin-top:6px"><label class="pflab">NEE presentes en el curso</label><div id="evNEE" class="wplist pfce"></div></div>
-        <div style="margin-top:14px"><button class="btn" id="btnEv" onclick="evGenerar()"><span class="material-symbols-outlined" style="font-size:18px">auto_awesome</span> Generar evaluación con IA</button></div>
+        <div style="margin-top:12px"><label class="pflab">NEE presentes en el curso (para la versión adaptada)</label><div id="evNEE" class="wplist pfce"></div></div>
+        <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn" id="btnEv" onclick="evGenerar(false)"><span class="material-symbols-outlined" style="font-size:18px">auto_awesome</span> Generar evaluación</button>
+          <button class="btn ghost" id="btnEvPIE" onclick="evGenerar(true)"><span class="material-symbols-outlined" style="font-size:18px">accessibility_new</span> Generar versión PIE (adecuada)</button>
+        </div>
         <textarea id="evTxt" rows="16" placeholder="La evaluación generada aparecerá aquí, editable…" style="width:100%;margin-top:14px;font-family:'Inter',sans-serif;font-size:13px;line-height:1.6;color:var(--text);background:var(--surface);border:1px solid var(--border-2);border-radius:9px;padding:12px"></textarea>
         <div style="display:flex;gap:10px;margin-top:14px;justify-content:flex-end;flex-wrap:wrap">
           <button class="btn ghost" onclick="evWord()"><span class="material-symbols-outlined" style="font-size:18px">description</span> Descargar Word</button>
@@ -359,15 +361,16 @@ function evInit(){
  var n=document.getElementById('evNEE'); if(n&&!n.innerHTML.trim())n.innerHTML=PL_NEE.map(function(x){return '<label><input type="checkbox" value="'+x.k+'"> '+x.n+'</label>';}).join('');
 }
 function evOnFormato(){var f=document.getElementById('evFormato').value; document.getElementById('evCompBox').style.display=(f==='paes')?'block':'none'; document.getElementById('evSimceBox').style.display=(f==='simce')?'block':'none';}
-function evGenerar(){
+function evGenerar(adaptada){
  var g=curGather('ev'); if(!g.asig){toast('Elige una asignatura o módulo.','danger');return;}
+ var nee=Array.prototype.map.call(document.querySelectorAll('#evNEE input:checked'),function(c){var it=PL_NEE.filter(function(x){return x.k===c.value;})[0];return it?it.n:c.value;});
+ if(adaptada&&!nee.length){toast('Para la versión PIE marca al menos una NEE.','danger');return;}
  var formato=document.getElementById('evFormato').value;
  var tipos=Array.prototype.map.call(document.querySelectorAll('#evTipos input:checked'),function(c){return c.value;});
- var nee=document.getElementById('evPIE').checked?Array.prototype.map.call(document.querySelectorAll('#evNEE input:checked'),function(c){var it=PL_NEE.filter(function(x){return x.k===c.value;})[0];return it?it.n:c.value;}):[];
- var datos={ asignatura:g.esTP?'':g.asig, nivel:document.getElementById('evCurso').value, curso:document.getElementById('evCurso').value, modulo:g.esTP?(window._PROF_TP[g.asig].nombre||g.asig):'', unidad:document.getElementById('evUnidad').value||'', tema:document.getElementById('evTema').value||'', oaEspecialidad:g.oaEsp, ae:g.ae, oag:g.oag, criterios:g.criterios, oas_seleccionados:g.oaChecked, oa:g.oaChecked.join(' | '), formato:formato, competenciaPaes:document.getElementById('evComp').value, prueba:document.getElementById('evSimce').value, simce:document.getElementById('evSimce').value, nPreguntas:document.getElementById('evN').value, puntaje:document.getElementById('evPuntaje').value, duracion:document.getElementById('evDur').value, tiposPreguntas:tipos, taxonomiaSistema:document.getElementById('evTax').value, nee:nee };
- var b=document.getElementById('btnEv');b.disabled=true;var o=b.innerHTML;b.innerHTML='<span class="material-symbols-outlined" style="font-size:18px">hourglass_top</span> Generando…';
+ var datos={ asignatura:g.esTP?'':g.asig, nivel:document.getElementById('evCurso').value, curso:document.getElementById('evCurso').value, modulo:g.esTP?(window._PROF_TP[g.asig].nombre||g.asig):'', unidad:document.getElementById('evUnidad').value||'', tema:document.getElementById('evTema').value||'', oaEspecialidad:g.oaEsp, ae:g.ae, oag:g.oag, criterios:g.criterios, oas_seleccionados:g.oaChecked, oa:g.oaChecked.join(' | '), formato:formato, competenciaPaes:document.getElementById('evComp').value, prueba:document.getElementById('evSimce').value, simce:document.getElementById('evSimce').value, nPreguntas:document.getElementById('evN').value, puntaje:document.getElementById('evPuntaje').value, duracion:document.getElementById('evDur').value, tiposPreguntas:tipos, taxonomiaSistema:document.getElementById('evTax').value, nee:nee, adaptadaPIE:!!adaptada };
+ var b=document.getElementById(adaptada?'btnEvPIE':'btnEv');b.disabled=true;var o=b.innerHTML;b.innerHTML='<span class="material-symbols-outlined" style="font-size:18px">hourglass_top</span> Generando…';
  fetch('/api/ia-asistente',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({tipo:'prueba',datos:datos})})
-  .then(function(r){return r.json()}).then(function(d){if(d.error)throw new Error(d.error);document.getElementById('evTxt').value=d.resultado||'(respuesta vacía)';toast('Evaluación generada. Revísala y edítala.','success');})
+  .then(function(r){return r.json()}).then(function(d){if(d.error)throw new Error(d.error);document.getElementById('evTxt').value=d.resultado||'(respuesta vacía)';toast(adaptada?'Versión PIE generada.':'Evaluación generada.','success');})
   .catch(function(e){toast('Error de IA: '+e.message,'danger');}).then(function(){b.disabled=false;b.innerHTML=o;});
 }
 function _evTit(){return 'Evaluación — '+(document.getElementById('evAsig').value||'')+' '+(document.getElementById('evCurso').value||'');}

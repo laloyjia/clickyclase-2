@@ -255,7 +255,18 @@ INSTRUCCIONES GENERALES
 ${getPartesPrueba(datos)}
 PAUTA DE CORRECCIÓN (respuesta correcta y puntaje por ítem)
 TABLA DE ESPECIFICACIONES:
-  OA | Contenido | Tipo ítem | N° ítem | Habilidad cognitiva | Puntaje`,
+  OA | Contenido | Tipo ítem | N° ítem | Habilidad cognitiva | Puntaje
+${datos.adaptadaPIE ? `
+════════════════════════════════════════════════
+⚠ GENERA ÚNICAMENTE LA VERSIÓN ADAPTADA PIE (Decreto 83/2015)
+Evaluación DIFERENCIADA para estudiantes con NEE: ${Array.isArray(datos.nee) ? datos.nee.join(', ') : (datos.nee || 'NEE del curso')}.
+Mantén los MISMOS OA/AE evaluados, pero aplica estas adecuaciones al instrumento:
+• Reduce la cantidad de ítems priorizando los objetivos esenciales.
+• Simplifica el lenguaje y las instrucciones (frases cortas, una instrucción por ítem, apoyos visuales/ejemplos).
+• Ajusta el formato: más espacio para responder, letra clara, alternativas más breves.
+• Considera más tiempo y apoyos permitidos (lectura en voz alta, calculadora, material concreto según corresponda).
+• Ajusta la escala de exigencia y explicita los criterios de logro.
+Encabeza el documento con "VERSIÓN ADAPTADA PIE" y agrega al final la lista de ADECUACIONES APLICADAS.` : ''}`,
 
     apunte: `${intro}Genera un APUNTE DE CONTENIDO completo para estudiantes chilenos:
 ${ctx}
