@@ -179,7 +179,7 @@ function _cargarCurriculoLibre(){
    window._ASIG_META=(d.asignaturas||[]).map(function(a){return {nombre:a.nombre,sigla:a.sigla,niveles:a.niveles};});
    fillSelect('matAsig',names);
    fillSelect('matNivel',(d.niveles||[]));
-   actualizarOAs();
+   _profTP(); actualizarOAs();
  }).catch(function(){});
 }
 // Aplica una lista de asignaturas/niveles concreta (asignada por el admin), con OA desde el currículo.
@@ -187,18 +187,22 @@ function _setAsig(asigNames,nivNames){
  if(typeof getCurriculumNacional!=='undefined'){
    getCurriculumNacional().then(function(d){ var byName={}; (d.asignaturas||[]).forEach(function(a){byName[(a.nombre||'').toLowerCase()]=a;});
      window._ASIG_META=asigNames.map(function(n){var h=byName[n.toLowerCase()];return {nombre:n,sigla:h?h.sigla:'',niveles:h?h.niveles:[]};});
-     fillSelect('matAsig',asigNames); fillSelect('matNivel',(nivNames&&nivNames.length)?nivNames:(d.niveles||[])); actualizarOAs(); });
- } else { window._ASIG_META=asigNames.map(function(n){return {nombre:n,sigla:'',niveles:[]};}); fillSelect('matAsig',asigNames); if(nivNames&&nivNames.length)fillSelect('matNivel',nivNames); actualizarOAs(); }
+     fillSelect('matAsig',asigNames); fillSelect('matNivel',(nivNames&&nivNames.length)?nivNames:(d.niveles||[])); _profTP(); actualizarOAs(); });
+ } else { window._ASIG_META=asigNames.map(function(n){return {nombre:n,sigla:'',niveles:[]};}); fillSelect('matAsig',asigNames); if(nivNames&&nivNames.length)fillSelect('matNivel',nivNames); _profTP(); actualizarOAs(); }
 }
+// Agrega los módulos TP asignados al profesor como opciones de asignatura.
+function _profTP(){ var u=window._PROF_U; if(!u||!(u.modulos&&u.modulos.length)||typeof loadCurriculaTP==='undefined')return; if(!u.especialidadKey&&!u.especialidad)return; loadCurriculaTP().then(function(CUR){ CUR=CUR||window.CURRICULA_CHILE; if(!CUR)return; var key=u.especialidadKey; if(!key&&u.especialidad&&CUR.getEspecialidades){ var e=(CUR.getEspecialidades()||[]).filter(function(x){return (x.nombre||'').toLowerCase()===(u.especialidad||'').toLowerCase();})[0]; if(e)key=e.key; } if(!key)return; var mods=(CUR&&CUR.getModulos)?CUR.getModulos(key):[]; var want=u.modulos.map(String); mods=mods.filter(function(m){return want.indexOf(String(m.num))!==-1;}); if(!mods.length)return; var sel=document.getElementById('matAsig'); if(!sel)return; window._PROF_TP={}; mods.forEach(function(m){ var label='TP · '+(m.nombre||('Módulo '+m.num)); if(sel.querySelector('option[value="'+label.replace(/"/g,'\\"')+'"]'))return; var opt=document.createElement('option'); opt.value=label; opt.textContent=label; sel.appendChild(opt); window._PROF_TP[label]={num:m.num,nombre:m.nombre,aes:m.aes||[]}; }); }); }
+function _renderTPModule(m){ var panel=document.getElementById('curPanel'); var aes=m.aes||[]; window._OAS_ACTUAL=aes.map(function(a){var t=a.texto||a.nombre||'';return {codigo:'AE'+(a.num||''),descripcion:t,desc:t,eje:''};}); var sel=document.getElementById('matOA'); sel.innerHTML='<option value="">— Todos los AE del módulo —</option>'+window._OAS_ACTUAL.map(function(o){return '<option value="'+(o.codigo+': '+o.descripcion).replace(/"/g,'&quot;')+'">'+o.codigo+' — '+(o.descripcion.length>70?o.descripcion.slice(0,70)+'…':o.descripcion)+'</option>';}).join(''); document.getElementById('curTit').textContent='TP · '+(m.nombre||''); document.getElementById('curCnt').textContent=window._OAS_ACTUAL.length; document.getElementById('curUnidades').innerHTML=''; document.getElementById('curOAs').innerHTML=window._OAS_ACTUAL.length?window._OAS_ACTUAL.map(function(o){return '<div class="row" style="align-items:flex-start"><span class="tag info" style="margin-right:8px">'+o.codigo+'</span><div style="flex:1;font-size:12.8px">'+o.descripcion+'</div></div>';}).join(''):'<div class="sub" style="margin:0">Este módulo no tiene aprendizajes esperados cargados.</div>'; panel.style.display=''; }
 function cargarAsignaturas(u){
  if(!window.ccStore)return;
+ window._PROF_U=u;
  var indep = u && u.role!=='admin' && (u.tipo==='independiente' || !u.orgId);
  var propiasA = (u && Array.isArray(u.asignaturas) && u.asignaturas.length) ? u.asignaturas : null;
  var propiasN = (u && Array.isArray(u.niveles) && u.niveles.length) ? u.niveles : null;
  if(indep){ if(propiasA){ _setAsig(propiasA,propiasN); return; } _cargarCurriculoLibre(); return; }   // particular: lo que le asignó el admin, o currículo completo
  Promise.all([ccStore.getConfig('academico'),ccStore.getConfig('asignaciones')]).then(function(res){var acad=res[0]||{},asign=res[1]||{};var allA=acad.asignaturas||[],allN=acad.niveles||[];var email='';try{if(window.EL_AUTH&&EL_AUTH.currentUser)email=(EL_AUTH.currentUser.email||'');}catch(e){}var misA=allA,misN=allN;if(asign.rows&&email){for(var i=0;i<asign.rows.length;i++){var r=asign.rows[i];if((r[0]||'').toLowerCase().trim()===email.toLowerCase().trim()){var a=(r[1]||'').split(',').map(function(s){return s.trim()}).filter(Boolean);var n=(r[2]||'').split(',').map(function(s){return s.trim()}).filter(Boolean);if(a.length)misA=a;if(n.length)misN=n;break;}}}
    if(!misA.length){ _cargarCurriculoLibre(); return; }   // colegio sin académico cargado: usar currículo nacional
-   window._ASIG_META=acad.asignaturasMeta||[];fillSelect('matAsig',misA);fillSelect('matNivel',misN);actualizarOAs();}).catch(function(){});}
+   window._ASIG_META=acad.asignaturasMeta||[];fillSelect('matAsig',misA);fillSelect('matNivel',misN);_profTP();actualizarOAs();}).catch(function(){});}
 if(typeof ELAuth!=='undefined'&&ELAuth.onUserReady){ELAuth.onUserReady(function(u){cargarAsignaturas(u);});}else{cargarAsignaturas(null);}
 
 // ── Currículum oficial: OAs y unidades por asignatura+nivel ──
@@ -206,7 +210,9 @@ window._NIV2CODE=null;window._OAS_ACTUAL=[];
 function _buildNivMap(){ if(window._NIV2CODE)return Promise.resolve(window._NIV2CODE); if(typeof CURRICULA_READY==='undefined')return Promise.resolve({}); return CURRICULA_READY.then(function(CUR){ var m={}; if(CUR&&CUR.getAllNiveles){ CUR.getAllNiveles().forEach(function(code){ m[(CUR.getNivelLabel(code)||'').toLowerCase()]=code; m[code.toLowerCase()]=code; }); } window._NIV2CODE=m; return m; }); }
 function _siglaDe(nombre){ var n=(nombre||'').toLowerCase(); var meta=window._ASIG_META||[]; for(var i=0;i<meta.length;i++){ if((meta[i].nombre||'').toLowerCase()===n) return meta[i].sigla; } return ''; }
 function actualizarOAs(){
- var asig=document.getElementById('matAsig').value, nivLabel=document.getElementById('matNivel').value, panel=document.getElementById('curPanel');
+ var asig=document.getElementById('matAsig').value, panel=document.getElementById('curPanel');
+ if(window._PROF_TP&&window._PROF_TP[asig]){ _renderTPModule(window._PROF_TP[asig]); return; }
+ var nivLabel=document.getElementById('matNivel').value;
  if(!asig||!nivLabel||typeof CURRICULA_READY==='undefined'){ if(panel)panel.style.display='none'; window._OAS_ACTUAL=[]; return; }
  Promise.all([CURRICULA_READY,_buildNivMap()]).then(function(r){ var CUR=r[0],nivMap=r[1]; if(!CUR){panel.style.display='none';return;}
   var sigla=_siglaDe(asig), code=nivMap[(nivLabel||'').toLowerCase()];

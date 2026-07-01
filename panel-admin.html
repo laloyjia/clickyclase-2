@@ -342,6 +342,12 @@
     <div id="wpMsg" class="sub" style="margin-top:10px"></div>
   </div>
 </div>
+<div class="overlay" id="modalVerUser">
+  <div class="modal" style="max-width:560px;max-height:85vh;overflow:auto">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px"><h3 style="font-size:16px;font-weight:600;display:flex;align-items:center;gap:8px"><span class="material-symbols-outlined" style="color:var(--primary)">badge</span> Detalle del usuario</h3><span class="material-symbols-outlined" style="cursor:pointer;color:var(--muted)" onclick="cerrarVerUser()">close</span></div>
+    <div id="vuBody"></div>
+  </div>
+</div>
 <div class="overlay" id="modalEditUser">
   <div class="modal" style="max-width:560px">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px"><h3 style="font-size:16px;font-weight:600;display:flex;align-items:center;gap:8px"><span class="material-symbols-outlined" style="color:var(--primary)">manage_accounts</span> Editar usuario</h3><span class="material-symbols-outlined" style="cursor:pointer;color:var(--muted)" onclick="cerrarEditUser()">close</span></div>
@@ -702,8 +708,8 @@ function _pwGather(){
  var org=document.getElementById('wpOrg').value,indep=(org==='__particular__'||!org);
  var liceos=Array.prototype.map.call(document.querySelectorAll('.wpLicChk:checked'),function(c){return c.value;});
  var prinEl=document.querySelector('input[name=wpLicPrin]:checked'),prin=(prinEl?prinEl.value:'')||liceos[0]||'';
- var espEl=document.getElementById('wpEsp'),espNombre=''; if(espEl&&espEl.value)espNombre=espEl.options[espEl.selectedIndex].text;
- return { nombre:document.getElementById('wpNombre').value.trim(), email:document.getElementById('wpEmail').value.trim(), pass:document.getElementById('wpPass').value, orgId:indep?null:org, tipo:indep?'independiente':'colegio', asignaturas:asig, niveles:_pwChecked('wpNiveles'), especialidad:espNombre, mencion:(document.getElementById('wpMencion')||{}).value||'', modulos:_pwChecked('wpMods'), liceos:liceos, liceoPrincipal:prin, cursos:(document.getElementById('wpCursos')||{}).value||'', capacidades:{paes:!!(document.getElementById('wpPaes')||{}).checked,simce:!!(document.getElementById('wpSimce')||{}).checked,marzano:!!(document.getElementById('wpMarzano')||{}).checked}, permisos:{planificar:!!(document.getElementById('wpPermPlan')||{}).checked,material:!!(document.getElementById('wpPermMat')||{}).checked} };
+ var espEl=document.getElementById('wpEsp'),espNombre='',espKey=''; if(espEl&&espEl.value){espNombre=espEl.options[espEl.selectedIndex].text;espKey=espEl.value;}
+ return { nombre:document.getElementById('wpNombre').value.trim(), email:document.getElementById('wpEmail').value.trim(), pass:document.getElementById('wpPass').value, orgId:indep?null:org, tipo:indep?'independiente':'colegio', asignaturas:asig, niveles:_pwChecked('wpNiveles'), especialidad:espNombre, especialidadKey:espKey, mencion:(document.getElementById('wpMencion')||{}).value||'', modulos:_pwChecked('wpMods'), liceos:liceos, liceoPrincipal:prin, cursos:(document.getElementById('wpCursos')||{}).value||'', capacidades:{paes:!!(document.getElementById('wpPaes')||{}).checked,simce:!!(document.getElementById('wpSimce')||{}).checked,marzano:!!(document.getElementById('wpMarzano')||{}).checked}, permisos:{planificar:!!(document.getElementById('wpPermPlan')||{}).checked,material:!!(document.getElementById('wpPermMat')||{}).checked} };
 }
 function pwResumen(){var g=_pwGather(),el=document.getElementById('wpResumen');var caps=[g.capacidades.paes?'PAES':'',g.capacidades.simce?'SIMCE':'',g.capacidades.marzano?'Marzano':''].filter(Boolean).join(', ')||'—';
  el.innerHTML='<div class="wpsec">Revisa y confirma</div>'+
@@ -717,7 +723,7 @@ function pwResumen(){var g=_pwGather(),el=document.getElementById('wpResumen');v
 function pwCrear(){var g=_pwGather(); if(!g.nombre||!g.email){toast('Faltan datos.','danger');PW.step=1;pwShow();return;}
  var btn=document.getElementById('wpFin');btn.disabled=true;var o=btn.innerHTML;btn.innerHTML='Creando…';
  fetch('https://identitytoolkit.googleapis.com/v1/accounts:signUp?key='+FIREBASE_CONFIG.apiKey,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:g.email,password:g.pass,displayName:g.nombre,returnSecureToken:false})})
-  .then(function(r){return r.json()}).then(function(res){ if(res.error){var m=res.error.message;if(m==='EMAIL_EXISTS')m='Ya existe una cuenta con ese correo.';throw new Error(m);} var uid=res.localId; if(!uid)throw new Error('No se obtuvo UID.'); var perfil={email:g.email,nombre:g.nombre,role:'profesor',tipo:g.tipo,orgId:g.orgId,seg:null,activo:true,primerIngreso:false,creadoEn:new Date().toISOString(),asignaturas:g.asignaturas,niveles:g.niveles,especialidad:g.especialidad,mencion:g.mencion,modulos:g.modulos,liceos:g.liceos,liceoPrincipal:g.liceoPrincipal,cursos:g.cursos,capacidades:g.capacidades,permisos:g.permisos}; var p=EL_DB.collection('usuarios').doc(uid).set(perfil); if(g.orgId){p=p.then(function(){return EL_DB.collection('organizaciones').doc(g.orgId).collection('miembros').doc(uid).set({rol:'profesor',email:g.email,nombre:g.nombre}).catch(function(){});});} return p; })
+  .then(function(r){return r.json()}).then(function(res){ if(res.error){var m=res.error.message;if(m==='EMAIL_EXISTS')m='Ya existe una cuenta con ese correo.';throw new Error(m);} var uid=res.localId; if(!uid)throw new Error('No se obtuvo UID.'); var perfil={email:g.email,nombre:g.nombre,role:'profesor',tipo:g.tipo,orgId:g.orgId,seg:null,activo:true,primerIngreso:false,creadoEn:new Date().toISOString(),asignaturas:g.asignaturas,niveles:g.niveles,especialidad:g.especialidad,especialidadKey:g.especialidadKey,mencion:g.mencion,modulos:g.modulos,liceos:g.liceos,liceoPrincipal:g.liceoPrincipal,cursos:g.cursos,capacidades:g.capacidades,permisos:g.permisos}; var p=EL_DB.collection('usuarios').doc(uid).set(perfil); if(g.orgId){p=p.then(function(){return EL_DB.collection('organizaciones').doc(g.orgId).collection('miembros').doc(uid).set({rol:'profesor',email:g.email,nombre:g.nombre}).catch(function(){});});} return p; })
   .then(function(){toast('Profesor creado: '+g.email,'success');btn.disabled=false;btn.innerHTML=o;cerrarWizProf();cargarUsuarios();})
   .catch(function(e){toast('Error: '+e.message,'danger');document.getElementById('wpMsg').textContent='Error: '+e.message;btn.disabled=false;btn.innerHTML=o;});
 }
@@ -759,6 +765,7 @@ function renderUsuarios(list){
    var esProf=u.role==='profesor';
    return '<tr data-txt="'+txt+'"><td>'+(u.email||u.uid)+'</td><td><span class="tag info">'+(u.role||'')+'</span></td><td>'+(u.tipo||'')+'</td><td>'+(u.seg||'—')+'</td><td>'+(u.orgId||'—')+'</td><td>'+est+'</td>'+
      '<td style="white-space:nowrap">'+
+       '<button class="btn ghost sm" title="Ver detalle" onclick="verUsuario(\''+u.uid+'\')"><span class="material-symbols-outlined" style="font-size:16px">visibility</span></button> '+
        '<button class="btn ghost sm" title="Editar" onclick="editarUsuario(\''+u.uid+'\')"><span class="material-symbols-outlined" style="font-size:16px">edit</span></button> '+
        (esProf?'<button class="btn ghost sm" title="Asignar liceos" onclick="asignarLiceosUser(\''+u.uid+'\')"><span class="material-symbols-outlined" style="font-size:16px">school</span></button> ':'')+
        '<button class="btn ghost sm" title="'+(activo?'Suspender':'Activar')+'" onclick="toggleUsuario(\''+u.uid+'\')"><span class="material-symbols-outlined" style="font-size:16px;color:var(--'+(activo?'danger':'success')+')">'+(activo?'block':'check_circle')+'</span></button>'+
@@ -766,6 +773,24 @@ function renderUsuarios(list){
  }).join(''):'<tr><td colspan="7" style="color:var(--muted)">Sin usuarios.</td></tr>';
 }
 function _findUser(uid){return _allUsers.filter(function(u){return u.uid===uid;})[0];}
+function verUsuario(uid){var u=_findUser(uid); if(!u)return; var b=document.getElementById('vuBody');
+ function row(ic,label,val){return '<div class="row"><span class="material-symbols-outlined ic">'+ic+'</span><div style="flex:1"><div class="sub" style="margin:0">'+label+'</div><div>'+(val||'—')+'</div></div></div>';}
+ function esc(s){return String(s==null?'':s).replace(/[<>&]/g,function(c){return {'<':'&lt;','>':'&gt;','&':'&amp;'}[c];});}
+ var caps=u.capacidades?[u.capacidades.paes?'PAES':'',u.capacidades.simce?'SIMCE':'',u.capacidades.marzano?'Marzano':''].filter(Boolean).join(', '):'';
+ var perms=u.permisos?[u.permisos.planificar?'Planificar':'',u.permisos.material?'Material':''].filter(Boolean).join(', '):'';
+ var ini=(u.nombre||u.email||'?').replace(/[^A-Za-zÁÉÍÓÚÑ]/g,'').slice(0,2).toUpperCase()||'US';
+ b.innerHTML='<div style="display:flex;align-items:center;gap:12px;margin-bottom:10px"><span class="av" style="width:42px;height:42px;font-size:15px">'+ini+'</span><div><div style="font-weight:600">'+esc(u.nombre||'—')+'</div><div class="sub" style="margin:0">'+esc(u.email||'')+'</div></div></div>'+
+  row('badge','Rol · Tipo · Estado',(u.role||'')+' · '+(u.tipo||'')+' · '+((u.activo!==false)?'Activo':'Suspendido')+(u.orgId?(' · '+u.orgId):''))+
+  row('menu_book','Asignaturas',(u.asignaturas&&u.asignaturas.length)?esc(u.asignaturas.join(', ')):'—')+
+  row('stairs','Niveles',(u.niveles&&u.niveles.length)?esc(u.niveles.join(', ')):'—')+
+  (u.especialidad?row('construction','Especialidad',esc(u.especialidad)+(u.mencion?(' · '+esc(u.mencion)):'')+((u.modulos&&u.modulos.length)?(' · '+u.modulos.length+' módulo(s)'):'')):'')+
+  ((u.liceos&&u.liceos.length)?row('apartment','Liceos',esc(u.liceos.join(', '))+(u.liceoPrincipal?(' (principal: '+esc(u.liceoPrincipal)+')'):'')):'')+
+  (u.cursos?row('groups','Cursos',esc(u.cursos)):'')+
+  (caps?row('workspace_premium','Capacidades',caps):'')+
+  (perms?row('tune','Permisos',perms):'');
+ document.getElementById('modalVerUser').classList.add('show');
+}
+function cerrarVerUser(){document.getElementById('modalVerUser').classList.remove('show');}
 function editarUsuario(uid){var u=_findUser(uid); if(!u)return; document.getElementById('euUid').value=uid; document.getElementById('euEmail').textContent=u.email||''; document.getElementById('euNombre').value=u.nombre||''; document.getElementById('euRole').value=u.role||'profesor'; document.getElementById('euSeg').value=u.seg||''; document.getElementById('euOrg').value=u.orgId||''; document.getElementById('euActivo').value=(u.activo!==false)?'true':'false'; document.getElementById('modalEditUser').classList.add('show');}
 function cerrarEditUser(){document.getElementById('modalEditUser').classList.remove('show');}
 function guardarEditUser(){var uid=document.getElementById('euUid').value; var datos={nombre:document.getElementById('euNombre').value.trim(),role:document.getElementById('euRole').value,seg:document.getElementById('euSeg').value||null,orgId:document.getElementById('euOrg').value.trim()||null,activo:document.getElementById('euActivo').value==='true'};
