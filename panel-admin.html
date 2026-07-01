@@ -182,23 +182,7 @@
     </section>
 
     <section class="sec" id="sec-academico">
-      <div class="h1">Académico del colegio</div><div class="sub">Define los niveles y asignaturas que imparte el colegio. El UTP los asigna a cada profesor y el profesor los usa al generar material.</div>
-      <div class="grid2">
-        <div class="card"><h3><span class="material-symbols-outlined">stairs</span> Niveles</h3><div class="sub">Un nivel por línea.</div>
-          <textarea id="acNiveles" rows="9" style="width:100%;font-family:'Inter',sans-serif;font-size:13.5px;color:var(--text);background:var(--surface);border:1px solid var(--border-2);border-radius:9px;padding:10px 12px"></textarea>
-        </div>
-        <div class="card"><h3><span class="material-symbols-outlined">menu_book</span> Asignaturas</h3><div class="sub">Una asignatura por línea.</div>
-          <textarea id="acAsig" rows="9" style="width:100%;font-family:'Inter',sans-serif;font-size:13.5px;color:var(--text);background:var(--surface);border:1px solid var(--border-2);border-radius:9px;padding:10px 12px"></textarea>
-        </div>
-      </div>
-      <div style="margin-top:6px;display:flex;gap:10px;flex-wrap:wrap">
-        <button class="btn ghost" onclick="cargarCurriculumOficial()"><span class="material-symbols-outlined" style="font-size:18px">auto_stories</span> Cargar currículum oficial (Mineduc)</button>
-        <button class="btn" onclick="guardarAcademico()"><span class="material-symbols-outlined" style="font-size:18px">save</span> Guardar académico</button>
-      </div>
-      <div class="legal" id="curHint" style="margin-top:12px">El currículum oficial trae las asignaturas del Plan Común (Básica 1°–8° y Media 1°–4°) con sus niveles y Objetivos de Aprendizaje (OA). Al guardarlo, cada profesor recibe automáticamente los OA de las asignaturas que se le asignen.</div>
-      <div class="card" id="curMapa" style="display:none;margin-top:12px"><div class="cardhead"><h3><span class="material-symbols-outlined">menu_book</span> Asignaturas del currículo nacional <span class="count" id="cnt-curmapa">0</span></h3></div>
-        <table><thead><tr><th>Asignatura</th><th>Sigla</th><th>Niveles</th></tr></thead><tbody id="tb-curmapa"></tbody></table>
-      </div>
+      <div class="h1">Currículo nacional (Mineduc)</div><div class="sub">Explora el currículo oficial: asignaturas del Plan Común con sus OA y módulos de las especialidades TP con sus aprendizajes esperados. El académico de cada colegio lo define su Administrador de Colegio; los profesores se autoasignan en el asistente.</div>
 
       <div class="card" style="margin-top:12px"><div class="cardhead"><h3><span class="material-symbols-outlined">travel_explore</span> Explorar currículo — OA y aprendizajes esperados</h3></div>
         <div class="sub">Revisa los Objetivos de Aprendizaje de cada asignatura del Plan Común y los Aprendizajes Esperados de cada módulo de las especialidades TP.</div>
@@ -422,7 +406,7 @@
 function ic(n){return '<span class="material-symbols-outlined">'+n+'</span>';}
 var _tt;function toast(msg,tone){var t=document.getElementById('toast');t.style.borderLeftColor='var(--'+(tone==='danger'?'danger':'success')+')';var i=t.querySelector('.material-symbols-outlined');i.style.color='var(--'+(tone==='danger'?'danger':'success')+')';i.textContent=tone==='danger'?'error':'check_circle';document.getElementById('toastMsg').textContent=msg;t.classList.add('show');clearTimeout(_tt);_tt=setTimeout(function(){t.classList.remove('show')},3200);}
 
-var NAV=[['dashboard','Resumen','resumen'],['group','Usuarios','usuarios'],['apartment','Liceos / Colegios','colegios'],['badge','Cuentas de colegio','cuentas'],['vpn_key','Códigos de acceso','codigos'],['menu_book','Académico','academico'],['description','Materiales','materiales'],['event_note','Planificaciones','planificaciones'],['smart_toy','Configuración IA','ia'],['campaign','Comunicados','comunicados'],['sensors','Monitoreo en vivo','monitoreo'],['bar_chart','Registro de Actividad','actividad']];
+var NAV=[['dashboard','Resumen','resumen'],['group','Usuarios','usuarios'],['apartment','Liceos / Colegios','colegios'],['badge','Cuentas de colegio','cuentas'],['vpn_key','Códigos de acceso','codigos'],['menu_book','Currículo','academico'],['description','Materiales','materiales'],['event_note','Planificaciones','planificaciones'],['smart_toy','Configuración IA','ia'],['campaign','Comunicados','comunicados'],['sensors','Monitoreo en vivo','monitoreo'],['bar_chart','Registro de Actividad','actividad']];
 document.getElementById('nav').innerHTML=NAV.map(function(n,i){return '<div class="nav-item'+(i===0?' active':'')+'" data-s="'+n[2]+'">'+ic(n[0])+'<span>'+n[1]+'</span></div>'}).join('');
 function show(s){document.querySelectorAll('.nav-item').forEach(function(x){x.classList.toggle('active',x.dataset.s===s)});document.querySelectorAll('.sec').forEach(function(x){x.classList.toggle('active',x.id==='sec-'+s)});
  if(s==='comunicados'){loadComunicados();}
@@ -860,7 +844,7 @@ function guardarModelo(){_ia.modelo=document.getElementById('modeloSel').value;g
 
 // ── Académico del colegio (niveles + asignaturas) ──
 var ACAD_DEF={niveles:['Pre-Kínder','Kínder','1° básico','2° básico','3° básico','4° básico','5° básico','6° básico','7° básico','8° básico','I medio','II medio','III medio','IV medio'],asignaturas:['Lenguaje y Comunicación','Matemática','Ciencias Naturales','Historia, Geografía y Cs. Sociales','Inglés','Educación Física y Salud','Artes Visuales','Música','Tecnología','Orientación','Biología','Física','Química','Filosofía','Educación Ciudadana']};
-function cargarAcademico(){ if(!window.ccStore)return; ccStore.getConfig('academico').then(function(o){ o=o||ACAD_DEF; document.getElementById('acNiveles').value=(o.niveles||ACAD_DEF.niveles).join('\n'); document.getElementById('acAsig').value=(o.asignaturas||ACAD_DEF.asignaturas).join('\n'); }).catch(function(){ document.getElementById('acNiveles').value=ACAD_DEF.niveles.join('\n'); document.getElementById('acAsig').value=ACAD_DEF.asignaturas.join('\n'); }); _buildCurMeta(); }
+function cargarAcademico(){ _buildCurMeta(); }
 // Construye un índice nombre→{sigla,niveles} desde el currículum nacional.
 window._CUR_BYNAME=null;
 function _buildCurMeta(){ if(typeof getCurriculumNacional==='undefined')return Promise.resolve(null); return getCurriculumNacional().then(function(d){ var m={}; (d.asignaturas||[]).forEach(function(a){ m[a.nombre.toLowerCase()]={sigla:a.sigla,niveles:a.niveles}; }); window._CUR_BYNAME=m; window._CUR_NAC=d; return d; }).catch(function(){return null;}); }
