@@ -11,6 +11,12 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="js/firebase-rest.js"></script>
+<script src="js/firebase-config.js"></script>
+<script src="js/firebase-auth.js"></script>
+<script src="js/cc-store.js"></script>
 <link rel="stylesheet" href="css/panel.css">
 <script src="js/cc-ui.js"></script>
 </head>
@@ -116,6 +122,16 @@
 <input type="file" id="fileDoc" style="display:none">
 <div id="toast"><span class="material-symbols-outlined" style="color:var(--success)">check_circle</span><span id="toastMsg"></span></div>
 
+<div class="overlay" id="carpOverlay">
+  <div class="modal" style="max-width:640px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+      <h3 style="font-size:16px;font-weight:600;display:flex;align-items:center;gap:8px"><span class="material-symbols-outlined" style="color:var(--primary)">folder_shared</span> Carpeta del estudiante</h3>
+      <span class="material-symbols-outlined" style="cursor:pointer;color:var(--muted)" onclick="cerrarCarp()">close</span>
+    </div>
+    <div id="carpBody"></div>
+  </div>
+</div>
+
 <script>
 function ic(n){return '<span class="material-symbols-outlined">'+n+'</span>';}
 function inferTone(s){s=(''+s).toLowerCase();
@@ -150,11 +166,20 @@ var REG={
    ['3°A','6','1','5','Al día'],
    ['4°A','7','2','5','Al día'],
    ['5°A','8','2','6','Supera cupo'],
-   ['I°B','5','2','3','Al día']]}
+   ['I°B','5','2','3','Al día']]},
+ historial:{headers:['Estudiante','Fecha','Hito / Nota'],statusIdx:-1,rows:[
+   ['Juan Pérez','mar 2026','Ingreso al programa con diagnóstico TEA nivel 1.'],
+   ['Juan Pérez','may 2026','Actualización de PACI v2; avances en autonomía.'],
+   ['Mateo Soto','abr 2026','Derivación a evaluación fonoaudiológica.']]}
 };
 
 function renderTable(key){
  var cfg=REG[key], el=document.getElementById('tb-'+key);
+ if(!el)return;
+ if(key==='estudiantes'){
+   el.innerHTML=cfg.rows.map(function(r,j){return '<tr data-txt="'+r.join(' ').toLowerCase()+'" style="cursor:pointer" onclick="carpeta('+j+')" title="Abrir carpeta del estudiante">'+r.map(function(c,i){return '<td>'+(i===cfg.statusIdx?tag(c):c)+'</td>'}).join('')+'</tr>'}).join('');
+   var ce=document.getElementById('cnt-estudiantes'); if(ce)ce.textContent=cfg.rows.length; return;
+ }
  if(key==='paci'){
    el.innerHTML=cfg.rows.map(function(r,i){var sub=r[3]?('<span class="material-symbols-outlined" style="font-size:14px;vertical-align:-2px">attach_file</span> '+r[3]):(r[1]||'');return '<div class="doc" data-txt="'+r.join(' ').toLowerCase()+'"><span class="di">'+ic('description')+'</span><div style="flex:1"><div class="dn">'+r[0]+'</div><div class="dm">'+sub+'</div></div>'+tag(r[3]?'Cargado':(r[2]||''))+'<button class="btn ghost sm" style="margin-left:12px" title="Subir archivo" onclick="docUpload('+i+')">'+ic('upload')+'</button></div>'}).join('');
  } else {
@@ -187,6 +212,36 @@ var _chN=null;
 function mkNiv(){var el=document.getElementById('chNiv');if(!el||typeof Chart==='undefined')return;if(_chN)_chN.destroy();
  Chart.defaults.color='#6B7280';Chart.defaults.borderColor='#E6E9F1';Chart.defaults.font.family='Inter';
  _chN=new Chart(el,{type:'bar',data:{labels:REG.niveles.rows.map(function(r){return r[0]}),datasets:[{label:'Permanentes',data:REG.niveles.rows.map(function(r){return +r[2]||0}),backgroundColor:'#5B4BE0'},{label:'Transitorios',data:REG.niveles.rows.map(function(r){return +r[3]||0}),backgroundColor:'#0FB5A8'}]},options:{responsive:true,maintainAspectRatio:false,scales:{x:{stacked:true},y:{stacked:true}}}});}
+
+// ── Carpeta por estudiante ──
+var _carpIdx=null;
+function _match(rows,name){var n=(name||'').toLowerCase().split(' ')[0];return rows.filter(function(r){return r.join(' ').toLowerCase().indexOf(n)!==-1;});}
+function _hoyPie(){var m=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'],d=new Date();return m[d.getMonth()]+' '+d.getFullYear();}
+function carpeta(j){_carpIdx=j;var e=REG.estudiantes.rows[j];if(!e)return;
+ var name=e[0];
+ var pacis=_match(REG.paci.rows,name), evals=_match(REG.evaluaciones.rows,name), hist=_match(REG.historial.rows,name);
+ var html='';
+ html+='<div style="display:flex;align-items:center;gap:12px;margin-bottom:12px"><span class="av" style="width:42px;height:42px;font-size:15px">'+name.split(' ').map(function(x){return x[0]}).slice(0,2).join('')+'</span><div><div style="font-weight:600;font-size:15px">'+name+'</div><div class="sub" style="margin:0">'+e[1]+' · '+tag(e[4])+'</div></div></div>';
+ html+='<div class="card" style="margin:0 0 10px;padding:11px 13px;background:var(--surface)"><div class="sub" style="margin:0;font-size:12px">⚠ Dato sensible (salud)</div><div style="margin-top:3px"><b>Diagnóstico:</b> '+e[2]+' &nbsp;·&nbsp; <b>NEE:</b> '+e[3]+'</div></div>';
+ html+='<div class="sec-title" style="margin:12px 0 6px"><span class="material-symbols-outlined" style="vertical-align:-4px;font-size:18px;color:var(--primary)">description</span> Documentos (PACI / informes)</div>';
+ html+=pacis.length?pacis.map(function(r){return '<div class="row"><span class="material-symbols-outlined ic">folder</span><div style="flex:1">'+r[0]+'<div class="sub" style="margin:0">'+(r[1]||r[3]||'')+'</div></div>'+tag(r[3]?'Cargado':r[2])+'</div>'}).join(''):'<div class="sub" style="margin:0">Sin documentos asociados.</div>';
+ html+='<div class="sec-title" style="margin:12px 0 6px"><span class="material-symbols-outlined" style="vertical-align:-4px;font-size:18px;color:var(--primary)">event_note</span> Evaluaciones</div>';
+ html+=evals.length?evals.map(function(r){return '<div class="row"><span class="material-symbols-outlined ic">fact_check</span><div style="flex:1">'+r[1]+'<div class="sub" style="margin:0">'+r[0]+'</div></div>'+tag(r[3])+'</div>'}).join(''):'<div class="sub" style="margin:0">Sin evaluaciones registradas.</div>';
+ html+='<div class="sec-title" style="margin:12px 0 6px"><span class="material-symbols-outlined" style="vertical-align:-4px;font-size:18px;color:var(--primary)">timeline</span> Historial</div>';
+ html+='<div id="carpHist"></div>';
+ html+='<div style="display:flex;gap:8px;margin-top:10px"><input id="carpNota" placeholder="Agregar hito o nota al historial…" style="flex:1;font-size:13px;color:var(--text);background:var(--bg);border:1px solid var(--border-2);border-radius:8px;padding:9px 11px"><button class="btn ghost sm" onclick="addNota()"><span class="material-symbols-outlined" style="font-size:16px">add</span> Nota</button></div>';
+ document.getElementById('carpBody').innerHTML=html;
+ renderCarpHist(name);
+ document.getElementById('carpOverlay').classList.add('show');
+}
+function renderCarpHist(name){var el=document.getElementById('carpHist');if(!el)return;var hist=_match(REG.historial.rows,name);
+ el.innerHTML=hist.length?('<div style="border-left:2px solid var(--border-2);margin-left:6px;padding-left:14px">'+hist.map(function(r){return '<div style="position:relative;padding-bottom:10px"><span style="position:absolute;left:-21px;top:3px;width:9px;height:9px;border-radius:50%;background:var(--primary)"></span><div style="font-size:12px;color:var(--muted)">'+(r[1]||'')+'</div><div style="font-size:13.5px">'+(r[2]||'')+'</div></div>'}).join('')+'</div>'):'<div class="sub" style="margin:0">Sin historial aún.</div>';
+}
+function addNota(){var inp=document.getElementById('carpNota'),txt=(inp.value||'').trim();if(!txt){toast('Escribe la nota.','danger');return;}var e=REG.estudiantes.rows[_carpIdx];if(!e)return;
+ REG.historial.rows.push([e[0],_hoyPie(),txt]);if(window.ccStore)ccStore.setTabla('pie_historial',REG.historial.rows);inp.value='';renderCarpHist(e[0]);toast('Nota agregada al historial.','success');
+}
+function cerrarCarp(){document.getElementById('carpOverlay').classList.remove('show');}
+document.getElementById('carpOverlay').addEventListener('click',function(e){if(e.target===this)cerrarCarp();});
 
 var NAV=[['dashboard','Resumen','resumen'],['person','Estudiantes PIE','estudiantes'],['diversity_1','Educadoras','educadoras'],['folder_shared','PACI / Informes','paci'],['event_note','Evaluaciones','evaluaciones'],['category','Niveles','niveles']];
 document.getElementById('nav').innerHTML=NAV.map(function(n,i){return '<div class="nav-item'+(i===0?' active':'')+'" data-s="'+n[2]+'">'+ic(n[0])+'<span>'+n[1]+'</span></div>'}).join('');

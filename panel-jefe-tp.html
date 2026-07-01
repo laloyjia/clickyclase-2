@@ -65,6 +65,24 @@
         <table><thead><tr><th>Módulo</th><th>Especialidad</th><th>Nivel</th><th>Estado</th></tr></thead><tbody id="tb-modulos"></tbody></table>
       </div>
     </section>
+    <section class="sec" id="sec-practicas">
+      <div class="h1">Prácticas profesionales</div><div class="sub">Seguimiento de prácticas en empresas y centros</div>
+      <div class="card"><div class="cardhead"><h3><span class="material-symbols-outlined">work</span> Prácticas <span class="count" id="cnt-practicas">0</span></h3>
+        <div class="tools"><div class="search"><span class="material-symbols-outlined">search</span><input data-f="practicas" placeholder="Buscar…"></div>
+          <button class="btn ghost sm" onclick="plantilla('practicas')"><span class="material-symbols-outlined" style="font-size:16px">download</span> Plantilla</button>
+          <button class="btn sm" onclick="importar('practicas')"><span class="material-symbols-outlined" style="font-size:16px">upload_file</span> Importar</button></div></div>
+        <table><thead><tr><th>Estudiante</th><th>Especialidad</th><th>Empresa / Centro</th><th>Tutor</th><th>Horas</th><th>Estado</th></tr></thead><tbody id="tb-practicas"></tbody></table>
+      </div>
+      <div class="legal"><b>⚖ Práctica profesional (Decreto 2516):</b> el plan de práctica considera <b>720 horas</b> y un profesor tutor. La práctica es requisito para la titulación TP.</div>
+    </section>
+    <section class="sec" id="sec-titulacion">
+      <div class="h1">Titulación</div><div class="sub">Proceso de titulación de egresados TP</div>
+      <div class="card"><div class="cardhead"><h3><span class="material-symbols-outlined">school</span> Titulación <span class="count" id="cnt-titulacion">0</span></h3>
+        <div class="tools"><div class="search"><span class="material-symbols-outlined">search</span><input data-f="titulacion" placeholder="Buscar…"></div>
+          <button class="btn sm" onclick="importar('titulacion')"><span class="material-symbols-outlined" style="font-size:16px">upload_file</span> Importar</button></div></div>
+        <table><thead><tr><th>Estudiante</th><th>Especialidad</th><th>Etapa</th><th>Plan de práctica</th><th>Estado</th></tr></thead><tbody id="tb-titulacion"></tbody></table>
+      </div>
+    </section>
   </main>
 </div>
 <input type="file" id="fileImp" accept=".xlsx,.xls,.csv" style="display:none">
@@ -79,9 +97,17 @@ var REG={
  profesores:{headers:['Profesor','Especialidad','Módulos','Estado'],statusIdx:3,rows:[
    ['R. Muñoz','Electrónica','3','Activo'],['E. Tapia','Administración','2','Activo'],['N. Silva','Gastronomía','2','Activo']]},
  modulos:{headers:['Módulo','Especialidad','Nivel','Estado'],statusIdx:3,rows:[
-   ['Circuitos eléctricos','Electrónica','III medio','Vigente'],['Contabilidad básica','Administración','III medio','Vigente'],['Técnicas culinarias','Gastronomía','III medio','Vigente']]}
+   ['Circuitos eléctricos','Electrónica','III medio','Vigente'],['Contabilidad básica','Administración','III medio','Vigente'],['Técnicas culinarias','Gastronomía','III medio','Vigente']]},
+ practicas:{headers:['Estudiante','Especialidad','Empresa / Centro','Tutor','Horas','Estado'],statusIdx:5,rows:[
+   ['C. Reyes','Electrónica','Servitec Ltda.','R. Muñoz','180 / 720','En curso'],
+   ['M. Olate','Administración','Contadores SpA','E. Tapia','720 / 720','Completada'],
+   ['F. Aravena','Gastronomía','Hotel Plaza','N. Silva','0 / 720','Sin iniciar']]},
+ titulacion:{headers:['Estudiante','Especialidad','Etapa','Plan de práctica','Estado'],statusIdx:4,rows:[
+   ['M. Olate','Administración','Práctica finalizada','Aprobado','Por titular'],
+   ['C. Reyes','Electrónica','En práctica','Aprobado','En proceso'],
+   ['F. Aravena','Gastronomía','Pendiente de práctica','Pendiente','Pendiente']]}
 };
-function renderTable(key){var cfg=REG[key],el=document.getElementById('tb-'+key);el.innerHTML=cfg.rows.map(function(r){return '<tr data-txt="'+r.join(' ').toLowerCase()+'">'+r.map(function(c,i){return '<td>'+(i===cfg.statusIdx?tag(c):c)+'</td>'}).join('')+'</tr>'}).join('');var cnt=document.getElementById('cnt-'+key);if(cnt)cnt.textContent=cfg.rows.length;}
+function renderTable(key){var cfg=REG[key],el=document.getElementById('tb-'+key);if(!el)return;el.innerHTML=cfg.rows.map(function(r){return '<tr data-txt="'+r.join(' ').toLowerCase()+'">'+r.map(function(c,i){return '<td>'+(i===cfg.statusIdx?tag(c):c)+'</td>'}).join('')+'</tr>'}).join('');var cnt=document.getElementById('cnt-'+key);if(cnt)cnt.textContent=cfg.rows.length;}
 Object.keys(REG).forEach(renderTable);
 if(window.ccStore)ccStore.hydrate('tp',REG,renderTable);
 window.CC_REG=REG;window.CC_RENDER=renderTable;window.CC_PREFIX='tp';
@@ -91,7 +117,7 @@ function plantilla(k){var ws=XLSX.utils.aoa_to_sheet([REG[k].headers]);var wb=XL
 function applyRows(rows){rows=rows.filter(function(r){return r&&r.join('').trim()!==''});if(rows.length<2){toast('Sin filas.','danger');return;}var n=REG[_impKey].headers.length;REG[_impKey].rows=rows.slice(1).map(function(r){var o=[];for(var i=0;i<n;i++)o.push(r[i]!=null?String(r[i]):'');return o;});renderTable(_impKey);if(window.ccStore)ccStore.setTabla('tp_'+_impKey,REG[_impKey].rows);toast(REG[_impKey].rows.length+' filas importadas.','success');}
 document.getElementById('fileImp').addEventListener('change',function(e){var file=e.target.files&&e.target.files[0];if(!file||!_impKey)return;var rd=new FileReader();rd.onload=function(ev){try{var wb=XLSX.read(new Uint8Array(ev.target.result),{type:'array'});applyRows(XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,defval:''}));}catch(err){toast('No se pudo leer.','danger');}};rd.readAsArrayBuffer(file);});
 var _tt;function toast(msg,tone){var t=document.getElementById('toast');t.style.borderLeftColor='var(--'+(tone==='danger'?'danger':'success')+')';var i=t.querySelector('.material-symbols-outlined');i.style.color='var(--'+(tone==='danger'?'danger':'success')+')';i.textContent=tone==='danger'?'error':'check_circle';document.getElementById('toastMsg').textContent=msg;t.classList.add('show');clearTimeout(_tt);_tt=setTimeout(function(){t.classList.remove('show')},3000);}
-var NAV=[['dashboard','Inicio','resumen'],['workspace_premium','Especialidades','especialidades'],['engineering','Profesores TP','profesores'],['view_module','Módulos','modulos']];
+var NAV=[['dashboard','Inicio','resumen'],['workspace_premium','Especialidades','especialidades'],['engineering','Profesores TP','profesores'],['view_module','Módulos','modulos'],['work','Prácticas','practicas'],['school','Titulación','titulacion']];
 document.getElementById('nav').innerHTML=NAV.map(function(n,i){return '<div class="nav-item'+(i===0?' active':'')+'" data-s="'+n[2]+'">'+ic(n[0])+'<span>'+n[1]+'</span></div>'}).join('');
 function show(s){document.querySelectorAll('.nav-item').forEach(function(x){x.classList.toggle('active',x.dataset.s===s)});document.querySelectorAll('.sec').forEach(function(x){x.classList.toggle('active',x.id==='sec-'+s)});}
 document.querySelectorAll('.nav-item').forEach(function(x){x.addEventListener('click',function(){show(x.dataset.s)})});

@@ -77,6 +77,16 @@
         <table><thead><tr><th>Profesional</th><th>Casos</th><th>Intervenciones</th><th>Estado</th></tr></thead><tbody id="tb-equipo"></tbody></table>
       </div>
     </section>
+    <section class="sec" id="sec-red">
+      <div class="h1">Red de apoyo</div><div class="sub">Directorio de la red de derivación · pulsa "Derivar" para registrar una derivación</div>
+      <div class="card"><div class="cardhead"><h3><span class="material-symbols-outlined">hub</span> Instituciones <span class="count" id="cnt-red">0</span></h3>
+        <div class="tools"><div class="search"><span class="material-symbols-outlined">search</span><input data-f="red" placeholder="Buscar institución…"></div>
+        <button class="btn ghost sm" onclick="plantilla('red')"><span class="material-symbols-outlined" style="font-size:16px">download</span> Plantilla</button>
+        <button class="btn sm" onclick="importar('red')"><span class="material-symbols-outlined" style="font-size:16px">upload_file</span> Importar</button></div></div>
+        <table><thead><tr><th>Institución</th><th>Tipo</th><th>Contacto</th><th>Convenio</th><th></th></tr></thead><tbody id="tb-red"></tbody></table>
+      </div>
+      <div class="legal"><b>⚖ Red de protección:</b> ante vulneración de derechos se deriva a OPD / Tribunales de Familia; ante riesgo vital o delito, a PDI/Carabineros y Fiscalía. Toda derivación debe quedar registrada (Ley 21.430 y circulares de la Superintendencia de Educación).</div>
+    </section>
     <section class="sec" id="sec-estrategias">
       <div class="h1">Estrategias</div><div class="sub">Estrategias de apoyo activas</div>
       <div class="card"><div class="cardhead"><h3><span class="material-symbols-outlined">lightbulb</span> Estrategias <span class="count" id="cnt-estrategias">0</span></h3>
@@ -105,10 +115,18 @@ var REG={
  equipo:{headers:['Profesional','Casos','Intervenciones','Estado'],statusIdx:3,rows:[
    ['P. Díaz (psicólogo)','8','23','Activo'],['S. Vega (trab. social)','7','19','Activo'],['Vacante','—','—','1 cupo']]},
  estrategias:{headers:['Estudiante / Curso','Estrategia','Responsable','Estado'],statusIdx:3,rows:[
-   ['K. Soto','Acompañamiento emocional semanal','P. Díaz','Activa'],['7°B','Taller de habilidades sociales','S. Vega','Activa']]}
+   ['K. Soto','Acompañamiento emocional semanal','P. Díaz','Activa'],['7°B','Taller de habilidades sociales','S. Vega','Activa']]},
+ red:{headers:['Institución','Tipo','Contacto','Convenio'],statusIdx:3,rows:[
+   ['OPD comunal','Protección de derechos','opd@comuna.cl · 600 000 000','Vigente'],
+   ['CESFAM sector','Salud / salud mental','cesfam@salud.cl · 41 000 0000','Vigente'],
+   ['Mejor Niñez','Protección especializada','contacto@mejorninez.cl','Vigente'],
+   ['PDI — Brigada de delitos','Delitos / riesgo vital','134','Sin convenio'],
+   ['Tribunal de Familia','Medidas de protección','—','Sin convenio'],
+   ['Fono Infancia','Orientación','800 200 818','Vigente']]}
 };
 function renderTable(key){var cfg=REG[key],el=document.getElementById('tb-'+key);
  if(key==='informes'){el.innerHTML=cfg.rows.map(function(r){return '<div class="doc" data-txt="'+r.join(' ').toLowerCase()+'"><span class="di">'+ic('description')+'</span><div style="flex:1"><div class="dn">'+r[0]+'</div><div class="dm">'+(r[1]||'')+'</div></div>'+tag(r[2]||'')+'</div>'}).join('');}
+ else if(key==='red'){el.innerHTML=cfg.rows.map(function(r,i){return '<tr data-txt="'+r.join(' ').toLowerCase()+'">'+r.map(function(c,j){return '<td>'+(j===cfg.statusIdx?tag(c):c)+'</td>'}).join('')+'<td style="text-align:right"><button class="btn ghost sm" onclick="derivarDesdeRed('+i+')"><span class="material-symbols-outlined" style="font-size:15px">call_split</span> Derivar</button></td></tr>'}).join('');}
  else{el.innerHTML=cfg.rows.map(function(r){return '<tr data-txt="'+r.join(' ').toLowerCase()+'">'+r.map(function(c,i){return '<td>'+(i===cfg.statusIdx?tag(c):c)+'</td>'}).join('')+'</tr>'}).join('');}
  var cnt=document.getElementById('cnt-'+key);if(cnt)cnt.textContent=cfg.rows.length;}
 Object.keys(REG).forEach(renderTable);
@@ -120,7 +138,8 @@ function plantilla(k){var ws=XLSX.utils.aoa_to_sheet([REG[k].headers]);var wb=XL
 function applyRows(rows){rows=rows.filter(function(r){return r&&r.join('').trim()!==''});if(rows.length<2){toast('Sin filas de datos.','danger');return;}var n=REG[_impKey].headers.length;REG[_impKey].rows=rows.slice(1).map(function(r){var o=[];for(var i=0;i<n;i++)o.push(r[i]!=null?String(r[i]):'');return o;});renderTable(_impKey);if(window.ccStore)ccStore.setTabla('aps_'+_impKey,REG[_impKey].rows);toast(REG[_impKey].rows.length+' filas importadas.','success');}
 document.getElementById('fileImp').addEventListener('change',function(e){var file=e.target.files&&e.target.files[0];if(!file||!_impKey)return;var rd=new FileReader();rd.onload=function(ev){try{var wb=XLSX.read(new Uint8Array(ev.target.result),{type:'array'});applyRows(XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,defval:''}));}catch(err){toast('No se pudo leer el archivo.','danger');}};rd.readAsArrayBuffer(file);});
 var _tt;function toast(msg,tone){var t=document.getElementById('toast');t.style.borderLeftColor='var(--'+(tone==='danger'?'danger':'success')+')';var i=t.querySelector('.material-symbols-outlined');i.style.color='var(--'+(tone==='danger'?'danger':'success')+')';i.textContent=tone==='danger'?'error':'check_circle';document.getElementById('toastMsg').textContent=msg;t.classList.add('show');clearTimeout(_tt);_tt=setTimeout(function(){t.classList.remove('show')},3000);}
-var NAV=[['dashboard','Resumen','resumen'],['folder','Casos','casos'],['call_split','Derivaciones','derivaciones'],['description','Informes','informes'],['groups','Mi equipo','equipo'],['lightbulb','Estrategias','estrategias']];
+function derivarDesdeRed(i){var inst=REG.red.rows[i][0];var est=prompt('Derivar a "'+inst+'"\n\nNombre del estudiante:');if(est==null)return;est=est.trim();if(!est){toast('Debes indicar el estudiante.','danger');return;}var motivo=prompt('Motivo de la derivación:')||'—';REG.derivaciones.rows.unshift([est,inst,motivo.trim(),'Sin confirmar']);renderTable('derivaciones');if(window.ccStore)ccStore.setTabla('aps_derivaciones',REG.derivaciones.rows);toast('Derivación a '+inst+' registrada.','success');show('derivaciones');}
+var NAV=[['dashboard','Resumen','resumen'],['folder','Casos','casos'],['call_split','Derivaciones','derivaciones'],['hub','Red de apoyo','red'],['description','Informes','informes'],['groups','Mi equipo','equipo'],['lightbulb','Estrategias','estrategias']];
 document.getElementById('nav').innerHTML=NAV.map(function(n,i){return '<div class="nav-item'+(i===0?' active':'')+'" data-s="'+n[2]+'">'+ic(n[0])+'<span>'+n[1]+'</span></div>'}).join('');
 function show(s){document.querySelectorAll('.nav-item').forEach(function(x){x.classList.toggle('active',x.dataset.s===s)});document.querySelectorAll('.sec').forEach(function(x){x.classList.toggle('active',x.id==='sec-'+s)});}
 document.querySelectorAll('.nav-item').forEach(function(x){x.addEventListener('click',function(){show(x.dataset.s)})});

@@ -15,6 +15,8 @@
 <script src="js/firebase-config.js"></script>
 <script src="js/firebase-auth.js"></script>
 <script src="js/firebase-db.js"></script>
+<script src="js/cc-store.js"></script>
+<script src="js/curricula-loader.js"></script>
 </head>
 <body>
 <div class="topbar">
@@ -137,7 +139,14 @@
           <textarea id="acAsig" rows="9" style="width:100%;font-family:'Inter',sans-serif;font-size:13.5px;color:var(--text);background:var(--surface);border:1px solid var(--border-2);border-radius:9px;padding:10px 12px"></textarea>
         </div>
       </div>
-      <div style="margin-top:6px"><button class="btn" onclick="guardarAcademico()"><span class="material-symbols-outlined" style="font-size:18px">save</span> Guardar académico</button></div>
+      <div style="margin-top:6px;display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn ghost" onclick="cargarCurriculumOficial()"><span class="material-symbols-outlined" style="font-size:18px">auto_stories</span> Cargar currículum oficial (Mineduc)</button>
+        <button class="btn" onclick="guardarAcademico()"><span class="material-symbols-outlined" style="font-size:18px">save</span> Guardar académico</button>
+      </div>
+      <div class="legal" id="curHint" style="margin-top:12px">El currículum oficial trae las asignaturas del Plan Común (Básica 1°–8° y Media 1°–4°) con sus niveles y Objetivos de Aprendizaje (OA). Al guardarlo, cada profesor recibe automáticamente los OA de las asignaturas que se le asignen.</div>
+      <div class="card" id="curMapa" style="display:none;margin-top:12px"><div class="cardhead"><h3><span class="material-symbols-outlined">menu_book</span> Asignaturas del currículo nacional <span class="count" id="cnt-curmapa">0</span></h3></div>
+        <table><thead><tr><th>Asignatura</th><th>Sigla</th><th>Niveles</th></tr></thead><tbody id="tb-curmapa"></tbody></table>
+      </div>
     </section>
 
     <section class="sec" id="sec-ia">
@@ -253,8 +262,14 @@ function guardarModelo(){_ia.modelo=document.getElementById('modeloSel').value;g
 
 // ── Académico del colegio (niveles + asignaturas) ──
 var ACAD_DEF={niveles:['Pre-Kínder','Kínder','1° básico','2° básico','3° básico','4° básico','5° básico','6° básico','7° básico','8° básico','I medio','II medio','III medio','IV medio'],asignaturas:['Lenguaje y Comunicación','Matemática','Ciencias Naturales','Historia, Geografía y Cs. Sociales','Inglés','Educación Física y Salud','Artes Visuales','Música','Tecnología','Orientación','Biología','Física','Química','Filosofía','Educación Ciudadana']};
-function cargarAcademico(){ if(!window.ccStore)return; ccStore.getConfig('academico').then(function(o){ o=o||ACAD_DEF; document.getElementById('acNiveles').value=(o.niveles||ACAD_DEF.niveles).join('\n'); document.getElementById('acAsig').value=(o.asignaturas||ACAD_DEF.asignaturas).join('\n'); }).catch(function(){ document.getElementById('acNiveles').value=ACAD_DEF.niveles.join('\n'); document.getElementById('acAsig').value=ACAD_DEF.asignaturas.join('\n'); }); }
-function guardarAcademico(){ var niv=document.getElementById('acNiveles').value.split('\n').map(function(s){return s.trim()}).filter(Boolean); var asig=document.getElementById('acAsig').value.split('\n').map(function(s){return s.trim()}).filter(Boolean); if(window.ccStore)ccStore.setConfig('academico',{niveles:niv,asignaturas:asig}); toast('Académico del colegio guardado ('+asig.length+' asignaturas, '+niv.length+' niveles).','success'); }
+function cargarAcademico(){ if(!window.ccStore)return; ccStore.getConfig('academico').then(function(o){ o=o||ACAD_DEF; document.getElementById('acNiveles').value=(o.niveles||ACAD_DEF.niveles).join('\n'); document.getElementById('acAsig').value=(o.asignaturas||ACAD_DEF.asignaturas).join('\n'); }).catch(function(){ document.getElementById('acNiveles').value=ACAD_DEF.niveles.join('\n'); document.getElementById('acAsig').value=ACAD_DEF.asignaturas.join('\n'); }); _buildCurMeta(); }
+// Construye un índice nombre→{sigla,niveles} desde el currículum nacional.
+window._CUR_BYNAME=null;
+function _buildCurMeta(){ if(typeof getCurriculumNacional==='undefined')return Promise.resolve(null); return getCurriculumNacional().then(function(d){ var m={}; (d.asignaturas||[]).forEach(function(a){ m[a.nombre.toLowerCase()]={sigla:a.sigla,niveles:a.niveles}; }); window._CUR_BYNAME=m; window._CUR_NAC=d; return d; }).catch(function(){return null;}); }
+function _nivLabel(n){ try{ return (window.CURRICULA_CHILE&&window.CURRICULA_CHILE.getNivelLabel)?window.CURRICULA_CHILE.getNivelLabel(n):n; }catch(e){return n;} }
+function _renderCurMapa(d){ var box=document.getElementById('curMapa'),tb=document.getElementById('tb-curmapa'); if(!box||!tb)return; box.style.display=''; tb.innerHTML=(d.asignaturas||[]).map(function(a){ return '<tr><td>'+a.nombre+'</td><td>'+(a.sigla||'—')+'</td><td>'+((a.niveles||[]).map(_nivLabel).join(', ')||'—')+'</td></tr>'; }).join(''); var c=document.getElementById('cnt-curmapa'); if(c)c.textContent=(d.asignaturas||[]).length; }
+function cargarCurriculumOficial(){ if(typeof getCurriculumNacional==='undefined'){toast('Currículum no disponible (revisa que js/curricula-loader.js esté cargado).','danger');return;} toast('Cargando currículum oficial…','success'); _buildCurMeta().then(function(d){ if(!d||!d.asignaturas||!d.asignaturas.length){toast('No se pudo leer el currículum.','danger');return;} document.getElementById('acNiveles').value=(d.niveles||[]).join('\n'); document.getElementById('acAsig').value=d.asignaturas.map(function(a){return a.nombre}).join('\n'); _renderCurMapa(d); toast(d.asignaturas.length+' asignaturas del currículo nacional cargadas. Revisa y pulsa Guardar.','success'); }); }
+function guardarAcademico(){ var niv=document.getElementById('acNiveles').value.split('\n').map(function(s){return s.trim()}).filter(Boolean); var asig=document.getElementById('acAsig').value.split('\n').map(function(s){return s.trim()}).filter(Boolean); var meta=asig.map(function(name){ var hit=window._CUR_BYNAME&&window._CUR_BYNAME[name.toLowerCase()]; return {nombre:name, sigla:hit?hit.sigla:'', niveles:hit?hit.niveles:[]}; }); if(window.ccStore)ccStore.setConfig('academico',{niveles:niv,asignaturas:asig,asignaturasMeta:meta}); var conOA=meta.filter(function(m){return m.sigla;}).length; toast('Académico guardado: '+asig.length+' asignaturas ('+conOA+' con OA del currículo), '+niv.length+' niveles.','success'); }
 
 // ── Asistente de creación de colegios ──
 var SEGS=[['prebasica','Pre-básica',['Pre-Kínder','Kínder']],['basica','Básica (1° a 6°)',['1° básico','2° básico','3° básico','4° básico','5° básico','6° básico']],['mediahc','Media H-C (7° a IV)',['7° básico','8° básico','I medio','II medio','III medio','IV medio']],['fg','Formación General (I a IV)',['I medio','II medio','III medio','IV medio']],['tp','Técnico Profesional (III-IV)',['III medio','IV medio']]];

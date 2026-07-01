@@ -14,6 +14,7 @@
 <script src="js/firebase-config.js"></script>
 <script src="js/firebase-auth.js"></script>
 <script src="js/cc-store.js"></script>
+<script src="js/curricula-loader.js"></script>
 <link rel="stylesheet" href="css/panel.css">
 <script src="js/cc-ui.js"></script>
 </head>
@@ -45,19 +46,38 @@
         <table><thead><tr><th>Nombre</th><th>Cargo</th><th>Área</th><th>Contrato</th><th>Horas</th><th>Estado</th></tr></thead><tbody id="tb-personal"></tbody></table>
       </div>
     </section>
+    <section class="sec" id="sec-accesos">
+      <div class="h1">Accesos y cuentas</div><div class="sub">Cuentas del personal del colegio y su estado de acceso</div>
+      <div class="card"><div class="cardhead"><h3><span class="material-symbols-outlined">key</span> Cuentas <span class="count" id="cnt-accesos">0</span></h3>
+        <div class="tools"><div class="search"><span class="material-symbols-outlined">search</span><input data-f="accesos" placeholder="Buscar…"></div></div></div>
+        <table><thead><tr><th>Cargo</th><th>Nombre</th><th>Correo</th><th>Acceso</th></tr></thead><tbody id="tb-accesos"></tbody></table>
+      </div>
+      <div class="legal"><b>ℹ Gestión de accesos:</b> cambia el estado a <i>Suspendido</i> para bloquear temporalmente a un usuario. Para restablecer contraseñas o crear nuevas cuentas se usa el panel de Administración general. Toda cuenta pertenece solo a este colegio (aislamiento multi-tenant).</div>
+    </section>
+    <section class="sec" id="sec-cursos">
+      <div class="h1">Cursos / Matrícula</div><div class="sub">Cursos del establecimiento y su matrícula</div>
+      <div class="card"><div class="cardhead"><h3><span class="material-symbols-outlined">meeting_room</span> Cursos <span class="count" id="cnt-cursos">0</span></h3>
+        <div class="tools"><div class="search"><span class="material-symbols-outlined">search</span><input data-f="cursos" placeholder="Buscar…"></div></div></div>
+        <table><thead><tr><th>Curso</th><th>Profesor jefe</th><th>Matrícula</th><th>Sala</th><th>Estado</th></tr></thead><tbody id="tb-cursos"></tbody></table>
+      </div>
+    </section>
     <section class="sec" id="sec-academico">
       <div class="h1">Académico</div><div class="sub">Niveles y asignaturas que imparte el colegio</div>
       <div class="grid2">
         <div class="card"><h3><span class="material-symbols-outlined">stairs</span> Niveles</h3><div class="sub">Uno por línea.</div><textarea id="acNiveles" rows="9" style="width:100%;font-family:'Inter',sans-serif;font-size:13.5px;color:var(--text);background:var(--surface);border:1px solid var(--border-2);border-radius:9px;padding:10px"></textarea></div>
         <div class="card"><h3><span class="material-symbols-outlined">menu_book</span> Asignaturas</h3><div class="sub">Una por línea.</div><textarea id="acAsig" rows="9" style="width:100%;font-family:'Inter',sans-serif;font-size:13.5px;color:var(--text);background:var(--surface);border:1px solid var(--border-2);border-radius:9px;padding:10px"></textarea></div>
       </div>
-      <div style="margin-top:6px"><button class="btn" onclick="guardarAcademico()"><span class="material-symbols-outlined" style="font-size:18px">save</span> Guardar académico</button></div>
+      <div style="margin-top:6px;display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn ghost" onclick="cargarCurriculumOficial()"><span class="material-symbols-outlined" style="font-size:18px">auto_stories</span> Cargar currículum oficial (Mineduc)</button>
+        <button class="btn" onclick="guardarAcademico()"><span class="material-symbols-outlined" style="font-size:18px">save</span> Guardar académico</button>
+      </div>
+      <div class="legal" style="margin-top:12px">El currículum oficial trae las asignaturas del Plan Común (Básica 1°–8° y Media 1°–4°) con sus niveles y Objetivos de Aprendizaje. Al guardarlo, cada profesor recibe los OA de las asignaturas que UTP/Dirección le asignen.</div>
     </section>
     <section class="sec" id="sec-asignar">
       <div class="h1">Asignar a profesores</div><div class="sub">Asigna a cada profesor sus asignaturas y niveles.</div>
       <div class="card"><div class="cardhead"><h3><span class="material-symbols-outlined">assignment_ind</span> Asignaciones <span class="count" id="cnt-asignar">0</span></h3>
         <div class="tools"><button class="btn ghost sm" onclick="addAsig()"><span class="material-symbols-outlined" style="font-size:16px">add</span> Agregar profesor</button></div></div>
-        <table><thead><tr><th>Correo del profesor</th><th>Asignaturas (coma)</th><th>Niveles (coma)</th></tr></thead><tbody id="tb-asignar"></tbody></table>
+        <table><thead><tr><th>Correo del profesor</th><th>Asignaturas (coma)</th><th>Niveles (coma)</th><th>Cursos (coma)</th><th></th></tr></thead><tbody id="tb-asignar"></tbody></table>
       </div>
       <div class="legal" id="asigHint">Asignaturas disponibles del colegio…</div>
     </section>
@@ -70,25 +90,40 @@ function ic(n){return '<span class="material-symbols-outlined">'+n+'</span>';}
 function inferTone(s){s=(''+s).toLowerCase();if(/(falta|atrasad|vencid)/.test(s))return 'danger';if(/(pendiente|vence|revisar)/.test(s))return 'warning';if(/(vigente|activ|al d[ií]a)/.test(s))return 'success';return 'info';}
 function tag(t){return '<span class="tag '+inferTone(t)+'">'+t+'</span>';}
 var ACAD_DEF={niveles:['Pre-Kínder','Kínder','1° básico','2° básico','3° básico','4° básico','5° básico','6° básico','7° básico','8° básico','I medio','II medio','III medio','IV medio'],asignaturas:['Lenguaje y Comunicación','Matemática','Ciencias Naturales','Historia, Geografía y Cs. Sociales','Inglés','Educación Física y Salud','Artes Visuales','Música','Tecnología','Orientación']};
-var REG={personal:{headers:['Nombre','Cargo','Área','Contrato','Horas','Estado'],statusIdx:5,rows:[['R. Soto','Jefe UTP','Académica','Indefinido','30 / 14','Activo'],['J. Fuentes','Profesor','Académica','Indefinido','38 / 6','Activo'],['M. Lagos','Enc. Convivencia','Ambiente','Indefinido','38 / 14','Activo']]}};
-function renderTable(key){var cfg=REG[key],el=document.getElementById('tb-'+key);el.innerHTML=cfg.rows.map(function(r){return '<tr data-txt="'+r.join(' ').toLowerCase()+'">'+r.map(function(c,i){return '<td>'+(i===cfg.statusIdx?tag(c):c)+'</td>'}).join('')+'</tr>'}).join('');var cnt=document.getElementById('cnt-'+key);if(cnt)cnt.textContent=cfg.rows.length;var p=document.getElementById('kPers');if(p)p.textContent=REG.personal.rows.length;}
+var REG={
+ personal:{headers:['Nombre','Cargo','Área','Contrato','Horas','Estado'],statusIdx:5,rows:[['R. Soto','Jefe UTP','Académica','Indefinido','30 / 14','Activo'],['J. Fuentes','Profesor','Académica','Indefinido','38 / 6','Activo'],['M. Lagos','Enc. Convivencia','Ambiente','Indefinido','38 / 14','Activo']]},
+ accesos:{headers:['Cargo','Nombre','Correo','Acceso'],statusIdx:3,rows:[
+   ['Director','C. Director','director@colegio.cl','Activo'],
+   ['Jefe UTP','R. Soto','utp@colegio.cl','Activo'],
+   ['Enc. Convivencia','M. Lagos','convivencia@colegio.cl','Activo'],
+   ['Coord. PIE','C. Rojas','pie@colegio.cl','Activo'],
+   ['Profesor','J. Fuentes','j.fuentes@colegio.cl','Activo']]},
+ cursos:{headers:['Curso','Profesor jefe','Matrícula','Sala','Estado'],statusIdx:4,rows:[
+   ['5°A','J. Fuentes','32','Sala 12','Activo'],
+   ['6°A','P. Núñez','31','Sala 14','Activo'],
+   ['I medio A','R. Soto','34','Sala 21','Activo']]}
+};
+function renderTable(key){var cfg=REG[key],el=document.getElementById('tb-'+key);if(!el)return;el.innerHTML=cfg.rows.map(function(r){return '<tr data-txt="'+r.join(' ').toLowerCase()+'">'+r.map(function(c,i){return '<td>'+(i===cfg.statusIdx?tag(c):c)+'</td>'}).join('')+'</tr>'}).join('');var cnt=document.getElementById('cnt-'+key);if(cnt)cnt.textContent=cfg.rows.length;var p=document.getElementById('kPers');if(p)p.textContent=REG.personal.rows.length;}
 Object.keys(REG).forEach(renderTable);
 if(window.ccStore)ccStore.hydrate('dir',REG,renderTable);
 window.CC_REG=REG;window.CC_RENDER=renderTable;window.CC_PREFIX='dir';
 document.addEventListener('input',function(e){var inp=e.target;if(!inp.dataset||!inp.dataset.f)return;var q=inp.value.toLowerCase(),cont=document.getElementById('tb-'+inp.dataset.f);cont.querySelectorAll('[data-txt]').forEach(function(r){r.style.display=r.dataset.txt.indexOf(q)!==-1?'':'none'});});
 var _tt;function toast(msg,tone){var t=document.getElementById('toast');t.style.borderLeftColor='var(--'+(tone==='danger'?'danger':'success')+')';var i=t.querySelector('.material-symbols-outlined');i.style.color='var(--'+(tone==='danger'?'danger':'success')+')';i.textContent=tone==='danger'?'error':'check_circle';document.getElementById('toastMsg').textContent=msg;t.classList.add('show');clearTimeout(_tt);_tt=setTimeout(function(){t.classList.remove('show')},3000);}
 // Académico
-function cargarAcademico(){if(!window.ccStore)return;ccStore.getConfig('academico').then(function(o){o=o||ACAD_DEF;document.getElementById('acNiveles').value=(o.niveles||ACAD_DEF.niveles).join('\n');document.getElementById('acAsig').value=(o.asignaturas||ACAD_DEF.asignaturas).join('\n');document.getElementById('kAsig').textContent=(o.asignaturas||ACAD_DEF.asignaturas).length;document.getElementById('kNiv').textContent=(o.niveles||ACAD_DEF.niveles).length;var h=document.getElementById('asigHint');if(h)h.innerHTML='<b>Asignaturas del colegio:</b> '+(o.asignaturas||ACAD_DEF.asignaturas).join(' · ');});}
-function guardarAcademico(){var niv=document.getElementById('acNiveles').value.split('\n').map(function(s){return s.trim()}).filter(Boolean);var asig=document.getElementById('acAsig').value.split('\n').map(function(s){return s.trim()}).filter(Boolean);if(window.ccStore)ccStore.setConfig('academico',{niveles:niv,asignaturas:asig});document.getElementById('kAsig').textContent=asig.length;document.getElementById('kNiv').textContent=niv.length;toast('Académico guardado.','success');}
+function cargarAcademico(){if(!window.ccStore)return;ccStore.getConfig('academico').then(function(o){o=o||ACAD_DEF;document.getElementById('acNiveles').value=(o.niveles||ACAD_DEF.niveles).join('\n');document.getElementById('acAsig').value=(o.asignaturas||ACAD_DEF.asignaturas).join('\n');document.getElementById('kAsig').textContent=(o.asignaturas||ACAD_DEF.asignaturas).length;document.getElementById('kNiv').textContent=(o.niveles||ACAD_DEF.niveles).length;var h=document.getElementById('asigHint');if(h)h.innerHTML='<b>Asignaturas del colegio:</b> '+(o.asignaturas||ACAD_DEF.asignaturas).join(' · ');});_buildCurMeta();}
+window._CUR_BYNAME=null;
+function _buildCurMeta(){if(typeof getCurriculumNacional==='undefined')return Promise.resolve(null);return getCurriculumNacional().then(function(d){var m={};(d.asignaturas||[]).forEach(function(a){m[a.nombre.toLowerCase()]={sigla:a.sigla,niveles:a.niveles};});window._CUR_BYNAME=m;return d;}).catch(function(){return null;});}
+function cargarCurriculumOficial(){if(typeof getCurriculumNacional==='undefined'){toast('Currículum no disponible.','danger');return;}toast('Cargando currículum oficial…','success');_buildCurMeta().then(function(d){if(!d||!d.asignaturas||!d.asignaturas.length){toast('No se pudo leer el currículum.','danger');return;}document.getElementById('acNiveles').value=(d.niveles||[]).join('\n');document.getElementById('acAsig').value=d.asignaturas.map(function(a){return a.nombre}).join('\n');document.getElementById('kAsig').textContent=d.asignaturas.length;document.getElementById('kNiv').textContent=(d.niveles||[]).length;var h=document.getElementById('asigHint');if(h)h.innerHTML='<b>Asignaturas del colegio:</b> '+d.asignaturas.map(function(a){return a.nombre}).join(' · ');toast(d.asignaturas.length+' asignaturas del currículo cargadas. Revisa y guarda.','success');});}
+function guardarAcademico(){var niv=document.getElementById('acNiveles').value.split('\n').map(function(s){return s.trim()}).filter(Boolean);var asig=document.getElementById('acAsig').value.split('\n').map(function(s){return s.trim()}).filter(Boolean);var meta=asig.map(function(name){var hit=window._CUR_BYNAME&&window._CUR_BYNAME[name.toLowerCase()];return {nombre:name,sigla:hit?hit.sigla:'',niveles:hit?hit.niveles:[]};});if(window.ccStore)ccStore.setConfig('academico',{niveles:niv,asignaturas:asig,asignaturasMeta:meta});document.getElementById('kAsig').textContent=asig.length;document.getElementById('kNiv').textContent=niv.length;var conOA=meta.filter(function(m){return m.sigla;}).length;toast('Académico guardado: '+asig.length+' asignaturas ('+conOA+' con OA), '+niv.length+' niveles.','success');}
 // Asignaciones
 var ASIG={rows:[]};
 function persistAsig(){if(window.ccStore)ccStore.setConfig('asignaciones',{rows:ASIG.rows});document.getElementById('kAsign').textContent=ASIG.rows.length;}
-function renderAsig(){var el=document.getElementById('tb-asignar');if(!el)return;el.innerHTML=ASIG.rows.map(function(r,i){return '<tr>'+[0,1,2].map(function(c){return '<td contenteditable="true" data-ag="'+i+'" data-agc="'+c+'" style="outline:none">'+(r[c]||'')+'</td>'}).join('')+'<td style="width:34px;text-align:center"><button onclick="delAsig('+i+')" title="Eliminar" style="background:none;border:none;color:var(--muted);cursor:pointer"><span class="material-symbols-outlined" style="font-size:17px">close</span></button></td></tr>'}).join('');var c=document.getElementById('cnt-asignar');if(c)c.textContent=ASIG.rows.length;document.getElementById('kAsign').textContent=ASIG.rows.length;}
-function addAsig(){ASIG.rows.push(['','','']);renderAsig();persistAsig();}
+function renderAsig(){var el=document.getElementById('tb-asignar');if(!el)return;el.innerHTML=ASIG.rows.map(function(r,i){return '<tr>'+[0,1,2,3].map(function(c){return '<td contenteditable="true" data-ag="'+i+'" data-agc="'+c+'" style="outline:none">'+(r[c]||'')+'</td>'}).join('')+'<td style="width:34px;text-align:center"><button onclick="delAsig('+i+')" title="Eliminar" style="background:none;border:none;color:var(--muted);cursor:pointer"><span class="material-symbols-outlined" style="font-size:17px">close</span></button></td></tr>'}).join('');var c=document.getElementById('cnt-asignar');if(c)c.textContent=ASIG.rows.length;document.getElementById('kAsign').textContent=ASIG.rows.length;}
+function addAsig(){ASIG.rows.push(['','','','']);renderAsig();persistAsig();}
 function delAsig(i){ASIG.rows.splice(i,1);renderAsig();persistAsig();}
-function cargarAsig(){if(!window.ccStore)return;ccStore.getConfig('asignaciones').then(function(o){ASIG.rows=(o&&o.rows)||[];renderAsig();});}
+function cargarAsig(){if(!window.ccStore)return;ccStore.getConfig('asignaciones').then(function(o){ASIG.rows=((o&&o.rows)||[]).map(function(r){r=r.slice();while(r.length<4)r.push('');return r;});renderAsig();});}
 document.addEventListener('focusout',function(e){var td=e.target;if(!td||!td.dataset||td.dataset.ag===undefined)return;var i=+td.dataset.ag,c=+td.dataset.agc;if(ASIG.rows[i]){ASIG.rows[i][c]=td.textContent.trim();persistAsig();}});
-var NAV=[['dashboard','Resumen','resumen'],['badge','Personal','personal'],['menu_book','Académico','academico'],['assignment_ind','Asignar profesores','asignar']];
+var NAV=[['dashboard','Resumen','resumen'],['badge','Personal','personal'],['key','Accesos','accesos'],['meeting_room','Cursos','cursos'],['menu_book','Académico','academico'],['assignment_ind','Asignar profesores','asignar']];
 document.getElementById('nav').innerHTML=NAV.map(function(n,i){return '<div class="nav-item'+(i===0?' active':'')+'" data-s="'+n[2]+'">'+ic(n[0])+'<span>'+n[1]+'</span></div>'}).join('');
 function show(s){document.querySelectorAll('.nav-item').forEach(function(x){x.classList.toggle('active',x.dataset.s===s)});document.querySelectorAll('.sec').forEach(function(x){x.classList.toggle('active',x.id==='sec-'+s)});}
 document.querySelectorAll('.nav-item').forEach(function(x){x.addEventListener('click',function(){show(x.dataset.s)})});

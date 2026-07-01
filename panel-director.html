@@ -213,6 +213,16 @@
       <div style="margin-top:10px"><button class="btn" onclick="guardarConfig()"><span class="material-symbols-outlined" style="font-size:18px">save</span> Guardar cambios</button> <button class="btn ghost" style="margin-left:8px" onclick="toast('Próximamente: gestión de usuarios y roles del colegio.','success')"><span class="material-symbols-outlined" style="font-size:18px">group</span> Gestionar usuarios y roles</button></div>
     </section>
 
+    <section class="sec" id="sec-asignar">
+      <div class="h1">Asignar profesores</div>
+      <div class="sub">Distribuye asignaturas, niveles y cursos a cada profesor. El profesor los verá y la IA usará los OA correspondientes.</div>
+      <div class="card"><div class="cardhead"><h3><span class="material-symbols-outlined">assignment_ind</span> Asignaciones <span class="count" id="cnt-asignar">0</span></h3>
+        <div class="tools"><button class="btn ghost sm" onclick="addAsig()"><span class="material-symbols-outlined" style="font-size:16px">add</span> Agregar profesor</button></div></div>
+        <table><thead><tr><th>Correo del profesor</th><th>Asignaturas (coma)</th><th>Niveles (coma)</th><th>Cursos (coma)</th><th></th></tr></thead><tbody id="tb-asignar"></tbody></table>
+      </div>
+      <div class="legal" id="asigHint">Cargando asignaturas y niveles del colegio…</div>
+    </section>
+
   </main>
 </div>
 
@@ -229,7 +239,7 @@ function inferTone(s){s=(''+s).toLowerCase();
   return 'info';}
 function tag(t){var c=inferTone(t);var rgb={success:'0,184,148',warning:'253,203,110',danger:'255,107,107',info:'0,206,201'}[c];var v='var(--'+(c==='info'?'secondary':c)+')';return '<span class="tag" style="color:'+v+';background:rgba('+rgb+',0.15)">'+t+'</span>';}
 
-var NAV=[['dashboard','Resumen','resumen'],['groups','Personal','personal'],['person','Estudiantes','estudiantes'],['category','Áreas','areas'],['calendar_month','Calendario','calendario'],['description','Lineamientos / PEI','pei'],['settings','Configuración','config']];
+var NAV=[['dashboard','Resumen','resumen'],['groups','Personal','personal'],['person','Estudiantes','estudiantes'],['category','Áreas','areas'],['assignment_ind','Asignar profesores','asignar'],['calendar_month','Calendario','calendario'],['description','Lineamientos / PEI','pei'],['settings','Configuración','config']];
 document.getElementById('nav').innerHTML=NAV.map(function(n,i){return '<div class="nav-item'+(i===0?' active':'')+'" data-s="'+n[2]+'">'+ic(n[0])+'<span>'+n[1]+'</span></div>'}).join('');
 
 // ── Registro de tablas importables ──
@@ -292,6 +302,16 @@ function dirPersist(key){ if(key==='calendario'){if(typeof persistCal==='functio
 function dirDel(key,i){ if(!REG[key])return; REG[key].rows.splice(i,1); renderTable(key); dirPersist(key); var c=document.getElementById('cnt-'+key); if(c)c.textContent=REG[key].rows.length; toast('Fila eliminada.','success'); }
 function dirAgregar(key){ if(!REG[key])return; var n=REG[key].headers.length; var row=[]; for(var x=0;x<n;x++)row.push(x===0?'(nuevo)':''); REG[key].rows.push(row); renderTable(key); dirPersist(key); var c=document.getElementById('cnt-'+key); if(c)c.textContent=REG[key].rows.length; toast('Fila agregada — edítala directamente.','success'); }
 document.addEventListener('focusout',function(e){ var td=e.target; if(!td||!td.dataset||td.dataset.k===undefined)return; var k=td.dataset.k,i=+td.dataset.i,c=+td.dataset.c; if(REG[k]&&REG[k].rows[i]){ REG[k].rows[i][c]=td.textContent.trim(); dirPersist(k); } });
+
+// ── Asignar profesores (asignaturas + niveles + cursos) ──
+var ASIG={rows:[]};
+function persistAsig(){ if(window.ccStore)ccStore.setConfig('asignaciones',{rows:ASIG.rows}); var c=document.getElementById('cnt-asignar'); if(c)c.textContent=ASIG.rows.length; }
+function renderAsig(){ var el=document.getElementById('tb-asignar'); if(!el)return; el.innerHTML=ASIG.rows.map(function(r,i){ return '<tr>'+[0,1,2,3].map(function(c){return '<td contenteditable="true" data-ag="'+i+'" data-agc="'+c+'" style="outline:none">'+(r[c]||'')+'</td>'}).join('')+'<td style="width:34px;text-align:center"><button onclick="delAsig('+i+')" title="Eliminar" style="background:none;border:none;color:var(--muted);cursor:pointer"><span class="material-symbols-outlined" style="font-size:17px">close</span></button></td></tr>'}).join(''); var c=document.getElementById('cnt-asignar'); if(c)c.textContent=ASIG.rows.length; }
+function addAsig(){ ASIG.rows.push(['','','','']); renderAsig(); persistAsig(); toast('Fila agregada — edita el correo y sus asignaturas.','success'); }
+function delAsig(i){ ASIG.rows.splice(i,1); renderAsig(); persistAsig(); }
+function cargarAsig(){ if(!window.ccStore)return; ccStore.getConfig('asignaciones').then(function(o){ ASIG.rows=(o&&o.rows)||[]; ASIG.rows=ASIG.rows.map(function(r){ r=r.slice(); while(r.length<4)r.push(''); return r; }); renderAsig(); }); ccStore.getConfig('academico').then(function(a){ var h=document.getElementById('asigHint'); if(h&&a){ h.innerHTML='<b>Asignaturas del colegio:</b> '+((a.asignaturas||[]).join(' · ')||'—')+'<br><b>Niveles:</b> '+((a.niveles||[]).join(' · ')||'—'); } }); }
+document.addEventListener('focusout',function(e){ var td=e.target; if(!td||!td.dataset||td.dataset.ag===undefined)return; var i=+td.dataset.ag,c=+td.dataset.agc; if(ASIG.rows[i]){ ASIG.rows[i][c]=td.textContent.trim(); persistAsig(); } });
+cargarAsig();
 
 // ── Buscador ──
 document.querySelectorAll('input[data-f]').forEach(function(inp){

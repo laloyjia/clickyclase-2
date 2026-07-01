@@ -14,6 +14,7 @@
 <script src="js/firebase-config.js"></script>
 <script src="js/firebase-auth.js"></script>
 <script src="js/cc-store.js"></script>
+<script src="js/curricula-loader.js"></script>
 <link rel="stylesheet" href="css/panel.css">
 <script src="js/cc-ui.js"></script>
 </head>
@@ -54,7 +55,12 @@
           <div class="fld"><label>Asignatura</label><select id="matAsig"><option value="">— Elige —</option><option>Lenguaje y Comunicación</option><option>Matemática</option><option>Ciencias Naturales</option><option>Historia, Geografía y Cs. Sociales</option><option>Inglés</option><option>Educación Física y Salud</option><option>Artes Visuales</option><option>Música</option><option>Tecnología</option><option>Orientación</option><option>Filosofía</option><option>Biología</option><option>Física</option><option>Química</option><option>Educación Ciudadana</option></select></div>
           <div class="fld"><label>Nivel / Curso</label><select id="matNivel"><option value="">— Elige —</option><option>Pre-Kínder</option><option>Kínder</option><option>1° básico</option><option>2° básico</option><option>3° básico</option><option>4° básico</option><option>5° básico</option><option>6° básico</option><option>7° básico</option><option>8° básico</option><option>I medio</option><option>II medio</option><option>III medio</option><option>IV medio</option></select></div>
           <div class="fld"><label>Tema / Unidad</label><input id="matTema" placeholder="Ej. Fracciones"></div>
-          <div class="fld" style="grid-column:1/-1"><label>Objetivo de aprendizaje (OA) — opcional</label><input id="matOA" placeholder="Pega aquí el OA del currículum si lo tienes"></div>
+          <div class="fld" style="grid-column:1/-1"><label>Objetivo de aprendizaje (OA)</label><select id="matOA"><option value="">— Todos los OA del nivel / general —</option></select></div>
+        </div>
+        <div id="curPanel" class="card" style="display:none;margin-top:12px;padding:12px;background:var(--surface)">
+          <div class="sec-title" style="margin-bottom:6px"><span class="material-symbols-outlined" style="vertical-align:-4px;color:var(--primary);font-size:18px">auto_stories</span> Currículum oficial Mineduc · <span id="curTit"></span> <span class="count" id="curCnt">0</span> OA</div>
+          <div id="curUnidades" class="sub" style="margin:0 0 8px"></div>
+          <div id="curOAs" style="max-height:230px;overflow:auto"></div>
         </div>
         <div style="margin-top:14px"><button class="btn" id="btnMat" onclick="generarMat()"><span class="material-symbols-outlined" style="font-size:18px">auto_awesome</span> Generar con IA</button></div>
         <textarea id="matTxt" rows="14" placeholder="El material generado aparecerá aquí, editable…" style="width:100%;margin-top:14px;font-family:'Inter',sans-serif;font-size:13px;line-height:1.6;color:var(--text);background:var(--surface);border:1px solid var(--border-2);border-radius:9px;padding:12px"></textarea>
@@ -148,6 +154,8 @@ var _tt;function toast(msg,tone){var t=document.getElementById('toast');t.style.
 function generarMat(){
  var tipo=document.getElementById('matTipo').value;
  var datos={asignatura:document.getElementById('matAsig').value.trim(),nivel:document.getElementById('matNivel').value.trim(),curso:document.getElementById('matNivel').value.trim(),tema:document.getElementById('matTema').value.trim(),oa:document.getElementById('matOA').value.trim()};
+ var oasAll=(window._OAS_ACTUAL||[]).map(function(o){return o.codigo+': '+(o.descripcion||o.desc||'');});
+ if(oasAll.length){ datos.curriculum=oasAll.join('\n'); if(!datos.oa)datos.oa='Alinear a los OA oficiales del nivel: '+oasAll.slice(0,8).join(' | '); }
  if(!datos.asignatura&&!datos.tema){toast('Indica al menos asignatura y tema.','danger');return;}
  var b=document.getElementById('btnMat');b.disabled=true;var o=b.innerHTML;b.innerHTML='<span class="material-symbols-outlined" style="font-size:18px">hourglass_top</span> Generando…';
  fetch('/api/ia-asistente',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({tipo:tipo,datos:datos})})
@@ -163,8 +171,33 @@ document.querySelectorAll('.nav-item').forEach(function(x){x.addEventListener('c
 
 // ── Asignaturas/niveles del profesor: catálogo del colegio (admin) + asignación del UTP ──
 function fillSelect(id,arr){var s=document.getElementById(id);if(!s||!arr||!arr.length)return;var cur=s.value;s.innerHTML='<option value="">— Elige —</option>'+arr.map(function(x){return '<option>'+x+'</option>'}).join('');if(cur)s.value=cur;}
-function cargarAsignaturas(){if(!window.ccStore)return;Promise.all([ccStore.getConfig('academico'),ccStore.getConfig('asignaciones')]).then(function(res){var acad=res[0]||{},asign=res[1]||{};var allA=acad.asignaturas||[],allN=acad.niveles||[];var email='';try{if(window.EL_AUTH&&EL_AUTH.currentUser)email=(EL_AUTH.currentUser.email||'');}catch(e){}var misA=allA,misN=allN;if(asign.rows&&email){for(var i=0;i<asign.rows.length;i++){var r=asign.rows[i];if((r[0]||'').toLowerCase().trim()===email.toLowerCase().trim()){var a=(r[1]||'').split(',').map(function(s){return s.trim()}).filter(Boolean);var n=(r[2]||'').split(',').map(function(s){return s.trim()}).filter(Boolean);if(a.length)misA=a;if(n.length)misN=n;break;}}}fillSelect('matAsig',misA);fillSelect('matNivel',misN);}).catch(function(){});}
+function cargarAsignaturas(){if(!window.ccStore)return;Promise.all([ccStore.getConfig('academico'),ccStore.getConfig('asignaciones')]).then(function(res){var acad=res[0]||{},asign=res[1]||{};var allA=acad.asignaturas||[],allN=acad.niveles||[];var email='';try{if(window.EL_AUTH&&EL_AUTH.currentUser)email=(EL_AUTH.currentUser.email||'');}catch(e){}var misA=allA,misN=allN;if(asign.rows&&email){for(var i=0;i<asign.rows.length;i++){var r=asign.rows[i];if((r[0]||'').toLowerCase().trim()===email.toLowerCase().trim()){var a=(r[1]||'').split(',').map(function(s){return s.trim()}).filter(Boolean);var n=(r[2]||'').split(',').map(function(s){return s.trim()}).filter(Boolean);if(a.length)misA=a;if(n.length)misN=n;break;}}}window._ASIG_META=acad.asignaturasMeta||[];fillSelect('matAsig',misA);fillSelect('matNivel',misN);actualizarOAs();}).catch(function(){});}
 if(typeof ELAuth!=='undefined'&&ELAuth.onUserReady){ELAuth.onUserReady(function(){cargarAsignaturas();});}else{cargarAsignaturas();}
+
+// ── Currículum oficial: OAs y unidades por asignatura+nivel ──
+window._NIV2CODE=null;window._OAS_ACTUAL=[];
+function _buildNivMap(){ if(window._NIV2CODE)return Promise.resolve(window._NIV2CODE); if(typeof CURRICULA_READY==='undefined')return Promise.resolve({}); return CURRICULA_READY.then(function(CUR){ var m={}; if(CUR&&CUR.getAllNiveles){ CUR.getAllNiveles().forEach(function(code){ m[(CUR.getNivelLabel(code)||'').toLowerCase()]=code; m[code.toLowerCase()]=code; }); } window._NIV2CODE=m; return m; }); }
+function _siglaDe(nombre){ var n=(nombre||'').toLowerCase(); var meta=window._ASIG_META||[]; for(var i=0;i<meta.length;i++){ if((meta[i].nombre||'').toLowerCase()===n) return meta[i].sigla; } return ''; }
+function actualizarOAs(){
+ var asig=document.getElementById('matAsig').value, nivLabel=document.getElementById('matNivel').value, panel=document.getElementById('curPanel');
+ if(!asig||!nivLabel||typeof CURRICULA_READY==='undefined'){ if(panel)panel.style.display='none'; window._OAS_ACTUAL=[]; return; }
+ Promise.all([CURRICULA_READY,_buildNivMap()]).then(function(r){ var CUR=r[0],nivMap=r[1]; if(!CUR){panel.style.display='none';return;}
+  var sigla=_siglaDe(asig), code=nivMap[(nivLabel||'').toLowerCase()];
+  if(!sigla||!code){ panel.style.display='none'; window._OAS_ACTUAL=[]; return; }
+  var oas=CUR.getOAs(sigla,code)||[], unidades=CUR.getUnidades(sigla,code)||[];
+  window._OAS_ACTUAL=oas;
+  var sel=document.getElementById('matOA'), prev=sel.value;
+  sel.innerHTML='<option value="">— Todos los OA del nivel / general —</option>'+oas.map(function(o){var d=(o.descripcion||o.desc||'');return '<option value="'+(o.codigo+': '+d).replace(/"/g,'&quot;')+'">'+o.codigo+' — '+(d.length>70?d.slice(0,70)+'…':d)+'</option>';}).join('');
+  if(prev)sel.value=prev;
+  var u=document.getElementById('curUnidades'); u.innerHTML=unidades.length?('<b>Unidades:</b> '+unidades.map(function(x){return typeof x==='string'?x:(x.nombre||x.titulo||'');}).filter(Boolean).join(' · ')):'';
+  var box=document.getElementById('curOAs'); box.innerHTML=oas.length?oas.map(function(o){var d=(o.descripcion||o.desc||'');return '<div class="row" style="align-items:flex-start"><span class="tag info" style="margin-right:8px">'+o.codigo+'</span><div style="flex:1;font-size:12.8px">'+(o.eje?('<b>'+o.eje+'.</b> '):'')+d+'</div></div>';}).join(''):'<div class="sub" style="margin:0">No hay OA en el currículo para esta asignatura/nivel.</div>';
+  document.getElementById('curTit').textContent=asig+' · '+nivLabel;
+  document.getElementById('curCnt').textContent=oas.length;
+  panel.style.display=(oas.length||unidades.length)?'':'none';
+ }).catch(function(){ if(panel)panel.style.display='none'; });
+}
+document.getElementById('matAsig').addEventListener('change',actualizarOAs);
+document.getElementById('matNivel').addEventListener('change',actualizarOAs);
 
 (function(){var el=document.getElementById('calColegio');
  function render(rows){if(!el)return;if(!rows||!rows.length){el.innerHTML='<div class="sub" style="margin:0">Aún no hay calendario institucional cargado.</div>';return;}el.innerHTML=rows.slice(0,8).map(function(r){return '<div class="row"><span class="material-symbols-outlined ic">event</span><div style="flex:1"><div>'+(r[1]||'')+'</div><div class="sub">'+(r[0]||'')+(r[2]?(' · '+r[2]):'')+'</div></div><span class="sub">'+(r[3]||'')+'</span></div>'}).join('');}

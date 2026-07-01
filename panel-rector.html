@@ -56,6 +56,14 @@
         <table><thead><tr><th>Curso</th><th>Matrícula</th><th>Asistencia</th><th>Promedio</th><th>PIE</th></tr></thead><tbody id="tb-estudiantes"></tbody></table>
       </div>
     </section>
+    <section class="sec" id="sec-indicadores">
+      <div class="h1">Indicadores institucionales</div><div class="sub">Indicadores Mineduc con metas y semáforo de avance</div>
+      <div class="card"><div class="cardhead"><h3><span class="material-symbols-outlined">leaderboard</span> Indicadores <span class="count" id="cnt-indicadores">0</span></h3>
+        <div class="tools"><div class="search"><span class="material-symbols-outlined">search</span><input data-f="indicadores" placeholder="Buscar…"></div></div></div>
+        <div id="tb-indicadores"></div>
+      </div>
+      <div class="legal"><b>ℹ Referencia:</b> los Indicadores de Desarrollo Personal y Social (IDPS), la asistencia, la aprobación y la retención forman parte del <b>Sistema de Aseguramiento de la Calidad (SAC)</b> y de la Categoría de Desempeño de la Agencia de Calidad de la Educación. Las metas se definen en el PME (Plan de Mejoramiento Educativo).</div>
+    </section>
     <section class="sec" id="sec-areas">
       <div class="h1">Áreas</div><div class="sub">Cumplimiento de tareas por área</div>
       <div class="card"><div class="cardhead"><h3><span class="material-symbols-outlined">task_alt</span> Tareas <span class="count" id="cnt-areas">0</span></h3>
@@ -77,15 +85,29 @@ var REG={
  estudiantes:{headers:['Curso','Matrícula','Asistencia','Promedio','PIE'],statusIdx:-1,rows:[
    ['5°A','32','94%','5,8','3'],['6°A','31','93%','5,6','4'],['I Medio A','34','89%','5,3','5']]},
  areas:{headers:['Tarea','Área','Responsable','Plazo','Estado'],statusIdx:4,rows:[
-   ['Planificaciones semestre','Académica','R. Soto','30 jun','En curso'],['Plan de convivencia','Ambiente','M. Lagos','28 jun','Atrasada'],['Actualización PACI','PIE','C. Rojas','20 jun','Completada']]}
+   ['Planificaciones semestre','Académica','R. Soto','30 jun','En curso'],['Plan de convivencia','Ambiente','M. Lagos','28 jun','Atrasada'],['Actualización PACI','PIE','C. Rojas','20 jun','Completada']]},
+ indicadores:{headers:['Indicador','Actual','Meta','Estado'],statusIdx:3,rows:[
+   ['Asistencia promedio','92','95','Por mejorar'],
+   ['Tasa de aprobación','94','96','Por mejorar'],
+   ['Retención escolar','97','97','Logrado'],
+   ['SIMCE Lectura','268','275','En proceso'],
+   ['SIMCE Matemática','255','270','En proceso'],
+   ['IDPS Autoestima y motivación','78','80','En proceso'],
+   ['IDPS Clima de convivencia','79','82','En proceso'],
+   ['Titulación TP (4° medio)','88','90','En proceso']]}
 };
-function renderTable(key){var cfg=REG[key],el=document.getElementById('tb-'+key);el.innerHTML=cfg.rows.map(function(r){return '<tr data-txt="'+r.join(' ').toLowerCase()+'">'+r.map(function(c,i){return '<td>'+(i===cfg.statusIdx?tag(c):c)+'</td>'}).join('')+'</tr>'}).join('');var cnt=document.getElementById('cnt-'+key);if(cnt)cnt.textContent=cfg.rows.length;var p=document.getElementById('kPers');if(p)p.textContent=REG.personal.rows.length;var cu=document.getElementById('kCur');if(cu)cu.textContent=REG.estudiantes.rows.length;}
+function renderTable(key){var cfg=REG[key],el=document.getElementById('tb-'+key);if(!el)return;
+ if(key==='indicadores'){
+   el.innerHTML=cfg.rows.map(function(r){var a=parseFloat(r[1])||0,m=parseFloat(r[2])||0,pct=m?Math.min(100,Math.round(a/m*100)):0;var tone=inferTone(r[3]);return '<div class="row" data-txt="'+r.join(' ').toLowerCase()+'" style="display:block"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px"><div style="font-weight:500">'+r[0]+'</div><div style="font-size:13px"><b>'+r[1]+'</b> <span class="sub" style="margin:0">/ meta '+r[2]+'</span> &nbsp;'+tag(r[3])+'</div></div><div style="height:8px;background:var(--border-2);border-radius:6px;overflow:hidden"><div style="height:100%;width:'+pct+'%;background:var(--'+tone+')"></div></div></div>'}).join('');
+   var ci=document.getElementById('cnt-indicadores');if(ci)ci.textContent=cfg.rows.length;return;
+ }
+ el.innerHTML=cfg.rows.map(function(r){return '<tr data-txt="'+r.join(' ').toLowerCase()+'">'+r.map(function(c,i){return '<td>'+(i===cfg.statusIdx?tag(c):c)+'</td>'}).join('')+'</tr>'}).join('');var cnt=document.getElementById('cnt-'+key);if(cnt)cnt.textContent=cfg.rows.length;var p=document.getElementById('kPers');if(p)p.textContent=REG.personal.rows.length;var cu=document.getElementById('kCur');if(cu)cu.textContent=REG.estudiantes.rows.length;}
 Object.keys(REG).forEach(renderTable);
 if(window.ccStore)ccStore.hydrate('dir',REG,renderTable);
 window.CC_REG=REG;window.CC_RENDER=renderTable;window.CC_PREFIX='dir';
 document.addEventListener('input',function(e){var inp=e.target;if(!inp.dataset||!inp.dataset.f)return;var q=inp.value.toLowerCase(),cont=document.getElementById('tb-'+inp.dataset.f);cont.querySelectorAll('[data-txt]').forEach(function(r){r.style.display=r.dataset.txt.indexOf(q)!==-1?'':'none'});});
 var _tt;function toast(msg,tone){var t=document.getElementById('toast');t.style.borderLeftColor='var(--'+(tone==='danger'?'danger':'success')+')';var i=t.querySelector('.material-symbols-outlined');i.style.color='var(--'+(tone==='danger'?'danger':'success')+')';i.textContent=tone==='danger'?'error':'check_circle';document.getElementById('toastMsg').textContent=msg;t.classList.add('show');clearTimeout(_tt);_tt=setTimeout(function(){t.classList.remove('show')},3000);}
-var NAV=[['dashboard','Resumen','resumen'],['groups','Personal','personal'],['person','Estudiantes','estudiantes'],['task_alt','Áreas','areas']];
+var NAV=[['dashboard','Resumen','resumen'],['leaderboard','Indicadores','indicadores'],['groups','Personal','personal'],['person','Estudiantes','estudiantes'],['task_alt','Áreas','areas']];
 document.getElementById('nav').innerHTML=NAV.map(function(n,i){return '<div class="nav-item'+(i===0?' active':'')+'" data-s="'+n[2]+'">'+ic(n[0])+'<span>'+n[1]+'</span></div>'}).join('');
 function show(s){document.querySelectorAll('.nav-item').forEach(function(x){x.classList.toggle('active',x.dataset.s===s)});document.querySelectorAll('.sec').forEach(function(x){x.classList.toggle('active',x.id==='sec-'+s)});}
 document.querySelectorAll('.nav-item').forEach(function(x){x.addEventListener('click',function(){show(x.dataset.s)})});

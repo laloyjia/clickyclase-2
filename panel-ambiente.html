@@ -97,6 +97,20 @@
       </div>
     </section>
 
+    <section class="sec" id="sec-seguimiento">
+      <div class="h1">Seguimiento de casos</div>
+      <div class="sub">Línea de tiempo y bitácora de hitos por caso</div>
+      <div class="card">
+        <div class="cardhead"><h3><span class="material-symbols-outlined">history</span> Bitácora <span class="count" id="cnt-seguimiento">0</span></h3>
+          <div class="tools"><div class="search"><span class="material-symbols-outlined">search</span><input data-f="seguimiento" placeholder="Buscar por caso…"></div>
+            <button class="btn ghost sm" onclick="plantilla('seguimiento')"><span class="material-symbols-outlined" style="font-size:16px">download</span> Plantilla</button>
+            <button class="btn sm" onclick="importar('seguimiento')"><span class="material-symbols-outlined" style="font-size:16px">upload_file</span> Importar</button></div>
+        </div>
+        <table><thead><tr><th>Caso / Estudiante</th><th>Fecha</th><th>Hito / Evento</th><th>Responsable</th><th>Estado</th></tr></thead><tbody id="tb-seguimiento"></tbody></table>
+      </div>
+      <div class="legal"><b>ℹ Tip:</b> al abrir un caso (sección Casos) verás su línea de tiempo completa y podrás registrar nuevos hitos en un clic. Cada hito queda guardado y compartido con dirección.</div>
+    </section>
+
     <section class="sec" id="sec-reglamento">
       <div class="h1">Reglamento</div>
       <div class="sub">Documentos de convivencia del colegio</div>
@@ -121,6 +135,14 @@
       <span class="material-symbols-outlined" style="cursor:pointer;color:var(--muted)" onclick="cerrarPlan()">close</span>
     </div>
     <div id="planCaso" class="sub" style="margin-bottom:8px"></div>
+    <div class="card" style="margin:0 0 12px;padding:12px;background:var(--surface)">
+      <div class="sec-title" style="margin-bottom:8px"><span class="material-symbols-outlined" style="vertical-align:-4px;color:var(--primary);font-size:18px">timeline</span> Línea de tiempo del caso</div>
+      <div id="planTimeline" style="margin-bottom:10px"></div>
+      <div style="display:flex;gap:8px">
+        <input id="hitoTxt" placeholder="Registrar nuevo hito (ej: Entrevista con apoderado)…" style="flex:1;font-size:13px;color:var(--text);background:var(--bg);border:1px solid var(--border-2);border-radius:8px;padding:9px 11px">
+        <button class="btn ghost sm" onclick="addHito()"><span class="material-symbols-outlined" style="font-size:16px">add</span> Hito</button>
+      </div>
+    </div>
     <div id="planDocsNote" class="sub" style="margin-bottom:12px;font-size:12px"></div>
     <button class="btn" id="btnGen" onclick="generarPlan()"><span class="material-symbols-outlined" style="font-size:18px">auto_awesome</span> Generar con IA</button>
     <textarea id="planTxt" rows="13" placeholder="El plan generado aparecerá aquí, editable…" style="width:100%;margin-top:14px;font-family:'Inter',sans-serif;font-size:13px;line-height:1.6;color:var(--text);background:var(--surface);border:1px solid var(--border-2);border-radius:9px;padding:12px"></textarea>
@@ -156,6 +178,11 @@ var REG={
    ['25 jun','Recreos dirigidos','2°A','Pendiente']]},
  equipo:{headers:['Profesional','Casos','Actividades','Estado'],statusIdx:3,rows:[
    ['J. Soto','3','2','Activo'],['R. Pérez','2','1','Activo']]},
+ seguimiento:{headers:['Caso / Estudiante','Fecha','Hito / Evento','Responsable','Estado'],statusIdx:4,rows:[
+   ['I°B · M. Rivas','18 jun','Recepción de denuncia de acoso escolar','M. Lagos','Abierto'],
+   ['I°B · M. Rivas','19 jun','Activación de protocolo y aviso a apoderados','M. Lagos','En seguimiento'],
+   ['4°A · E. Pérez','15 jun','Entrevista con estudiante y compromiso','J. Soto','En seguimiento'],
+   ['7°B · grupo','12 jun','Mediación grupal realizada','M. Lagos','Resuelto']]},
  reglamento:{headers:['Documento','Versión / fecha','Estado'],statusIdx:2,rows:[
    ['Reglamento Interno de Convivencia','v1 · 2024','Por actualizar'],
    ['Plan de Gestión de la Convivencia','2026','Vigente'],
@@ -198,8 +225,23 @@ var _tt;function toast(msg,tone){var t=document.getElementById('toast');t.style.
 var LEYES='Normativa chilena de convivencia escolar a considerar: Ley 20.536 sobre violencia escolar (protocolos obligatorios y Encargado de Convivencia); Política Nacional de Convivencia Escolar (Mineduc); Ley 21.128 "Aula Segura" cuando aplique; enfoque de derechos del niño (Ley 21.430). Si hay estudiantes con NEE, considerar Decreto 83.';
 function docsInst(){var o={};try{o=JSON.parse(localStorage.getItem('cc_docs')||'{}');}catch(e){}var k=Object.keys(o);return {n:k.length,txt:k.map(function(x){return '### '+x+'\n'+o[x]}).join('\n\n')};}
 var _planCaso=null;
+function _hoy(){var m=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'],d=new Date();return (d.getDate()<10?'0':'')+d.getDate()+' '+m[d.getMonth()];}
+function _caseKey(r){return (r&&r[0]?r[0]:'').toLowerCase();}
+function renderTimeline(){var el=document.getElementById('planTimeline');if(!el||!_planCaso)return;
+ var key=_caseKey(_planCaso);
+ var hits=REG.seguimiento.rows.filter(function(r){return _caseKey(r)===key;});
+ if(!hits.length){el.innerHTML='<div class="sub" style="margin:0;font-size:12.5px">Sin hitos registrados aún. Agrega el primero abajo.</div>';return;}
+ el.innerHTML='<div style="border-left:2px solid var(--border-2);margin-left:6px;padding-left:14px">'+hits.map(function(r){var tone=inferTone(r[4]);return '<div style="position:relative;padding-bottom:11px"><span style="position:absolute;left:-21px;top:2px;width:10px;height:10px;border-radius:50%;background:var(--'+tone+')"></span><div style="font-size:12px;color:var(--muted)">'+(r[1]||'')+' · '+(r[3]||'')+'</div><div style="font-size:13.5px">'+(r[2]||'')+'</div></div>'}).join('')+'</div>';
+}
+function addHito(){var inp=document.getElementById('hitoTxt'),txt=(inp.value||'').trim();if(!txt){toast('Escribe el hito.','danger');return;}
+ if(!_planCaso)return;
+ REG.seguimiento.rows.push([_planCaso[0],_hoy(),txt,_planCaso[2]||'',_planCaso[4]||'En seguimiento']);
+ renderTable('seguimiento');if(window.ccStore)ccStore.setTabla('amb_seguimiento',REG.seguimiento.rows);
+ inp.value='';renderTimeline();toast('Hito registrado en la línea de tiempo.','success');
+}
 function planIA(j){_planCaso=REG.casos.rows[j];
  document.getElementById('planCaso').innerHTML='<b>Caso:</b> '+_planCaso[0]+' · '+_planCaso[1]+' · resp. '+_planCaso[2]+' · '+_planCaso[3];
+ renderTimeline();
  function _note(){var d=docsInst();document.getElementById('planDocsNote').innerHTML=d.n?('<span class="material-symbols-outlined" style="font-size:14px;vertical-align:-2px;color:var(--success)">check_circle</span> La IA usará '+d.n+' documento(s) institucional(es) cargado(s) por dirección.'):'<span class="material-symbols-outlined" style="font-size:14px;vertical-align:-2px;color:var(--warning)">info</span> Sin documentos institucionales cargados; la IA usará solo la normativa.';}
  _note(); if(window.ccStore)ccStore.getDocs().then(_note).catch(function(){});
  document.getElementById('planTxt').value='';
@@ -227,7 +269,7 @@ function guardarPlan(){var txt=document.getElementById('planTxt').value||'';if(!
  var c=_planCaso;REG.planes.rows.unshift([c[0]+' · '+c[1],'Plan generado con IA',c[2],'—','Pendiente']);renderTable('planes');if(window.ccStore)ccStore.setTabla('amb_planes',REG.planes.rows);toast('Plan guardado en Planes de acción.','success');cerrarPlan();show('planes');
 }
 
-var NAV=[['dashboard','Resumen','resumen'],['folder','Casos','casos'],['alt_route','Planes de acción','planes'],['event','Actividades','actividades'],['groups','Mi equipo','equipo'],['menu_book','Reglamento','reglamento']];
+var NAV=[['dashboard','Resumen','resumen'],['folder','Casos','casos'],['history','Seguimiento','seguimiento'],['alt_route','Planes de acción','planes'],['event','Actividades','actividades'],['groups','Mi equipo','equipo'],['menu_book','Reglamento','reglamento']];
 document.getElementById('nav').innerHTML=NAV.map(function(n,i){return '<div class="nav-item'+(i===0?' active':'')+'" data-s="'+n[2]+'">'+ic(n[0])+'<span>'+n[1]+'</span></div>'}).join('');
 function show(s){document.querySelectorAll('.nav-item').forEach(function(x){x.classList.toggle('active',x.dataset.s===s)});document.querySelectorAll('.sec').forEach(function(x){x.classList.toggle('active',x.id==='sec-'+s)});}
 document.querySelectorAll('.nav-item').forEach(function(x){x.addEventListener('click',function(){show(x.dataset.s)})});
