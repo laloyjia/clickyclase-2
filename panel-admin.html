@@ -103,8 +103,19 @@
 
         <div class="wzstep" data-step="3" style="display:none">
           <div class="grid2">
-            <div class="card" style="margin:0"><h3><span class="material-symbols-outlined">menu_book</span> Asignaturas</h3><div class="sub">Una por línea.</div><textarea id="wzAsig" rows="8" style="width:100%;font-family:'Inter',sans-serif;font-size:13.5px;color:var(--text);background:var(--surface);border:1px solid var(--border-2);border-radius:9px;padding:10px"></textarea></div>
-            <div class="card" style="margin:0"><h3><span class="material-symbols-outlined">construction</span> Especialidades TP</h3><div class="sub">Una por línea (solo si imparte Técnico Profesional).</div><textarea id="wzEsp" rows="8" style="width:100%;font-family:'Inter',sans-serif;font-size:13.5px;color:var(--text);background:var(--surface);border:1px solid var(--border-2);border-radius:9px;padding:10px"></textarea></div>
+            <div class="card" style="margin:0">
+              <div class="cardhead" style="padding:0 0 6px"><h3><span class="material-symbols-outlined">menu_book</span> Asignaturas <span class="count" id="wzAsigCnt">0</span></h3>
+                <div class="tools"><button type="button" class="btn ghost sm" onclick="wzToggleAll('wzAsigList',true)">Todas</button><button type="button" class="btn ghost sm" onclick="wzToggleAll('wzAsigList',false)">Ninguna</button></div></div>
+              <div class="sub">Marca las asignaturas que imparte (currículo nacional Mineduc).</div>
+              <div id="wzAsigList" style="max-height:240px;overflow:auto;border:1px solid var(--border-2);border-radius:9px;padding:6px;margin-top:6px;background:var(--surface)"></div>
+            </div>
+            <div class="card" style="margin:0">
+              <div class="cardhead" style="padding:0 0 6px"><h3><span class="material-symbols-outlined">construction</span> Especialidades TP <span class="count" id="wzEspCnt">0</span></h3>
+                <div class="tools"><button type="button" class="btn ghost sm" onclick="wzToggleAll('wzEspList',false)">Ninguna</button></div></div>
+              <div class="sub">Marca solo si imparte Técnico Profesional.</div>
+              <input id="wzEspFilter" placeholder="Filtrar especialidad…" oninput="wzFilter('wzEspList',this.value)" style="width:100%;margin-top:6px;font-size:13px;color:var(--text);background:var(--surface);border:1px solid var(--border-2);border-radius:8px;padding:8px 10px">
+              <div id="wzEspList" style="max-height:200px;overflow:auto;border:1px solid var(--border-2);border-radius:9px;padding:6px;margin-top:6px;background:var(--surface)"></div>
+            </div>
           </div>
         </div>
 
@@ -275,7 +286,25 @@ function guardarAcademico(){ var niv=document.getElementById('acNiveles').value.
 var SEGS=[['prebasica','Pre-básica',['Pre-Kínder','Kínder']],['basica','Básica (1° a 6°)',['1° básico','2° básico','3° básico','4° básico','5° básico','6° básico']],['mediahc','Media H-C (7° a IV)',['7° básico','8° básico','I medio','II medio','III medio','IV medio']],['fg','Formación General (I a IV)',['I medio','II medio','III medio','IV medio']],['tp','Técnico Profesional (III-IV)',['III medio','IV medio']]];
 var _wz=1;
 function renderSegmentos(){ document.getElementById('wzSegmentos').innerHTML=SEGS.map(function(s){return '<div style="display:flex;align-items:center;gap:12px"><label style="display:flex;align-items:center;gap:8px;min-width:260px;font-size:13.5px"><input type="checkbox" data-seg="'+s[0]+'"> '+s[1]+'</label><input type="number" min="0" value="0" data-segn="'+s[0]+'" style="width:90px;background:var(--surface);border:1px solid var(--border-2);border-radius:8px;padding:7px;color:var(--text)"> <span class="sub" style="margin:0">profesores</span></div>'}).join(''); }
-function abrirWizard(){ _wz=1; renderSegmentos(); document.getElementById('wzAsig').value=ACAD_DEF.asignaturas.join('\n'); document.getElementById('wzEsp').value=['Electricidad','Electrónica','Administración','Contabilidad','Gastronomía','Atención de Párvulos'].join('\n'); document.getElementById('wizard').style.display='block'; document.getElementById('wzMsg').textContent=''; showStep(); document.getElementById('wizard').scrollIntoView({behavior:'smooth'}); }
+function abrirWizard(){ _wz=1; renderSegmentos(); fillWizardStep3(); document.getElementById('wizard').style.display='block'; document.getElementById('wzMsg').textContent=''; showStep(); document.getElementById('wizard').scrollIntoView({behavior:'smooth'}); }
+// ── Paso 3: listas seleccionables (checkbox) desde el currículo oficial ──
+function _wzItem(list,val,checked){ return '<label style="display:flex;align-items:center;gap:9px;padding:6px 7px;border-radius:6px;cursor:pointer;font-size:13.5px" onmouseover="this.style.background=\'var(--bg)\'" onmouseout="this.style.background=\'\'"><input type="checkbox" data-wz="'+list+'" value="'+(''+val).replace(/"/g,'&quot;')+'"'+(checked?' checked':'')+'> '+val+'</label>'; }
+function wzRenderList(listId,items,checked){ var el=document.getElementById(listId); if(!el)return; el.innerHTML=(items||[]).map(function(v){return _wzItem(listId,v,checked);}).join(''); wzUpdCnt(listId); el.addEventListener('change',function(){wzUpdCnt(listId);}); }
+function wzUpdCnt(listId){ var el=document.getElementById(listId); if(!el)return; var n=el.querySelectorAll('input:checked').length; var c=document.getElementById(listId==='wzAsigList'?'wzAsigCnt':'wzEspCnt'); if(c)c.textContent=n; }
+function wzToggleAll(listId,val){ var el=document.getElementById(listId); if(!el)return; el.querySelectorAll('input[type=checkbox]').forEach(function(chk){ if(chk.closest('label').style.display!=='none') chk.checked=val; }); wzUpdCnt(listId); }
+function wzFilter(listId,q){ q=(q||'').toLowerCase(); var el=document.getElementById(listId); if(!el)return; el.querySelectorAll('label').forEach(function(l){ l.style.display=l.textContent.toLowerCase().indexOf(q)!==-1?'':'none'; }); }
+function wzChecked(listId){ var el=document.getElementById(listId); if(!el)return []; return Array.prototype.map.call(el.querySelectorAll('input:checked'),function(c){return c.value;}); }
+function fillWizardStep3(){
+ if(typeof _buildCurMeta==='function')_buildCurMeta();
+ // Asignaturas: currículo nacional (con fallback a la lista por defecto), todas marcadas
+ if(typeof getCurriculumNacional!=='undefined'){ getCurriculumNacional().then(function(d){ var names=(d&&d.asignaturas&&d.asignaturas.length)?d.asignaturas.map(function(a){return a.nombre}):ACAD_DEF.asignaturas; wzRenderList('wzAsigList',names,true); }).catch(function(){ wzRenderList('wzAsigList',ACAD_DEF.asignaturas,true); }); }
+ else { wzRenderList('wzAsigList',ACAD_DEF.asignaturas,true); }
+ // Especialidades TP: catálogo oficial, ninguna marcada por defecto
+ var esps=['Electricidad','Electrónica','Administración','Contabilidad','Gastronomía','Atención de Párvulos'];
+ function _pintaEsp(list){ list=(list&&list.length)?list.slice().sort(function(a,b){return a.localeCompare(b);}):esps; wzRenderList('wzEspList',list,false); }
+ if(typeof CURRICULA_READY!=='undefined'){ CURRICULA_READY.then(function(CUR){ try{ var e=(CUR&&CUR.getEspecialidades)?CUR.getEspecialidades().map(function(x){return x.nombre;}).filter(Boolean):null; _pintaEsp(e); }catch(_){ _pintaEsp(null); } }).catch(function(){_pintaEsp(null);}); }
+ else { _pintaEsp(null); }
+}
 function cerrarWizard(){ document.getElementById('wizard').style.display='none'; }
 function showStep(){ document.querySelectorAll('.wzstep').forEach(function(x){x.style.display=(+x.dataset.step===_wz)?'block':'none'}); document.getElementById('wzStepLabel').textContent='Paso '+_wz+' de 4'; document.getElementById('wzPrev').style.visibility=_wz>1?'visible':'hidden'; document.getElementById('wzNext').style.display=_wz<4?'inline-flex':'none'; document.getElementById('wzFin').style.display=_wz===4?'inline-flex':'none'; }
 function wzStep(d){ if(d>0&&_wz===1&&!document.getElementById('wzNombre').value.trim()){toast('Indica el nombre del colegio.','danger');return;} _wz=Math.min(4,Math.max(1,_wz+d)); showStep(); }
@@ -291,7 +320,9 @@ function crearColegio(){
  var dep=document.getElementById('wzDep').value, jec=document.getElementById('wzJEC').value, pass=document.getElementById('wzPass').value||'Demo1234!';
  var segmentos={}, niveles=[];
  document.querySelectorAll('#wzSegmentos input[data-seg]').forEach(function(chk){ if(chk.checked){ var key=chk.dataset.seg; segmentos[key]=+(document.querySelector('#wzSegmentos input[data-segn="'+key+'"]').value)||0; var seg=SEGS.filter(function(s){return s[0]===key})[0]; if(seg)seg[2].forEach(function(nv){if(niveles.indexOf(nv)===-1)niveles.push(nv);}); } });
- var asignaturas=_lineas('wzAsig'), especialidades=_lineas('wzEsp'), cargos=[];
+ var asignaturas=wzChecked('wzAsigList'), especialidades=wzChecked('wzEspList'), cargos=[];
+ if(!asignaturas.length){toast('Selecciona al menos una asignatura.','danger');_wz=3;showStep();return;}
+ var asignaturasMeta=asignaturas.map(function(name){ var hit=window._CUR_BYNAME&&window._CUR_BYNAME[name.toLowerCase()]; return {nombre:name, sigla:hit?hit.sigla:'', niveles:hit?hit.niveles:[]}; });
  var a=document.getElementById('wzAdmin').value.trim(); if(a)cargos.push([a,'Administrador de Colegio','admin_colegio']);
  var dd=document.getElementById('wzDir').value.trim(); if(dd)cargos.push([dd,'Director','director']);
  var rr=document.getElementById('wzRector').value.trim(); if(rr)cargos.push([rr,'Rector','rector']);
@@ -300,7 +331,7 @@ function crearColegio(){
  var btn=document.getElementById('wzFin'); btn.disabled=true; var o=btn.innerHTML; btn.innerHTML='Creando…'; document.getElementById('wzMsg').textContent='Creando colegio y cuentas…';
  var colegio={id:id,nombre:nombre,rbd:rbd,dependencia:dep,jec:jec,segmentos:segmentos};
  EL_DB.collection('organizaciones').doc(id).collection('config').doc('colegio').set({json:JSON.stringify(colegio)})
-  .then(function(){ return EL_DB.collection('organizaciones').doc(id).collection('config').doc('academico').set({json:JSON.stringify({niveles:niveles,asignaturas:asignaturas,especialidades:especialidades})}); })
+  .then(function(){ return EL_DB.collection('organizaciones').doc(id).collection('config').doc('academico').set({json:JSON.stringify({niveles:niveles,asignaturas:asignaturas,asignaturasMeta:asignaturasMeta,especialidades:especialidades})}); })
   .then(function(){ return EL_DB.collection('sistema').doc('colegios').get().then(function(d){ var lista=(d.exists&&d.data().lista)?d.data().lista:[]; if(!lista.filter(function(c){return c.id===id}).length) lista.push({id:id,nombre:nombre,rbd:rbd,dependencia:dep,cargos:cargos.length}); return EL_DB.collection('sistema').doc('colegios').set({lista:lista}); }); })
   .then(function(){ var chain=Promise.resolve(); cargos.forEach(function(c){ chain=chain.then(function(){ return _crearCuenta(c[0],c[1],c[2],id,pass).catch(function(){}); }); }); return chain; })
   .then(function(){ toast('Colegio "'+nombre+'" creado con '+cargos.length+' cargo(s).','success'); btn.disabled=false; btn.innerHTML=o; cerrarWizard(); cargarColegios(); cargarUsuarios(); })
