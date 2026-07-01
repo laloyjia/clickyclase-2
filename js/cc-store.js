@@ -21,9 +21,16 @@ var ccStore = (function () {
         var done = false;
         ELAuth.onUserReady(function (u) {
           if (done) return; done = true;
-          if (u && u.orgId) {
-            try { var last = localStorage.getItem('cc_org'); if (last && last !== u.orgId) { Object.keys(localStorage).forEach(function (k) { if (/^cc_(calendario|docs|t_|cfg_|branding)/.test(k)) localStorage.removeItem(k); }); } localStorage.setItem('cc_org', u.orgId); } catch (e) {}
-            ORG = u.orgId;   // ← aislar por colegio del usuario
+          // Espacio de datos (org) del usuario:
+          //  - Con colegio (orgId): el colegio.
+          //  - Profesor/independiente sin colegio: su propio espacio 'indep_<uid>'.
+          //  - Admin u otros sin orgId: fallback (colegio-demo).
+          var target = null;
+          if (u && u.orgId) target = u.orgId;
+          else if (u && u.uid && u.role && u.role !== 'admin') target = 'indep_' + u.uid;
+          if (target) {
+            try { var last = localStorage.getItem('cc_org'); if (last && last !== target) { Object.keys(localStorage).forEach(function (k) { if (/^cc_(calendario|docs|t_|cfg_|branding)/.test(k)) localStorage.removeItem(k); }); } localStorage.setItem('cc_org', target); } catch (e) {}
+            ORG = target;   // ← aislar por colegio o por profesor independiente
           }
           res(!!(window.EL_AUTH && window.EL_AUTH.currentUser));
         });

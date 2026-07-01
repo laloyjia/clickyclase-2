@@ -171,8 +171,25 @@ document.querySelectorAll('.nav-item').forEach(function(x){x.addEventListener('c
 
 // ── Asignaturas/niveles del profesor: catálogo del colegio (admin) + asignación del UTP ──
 function fillSelect(id,arr){var s=document.getElementById(id);if(!s||!arr||!arr.length)return;var cur=s.value;s.innerHTML='<option value="">— Elige —</option>'+arr.map(function(x){return '<option>'+x+'</option>'}).join('');if(cur)s.value=cur;}
-function cargarAsignaturas(){if(!window.ccStore)return;Promise.all([ccStore.getConfig('academico'),ccStore.getConfig('asignaciones')]).then(function(res){var acad=res[0]||{},asign=res[1]||{};var allA=acad.asignaturas||[],allN=acad.niveles||[];var email='';try{if(window.EL_AUTH&&EL_AUTH.currentUser)email=(EL_AUTH.currentUser.email||'');}catch(e){}var misA=allA,misN=allN;if(asign.rows&&email){for(var i=0;i<asign.rows.length;i++){var r=asign.rows[i];if((r[0]||'').toLowerCase().trim()===email.toLowerCase().trim()){var a=(r[1]||'').split(',').map(function(s){return s.trim()}).filter(Boolean);var n=(r[2]||'').split(',').map(function(s){return s.trim()}).filter(Boolean);if(a.length)misA=a;if(n.length)misN=n;break;}}}window._ASIG_META=acad.asignaturasMeta||[];fillSelect('matAsig',misA);fillSelect('matNivel',misN);actualizarOAs();}).catch(function(){});}
-if(typeof ELAuth!=='undefined'&&ELAuth.onUserReady){ELAuth.onUserReady(function(){cargarAsignaturas();});}else{cargarAsignaturas();}
+// Carga el currículo nacional completo (profesor independiente: se autoasigna).
+function _cargarCurriculoLibre(){
+ if(typeof getCurriculumNacional==='undefined'){return;}
+ getCurriculumNacional().then(function(d){
+   var names=(d.asignaturas||[]).map(function(a){return a.nombre;});
+   window._ASIG_META=(d.asignaturas||[]).map(function(a){return {nombre:a.nombre,sigla:a.sigla,niveles:a.niveles};});
+   fillSelect('matAsig',names);
+   fillSelect('matNivel',(d.niveles||[]));
+   actualizarOAs();
+ }).catch(function(){});
+}
+function cargarAsignaturas(u){
+ if(!window.ccStore)return;
+ var indep = u && u.role!=='admin' && (u.tipo==='independiente' || !u.orgId);
+ if(indep){ _cargarCurriculoLibre(); return; }   // ← profesor particular: currículo completo
+ Promise.all([ccStore.getConfig('academico'),ccStore.getConfig('asignaciones')]).then(function(res){var acad=res[0]||{},asign=res[1]||{};var allA=acad.asignaturas||[],allN=acad.niveles||[];var email='';try{if(window.EL_AUTH&&EL_AUTH.currentUser)email=(EL_AUTH.currentUser.email||'');}catch(e){}var misA=allA,misN=allN;if(asign.rows&&email){for(var i=0;i<asign.rows.length;i++){var r=asign.rows[i];if((r[0]||'').toLowerCase().trim()===email.toLowerCase().trim()){var a=(r[1]||'').split(',').map(function(s){return s.trim()}).filter(Boolean);var n=(r[2]||'').split(',').map(function(s){return s.trim()}).filter(Boolean);if(a.length)misA=a;if(n.length)misN=n;break;}}}
+   if(!misA.length){ _cargarCurriculoLibre(); return; }   // colegio sin académico cargado: usar currículo nacional
+   window._ASIG_META=acad.asignaturasMeta||[];fillSelect('matAsig',misA);fillSelect('matNivel',misN);actualizarOAs();}).catch(function(){});}
+if(typeof ELAuth!=='undefined'&&ELAuth.onUserReady){ELAuth.onUserReady(function(u){cargarAsignaturas(u);});}else{cargarAsignaturas(null);}
 
 // ── Currículum oficial: OAs y unidades por asignatura+nivel ──
 window._NIV2CODE=null;window._OAS_ACTUAL=[];
