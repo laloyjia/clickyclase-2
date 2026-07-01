@@ -79,18 +79,11 @@
           <div class="fld"><label>Segmento (solo UTP)</label><select id="nuSeg"><option value="">— (no aplica)</option><option value="pre">Pre-básica</option><option value="b16">1° a 6° básico</option><option value="mhc">Media H-C</option><option value="mfg">Media Formación General</option><option value="tp">Técnico Profesional</option></select></div>
           <div class="fld"><label>Contraseña inicial</label><input id="nuPass" value="Demo1234!"></div>
         </div>
-        <div id="nuProfBox" style="margin-top:12px;border-top:1px solid var(--border-2);padding-top:12px">
-          <div class="sub" style="margin:0 0 8px"><b>Asignación (solo profesores):</b> qué imparte. Para un profesor particular esto define sus asignaturas y OA en su panel.</div>
-          <div class="frm">
-            <div class="fld" style="grid-column:1/-1">
-              <label>Asignaturas <span id="nuAsigCnt" class="count">0</span> <button type="button" class="btn ghost sm" style="margin-left:8px" onclick="nuLlenarCurric()">Cargar currículo</button> <button type="button" class="btn ghost sm" onclick="nuToggleAsig(false)">Ninguna</button></label>
-              <div id="nuAsigList" style="max-height:170px;overflow:auto;border:1px solid var(--border-2);border-radius:9px;padding:6px;background:var(--surface)"><div class="sub" style="margin:0">Pulsa "Cargar currículo" para elegir asignaturas.</div></div>
-            </div>
-            <div class="fld"><label>Niveles (coma, opcional)</label><input id="nuNiv" placeholder="ej: 5° Básico, 6° Básico"></div>
-            <div class="fld"><label>Especialidad TP (opcional)</label><input id="nuEsp" placeholder="ej: Electrónica"></div>
-          </div>
+        <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn" id="btnCrear" onclick="crearUsuario()"><span class="material-symbols-outlined" style="font-size:18px">add</span> Crear cargo</button>
+          <button class="btn ghost" onclick="abrirWizProf()"><span class="material-symbols-outlined" style="font-size:18px">school</span> Nuevo Profesor (asistente)</button>
         </div>
-        <div style="margin-top:14px"><button class="btn" id="btnCrear" onclick="crearUsuario()"><span class="material-symbols-outlined" style="font-size:18px">add</span> Crear usuario</button></div>
+        <div class="sub" style="margin-top:8px">Para profesores usa el asistente: define tipo (Básica / Plan Común / TP), asignaturas, niveles, especialidad, liceos y permisos, paso a paso.</div>
       </div>
       <div class="card"><div class="cardhead"><h3><span class="material-symbols-outlined">group</span> Usuarios <span class="count" id="cnt-usuarios">0</span></h3>
         <div class="tools"><div class="search"><span class="material-symbols-outlined">search</span><input id="buscarU" placeholder="Buscar…"></div>
@@ -317,6 +310,53 @@
     </section>
     </div>
   </main>
+</div>
+<style>
+.wpcard{border:1.5px solid var(--border-2);border-radius:12px;padding:14px 10px;text-align:center;cursor:pointer;transition:all .15s;background:var(--surface)}
+.wpcard:hover{border-color:var(--primary)}
+.wpcard.sel{border-color:var(--primary);background:rgba(91,75,224,.08);box-shadow:0 0 0 2px rgba(91,75,224,.15)}
+.wplist{max-height:180px;overflow:auto;border:1px solid var(--border-2);border-radius:9px;padding:6px;background:var(--surface)}
+.wplist label{display:flex;align-items:center;gap:9px;padding:5px 6px;border-radius:6px;cursor:pointer;font-size:13.5px}
+.wplist label:hover{background:var(--bg)}
+.wpsec{font-weight:600;font-size:13.5px;margin:14px 0 6px;display:flex;align-items:center;gap:6px}
+.wpstepdot{width:22px;height:22px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;background:var(--border-2);color:var(--muted)}
+.wpstepdot.on{background:var(--primary);color:#fff}
+.wpstepdot.done{background:var(--success);color:#fff}
+</style>
+<div class="overlay" id="wpOverlay">
+  <div class="modal" style="max-width:680px;max-height:88vh;overflow:auto">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px"><h3 style="font-size:16px;font-weight:600;display:flex;align-items:center;gap:8px"><span class="material-symbols-outlined" style="color:var(--primary)">school</span> Crear Nuevo Profesor</h3><span class="material-symbols-outlined" style="cursor:pointer;color:var(--muted)" onclick="cerrarWizProf()">close</span></div>
+    <div id="wpStepper" style="display:flex;align-items:center;gap:6px;margin:6px 0 16px;font-size:12px"></div>
+
+    <div class="wpstep" id="wpStep1">
+      <div class="frm">
+        <div class="fld" style="grid-column:1/-1"><label>Nombre completo *</label><input id="wpNombre" placeholder="Juan Pérez González"></div>
+        <div class="fld"><label>Correo electrónico *</label><input id="wpEmail" placeholder="juan@colegio.cl"></div>
+        <div class="fld"><label>Contraseña inicial * (mín. 6)</label><input id="wpPass" value="Demo1234!"></div>
+        <div class="fld" style="grid-column:1/-1"><label>Organización / Colegio</label><select id="wpOrg"></select></div>
+      </div>
+    </div>
+
+    <div class="wpstep" id="wpStep2" style="display:none">
+      <div class="sub">¿Qué tipo(s) de docente es? <b>Puede marcar más de uno</b> (ej: Básica + Plan Común).</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px" id="wpTipos">
+        <div class="wpcard" data-tipo="basica" onclick="pwToggleTipo('basica')"><span class="material-symbols-outlined" style="font-size:26px;color:var(--primary)">auto_stories</span><div style="font-weight:600;margin-top:6px">Educación Básica</div><div class="sub" style="margin:0">1° a 8° Básico</div></div>
+        <div class="wpcard" data-tipo="media" onclick="pwToggleTipo('media')"><span class="material-symbols-outlined" style="font-size:26px;color:var(--primary)">school</span><div style="font-weight:600;margin-top:6px">Plan Común</div><div class="sub" style="margin:0">1° a 4° Medio C-H</div></div>
+        <div class="wpcard" data-tipo="tp" onclick="pwToggleTipo('tp')"><span class="material-symbols-outlined" style="font-size:26px;color:var(--primary)">construction</span><div style="font-weight:600;margin-top:6px">Técnico-Profesional</div><div class="sub" style="margin:0">EMTP — Especialidad</div></div>
+      </div>
+    </div>
+
+    <div class="wpstep" id="wpStep3" style="display:none"><div id="wpAsignar"></div></div>
+
+    <div class="wpstep" id="wpStep4" style="display:none"><div id="wpResumen"></div></div>
+
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:16px">
+      <button class="btn ghost" id="wpPrev" onclick="pwGoto(-1)" style="visibility:hidden"><span class="material-symbols-outlined" style="font-size:18px">arrow_back</span> Atrás</button>
+      <div><button class="btn" id="wpNext" onclick="pwGoto(1)">Siguiente <span class="material-symbols-outlined" style="font-size:18px">arrow_forward</span></button>
+      <button class="btn" id="wpFin" style="display:none" onclick="pwCrear()"><span class="material-symbols-outlined" style="font-size:18px">check</span> Crear profesor</button></div>
+    </div>
+    <div id="wpMsg" class="sub" style="margin-top:10px"></div>
+  </div>
 </div>
 <div class="overlay" id="modalEditUser">
   <div class="modal" style="max-width:560px">
@@ -631,6 +671,73 @@ function crearCuentaColegio(){ var org=document.getElementById('ccColegio').valu
 function _incCargos(org){ EL_DB.collection('sistema').doc('colegios').get().then(function(d){ var lista=(d.exists&&d.data().lista)?d.data().lista:[]; var ch=false; lista=lista.map(function(c){ if(c.id===org){c.cargos=(c.cargos||0)+1;ch=true;} return c; }); if(ch){EL_DB.collection('sistema').doc('colegios').set({lista:lista}).then(cargarColegios);} }).catch(function(){}); }
 function renderCuentasColegio(){ var org=document.getElementById('ccColegio').value, tb=document.getElementById('tb-cuentas'); if(!tb)return; if(!org){tb.innerHTML='<tr><td colspan="4" style="color:var(--muted)">Elige un colegio arriba.</td></tr>';document.getElementById('cnt-cuentas').textContent=0;return;} var rows=(_allUsers||[]).filter(function(u){return u.orgId===org;}); document.getElementById('cnt-cuentas').textContent=rows.length; tb.innerHTML=rows.length?rows.map(function(u){var act=u.activo!==false; return '<tr><td>'+(u.email||u.uid)+'</td><td>'+(u.nombre||'—')+'</td><td><span class="tag info">'+(u.role||'')+'</span></td><td>'+(act?'<span class="tag success">Activo</span>':'<span class="tag danger">Suspendido</span>')+'</td></tr>';}).join(''):'<tr><td colspan="4" style="color:var(--muted)">Este colegio aún no tiene cuentas.</td></tr>'; }
 
+// ══════════ Asistente "Crear Nuevo Profesor" (4 pasos) ══════════
+var PW={step:1,tipos:{basica:false,media:false,tp:false}};
+function abrirWizProf(){
+ PW={step:1,tipos:{basica:false,media:false,tp:false}};
+ document.getElementById('wpNombre').value=''; document.getElementById('wpEmail').value=''; document.getElementById('wpPass').value='Demo1234!'; document.getElementById('wpMsg').textContent='';
+ var sel=document.getElementById('wpOrg'); if(sel){ var opts='<option value="__particular__">🧑‍🏫 Particular / Independiente (sin colegio)</option><option value="colegio-demo">Colegio demo</option>'; (_colegiosReg||[]).forEach(function(x){if(x.id!=='colegio-demo')opts+='<option value="'+x.id+'">'+x.nombre+'</option>';}); sel.innerHTML=opts; }
+ document.querySelectorAll('#wpTipos .wpcard').forEach(function(c){c.classList.remove('sel');});
+ if(typeof ELDB!=='undefined'&&ELDB.liceos&&!(allLiceos&&allLiceos.length)){ELDB.liceos.listar(false).then(function(l){allLiceos=l||[];});}
+ pwShow(); document.getElementById('wpOverlay').classList.add('show');
+}
+function cerrarWizProf(){document.getElementById('wpOverlay').classList.remove('show');}
+document.getElementById('wpOverlay').addEventListener('click',function(e){if(e.target===this)cerrarWizProf();});
+function pwToggleTipo(t){ PW.tipos[t]=!PW.tipos[t]; var c=document.querySelector('#wpTipos .wpcard[data-tipo="'+t+'"]'); if(c)c.classList.toggle('sel',PW.tipos[t]); }
+function pwStepper(){ var labels=['Datos','Tipo','Asignar','Confirmar'],el=document.getElementById('wpStepper'); el.innerHTML=labels.map(function(l,i){var n=i+1,cls=n<PW.step?'done':(n===PW.step?'on':'');return '<span class="wpstepdot '+cls+'">'+(n<PW.step?'✓':n)+'</span> <span style="color:'+(n===PW.step?'var(--primary)':'var(--muted)')+';font-weight:'+(n===PW.step?'600':'400')+'">'+l+'</span>'+(n<4?'<span style="flex:1;height:1px;background:var(--border-2);min-width:12px;margin:0 4px"></span>':'');}).join(''); }
+function pwShow(){ for(var i=1;i<=4;i++){var s=document.getElementById('wpStep'+i); if(s)s.style.display=(i===PW.step)?'block':'none';} document.getElementById('wpPrev').style.visibility=PW.step>1?'visible':'hidden'; document.getElementById('wpNext').style.display=PW.step<4?'inline-flex':'none'; document.getElementById('wpFin').style.display=PW.step===4?'inline-flex':'none'; pwStepper(); if(PW.step===3)pwBuildAsignar(); if(PW.step===4)pwResumen(); }
+function pwGoto(d){
+ if(d>0){
+   if(PW.step===1){ if(!document.getElementById('wpNombre').value.trim()||!document.getElementById('wpEmail').value.trim()){toast('Completa nombre y correo.','danger');return;} if((document.getElementById('wpPass').value||'').length<6){toast('Contraseña mínima 6 caracteres.','danger');return;} }
+   if(PW.step===2){ if(!PW.tipos.basica&&!PW.tipos.media&&!PW.tipos.tp){toast('Elige al menos un tipo de docente.','danger');return;} }
+ }
+ PW.step=Math.min(4,Math.max(1,PW.step+d)); pwShow();
+}
+function pwBuildAsignar(){
+ var host=document.getElementById('wpAsignar'),html='';
+ if(PW.tipos.basica) html+='<div class="wpsec"><span class="material-symbols-outlined" style="font-size:18px;color:var(--primary)">menu_book</span> Asignaturas — Educación Básica</div><div class="wplist" id="wpAsigBasica"><div class="sub" style="margin:0">Cargando…</div></div>';
+ if(PW.tipos.media) html+='<div class="wpsec"><span class="material-symbols-outlined" style="font-size:18px;color:var(--primary)">menu_book</span> Asignaturas — Plan Común (Media)</div><div class="wplist" id="wpAsigMedia"><div class="sub" style="margin:0">Cargando…</div></div>';
+ if(PW.tipos.tp) html+='<div class="wpsec"><span class="material-symbols-outlined" style="font-size:18px;color:var(--primary)">construction</span> Especialidad EMTP</div><div class="frm"><div class="fld" style="grid-column:1/-1"><label>Especialidad</label><select id="wpEsp" onchange="pwLoadMods()"><option value="">— Selecciona —</option></select></div><div class="fld" style="grid-column:1/-1"><label>Mención (opcional)</label><input id="wpMencion" placeholder="ej: Recursos Humanos"></div></div><div class="wpsec">Módulos asignados</div><div class="wplist" id="wpMods"><div class="sub" style="margin:0">Elige una especialidad.</div></div>';
+ html+='<div class="wpsec">Niveles asignados</div><div class="wplist" id="wpNiveles"></div>';
+ html+='<div class="wpsec"><span class="material-symbols-outlined" style="font-size:18px;color:var(--primary)">apartment</span> Institución educativa</div><div class="sub" style="margin:0 0 4px">Marca uno o más liceos. El principal aparece por defecto en sus documentos.</div><div class="wplist" id="wpLiceos"><div class="sub" style="margin:0">Cargando…</div></div>';
+ html+='<div class="wpsec">Clase asignada</div><input id="wpCursos" placeholder="Ej: 3° Medio A, 2° Básico B" style="width:100%;font-size:13.5px;color:var(--text);background:var(--surface);border:1px solid var(--border-2);border-radius:8px;padding:9px 11px">';
+ html+='<div class="wpsec"><span class="material-symbols-outlined" style="font-size:18px;color:var(--primary)">workspace_premium</span> Capacidades pedagógicas</div><div class="wplist" style="max-height:none"><label><input type="checkbox" id="wpPaes"> Formato PAES — pruebas y guías en estructura PAES</label><label><input type="checkbox" id="wpSimce"> Formato SIMCE — estructura SIMCE</label><label><input type="checkbox" id="wpMarzano"> Taxonomía Marzano</label></div>';
+ html+='<div class="wpsec">Permisos del docente</div><div class="wplist" style="max-height:none"><label><input type="checkbox" id="wpPermPlan" checked> Puede crear planificaciones</label><label><input type="checkbox" id="wpPermMat" checked> Puede crear material</label></div>';
+ host.innerHTML=html;
+ if(typeof CURRICULA_READY!=='undefined'){ CURRICULA_READY.then(function(CUR){ if(PW.tipos.basica)_pwFillAsig('wpAsigBasica',CUR.getAsignaturas('basica')); if(PW.tipos.media)_pwFillAsig('wpAsigMedia',CUR.getAsignaturas('media')); _pwFillNiveles(CUR); if(PW.tipos.tp)_pwFillEsp(CUR); }); }
+ _pwFillLiceos();
+}
+function _pwFillAsig(id,arr){ var el=document.getElementById(id); if(!el)return; el.innerHTML=(arr||[]).map(function(a){return '<label><input type="checkbox" value="'+(a.nombre||'').replace(/"/g,'&quot;')+'"> '+(a.nombre||'')+'</label>';}).join('')||'<div class="sub" style="margin:0">Sin asignaturas.</div>'; }
+function _pwFillNiveles(CUR){ var el=document.getElementById('wpNiveles'); if(!el)return; el.innerHTML=(CUR.getAllNiveles()||[]).map(function(n){return '<label><input type="checkbox" value="'+CUR.getNivelLabel(n)+'"> '+CUR.getNivelLabel(n)+'</label>';}).join(''); }
+function _pwFillEsp(CUR){ var sel=document.getElementById('wpEsp'); if(!sel)return; var p=(typeof loadCurriculaTP!=='undefined')?loadCurriculaTP():Promise.resolve(CUR); p.then(function(C){ C=C||CUR; window._PW_CUR=C; var esps=(C.getEspecialidades?C.getEspecialidades():[]),bySec={}; esps.forEach(function(e){var s=e.sector||'Otras';(bySec[s]=bySec[s]||[]).push(e);}); var html='<option value="">— Selecciona —</option>'; Object.keys(bySec).sort().forEach(function(s){html+='<optgroup label="'+s+'">'+bySec[s].map(function(e){return '<option value="'+e.key+'">'+e.nombre+'</option>';}).join('')+'</optgroup>';}); sel.innerHTML=html; }); }
+function pwLoadMods(){ var key=document.getElementById('wpEsp').value,box=document.getElementById('wpMods'); if(!key){box.innerHTML='<div class="sub" style="margin:0">Elige una especialidad.</div>';return;} var CUR=window._PW_CUR||window.CURRICULA_CHILE,mods=(CUR&&CUR.getModulos)?CUR.getModulos(key):[]; box.innerHTML=mods.length?mods.map(function(m){return '<label><input type="checkbox" value="'+(m.num||'')+'"> '+(m.num?('M'+m.num+' — '):'')+(m.nombre||'')+'</label>';}).join(''):'<div class="sub" style="margin:0">Sin módulos cargados.</div>'; }
+function _pwFillLiceos(){ var el=document.getElementById('wpLiceos'); if(!el)return; var cat=allLiceos||[]; if(!cat.length){el.innerHTML='<div class="sub" style="margin:0">Sin liceos en el catálogo (opcional para particular).</div>';return;} el.innerHTML=cat.map(function(l){return '<label><input type="checkbox" class="wpLicChk" value="'+l.slug+'"> <span style="flex:1">'+(l.nombre||l.slug)+'</span><span class="sub" style="margin:0"><input type="radio" name="wpLicPrin" value="'+l.slug+'"> principal</span></label>';}).join(''); }
+function _pwChecked(id){var el=document.getElementById(id);if(!el)return [];return Array.prototype.map.call(el.querySelectorAll('input[type=checkbox]:checked'),function(c){return c.value;});}
+function _pwGather(){
+ var asig=[].concat(_pwChecked('wpAsigBasica'),_pwChecked('wpAsigMedia'));
+ var org=document.getElementById('wpOrg').value,indep=(org==='__particular__'||!org);
+ var liceos=Array.prototype.map.call(document.querySelectorAll('.wpLicChk:checked'),function(c){return c.value;});
+ var prinEl=document.querySelector('input[name=wpLicPrin]:checked'),prin=(prinEl?prinEl.value:'')||liceos[0]||'';
+ var espEl=document.getElementById('wpEsp'),espNombre=''; if(espEl&&espEl.value)espNombre=espEl.options[espEl.selectedIndex].text;
+ return { nombre:document.getElementById('wpNombre').value.trim(), email:document.getElementById('wpEmail').value.trim(), pass:document.getElementById('wpPass').value, orgId:indep?null:org, tipo:indep?'independiente':'colegio', asignaturas:asig, niveles:_pwChecked('wpNiveles'), especialidad:espNombre, mencion:(document.getElementById('wpMencion')||{}).value||'', modulos:_pwChecked('wpMods'), liceos:liceos, liceoPrincipal:prin, cursos:(document.getElementById('wpCursos')||{}).value||'', capacidades:{paes:!!(document.getElementById('wpPaes')||{}).checked,simce:!!(document.getElementById('wpSimce')||{}).checked,marzano:!!(document.getElementById('wpMarzano')||{}).checked}, permisos:{planificar:!!(document.getElementById('wpPermPlan')||{}).checked,material:!!(document.getElementById('wpPermMat')||{}).checked} };
+}
+function pwResumen(){var g=_pwGather(),el=document.getElementById('wpResumen');var caps=[g.capacidades.paes?'PAES':'',g.capacidades.simce?'SIMCE':'',g.capacidades.marzano?'Marzano':''].filter(Boolean).join(', ')||'—';
+ el.innerHTML='<div class="wpsec">Revisa y confirma</div>'+
+  '<div class="row"><span class="material-symbols-outlined ic">person</span><div style="flex:1"><b>'+_comEsc(g.nombre||'—')+'</b><div class="sub" style="margin:0">'+_comEsc(g.email||'')+' · '+(g.orgId?('Colegio: '+g.orgId):'Particular / Independiente')+'</div></div></div>'+
+  '<div class="row"><span class="material-symbols-outlined ic">menu_book</span><div style="flex:1">Asignaturas: '+(g.asignaturas.length?_comEsc(g.asignaturas.join(', ')):'—')+'</div></div>'+
+  '<div class="row"><span class="material-symbols-outlined ic">stairs</span><div style="flex:1">Niveles: '+(g.niveles.length?_comEsc(g.niveles.join(', ')):'—')+'</div></div>'+
+  (g.especialidad?'<div class="row"><span class="material-symbols-outlined ic">construction</span><div style="flex:1">Especialidad: '+_comEsc(g.especialidad)+(g.mencion?(' · '+_comEsc(g.mencion)):'')+' · '+g.modulos.length+' módulo(s)</div></div>':'')+
+  (g.liceos.length?'<div class="row"><span class="material-symbols-outlined ic">apartment</span><div style="flex:1">Liceos: '+_comEsc(g.liceos.join(', '))+' (principal: '+_comEsc(g.liceoPrincipal||'—')+')</div></div>':'')+
+  '<div class="row"><span class="material-symbols-outlined ic">tune</span><div style="flex:1">Capacidades: '+caps+' · Permisos: '+[g.permisos.planificar?'planificar':'',g.permisos.material?'material':''].filter(Boolean).join(', ')+'</div></div>';
+}
+function pwCrear(){var g=_pwGather(); if(!g.nombre||!g.email){toast('Faltan datos.','danger');PW.step=1;pwShow();return;}
+ var btn=document.getElementById('wpFin');btn.disabled=true;var o=btn.innerHTML;btn.innerHTML='Creando…';
+ fetch('https://identitytoolkit.googleapis.com/v1/accounts:signUp?key='+FIREBASE_CONFIG.apiKey,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:g.email,password:g.pass,displayName:g.nombre,returnSecureToken:false})})
+  .then(function(r){return r.json()}).then(function(res){ if(res.error){var m=res.error.message;if(m==='EMAIL_EXISTS')m='Ya existe una cuenta con ese correo.';throw new Error(m);} var uid=res.localId; if(!uid)throw new Error('No se obtuvo UID.'); var perfil={email:g.email,nombre:g.nombre,role:'profesor',tipo:g.tipo,orgId:g.orgId,seg:null,activo:true,primerIngreso:false,creadoEn:new Date().toISOString(),asignaturas:g.asignaturas,niveles:g.niveles,especialidad:g.especialidad,mencion:g.mencion,modulos:g.modulos,liceos:g.liceos,liceoPrincipal:g.liceoPrincipal,cursos:g.cursos,capacidades:g.capacidades,permisos:g.permisos}; var p=EL_DB.collection('usuarios').doc(uid).set(perfil); if(g.orgId){p=p.then(function(){return EL_DB.collection('organizaciones').doc(g.orgId).collection('miembros').doc(uid).set({rol:'profesor',email:g.email,nombre:g.nombre}).catch(function(){});});} return p; })
+  .then(function(){toast('Profesor creado: '+g.email,'success');btn.disabled=false;btn.innerHTML=o;cerrarWizProf();cargarUsuarios();})
+  .catch(function(e){toast('Error: '+e.message,'danger');document.getElementById('wpMsg').textContent='Error: '+e.message;btn.disabled=false;btn.innerHTML=o;});
+}
+
 // ── Auth gate ──
 function esAdmin(u){if(!u)return false;if(u.role==='admin')return true;var L=window.EL_ADMIN_EMAILS||(window.EL_ADMIN_EMAIL?[window.EL_ADMIN_EMAIL]:[]);return L.indexOf(u.email)!==-1;}
 function iniciar(){
@@ -713,7 +820,6 @@ function crearUsuario(){
     if(res.error){var m=res.error.message;if(m==='EMAIL_EXISTS')m='Ya existe una cuenta con ese correo.';throw new Error(m);}
     var uid=res.localId;if(!uid)throw new Error('No se obtuvo UID.');
     var perfil={email:email,nombre:nombre,role:role,tipo:tipo,orgId:orgId,seg:seg,activo:true,primerIngreso:false,creadoEn:new Date().toISOString()};
-    if(role==='profesor'){ perfil.asignaturas=nuAsigChecked(); perfil.niveles=(document.getElementById('nuNiv').value||'').split(',').map(function(s){return s.trim();}).filter(Boolean); var esp=(document.getElementById('nuEsp').value||'').trim(); if(esp)perfil.especialidad=esp; }
     return EL_DB.collection('usuarios').doc(uid).set(perfil).then(function(){
       if(orgId){return EL_DB.collection('organizaciones').doc(orgId).collection('miembros').doc(uid).set({rol:role,email:email,nombre:nombre,seg:seg}).catch(function(){});}
     });
