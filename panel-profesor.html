@@ -145,7 +145,10 @@
         <div style="margin-top:12px"><label class="pflab">Tipos de ítem</label>
           <div id="evTipos" class="wplist pfce"></div>
         </div>
-        <div style="margin-top:12px"><label class="pflab">NEE presentes en el curso (para la versión adaptada)</label><div id="evNEE" class="wplist pfce"></div></div>
+        <div class="grid2" style="margin-top:12px">
+          <div><label class="pflab">NEE presentes en el curso</label><div id="evNEE" class="wplist pfce"></div></div>
+          <div><label class="pflab">Adecuaciones a aplicar (versión PIE)</label><div id="evAdec" class="wplist pfce"></div></div>
+        </div>
         <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap">
           <button class="btn" id="btnEv" onclick="evGenerar(false)"><span class="material-symbols-outlined" style="font-size:18px">auto_awesome</span> Generar evaluación</button>
           <button class="btn ghost" id="btnEvPIE" onclick="evGenerar(true)"><span class="material-symbols-outlined" style="font-size:18px">accessibility_new</span> Generar versión PIE (adecuada)</button>
@@ -355,11 +358,14 @@ function pfGuardar(){var txt=document.getElementById('plTxt').value||'';if(!txt.
 
 // ══════════ Evaluaciones ══════════
 var EV_TIPOS=['Selección múltiple','Verdadero / Falso','Términos pareados','Completación','Desarrollo','Respuesta breve'];
+var EV_ADEC=['Más tiempo para responder','Reducir la cantidad de preguntas','Reducir el número de alternativas (a 3)','Resaltar / ennegrecer los datos esenciales del enunciado','Simplificar el lenguaje y las instrucciones','Una sola instrucción por ítem','Más espacio para responder y letra ampliada','Incluir apoyos visuales o ejemplos','Permitir lectura en voz alta del enunciado','Permitir material de apoyo (calculadora, tabla, formulario)','Fraccionar la evaluación en secciones','Considerar evaluación oral complementaria'];
 function evInit(){
  _pfFillSel('evAsig','evCurso');
  var t=document.getElementById('evTipos'); if(t&&!t.innerHTML.trim())t.innerHTML=EV_TIPOS.map(function(x,i){return '<label><input type="checkbox" value="'+x+'"'+(i===0?' checked':'')+'> '+x+'</label>';}).join('');
- var n=document.getElementById('evNEE'); if(n&&!n.innerHTML.trim())n.innerHTML=PL_NEE.map(function(x){return '<label><input type="checkbox" value="'+x.k+'"> '+x.n+'</label>';}).join('');
+ var n=document.getElementById('evNEE'); if(n&&!n.innerHTML.trim())n.innerHTML=PL_NEE.map(function(x){return '<label><input type="checkbox" value="'+x.k+'" onchange="evAdecSug()"> '+x.n+'</label>';}).join('');
+ var a=document.getElementById('evAdec'); if(a&&!a.innerHTML.trim())a.innerHTML=EV_ADEC.map(function(x){return '<label><input type="checkbox" value="'+x+'"> '+x+'</label>';}).join('');
 }
+function evAdecSug(){ var hay=document.querySelectorAll('#evNEE input:checked').length>0; if(!hay)return; var sug=['Más tiempo para responder','Simplificar el lenguaje y las instrucciones','Resaltar / ennegrecer los datos esenciales del enunciado','Incluir apoyos visuales o ejemplos']; document.querySelectorAll('#evAdec input[type=checkbox]').forEach(function(c){ if(sug.indexOf(c.value)!==-1)c.checked=true; }); }
 function evOnFormato(){var f=document.getElementById('evFormato').value; document.getElementById('evCompBox').style.display=(f==='paes')?'block':'none'; document.getElementById('evSimceBox').style.display=(f==='simce')?'block':'none';}
 function evGenerar(adaptada){
  var g=curGather('ev'); if(!g.asig){toast('Elige una asignatura o módulo.','danger');return;}
@@ -367,7 +373,7 @@ function evGenerar(adaptada){
  if(adaptada&&!nee.length){toast('Para la versión PIE marca al menos una NEE.','danger');return;}
  var formato=document.getElementById('evFormato').value;
  var tipos=Array.prototype.map.call(document.querySelectorAll('#evTipos input:checked'),function(c){return c.value;});
- var datos={ asignatura:g.esTP?'':g.asig, nivel:document.getElementById('evCurso').value, curso:document.getElementById('evCurso').value, modulo:g.esTP?(window._PROF_TP[g.asig].nombre||g.asig):'', unidad:document.getElementById('evUnidad').value||'', tema:document.getElementById('evTema').value||'', oaEspecialidad:g.oaEsp, ae:g.ae, oag:g.oag, criterios:g.criterios, oas_seleccionados:g.oaChecked, oa:g.oaChecked.join(' | '), formato:formato, competenciaPaes:document.getElementById('evComp').value, prueba:document.getElementById('evSimce').value, simce:document.getElementById('evSimce').value, nPreguntas:document.getElementById('evN').value, puntaje:document.getElementById('evPuntaje').value, duracion:document.getElementById('evDur').value, tiposPreguntas:tipos, taxonomiaSistema:document.getElementById('evTax').value, nee:nee, adaptadaPIE:!!adaptada };
+ var datos={ asignatura:g.esTP?'':g.asig, nivel:document.getElementById('evCurso').value, curso:document.getElementById('evCurso').value, modulo:g.esTP?(window._PROF_TP[g.asig].nombre||g.asig):'', unidad:document.getElementById('evUnidad').value||'', tema:document.getElementById('evTema').value||'', oaEspecialidad:g.oaEsp, ae:g.ae, oag:g.oag, criterios:g.criterios, oas_seleccionados:g.oaChecked, oa:g.oaChecked.join(' | '), formato:formato, competenciaPaes:document.getElementById('evComp').value, prueba:document.getElementById('evSimce').value, simce:document.getElementById('evSimce').value, nPreguntas:document.getElementById('evN').value, puntaje:document.getElementById('evPuntaje').value, duracion:document.getElementById('evDur').value, tiposPreguntas:tipos, taxonomiaSistema:document.getElementById('evTax').value, nee:nee, adaptadaPIE:!!adaptada, adecuacionesPIE:Array.prototype.map.call(document.querySelectorAll('#evAdec input:checked'),function(c){return c.value;}) };
  var b=document.getElementById(adaptada?'btnEvPIE':'btnEv');b.disabled=true;var o=b.innerHTML;b.innerHTML='<span class="material-symbols-outlined" style="font-size:18px">hourglass_top</span> Generando…';
  fetch('/api/ia-asistente',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({tipo:'prueba',datos:datos})})
   .then(function(r){return r.json()}).then(function(d){if(d.error)throw new Error(d.error);document.getElementById('evTxt').value=d.resultado||'(respuesta vacía)';toast(adaptada?'Versión PIE generada.':'Evaluación generada.','success');})

@@ -260,12 +260,12 @@ ${datos.adaptadaPIE ? `
 ════════════════════════════════════════════════
 ⚠ GENERA ÚNICAMENTE LA VERSIÓN ADAPTADA PIE (Decreto 83/2015)
 Evaluación DIFERENCIADA para estudiantes con NEE: ${Array.isArray(datos.nee) ? datos.nee.join(', ') : (datos.nee || 'NEE del curso')}.
-Mantén los MISMOS OA/AE evaluados, pero aplica estas adecuaciones al instrumento:
-• Reduce la cantidad de ítems priorizando los objetivos esenciales.
-• Simplifica el lenguaje y las instrucciones (frases cortas, una instrucción por ítem, apoyos visuales/ejemplos).
-• Ajusta el formato: más espacio para responder, letra clara, alternativas más breves.
-• Considera más tiempo y apoyos permitidos (lectura en voz alta, calculadora, material concreto según corresponda).
-• Ajusta la escala de exigencia y explicita los criterios de logro.
+Mantén los MISMOS OA/AE evaluados y aplica EXACTAMENTE las siguientes adecuaciones elegidas por el docente (no agregues otras ni las omitas):
+${(Array.isArray(datos.adecuacionesPIE) && datos.adecuacionesPIE.length) ? datos.adecuacionesPIE.map(a => '• ' + a).join('\n') : '• Reduce la cantidad de ítems priorizando lo esencial.\n• Simplifica el lenguaje y las instrucciones.\n• Más espacio para responder y letra clara.\n• Considera más tiempo y apoyos permitidos.'}
+Instrucciones de aplicación:
+- Si se pide "reducir alternativas", deja solo 3 opciones por ítem de selección múltiple.
+- Si se pide "resaltar/ennegrecer datos esenciales", escribe en MAYÚSCULAS o entre **asteriscos** las palabras clave del enunciado.
+- Si se pide "reducir preguntas", genera menos ítems que la versión estándar, cubriendo los objetivos esenciales.
 Encabeza el documento con "VERSIÓN ADAPTADA PIE" y agrega al final la lista de ADECUACIONES APLICADAS.` : ''}`,
 
     apunte: `${intro}Genera un APUNTE DE CONTENIDO completo para estudiantes chilenos:
