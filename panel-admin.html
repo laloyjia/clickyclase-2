@@ -15,6 +15,7 @@
 <script src="js/firebase-config.js"></script>
 <script src="js/firebase-auth.js"></script>
 <script src="js/firebase-db.js"></script>
+<script src="js/colegios.js"></script>
 <script src="js/cc-store.js"></script>
 <script src="js/curricula-loader.js"></script>
 </head>
@@ -77,8 +78,15 @@
     </section>
 
     <section class="sec" id="sec-colegios">
-      <div class="h1">Colegios</div><div class="sub">Crea y administra los establecimientos de la plataforma</div>
-      <div class="card"><div class="cardhead"><h3><span class="material-symbols-outlined">apartment</span> Colegios <span class="count" id="cnt-colegios">0</span></h3>
+      <div class="h1">Liceos / Colegios</div><div class="sub">Catálogo institucional. Cada liceo se asigna a profesores y su logo aparece en los documentos generados.</div>
+      <div class="card"><div class="cardhead"><h3><span class="material-symbols-outlined">school</span> Liceos registrados <span class="count" id="sbCntLiceos">0</span></h3>
+        <div class="tools"><div class="search"><span class="material-symbols-outlined">search</span><input id="liceoSearch" placeholder="Buscar liceo…" oninput="filtrarLiceos()"></div>
+          <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--muted)"><input type="checkbox" id="liceoIncInact" onchange="loadLiceos()"> Incluir inactivos</label>
+          <button class="btn" onclick="abrirModalLiceo('')"><span class="material-symbols-outlined" style="font-size:18px">add</span> Nuevo liceo</button></div></div>
+        <table><thead><tr><th>Logo</th><th>Nombre</th><th>RBD</th><th>Comuna / Región</th><th>Dependencia</th><th>Estado</th><th>Acciones</th></tr></thead><tbody id="liceosTbody"><tr><td colspan="7" style="color:var(--muted)">Cargando…</td></tr></tbody></table>
+      </div>
+
+      <div class="card"><div class="cardhead"><h3><span class="material-symbols-outlined">apartment</span> Colegios multi-tenant (con equipo y paneles) <span class="count" id="cnt-colegios">0</span></h3>
         <div class="tools"><button class="btn" onclick="abrirWizard()"><span class="material-symbols-outlined" style="font-size:18px">add_business</span> Crear colegio</button></div></div>
         <table><thead><tr><th>Colegio</th><th>RBD</th><th>Dependencia</th><th>Cargos creados</th></tr></thead><tbody id="tb-colegios"><tr><td colspan="4" style="color:var(--muted)">Sin colegios aún. Usa "Crear colegio".</td></tr></tbody></table>
       </div>
@@ -178,19 +186,271 @@
       </div>
       <div class="legal"><b>Nota de seguridad:</b> la clave se guarda en Firestore (<code>sistema/gemini</code>) y la usa el panel de admin. Para que el generador de IA la utilice de forma segura en producción, también debe estar como variable de entorno <code>GEMINI_API_KEY</code> en Vercel. La conexión directa serverless↔Firestore se habilita con una cuenta de servicio (siguiente etapa).</div>
     </section>
+
+    <section class="sec" id="sec-comunicados">
+      <div class="h1">Comunicados</div><div class="sub">Envía avisos a todos los profesores. Aparecen en su panel apenas ingresan.</div>
+      <div class="card"><h3><span class="material-symbols-outlined">campaign</span> Nuevo comunicado</h3>
+        <div class="frm">
+          <div class="fld"><label>Tipo de aviso</label><select id="comTipo"><option value="capacitacion">🎓 Capacitación</option><option value="avance">🚀 Novedad / Avance</option><option value="general">📌 General</option></select></div>
+          <div class="fld" style="grid-column:1/-1"><label>Título</label><input id="comTitulo" placeholder="Ej: Capacitación sobre el generador de pruebas SIMCE"></div>
+          <div class="fld" style="grid-column:1/-1"><label>Mensaje</label><textarea id="comMensaje" rows="4" style="width:100%;font-family:'Inter',sans-serif;font-size:13.5px;color:var(--text);background:var(--surface);border:1px solid var(--border-2);border-radius:9px;padding:10px"></textarea></div>
+        </div>
+        <div style="margin-top:10px"><button class="btn" onclick="crearComunicado()"><span class="material-symbols-outlined" style="font-size:18px">send</span> Publicar comunicado</button></div>
+      </div>
+      <div class="card"><div class="cardhead"><h3><span class="material-symbols-outlined">list</span> Comunicados publicados</h3></div><div id="comLista"><div class="sub">Cargando…</div></div></div>
+    </section>
+
+    <section class="sec" id="sec-monitoreo">
+      <div class="h1">Monitoreo en vivo</div><div class="sub">Quién está conectado y qué eventos ocurren en la plataforma — se actualiza solo.</div>
+      <div class="kpis">
+        <div class="kpi"><div class="l">Online ahora</div><div class="v" id="monOnline">—</div></div>
+        <div class="kpi"><div class="l">Eventos últimos 5 min</div><div class="v" id="monEv5">—</div></div>
+        <div class="kpi"><div class="l">Generaciones hoy</div><div class="v" id="monGen">—</div></div>
+      </div>
+      <div class="card"><div class="cardhead"><h3><span class="material-symbols-outlined">wifi</span> Usuarios online ahora</h3><div class="sub" style="margin:0">online = activo en los últimos 2 min</div></div><div id="monLista"><div class="sub">Cargando…</div></div></div>
+      <div class="card"><div class="cardhead"><h3><span class="material-symbols-outlined">bolt</span> Feed de eventos en vivo</h3><div class="sub" style="margin:0">últimos 100 eventos</div></div><div id="monFeed"><div class="sub">Cargando…</div></div></div>
+    </section>
+
+    <section class="sec" id="sec-actividad">
+      <div class="h1">Registro de Actividad</div><div class="sub">Log de eventos por usuario: logins, generación de material, planificaciones y acciones admin.</div>
+      <div class="kpis">
+        <div class="kpi"><div class="l">Total eventos</div><div class="v" id="actTotal">—</div></div>
+        <div class="kpi"><div class="l">Hoy</div><div class="v" id="actHoy">—</div></div>
+        <div class="kpi"><div class="l">Esta semana</div><div class="v" id="actSemana">—</div></div>
+        <div class="kpi"><div class="l">Usuarios activos hoy</div><div class="v" id="actActivos">—</div></div>
+      </div>
+      <div class="card"><div class="cardhead"><h3><span class="material-symbols-outlined">filter_alt</span> Filtros</h3>
+        <div class="tools"><button class="btn ghost sm" onclick="exportarActividadCSV()"><span class="material-symbols-outlined" style="font-size:16px">download</span> Exportar CSV</button><button class="btn ghost sm" onclick="cargarActividad()"><span class="material-symbols-outlined" style="font-size:16px">refresh</span> Refrescar</button><button class="btn ghost sm" onclick="purgarActividadManual()"><span class="material-symbols-outlined" style="font-size:16px">delete_sweep</span> Purgar &gt;90 días</button></div></div>
+        <div class="frm">
+          <div class="fld"><label>Usuario (email)</label><input id="actEmail" placeholder="correo@…"></div>
+          <div class="fld"><label>Tipo de evento</label><select id="actTipo"><option value="">— Todos —</option><option value="login">Inicio de sesión</option><option value="generar_material">Generó material</option><option value="crear_planificacion">Creó planificación</option><option value="descarga_word">Descargó Word</option><option value="refinar_material">Refinó con IA</option></select></div>
+          <div class="fld"><label>Desde</label><input id="actDesde" type="date"></div>
+          <div class="fld"><label>Hasta</label><input id="actHasta" type="date"></div>
+        </div>
+        <div style="margin-top:10px"><button class="btn" onclick="cargarActividad()"><span class="material-symbols-outlined" style="font-size:18px">search</span> Filtrar</button></div>
+      </div>
+      <div class="card"><div class="cardhead"><h3><span class="material-symbols-outlined">history</span> Eventos <span class="count" id="actCnt">0</span></h3></div>
+        <table><thead><tr><th>Fecha / Hora</th><th>Usuario</th><th>Acción</th></tr></thead><tbody id="actTbody"></tbody></table>
+      </div>
+    </section>
     </div>
   </main>
+</div>
+<div class="overlay" id="modalLiceo">
+  <div class="modal" style="max-width:660px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px"><h3 id="liceoModalTitle" style="font-size:16px;font-weight:600;display:flex;align-items:center;gap:8px"><span class="material-symbols-outlined" style="color:var(--primary)">school</span> Nuevo Liceo</h3><span class="material-symbols-outlined" style="cursor:pointer;color:var(--muted)" onclick="cerrarModalLiceo()">close</span></div>
+    <input type="hidden" id="liceoEditingSlug">
+    <div class="frm">
+      <div class="fld" style="grid-column:1/-1"><label>Nombre oficial del liceo *</label><input id="liceoNombre" oninput="liceoAutoSlug()" placeholder="ej: Liceo Salesiano de Talca"></div>
+      <div class="fld"><label>Slug (identificador) *</label><input id="liceoSlug" placeholder="liceo-salesiano-talca"></div>
+      <div class="fld"><label>RBD</label><input id="liceoRbd" placeholder="ej: 2780-3"></div>
+      <div class="fld"><label>Comuna</label><input id="liceoComuna" placeholder="ej: Talca"></div>
+      <div class="fld"><label>Región</label><input id="liceoRegion" placeholder="ej: Maule"></div>
+      <div class="fld"><label>Dependencia</label><select id="liceoDependencia"><option value="">— Seleccionar —</option><option value="municipal">Municipal / SLEP</option><option value="subvencionado">Part. Subvencionado</option><option value="pagado">Part. Pagado</option><option value="delegada">Administración delegada</option><option value="otro">Otro</option></select></div>
+      <div class="fld" style="grid-column:1/-1"><label>Ruta del logo</label><input id="liceoLogoPath" placeholder="assets/logos/colegios/liceo-salesiano-talca.png"></div>
+      <div class="fld" style="grid-column:1/-1"><label>Alias (separados por coma, opcional)</label><input id="liceoAlias" placeholder="liceo salesianos, salesianos talca"></div>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px;margin-top:12px">
+      <img id="liceoLogoPreview" src="assets/logos/colegios/default.svg" onerror="this.onerror=null;this.src='assets/logos/colegios/default.svg';" style="width:56px;height:56px;object-fit:contain;background:#fff;border:1px solid var(--border-2);border-radius:8px;padding:3px">
+      <div class="sub" style="margin:0">Vista previa del logo. Sube el PNG a esa ruta por git; si no existe, se usa el logo por defecto.</div>
+    </div>
+    <div id="liceoNotif" class="sub" style="margin-top:8px"></div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:12px"><button class="btn ghost" onclick="cerrarModalLiceo()">Cancelar</button><button class="btn" id="btnGuardarLiceo" onclick="guardarLiceo()"><span class="material-symbols-outlined" style="font-size:18px">save</span> Guardar liceo</button></div>
+  </div>
 </div>
 <div id="toast"><span class="material-symbols-outlined" style="color:var(--success)">check_circle</span><span id="toastMsg"></span></div>
 <script>
 function ic(n){return '<span class="material-symbols-outlined">'+n+'</span>';}
 var _tt;function toast(msg,tone){var t=document.getElementById('toast');t.style.borderLeftColor='var(--'+(tone==='danger'?'danger':'success')+')';var i=t.querySelector('.material-symbols-outlined');i.style.color='var(--'+(tone==='danger'?'danger':'success')+')';i.textContent=tone==='danger'?'error':'check_circle';document.getElementById('toastMsg').textContent=msg;t.classList.add('show');clearTimeout(_tt);_tt=setTimeout(function(){t.classList.remove('show')},3200);}
 
-var NAV=[['dashboard','Resumen','resumen'],['group','Usuarios','usuarios'],['apartment','Colegios','colegios'],['menu_book','Académico','academico'],['smart_toy','Configuración IA','ia']];
+var NAV=[['dashboard','Resumen','resumen'],['group','Usuarios','usuarios'],['apartment','Liceos / Colegios','colegios'],['menu_book','Académico','academico'],['smart_toy','Configuración IA','ia'],['campaign','Comunicados','comunicados'],['sensors','Monitoreo en vivo','monitoreo'],['bar_chart','Registro de Actividad','actividad']];
 document.getElementById('nav').innerHTML=NAV.map(function(n,i){return '<div class="nav-item'+(i===0?' active':'')+'" data-s="'+n[2]+'">'+ic(n[0])+'<span>'+n[1]+'</span></div>'}).join('');
-function show(s){document.querySelectorAll('.nav-item').forEach(function(x){x.classList.toggle('active',x.dataset.s===s)});document.querySelectorAll('.sec').forEach(function(x){x.classList.toggle('active',x.id==='sec-'+s)});}
+function show(s){document.querySelectorAll('.nav-item').forEach(function(x){x.classList.toggle('active',x.dataset.s===s)});document.querySelectorAll('.sec').forEach(function(x){x.classList.toggle('active',x.id==='sec-'+s)});
+ if(s==='comunicados'){loadComunicados();}
+ if(s==='monitoreo'){iniciarMonitoreo();}else{detenerMonitoreo();}
+ if(s==='actividad'){cargarActividad();}
+ if(s==='colegios'){loadLiceos();}
+}
 document.querySelectorAll('.nav-item').forEach(function(x){x.addEventListener('click',function(){show(x.dataset.s)})});
 function salir(){try{ELAuth.logout();}catch(e){}window.location.href='login.html';}
+
+// ── Comunicados (colección anuncios) ──
+function _comEsc(s){ return String(s==null?'':s).replace(/[<>&]/g,function(c){return {'<':'&lt;','>':'&gt;','&':'&amp;'}[c];}); }
+function crearComunicado(){
+  var tipo=document.getElementById('comTipo').value;
+  var titulo=(document.getElementById('comTitulo').value||'').trim();
+  var mensaje=(document.getElementById('comMensaje').value||'').trim();
+  if(!titulo||!mensaje){ toast('Completa el título y el mensaje.','danger'); return; }
+  if(typeof EL_DB==='undefined'){ toast('Base de datos no disponible.','danger'); return; }
+  EL_DB.collection('anuncios').add({ tipo:tipo, titulo:titulo, mensaje:mensaje, activo:true, creadoEn:new Date().toISOString(), autorNombre:'Administración' }).then(function(){
+    toast('Comunicado publicado. Los profesores lo verán al ingresar.','success');
+    document.getElementById('comTitulo').value=''; document.getElementById('comMensaje').value='';
+    loadComunicados();
+  }).catch(function(e){ toast('Error: '+(e&&e.message||e),'danger'); });
+}
+function loadComunicados(){
+  var box=document.getElementById('comLista'); if(!box||typeof EL_DB==='undefined') return;
+  EL_DB.collection('anuncios').get().then(function(snap){
+    var items=[]; snap.forEach(function(d){ var a=d.data()||{}; a._id=d.id; items.push(a); });
+    items.sort(function(x,y){ return String(y.creadoEn||'').localeCompare(String(x.creadoEn||'')); });
+    if(!items.length){ box.innerHTML='<div class="sub">Aún no hay comunicados publicados.</div>'; return; }
+    box.innerHTML=items.map(function(a){
+      return '<div style="padding:11px 13px;border:1px solid var(--border-2);border-radius:9px;margin-bottom:8px">'+
+        '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><strong>'+_comEsc(a.titulo||'')+'</strong>'+
+        '<span class="tag info">'+_comEsc(a.tipo||'')+'</span>'+
+        '<span style="margin-left:auto;font-size:12px;color:var(--muted)">'+String(a.creadoEn||'').slice(0,10)+'</span>'+
+        '<button class="btn ghost sm" onclick="eliminarComunicado(\''+a._id+'\')"><span class="material-symbols-outlined" style="font-size:15px;color:var(--danger)">delete</span></button></div>'+
+        '<div style="font-size:13px;color:var(--muted);margin-top:6px;white-space:pre-wrap">'+_comEsc(a.mensaje||'')+'</div></div>';
+    }).join('');
+  }).catch(function(){ box.innerHTML='<div class="sub" style="color:var(--danger)">Error al cargar los comunicados.</div>'; });
+}
+function eliminarComunicado(id){
+  if(!id||typeof EL_DB==='undefined') return;
+  if(!confirm('¿Eliminar este comunicado? Dejará de verse en el panel de los profesores.')) return;
+  EL_DB.collection('anuncios').doc(id).delete().then(loadComunicados).catch(function(){});
+}
+
+// ── Monitoreo en vivo (usuarios online + feed de actividad) ──
+var _monUnsubOnline=null,_monUnsubFeed=null,_monStarted=false;
+function _monEsc(s){return String(s==null?'':s).replace(/[<>&]/g,function(c){return {'<':'&lt;','>':'&gt;','&':'&amp;'}[c];});}
+function _hace(tsNum){ if(!tsNum)return''; var d=Math.max(0,Date.now()-Number(tsNum)),s=Math.floor(d/1000); if(s<60)return 'hace '+s+' s'; var m=Math.floor(s/60); if(m<60)return 'hace '+m+' min'; var h=Math.floor(m/60); if(h<24)return 'hace '+h+' h'; return 'hace '+Math.floor(h/24)+' d'; }
+function _tsNum(u){ if(u.tsNum)return Number(u.tsNum); if(u.lastSeenNum)return Number(u.lastSeenNum); if(u.lastSeen)return Date.parse(u.lastSeen); if(u.ts)return Date.parse(u.ts); return 0; }
+function _evDetalle(e){ var m=e.meta||e.detalles||{},p=[]; if(m.asignatura)p.push(m.asignatura); if(m.curso)p.push(m.curso); if(m.tipoDoc)p.push(m.tipoDoc); if(m.tipoNombre)p.push(m.tipoNombre); if(m.titulo)p.push('"'+String(m.titulo).slice(0,40)+'"'); return p.join(' · '); }
+function iniciarMonitoreo(){
+  if(_monStarted||typeof EL_DB==='undefined')return; _monStarted=true;
+  _monUnsubOnline=EL_DB.collection('usuarios').onSnapshot(function(snap){
+    var ahora=Date.now(),UMBRAL=2*60*1000,on=[];
+    snap.forEach(function(d){var u=d.data()||{};u._id=d.id;var ts=_tsNum(u);if(ts&&(ahora-ts)<=UMBRAL){u._ts=ts;on.push(u);}});
+    on.sort(function(a,b){return b._ts-a._ts;});
+    var mo=document.getElementById('monOnline'); if(mo)mo.textContent=on.length;
+    var list=document.getElementById('monLista'); if(!list)return;
+    list.innerHTML=on.length?on.map(function(u){var nombre=u.nombre||u.displayName||(u.email||'').split('@')[0]||'Usuario';var pag=u.currentPageLabel||(u.currentPage?u.currentPage.replace(/\.html$/,''):'—');return '<div class="row"><span class="material-symbols-outlined ic" style="color:var(--success)">circle</span><div style="flex:1"><div><b>'+_monEsc(nombre)+'</b> <span class="tag '+(u.role==='admin'?'info':'success')+'">'+_monEsc(u.role||'usuario')+'</span></div><div class="sub" style="margin:0">'+_monEsc(u.email||'')+' · '+_monEsc(pag)+'</div></div><span class="sub">'+_hace(u._ts)+'</span></div>';}).join(''):'<div class="sub">Nadie conectado en este momento.</div>';
+  });
+  _monUnsubFeed=EL_DB.collection('actividad').orderBy('tsNum','desc').limit(100).onSnapshot(function(snap){
+    var items=[]; snap.forEach(function(d){var e=d.data()||{};e._id=d.id;items.push(e);});
+    var ahora=Date.now(),ev5=0,gen=0,hoy=new Date().toISOString().slice(0,10);
+    items.forEach(function(e){var ts=e.tsNum||Date.parse(e.ts||''); if(ts&&(ahora-ts)<=5*60*1000)ev5++; if((e.tipo||'').indexOf('generar_')===0&&String(e.ts||'').slice(0,10)===hoy)gen++;});
+    var a=document.getElementById('monEv5'); if(a)a.textContent=ev5; var g=document.getElementById('monGen'); if(g)g.textContent=gen;
+    var feed=document.getElementById('monFeed'); if(!feed)return;
+    feed.innerHTML=items.length?items.map(function(e){var nombre=e.userNombre||(e.userEmail||'').split('@')[0]||'—';var det=_evDetalle(e);return '<div class="row"><span class="tag info" style="margin-right:8px">'+_monEsc(e.tipoLabel||e.tipo||'evento')+'</span><div style="flex:1"><b>'+_monEsc(nombre)+'</b>'+(det?' <span class="sub" style="margin:0">'+_monEsc(det)+'</span>':'')+'</div><span class="sub">'+_hace(e.tsNum||Date.parse(e.ts||''))+'</span></div>';}).join(''):'<div class="sub">Sin eventos aún.</div>';
+  });
+}
+function detenerMonitoreo(){ try{if(_monUnsubOnline)_monUnsubOnline();}catch(e){} try{if(_monUnsubFeed)_monUnsubFeed();}catch(e){} _monUnsubOnline=_monUnsubFeed=null; _monStarted=false; }
+
+// ── Registro de Actividad (audit log vía ELDB.actividad) ──
+var _actCache=[];
+function _fmtFecha(ts){ if(!ts)return '—'; var d=new Date(ts); if(isNaN(d))return '—'; return d.toLocaleString('es-CL',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}); }
+function cargarActividad(){
+  if(typeof ELDB==='undefined'||!ELDB.actividad){ document.getElementById('actTbody').innerHTML='<tr><td colspan="3" style="text-align:center;color:var(--danger);padding:26px">Audit log no disponible (ELDB.actividad no cargó).</td></tr>'; return; }
+  var inD=document.getElementById('actDesde'); if(inD&&!inD.value){ var d=new Date(); d.setDate(d.getDate()-7); inD.value=d.toISOString().slice(0,10); }
+  document.getElementById('actTbody').innerHTML='<tr><td colspan="3" style="text-align:center;color:var(--muted);padding:26px">Cargando registro…</td></tr>';
+  ELDB.actividad.listar({limit:1000}).then(function(items){ _actCache=items||[]; aplicarFiltrosActividad(); renderKpisActividad(); if(ELDB.actividad.purgar)ELDB.actividad.purgar(90,false).catch(function(){}); });
+}
+function _actFiltrados(){
+  var email=(document.getElementById('actEmail').value||'').trim().toLowerCase();
+  var tipo=(document.getElementById('actTipo').value||'').trim();
+  var dS=document.getElementById('actDesde').value, hS=document.getElementById('actHasta').value;
+  var desde=dS?new Date(dS).getTime():0, hasta=hS?(new Date(hS).getTime()+86400000):Infinity;
+  return _actCache.filter(function(e){ var ts=e.tsNum||Date.parse(e.ts||'');
+    if(email&&(e.userEmail||'').toLowerCase().indexOf(email)===-1)return false;
+    if(tipo&&e.tipo!==tipo)return false;
+    if(ts<desde||ts>hasta)return false; return true; });
+}
+function aplicarFiltrosActividad(){
+  var rows=_actFiltrados(), tb=document.getElementById('actTbody'), c=document.getElementById('actCnt');
+  if(c)c.textContent=rows.length+' de '+_actCache.length;
+  tb.innerHTML=rows.length?rows.map(function(e){var nombre=e.userNombre||(e.userEmail||'').split('@')[0]||'—';var det=_evDetalle(e);return '<tr><td style="white-space:nowrap">'+_fmtFecha(e.tsNum||Date.parse(e.ts||''))+'</td><td><b>'+_monEsc(nombre)+'</b><div class="sub" style="margin:0">'+_monEsc(e.userEmail||'')+'</div></td><td><span style="font-weight:600">'+_monEsc(e.tipoLabel||e.tipo||'evento')+'</span>'+(det?' <span class="sub" style="margin:0">· '+_monEsc(det)+'</span>':'')+'</td></tr>';}).join(''):'<tr><td colspan="3" style="text-align:center;color:var(--muted);padding:26px">Sin eventos para el filtro.</td></tr>';
+}
+function renderKpisActividad(){
+  var hoy=new Date().toISOString().slice(0,10), sem=Date.now()-7*86400000, emailsHoy={};
+  var nHoy=0,nSem=0;
+  _actCache.forEach(function(e){var ts=e.tsNum||Date.parse(e.ts||''); var dia=String(e.ts||new Date(ts).toISOString()).slice(0,10); if(dia===hoy){nHoy++; emailsHoy[e.userEmail||e.uid||'?']=1;} if(ts>=sem)nSem++;});
+  var set=function(id,v){var el=document.getElementById(id);if(el)el.textContent=v;};
+  set('actTotal',_actCache.length); set('actHoy',nHoy); set('actSemana',nSem); set('actActivos',Object.keys(emailsHoy).length);
+}
+function exportarActividadCSV(){
+  var rows=_actFiltrados(); if(!rows.length){toast('No hay eventos para exportar.','danger');return;}
+  var head=['Fecha','Usuario','Email','Tipo','Detalle'];
+  var lines=[head.join(',')].concat(rows.map(function(e){var det=_evDetalle(e).replace(/"/g,'""');var nombre=(e.userNombre||'').replace(/"/g,'""');return ['"'+_fmtFecha(e.tsNum||Date.parse(e.ts||''))+'"','"'+nombre+'"','"'+(e.userEmail||'')+'"','"'+(e.tipoLabel||e.tipo||'')+'"','"'+det+'"'].join(',');}));
+  var blob=new Blob(['﻿'+lines.join('\n')],{type:'text/csv;charset=utf-8'});var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='registro-actividad.csv';a.click();toast('CSV exportado ('+rows.length+' eventos).','success');
+}
+function purgarActividadManual(){
+  if(typeof ELDB==='undefined'||!ELDB.actividad||!ELDB.actividad.purgar){toast('Purga no disponible.','danger');return;}
+  if(!confirm('¿Borrar permanentemente los eventos con más de 90 días? Esta acción no se puede deshacer.'))return;
+  ELDB.actividad.purgar(90,true).then(function(res){ toast(res&&res.borrados>0?(res.borrados+' evento(s) eliminado(s).'):'No había eventos >90 días.','success'); cargarActividad(); });
+}
+
+// ── Liceos / Colegios (catálogo, colección liceos vía ELDB.liceos) ──
+var DEPENDENCIAS_LBL={municipal:'Municipal / SLEP',subvencionado:'Part. Subvencionado',pagado:'Part. Pagado',delegada:'Administración delegada',otro:'Otro'};
+var allLiceos=[];
+function loadLiceos(){
+  var inc=(document.getElementById('liceoIncInact')||{}).checked===true;
+  if(typeof ELDB==='undefined'||!ELDB.liceos||typeof ELDB.liceos.listar!=='function'){ document.getElementById('liceosTbody').innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--danger)">Módulo de liceos no disponible.</td></tr>'; return; }
+  ELDB.liceos.listar(inc).then(function(list){ allLiceos=list||[]; var sb=document.getElementById('sbCntLiceos'); if(sb)sb.textContent=allLiceos.filter(function(l){return l.activo!==false;}).length; renderLiceos(allLiceos); if(window.ELColegios&&ELColegios.invalidarCache)ELColegios.invalidarCache(); })
+   .catch(function(e){ document.getElementById('liceosTbody').innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--danger)">Error: '+(e&&e.message||'desconocido')+'</td></tr>'; });
+}
+function renderLiceos(list){
+  var tb=document.getElementById('liceosTbody'); if(!tb)return;
+  if(!list||!list.length){ tb.innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--muted)">Sin liceos registrados. Usa "Nuevo liceo".</td></tr>'; return; }
+  tb.innerHTML=list.map(function(l){
+    var logo=l.logoPath||('assets/logos/colegios/'+l.slug+'.png');
+    var dep=DEPENDENCIAS_LBL[l.dependencia]||(l.dependencia||'—');
+    var est=l.activo!==false?'<span class="tag success">Activo</span>':'<span class="tag danger">Inactivo</span>';
+    var acc=l.activo!==false
+      ? '<button class="btn ghost sm" onclick="abrirModalLiceo(\''+l.slug+'\')" title="Editar"><span class="material-symbols-outlined" style="font-size:16px">edit</span></button> <button class="btn ghost sm" onclick="eliminarLiceo(\''+l.slug+'\')" title="Desactivar"><span class="material-symbols-outlined" style="font-size:16px;color:var(--danger)">block</span></button>'
+      : '<button class="btn ghost sm" onclick="restaurarLiceo(\''+l.slug+'\')" title="Restaurar"><span class="material-symbols-outlined" style="font-size:16px">restore</span> Restaurar</button>';
+    return '<tr><td><img src="'+logo+'" alt="logo" onerror="this.onerror=null;this.src=\'assets/logos/colegios/default.svg\';" style="width:36px;height:36px;object-fit:contain;background:#fff;border-radius:6px;padding:2px;border:1px solid var(--border-2)"></td>'+
+      '<td><b>'+(l.nombre||'—')+'</b><div class="sub" style="margin:0;font-family:monospace">'+l.slug+'</div></td>'+
+      '<td>'+(l.rbd||'—')+'</td><td>'+(l.comuna||'—')+(l.region?' <span class="sub" style="margin:0">· '+l.region+'</span>':'')+'</td>'+
+      '<td>'+dep+'</td><td>'+est+'</td><td style="white-space:nowrap">'+acc+'</td></tr>';
+  }).join('');
+}
+function filtrarLiceos(){
+  var q=((document.getElementById('liceoSearch')||{}).value||'').toLowerCase().trim();
+  if(!q){renderLiceos(allLiceos);return;}
+  renderLiceos(allLiceos.filter(function(l){var hay=(l.nombre||'')+' '+(l.slug||'')+' '+(l.rbd||'')+' '+(l.comuna||'')+' '+(l.region||'')+' '+((l.alias||[]).join(' '));return hay.toLowerCase().indexOf(q)!==-1;}));
+}
+function abrirModalLiceo(slug){
+  var editing=!!slug;
+  document.getElementById('liceoModalTitle').innerHTML='<span class="material-symbols-outlined" style="color:var(--primary)">school</span> '+(editing?'Editar Liceo':'Nuevo Liceo');
+  document.getElementById('liceoEditingSlug').value=editing?slug:'';
+  ['liceoNombre','liceoSlug','liceoRbd','liceoComuna','liceoRegion','liceoLogoPath','liceoAlias'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('liceoDependencia').value='';
+  document.getElementById('liceoLogoPreview').src='assets/logos/colegios/default.svg';
+  document.getElementById('liceoNotif').textContent='';
+  var slugIn=document.getElementById('liceoSlug'); slugIn.readOnly=editing; slugIn.style.opacity=editing?'.6':'1';
+  var lp=document.getElementById('liceoLogoPath'); if(lp)delete lp.dataset.touched;
+  if(editing){ var l=allLiceos.filter(function(x){return x.slug===slug;})[0]; if(!l){toast('Liceo no encontrado.','danger');return;}
+    document.getElementById('liceoNombre').value=l.nombre||''; slugIn.value=l.slug||''; document.getElementById('liceoRbd').value=l.rbd||''; document.getElementById('liceoComuna').value=l.comuna||''; document.getElementById('liceoRegion').value=l.region||''; document.getElementById('liceoDependencia').value=l.dependencia||''; document.getElementById('liceoLogoPath').value=l.logoPath||('assets/logos/colegios/'+l.slug+'.png'); document.getElementById('liceoAlias').value=Array.isArray(l.alias)?l.alias.join(', '):''; document.getElementById('liceoLogoPreview').src=l.logoPath||('assets/logos/colegios/'+l.slug+'.png');
+  }
+  document.getElementById('modalLiceo').classList.add('show');
+}
+function cerrarModalLiceo(){ document.getElementById('modalLiceo').classList.remove('show'); }
+function liceoAutoSlug(){
+  var slugIn=document.getElementById('liceoSlug'); if(slugIn.readOnly)return;
+  var nombre=document.getElementById('liceoNombre').value;
+  var slug=(window.ELColegios&&ELColegios.slugify)?ELColegios.slugify(nombre):String(nombre||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9\s-]/g,'').replace(/\s+/g,'-').replace(/-+/g,'-').replace(/^-|-$/g,'');
+  slugIn.value=slug;
+  var logoIn=document.getElementById('liceoLogoPath');
+  if(logoIn&&!logoIn.dataset.touched){ logoIn.value=slug?('assets/logos/colegios/'+slug+'.png'):''; document.getElementById('liceoLogoPreview').src=logoIn.value||'assets/logos/colegios/default.svg'; }
+}
+document.addEventListener('input',function(e){ if(e.target&&e.target.id==='liceoLogoPath'){ e.target.dataset.touched='1'; var p=document.getElementById('liceoLogoPreview'); if(p)p.src=e.target.value||'assets/logos/colegios/default.svg'; } });
+function guardarLiceo(){
+  var slugEdit=document.getElementById('liceoEditingSlug').value, editing=!!slugEdit;
+  var nombre=document.getElementById('liceoNombre').value.trim();
+  var slug=document.getElementById('liceoSlug').value.trim().toLowerCase();
+  var nf=document.getElementById('liceoNotif');
+  if(!nombre){nf.textContent='El nombre es obligatorio.';nf.style.color='var(--danger)';return;}
+  if(!slug||!/^[a-z0-9-]+$/.test(slug)){nf.textContent='Slug inválido (solo minúsculas, números y guiones).';nf.style.color='var(--danger)';return;}
+  var alias=(document.getElementById('liceoAlias').value||'').split(',').map(function(s){return s.trim();}).filter(Boolean);
+  var data={slug:slug,nombre:nombre,rbd:document.getElementById('liceoRbd').value.trim(),comuna:document.getElementById('liceoComuna').value.trim(),region:document.getElementById('liceoRegion').value.trim(),dependencia:document.getElementById('liceoDependencia').value,logoPath:document.getElementById('liceoLogoPath').value.trim()||('assets/logos/colegios/'+slug+'.png'),alias:alias};
+  var btn=document.getElementById('btnGuardarLiceo'); if(btn)btn.disabled=true;
+  var p=editing?ELDB.liceos.actualizar(slugEdit,data):ELDB.liceos.crear(data);
+  p.then(function(){ if(btn)btn.disabled=false; toast(editing?'Liceo actualizado.':'Liceo creado.','success'); cerrarModalLiceo(); loadLiceos(); })
+   .catch(function(e){ if(btn)btn.disabled=false; nf.textContent='Error: '+(e&&e.message||'guardando'); nf.style.color='var(--danger)'; });
+}
+function eliminarLiceo(slug){ var l=allLiceos.filter(function(x){return x.slug===slug;})[0]; if(!confirm('¿Desactivar el liceo "'+(l?l.nombre:slug)+'"? Podrás restaurarlo cuando quieras.'))return; ELDB.liceos.eliminar(slug).then(loadLiceos).catch(function(e){toast('Error: '+(e&&e.message||''),'danger');}); }
+function restaurarLiceo(slug){ ELDB.liceos.restaurar(slug).then(loadLiceos).catch(function(e){toast('Error: '+(e&&e.message||''),'danger');}); }
 
 // ── Auth gate ──
 function esAdmin(u){if(!u)return false;if(u.role==='admin')return true;var L=window.EL_ADMIN_EMAILS||(window.EL_ADMIN_EMAIL?[window.EL_ADMIN_EMAIL]:[]);return L.indexOf(u.email)!==-1;}
