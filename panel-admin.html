@@ -79,6 +79,17 @@
           <div class="fld"><label>Segmento (solo UTP)</label><select id="nuSeg"><option value="">— (no aplica)</option><option value="pre">Pre-básica</option><option value="b16">1° a 6° básico</option><option value="mhc">Media H-C</option><option value="mfg">Media Formación General</option><option value="tp">Técnico Profesional</option></select></div>
           <div class="fld"><label>Contraseña inicial</label><input id="nuPass" value="Demo1234!"></div>
         </div>
+        <div id="nuProfBox" style="margin-top:12px;border-top:1px solid var(--border-2);padding-top:12px">
+          <div class="sub" style="margin:0 0 8px"><b>Asignación (solo profesores):</b> qué imparte. Para un profesor particular esto define sus asignaturas y OA en su panel.</div>
+          <div class="frm">
+            <div class="fld" style="grid-column:1/-1">
+              <label>Asignaturas <span id="nuAsigCnt" class="count">0</span> <button type="button" class="btn ghost sm" style="margin-left:8px" onclick="nuLlenarCurric()">Cargar currículo</button> <button type="button" class="btn ghost sm" onclick="nuToggleAsig(false)">Ninguna</button></label>
+              <div id="nuAsigList" style="max-height:170px;overflow:auto;border:1px solid var(--border-2);border-radius:9px;padding:6px;background:var(--surface)"><div class="sub" style="margin:0">Pulsa "Cargar currículo" para elegir asignaturas.</div></div>
+            </div>
+            <div class="fld"><label>Niveles (coma, opcional)</label><input id="nuNiv" placeholder="ej: 5° Básico, 6° Básico"></div>
+            <div class="fld"><label>Especialidad TP (opcional)</label><input id="nuEsp" placeholder="ej: Electrónica"></div>
+          </div>
+        </div>
         <div style="margin-top:14px"><button class="btn" id="btnCrear" onclick="crearUsuario()"><span class="material-symbols-outlined" style="font-size:18px">add</span> Crear usuario</button></div>
       </div>
       <div class="card"><div class="cardhead"><h3><span class="material-symbols-outlined">group</span> Usuarios <span class="count" id="cnt-usuarios">0</span></h3>
@@ -93,13 +104,13 @@
       <div class="card"><div class="cardhead"><h3><span class="material-symbols-outlined">school</span> Liceos registrados <span class="count" id="sbCntLiceos">0</span></h3>
         <div class="tools"><div class="search"><span class="material-symbols-outlined">search</span><input id="liceoSearch" placeholder="Buscar liceo…" oninput="filtrarLiceos()"></div>
           <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--muted)"><input type="checkbox" id="liceoIncInact" onchange="loadLiceos()"> Incluir inactivos</label>
-          <button class="btn" onclick="abrirModalLiceo('')"><span class="material-symbols-outlined" style="font-size:18px">add</span> Nuevo liceo</button></div></div>
+          <button class="btn" onclick="abrirModalLiceo('')"><span class="material-symbols-outlined" style="font-size:18px">add_business</span> Crear colegio</button></div></div>
         <table><thead><tr><th>Logo</th><th>Nombre</th><th>RBD</th><th>Comuna / Región</th><th>Dependencia</th><th>Estado</th><th>Acciones</th></tr></thead><tbody id="liceosTbody"><tr><td colspan="7" style="color:var(--muted)">Cargando…</td></tr></tbody></table>
       </div>
 
-      <div class="card"><div class="cardhead"><h3><span class="material-symbols-outlined">apartment</span> Colegios multi-tenant (con equipo y paneles) <span class="count" id="cnt-colegios">0</span></h3>
-        <div class="tools"><button class="btn" onclick="abrirWizard()"><span class="material-symbols-outlined" style="font-size:18px">add_business</span> Crear colegio</button></div></div>
-        <table><thead><tr><th>Colegio</th><th>RBD</th><th>Dependencia</th><th>Cargos creados</th><th></th></tr></thead><tbody id="tb-colegios"><tr><td colspan="5" style="color:var(--muted)">Sin colegios aún. Usa "Crear colegio".</td></tr></tbody></table>
+      <div class="card"><div class="cardhead"><h3><span class="material-symbols-outlined">apartment</span> Colegios con panel y equipo <span class="count" id="cnt-colegios">0</span></h3>
+        <div class="sub" style="margin:0">Cada colegio creado arriba tiene su espacio de datos y paneles. Gestiona sus cuentas en "Cuentas de colegio".</div></div>
+        <table><thead><tr><th>Colegio</th><th>RBD</th><th>Dependencia</th><th>Cargos creados</th><th></th></tr></thead><tbody id="tb-colegios"><tr><td colspan="5" style="color:var(--muted)">Aún no hay colegios. Crea uno con "Crear colegio".</td></tr></tbody></table>
       </div>
 
       <div class="card" id="wizard" style="display:none">
@@ -156,6 +167,24 @@
           <button class="btn" id="wzFin" onclick="crearColegio()" style="display:none"><span class="material-symbols-outlined" style="font-size:18px">check</span> Crear colegio</button></div>
         </div>
         <div id="wzMsg" class="sub" style="margin-top:10px"></div>
+      </div>
+    </section>
+
+    <section class="sec" id="sec-cuentas">
+      <div class="h1">Cuentas de colegio</div><div class="sub">Crea los correos y cargos de un colegio (director, UTP, rector, jefe TP, profesores, convivencia, apoyo, PIE). Se asignan automáticamente a ese colegio.</div>
+      <div class="card"><h3><span class="material-symbols-outlined">badge</span> Nueva cuenta</h3>
+        <div class="frm">
+          <div class="fld"><label>Colegio</label><select id="ccColegio"><option value="">— Elige un colegio —</option></select></div>
+          <div class="fld"><label>Cargo / rol</label><select id="ccRol"><option value="admin_colegio">Administrador de colegio</option><option value="director">Director</option><option value="rector">Rector</option><option value="utp">Encargado pedagógico (UTP)</option><option value="jefe_tp">Jefe de especialidad TP</option><option value="profesor">Profesor</option><option value="amb_enc">Encargado de ambiente</option><option value="amb_prof">Profesional de ambiente</option><option value="aps_enc">Encargado apoyo psicosocial</option><option value="aps_prof">Profesional apoyo psicosocial</option><option value="pie_enc">Encargada PIE</option><option value="pie_edu">Educadora PIE</option></select></div>
+          <div class="fld"><label>Nombre</label><input id="ccNombre" placeholder="Nombre y apellido"></div>
+          <div class="fld"><label>Correo</label><input id="ccEmail" placeholder="persona@colegio.cl"></div>
+          <div class="fld"><label>Segmento (solo UTP)</label><select id="ccSeg"><option value="">— (no aplica)</option><option value="pre">Pre-básica</option><option value="b16">1° a 6° básico</option><option value="mhc">Media H-C</option><option value="mfg">Media Formación General</option><option value="tp">Técnico Profesional</option></select></div>
+          <div class="fld"><label>Contraseña inicial</label><input id="ccPass" value="Demo1234!"></div>
+        </div>
+        <div style="margin-top:12px"><button class="btn" onclick="crearCuentaColegio()"><span class="material-symbols-outlined" style="font-size:18px">add</span> Crear cuenta</button></div>
+      </div>
+      <div class="card"><div class="cardhead"><h3><span class="material-symbols-outlined">groups</span> Cuentas del colegio seleccionado <span class="count" id="cnt-cuentas">0</span></h3><div class="tools"><button class="btn ghost sm" onclick="renderCuentasColegio()"><span class="material-symbols-outlined" style="font-size:16px">refresh</span> Actualizar</button></div></div>
+        <table><thead><tr><th>Correo</th><th>Nombre</th><th>Rol</th><th>Estado</th></tr></thead><tbody id="tb-cuentas"><tr><td colspan="4" style="color:var(--muted)">Elige un colegio arriba.</td></tr></tbody></table>
       </div>
     </section>
 
@@ -353,7 +382,7 @@
 function ic(n){return '<span class="material-symbols-outlined">'+n+'</span>';}
 var _tt;function toast(msg,tone){var t=document.getElementById('toast');t.style.borderLeftColor='var(--'+(tone==='danger'?'danger':'success')+')';var i=t.querySelector('.material-symbols-outlined');i.style.color='var(--'+(tone==='danger'?'danger':'success')+')';i.textContent=tone==='danger'?'error':'check_circle';document.getElementById('toastMsg').textContent=msg;t.classList.add('show');clearTimeout(_tt);_tt=setTimeout(function(){t.classList.remove('show')},3200);}
 
-var NAV=[['dashboard','Resumen','resumen'],['group','Usuarios','usuarios'],['vpn_key','Códigos de acceso','codigos'],['apartment','Liceos / Colegios','colegios'],['menu_book','Académico','academico'],['description','Materiales','materiales'],['event_note','Planificaciones','planificaciones'],['smart_toy','Configuración IA','ia'],['campaign','Comunicados','comunicados'],['sensors','Monitoreo en vivo','monitoreo'],['bar_chart','Registro de Actividad','actividad']];
+var NAV=[['dashboard','Resumen','resumen'],['group','Usuarios','usuarios'],['apartment','Liceos / Colegios','colegios'],['badge','Cuentas de colegio','cuentas'],['vpn_key','Códigos de acceso','codigos'],['menu_book','Académico','academico'],['description','Materiales','materiales'],['event_note','Planificaciones','planificaciones'],['smart_toy','Configuración IA','ia'],['campaign','Comunicados','comunicados'],['sensors','Monitoreo en vivo','monitoreo'],['bar_chart','Registro de Actividad','actividad']];
 document.getElementById('nav').innerHTML=NAV.map(function(n,i){return '<div class="nav-item'+(i===0?' active':'')+'" data-s="'+n[2]+'">'+ic(n[0])+'<span>'+n[1]+'</span></div>'}).join('');
 function show(s){document.querySelectorAll('.nav-item').forEach(function(x){x.classList.toggle('active',x.dataset.s===s)});document.querySelectorAll('.sec').forEach(function(x){x.classList.toggle('active',x.id==='sec-'+s)});
  if(s==='comunicados'){loadComunicados();}
@@ -363,6 +392,7 @@ function show(s){document.querySelectorAll('.nav-item').forEach(function(x){x.cl
  if(s==='codigos'){loadCodigos();}
  if(s==='materiales'){loadMateriales();}
  if(s==='planificaciones'){loadPlanificaciones();}
+ if(s==='cuentas'){loadCuentasColegios();}
 }
 document.querySelectorAll('.nav-item').forEach(function(x){x.addEventListener('click',function(){show(x.dataset.s)})});
 function salir(){try{ELAuth.logout();}catch(e){}window.location.href='login.html';}
@@ -540,8 +570,17 @@ function guardarLiceo(){
   var data={slug:slug,nombre:nombre,rbd:document.getElementById('liceoRbd').value.trim(),comuna:document.getElementById('liceoComuna').value.trim(),region:document.getElementById('liceoRegion').value.trim(),dependencia:document.getElementById('liceoDependencia').value,logoPath:document.getElementById('liceoLogoPath').value.trim()||('assets/logos/colegios/'+slug+'.png'),alias:alias};
   var btn=document.getElementById('btnGuardarLiceo'); if(btn)btn.disabled=true;
   var p=editing?ELDB.liceos.actualizar(slugEdit,data):ELDB.liceos.crear(data);
-  p.then(function(){ if(btn)btn.disabled=false; toast(editing?'Liceo actualizado.':'Liceo creado.','success'); cerrarModalLiceo(); loadLiceos(); })
+  p.then(function(){ return _upsertTenant(slug,data); })
+   .then(function(){ if(btn)btn.disabled=false; toast(editing?'Colegio actualizado.':'Colegio creado. Ya puedes crear sus cuentas en "Cuentas de colegio".','success'); cerrarModalLiceo(); loadLiceos(); cargarColegios(); })
    .catch(function(e){ if(btn)btn.disabled=false; nf.textContent='Error: '+(e&&e.message||'guardando'); nf.style.color='var(--danger)'; });
+}
+// Crea/actualiza el espacio multi-tenant del colegio (organización + registro).
+function _upsertTenant(slug,data){
+  if(typeof EL_DB==='undefined')return Promise.resolve();
+  var colegio={id:slug,nombre:data.nombre,rbd:data.rbd||'',dependencia:data.dependencia||'',comuna:data.comuna||'',region:data.region||''};
+  return EL_DB.collection('organizaciones').doc(slug).collection('config').doc('colegio').set({json:JSON.stringify(colegio)})
+   .then(function(){ return EL_DB.collection('sistema').doc('colegios').get(); })
+   .then(function(d){ var lista=(d.exists&&d.data().lista)?d.data().lista:[]; var i=-1; for(var k=0;k<lista.length;k++){if(lista[k].id===slug){i=k;break;}} var reg={id:slug,nombre:data.nombre,rbd:data.rbd||'',dependencia:data.dependencia||'',cargos:(i>=0?(lista[i].cargos||0):0)}; if(i>=0)lista[i]=reg; else lista.push(reg); return EL_DB.collection('sistema').doc('colegios').set({lista:lista}); });
 }
 function eliminarLiceo(slug){ var l=allLiceos.filter(function(x){return x.slug===slug;})[0]; if(!confirm('¿Desactivar el liceo "'+(l?l.nombre:slug)+'"? Podrás restaurarlo cuando quieras.'))return; ELDB.liceos.eliminar(slug).then(loadLiceos).catch(function(e){toast('Error: '+(e&&e.message||''),'danger');}); }
 function restaurarLiceo(slug){ ELDB.liceos.restaurar(slug).then(loadLiceos).catch(function(e){toast('Error: '+(e&&e.message||''),'danger');}); }
@@ -568,6 +607,29 @@ function eliminarPlan(id){ if(!confirm('¿Eliminar esta planificación?'))return
 
 // ── Alertas de seguridad (banner en Actividad) ──
 function loadAlertas(){ var b=document.getElementById('actAlertas'); if(!b||typeof ELDB==='undefined'||!ELDB.actividad||!ELDB.actividad.listarAlertas)return; ELDB.actividad.listarAlertas(24).then(function(al){ al=al||[]; if(!al.length){b.style.display='none';return;} b.style.display='block'; document.getElementById('actAlertasTxt').textContent=al.length+' alerta(s) de seguridad en las últimas 24 h (logins fallidos / accesos sospechosos).'; }).catch(function(){b.style.display='none';}); }
+
+// ── Cuentas de colegio (crear cargos/correos por colegio) ──
+function loadCuentasColegios(){ var sel=document.getElementById('ccColegio'); if(!sel)return; var cur=sel.value; var opts=[]; var seen={};
+ (_colegiosReg||[]).forEach(function(x){ if(!seen[x.id]){seen[x.id]=1;opts.push({id:x.id,nombre:x.nombre});} });
+ (allLiceos||[]).forEach(function(l){ if(!seen[l.slug]){seen[l.slug]=1;opts.push({id:l.slug,nombre:l.nombre});} });
+ // asegurar colegio-demo
+ if(!seen['colegio-demo'])opts.unshift({id:'colegio-demo',nombre:'Colegio demo'});
+ sel.innerHTML='<option value="">— Elige un colegio —</option>'+opts.map(function(o){return '<option value="'+o.id+'">'+o.nombre+' ('+o.id+')</option>';}).join('');
+ if(cur)sel.value=cur;
+ sel.onchange=renderCuentasColegio; renderCuentasColegio();
+}
+function crearCuentaColegio(){ var org=document.getElementById('ccColegio').value; if(!org){toast('Elige un colegio.','danger');return;}
+ var nombre=document.getElementById('ccNombre').value.trim(), email=document.getElementById('ccEmail').value.trim(), role=document.getElementById('ccRol').value, seg=document.getElementById('ccSeg').value||null, pass=document.getElementById('ccPass').value||'Demo1234!';
+ if(!nombre||!email){toast('Completa nombre y correo.','danger');return;}
+ if(pass.length<6){toast('La contraseña debe tener al menos 6 caracteres.','danger');return;}
+ fetch('https://identitytoolkit.googleapis.com/v1/accounts:signUp?key='+FIREBASE_CONFIG.apiKey,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:email,password:pass,displayName:nombre,returnSecureToken:false})})
+  .then(function(r){return r.json()}).then(function(res){ if(res.error){var m=res.error.message;if(m==='EMAIL_EXISTS')m='Ya existe una cuenta con ese correo.';throw new Error(m);} var uid=res.localId; if(!uid)throw new Error('No se obtuvo UID.'); var perfil={email:email,nombre:nombre,role:role,tipo:'colegio',orgId:org,seg:seg,activo:true,primerIngreso:false,creadoEn:new Date().toISOString()}; return EL_DB.collection('usuarios').doc(uid).set(perfil).then(function(){ return EL_DB.collection('organizaciones').doc(org).collection('miembros').doc(uid).set({rol:role,email:email,nombre:nombre,seg:seg}).catch(function(){}); }); })
+  .then(function(){ toast('Cuenta creada: '+email,'success'); document.getElementById('ccNombre').value='';document.getElementById('ccEmail').value=''; return cargarUsuarios(); })
+  .then(function(){ renderCuentasColegio(); _incCargos(org); })
+  .catch(function(e){ toast('Error: '+e.message,'danger'); });
+}
+function _incCargos(org){ EL_DB.collection('sistema').doc('colegios').get().then(function(d){ var lista=(d.exists&&d.data().lista)?d.data().lista:[]; var ch=false; lista=lista.map(function(c){ if(c.id===org){c.cargos=(c.cargos||0)+1;ch=true;} return c; }); if(ch){EL_DB.collection('sistema').doc('colegios').set({lista:lista}).then(cargarColegios);} }).catch(function(){}); }
+function renderCuentasColegio(){ var org=document.getElementById('ccColegio').value, tb=document.getElementById('tb-cuentas'); if(!tb)return; if(!org){tb.innerHTML='<tr><td colspan="4" style="color:var(--muted)">Elige un colegio arriba.</td></tr>';document.getElementById('cnt-cuentas').textContent=0;return;} var rows=(_allUsers||[]).filter(function(u){return u.orgId===org;}); document.getElementById('cnt-cuentas').textContent=rows.length; tb.innerHTML=rows.length?rows.map(function(u){var act=u.activo!==false; return '<tr><td>'+(u.email||u.uid)+'</td><td>'+(u.nombre||'—')+'</td><td><span class="tag info">'+(u.role||'')+'</span></td><td>'+(act?'<span class="tag success">Activo</span>':'<span class="tag danger">Suspendido</span>')+'</td></tr>';}).join(''):'<tr><td colspan="4" style="color:var(--muted)">Este colegio aún no tiene cuentas.</td></tr>'; }
 
 // ── Auth gate ──
 function esAdmin(u){if(!u)return false;if(u.role==='admin')return true;var L=window.EL_ADMIN_EMAILS||(window.EL_ADMIN_EMAIL?[window.EL_ADMIN_EMAIL]:[]);return L.indexOf(u.email)!==-1;}
@@ -651,6 +713,7 @@ function crearUsuario(){
     if(res.error){var m=res.error.message;if(m==='EMAIL_EXISTS')m='Ya existe una cuenta con ese correo.';throw new Error(m);}
     var uid=res.localId;if(!uid)throw new Error('No se obtuvo UID.');
     var perfil={email:email,nombre:nombre,role:role,tipo:tipo,orgId:orgId,seg:seg,activo:true,primerIngreso:false,creadoEn:new Date().toISOString()};
+    if(role==='profesor'){ perfil.asignaturas=nuAsigChecked(); perfil.niveles=(document.getElementById('nuNiv').value||'').split(',').map(function(s){return s.trim();}).filter(Boolean); var esp=(document.getElementById('nuEsp').value||'').trim(); if(esp)perfil.especialidad=esp; }
     return EL_DB.collection('usuarios').doc(uid).set(perfil).then(function(){
       if(orgId){return EL_DB.collection('organizaciones').doc(orgId).collection('miembros').doc(uid).set({rol:role,email:email,nombre:nombre,seg:seg}).catch(function(){});}
     });
@@ -659,6 +722,12 @@ function crearUsuario(){
   .catch(function(err){toast('Error: '+err.message,'danger');})
   .then(function(){b.disabled=false;b.innerHTML=o;});
 }
+
+// ── Asignaturas del profesor al crearlo (checkboxes desde el currículo) ──
+function nuLlenarCurric(){ var box=document.getElementById('nuAsigList'); if(typeof getCurriculumNacional==='undefined'){box.innerHTML='<div class="sub" style="margin:0;color:var(--danger)">Currículo no disponible.</div>';return;} box.innerHTML='<div class="sub" style="margin:0">Cargando…</div>'; getCurriculumNacional().then(function(d){ var names=(d.asignaturas||[]).map(function(a){return a.nombre;}); box.innerHTML=names.map(function(n){return '<label style="display:flex;align-items:center;gap:9px;padding:5px 6px;border-radius:6px;cursor:pointer;font-size:13.5px"><input type="checkbox" value="'+n.replace(/"/g,'&quot;')+'" onchange="nuUpdCnt()"> '+n+'</label>';}).join(''); nuUpdCnt(); }); }
+function nuUpdCnt(){ var el=document.getElementById('nuAsigList'); var c=document.getElementById('nuAsigCnt'); if(el&&c)c.textContent=el.querySelectorAll('input:checked').length; }
+function nuToggleAsig(v){ var el=document.getElementById('nuAsigList'); if(!el)return; el.querySelectorAll('input[type=checkbox]').forEach(function(chk){chk.checked=v;}); nuUpdCnt(); }
+function nuAsigChecked(){ var el=document.getElementById('nuAsigList'); if(!el)return []; return Array.prototype.map.call(el.querySelectorAll('input:checked'),function(c){return c.value;}); }
 
 // ── Configuración IA (Firestore sistema/gemini) ──
 var _ia={keys:[],modelo:'gemini-2.5-flash'};

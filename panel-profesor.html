@@ -182,10 +182,20 @@ function _cargarCurriculoLibre(){
    actualizarOAs();
  }).catch(function(){});
 }
+// Aplica una lista de asignaturas/niveles concreta (asignada por el admin), con OA desde el currículo.
+function _setAsig(asigNames,nivNames){
+ if(typeof getCurriculumNacional!=='undefined'){
+   getCurriculumNacional().then(function(d){ var byName={}; (d.asignaturas||[]).forEach(function(a){byName[(a.nombre||'').toLowerCase()]=a;});
+     window._ASIG_META=asigNames.map(function(n){var h=byName[n.toLowerCase()];return {nombre:n,sigla:h?h.sigla:'',niveles:h?h.niveles:[]};});
+     fillSelect('matAsig',asigNames); fillSelect('matNivel',(nivNames&&nivNames.length)?nivNames:(d.niveles||[])); actualizarOAs(); });
+ } else { window._ASIG_META=asigNames.map(function(n){return {nombre:n,sigla:'',niveles:[]};}); fillSelect('matAsig',asigNames); if(nivNames&&nivNames.length)fillSelect('matNivel',nivNames); actualizarOAs(); }
+}
 function cargarAsignaturas(u){
  if(!window.ccStore)return;
  var indep = u && u.role!=='admin' && (u.tipo==='independiente' || !u.orgId);
- if(indep){ _cargarCurriculoLibre(); return; }   // ← profesor particular: currículo completo
+ var propiasA = (u && Array.isArray(u.asignaturas) && u.asignaturas.length) ? u.asignaturas : null;
+ var propiasN = (u && Array.isArray(u.niveles) && u.niveles.length) ? u.niveles : null;
+ if(indep){ if(propiasA){ _setAsig(propiasA,propiasN); return; } _cargarCurriculoLibre(); return; }   // particular: lo que le asignó el admin, o currículo completo
  Promise.all([ccStore.getConfig('academico'),ccStore.getConfig('asignaciones')]).then(function(res){var acad=res[0]||{},asign=res[1]||{};var allA=acad.asignaturas||[],allN=acad.niveles||[];var email='';try{if(window.EL_AUTH&&EL_AUTH.currentUser)email=(EL_AUTH.currentUser.email||'');}catch(e){}var misA=allA,misN=allN;if(asign.rows&&email){for(var i=0;i<asign.rows.length;i++){var r=asign.rows[i];if((r[0]||'').toLowerCase().trim()===email.toLowerCase().trim()){var a=(r[1]||'').split(',').map(function(s){return s.trim()}).filter(Boolean);var n=(r[2]||'').split(',').map(function(s){return s.trim()}).filter(Boolean);if(a.length)misA=a;if(n.length)misN=n;break;}}}
    if(!misA.length){ _cargarCurriculoLibre(); return; }   // colegio sin académico cargado: usar currículo nacional
    window._ASIG_META=acad.asignaturasMeta||[];fillSelect('matAsig',misA);fillSelect('matNivel',misN);actualizarOAs();}).catch(function(){});}
