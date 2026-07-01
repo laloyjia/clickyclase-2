@@ -65,6 +65,7 @@
             <option value="pie_edu">Educadora PIE</option>
             <option value="admin">Administrador</option>
           </select></div>
+          <div class="fld"><label>Organización / Colegio</label><select id="nuOrg"><option value="__particular__">🧑‍🏫 Particular / Independiente (sin colegio)</option><option value="colegio-demo">Colegio demo</option></select></div>
           <div class="fld"><label>Segmento (solo UTP)</label><select id="nuSeg"><option value="">— (no aplica)</option><option value="pre">Pre-básica</option><option value="b16">1° a 6° básico</option><option value="mhc">Media H-C</option><option value="mfg">Media Formación General</option><option value="tp">Técnico Profesional</option></select></div>
           <div class="fld"><label>Contraseña inicial</label><input id="nuPass" value="Demo1234!"></div>
         </div>
@@ -88,7 +89,7 @@
 
       <div class="card"><div class="cardhead"><h3><span class="material-symbols-outlined">apartment</span> Colegios multi-tenant (con equipo y paneles) <span class="count" id="cnt-colegios">0</span></h3>
         <div class="tools"><button class="btn" onclick="abrirWizard()"><span class="material-symbols-outlined" style="font-size:18px">add_business</span> Crear colegio</button></div></div>
-        <table><thead><tr><th>Colegio</th><th>RBD</th><th>Dependencia</th><th>Cargos creados</th></tr></thead><tbody id="tb-colegios"><tr><td colspan="4" style="color:var(--muted)">Sin colegios aún. Usa "Crear colegio".</td></tr></tbody></table>
+        <table><thead><tr><th>Colegio</th><th>RBD</th><th>Dependencia</th><th>Cargos creados</th><th></th></tr></thead><tbody id="tb-colegios"><tr><td colspan="5" style="color:var(--muted)">Sin colegios aún. Usa "Crear colegio".</td></tr></tbody></table>
       </div>
 
       <div class="card" id="wizard" style="display:none">
@@ -166,6 +167,16 @@
       <div class="card" id="curMapa" style="display:none;margin-top:12px"><div class="cardhead"><h3><span class="material-symbols-outlined">menu_book</span> Asignaturas del currículo nacional <span class="count" id="cnt-curmapa">0</span></h3></div>
         <table><thead><tr><th>Asignatura</th><th>Sigla</th><th>Niveles</th></tr></thead><tbody id="tb-curmapa"></tbody></table>
       </div>
+
+      <div class="card" style="margin-top:12px"><div class="cardhead"><h3><span class="material-symbols-outlined">travel_explore</span> Explorar currículo — OA y aprendizajes esperados</h3></div>
+        <div class="sub">Revisa los Objetivos de Aprendizaje de cada asignatura del Plan Común y los Aprendizajes Esperados de cada módulo de las especialidades TP.</div>
+        <div class="frm" style="margin-top:8px">
+          <div class="fld"><label>Ámbito</label><select id="expAmbito" onchange="expOnAmbito()"><option value="pc">Plan Común (asignaturas)</option><option value="tp">Técnico Profesional (módulos)</option></select></div>
+          <div class="fld"><label id="expLbl1">Asignatura</label><select id="expSel1" onchange="expOnSel1()"><option value="">— Elige —</option></select></div>
+          <div class="fld"><label id="expLbl2">Nivel / Módulo</label><select id="expSel2" onchange="expRender()"><option value="">— Elige —</option></select></div>
+        </div>
+        <div id="expOut" style="margin-top:12px"><div class="sub">Elige un ámbito y una asignatura o módulo para ver sus objetivos.</div></div>
+      </div>
     </section>
 
     <section class="sec" id="sec-ia">
@@ -235,6 +246,19 @@
     </section>
     </div>
   </main>
+</div>
+<div class="overlay" id="modalEditColegio">
+  <div class="modal" style="max-width:560px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px"><h3 style="font-size:16px;font-weight:600;display:flex;align-items:center;gap:8px"><span class="material-symbols-outlined" style="color:var(--primary)">apartment</span> Editar colegio</h3><span class="material-symbols-outlined" style="cursor:pointer;color:var(--muted)" onclick="cerrarEditColegio()">close</span></div>
+    <input type="hidden" id="ecId">
+    <div class="frm">
+      <div class="fld" style="grid-column:1/-1"><label>Nombre del colegio</label><input id="ecNombre"></div>
+      <div class="fld"><label>RBD</label><input id="ecRbd" placeholder="12345-6"></div>
+      <div class="fld"><label>Dependencia</label><select id="ecDep"><option>Particular subvencionado</option><option>Municipal / SLEP</option><option>Particular pagado</option><option>Administración delegada</option></select></div>
+    </div>
+    <div class="legal" style="margin-top:10px">Para editar niveles, asignaturas o especialidades de este colegio, ingresa como su Administrador de Colegio o usa la sección Académico. Los cargos y cuentas se gestionan en Usuarios.</div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:12px"><button class="btn ghost" onclick="cerrarEditColegio()">Cancelar</button><button class="btn" onclick="guardarEditColegio()"><span class="material-symbols-outlined" style="font-size:18px">save</span> Guardar</button></div>
+  </div>
 </div>
 <div class="overlay" id="modalLiceo">
   <div class="modal" style="max-width:660px">
@@ -457,7 +481,7 @@ function esAdmin(u){if(!u)return false;if(u.role==='admin')return true;var L=win
 function iniciar(){
  document.getElementById('content').style.display='block';
  document.getElementById('authMsg').style.display='none';
- cargarUsuarios(); cargarIA(); cargarAcademico(); cargarColegios();
+ cargarUsuarios(); cargarIA(); cargarAcademico(); cargarColegios(); if(typeof expOnAmbito==='function')expOnAmbito();
  document.getElementById('estDb').textContent='conectada (clickyclase-2)';
 }
 if(typeof ELAuth!=='undefined'&&ELAuth.onUserReady){
@@ -490,8 +514,10 @@ function crearUsuario(){
  var pass=document.getElementById('nuPass').value;
  if(!nombre||!email){toast('Completa nombre y correo.','danger');return;}
  if((pass||'').length<6){toast('La contraseña debe tener al menos 6 caracteres.','danger');return;}
- var orgId=(role==='admin')?null:'colegio-demo';
- var tipo=(role==='admin')?'plataforma':'colegio';
+ var orgSel=(document.getElementById('nuOrg')||{}).value;
+ var independiente=(orgSel==='__particular__'||!orgSel);
+ var orgId=(role==='admin')?null:(independiente?null:orgSel);
+ var tipo=(role==='admin')?'plataforma':(orgId?'colegio':'independiente');
  var b=document.getElementById('btnCrear');b.disabled=true;var o=b.innerHTML;b.innerHTML='<span class="material-symbols-outlined" style="font-size:18px">hourglass_top</span> Creando…';
  fetch('https://identitytoolkit.googleapis.com/v1/accounts:signUp?key='+FIREBASE_CONFIG.apiKey,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:email,password:pass,displayName:nombre,returnSecureToken:false})})
   .then(function(r){return r.json()})
@@ -541,6 +567,51 @@ function _nivLabel(n){ try{ return (window.CURRICULA_CHILE&&window.CURRICULA_CHI
 function _renderCurMapa(d){ var box=document.getElementById('curMapa'),tb=document.getElementById('tb-curmapa'); if(!box||!tb)return; box.style.display=''; tb.innerHTML=(d.asignaturas||[]).map(function(a){ return '<tr><td>'+a.nombre+'</td><td>'+(a.sigla||'—')+'</td><td>'+((a.niveles||[]).map(_nivLabel).join(', ')||'—')+'</td></tr>'; }).join(''); var c=document.getElementById('cnt-curmapa'); if(c)c.textContent=(d.asignaturas||[]).length; }
 function cargarCurriculumOficial(){ if(typeof getCurriculumNacional==='undefined'){toast('Currículum no disponible (revisa que js/curricula-loader.js esté cargado).','danger');return;} toast('Cargando currículum oficial…','success'); _buildCurMeta().then(function(d){ if(!d||!d.asignaturas||!d.asignaturas.length){toast('No se pudo leer el currículum.','danger');return;} document.getElementById('acNiveles').value=(d.niveles||[]).join('\n'); document.getElementById('acAsig').value=d.asignaturas.map(function(a){return a.nombre}).join('\n'); _renderCurMapa(d); toast(d.asignaturas.length+' asignaturas del currículo nacional cargadas. Revisa y pulsa Guardar.','success'); }); }
 function guardarAcademico(){ var niv=document.getElementById('acNiveles').value.split('\n').map(function(s){return s.trim()}).filter(Boolean); var asig=document.getElementById('acAsig').value.split('\n').map(function(s){return s.trim()}).filter(Boolean); var meta=asig.map(function(name){ var hit=window._CUR_BYNAME&&window._CUR_BYNAME[name.toLowerCase()]; return {nombre:name, sigla:hit?hit.sigla:'', niveles:hit?hit.niveles:[]}; }); if(window.ccStore)ccStore.setConfig('academico',{niveles:niv,asignaturas:asig,asignaturasMeta:meta}); var conOA=meta.filter(function(m){return m.sigla;}).length; toast('Académico guardado: '+asig.length+' asignaturas ('+conOA+' con OA del currículo), '+niv.length+' niveles.','success'); }
+
+// ── Explorador de currículo (OA por asignatura / AE por módulo TP) ──
+window._EXP_ASIG=[];window._EXP_MODS=[];window._EXP_CUR=null;
+function expOnAmbito(){
+  var amb=document.getElementById('expAmbito').value;
+  var l1=document.getElementById('expLbl1'),l2=document.getElementById('expLbl2'),s1=document.getElementById('expSel1'),s2=document.getElementById('expSel2'),out=document.getElementById('expOut');
+  s2.innerHTML='<option value="">— Elige —</option>';
+  if(amb==='pc'){
+    l1.textContent='Asignatura'; l2.textContent='Nivel';
+    if(typeof getCurriculumNacional==='undefined'){out.innerHTML='<div class="sub" style="color:var(--danger)">Currículo no disponible.</div>';return;}
+    getCurriculumNacional().then(function(d){ window._EXP_ASIG=d.asignaturas||[]; s1.innerHTML='<option value="">— Elige —</option>'+window._EXP_ASIG.map(function(a,i){return '<option value="'+i+'">'+a.nombre+'</option>';}).join(''); out.innerHTML='<div class="sub">Elige una asignatura y un nivel.</div>'; });
+  } else {
+    l1.textContent='Especialidad'; l2.textContent='Módulo';
+    out.innerHTML='<div class="sub">Cargando especialidades TP…</div>';
+    var p=(typeof loadCurriculaTP!=='undefined')?loadCurriculaTP():(window.CURRICULA_READY||Promise.resolve(window.CURRICULA_CHILE));
+    p.then(function(CUR){ CUR=CUR||window.CURRICULA_CHILE; window._EXP_CUR=CUR; var esps=(CUR&&CUR.getEspecialidades)?CUR.getEspecialidades():[]; s1.innerHTML='<option value="">— Elige —</option>'+esps.map(function(e){return '<option value="'+e.key+'">'+e.nombre+'</option>';}).join(''); out.innerHTML='<div class="sub">Elige una especialidad y un módulo.</div>'; });
+  }
+}
+function expOnSel1(){
+  var amb=document.getElementById('expAmbito').value,s1=document.getElementById('expSel1'),s2=document.getElementById('expSel2');
+  if(amb==='pc'){
+    var a=(window._EXP_ASIG||[])[+s1.value]; if(!a){s2.innerHTML='<option value="">— Elige —</option>';return;}
+    window.CURRICULA_READY.then(function(CUR){ s2.innerHTML='<option value="">— Elige —</option>'+(a.niveles||[]).map(function(n){return '<option value="'+n+'">'+CUR.getNivelLabel(n)+'</option>';}).join(''); expRender(); });
+  } else {
+    var CUR=window._EXP_CUR||window.CURRICULA_CHILE; var mods=(CUR&&CUR.getModulos)?CUR.getModulos(s1.value):[]; window._EXP_MODS=mods; s2.innerHTML='<option value="">— Elige —</option>'+mods.map(function(m){return '<option value="'+m.num+'">'+(m.num?('M'+m.num+' · '):'')+(m.nombre||'')+'</option>';}).join(''); expRender();
+  }
+}
+function expRender(){
+  var amb=document.getElementById('expAmbito').value,out=document.getElementById('expOut');
+  if(amb==='pc'){
+    var a=(window._EXP_ASIG||[])[+document.getElementById('expSel1').value],code=document.getElementById('expSel2').value;
+    if(!a||!code){out.innerHTML='<div class="sub">Elige una asignatura y un nivel.</div>';return;}
+    window.CURRICULA_READY.then(function(CUR){ var oas=CUR.getOAs(a.sigla,code)||[],uni=CUR.getUnidades(a.sigla,code)||[];
+      out.innerHTML='<div style="font-weight:600;margin-bottom:6px">'+a.nombre+' · '+CUR.getNivelLabel(code)+' <span class="count">'+oas.length+' OA</span></div>'+
+        (uni.length?'<div class="sub" style="margin:0 0 8px"><b>Unidades:</b> '+uni.map(function(x){return typeof x==='string'?x:(x.nombre||x.titulo||'');}).filter(Boolean).join(' · ')+'</div>':'')+
+        (oas.length?oas.map(function(o){var d=o.descripcion||o.desc||'';return '<div class="row" style="align-items:flex-start"><span class="tag info" style="margin-right:8px">'+o.codigo+'</span><div style="flex:1;font-size:13px">'+(o.eje?'<b>'+o.eje+'.</b> ':'')+d+'</div></div>';}).join(''):'<div class="sub">No hay OA para esta asignatura/nivel.</div>');
+    });
+  } else {
+    var num=document.getElementById('expSel2').value,m=(window._EXP_MODS||[]).filter(function(x){return String(x.num)===String(num);})[0];
+    if(!m){out.innerHTML='<div class="sub">Elige una especialidad y un módulo.</div>';return;}
+    var aes=m.aes||[];
+    out.innerHTML='<div style="font-weight:600;margin-bottom:6px">'+(m.nombre||'Módulo')+(m.horas?(' · '+m.horas+' h'):'')+' <span class="count">'+aes.length+' AE</span></div>'+
+      (aes.length?aes.map(function(ae){return '<div class="row" style="align-items:flex-start"><span class="tag info" style="margin-right:8px">AE'+(ae.num||'')+'</span><div style="flex:1;font-size:13px">'+(ae.texto||ae.nombre||'')+'</div></div>';}).join(''):'<div class="sub">Este módulo no tiene aprendizajes esperados cargados.</div>');
+  }
+}
 
 // ── Asistente de creación de colegios ──
 var SEGS=[['prebasica','Pre-básica',['Pre-Kínder','Kínder']],['basica','Básica (1° a 6°)',['1° básico','2° básico','3° básico','4° básico','5° básico','6° básico']],['mediahc','Media H-C (7° a IV)',['7° básico','8° básico','I medio','II medio','III medio','IV medio']],['fg','Formación General (I a IV)',['I medio','II medio','III medio','IV medio']],['tp','Técnico Profesional (III-IV)',['III medio','IV medio']]];
@@ -597,7 +668,18 @@ function crearColegio(){
   .then(function(){ toast('Colegio "'+nombre+'" creado con '+cargos.length+' cargo(s).','success'); btn.disabled=false; btn.innerHTML=o; cerrarWizard(); cargarColegios(); cargarUsuarios(); })
   .catch(function(e){ toast('Error: '+e.message,'danger'); document.getElementById('wzMsg').textContent='Error: '+e.message; btn.disabled=false; btn.innerHTML=o; });
 }
-function cargarColegios(){ if(typeof EL_DB==='undefined')return; EL_DB.collection('sistema').doc('colegios').get().then(function(d){ var lista=(d.exists&&d.data().lista)?d.data().lista:[]; var tb=document.getElementById('tb-colegios'); var c=document.getElementById('cnt-colegios'); if(c)c.textContent=lista.length; if(tb)tb.innerHTML=lista.length?lista.map(function(x){return '<tr><td>'+x.nombre+' <span class="sub">('+x.id+')</span></td><td>'+(x.rbd||'—')+'</td><td>'+(x.dependencia||'—')+'</td><td>'+(x.cargos||0)+'</td></tr>'}).join(''):'<tr><td colspan="4" style="color:var(--muted)">Sin colegios aún.</td></tr>'; }).catch(function(){}); }
+var _colegiosReg=[];
+function cargarColegios(){ if(typeof EL_DB==='undefined')return; EL_DB.collection('sistema').doc('colegios').get().then(function(d){ var lista=(d.exists&&d.data().lista)?d.data().lista:[]; _colegiosReg=lista; var tb=document.getElementById('tb-colegios'); var c=document.getElementById('cnt-colegios'); if(c)c.textContent=lista.length; if(tb)tb.innerHTML=lista.length?lista.map(function(x){return '<tr><td>'+x.nombre+' <span class="sub">('+x.id+')</span></td><td>'+(x.rbd||'—')+'</td><td>'+(x.dependencia||'—')+'</td><td>'+(x.cargos||0)+'</td><td style="white-space:nowrap"><button class="btn ghost sm" onclick="abrirEditColegio(\''+x.id+'\')"><span class="material-symbols-outlined" style="font-size:16px">edit</span> Editar</button></td></tr>'}).join(''):'<tr><td colspan="5" style="color:var(--muted)">Sin colegios aún.</td></tr>'; _poblarNuOrg(lista); }).catch(function(){}); }
+function _poblarNuOrg(lista){ var sel=document.getElementById('nuOrg'); if(!sel)return; var cur=sel.value; var opts='<option value="__particular__">🧑‍🏫 Particular / Independiente (sin colegio)</option><option value="colegio-demo">Colegio demo</option>'; (lista||[]).forEach(function(x){ if(x.id==='colegio-demo')return; opts+='<option value="'+x.id+'">'+x.nombre+'</option>'; }); sel.innerHTML=opts; if(cur)sel.value=cur; }
+function abrirEditColegio(id){ var x=_colegiosReg.filter(function(c){return c.id===id;})[0]||{id:id}; document.getElementById('ecId').value=id; document.getElementById('ecNombre').value=x.nombre||''; document.getElementById('ecRbd').value=x.rbd||''; document.getElementById('ecDep').value=x.dependencia||'Particular subvencionado'; document.getElementById('modalEditColegio').classList.add('show'); }
+function cerrarEditColegio(){ document.getElementById('modalEditColegio').classList.remove('show'); }
+function guardarEditColegio(){ var id=document.getElementById('ecId').value; var nombre=document.getElementById('ecNombre').value.trim(); var rbd=document.getElementById('ecRbd').value.trim(); var dep=document.getElementById('ecDep').value; if(!nombre){toast('El nombre es obligatorio.','danger');return;}
+ var ref=EL_DB.collection('organizaciones').doc(id).collection('config').doc('colegio');
+ ref.get().then(function(d){ var o={}; try{o=(d.exists&&d.data().json)?JSON.parse(d.data().json):{};}catch(e){} o.id=id; o.nombre=nombre; o.rbd=rbd; o.dependencia=dep; return ref.set({json:JSON.stringify(o)}); })
+  .then(function(){ return EL_DB.collection('sistema').doc('colegios').get().then(function(d){ var lista=(d.exists&&d.data().lista)?d.data().lista:[]; lista=lista.map(function(c){ if(c.id===id){c.nombre=nombre;c.rbd=rbd;c.dependencia=dep;} return c; }); return EL_DB.collection('sistema').doc('colegios').set({lista:lista}); }); })
+  .then(function(){ toast('Colegio actualizado.','success'); cerrarEditColegio(); cargarColegios(); })
+  .catch(function(e){ toast('Error: '+(e&&e.message||''),'danger'); });
+}
 </script>
 </body>
 </html>
