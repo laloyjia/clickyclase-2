@@ -640,7 +640,11 @@ export default async function handler(req, res) {
       ? { maxOutputTokens: 8192, temperature: 0.65, topP: 0.9 }
       : isRaw
         ? { maxOutputTokens: rawMax || 8192, temperature: rawTemp != null ? rawTemp : 0.7, topP: 0.9 }
-        : { maxOutputTokens: 3072, temperature: 0.72, topP: 0.9 };
+        : { maxOutputTokens: 32768, temperature: 0.72, topP: 0.9 };
+  // maxOutputTokens es un TECHO, no una meta: el modelo termina y se detiene solo.
+  // Lo dejamos alto para que ningún documento se trunque. Y apagamos el "pensamiento"
+  // (thinkingBudget 0) para que todo el presupuesto vaya al documento, no al razonamiento.
+  genCfg.thinkingConfig = { thinkingBudget: 0 };
 
   // Modelo a usar (el cliente puede sugerir, pero validamos contra allowlist)
   const modeloPedido = (datos && datos.modelo) ? String(datos.modelo) : '';
