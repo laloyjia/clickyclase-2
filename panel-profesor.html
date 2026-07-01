@@ -92,6 +92,14 @@
         <div style="margin-top:12px"><label style="font-size:12px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted)">Aprendizaje(s) esperado(s)</label>
           <textarea id="plAE" rows="3" placeholder="Se autocompleta con los AE del módulo TP, o descríbelos aquí…" style="width:100%;margin-top:6px;font-family:'Inter',sans-serif;font-size:13px;color:var(--text);background:var(--surface);border:1px solid var(--border-2);border-radius:9px;padding:10px"></textarea>
         </div>
+        <div id="plTPInfo" class="legal" style="display:none;margin-top:12px"></div>
+        <div style="margin-top:12px"><label style="font-size:12px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted)">Criterios de evaluación</label>
+          <textarea id="plCE" rows="4" placeholder="Se autocompletan con los criterios de evaluación del módulo TP, o descríbelos aquí…" style="width:100%;margin-top:6px;font-family:'Inter',sans-serif;font-size:13px;color:var(--text);background:var(--surface);border:1px solid var(--border-2);border-radius:9px;padding:10px"></textarea>
+        </div>
+        <div style="margin-top:12px"><label style="font-size:12px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted)">NEE — Necesidades Educativas Especiales (Decreto 170)</label>
+          <div id="plNEE" class="wplist" style="max-height:150px;overflow:auto;border:1px solid var(--border-2);border-radius:9px;padding:6px;background:var(--surface);margin-top:6px"></div>
+          <div class="sub" style="margin:6px 0 0;font-size:12px">Al marcar una NEE se sugieren adecuaciones abajo (Decreto 83).</div>
+        </div>
         <div class="grid2" style="margin-top:12px">
           <div><label style="font-size:12px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted)">Valores (Marco de la Buena Enseñanza)</label>
             <div id="plValores" class="wplist" style="max-height:150px;overflow:auto;border:1px solid var(--border-2);border-radius:9px;padding:6px;background:var(--surface);margin-top:6px"></div>
@@ -212,6 +220,17 @@ function show(s){document.querySelectorAll('.nav-item').forEach(function(x){x.cl
 // ══════════ Planificaciones (formato Mineduc) ══════════
 var PL_VALORES=['Respeto','Responsabilidad','Honestidad','Colaboración','Empatía','Perseverancia','Pensamiento crítico','Autonomía','Inclusión y respeto a la diversidad','Cuidado del entorno'];
 var PL_PIE=['Tiempo adicional para las actividades','Material ampliado / adaptado','Ubicación preferente en la sala','Apoyo del equipo PIE en aula','Priorización de objetivos de aprendizaje','Graduación de la dificultad','Instrucciones simplificadas con apoyos visuales','Evaluación diferenciada'];
+var PL_NEE=[
+ {k:'TDAH',n:'TDA / TDAH (déficit atencional)',adec:['Tiempo adicional para las actividades','Instrucciones simplificadas con apoyos visuales','Ubicación preferente en la sala','Fraccionar las tareas en pasos cortos']},
+ {k:'DEA',n:'Dificultades específicas del aprendizaje (dislexia / discalculia)',adec:['Material ampliado / adaptado','Evaluación diferenciada','Apoyo de lectura en voz alta / uso de calculadora','Tiempo adicional para las actividades']},
+ {k:'TEL',n:'Trastorno específico del lenguaje (TEL)',adec:['Instrucciones simplificadas con apoyos visuales','Apoyo del equipo PIE en aula','Refuerzo del vocabulario clave']},
+ {k:'TEA',n:'Trastorno del espectro autista (TEA)',adec:['Anticipación y rutinas claras','Apoyos visuales y pictogramas','Ubicación preferente en la sala','Reducir estímulos distractores']},
+ {k:'DI',n:'Discapacidad intelectual',adec:['Priorización de objetivos de aprendizaje','Graduación de la dificultad','Apoyo del equipo PIE en aula','Evaluación diferenciada']},
+ {k:'DV',n:'Discapacidad visual',adec:['Material ampliado / adaptado','Ubicación preferente en la sala','Apoyos táctiles y auditivos']},
+ {k:'DA',n:'Discapacidad auditiva',adec:['Apoyos visuales y subtitulado','Ubicación preferente en la sala','Instrucciones simplificadas con apoyos visuales']},
+ {k:'DM',n:'Discapacidad motora',adec:['Accesibilidad del puesto de trabajo','Tiempo adicional para las actividades','Apoyos técnicos según necesidad']}
+];
+function pfNEE(){ var checked=Array.prototype.map.call(document.querySelectorAll('#plNEE input:checked'),function(c){return c.value;}); var sug={}; checked.forEach(function(k){var it=PL_NEE.filter(function(x){return x.k===k;})[0]; if(it)it.adec.forEach(function(a){sug[a]=1;});}); var pieVals={}; document.querySelectorAll('#plPIE input[type=checkbox]').forEach(function(chk){pieVals[chk.value]=chk;}); var extra=[]; Object.keys(sug).forEach(function(a){ if(pieVals[a])pieVals[a].checked=true; else extra.push(a); }); if(extra.length){ var t=document.getElementById('plPIEtxt'); var cur=(t.value||'').split(',').map(function(s){return s.trim();}).filter(Boolean); extra.forEach(function(a){if(cur.indexOf(a)===-1)cur.push(a);}); t.value=cur.join(', '); } }
 function pfInit(){
  var pA=document.getElementById('plAsig'),meta=window._ASIG_META||[];
  var opts='<option value="">— Elige —</option>'+meta.map(function(m){return '<option value="'+(m.nombre||'').replace(/"/g,'&quot;')+'">'+(m.nombre||'')+'</option>';}).join('');
@@ -221,15 +240,20 @@ function pfInit(){
  if(pN)pN.innerHTML=mN?mN.innerHTML:'<option value="">— Elige —</option>';
  var v=document.getElementById('plValores'); if(v&&!v.innerHTML.trim())v.innerHTML=PL_VALORES.map(function(x){return '<label><input type="checkbox" value="'+x+'"> '+x+'</label>';}).join('');
  var p=document.getElementById('plPIE'); if(p&&!p.innerHTML.trim())p.innerHTML=PL_PIE.map(function(x){return '<label><input type="checkbox" value="'+x+'"> '+x+'</label>';}).join('');
+ var n=document.getElementById('plNEE'); if(n&&!n.innerHTML.trim())n.innerHTML=PL_NEE.map(function(x){return '<label><input type="checkbox" value="'+x.k+'" onchange="pfNEE()"> '+x.n+'</label>';}).join('');
 }
 function _pfNivMap(){ if(window._NIV2CODE)return Promise.resolve(window._NIV2CODE); if(typeof CURRICULA_READY==='undefined')return Promise.resolve({}); return CURRICULA_READY.then(function(CUR){var m={};(CUR.getAllNiveles()||[]).forEach(function(c){m[(CUR.getNivelLabel(c)||'').toLowerCase()]=c;m[c.toLowerCase()]=c;});window._NIV2CODE=m;return m;}); }
 function pfBuildOA(){
  var asig=document.getElementById('plAsig').value,box=document.getElementById('plOA');
  if(window._PROF_TP&&window._PROF_TP[asig]){ var m=window._PROF_TP[asig],aes=m.aes||[];
-   box.innerHTML=aes.length?aes.map(function(a){var t=a.texto||a.nombre||'';return '<label><input type="checkbox" value="AE'+(a.num||'')+'" data-desc="'+t.replace(/"/g,'&quot;')+'"> <b>AE'+(a.num||'')+'</b> — '+t+'</label>';}).join(''):'<div class="sub" style="margin:0">Este módulo no tiene AE cargados.</div>';
-   var ae=document.getElementById('plAE'); if(ae&&!ae.value)ae.value=aes.map(function(a){return 'AE'+(a.num||'')+': '+(a.texto||a.nombre||'');}).join('\n');
+   box.innerHTML=aes.length?aes.map(function(a){var t=a.texto||'';return '<label><input type="checkbox" value="'+(a.codigo||'AE')+'" data-desc="'+t.replace(/"/g,'&quot;')+'"> <b>'+(a.codigo||'AE')+'</b> — '+t+'</label>';}).join(''):'<div class="sub" style="margin:0">Este módulo no tiene AE cargados.</div>';
+   var ae=document.getElementById('plAE'); ae.value=aes.map(function(a){return (a.codigo||'AE')+': '+(a.texto||'');}).join('\n');
+   var ces=[]; aes.forEach(function(a){(a.ces||[]).forEach(function(c){ces.push((a.codigo||'AE')+' · '+(c.codigo||'CE')+': '+(c.texto||''));});}); document.getElementById('plCE').value=ces.join('\n');
+   var info='<b>Objetivo(s) de aprendizaje de la especialidad:</b><br>'+((m.oaEsp&&m.oaEsp.length)?m.oaEsp.map(function(o){return '• '+o;}).join('<br>'):'—')+'<br><br><b>Aprendizajes esperados genéricos (OAG · Decreto 452):</b> '+OAG_EMTP.map(function(g){return g[0];}).join(', ')+' — la IA integrará los pertinentes.';
+   var ti=document.getElementById('plTPInfo'); ti.innerHTML=info; ti.style.display='';
    var u=document.getElementById('plUnidad'); if(u&&!u.value)u.value=m.nombre||''; return;
  }
+ var ti2=document.getElementById('plTPInfo'); if(ti2)ti2.style.display='none';
  var curso=document.getElementById('plCurso').value;
  if(!asig||!curso||typeof CURRICULA_READY==='undefined'){box.innerHTML='<div class="sub" style="margin:0">Elige asignatura/módulo y curso.</div>';return;}
  var meta=(window._ASIG_META||[]).filter(function(m){return m.nombre===asig;})[0];
@@ -247,7 +271,9 @@ function pfGenerar(){
  var adec=Array.prototype.map.call(document.querySelectorAll('#plPIE input:checked'),function(c){return c.value;});
  var adecTxt=(document.getElementById('plPIEtxt').value||'').trim(); if(adecTxt)adec.push(adecTxt);
  var asigVal=document.getElementById('plAsig').value, esTP=!!(window._PROF_TP&&window._PROF_TP[asigVal]);
- var datos={ asignatura:esTP?'':asigVal, nivel:document.getElementById('plCurso').value, curso:document.getElementById('plCurso').value, modulo:esTP?(window._PROF_TP[asigVal].nombre||asigVal):'', unidad:document.getElementById('plUnidad').value||'', tema:document.getElementById('plTema').value||'', horas:document.getElementById('plHoras').value||'', ae:document.getElementById('plAE').value||'', valores:valores, adecuaciones:adec.map(function(a){return '• '+a;}).join('\n'), oas_seleccionados:oaChecked, oa:oaChecked.join(' | ') };
+ var nee=Array.prototype.map.call(document.querySelectorAll('#plNEE input:checked'),function(c){var it=PL_NEE.filter(function(x){return x.k===c.value;})[0];return it?it.n:c.value;});
+ var oaEsp='',oag=''; if(esTP){var mm=window._PROF_TP[asigVal]; oaEsp=(mm.oaEsp||[]).join(' | '); oag=OAG_EMTP.map(function(g){return g[0];}).join(', ');}
+ var datos={ asignatura:esTP?'':asigVal, nivel:document.getElementById('plCurso').value, curso:document.getElementById('plCurso').value, modulo:esTP?(window._PROF_TP[asigVal].nombre||asigVal):'', unidad:document.getElementById('plUnidad').value||'', tema:document.getElementById('plTema').value||'', horas:document.getElementById('plHoras').value||'', ae:document.getElementById('plAE').value||'', criterios:document.getElementById('plCE').value||'', valores:valores, nee:nee, oaEspecialidad:oaEsp, oag:oag, adecuaciones:adec.map(function(a){return '• '+a;}).join('\n'), oas_seleccionados:oaChecked, oa:oaChecked.join(' | ') };
  if(!asigVal){toast('Elige una asignatura o módulo.','danger');return;}
  var b=document.getElementById('btnPl');b.disabled=true;var o=b.innerHTML;b.innerHTML='<span class="material-symbols-outlined" style="font-size:18px">hourglass_top</span> Generando…';
  fetch('/api/ia-asistente',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({tipo:'planificacion',datos:datos})})
@@ -292,8 +318,23 @@ function _setAsig(asigNames,nivNames){
  } else { window._ASIG_META=asigNames.map(function(n){return {nombre:n,sigla:'',niveles:[]};}); fillSelect('matAsig',asigNames); if(nivNames&&nivNames.length)fillSelect('matNivel',nivNames); _profTP(); actualizarOAs(); }
 }
 // Agrega los módulos TP asignados al profesor como opciones de asignatura.
-function _profTP(){ var u=window._PROF_U; if(!u||!(u.modulos&&u.modulos.length)||typeof loadCurriculaTP==='undefined')return; if(!u.especialidadKey&&!u.especialidad)return; loadCurriculaTP().then(function(CUR){ CUR=CUR||window.CURRICULA_CHILE; if(!CUR)return; var key=u.especialidadKey; if(!key&&u.especialidad&&CUR.getEspecialidades){ var e=(CUR.getEspecialidades()||[]).filter(function(x){return (x.nombre||'').toLowerCase()===(u.especialidad||'').toLowerCase();})[0]; if(e)key=e.key; } if(!key)return; var mods=(CUR&&CUR.getModulos)?CUR.getModulos(key):[]; var want=u.modulos.map(String); mods=mods.filter(function(m){return want.indexOf(String(m.num))!==-1;}); if(!mods.length)return; var sel=document.getElementById('matAsig'); if(!sel)return; window._PROF_TP={}; mods.forEach(function(m){ var label='TP · '+(m.nombre||('Módulo '+m.num)); if(sel.querySelector('option[value="'+label.replace(/"/g,'\\"')+'"]'))return; var opt=document.createElement('option'); opt.value=label; opt.textContent=label; sel.appendChild(opt); window._PROF_TP[label]={num:m.num,nombre:m.nombre,aes:m.aes||[]}; }); }); }
-function _renderTPModule(m){ var panel=document.getElementById('curPanel'); var aes=m.aes||[]; window._OAS_ACTUAL=aes.map(function(a){var t=a.texto||a.nombre||'';return {codigo:'AE'+(a.num||''),descripcion:t,desc:t,eje:''};}); var sel=document.getElementById('matOA'); sel.innerHTML='<option value="">— Todos los AE del módulo —</option>'+window._OAS_ACTUAL.map(function(o){return '<option value="'+(o.codigo+': '+o.descripcion).replace(/"/g,'&quot;')+'">'+o.codigo+' — '+(o.descripcion.length>70?o.descripcion.slice(0,70)+'…':o.descripcion)+'</option>';}).join(''); document.getElementById('curTit').textContent='TP · '+(m.nombre||''); document.getElementById('curCnt').textContent=window._OAS_ACTUAL.length; document.getElementById('curUnidades').innerHTML=''; document.getElementById('curOAs').innerHTML=window._OAS_ACTUAL.length?window._OAS_ACTUAL.map(function(o){return '<div class="row" style="align-items:flex-start"><span class="tag info" style="margin-right:8px">'+o.codigo+'</span><div style="flex:1;font-size:12.8px">'+o.descripcion+'</div></div>';}).join(''):'<div class="sub" style="margin:0">Este módulo no tiene aprendizajes esperados cargados.</div>'; panel.style.display=''; }
+// OAG oficiales EMTP (Objetivos de Aprendizaje Genéricos, 12 letras A-L, Decreto 452).
+var OAG_EMTP=[['A','Comunicarse oralmente y por escrito con claridad en distintos contextos.'],['B','Leer y utilizar distintos tipos de textos relacionados con el trabajo.'],['C','Realizar cálculos y estimaciones necesarios para el trabajo.'],['D','Trabajar eficazmente en equipo, coordinando acciones con otros.'],['E','Tratar con respeto a subordinados, superiores, pares, clientes y usuarios.'],['F','Respetar y utilizar las normas de seguridad y prevención de riesgos.'],['G','Participar proactivamente en equipos de trabajo y organizaciones.'],['H','Manejar tecnologías de la información y comunicación para el trabajo.'],['I','Utilizar eficientemente los insumos y recursos en el trabajo.'],['J','Cumplir las tareas y obligaciones laborales con responsabilidad y honestidad.'],['K','Prevenir situaciones de riesgo y enfermedades ocupacionales.'],['L','Emprender iniciativas e identificar oportunidades para generar proyectos.']];
+function _profTP(){ var u=window._PROF_U; if(!u||!(u.modulos&&u.modulos.length)||typeof loadCurriculaTP==='undefined')return; if(!u.especialidadKey&&!u.especialidad)return;
+ loadCurriculaTP().then(function(CUR){ CUR=CUR||window.CURRICULA_CHILE; if(!CUR)return;
+  var key=u.especialidadKey; if(!key&&u.especialidad&&CUR.getEspecialidades){var e=(CUR.getEspecialidades()||[]).filter(function(x){return (x.nombre||'').toLowerCase()===(u.especialidad||'').toLowerCase();})[0]; if(e)key=e.key;}
+  if(!key)return; var full=(window.CURRICULA_FULL&&window.CURRICULA_FULL[key])||null;
+  var sel=document.getElementById('matAsig'); if(!sel)return; window._PROF_TP={};
+  (u.modulos||[]).forEach(function(mk){ mk=String(mk); var raw=full&&full.modulos&&full.modulos[mk]; var nombre,oaEsp=[],aes=[];
+    if(raw){ nombre=raw.nombre||mk; oaEsp=raw.oas?Object.keys(raw.oas).map(function(k){return raw.oas[k];}):[]; aes=raw.aes?Object.keys(raw.aes).map(function(k){var a=raw.aes[k]||{};return {codigo:k,texto:a.texto||'',ces:a.ces?Object.keys(a.ces).map(function(c){return {codigo:c,texto:a.ces[c]};}):[]};}):[]; }
+    else { var m=((CUR.getModulos&&CUR.getModulos(key))||[]).filter(function(x){return String(x.num)===mk;})[0]; if(!m)return; nombre=m.nombre||mk; (m.aes||[]).forEach(function(a){aes.push({codigo:'AE'+(a.num||''),texto:a.texto||a.nombre||'',ces:[]});}); }
+    var label='TP · '+(nombre||mk);
+    window._PROF_TP[label]={num:mk,nombre:nombre,oaEsp:oaEsp,aes:aes,espKey:key};
+    if(!sel.querySelector('option[value="'+label.replace(/"/g,'\\"')+'"]')){var opt=document.createElement('option');opt.value=label;opt.textContent=label;sel.appendChild(opt);}
+  });
+ });
+}
+function _renderTPModule(m){ var panel=document.getElementById('curPanel'); var aes=m.aes||[]; window._OAS_ACTUAL=aes.map(function(a){var t=a.texto||a.nombre||'';return {codigo:a.codigo||('AE'+(a.num||'')),descripcion:t,desc:t,eje:''};}); var sel=document.getElementById('matOA'); sel.innerHTML='<option value="">— Todos los AE del módulo —</option>'+window._OAS_ACTUAL.map(function(o){return '<option value="'+(o.codigo+': '+o.descripcion).replace(/"/g,'&quot;')+'">'+o.codigo+' — '+(o.descripcion.length>70?o.descripcion.slice(0,70)+'…':o.descripcion)+'</option>';}).join(''); document.getElementById('curTit').textContent='TP · '+(m.nombre||''); document.getElementById('curCnt').textContent=window._OAS_ACTUAL.length; document.getElementById('curUnidades').innerHTML=''; document.getElementById('curOAs').innerHTML=window._OAS_ACTUAL.length?window._OAS_ACTUAL.map(function(o){return '<div class="row" style="align-items:flex-start"><span class="tag info" style="margin-right:8px">'+o.codigo+'</span><div style="flex:1;font-size:12.8px">'+o.descripcion+'</div></div>';}).join(''):'<div class="sub" style="margin:0">Este módulo no tiene aprendizajes esperados cargados.</div>'; panel.style.display=''; }
 function cargarAsignaturas(u){
  if(!window.ccStore)return;
  window._PROF_U=u;

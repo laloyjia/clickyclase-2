@@ -174,7 +174,7 @@ ESTRUCTURA REQUERIDA:
 PLANIFICACIÓN DE CLASE
 Institución: [${datos.colegio || '_____________'}]
 Asignatura: ${datos.asignatura || '___'}  |  Nivel/Curso: ${datos.nivel || datos.curso || '___'}  |  Duración: ${datos.horas || '___'} hrs
-${datos.modulo ? 'Módulo (EMTP): ' + datos.modulo + '\n' : ''}${hasOAs ? 'Objetivo(s) de Aprendizaje Mineduc: [citar códigos OA aquí]' : 'OA / AE: _______________'}
+${datos.modulo ? 'Módulo (EMTP): ' + datos.modulo + '\n' : ''}${datos.oaEspecialidad ? 'OA de la especialidad: ' + datos.oaEspecialidad + '\n' : ''}${datos.oag ? 'Objetivos de Aprendizaje Genéricos (OAG): ' + datos.oag + '\n' : ''}${hasOAs ? 'Objetivo(s) de Aprendizaje Mineduc: [citar códigos OA aquí]' : 'OA / AE: _______________'}
 ${datos.ae ? 'Aprendizaje(s) Esperado(s): ' + datos.ae + '\n' : ''}Unidad: ${datos.unidad || '___'}  |  Tema: ${datos.tema || '___'}
 ═══════════════════════════════════════════════
 
@@ -202,13 +202,17 @@ INDICADORES DE LOGRO (deben ser verificables y corresponder al OA citado):
 • El/la estudiante [verbo observable]...
 • El/la estudiante [verbo observable]...
 
+CRITERIOS DE EVALUACIÓN (observables y medibles, alineados a los OA/AE citados)
+${datos.criterios ? datos.criterios : '• Redacta criterios de evaluación verificables para cada objetivo/aprendizaje esperado.'}
+
 VALORES Y ACTITUDES (Marco de la Buena Enseñanza)
 ${datos.valores ? '• Promover explícitamente: ' + datos.valores : '• Señala los valores y actitudes transversales a promover en la clase.'}
 
-ADECUACIONES CURRICULARES (Decreto 83/2015 · diagnóstico PIE)
-${datos.adecuaciones ? datos.adecuaciones : '• Indica adecuaciones de acceso y/o en los objetivos según los diagnósticos del curso (si aplica).'}
+ATENCIÓN A LA DIVERSIDAD — NEE (Decreto 170)
+${datos.nee ? 'Diagnóstico(s) presente(s) en el curso: ' + (Array.isArray(datos.nee) ? datos.nee.join(', ') : datos.nee) : 'Indica si hay estudiantes con NEE.'}
 
-${datos.nee && datos.nee.length ? 'ATENCIÓN A LA DIVERSIDAD (NEE): ' + (Array.isArray(datos.nee) ? datos.nee.join(', ') : datos.nee) : ''}`,
+ADECUACIONES CURRICULARES (Decreto 83/2015, coherentes con las NEE señaladas)
+${datos.adecuaciones ? datos.adecuaciones : '• Indica adecuaciones de acceso y/o en los objetivos según los diagnósticos del curso (si aplica).'}`,
 
     guia: `${intro}Genera una GUÍA DE APRENDIZAJE completa para estudiantes chilenos:
 ${ctx}
