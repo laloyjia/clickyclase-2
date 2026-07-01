@@ -86,11 +86,8 @@
           <div class="fld"><label>Cantidad de horas pedagógicas</label><input id="plHoras" type="number" min="1" placeholder="Ej. 2"></div>
           <div class="fld"><label>Tema (opcional)</label><input id="plTema" placeholder="Ej. Suma de fracciones"></div>
         </div>
-        <div style="margin-top:12px"><label style="font-size:12px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted)">Objetivo(s) de aprendizaje (OA) / Aprendizaje esperado (AE)</label>
-          <div id="plOA" class="wplist" style="max-height:170px;overflow:auto;border:1px solid var(--border-2);border-radius:9px;padding:6px;background:var(--surface);margin-top:6px"><div class="sub" style="margin:0">Elige asignatura y curso.</div></div>
-        </div>
-        <div style="margin-top:12px"><label style="font-size:12px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted)">Aprendizaje(s) esperado(s)</label>
-          <textarea id="plAE" rows="3" placeholder="Se autocompleta con los AE del módulo TP, o descríbelos aquí…" style="width:100%;margin-top:6px;font-family:'Inter',sans-serif;font-size:13px;color:var(--text);background:var(--surface);border:1px solid var(--border-2);border-radius:9px;padding:10px"></textarea>
+        <div style="margin-top:12px"><label id="plOALbl" style="font-size:12px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted)">Objetivo(s) de aprendizaje (OA) que trabajará</label>
+          <div id="plOA" class="wplist" style="max-height:180px;overflow:auto;border:1px solid var(--border-2);border-radius:9px;padding:6px;background:var(--surface);margin-top:6px"><div class="sub" style="margin:0">Elige asignatura/módulo y curso.</div></div>
         </div>
         <div id="plTPInfo" class="legal" style="display:none;margin-top:12px"></div>
         <div style="margin-top:12px"><label style="font-size:12px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted)">Criterios de evaluación</label>
@@ -247,13 +244,14 @@ function pfBuildOA(){
  var asig=document.getElementById('plAsig').value,box=document.getElementById('plOA');
  if(window._PROF_TP&&window._PROF_TP[asig]){ var m=window._PROF_TP[asig],aes=m.aes||[];
    box.innerHTML=aes.length?aes.map(function(a){var t=a.texto||'';return '<label><input type="checkbox" value="'+(a.codigo||'AE')+'" data-desc="'+t.replace(/"/g,'&quot;')+'"> <b>'+(a.codigo||'AE')+'</b> — '+t+'</label>';}).join(''):'<div class="sub" style="margin:0">Este módulo no tiene AE cargados.</div>';
-   var ae=document.getElementById('plAE'); ae.value=aes.map(function(a){return (a.codigo||'AE')+': '+(a.texto||'');}).join('\n');
+   var lbl=document.getElementById('plOALbl'); if(lbl)lbl.textContent='Aprendizajes esperados (AE) del módulo que trabajará';
    var ces=[]; aes.forEach(function(a){(a.ces||[]).forEach(function(c){ces.push((a.codigo||'AE')+' · '+(c.codigo||'CE')+': '+(c.texto||''));});}); document.getElementById('plCE').value=ces.join('\n');
    var info='<b>Objetivo(s) de aprendizaje de la especialidad:</b><br>'+((m.oaEsp&&m.oaEsp.length)?m.oaEsp.map(function(o){return '• '+o;}).join('<br>'):'—')+'<br><br><b>Aprendizajes esperados genéricos (OAG · Decreto 452):</b> '+OAG_EMTP.map(function(g){return g[0];}).join(', ')+' — la IA integrará los pertinentes.';
    var ti=document.getElementById('plTPInfo'); ti.innerHTML=info; ti.style.display='';
    var u=document.getElementById('plUnidad'); if(u&&!u.value)u.value=m.nombre||''; return;
  }
  var ti2=document.getElementById('plTPInfo'); if(ti2)ti2.style.display='none';
+ var lbl0=document.getElementById('plOALbl'); if(lbl0)lbl0.textContent='Objetivo(s) de aprendizaje (OA) que trabajará';
  var curso=document.getElementById('plCurso').value;
  if(!asig||!curso||typeof CURRICULA_READY==='undefined'){box.innerHTML='<div class="sub" style="margin:0">Elige asignatura/módulo y curso.</div>';return;}
  var meta=(window._ASIG_META||[]).filter(function(m){return m.nombre===asig;})[0];
@@ -264,7 +262,6 @@ function pfBuildOA(){
    box.innerHTML=oas.length?oas.map(function(o){var d=o.descripcion||o.desc||'';return '<label><input type="checkbox" value="'+(o.codigo||'').replace(/"/g,'&quot;')+'" data-desc="'+d.replace(/"/g,'&quot;')+'"> <b>'+o.codigo+'</b> — '+d+'</label>';}).join(''):'<div class="sub" style="margin:0">Sin OA cargados para esta selección.</div>';
  });
 }
-function pfOnModulo(){var k=document.getElementById('plModulo').value; if(k&&window._PROF_TP&&window._PROF_TP[k]){var aes=window._PROF_TP[k].aes||[]; document.getElementById('plAE').value=aes.map(function(a){return 'AE'+(a.num||'')+': '+(a.texto||a.nombre||'');}).join('\n'); var u=document.getElementById('plUnidad'); if(u&&!u.value)u.value=window._PROF_TP[k].nombre||'';}}
 function pfGenerar(){
  var oaChecked=Array.prototype.map.call(document.querySelectorAll('#plOA input:checked'),function(c){return c.value+(c.dataset.desc?(' ('+c.dataset.desc+')'):'');});
  var valores=Array.prototype.map.call(document.querySelectorAll('#plValores input:checked'),function(c){return c.value;}).join(', ');
@@ -273,7 +270,7 @@ function pfGenerar(){
  var asigVal=document.getElementById('plAsig').value, esTP=!!(window._PROF_TP&&window._PROF_TP[asigVal]);
  var nee=Array.prototype.map.call(document.querySelectorAll('#plNEE input:checked'),function(c){var it=PL_NEE.filter(function(x){return x.k===c.value;})[0];return it?it.n:c.value;});
  var oaEsp='',oag=''; if(esTP){var mm=window._PROF_TP[asigVal]; oaEsp=(mm.oaEsp||[]).join(' | '); oag=OAG_EMTP.map(function(g){return g[0];}).join(', ');}
- var datos={ asignatura:esTP?'':asigVal, nivel:document.getElementById('plCurso').value, curso:document.getElementById('plCurso').value, modulo:esTP?(window._PROF_TP[asigVal].nombre||asigVal):'', unidad:document.getElementById('plUnidad').value||'', tema:document.getElementById('plTema').value||'', horas:document.getElementById('plHoras').value||'', ae:document.getElementById('plAE').value||'', criterios:document.getElementById('plCE').value||'', valores:valores, nee:nee, oaEspecialidad:oaEsp, oag:oag, adecuaciones:adec.map(function(a){return '• '+a;}).join('\n'), oas_seleccionados:oaChecked, oa:oaChecked.join(' | ') };
+ var datos={ asignatura:esTP?'':asigVal, nivel:document.getElementById('plCurso').value, curso:document.getElementById('plCurso').value, modulo:esTP?(window._PROF_TP[asigVal].nombre||asigVal):'', unidad:document.getElementById('plUnidad').value||'', tema:document.getElementById('plTema').value||'', horas:document.getElementById('plHoras').value||'', ae:oaChecked.join(' | '), criterios:document.getElementById('plCE').value||'', valores:valores, nee:nee, oaEspecialidad:oaEsp, oag:oag, adecuaciones:adec.map(function(a){return '• '+a;}).join('\n'), oas_seleccionados:oaChecked, oa:oaChecked.join(' | ') };
  if(!asigVal){toast('Elige una asignatura o módulo.','danger');return;}
  var b=document.getElementById('btnPl');b.disabled=true;var o=b.innerHTML;b.innerHTML='<span class="material-symbols-outlined" style="font-size:18px">hourglass_top</span> Generando…';
  fetch('/api/ia-asistente',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({tipo:'planificacion',datos:datos})})
@@ -326,7 +323,7 @@ function _profTP(){ var u=window._PROF_U; if(!u||!(u.modulos&&u.modulos.length)|
   if(!key)return; var full=(window.CURRICULA_FULL&&window.CURRICULA_FULL[key])||null;
   var sel=document.getElementById('matAsig'); if(!sel)return; window._PROF_TP={};
   (u.modulos||[]).forEach(function(mk){ mk=String(mk); var raw=full&&full.modulos&&full.modulos[mk]; var nombre,oaEsp=[],aes=[];
-    if(raw){ nombre=raw.nombre||mk; oaEsp=raw.oas?Object.keys(raw.oas).map(function(k){return raw.oas[k];}):[]; aes=raw.aes?Object.keys(raw.aes).map(function(k){var a=raw.aes[k]||{};return {codigo:k,texto:a.texto||'',ces:a.ces?Object.keys(a.ces).map(function(c){return {codigo:c,texto:a.ces[c]};}):[]};}):[]; }
+    if(raw){ nombre=raw.nombre||mk; oaEsp=raw.oas?Object.keys(raw.oas).map(function(k){return raw.oas[k];}):[]; aes=raw.aes?Object.keys(raw.aes).map(function(k){var a=raw.aes[k]||{};return {codigo:k,texto:a.texto||'',ces:a.ces?Object.keys(a.ces).map(function(c){var cv=a.ces[c];return {codigo:c,texto:(typeof cv==='string')?cv:((cv&&cv.texto)||'')};}):[]};}):[]; }
     else { var m=((CUR.getModulos&&CUR.getModulos(key))||[]).filter(function(x){return String(x.num)===mk;})[0]; if(!m)return; nombre=m.nombre||mk; (m.aes||[]).forEach(function(a){aes.push({codigo:'AE'+(a.num||''),texto:a.texto||a.nombre||'',ces:[]});}); }
     var label='TP · '+(nombre||mk);
     window._PROF_TP[label]={num:mk,nombre:nombre,oaEsp:oaEsp,aes:aes,espKey:key};
