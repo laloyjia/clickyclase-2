@@ -119,6 +119,45 @@
       <div class="legal"><b>⚖ Formato Mineduc:</b> la planificación se estructura según los estándares del currículum nacional (OA, habilidades, actitudes) e incorpora el Marco de la Buena Enseñanza y las adecuaciones del Decreto 83/2015 para NEE.</div>
     </section>
 
+    <section class="sec" id="sec-evaluaciones">
+      <div class="h1">Evaluaciones</div><div class="sub">Genera pruebas con formato Mineduc / PAES / SIMCE, con pauta de corrección y tabla de especificaciones</div>
+      <div class="card">
+        <div class="frm">
+          <div class="fld"><label>Asignatura / Módulo</label><select id="evAsig" onchange="pfBuildOA('ev')"><option value="">— Elige —</option></select></div>
+          <div class="fld"><label>Curso / Nivel</label><select id="evCurso" onchange="pfBuildOA('ev')"><option value="">— Elige —</option></select></div>
+          <div class="fld"><label>Unidad</label><input id="evUnidad" placeholder="Ej. Unidad 2"></div>
+          <div class="fld"><label>Tema (opcional)</label><input id="evTema" placeholder="Ej. Circuitos analógicos"></div>
+        </div>
+        <div class="card" style="margin-top:12px;padding:14px;background:var(--surface)">
+          <div class="sec-title" style="margin-bottom:6px"><span class="material-symbols-outlined" style="vertical-align:-4px;color:var(--primary);font-size:18px">track_changes</span> Objetivos curriculares</div>
+          <div id="evCurric"><div class="sub" style="margin:0">Elige asignatura/módulo y curso arriba.</div></div>
+        </div>
+        <div class="sec-title" style="margin-top:14px;margin-bottom:2px"><span class="material-symbols-outlined" style="vertical-align:-4px;color:var(--primary);font-size:18px">tune</span> Configuración de la evaluación</div>
+        <div class="frm">
+          <div class="fld"><label>Formato</label><select id="evFormato" onchange="evOnFormato()"><option value="estandar">Estándar Mineduc</option><option value="paes">PAES</option><option value="simce">SIMCE</option></select></div>
+          <div class="fld" id="evCompBox" style="display:none"><label>Competencia PAES</label><select id="evComp"><option value="lectora">Competencia Lectora</option><option value="m1">Matemática M1</option><option value="m2">Matemática M2</option><option value="ciencias">Ciencias (Bio/Fís/Quím)</option><option value="historia">Historia y Cs. Sociales</option><option value="ingles">Inglés (Reading)</option></select></div>
+          <div class="fld" id="evSimceBox" style="display:none"><label>Prueba SIMCE</label><select id="evSimce"><option value="lectura">Comprensión de Lectura</option><option value="matematica">Matemática</option><option value="ciencias">Ciencias Naturales</option><option value="historia">Historia y Cs. Sociales</option></select></div>
+          <div class="fld"><label>N° de preguntas</label><input id="evN" type="number" min="1" max="60" value="15"></div>
+          <div class="fld"><label>Puntaje total</label><input id="evPuntaje" placeholder="Ej. 60"></div>
+          <div class="fld"><label>Duración</label><input id="evDur" placeholder="Ej. 90 min" value="90 min"></div>
+          <div class="fld"><label>Taxonomía</label><select id="evTax"><option value="bloom">Bloom</option><option value="marzano">Marzano</option></select></div>
+        </div>
+        <div style="margin-top:12px"><label class="pflab">Tipos de ítem</label>
+          <div id="evTipos" class="wplist pfce"></div>
+        </div>
+        <label style="display:flex;align-items:center;gap:8px;margin-top:12px;font-size:13.5px;cursor:pointer"><input type="checkbox" id="evPIE" onchange="document.getElementById('evNEEbox').style.display=this.checked?'block':'none'"> Generar también versión adaptada PIE (según NEE)</label>
+        <div id="evNEEbox" style="display:none;margin-top:6px"><label class="pflab">NEE presentes en el curso</label><div id="evNEE" class="wplist pfce"></div></div>
+        <div style="margin-top:14px"><button class="btn" id="btnEv" onclick="evGenerar()"><span class="material-symbols-outlined" style="font-size:18px">auto_awesome</span> Generar evaluación con IA</button></div>
+        <textarea id="evTxt" rows="16" placeholder="La evaluación generada aparecerá aquí, editable…" style="width:100%;margin-top:14px;font-family:'Inter',sans-serif;font-size:13px;line-height:1.6;color:var(--text);background:var(--surface);border:1px solid var(--border-2);border-radius:9px;padding:12px"></textarea>
+        <div style="display:flex;gap:10px;margin-top:14px;justify-content:flex-end;flex-wrap:wrap">
+          <button class="btn ghost" onclick="evWord()"><span class="material-symbols-outlined" style="font-size:18px">description</span> Descargar Word</button>
+          <button class="btn ghost" onclick="evPDF()"><span class="material-symbols-outlined" style="font-size:18px">picture_as_pdf</span> Descargar PDF</button>
+          <button class="btn" onclick="evGuardar()"><span class="material-symbols-outlined" style="font-size:18px">save</span> Guardar en biblioteca</button>
+        </div>
+      </div>
+      <div class="legal"><b>Incluye dos versiones:</b> Versión Estudiante (instrumento listo para imprimir) y Versión Profesor (tabla de especificaciones, pauta de corrección y rúbrica). PAES: 5 alternativas con estímulos; SIMCE: 4 alternativas por estándares.</div>
+    </section>
+
     <section class="sec" id="sec-cursos">
       <div class="h1">Mis cursos</div><div class="sub">Cursos asignados</div>
       <div class="card"><div class="cardhead"><h3><span class="material-symbols-outlined">groups</span> Cursos <span class="count" id="cnt-cursos">0</span></h3>
@@ -212,9 +251,9 @@ function generarMat(){
 }
 function exportarWord(){var txt=document.getElementById('matTxt').value||'';if(!txt.trim()){toast('Primero genera el material.','danger');return;}var tit=document.getElementById('matTipo').selectedOptions[0].text+' — '+document.getElementById('matTema').value;var html='<h2>'+tit+'</h2><pre style="font-family:Calibri,Arial;font-size:11pt;white-space:pre-wrap">'+txt.replace(/&/g,'&amp;').replace(/</g,'&lt;')+'</pre>';var blob=new Blob(['<html xmlns:w="urn:schemas-microsoft-com:office:word"><head><meta charset="utf-8"></head><body>'+html+'</body></html>'],{type:'application/msword'});var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='material.doc';a.click();toast('Exportado a Word.','success');}
 function guardarMat(){var txt=document.getElementById('matTxt').value||'';if(!txt.trim()){toast('Primero genera el material.','danger');return;}var tipo=document.getElementById('matTipo').selectedOptions[0].text;var tema=document.getElementById('matTema').value||'(sin tema)';var asig=document.getElementById('matAsig').value||'';REG.biblioteca.rows.unshift([tipo+' — '+tema,asig+' · jun 2026','Guardado']);renderTable('biblioteca');if(window.ccStore)ccStore.setTabla('prof_biblioteca',REG.biblioteca.rows);toast('Guardado en biblioteca.','success');show('biblioteca');}
-var NAV=[['dashboard','Inicio','resumen'],['smart_toy','Generar material (IA)','material'],['event_note','Planificaciones','planificaciones'],['groups','Mis cursos','cursos'],['table_chart','Notas y asistencia','notas'],['chat','Anotaciones','anotaciones'],['menu_book','Biblioteca','biblioteca']];
+var NAV=[['dashboard','Inicio','resumen'],['smart_toy','Generar material (IA)','material'],['event_note','Planificaciones','planificaciones'],['quiz','Evaluaciones','evaluaciones'],['groups','Mis cursos','cursos'],['table_chart','Notas y asistencia','notas'],['chat','Anotaciones','anotaciones'],['menu_book','Biblioteca','biblioteca']];
 document.getElementById('nav').innerHTML=NAV.map(function(n,i){return '<div class="nav-item'+(i===0?' active':'')+'" data-s="'+n[2]+'">'+ic(n[0])+'<span>'+n[1]+'</span></div>'}).join('');
-function show(s){document.querySelectorAll('.nav-item').forEach(function(x){x.classList.toggle('active',x.dataset.s===s)});document.querySelectorAll('.sec').forEach(function(x){x.classList.toggle('active',x.id==='sec-'+s)});if(s==='planificaciones')pfInit();}
+function show(s){document.querySelectorAll('.nav-item').forEach(function(x){x.classList.toggle('active',x.dataset.s===s)});document.querySelectorAll('.sec').forEach(function(x){x.classList.toggle('active',x.id==='sec-'+s)});if(s==='planificaciones')pfInit();if(s==='evaluaciones')evInit();}
 
 // ══════════ Planificaciones (formato Mineduc) ══════════
 var PL_VALORES=['Respeto','Responsabilidad','Honestidad','Colaboración','Empatía','Perseverancia','Pensamiento crítico','Autonomía','Inclusión y respeto a la diversidad','Cuidado del entorno'];
@@ -230,69 +269,68 @@ var PL_NEE=[
  {k:'DM',n:'Discapacidad motora',adec:['Accesibilidad del puesto de trabajo','Tiempo adicional para las actividades','Apoyos técnicos según necesidad']}
 ];
 function pfNEE(){ var checked=Array.prototype.map.call(document.querySelectorAll('#plNEE input:checked'),function(c){return c.value;}); var sug={}; checked.forEach(function(k){var it=PL_NEE.filter(function(x){return x.k===k;})[0]; if(it)it.adec.forEach(function(a){sug[a]=1;});}); var pieVals={}; document.querySelectorAll('#plPIE input[type=checkbox]').forEach(function(chk){pieVals[chk.value]=chk;}); var extra=[]; Object.keys(sug).forEach(function(a){ if(pieVals[a])pieVals[a].checked=true; else extra.push(a); }); if(extra.length){ var t=document.getElementById('plPIEtxt'); var cur=(t.value||'').split(',').map(function(s){return s.trim();}).filter(Boolean); extra.forEach(function(a){if(cur.indexOf(a)===-1)cur.push(a);}); t.value=cur.join(', '); } }
-function pfInit(){
- var pA=document.getElementById('plAsig'),meta=window._ASIG_META||[];
+function _pfFillSel(asigId,cursoId){
+ var pA=document.getElementById(asigId),meta=window._ASIG_META||[];
  var opts='<option value="">— Elige —</option>'+meta.map(function(m){return '<option value="'+(m.nombre||'').replace(/"/g,'&quot;')+'">'+(m.nombre||'')+'</option>';}).join('');
  if(window._PROF_TP){var ks=Object.keys(window._PROF_TP); if(ks.length)opts+='<optgroup label="Módulos TP">'+ks.map(function(k){return '<option value="'+k.replace(/"/g,'&quot;')+'">'+k+'</option>';}).join('')+'</optgroup>';}
- if(pA)pA.innerHTML=opts;
- var pN=document.getElementById('plCurso'),mN=document.getElementById('matNivel');
- if(pN)pN.innerHTML=mN?mN.innerHTML:'<option value="">— Elige —</option>';
+ if(pA){var cur=pA.value;pA.innerHTML=opts;if(cur)pA.value=cur;}
+ var pN=document.getElementById(cursoId),mN=document.getElementById('matNivel');
+ if(pN&&!pN.querySelector('option[value]:not([value=""])'))pN.innerHTML=mN?mN.innerHTML:'<option value="">— Elige —</option>';
+}
+function pfInit(){
+ _pfFillSel('plAsig','plCurso');
  var v=document.getElementById('plValores'); if(v&&!v.innerHTML.trim())v.innerHTML=PL_VALORES.map(function(x){return '<label><input type="checkbox" value="'+x+'"> '+x+'</label>';}).join('');
  var p=document.getElementById('plPIE'); if(p&&!p.innerHTML.trim())p.innerHTML=PL_PIE.map(function(x){return '<label><input type="checkbox" value="'+x+'"> '+x+'</label>';}).join('');
  var n=document.getElementById('plNEE'); if(n&&!n.innerHTML.trim())n.innerHTML=PL_NEE.map(function(x){return '<label><input type="checkbox" value="'+x.k+'" onchange="pfNEE()"> '+x.n+'</label>';}).join('');
 }
-function _pfCrit(){var arr=Array.prototype.map.call(document.querySelectorAll('#plCE input:checked'),function(c){return c.value+': '+(c.dataset.desc||'');});var t=(document.getElementById('plCEtxt').value||'').trim();if(t)arr.push(t);return arr.map(function(c){return '• '+c;}).join('\n');}
+function _pfCrit(p){p=p||'pl';var arr=Array.prototype.map.call(document.querySelectorAll('#'+p+'CE input:checked'),function(c){return c.value+': '+(c.dataset.desc||'');});var te=document.getElementById(p+'CEtxt');var t=te?(te.value||'').trim():'';if(t)arr.push(t);return arr.map(function(c){return '• '+c;}).join('\n');}
+window._CURM={};
+function curGather(p){p=p||'pl';var asig=document.getElementById(p+'Asig').value,esTP=!!(window._PROF_TP&&window._PROF_TP[asig]),oaChecked=[],oaEsp='',ae='',oag='';
+ if(esTP){var m=window._PROF_TP[asig];var os=document.getElementById(p+'OAsel');if(os&&m.oas[+os.value]){var oo=m.oas[+os.value];oaEsp=oo.codigo+': '+oo.texto;}var asl=document.getElementById(p+'AEsel');if(asl&&m.aes[+asl.value]){var aa=m.aes[+asl.value];ae='AE '+(+asl.value+1)+': '+aa.texto;}oaChecked=ae?[ae]:[];var set={};document.querySelectorAll('#'+p+'CE input:checked').forEach(function(c){(c.dataset.oag||'').split(',').filter(Boolean).forEach(function(g){set[g]=1;});});oag=Object.keys(set).sort().join(', ');}
+ else{oaChecked=Array.prototype.map.call(document.querySelectorAll('#'+p+'OA input:checked'),function(c){return c.value+(c.dataset.desc?(' ('+c.dataset.desc+')'):'');});}
+ return {esTP:esTP,asig:asig,oaChecked:oaChecked,oaEsp:oaEsp,ae:ae,oag:oag,criterios:_pfCrit(p)};}
 function _pfNivMap(){ if(window._NIV2CODE)return Promise.resolve(window._NIV2CODE); if(typeof CURRICULA_READY==='undefined')return Promise.resolve({}); return CURRICULA_READY.then(function(CUR){var m={};(CUR.getAllNiveles()||[]).forEach(function(c){m[(CUR.getNivelLabel(c)||'').toLowerCase()]=c;m[c.toLowerCase()]=c;});window._NIV2CODE=m;return m;}); }
 function _short(s,n){s=s||'';return s.length>n?s.slice(0,n)+'…':s;}
-function pfBuildOA(){
- var asig=document.getElementById('plAsig').value, host=document.getElementById('plCurric'); if(!host)return;
- // ── TP: cascada Módulo → OA → AE → CE → OAG ──
- if(window._PROF_TP&&window._PROF_TP[asig]){ var m=window._PROF_TP[asig]; window._PL_M=m;
-   var uu=document.getElementById('plUnidad'); if(uu&&!uu.value)uu.value=m.nombre||'';
+function pfBuildOA(p){ p=p||'pl';
+ var asig=document.getElementById(p+'Asig').value, host=document.getElementById(p+'Curric'); if(!host)return;
+ if(window._PROF_TP&&window._PROF_TP[asig]){ var m=window._PROF_TP[asig]; window._CURM[p]=m;
+   var uu=document.getElementById(p+'Unidad'); if(uu&&!uu.value)uu.value=m.nombre||'';
    var h='';
    h+='<label class="pflab">Objetivo de aprendizaje (OA) de la especialidad</label>';
-   h+=(m.oas&&m.oas.length)?('<select id="plOAsel" class="pfsel" onchange="pfOAsel()">'+m.oas.map(function(o,i){return '<option value="'+i+'">'+(o.codigo||'OA')+': '+_short(o.texto,90)+'</option>';}).join('')+'</select><div id="plOAtext" class="pfbox"></div>'):'<div class="pfbox">Este módulo no registra OA de especialidad.</div>';
+   h+=(m.oas&&m.oas.length)?('<select id="'+p+'OAsel" class="pfsel" onchange="pfOAsel(\''+p+'\')">'+m.oas.map(function(o,i){return '<option value="'+i+'">'+(o.codigo||'OA')+': '+_short(o.texto,90)+'</option>';}).join('')+'</select><div id="'+p+'OAtext" class="pfbox"></div>'):'<div class="pfbox">Este módulo no registra OA de especialidad.</div>';
    h+='<label class="pflab">Aprendizaje esperado (AE)</label>';
-   h+=(m.aes&&m.aes.length)?('<select id="plAEsel" class="pfsel" onchange="pfAEsel()">'+m.aes.map(function(a,i){return '<option value="'+i+'">AE '+(i+1)+': '+_short(a.texto,90)+'</option>';}).join('')+'</select>'):'<div class="pfbox">Sin aprendizajes esperados.</div>';
-   h+='<label class="pflab">Criterios de evaluación (CE) — marca los que evaluarás</label>';
-   h+='<div id="plCE" class="wplist pfce"></div>';
-   h+='<input id="plCEtxt" placeholder="Agregar un criterio propio…" style="width:100%;margin-top:6px;font-size:13px;color:var(--text);background:var(--bg);border:1px solid var(--border-2);border-radius:8px;padding:8px 10px">';
+   h+=(m.aes&&m.aes.length)?('<select id="'+p+'AEsel" class="pfsel" onchange="pfAEsel(\''+p+'\')">'+m.aes.map(function(a,i){return '<option value="'+i+'">AE '+(i+1)+': '+_short(a.texto,90)+'</option>';}).join('')+'</select>'):'<div class="pfbox">Sin aprendizajes esperados.</div>';
+   h+='<label class="pflab">Criterios de evaluación (CE) — marca los que trabajarás</label>';
+   h+='<div id="'+p+'CE" class="wplist pfce"></div>';
+   h+='<input id="'+p+'CEtxt" placeholder="Agregar un criterio propio…" style="width:100%;margin-top:6px;font-size:13px;color:var(--text);background:var(--bg);border:1px solid var(--border-2);border-radius:8px;padding:8px 10px">';
    h+='<label class="pflab">Objetivos de Aprendizaje Genéricos (OAG) asociados</label>';
-   h+='<div id="plOAG"></div>';
-   host.innerHTML=h; pfOAsel(); pfAEsel(); return;
+   h+='<div id="'+p+'OAG"></div>';
+   host.innerHTML=h; pfOAsel(p); pfAEsel(p); return;
  }
- // ── Plan común: OA por asignatura + curso ──
- var curso=document.getElementById('plCurso').value;
+ var curso=document.getElementById(p+'Curso').value;
  if(!asig||!curso||typeof CURRICULA_READY==='undefined'){ host.innerHTML='<div class="sub" style="margin:0">Elige asignatura/módulo y curso arriba para desplegar los objetivos.</div>'; return; }
  var meta=(window._ASIG_META||[]).filter(function(x){return x.nombre===asig;})[0];
  Promise.all([CURRICULA_READY,_pfNivMap()]).then(function(r){var CUR=r[0],nm=r[1],sigla=meta?meta.sigla:'',code=nm[(curso||'').toLowerCase()];
-   var uni=(sigla&&code)?(CUR.getUnidades(sigla,code)||[]):[]; var uEl=document.getElementById('plUnidad'); if(uEl&&!uEl.value&&uni.length){var u0=uni[0];uEl.value=(typeof u0==='string')?u0:(u0.nombre||u0.titulo||'');}
+   var uni=(sigla&&code)?(CUR.getUnidades(sigla,code)||[]):[]; var uEl=document.getElementById(p+'Unidad'); if(uEl&&!uEl.value&&uni.length){var u0=uni[0];uEl.value=(typeof u0==='string')?u0:(u0.nombre||u0.titulo||'');}
    var oas=(sigla&&code)?(CUR.getOAs(sigla,code)||[]):[];
-   var h='<label class="pflab">Objetivo(s) de aprendizaje (OA) que trabajará</label>';
-   h+='<div id="plOA" class="wplist pfce">'+(oas.length?oas.map(function(o){var d=o.descripcion||o.desc||'';return '<label><input type="checkbox" value="'+(o.codigo||'').replace(/"/g,'&quot;')+'" data-desc="'+d.replace(/"/g,'&quot;')+'"> <b>'+o.codigo+'</b> — '+d+'</label>';}).join(''):'<div class="sub" style="margin:0">Sin OA para esta asignatura/curso.</div>')+'</div>';
+   var h='<label class="pflab">Objetivo(s) de aprendizaje (OA)</label>';
+   h+='<div id="'+p+'OA" class="wplist pfce">'+(oas.length?oas.map(function(o){var d=o.descripcion||o.desc||'';return '<label><input type="checkbox" value="'+(o.codigo||'').replace(/"/g,'&quot;')+'" data-desc="'+d.replace(/"/g,'&quot;')+'"> <b>'+o.codigo+'</b> — '+d+'</label>';}).join(''):'<div class="sub" style="margin:0">Sin OA para esta asignatura/curso.</div>')+'</div>';
    h+='<label class="pflab">Criterios de evaluación</label><div class="pfbox">El Plan Común no trae criterios predefinidos; agrégalos abajo o deja que la IA los proponga.</div>';
-   h+='<input id="plCEtxt" placeholder="Agregar un criterio propio…" style="width:100%;margin-top:6px;font-size:13px;color:var(--text);background:var(--bg);border:1px solid var(--border-2);border-radius:8px;padding:8px 10px">';
+   h+='<input id="'+p+'CEtxt" placeholder="Agregar un criterio propio…" style="width:100%;margin-top:6px;font-size:13px;color:var(--text);background:var(--bg);border:1px solid var(--border-2);border-radius:8px;padding:8px 10px">';
    host.innerHTML=h;
  });
 }
-function pfOAsel(){var m=window._PL_M; if(!m)return; var s=document.getElementById('plOAsel'); if(!s)return; var o=m.oas[+s.value]; var b=document.getElementById('plOAtext'); if(b)b.textContent=o?(o.codigo+': '+o.texto):'';}
-function pfAEsel(){var m=window._PL_M; if(!m)return; var s=document.getElementById('plAEsel'); var ae=s?m.aes[+s.value]:null; var box=document.getElementById('plCE'); if(!box)return; var ces=ae?(ae.ces||[]):[]; box.innerHTML=ces.length?ces.map(function(c){return '<label><input type="checkbox" value="'+(c.codigo||'CE').replace(/"/g,'&quot;')+'" data-desc="'+(c.texto||'').replace(/"/g,'&quot;')+'" data-oag="'+((c.oag||[]).join(',')).replace(/"/g,'&quot;')+'" onchange="pfCEsel()"> <b>'+(c.codigo||'CE')+'</b> — '+(c.texto||'')+'</label>';}).join(''):'<div class="sub" style="margin:0">Este AE no tiene criterios cargados.</div>'; pfCEsel();}
-function pfCEsel(){var set={}; document.querySelectorAll('#plCE input:checked').forEach(function(c){(c.dataset.oag||'').split(',').filter(Boolean).forEach(function(g){set[g]=1;});}); var codes=Object.keys(set).sort(); var el=document.getElementById('plOAG'); if(!el)return; el.innerHTML=codes.length?codes.map(function(g){var t=(OAG_EMTP.filter(function(x){return x[0]===g;})[0]||[g,''])[1]; return '<div class="row" style="align-items:flex-start"><span class="tag info" style="margin-right:8px">'+g+'</span><div style="flex:1;font-size:12.8px">'+t+'</div></div>';}).join(''):'<div class="sub" style="margin:0">Marca criterios para ver sus OAG asociados.</div>';}
+function pfOAsel(p){p=p||'pl';var m=window._CURM[p]; if(!m)return; var s=document.getElementById(p+'OAsel'); if(!s)return; var o=m.oas[+s.value]; var b=document.getElementById(p+'OAtext'); if(b)b.textContent=o?(o.codigo+': '+o.texto):'';}
+function pfAEsel(p){p=p||'pl';var m=window._CURM[p]; if(!m)return; var s=document.getElementById(p+'AEsel'); var ae=s?m.aes[+s.value]:null; var box=document.getElementById(p+'CE'); if(!box)return; var ces=ae?(ae.ces||[]):[]; box.innerHTML=ces.length?ces.map(function(c){return '<label><input type="checkbox" value="'+(c.codigo||'CE').replace(/"/g,'&quot;')+'" data-desc="'+(c.texto||'').replace(/"/g,'&quot;')+'" data-oag="'+((c.oag||[]).join(',')).replace(/"/g,'&quot;')+'" onchange="pfCEsel(\''+p+'\')"> <b>'+(c.codigo||'CE')+'</b> — '+(c.texto||'')+'</label>';}).join(''):'<div class="sub" style="margin:0">Este AE no tiene criterios cargados.</div>'; pfCEsel(p);}
+function pfCEsel(p){p=p||'pl';var set={}; document.querySelectorAll('#'+p+'CE input:checked').forEach(function(c){(c.dataset.oag||'').split(',').filter(Boolean).forEach(function(g){set[g]=1;});}); var codes=Object.keys(set).sort(); var el=document.getElementById(p+'OAG'); if(!el)return; el.innerHTML=codes.length?codes.map(function(g){var t=(OAG_EMTP.filter(function(x){return x[0]===g;})[0]||[g,''])[1]; return '<div class="row" style="align-items:flex-start"><span class="tag info" style="margin-right:8px">'+g+'</span><div style="flex:1;font-size:12.8px">'+t+'</div></div>';}).join(''):'<div class="sub" style="margin:0">Marca criterios para ver sus OAG asociados.</div>';}
 function pfGenerar(){
+ var g=curGather('pl');
  var valores=Array.prototype.map.call(document.querySelectorAll('#plValores input:checked'),function(c){return c.value;}).join(', ');
  var adec=Array.prototype.map.call(document.querySelectorAll('#plPIE input:checked'),function(c){return c.value;});
  var adecTxt=(document.getElementById('plPIEtxt').value||'').trim(); if(adecTxt)adec.push(adecTxt);
- var asigVal=document.getElementById('plAsig').value, esTP=!!(window._PROF_TP&&window._PROF_TP[asigVal]);
  var nee=Array.prototype.map.call(document.querySelectorAll('#plNEE input:checked'),function(c){var it=PL_NEE.filter(function(x){return x.k===c.value;})[0];return it?it.n:c.value;});
- var oaChecked=[],oaEsp='',ae='',oag='';
- if(esTP){ var m=window._PROF_TP[asigVal];
-   var os=document.getElementById('plOAsel'); if(os&&m.oas[+os.value]){var oo=m.oas[+os.value]; oaEsp=oo.codigo+': '+oo.texto;}
-   var asl=document.getElementById('plAEsel'); if(asl&&m.aes[+asl.value]){var aa=m.aes[+asl.value]; ae='AE '+(+asl.value+1)+': '+aa.texto;}
-   oaChecked=ae?[ae]:[];
-   var set={}; document.querySelectorAll('#plCE input:checked').forEach(function(c){(c.dataset.oag||'').split(',').filter(Boolean).forEach(function(g){set[g]=1;});}); oag=Object.keys(set).sort().join(', ');
- } else { oaChecked=Array.prototype.map.call(document.querySelectorAll('#plOA input:checked'),function(c){return c.value+(c.dataset.desc?(' ('+c.dataset.desc+')'):'');}); }
- var datos={ asignatura:esTP?'':asigVal, nivel:document.getElementById('plCurso').value, curso:document.getElementById('plCurso').value, modulo:esTP?(window._PROF_TP[asigVal].nombre||asigVal):'', unidad:document.getElementById('plUnidad').value||'', tema:document.getElementById('plTema').value||'', horas:document.getElementById('plHoras').value||'', ae:ae||oaChecked.join(' | '), criterios:_pfCrit(), valores:valores, nee:nee, oaEspecialidad:oaEsp, oag:oag, adecuaciones:adec.map(function(a){return '• '+a;}).join('\n'), oas_seleccionados:oaChecked, oa:oaChecked.join(' | ') };
- if(!asigVal){toast('Elige una asignatura o módulo.','danger');return;}
+ var datos={ asignatura:g.esTP?'':g.asig, nivel:document.getElementById('plCurso').value, curso:document.getElementById('plCurso').value, modulo:g.esTP?(window._PROF_TP[g.asig].nombre||g.asig):'', unidad:document.getElementById('plUnidad').value||'', tema:document.getElementById('plTema').value||'', horas:document.getElementById('plHoras').value||'', ae:g.ae||g.oaChecked.join(' | '), criterios:g.criterios, valores:valores, nee:nee, oaEspecialidad:g.oaEsp, oag:g.oag, adecuaciones:adec.map(function(a){return '• '+a;}).join('\n'), oas_seleccionados:g.oaChecked, oa:g.oaChecked.join(' | ') };
+ if(!g.asig){toast('Elige una asignatura o módulo.','danger');return;}
  var b=document.getElementById('btnPl');b.disabled=true;var o=b.innerHTML;b.innerHTML='<span class="material-symbols-outlined" style="font-size:18px">hourglass_top</span> Generando…';
  fetch('/api/ia-asistente',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({tipo:'planificacion',datos:datos})})
   .then(function(r){return r.json()}).then(function(d){if(d.error)throw new Error(d.error);document.getElementById('plTxt').value=d.resultado||'(respuesta vacía)';toast('Planificación generada. Revísala y edítala.','success');})
@@ -312,6 +350,30 @@ function pfPDF(){var txt=document.getElementById('plTxt').value||'';if(!txt.trim
 function pfGuardar(){var txt=document.getElementById('plTxt').value||'';if(!txt.trim()){toast('Primero genera la planificación.','danger');return;}
  REG.biblioteca.rows.unshift(['Planificación — '+(document.getElementById('plUnidad').value||_plTitulo()),(document.getElementById('plAsig').value||'')+' · '+(document.getElementById('plCurso').value||'')+' · jun 2026','Guardado']);
  renderTable('biblioteca'); if(window.ccStore)ccStore.setTabla('prof_biblioteca',REG.biblioteca.rows); toast('Planificación guardada en biblioteca.','success');}
+
+// ══════════ Evaluaciones ══════════
+var EV_TIPOS=['Selección múltiple','Verdadero / Falso','Términos pareados','Completación','Desarrollo','Respuesta breve'];
+function evInit(){
+ _pfFillSel('evAsig','evCurso');
+ var t=document.getElementById('evTipos'); if(t&&!t.innerHTML.trim())t.innerHTML=EV_TIPOS.map(function(x,i){return '<label><input type="checkbox" value="'+x+'"'+(i===0?' checked':'')+'> '+x+'</label>';}).join('');
+ var n=document.getElementById('evNEE'); if(n&&!n.innerHTML.trim())n.innerHTML=PL_NEE.map(function(x){return '<label><input type="checkbox" value="'+x.k+'"> '+x.n+'</label>';}).join('');
+}
+function evOnFormato(){var f=document.getElementById('evFormato').value; document.getElementById('evCompBox').style.display=(f==='paes')?'block':'none'; document.getElementById('evSimceBox').style.display=(f==='simce')?'block':'none';}
+function evGenerar(){
+ var g=curGather('ev'); if(!g.asig){toast('Elige una asignatura o módulo.','danger');return;}
+ var formato=document.getElementById('evFormato').value;
+ var tipos=Array.prototype.map.call(document.querySelectorAll('#evTipos input:checked'),function(c){return c.value;});
+ var nee=document.getElementById('evPIE').checked?Array.prototype.map.call(document.querySelectorAll('#evNEE input:checked'),function(c){var it=PL_NEE.filter(function(x){return x.k===c.value;})[0];return it?it.n:c.value;}):[];
+ var datos={ asignatura:g.esTP?'':g.asig, nivel:document.getElementById('evCurso').value, curso:document.getElementById('evCurso').value, modulo:g.esTP?(window._PROF_TP[g.asig].nombre||g.asig):'', unidad:document.getElementById('evUnidad').value||'', tema:document.getElementById('evTema').value||'', oaEspecialidad:g.oaEsp, ae:g.ae, oag:g.oag, criterios:g.criterios, oas_seleccionados:g.oaChecked, oa:g.oaChecked.join(' | '), formato:formato, competenciaPaes:document.getElementById('evComp').value, prueba:document.getElementById('evSimce').value, simce:document.getElementById('evSimce').value, nPreguntas:document.getElementById('evN').value, puntaje:document.getElementById('evPuntaje').value, duracion:document.getElementById('evDur').value, tiposPreguntas:tipos, taxonomiaSistema:document.getElementById('evTax').value, nee:nee };
+ var b=document.getElementById('btnEv');b.disabled=true;var o=b.innerHTML;b.innerHTML='<span class="material-symbols-outlined" style="font-size:18px">hourglass_top</span> Generando…';
+ fetch('/api/ia-asistente',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({tipo:'prueba',datos:datos})})
+  .then(function(r){return r.json()}).then(function(d){if(d.error)throw new Error(d.error);document.getElementById('evTxt').value=d.resultado||'(respuesta vacía)';toast('Evaluación generada. Revísala y edítala.','success');})
+  .catch(function(e){toast('Error de IA: '+e.message,'danger');}).then(function(){b.disabled=false;b.innerHTML=o;});
+}
+function _evTit(){return 'Evaluación — '+(document.getElementById('evAsig').value||'')+' '+(document.getElementById('evCurso').value||'');}
+function evWord(){var txt=document.getElementById('evTxt').value||'';if(!txt.trim()){toast('Primero genera la evaluación.','danger');return;}var html='<h2>'+_evTit()+'</h2><pre style="font-family:Calibri,Arial;font-size:11pt;white-space:pre-wrap">'+txt.replace(/&/g,'&amp;').replace(/</g,'&lt;')+'</pre>';var blob=new Blob(['<html xmlns:w="urn:schemas-microsoft-com:office:word"><head><meta charset="utf-8"></head><body>'+html+'</body></html>'],{type:'application/msword'});var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='evaluacion.doc';a.click();toast('Exportado a Word.','success');}
+function evPDF(){var txt=document.getElementById('evTxt').value||'';if(!txt.trim()){toast('Primero genera la evaluación.','danger');return;}var J=(window.jspdf&&window.jspdf.jsPDF);if(!J){toast('Generador PDF no disponible.','danger');return;}var doc=new J({unit:'pt',format:'letter'}),margin=48,ph=doc.internal.pageSize.getHeight(),width=doc.internal.pageSize.getWidth()-margin*2,y=margin;doc.setFont('helvetica','bold');doc.setFontSize(13);doc.text(_evTit(),margin,y);y+=20;doc.setFont('helvetica','normal');doc.setFontSize(10);var lines=doc.splitTextToSize(txt,width);for(var i=0;i<lines.length;i++){if(y>ph-margin){doc.addPage();y=margin;}doc.text(lines[i],margin,y);y+=14;}doc.save('evaluacion.pdf');toast('PDF descargado.','success');}
+function evGuardar(){var txt=document.getElementById('evTxt').value||'';if(!txt.trim()){toast('Primero genera la evaluación.','danger');return;}REG.biblioteca.rows.unshift(['Evaluación — '+(document.getElementById('evAsig').value||''),(document.getElementById('evCurso').value||'')+' · '+(document.getElementById('evFormato').value||'')+' · jun 2026','Guardado']);renderTable('biblioteca');if(window.ccStore)ccStore.setTabla('prof_biblioteca',REG.biblioteca.rows);toast('Evaluación guardada en biblioteca.','success');}
 document.querySelectorAll('.nav-item').forEach(function(x){x.addEventListener('click',function(){show(x.dataset.s)})});
 
 // ── Asignaturas/niveles del profesor: catálogo del colegio (admin) + asignación del UTP ──
