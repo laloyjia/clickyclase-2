@@ -37,13 +37,23 @@
       <div class="h1">Resumen de plataforma</div><div class="sub">Vista global de Click&Clase</div>
       <div class="kpis">
         <div class="kpi"><div class="l">Usuarios</div><div class="v" id="kpiUsuarios">—</div></div>
-        <div class="kpi"><div class="l">Colegios</div><div class="v" id="kpiColegios">1</div></div>
-        <div class="kpi"><div class="l">API Keys IA</div><div class="v" id="kpiKeys">—</div></div>
-        <div class="kpi"><div class="l">Modelo IA</div><div class="v" id="kpiModelo" style="font-size:15px">—</div></div>
+        <div class="kpi"><div class="l">Profesores</div><div class="v" id="kpiProfes">—</div></div>
+        <div class="kpi"><div class="l">Colegios</div><div class="v" id="kpiColegios">0</div></div>
+        <div class="kpi"><div class="l">Materiales</div><div class="v" id="kpiMats">—</div></div>
+        <div class="kpi"><div class="l">Planificaciones</div><div class="v" id="kpiPlanif">—</div></div>
       </div>
-      <div class="card"><h3><span class="material-symbols-outlined">bolt</span> Estado del sistema</h3>
+      <div class="card"><h3><span class="material-symbols-outlined">bolt</span> Accesos rápidos</h3>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn" onclick="show('usuarios')"><span class="material-symbols-outlined" style="font-size:18px">person_add</span> Nuevo usuario</button>
+          <button class="btn ghost" onclick="show('codigos')"><span class="material-symbols-outlined" style="font-size:18px">vpn_key</span> Códigos de acceso</button>
+          <button class="btn ghost" onclick="show('colegios')"><span class="material-symbols-outlined" style="font-size:18px">add_business</span> Colegios</button>
+          <button class="btn ghost" onclick="show('comunicados')"><span class="material-symbols-outlined" style="font-size:18px">campaign</span> Comunicado</button>
+          <button class="btn ghost" onclick="show('monitoreo')"><span class="material-symbols-outlined" style="font-size:18px">sensors</span> Monitoreo</button>
+        </div>
+      </div>
+      <div class="card"><h3><span class="material-symbols-outlined">insights</span> Estado del sistema</h3>
         <div class="row"><span class="material-symbols-outlined ic">database</span><div style="flex:1">Base de datos: <b id="estDb">verificando…</b></div></div>
-        <div class="row"><span class="material-symbols-outlined ic">smart_toy</span><div style="flex:1">Configuración IA: <b id="estIa">verificando…</b></div></div>
+        <div class="row"><span class="material-symbols-outlined ic">smart_toy</span><div style="flex:1">Configuración IA: <b id="estIa">verificando…</b> · Modelo <b id="kpiModelo">—</b> · <b id="kpiKeys">—</b> keys</div></div>
       </div>
     </section>
 
@@ -74,7 +84,7 @@
       <div class="card"><div class="cardhead"><h3><span class="material-symbols-outlined">group</span> Usuarios <span class="count" id="cnt-usuarios">0</span></h3>
         <div class="tools"><div class="search"><span class="material-symbols-outlined">search</span><input id="buscarU" placeholder="Buscar…"></div>
         <button class="btn ghost sm" onclick="cargarUsuarios()"><span class="material-symbols-outlined" style="font-size:16px">refresh</span> Actualizar</button></div></div>
-        <table><thead><tr><th>Correo</th><th>Rol</th><th>Tipo</th><th>Segmento</th><th>Organización</th></tr></thead><tbody id="tb-usuarios"><tr><td colspan="5" style="color:var(--muted)">Cargando…</td></tr></tbody></table>
+        <table><thead><tr><th>Correo</th><th>Rol</th><th>Tipo</th><th>Segmento</th><th>Organización</th><th>Estado</th><th>Acciones</th></tr></thead><tbody id="tb-usuarios"><tr><td colspan="7" style="color:var(--muted)">Cargando…</td></tr></tbody></table>
       </div>
     </section>
 
@@ -224,6 +234,7 @@
 
     <section class="sec" id="sec-actividad">
       <div class="h1">Registro de Actividad</div><div class="sub">Log de eventos por usuario: logins, generación de material, planificaciones y acciones admin.</div>
+      <div id="actAlertas" class="card" style="display:none;border-left:4px solid var(--danger);background:rgba(220,38,38,.06)"><div class="row" style="cursor:pointer" onclick="document.getElementById('actTipo').value='alerta_seguridad';cargarActividad()"><span class="material-symbols-outlined ic" style="color:var(--danger)">warning</span><div style="flex:1"><b>Alertas de seguridad</b> · <span id="actAlertasTxt"></span></div><span class="material-symbols-outlined" style="color:var(--faint)">chevron_right</span></div></div>
       <div class="kpis">
         <div class="kpi"><div class="l">Total eventos</div><div class="v" id="actTotal">—</div></div>
         <div class="kpi"><div class="l">Hoy</div><div class="v" id="actHoy">—</div></div>
@@ -234,7 +245,7 @@
         <div class="tools"><button class="btn ghost sm" onclick="exportarActividadCSV()"><span class="material-symbols-outlined" style="font-size:16px">download</span> Exportar CSV</button><button class="btn ghost sm" onclick="cargarActividad()"><span class="material-symbols-outlined" style="font-size:16px">refresh</span> Refrescar</button><button class="btn ghost sm" onclick="purgarActividadManual()"><span class="material-symbols-outlined" style="font-size:16px">delete_sweep</span> Purgar &gt;90 días</button></div></div>
         <div class="frm">
           <div class="fld"><label>Usuario (email)</label><input id="actEmail" placeholder="correo@…"></div>
-          <div class="fld"><label>Tipo de evento</label><select id="actTipo"><option value="">— Todos —</option><option value="login">Inicio de sesión</option><option value="generar_material">Generó material</option><option value="crear_planificacion">Creó planificación</option><option value="descarga_word">Descargó Word</option><option value="refinar_material">Refinó con IA</option></select></div>
+          <div class="fld"><label>Tipo de evento</label><select id="actTipo"><option value="">— Todos —</option><option value="login">Inicio de sesión</option><option value="generar_material">Generó material</option><option value="crear_planificacion">Creó planificación</option><option value="descarga_word">Descargó Word</option><option value="refinar_material">Refinó con IA</option><option value="alerta_seguridad">Alertas de seguridad</option></select></div>
           <div class="fld"><label>Desde</label><input id="actDesde" type="date"></div>
           <div class="fld"><label>Hasta</label><input id="actHasta" type="date"></div>
         </div>
@@ -244,8 +255,63 @@
         <table><thead><tr><th>Fecha / Hora</th><th>Usuario</th><th>Acción</th></tr></thead><tbody id="actTbody"></tbody></table>
       </div>
     </section>
+
+    <section class="sec" id="sec-codigos">
+      <div class="h1">Códigos de acceso</div><div class="sub">Genera códigos para que profesores o estudiantes se registren en la plataforma.</div>
+      <div class="card"><h3><span class="material-symbols-outlined">vpn_key</span> Nuevo código</h3>
+        <div class="frm">
+          <div class="fld"><label>Rol que otorga</label><select id="cgRol"><option value="profesor">Profesor</option><option value="estudiante">Estudiante</option></select></div>
+          <div class="fld"><label>Curso (opcional)</label><input id="cgCurso" placeholder="ej: 5°A"></div>
+          <div class="fld"><label>Asignatura (opcional)</label><input id="cgAsig" placeholder="ej: Matemática"></div>
+        </div>
+        <div style="margin-top:10px"><button class="btn" onclick="crearCodigo()"><span class="material-symbols-outlined" style="font-size:18px">add</span> Generar código</button></div>
+      </div>
+      <div class="card"><div class="cardhead"><h3><span class="material-symbols-outlined">list</span> Códigos generados <span class="count" id="cnt-codigos">0</span></h3><div class="tools"><button class="btn ghost sm" onclick="loadCodigos()"><span class="material-symbols-outlined" style="font-size:16px">refresh</span> Actualizar</button></div></div>
+        <table><thead><tr><th>Código</th><th>Rol</th><th>Estado</th><th>Curso / Asignatura</th><th>Creado</th><th></th></tr></thead><tbody id="tb-codigos"><tr><td colspan="6" style="color:var(--muted)">—</td></tr></tbody></table>
+      </div>
+    </section>
+
+    <section class="sec" id="sec-materiales">
+      <div class="h1">Materiales generados</div><div class="sub">Guías, pruebas y apuntes creados por los profesores con IA.</div>
+      <div class="card"><div class="cardhead"><h3><span class="material-symbols-outlined">description</span> Materiales <span class="count" id="cnt-materiales">0</span></h3>
+        <div class="tools"><div class="search"><span class="material-symbols-outlined">search</span><input id="matBuscar" placeholder="Buscar…" oninput="filtrarMat()"></div><button class="btn ghost sm" onclick="loadMateriales()"><span class="material-symbols-outlined" style="font-size:16px">refresh</span> Actualizar</button></div></div>
+        <table><thead><tr><th>Título</th><th>Asignatura</th><th>Curso</th><th>Autor</th><th>Fecha</th><th></th></tr></thead><tbody id="tb-materiales"><tr><td colspan="6" style="color:var(--muted)">Cargando…</td></tr></tbody></table>
+      </div>
+    </section>
+
+    <section class="sec" id="sec-planificaciones">
+      <div class="h1">Planificaciones</div><div class="sub">Planificaciones creadas por los profesores.</div>
+      <div class="card"><div class="cardhead"><h3><span class="material-symbols-outlined">event_note</span> Planificaciones <span class="count" id="cnt-planificaciones">0</span></h3>
+        <div class="tools"><div class="search"><span class="material-symbols-outlined">search</span><input id="planBuscar" placeholder="Buscar…" oninput="filtrarPlan()"></div><button class="btn ghost sm" onclick="loadPlanificaciones()"><span class="material-symbols-outlined" style="font-size:16px">refresh</span> Actualizar</button></div></div>
+        <table><thead><tr><th>Título</th><th>Asignatura</th><th>Nivel</th><th>Autor</th><th>Fecha</th><th></th></tr></thead><tbody id="tb-planificaciones"><tr><td colspan="6" style="color:var(--muted)">Cargando…</td></tr></tbody></table>
+      </div>
+    </section>
     </div>
   </main>
+</div>
+<div class="overlay" id="modalEditUser">
+  <div class="modal" style="max-width:560px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px"><h3 style="font-size:16px;font-weight:600;display:flex;align-items:center;gap:8px"><span class="material-symbols-outlined" style="color:var(--primary)">manage_accounts</span> Editar usuario</h3><span class="material-symbols-outlined" style="cursor:pointer;color:var(--muted)" onclick="cerrarEditUser()">close</span></div>
+    <input type="hidden" id="euUid">
+    <div class="sub" id="euEmail" style="margin-top:0"></div>
+    <div class="frm" style="margin-top:8px">
+      <div class="fld" style="grid-column:1/-1"><label>Nombre</label><input id="euNombre"></div>
+      <div class="fld"><label>Rol</label><select id="euRole"><option value="director">Director</option><option value="utp">UTP</option><option value="profesor">Profesor</option><option value="amb_enc">Enc. ambiente</option><option value="amb_prof">Prof. ambiente</option><option value="aps_enc">Enc. apoyo</option><option value="aps_prof">Prof. apoyo</option><option value="pie_enc">Enc. PIE</option><option value="pie_edu">Educadora PIE</option><option value="admin_colegio">Admin colegio</option><option value="rector">Rector</option><option value="jefe_tp">Jefe TP</option><option value="admin">Administrador</option></select></div>
+      <div class="fld"><label>Segmento (UTP)</label><select id="euSeg"><option value="">—</option><option value="pre">Pre-básica</option><option value="b16">1° a 6°</option><option value="mhc">Media H-C</option><option value="mfg">Media FG</option><option value="tp">TP</option></select></div>
+      <div class="fld"><label>Organización (orgId)</label><input id="euOrg" placeholder="colegio-demo o vacío"></div>
+      <div class="fld"><label>Estado</label><select id="euActivo"><option value="true">Activo</option><option value="false">Suspendido</option></select></div>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:12px"><button class="btn ghost" onclick="resetPass()"><span class="material-symbols-outlined" style="font-size:18px">lock_reset</span> Enviar reset de contraseña</button><button class="btn" onclick="guardarEditUser()"><span class="material-symbols-outlined" style="font-size:18px">save</span> Guardar</button></div>
+  </div>
+</div>
+<div class="overlay" id="modalLiceosUser">
+  <div class="modal" style="max-width:520px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px"><h3 style="font-size:16px;font-weight:600;display:flex;align-items:center;gap:8px"><span class="material-symbols-outlined" style="color:var(--primary)">school</span> Liceos del profesor</h3><span class="material-symbols-outlined" style="cursor:pointer;color:var(--muted)" onclick="cerrarLiceosUser()">close</span></div>
+    <input type="hidden" id="luUid">
+    <div class="sub" id="luNombre" style="margin-top:0"></div>
+    <div id="luLista" style="max-height:280px;overflow:auto;border:1px solid var(--border-2);border-radius:9px;padding:8px;margin-top:8px"></div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:12px"><button class="btn ghost" onclick="cerrarLiceosUser()">Cancelar</button><button class="btn" onclick="guardarLiceosUser()"><span class="material-symbols-outlined" style="font-size:18px">save</span> Guardar</button></div>
+  </div>
 </div>
 <div class="overlay" id="modalEditColegio">
   <div class="modal" style="max-width:560px">
@@ -287,13 +353,16 @@
 function ic(n){return '<span class="material-symbols-outlined">'+n+'</span>';}
 var _tt;function toast(msg,tone){var t=document.getElementById('toast');t.style.borderLeftColor='var(--'+(tone==='danger'?'danger':'success')+')';var i=t.querySelector('.material-symbols-outlined');i.style.color='var(--'+(tone==='danger'?'danger':'success')+')';i.textContent=tone==='danger'?'error':'check_circle';document.getElementById('toastMsg').textContent=msg;t.classList.add('show');clearTimeout(_tt);_tt=setTimeout(function(){t.classList.remove('show')},3200);}
 
-var NAV=[['dashboard','Resumen','resumen'],['group','Usuarios','usuarios'],['apartment','Liceos / Colegios','colegios'],['menu_book','Académico','academico'],['smart_toy','Configuración IA','ia'],['campaign','Comunicados','comunicados'],['sensors','Monitoreo en vivo','monitoreo'],['bar_chart','Registro de Actividad','actividad']];
+var NAV=[['dashboard','Resumen','resumen'],['group','Usuarios','usuarios'],['vpn_key','Códigos de acceso','codigos'],['apartment','Liceos / Colegios','colegios'],['menu_book','Académico','academico'],['description','Materiales','materiales'],['event_note','Planificaciones','planificaciones'],['smart_toy','Configuración IA','ia'],['campaign','Comunicados','comunicados'],['sensors','Monitoreo en vivo','monitoreo'],['bar_chart','Registro de Actividad','actividad']];
 document.getElementById('nav').innerHTML=NAV.map(function(n,i){return '<div class="nav-item'+(i===0?' active':'')+'" data-s="'+n[2]+'">'+ic(n[0])+'<span>'+n[1]+'</span></div>'}).join('');
 function show(s){document.querySelectorAll('.nav-item').forEach(function(x){x.classList.toggle('active',x.dataset.s===s)});document.querySelectorAll('.sec').forEach(function(x){x.classList.toggle('active',x.id==='sec-'+s)});
  if(s==='comunicados'){loadComunicados();}
  if(s==='monitoreo'){iniciarMonitoreo();}else{detenerMonitoreo();}
  if(s==='actividad'){cargarActividad();}
  if(s==='colegios'){loadLiceos();}
+ if(s==='codigos'){loadCodigos();}
+ if(s==='materiales'){loadMateriales();}
+ if(s==='planificaciones'){loadPlanificaciones();}
 }
 document.querySelectorAll('.nav-item').forEach(function(x){x.addEventListener('click',function(){show(x.dataset.s)})});
 function salir(){try{ELAuth.logout();}catch(e){}window.location.href='login.html';}
@@ -369,6 +438,7 @@ function cargarActividad(){
   var inD=document.getElementById('actDesde'); if(inD&&!inD.value){ var d=new Date(); d.setDate(d.getDate()-7); inD.value=d.toISOString().slice(0,10); }
   document.getElementById('actTbody').innerHTML='<tr><td colspan="3" style="text-align:center;color:var(--muted);padding:26px">Cargando registro…</td></tr>';
   ELDB.actividad.listar({limit:1000}).then(function(items){ _actCache=items||[]; aplicarFiltrosActividad(); renderKpisActividad(); if(ELDB.actividad.purgar)ELDB.actividad.purgar(90,false).catch(function(){}); });
+  loadAlertas();
 }
 function _actFiltrados(){
   var email=(document.getElementById('actEmail').value||'').trim().toLowerCase();
@@ -476,12 +546,35 @@ function guardarLiceo(){
 function eliminarLiceo(slug){ var l=allLiceos.filter(function(x){return x.slug===slug;})[0]; if(!confirm('¿Desactivar el liceo "'+(l?l.nombre:slug)+'"? Podrás restaurarlo cuando quieras.'))return; ELDB.liceos.eliminar(slug).then(loadLiceos).catch(function(e){toast('Error: '+(e&&e.message||''),'danger');}); }
 function restaurarLiceo(slug){ ELDB.liceos.restaurar(slug).then(loadLiceos).catch(function(e){toast('Error: '+(e&&e.message||''),'danger');}); }
 
+// ── Códigos de acceso ──
+function crearCodigo(){ if(typeof ELDB==='undefined'||!ELDB.codigos){toast('Módulo de códigos no disponible.','danger');return;}
+ ELDB.codigos.crear({role:document.getElementById('cgRol').value,curso:document.getElementById('cgCurso').value.trim(),asignatura:document.getElementById('cgAsig').value.trim()}).then(function(c){ toast('Código generado: '+c.codigo,'success'); loadCodigos(); }).catch(function(e){toast('Error: '+(e&&e.message||''),'danger');}); }
+function loadCodigos(){ var tb=document.getElementById('tb-codigos'); if(!tb||typeof ELDB==='undefined'||!ELDB.codigos)return; ELDB.codigos.listar().then(function(list){ document.getElementById('cnt-codigos').textContent=list.length; tb.innerHTML=list.length?list.map(function(c){ var est=c.usado?'<span class="tag danger">Usado</span>':'<span class="tag success">Disponible</span>'; return '<tr><td style="font-family:monospace;font-weight:600">'+(c.codigo||'')+'</td><td><span class="tag info">'+(c.role||'')+'</span></td><td>'+est+'</td><td>'+[c.curso,c.asignatura].filter(Boolean).join(' · ')+'</td><td>'+String(c.creadoEn||'').slice(0,10)+'</td><td><button class="btn ghost sm" title="Copiar" onclick="copiarCodigo(\''+(c.codigo||'')+'\')"><span class="material-symbols-outlined" style="font-size:15px">content_copy</span></button></td></tr>'; }).join(''):'<tr><td colspan="6" style="color:var(--muted)">Sin códigos generados.</td></tr>'; }).catch(function(e){ tb.innerHTML='<tr><td colspan="6" style="color:var(--danger)">Error: '+(e&&e.message||'')+'</td></tr>'; }); }
+function copiarCodigo(c){ if(navigator.clipboard){navigator.clipboard.writeText(c).then(function(){toast('Código copiado.','success');}).catch(function(){toast(c,'success');});}else{toast(c,'success');} }
+
+// ── Materiales ──
+var _matCache=[];
+function loadMateriales(){ var tb=document.getElementById('tb-materiales'); if(typeof ELDB==='undefined'||!ELDB.materiales)return; ELDB.materiales.listar({}).then(function(items){ _matCache=items||[]; var k=document.getElementById('kpiMats'); if(k)k.textContent=_matCache.length; var c=document.getElementById('cnt-materiales'); if(c)c.textContent=_matCache.length; if(tb)renderMat(_matCache); }).catch(function(e){ if(tb)tb.innerHTML='<tr><td colspan="6" style="color:var(--danger)">Error: '+(e&&e.message||'')+'</td></tr>'; }); }
+function renderMat(list){ var tb=document.getElementById('tb-materiales'); if(!tb)return; tb.innerHTML=list.length?list.map(function(m){ return '<tr data-txt="'+((m.titulo||'')+' '+(m.asignatura||'')+' '+(m.email||'')).toLowerCase()+'"><td>'+(m.titulo||m.tipoNombre||'(sin título)')+'</td><td>'+(m.asignatura||'—')+'</td><td>'+(m.curso||m.nivel||'—')+'</td><td>'+(m.profesor||m.email||'—')+'</td><td>'+String(m.fechaISO||'').slice(0,10)+'</td><td><button class="btn ghost sm" title="Eliminar" onclick="eliminarMaterial(\''+m.id+'\')"><span class="material-symbols-outlined" style="font-size:15px;color:var(--danger)">delete</span></button></td></tr>'; }).join(''):'<tr><td colspan="6" style="color:var(--muted)">Sin materiales.</td></tr>'; }
+function filtrarMat(){ var q=(document.getElementById('matBuscar').value||'').toLowerCase(); renderMat(_matCache.filter(function(m){return ((m.titulo||'')+' '+(m.asignatura||'')+' '+(m.email||'')).toLowerCase().indexOf(q)!==-1;})); }
+function eliminarMaterial(id){ if(!confirm('¿Eliminar este material?'))return; ELDB.materiales.eliminar(id).then(function(){toast('Material eliminado.','success');loadMateriales();}).catch(function(e){toast('Error: '+(e&&e.message||''),'danger');}); }
+
+// ── Planificaciones ──
+var _planCache=[];
+function loadPlanificaciones(){ var tb=document.getElementById('tb-planificaciones'); if(typeof ELDB==='undefined'||!ELDB.planificaciones)return; ELDB.planificaciones.listar({}).then(function(items){ _planCache=items||[]; var k=document.getElementById('kpiPlanif'); if(k)k.textContent=_planCache.length; var c=document.getElementById('cnt-planificaciones'); if(c)c.textContent=_planCache.length; if(tb)renderPlan(_planCache); }).catch(function(e){ if(tb)tb.innerHTML='<tr><td colspan="6" style="color:var(--danger)">Error: '+(e&&e.message||'')+'</td></tr>'; }); }
+function renderPlan(list){ var tb=document.getElementById('tb-planificaciones'); if(!tb)return; tb.innerHTML=list.length?list.map(function(p){ return '<tr data-txt="'+((p.titulo||'')+' '+(p.asignatura||'')+' '+(p.email||'')).toLowerCase()+'"><td>'+(p.titulo||'(sin título)')+'</td><td>'+(p.asignatura||'—')+'</td><td>'+(p.nivel||p.curso||'—')+'</td><td>'+(p.profesor||p.email||'—')+'</td><td>'+String(p.fechaISO||'').slice(0,10)+'</td><td><button class="btn ghost sm" title="Eliminar" onclick="eliminarPlan(\''+p.id+'\')"><span class="material-symbols-outlined" style="font-size:15px;color:var(--danger)">delete</span></button></td></tr>'; }).join(''):'<tr><td colspan="6" style="color:var(--muted)">Sin planificaciones.</td></tr>'; }
+function filtrarPlan(){ var q=(document.getElementById('planBuscar').value||'').toLowerCase(); renderPlan(_planCache.filter(function(p){return ((p.titulo||'')+' '+(p.asignatura||'')+' '+(p.email||'')).toLowerCase().indexOf(q)!==-1;})); }
+function eliminarPlan(id){ if(!confirm('¿Eliminar esta planificación?'))return; ELDB.planificaciones.eliminar(id).then(function(){toast('Planificación eliminada.','success');loadPlanificaciones();}).catch(function(e){toast('Error: '+(e&&e.message||''),'danger');}); }
+
+// ── Alertas de seguridad (banner en Actividad) ──
+function loadAlertas(){ var b=document.getElementById('actAlertas'); if(!b||typeof ELDB==='undefined'||!ELDB.actividad||!ELDB.actividad.listarAlertas)return; ELDB.actividad.listarAlertas(24).then(function(al){ al=al||[]; if(!al.length){b.style.display='none';return;} b.style.display='block'; document.getElementById('actAlertasTxt').textContent=al.length+' alerta(s) de seguridad en las últimas 24 h (logins fallidos / accesos sospechosos).'; }).catch(function(){b.style.display='none';}); }
+
 // ── Auth gate ──
 function esAdmin(u){if(!u)return false;if(u.role==='admin')return true;var L=window.EL_ADMIN_EMAILS||(window.EL_ADMIN_EMAIL?[window.EL_ADMIN_EMAIL]:[]);return L.indexOf(u.email)!==-1;}
 function iniciar(){
  document.getElementById('content').style.display='block';
  document.getElementById('authMsg').style.display='none';
- cargarUsuarios(); cargarIA(); cargarAcademico(); cargarColegios(); if(typeof expOnAmbito==='function')expOnAmbito();
+ cargarUsuarios(); cargarIA(); cargarAcademico(); cargarColegios(); if(typeof expOnAmbito==='function')expOnAmbito(); loadMateriales(); loadPlanificaciones();
  document.getElementById('estDb').textContent='conectada (clickyclase-2)';
 }
 if(typeof ELAuth!=='undefined'&&ELAuth.onUserReady){
@@ -493,16 +586,49 @@ if(typeof ELAuth!=='undefined'&&ELAuth.onUserReady){
 } else { document.getElementById('authMsg').style.display='block'; }
 
 // ── Usuarios ──
+var _allUsers=[];
 function cargarUsuarios(){
  if(typeof EL_DB==='undefined')return;
  EL_DB.collection('usuarios').get().then(function(snap){
-   var rows=(snap.docs||[]).map(function(d){var u=d.data()||{};return [u.email||d.id,u.role||'',u.tipo||'',u.seg||'—',u.orgId||'—'];});
-   document.getElementById('cnt-usuarios').textContent=rows.length;
-   document.getElementById('kpiUsuarios').textContent=rows.length;
-   var tb=document.getElementById('tb-usuarios');
-   tb.innerHTML=rows.length?rows.map(function(r){return '<tr data-txt="'+r.join(' ').toLowerCase()+'">'+'<td>'+r[0]+'</td><td><span class="tag info">'+r[1]+'</span></td><td>'+r[2]+'</td><td>'+r[3]+'</td><td>'+r[4]+'</td></tr>'}).join(''):'<tr><td colspan="5" style="color:var(--muted)">Sin usuarios.</td></tr>';
- }).catch(function(e){document.getElementById('tb-usuarios').innerHTML='<tr><td colspan="5" style="color:var(--danger)">Error: '+e.message+'</td></tr>';});
+   _allUsers=(snap.docs||[]).map(function(d){var u=d.data()||{};u.uid=d.id;return u;});
+   document.getElementById('cnt-usuarios').textContent=_allUsers.length;
+   var kU=document.getElementById('kpiUsuarios'); if(kU)kU.textContent=_allUsers.length;
+   var kP=document.getElementById('kpiProfes'); if(kP)kP.textContent=_allUsers.filter(function(u){return u.role==='profesor';}).length;
+   renderUsuarios(_allUsers);
+ }).catch(function(e){document.getElementById('tb-usuarios').innerHTML='<tr><td colspan="7" style="color:var(--danger)">Error: '+e.message+'</td></tr>';});
 }
+function renderUsuarios(list){
+ var tb=document.getElementById('tb-usuarios'); if(!tb)return;
+ tb.innerHTML=list.length?list.map(function(u){
+   var activo=u.activo!==false;
+   var est=activo?'<span class="tag success">Activo</span>':'<span class="tag danger">Suspendido</span>';
+   var txt=((u.email||'')+' '+(u.role||'')+' '+(u.tipo||'')+' '+(u.orgId||'')).toLowerCase();
+   var esProf=u.role==='profesor';
+   return '<tr data-txt="'+txt+'"><td>'+(u.email||u.uid)+'</td><td><span class="tag info">'+(u.role||'')+'</span></td><td>'+(u.tipo||'')+'</td><td>'+(u.seg||'—')+'</td><td>'+(u.orgId||'—')+'</td><td>'+est+'</td>'+
+     '<td style="white-space:nowrap">'+
+       '<button class="btn ghost sm" title="Editar" onclick="editarUsuario(\''+u.uid+'\')"><span class="material-symbols-outlined" style="font-size:16px">edit</span></button> '+
+       (esProf?'<button class="btn ghost sm" title="Asignar liceos" onclick="asignarLiceosUser(\''+u.uid+'\')"><span class="material-symbols-outlined" style="font-size:16px">school</span></button> ':'')+
+       '<button class="btn ghost sm" title="'+(activo?'Suspender':'Activar')+'" onclick="toggleUsuario(\''+u.uid+'\')"><span class="material-symbols-outlined" style="font-size:16px;color:var(--'+(activo?'danger':'success')+')">'+(activo?'block':'check_circle')+'</span></button>'+
+     '</td></tr>';
+ }).join(''):'<tr><td colspan="7" style="color:var(--muted)">Sin usuarios.</td></tr>';
+}
+function _findUser(uid){return _allUsers.filter(function(u){return u.uid===uid;})[0];}
+function editarUsuario(uid){var u=_findUser(uid); if(!u)return; document.getElementById('euUid').value=uid; document.getElementById('euEmail').textContent=u.email||''; document.getElementById('euNombre').value=u.nombre||''; document.getElementById('euRole').value=u.role||'profesor'; document.getElementById('euSeg').value=u.seg||''; document.getElementById('euOrg').value=u.orgId||''; document.getElementById('euActivo').value=(u.activo!==false)?'true':'false'; document.getElementById('modalEditUser').classList.add('show');}
+function cerrarEditUser(){document.getElementById('modalEditUser').classList.remove('show');}
+function guardarEditUser(){var uid=document.getElementById('euUid').value; var datos={nombre:document.getElementById('euNombre').value.trim(),role:document.getElementById('euRole').value,seg:document.getElementById('euSeg').value||null,orgId:document.getElementById('euOrg').value.trim()||null,activo:document.getElementById('euActivo').value==='true'};
+ var p=(typeof ELDB!=='undefined'&&ELDB.usuarios&&ELDB.usuarios.actualizar)?ELDB.usuarios.actualizar(uid,datos):EL_DB.collection('usuarios').doc(uid).update(datos);
+ p.then(function(){toast('Usuario actualizado.','success');cerrarEditUser();cargarUsuarios();}).catch(function(e){toast('Error: '+(e&&e.message||''),'danger');});}
+function toggleUsuario(uid){var u=_findUser(uid); if(!u)return; var nuevo=(u.activo===false); if(!confirm((nuevo?'¿Activar':'¿Suspender')+' a '+(u.email||uid)+'?'))return; EL_DB.collection('usuarios').doc(uid).update({activo:nuevo}).then(function(){toast(nuevo?'Usuario activado.':'Usuario suspendido.','success');cargarUsuarios();}).catch(function(e){toast('Error: '+(e&&e.message||''),'danger');});}
+function resetPass(){var uid=document.getElementById('euUid').value; var u=_findUser(uid); if(!u||!u.email){toast('Sin correo.','danger');return;} if(!confirm('¿Enviar correo de restablecimiento de contraseña a '+u.email+'?'))return;
+ fetch('https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key='+FIREBASE_CONFIG.apiKey,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({requestType:'PASSWORD_RESET',email:u.email})}).then(function(r){return r.json();}).then(function(res){ if(res.error)throw new Error(res.error.message); toast('Correo de reset enviado a '+u.email,'success'); }).catch(function(e){toast('Error: '+(e&&e.message||''),'danger');});}
+// Asignar liceos a un profesor
+var _luState={liceos:[]};
+function asignarLiceosUser(uid){var u=_findUser(uid); if(!u)return; document.getElementById('luUid').value=uid; document.getElementById('luNombre').textContent=(u.nombre||u.email||''); _luState.liceos=Array.isArray(u.liceos)?u.liceos.slice():[];
+ var render=function(cat){ var box=document.getElementById('luLista'); if(!cat||!cat.length){box.innerHTML='<div class="sub" style="margin:0">No hay liceos en el catálogo. Créalos en Liceos / Colegios.</div>';return;} box.innerHTML=cat.map(function(l){var ck=_luState.liceos.indexOf(l.slug)!==-1?' checked':''; return '<label style="display:flex;align-items:center;gap:9px;padding:6px 7px;border-radius:6px;cursor:pointer;font-size:13.5px"><input type="checkbox" value="'+l.slug+'"'+ck+'> '+(l.nombre||l.slug)+'</label>';}).join(''); };
+ if(typeof ELDB!=='undefined'&&ELDB.liceos){ELDB.liceos.listar(false).then(function(cat){render(cat||[]);});}else{render(allLiceos||[]);}
+ document.getElementById('modalLiceosUser').classList.add('show');}
+function cerrarLiceosUser(){document.getElementById('modalLiceosUser').classList.remove('show');}
+function guardarLiceosUser(){var uid=document.getElementById('luUid').value; var sel=Array.prototype.map.call(document.querySelectorAll('#luLista input:checked'),function(c){return c.value;}); var datos={liceos:sel,liceoPrincipal:sel[0]||''}; EL_DB.collection('usuarios').doc(uid).update(datos).then(function(){toast('Liceos asignados ('+sel.length+').','success');cerrarLiceosUser();cargarUsuarios();}).catch(function(e){toast('Error: '+(e&&e.message||''),'danger');});}
 document.getElementById('buscarU').addEventListener('input',function(){var q=this.value.toLowerCase();document.querySelectorAll('#tb-usuarios tr[data-txt]').forEach(function(r){r.style.display=r.dataset.txt.indexOf(q)!==-1?'':'none'});});
 
 // ── Crear usuario (cargo) — REST Identity Toolkit + doc en Firestore ──
