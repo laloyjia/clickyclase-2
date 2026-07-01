@@ -21,6 +21,11 @@
 <style>
 .wplist label{display:flex;align-items:center;gap:9px;padding:5px 6px;border-radius:6px;cursor:pointer;font-size:13.5px}
 .wplist label:hover{background:var(--bg)}
+.pflab{display:block;font-size:12px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);margin:14px 0 5px;font-weight:600}
+.pflab:first-child{margin-top:0}
+.pfsel{width:100%;font-size:13.5px;color:var(--text);background:var(--bg);border:1px solid var(--border-2);border-radius:8px;padding:9px 11px}
+.pfbox{font-size:12.5px;color:var(--muted);background:var(--bg);border:1px solid var(--border-2);border-radius:8px;padding:8px 10px;margin-top:6px;line-height:1.5}
+.pfce{max-height:200px;overflow:auto;border:1px solid var(--border-2);border-radius:9px;padding:6px;background:var(--bg);margin-top:6px}
 </style>
 </head>
 <body>
@@ -86,13 +91,9 @@
           <div class="fld"><label>Cantidad de horas pedagógicas</label><input id="plHoras" type="number" min="1" placeholder="Ej. 2"></div>
           <div class="fld"><label>Tema (opcional)</label><input id="plTema" placeholder="Ej. Suma de fracciones"></div>
         </div>
-        <div style="margin-top:12px"><label id="plOALbl" style="font-size:12px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted)">Objetivo(s) de aprendizaje (OA) que trabajará</label>
-          <div id="plOA" class="wplist" style="max-height:180px;overflow:auto;border:1px solid var(--border-2);border-radius:9px;padding:6px;background:var(--surface);margin-top:6px"><div class="sub" style="margin:0">Elige asignatura/módulo y curso.</div></div>
-        </div>
-        <div id="plTPInfo" class="legal" style="display:none;margin-top:12px"></div>
-        <div style="margin-top:12px"><label style="font-size:12px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted)">Criterios de evaluación (marca los que evaluarás)</label>
-          <div id="plCE" class="wplist" style="max-height:190px;overflow:auto;border:1px solid var(--border-2);border-radius:9px;padding:6px;background:var(--surface);margin-top:6px"><div class="sub" style="margin:0">Elige un módulo o asignatura para ver sus criterios.</div></div>
-          <input id="plCEtxt" placeholder="Agregar un criterio propio…" style="width:100%;margin-top:6px;font-size:13px;color:var(--text);background:var(--surface);border:1px solid var(--border-2);border-radius:8px;padding:8px 10px">
+        <div class="card" style="margin-top:12px;padding:14px;background:var(--surface)">
+          <div class="sec-title" style="margin-bottom:6px"><span class="material-symbols-outlined" style="vertical-align:-4px;color:var(--primary);font-size:18px">track_changes</span> Objetivos curriculares</div>
+          <div id="plCurric"><div class="sub" style="margin:0">Elige asignatura/módulo y curso arriba para desplegar los objetivos.</div></div>
         </div>
         <div style="margin-top:12px"><label style="font-size:12px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted)">NEE — Necesidades Educativas Especiales (Decreto 170)</label>
           <div id="plNEE" class="wplist" style="max-height:150px;overflow:auto;border:1px solid var(--border-2);border-radius:9px;padding:6px;background:var(--surface);margin-top:6px"></div>
@@ -242,38 +243,55 @@ function pfInit(){
 }
 function _pfCrit(){var arr=Array.prototype.map.call(document.querySelectorAll('#plCE input:checked'),function(c){return c.value+': '+(c.dataset.desc||'');});var t=(document.getElementById('plCEtxt').value||'').trim();if(t)arr.push(t);return arr.map(function(c){return '• '+c;}).join('\n');}
 function _pfNivMap(){ if(window._NIV2CODE)return Promise.resolve(window._NIV2CODE); if(typeof CURRICULA_READY==='undefined')return Promise.resolve({}); return CURRICULA_READY.then(function(CUR){var m={};(CUR.getAllNiveles()||[]).forEach(function(c){m[(CUR.getNivelLabel(c)||'').toLowerCase()]=c;m[c.toLowerCase()]=c;});window._NIV2CODE=m;return m;}); }
+function _short(s,n){s=s||'';return s.length>n?s.slice(0,n)+'…':s;}
 function pfBuildOA(){
- var asig=document.getElementById('plAsig').value,box=document.getElementById('plOA');
- if(window._PROF_TP&&window._PROF_TP[asig]){ var m=window._PROF_TP[asig],aes=m.aes||[];
-   box.innerHTML=aes.length?aes.map(function(a){var t=a.texto||'';return '<label><input type="checkbox" value="'+(a.codigo||'AE')+'" data-desc="'+t.replace(/"/g,'&quot;')+'"> <b>'+(a.codigo||'AE')+'</b> — '+t+'</label>';}).join(''):'<div class="sub" style="margin:0">Este módulo no tiene AE cargados.</div>';
-   var lbl=document.getElementById('plOALbl'); if(lbl)lbl.textContent='Aprendizajes esperados (AE) del módulo que trabajará';
-   var ceH=[]; aes.forEach(function(a){(a.ces||[]).forEach(function(c){var val=(a.codigo||'AE')+' · '+(c.codigo||'CE'),t=c.texto||'';ceH.push('<label><input type="checkbox" value="'+val.replace(/"/g,'&quot;')+'" data-desc="'+t.replace(/"/g,'&quot;')+'"> <b>'+val+'</b> — '+t+'</label>');});}); document.getElementById('plCE').innerHTML=ceH.length?ceH.join(''):'<div class="sub" style="margin:0">Este módulo no tiene criterios cargados.</div>';
-   var info='<b>Objetivo(s) de aprendizaje de la especialidad:</b><br>'+((m.oaEsp&&m.oaEsp.length)?m.oaEsp.map(function(o){return '• '+o;}).join('<br>'):'—')+'<br><br><b>Aprendizajes esperados genéricos (OAG · Decreto 452):</b> '+OAG_EMTP.map(function(g){return g[0];}).join(', ')+' — la IA integrará los pertinentes.';
-   var ti=document.getElementById('plTPInfo'); ti.innerHTML=info; ti.style.display='';
-   var u=document.getElementById('plUnidad'); if(u&&!u.value)u.value=m.nombre||''; return;
+ var asig=document.getElementById('plAsig').value, host=document.getElementById('plCurric'); if(!host)return;
+ // ── TP: cascada Módulo → OA → AE → CE → OAG ──
+ if(window._PROF_TP&&window._PROF_TP[asig]){ var m=window._PROF_TP[asig]; window._PL_M=m;
+   var uu=document.getElementById('plUnidad'); if(uu&&!uu.value)uu.value=m.nombre||'';
+   var h='';
+   h+='<label class="pflab">Objetivo de aprendizaje (OA) de la especialidad</label>';
+   h+=(m.oas&&m.oas.length)?('<select id="plOAsel" class="pfsel" onchange="pfOAsel()">'+m.oas.map(function(o,i){return '<option value="'+i+'">'+(o.codigo||'OA')+': '+_short(o.texto,90)+'</option>';}).join('')+'</select><div id="plOAtext" class="pfbox"></div>'):'<div class="pfbox">Este módulo no registra OA de especialidad.</div>';
+   h+='<label class="pflab">Aprendizaje esperado (AE)</label>';
+   h+=(m.aes&&m.aes.length)?('<select id="plAEsel" class="pfsel" onchange="pfAEsel()">'+m.aes.map(function(a,i){return '<option value="'+i+'">AE '+(i+1)+': '+_short(a.texto,90)+'</option>';}).join('')+'</select>'):'<div class="pfbox">Sin aprendizajes esperados.</div>';
+   h+='<label class="pflab">Criterios de evaluación (CE) — marca los que evaluarás</label>';
+   h+='<div id="plCE" class="wplist pfce"></div>';
+   h+='<input id="plCEtxt" placeholder="Agregar un criterio propio…" style="width:100%;margin-top:6px;font-size:13px;color:var(--text);background:var(--bg);border:1px solid var(--border-2);border-radius:8px;padding:8px 10px">';
+   h+='<label class="pflab">Objetivos de Aprendizaje Genéricos (OAG) asociados</label>';
+   h+='<div id="plOAG"></div>';
+   host.innerHTML=h; pfOAsel(); pfAEsel(); return;
  }
- var ti2=document.getElementById('plTPInfo'); if(ti2)ti2.style.display='none';
- var lbl0=document.getElementById('plOALbl'); if(lbl0)lbl0.textContent='Objetivo(s) de aprendizaje (OA) que trabajará';
- var ceB=document.getElementById('plCE'); if(ceB)ceB.innerHTML='<div class="sub" style="margin:0">El Plan Común no trae criterios predefinidos; agrégalos abajo o deja que la IA los proponga.</div>';
+ // ── Plan común: OA por asignatura + curso ──
  var curso=document.getElementById('plCurso').value;
- if(!asig||!curso||typeof CURRICULA_READY==='undefined'){box.innerHTML='<div class="sub" style="margin:0">Elige asignatura/módulo y curso.</div>';return;}
- var meta=(window._ASIG_META||[]).filter(function(m){return m.nombre===asig;})[0];
+ if(!asig||!curso||typeof CURRICULA_READY==='undefined'){ host.innerHTML='<div class="sub" style="margin:0">Elige asignatura/módulo y curso arriba para desplegar los objetivos.</div>'; return; }
+ var meta=(window._ASIG_META||[]).filter(function(x){return x.nombre===asig;})[0];
  Promise.all([CURRICULA_READY,_pfNivMap()]).then(function(r){var CUR=r[0],nm=r[1],sigla=meta?meta.sigla:'',code=nm[(curso||'').toLowerCase()];
-   if(!sigla||!code){box.innerHTML='<div class="sub" style="margin:0">Sin OA para esta asignatura/curso.</div>';return;}
-   var oas=CUR.getOAs(sigla,code)||[],uni=CUR.getUnidades(sigla,code)||[];
-   var uEl=document.getElementById('plUnidad'); if(uEl&&!uEl.value&&uni.length){var u0=uni[0];uEl.value=(typeof u0==='string')?u0:(u0.nombre||u0.titulo||'');}
-   box.innerHTML=oas.length?oas.map(function(o){var d=o.descripcion||o.desc||'';return '<label><input type="checkbox" value="'+(o.codigo||'').replace(/"/g,'&quot;')+'" data-desc="'+d.replace(/"/g,'&quot;')+'"> <b>'+o.codigo+'</b> — '+d+'</label>';}).join(''):'<div class="sub" style="margin:0">Sin OA cargados para esta selección.</div>';
+   var uni=(sigla&&code)?(CUR.getUnidades(sigla,code)||[]):[]; var uEl=document.getElementById('plUnidad'); if(uEl&&!uEl.value&&uni.length){var u0=uni[0];uEl.value=(typeof u0==='string')?u0:(u0.nombre||u0.titulo||'');}
+   var oas=(sigla&&code)?(CUR.getOAs(sigla,code)||[]):[];
+   var h='<label class="pflab">Objetivo(s) de aprendizaje (OA) que trabajará</label>';
+   h+='<div id="plOA" class="wplist pfce">'+(oas.length?oas.map(function(o){var d=o.descripcion||o.desc||'';return '<label><input type="checkbox" value="'+(o.codigo||'').replace(/"/g,'&quot;')+'" data-desc="'+d.replace(/"/g,'&quot;')+'"> <b>'+o.codigo+'</b> — '+d+'</label>';}).join(''):'<div class="sub" style="margin:0">Sin OA para esta asignatura/curso.</div>')+'</div>';
+   h+='<label class="pflab">Criterios de evaluación</label><div class="pfbox">El Plan Común no trae criterios predefinidos; agrégalos abajo o deja que la IA los proponga.</div>';
+   h+='<input id="plCEtxt" placeholder="Agregar un criterio propio…" style="width:100%;margin-top:6px;font-size:13px;color:var(--text);background:var(--bg);border:1px solid var(--border-2);border-radius:8px;padding:8px 10px">';
+   host.innerHTML=h;
  });
 }
+function pfOAsel(){var m=window._PL_M; if(!m)return; var s=document.getElementById('plOAsel'); if(!s)return; var o=m.oas[+s.value]; var b=document.getElementById('plOAtext'); if(b)b.textContent=o?(o.codigo+': '+o.texto):'';}
+function pfAEsel(){var m=window._PL_M; if(!m)return; var s=document.getElementById('plAEsel'); var ae=s?m.aes[+s.value]:null; var box=document.getElementById('plCE'); if(!box)return; var ces=ae?(ae.ces||[]):[]; box.innerHTML=ces.length?ces.map(function(c){return '<label><input type="checkbox" value="'+(c.codigo||'CE').replace(/"/g,'&quot;')+'" data-desc="'+(c.texto||'').replace(/"/g,'&quot;')+'" data-oag="'+((c.oag||[]).join(',')).replace(/"/g,'&quot;')+'" onchange="pfCEsel()"> <b>'+(c.codigo||'CE')+'</b> — '+(c.texto||'')+'</label>';}).join(''):'<div class="sub" style="margin:0">Este AE no tiene criterios cargados.</div>'; pfCEsel();}
+function pfCEsel(){var set={}; document.querySelectorAll('#plCE input:checked').forEach(function(c){(c.dataset.oag||'').split(',').filter(Boolean).forEach(function(g){set[g]=1;});}); var codes=Object.keys(set).sort(); var el=document.getElementById('plOAG'); if(!el)return; el.innerHTML=codes.length?codes.map(function(g){var t=(OAG_EMTP.filter(function(x){return x[0]===g;})[0]||[g,''])[1]; return '<div class="row" style="align-items:flex-start"><span class="tag info" style="margin-right:8px">'+g+'</span><div style="flex:1;font-size:12.8px">'+t+'</div></div>';}).join(''):'<div class="sub" style="margin:0">Marca criterios para ver sus OAG asociados.</div>';}
 function pfGenerar(){
- var oaChecked=Array.prototype.map.call(document.querySelectorAll('#plOA input:checked'),function(c){return c.value+(c.dataset.desc?(' ('+c.dataset.desc+')'):'');});
  var valores=Array.prototype.map.call(document.querySelectorAll('#plValores input:checked'),function(c){return c.value;}).join(', ');
  var adec=Array.prototype.map.call(document.querySelectorAll('#plPIE input:checked'),function(c){return c.value;});
  var adecTxt=(document.getElementById('plPIEtxt').value||'').trim(); if(adecTxt)adec.push(adecTxt);
  var asigVal=document.getElementById('plAsig').value, esTP=!!(window._PROF_TP&&window._PROF_TP[asigVal]);
  var nee=Array.prototype.map.call(document.querySelectorAll('#plNEE input:checked'),function(c){var it=PL_NEE.filter(function(x){return x.k===c.value;})[0];return it?it.n:c.value;});
- var oaEsp='',oag=''; if(esTP){var mm=window._PROF_TP[asigVal]; oaEsp=(mm.oaEsp||[]).join(' | '); oag=OAG_EMTP.map(function(g){return g[0];}).join(', ');}
- var datos={ asignatura:esTP?'':asigVal, nivel:document.getElementById('plCurso').value, curso:document.getElementById('plCurso').value, modulo:esTP?(window._PROF_TP[asigVal].nombre||asigVal):'', unidad:document.getElementById('plUnidad').value||'', tema:document.getElementById('plTema').value||'', horas:document.getElementById('plHoras').value||'', ae:oaChecked.join(' | '), criterios:_pfCrit(), valores:valores, nee:nee, oaEspecialidad:oaEsp, oag:oag, adecuaciones:adec.map(function(a){return '• '+a;}).join('\n'), oas_seleccionados:oaChecked, oa:oaChecked.join(' | ') };
+ var oaChecked=[],oaEsp='',ae='',oag='';
+ if(esTP){ var m=window._PROF_TP[asigVal];
+   var os=document.getElementById('plOAsel'); if(os&&m.oas[+os.value]){var oo=m.oas[+os.value]; oaEsp=oo.codigo+': '+oo.texto;}
+   var asl=document.getElementById('plAEsel'); if(asl&&m.aes[+asl.value]){var aa=m.aes[+asl.value]; ae='AE '+(+asl.value+1)+': '+aa.texto;}
+   oaChecked=ae?[ae]:[];
+   var set={}; document.querySelectorAll('#plCE input:checked').forEach(function(c){(c.dataset.oag||'').split(',').filter(Boolean).forEach(function(g){set[g]=1;});}); oag=Object.keys(set).sort().join(', ');
+ } else { oaChecked=Array.prototype.map.call(document.querySelectorAll('#plOA input:checked'),function(c){return c.value+(c.dataset.desc?(' ('+c.dataset.desc+')'):'');}); }
+ var datos={ asignatura:esTP?'':asigVal, nivel:document.getElementById('plCurso').value, curso:document.getElementById('plCurso').value, modulo:esTP?(window._PROF_TP[asigVal].nombre||asigVal):'', unidad:document.getElementById('plUnidad').value||'', tema:document.getElementById('plTema').value||'', horas:document.getElementById('plHoras').value||'', ae:ae||oaChecked.join(' | '), criterios:_pfCrit(), valores:valores, nee:nee, oaEspecialidad:oaEsp, oag:oag, adecuaciones:adec.map(function(a){return '• '+a;}).join('\n'), oas_seleccionados:oaChecked, oa:oaChecked.join(' | ') };
  if(!asigVal){toast('Elige una asignatura o módulo.','danger');return;}
  var b=document.getElementById('btnPl');b.disabled=true;var o=b.innerHTML;b.innerHTML='<span class="material-symbols-outlined" style="font-size:18px">hourglass_top</span> Generando…';
  fetch('/api/ia-asistente',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({tipo:'planificacion',datos:datos})})
@@ -325,11 +343,11 @@ function _profTP(){ var u=window._PROF_U; if(!u||!(u.modulos&&u.modulos.length)|
   var key=u.especialidadKey; if(!key&&u.especialidad&&CUR.getEspecialidades){var e=(CUR.getEspecialidades()||[]).filter(function(x){return (x.nombre||'').toLowerCase()===(u.especialidad||'').toLowerCase();})[0]; if(e)key=e.key;}
   if(!key)return; var full=(window.CURRICULA_FULL&&window.CURRICULA_FULL[key])||null;
   var sel=document.getElementById('matAsig'); if(!sel)return; window._PROF_TP={};
-  (u.modulos||[]).forEach(function(mk){ mk=String(mk); var raw=full&&full.modulos&&full.modulos[mk]; var nombre,oaEsp=[],aes=[];
-    if(raw){ nombre=raw.nombre||mk; oaEsp=raw.oas?Object.keys(raw.oas).map(function(k){return raw.oas[k];}):[]; aes=raw.aes?Object.keys(raw.aes).map(function(k){var a=raw.aes[k]||{};return {codigo:k,texto:a.texto||'',ces:a.ces?Object.keys(a.ces).map(function(c){var cv=a.ces[c];return {codigo:c,texto:(typeof cv==='string')?cv:((cv&&cv.texto)||'')};}):[]};}):[]; }
+  (u.modulos||[]).forEach(function(mk){ mk=String(mk); var raw=full&&full.modulos&&full.modulos[mk]; var nombre,oas=[],aes=[];
+    if(raw){ nombre=raw.nombre||mk; oas=raw.oas?Object.keys(raw.oas).map(function(k){return {codigo:k,texto:raw.oas[k]};}):[]; aes=raw.aes?Object.keys(raw.aes).map(function(k){var a=raw.aes[k]||{};return {codigo:k,texto:a.texto||'',ces:a.ces?Object.keys(a.ces).map(function(c){var cv=a.ces[c];return {codigo:c,texto:(typeof cv==='string')?cv:((cv&&cv.texto)||''),oag:(cv&&cv.oag)||[]};}):[]};}):[]; }
     else { var m=((CUR.getModulos&&CUR.getModulos(key))||[]).filter(function(x){return String(x.num)===mk;})[0]; if(!m)return; nombre=m.nombre||mk; (m.aes||[]).forEach(function(a){aes.push({codigo:'AE'+(a.num||''),texto:a.texto||a.nombre||'',ces:[]});}); }
     var label='TP · '+(nombre||mk);
-    window._PROF_TP[label]={num:mk,nombre:nombre,oaEsp:oaEsp,aes:aes,espKey:key};
+    window._PROF_TP[label]={num:mk,nombre:nombre,oas:oas,aes:aes,espKey:key};
     if(!sel.querySelector('option[value="'+label.replace(/"/g,'\\"')+'"]')){var opt=document.createElement('option');opt.value=label;opt.textContent=label;sel.appendChild(opt);}
   });
  });
