@@ -8,6 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
 <script src="js/firebase-rest.js"></script>
@@ -17,6 +18,10 @@
 <script src="js/curricula-loader.js"></script>
 <link rel="stylesheet" href="css/panel.css">
 <script src="js/cc-ui.js"></script>
+<style>
+.wplist label{display:flex;align-items:center;gap:9px;padding:5px 6px;border-radius:6px;cursor:pointer;font-size:13.5px}
+.wplist label:hover{background:var(--bg)}
+</style>
 </head>
 <body>
 <div class="topbar">
@@ -69,6 +74,43 @@
           <button class="btn" onclick="guardarMat()"><span class="material-symbols-outlined" style="font-size:18px">save</span> Guardar en biblioteca</button>
         </div>
       </div>
+    </section>
+
+    <section class="sec" id="sec-planificaciones">
+      <div class="h1">Planificaciones</div><div class="sub">Planificación de clase con formato estándar Mineduc, generada con IA</div>
+      <div class="card">
+        <div class="frm">
+          <div class="fld"><label>Asignatura</label><select id="plAsig" onchange="pfBuildOA()"><option value="">— Elige —</option></select></div>
+          <div class="fld"><label>Curso / Nivel</label><select id="plCurso" onchange="pfBuildOA()"><option value="">— Elige —</option></select></div>
+          <div class="fld"><label>Módulo (EMTP, opcional)</label><select id="plModulo" onchange="pfOnModulo()"><option value="">— (no aplica) —</option></select></div>
+          <div class="fld"><label>Unidad</label><input id="plUnidad" placeholder="Ej. Unidad 2: Fracciones"></div>
+          <div class="fld"><label>Cantidad de horas pedagógicas</label><input id="plHoras" type="number" min="1" placeholder="Ej. 2"></div>
+          <div class="fld"><label>Tema (opcional)</label><input id="plTema" placeholder="Ej. Suma de fracciones"></div>
+        </div>
+        <div style="margin-top:12px"><label style="font-size:12px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted)">Objetivo(s) de aprendizaje (OA) que trabajará</label>
+          <div id="plOA" class="wplist" style="max-height:170px;overflow:auto;border:1px solid var(--border-2);border-radius:9px;padding:6px;background:var(--surface);margin-top:6px"><div class="sub" style="margin:0">Elige asignatura y curso.</div></div>
+        </div>
+        <div style="margin-top:12px"><label style="font-size:12px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted)">Aprendizaje(s) esperado(s)</label>
+          <textarea id="plAE" rows="3" placeholder="Se autocompleta con los AE del módulo TP, o descríbelos aquí…" style="width:100%;margin-top:6px;font-family:'Inter',sans-serif;font-size:13px;color:var(--text);background:var(--surface);border:1px solid var(--border-2);border-radius:9px;padding:10px"></textarea>
+        </div>
+        <div class="grid2" style="margin-top:12px">
+          <div><label style="font-size:12px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted)">Valores (Marco de la Buena Enseñanza)</label>
+            <div id="plValores" class="wplist" style="max-height:150px;overflow:auto;border:1px solid var(--border-2);border-radius:9px;padding:6px;background:var(--surface);margin-top:6px"></div>
+          </div>
+          <div><label style="font-size:12px;text-transform:uppercase;letter-spacing:.4px;color:var(--muted)">Adecuaciones según diagnóstico PIE (Decreto 83)</label>
+            <div id="plPIE" class="wplist" style="max-height:150px;overflow:auto;border:1px solid var(--border-2);border-radius:9px;padding:6px;background:var(--surface);margin-top:6px"></div>
+            <input id="plPIEtxt" placeholder="Otra adecuación específica…" style="width:100%;margin-top:6px;font-size:13px;color:var(--text);background:var(--surface);border:1px solid var(--border-2);border-radius:8px;padding:8px 10px">
+          </div>
+        </div>
+        <div style="margin-top:14px"><button class="btn" id="btnPl" onclick="pfGenerar()"><span class="material-symbols-outlined" style="font-size:18px">auto_awesome</span> Generar planificación con IA</button></div>
+        <textarea id="plTxt" rows="16" placeholder="La planificación generada aparecerá aquí, editable…" style="width:100%;margin-top:14px;font-family:'Inter',sans-serif;font-size:13px;line-height:1.6;color:var(--text);background:var(--surface);border:1px solid var(--border-2);border-radius:9px;padding:12px"></textarea>
+        <div style="display:flex;gap:10px;margin-top:14px;justify-content:flex-end;flex-wrap:wrap">
+          <button class="btn ghost" onclick="pfWord()"><span class="material-symbols-outlined" style="font-size:18px">description</span> Descargar Word</button>
+          <button class="btn ghost" onclick="pfPDF()"><span class="material-symbols-outlined" style="font-size:18px">picture_as_pdf</span> Descargar PDF</button>
+          <button class="btn" onclick="pfGuardar()"><span class="material-symbols-outlined" style="font-size:18px">save</span> Guardar en biblioteca</button>
+        </div>
+      </div>
+      <div class="legal"><b>⚖ Formato Mineduc:</b> la planificación se estructura según los estándares del currículum nacional (OA, habilidades, actitudes) e incorpora el Marco de la Buena Enseñanza y las adecuaciones del Decreto 83/2015 para NEE.</div>
     </section>
 
     <section class="sec" id="sec-cursos">
@@ -164,9 +206,63 @@ function generarMat(){
 }
 function exportarWord(){var txt=document.getElementById('matTxt').value||'';if(!txt.trim()){toast('Primero genera el material.','danger');return;}var tit=document.getElementById('matTipo').selectedOptions[0].text+' — '+document.getElementById('matTema').value;var html='<h2>'+tit+'</h2><pre style="font-family:Calibri,Arial;font-size:11pt;white-space:pre-wrap">'+txt.replace(/&/g,'&amp;').replace(/</g,'&lt;')+'</pre>';var blob=new Blob(['<html xmlns:w="urn:schemas-microsoft-com:office:word"><head><meta charset="utf-8"></head><body>'+html+'</body></html>'],{type:'application/msword'});var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='material.doc';a.click();toast('Exportado a Word.','success');}
 function guardarMat(){var txt=document.getElementById('matTxt').value||'';if(!txt.trim()){toast('Primero genera el material.','danger');return;}var tipo=document.getElementById('matTipo').selectedOptions[0].text;var tema=document.getElementById('matTema').value||'(sin tema)';var asig=document.getElementById('matAsig').value||'';REG.biblioteca.rows.unshift([tipo+' — '+tema,asig+' · jun 2026','Guardado']);renderTable('biblioteca');if(window.ccStore)ccStore.setTabla('prof_biblioteca',REG.biblioteca.rows);toast('Guardado en biblioteca.','success');show('biblioteca');}
-var NAV=[['dashboard','Inicio','resumen'],['smart_toy','Generar material (IA)','material'],['groups','Mis cursos','cursos'],['table_chart','Notas y asistencia','notas'],['chat','Anotaciones','anotaciones'],['menu_book','Biblioteca','biblioteca']];
+var NAV=[['dashboard','Inicio','resumen'],['smart_toy','Generar material (IA)','material'],['event_note','Planificaciones','planificaciones'],['groups','Mis cursos','cursos'],['table_chart','Notas y asistencia','notas'],['chat','Anotaciones','anotaciones'],['menu_book','Biblioteca','biblioteca']];
 document.getElementById('nav').innerHTML=NAV.map(function(n,i){return '<div class="nav-item'+(i===0?' active':'')+'" data-s="'+n[2]+'">'+ic(n[0])+'<span>'+n[1]+'</span></div>'}).join('');
-function show(s){document.querySelectorAll('.nav-item').forEach(function(x){x.classList.toggle('active',x.dataset.s===s)});document.querySelectorAll('.sec').forEach(function(x){x.classList.toggle('active',x.id==='sec-'+s)});}
+function show(s){document.querySelectorAll('.nav-item').forEach(function(x){x.classList.toggle('active',x.dataset.s===s)});document.querySelectorAll('.sec').forEach(function(x){x.classList.toggle('active',x.id==='sec-'+s)});if(s==='planificaciones')pfInit();}
+
+// ══════════ Planificaciones (formato Mineduc) ══════════
+var PL_VALORES=['Respeto','Responsabilidad','Honestidad','Colaboración','Empatía','Perseverancia','Pensamiento crítico','Autonomía','Inclusión y respeto a la diversidad','Cuidado del entorno'];
+var PL_PIE=['Tiempo adicional para las actividades','Material ampliado / adaptado','Ubicación preferente en la sala','Apoyo del equipo PIE en aula','Priorización de objetivos de aprendizaje','Graduación de la dificultad','Instrucciones simplificadas con apoyos visuales','Evaluación diferenciada'];
+function pfInit(){
+ var pA=document.getElementById('plAsig'),meta=window._ASIG_META||[];
+ if(pA)pA.innerHTML='<option value="">— Elige —</option>'+meta.map(function(m){return '<option value="'+(m.nombre||'').replace(/"/g,'&quot;')+'">'+(m.nombre||'')+'</option>';}).join('');
+ var pN=document.getElementById('plCurso'),mN=document.getElementById('matNivel');
+ if(pN)pN.innerHTML=mN?mN.innerHTML:'<option value="">— Elige —</option>';
+ var pM=document.getElementById('plModulo'),opts='<option value="">— (no aplica) —</option>';
+ if(window._PROF_TP)Object.keys(window._PROF_TP).forEach(function(k){opts+='<option value="'+k.replace(/"/g,'&quot;')+'">'+k+'</option>';});
+ if(pM)pM.innerHTML=opts;
+ var v=document.getElementById('plValores'); if(v&&!v.innerHTML.trim())v.innerHTML=PL_VALORES.map(function(x){return '<label><input type="checkbox" value="'+x+'"> '+x+'</label>';}).join('');
+ var p=document.getElementById('plPIE'); if(p&&!p.innerHTML.trim())p.innerHTML=PL_PIE.map(function(x){return '<label><input type="checkbox" value="'+x+'"> '+x+'</label>';}).join('');
+}
+function _pfNivMap(){ if(window._NIV2CODE)return Promise.resolve(window._NIV2CODE); if(typeof CURRICULA_READY==='undefined')return Promise.resolve({}); return CURRICULA_READY.then(function(CUR){var m={};(CUR.getAllNiveles()||[]).forEach(function(c){m[(CUR.getNivelLabel(c)||'').toLowerCase()]=c;m[c.toLowerCase()]=c;});window._NIV2CODE=m;return m;}); }
+function pfBuildOA(){
+ var asig=document.getElementById('plAsig').value,curso=document.getElementById('plCurso').value,box=document.getElementById('plOA');
+ if(!asig||!curso||typeof CURRICULA_READY==='undefined'){box.innerHTML='<div class="sub" style="margin:0">Elige asignatura y curso.</div>';return;}
+ var meta=(window._ASIG_META||[]).filter(function(m){return m.nombre===asig;})[0];
+ Promise.all([CURRICULA_READY,_pfNivMap()]).then(function(r){var CUR=r[0],nm=r[1],sigla=meta?meta.sigla:'',code=nm[(curso||'').toLowerCase()];
+   if(!sigla||!code){box.innerHTML='<div class="sub" style="margin:0">Sin OA para esta asignatura/curso.</div>';return;}
+   var oas=CUR.getOAs(sigla,code)||[],uni=CUR.getUnidades(sigla,code)||[];
+   var uEl=document.getElementById('plUnidad'); if(uEl&&!uEl.value&&uni.length){var u0=uni[0];uEl.value=(typeof u0==='string')?u0:(u0.nombre||u0.titulo||'');}
+   box.innerHTML=oas.length?oas.map(function(o){var d=o.descripcion||o.desc||'';return '<label><input type="checkbox" value="'+(o.codigo||'').replace(/"/g,'&quot;')+'" data-desc="'+d.replace(/"/g,'&quot;')+'"> <b>'+o.codigo+'</b> — '+d+'</label>';}).join(''):'<div class="sub" style="margin:0">Sin OA cargados para esta selección.</div>';
+ });
+}
+function pfOnModulo(){var k=document.getElementById('plModulo').value; if(k&&window._PROF_TP&&window._PROF_TP[k]){var aes=window._PROF_TP[k].aes||[]; document.getElementById('plAE').value=aes.map(function(a){return 'AE'+(a.num||'')+': '+(a.texto||a.nombre||'');}).join('\n'); var u=document.getElementById('plUnidad'); if(u&&!u.value)u.value=window._PROF_TP[k].nombre||'';}}
+function pfGenerar(){
+ var oaChecked=Array.prototype.map.call(document.querySelectorAll('#plOA input:checked'),function(c){return c.value+(c.dataset.desc?(' ('+c.dataset.desc+')'):'');});
+ var valores=Array.prototype.map.call(document.querySelectorAll('#plValores input:checked'),function(c){return c.value;}).join(', ');
+ var adec=Array.prototype.map.call(document.querySelectorAll('#plPIE input:checked'),function(c){return c.value;});
+ var adecTxt=(document.getElementById('plPIEtxt').value||'').trim(); if(adecTxt)adec.push(adecTxt);
+ var datos={ asignatura:document.getElementById('plAsig').value, nivel:document.getElementById('plCurso').value, curso:document.getElementById('plCurso').value, modulo:document.getElementById('plModulo').value||'', unidad:document.getElementById('plUnidad').value||'', tema:document.getElementById('plTema').value||'', horas:document.getElementById('plHoras').value||'', ae:document.getElementById('plAE').value||'', valores:valores, adecuaciones:adec.map(function(a){return '• '+a;}).join('\n'), oas_seleccionados:oaChecked, oa:oaChecked.join(' | ') };
+ if(!datos.asignatura&&!datos.modulo){toast('Elige al menos asignatura o módulo.','danger');return;}
+ var b=document.getElementById('btnPl');b.disabled=true;var o=b.innerHTML;b.innerHTML='<span class="material-symbols-outlined" style="font-size:18px">hourglass_top</span> Generando…';
+ fetch('/api/ia-asistente',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({tipo:'planificacion',datos:datos})})
+  .then(function(r){return r.json()}).then(function(d){if(d.error)throw new Error(d.error);document.getElementById('plTxt').value=d.resultado||'(respuesta vacía)';toast('Planificación generada. Revísala y edítala.','success');})
+  .catch(function(e){toast('Error de IA: '+e.message,'danger');}).then(function(){b.disabled=false;b.innerHTML=o;});
+}
+function _plTitulo(){return 'Planificación — '+(document.getElementById('plAsig').value||document.getElementById('plModulo').value||'clase')+' '+(document.getElementById('plCurso').value||'');}
+function pfWord(){var txt=document.getElementById('plTxt').value||'';if(!txt.trim()){toast('Primero genera la planificación.','danger');return;}var html='<h2>'+_plTitulo()+'</h2><pre style="font-family:Calibri,Arial;font-size:11pt;white-space:pre-wrap">'+txt.replace(/&/g,'&amp;').replace(/</g,'&lt;')+'</pre>';var blob=new Blob(['<html xmlns:w="urn:schemas-microsoft-com:office:word"><head><meta charset="utf-8"></head><body>'+html+'</body></html>'],{type:'application/msword'});var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='planificacion.doc';a.click();toast('Exportado a Word.','success');}
+function pfPDF(){var txt=document.getElementById('plTxt').value||'';if(!txt.trim()){toast('Primero genera la planificación.','danger');return;}
+ var J=(window.jspdf&&window.jspdf.jsPDF); if(!J){toast('Generador PDF no disponible.','danger');return;}
+ var doc=new J({unit:'pt',format:'letter'}),margin=48,pw=doc.internal.pageSize.getWidth(),ph=doc.internal.pageSize.getHeight(),width=pw-margin*2,y=margin;
+ doc.setFont('helvetica','bold');doc.setFontSize(13);doc.text(_plTitulo(),margin,y);y+=20;
+ doc.setFont('helvetica','normal');doc.setFontSize(10);
+ var lines=doc.splitTextToSize(txt,width);
+ for(var i=0;i<lines.length;i++){ if(y>ph-margin){doc.addPage();y=margin;} doc.text(lines[i],margin,y); y+=14; }
+ doc.save('planificacion.pdf'); toast('PDF descargado.','success');
+}
+function pfGuardar(){var txt=document.getElementById('plTxt').value||'';if(!txt.trim()){toast('Primero genera la planificación.','danger');return;}
+ REG.biblioteca.rows.unshift(['Planificación — '+(document.getElementById('plUnidad').value||_plTitulo()),(document.getElementById('plAsig').value||'')+' · '+(document.getElementById('plCurso').value||'')+' · jun 2026','Guardado']);
+ renderTable('biblioteca'); if(window.ccStore)ccStore.setTabla('prof_biblioteca',REG.biblioteca.rows); toast('Planificación guardada en biblioteca.','success');}
 document.querySelectorAll('.nav-item').forEach(function(x){x.addEventListener('click',function(){show(x.dataset.s)})});
 
 // ── Asignaturas/niveles del profesor: catálogo del colegio (admin) + asignación del UTP ──
