@@ -160,7 +160,8 @@ Conoces el currículum nacional: Educación Básica 1°-8°, Plan Común 1°-4°
 Redactas en español formal chileno, de forma práctica y lista para usar en aula.
 ${hasOAs ? 'FUNDAMENTAL: El documento debe estar ALINEADO CURRICULAMENTE con los OA indicados — citar sus códigos en los objetivos y la evaluación.' : ''}
 Responde SOLO con el documento solicitado, sin saludos ni comentarios adicionales.
-Usa secciones en MAYÚSCULAS, bullets (•) y numeración donde corresponda.\n\n`;
+Usa secciones en MAYÚSCULAS, bullets (•) y numeración donde corresponda.
+Para expresiones matemáticas usa notación clara en texto plano con símbolos Unicode legibles: potencias con superíndices (x², 10³), subíndices cuando corresponda, fracciones como a/b, raíz √, multiplicación ×, división ÷, y los signos ≤ ≥ ≠ ± π ° cuando apliquen. Escribe cada ecuación o paso en su propia línea. NO uses LaTeX ni signos $...$.\n\n`;
 
   const ctx = buildContext(datos);
 

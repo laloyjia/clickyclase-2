@@ -349,33 +349,35 @@ function _docHTML(txt){
  var lines=(txt||'').split(/\r?\n/),out=[],inList=false;
  function closeList(){if(inList){out.push('</ul>');inList=false;}}
  lines.forEach(function(ln){var t=ln.replace(/\s+$/,'');
-   if(!t.trim()){closeList();out.push('<div style="height:6px"></div>');return;}
+   if(!t.trim()){closeList();out.push('<div style="height:8px;line-height:8px">&nbsp;</div>');return;}
    var isBullet=/^\s*[•\-\*·]\s+/.test(t);
-   if(isBullet){if(!inList){out.push('<ul style="margin:4px 0 4px 20px;padding:0">');inList=true;}out.push('<li style="margin:2px 0">'+_docEsc(t.replace(/^\s*[•\-\*·]\s+/,''))+'</li>');return;}
+   if(isBullet){if(!inList){out.push('<ul style="margin:2px 0 2px 22px;padding:0">');inList=true;}out.push('<li style="margin:2px 0">'+_docEsc(t.replace(/^\s*[•\-\*·]\s+/,''))+'</li>');return;}
    closeList();
    var letters=t.replace(/[^A-Za-zÁÉÍÓÚÑáéíóúñ]/g,'');
    var isHeading=(letters.length>2 && letters===letters.toUpperCase()) || /:\s*$/.test(t.trim());
-   if(isHeading)out.push('<div style="font-weight:700;font-size:12pt;margin:12px 0 4px;color:#1f2430">'+_docEsc(t.trim())+'</div>');
-   else out.push('<div style="margin:3px 0;white-space:pre-wrap">'+_docEsc(t)+'</div>');
+   if(isHeading)out.push('<div style="font-weight:700;margin:12px 0 4px">'+_docEsc(t.trim())+'</div>');
+   else out.push('<div style="margin:2px 0;white-space:pre-wrap">'+_docEsc(t)+'</div>');
  });
  closeList();
  return out.join('');
 }
+// Todo el documento en Arial 12, uniforme (títulos en negrita, mismo tamaño).
 function _bajarWord(titulo,txt,fname){
- var body='<div style="font-family:Calibri,Arial,sans-serif;font-size:11pt;color:#111"><h2 style="margin:0 0 10px;font-family:Calibri,Arial">'+_docEsc(titulo)+'</h2>'+_docHTML(txt)+'</div>';
- var blob=new Blob(['<html xmlns:w="urn:schemas-microsoft-com:office:word"><head><meta charset="utf-8"></head><body>'+body+'</body></html>'],{type:'application/msword'});
+ var body='<div style="font-family:Arial,sans-serif;font-size:12pt;line-height:1.45;color:#000"><div style="font-weight:700;margin:0 0 10px">'+_docEsc(titulo)+'</div>'+_docHTML(txt)+'</div>';
+ var blob=new Blob(['<html xmlns:w="urn:schemas-microsoft-com:office:word"><head><meta charset="utf-8"><style>body,div,li,p{font-family:Arial,sans-serif;font-size:12pt}</style></head><body>'+body+'</body></html>'],{type:'application/msword'});
  var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=fname;a.click();toast('Exportado a Word.','success');
+}
+// PDF de alta fidelidad vía impresión del navegador (Arial 12 + símbolos matemáticos correctos).
+function _imprimirDoc(titulo,txt){
+ var w=window.open('','_blank');
+ if(!w){toast('Permite las ventanas emergentes para generar el PDF.','danger');return;}
+ var html='<html><head><meta charset="utf-8"><title>'+_docEsc(titulo)+'</title><style>@page{margin:2cm}*{font-family:Arial,Helvetica,sans-serif;font-size:12pt}body{color:#000;line-height:1.45}h1{font-size:12pt;font-weight:700;margin:0 0 10px}ul{margin:2px 0 2px 22px}</style></head><body><h1>'+_docEsc(titulo)+'</h1>'+_docHTML(txt)+'<scr'+'ipt>window.onload=function(){setTimeout(function(){window.print();},200);}</scr'+'ipt></body></html>';
+ w.document.open();w.document.write(html);w.document.close();
+ toast('Se abrió la vista de impresión: elige "Guardar como PDF".','success');
 }
 function _plTitulo(){return 'Planificación — '+(document.getElementById('plAsig').value||'clase')+' '+(document.getElementById('plCurso').value||'');}
 function pfWord(){var txt=document.getElementById('plTxt').value||'';if(!txt.trim()){toast('Primero genera la planificación.','danger');return;}_bajarWord(_plTitulo(),txt,'planificacion.doc');}
-function pfPDF(){var txt=document.getElementById('plTxt').value||'';if(!txt.trim()){toast('Primero genera la planificación.','danger');return;}
- var J=(window.jspdf&&window.jspdf.jsPDF); if(!J){toast('Generador PDF no disponible.','danger');return;}
- var doc=new J({unit:'pt',format:'letter'}),margin=48,pw=doc.internal.pageSize.getWidth(),ph=doc.internal.pageSize.getHeight(),width=pw-margin*2,y=margin;
- doc.setFont('helvetica','bold');doc.setFontSize(13);doc.text(_plTitulo(),margin,y);y+=20;
- doc.setFont('helvetica','normal');doc.setFontSize(10);
- var lines=doc.splitTextToSize(txt,width);
- for(var i=0;i<lines.length;i++){ if(y>ph-margin){doc.addPage();y=margin;} doc.text(lines[i],margin,y); y+=14; }
- doc.save('planificacion.pdf'); toast('PDF descargado.','success');
+function pfPDF(){var txt=document.getElementById('plTxt').value||'';if(!txt.trim()){toast('Primero genera la planificación.','danger');return;}_imprimirDoc(_plTitulo(),txt);
 }
 function pfGuardar(){var txt=document.getElementById('plTxt').value||'';if(!txt.trim()){toast('Primero genera la planificación.','danger');return;}
  REG.biblioteca.rows.unshift(['Planificación — '+(document.getElementById('plUnidad').value||_plTitulo()),(document.getElementById('plAsig').value||'')+' · '+(document.getElementById('plCurso').value||'')+' · jun 2026','Guardado']);
@@ -413,7 +415,7 @@ function evWord(){var txt=document.getElementById('evTxt').value||'';if(!txt.tri
 function evWordEst(){var txt=document.getElementById('evTxt').value||'';if(!txt.trim()){toast('Primero genera la evaluación.','danger');return;}_bajarWord(_evTit()+' (Estudiante)',_evStudentPart(txt),'evaluacion-estudiante.doc');}
 function _evProfPart(txt){var re=/(VERSI[ÓO]N\s+PROFESOR|PAUTA DE CORRECCI[ÓO]N|TABLA DE ESPECIFICACIONES)/i;var i=(txt||'').search(re);return i>0?txt.slice(i):'';}
 function evWordProf(){var txt=document.getElementById('evTxt').value||'';var p=_evProfPart(txt);if(!p.trim()){toast('No se detectó la pauta/versión profesor en el texto.','danger');return;}_bajarWord(_evTit()+' (Pauta y corrección)',p,'evaluacion-pauta.doc');}
-function evPDF(){var txt=document.getElementById('evTxt').value||'';if(!txt.trim()){toast('Primero genera la evaluación.','danger');return;}var J=(window.jspdf&&window.jspdf.jsPDF);if(!J){toast('Generador PDF no disponible.','danger');return;}var doc=new J({unit:'pt',format:'letter'}),margin=48,ph=doc.internal.pageSize.getHeight(),width=doc.internal.pageSize.getWidth()-margin*2,y=margin;doc.setFont('helvetica','bold');doc.setFontSize(13);doc.text(_evTit(),margin,y);y+=20;doc.setFont('helvetica','normal');doc.setFontSize(10);var lines=doc.splitTextToSize(txt,width);for(var i=0;i<lines.length;i++){if(y>ph-margin){doc.addPage();y=margin;}doc.text(lines[i],margin,y);y+=14;}doc.save('evaluacion.pdf');toast('PDF descargado.','success');}
+function evPDF(){var txt=document.getElementById('evTxt').value||'';if(!txt.trim()){toast('Primero genera la evaluación.','danger');return;}_imprimirDoc(_evTit(),txt);}
 function evGuardar(){var txt=document.getElementById('evTxt').value||'';if(!txt.trim()){toast('Primero genera la evaluación.','danger');return;}REG.biblioteca.rows.unshift(['Evaluación — '+(document.getElementById('evAsig').value||''),(document.getElementById('evCurso').value||'')+' · '+(document.getElementById('evFormato').value||'')+' · jun 2026','Guardado']);renderTable('biblioteca');if(window.ccStore)ccStore.setTabla('prof_biblioteca',REG.biblioteca.rows);toast('Evaluación guardada en biblioteca.','success');}
 document.querySelectorAll('.nav-item').forEach(function(x){x.addEventListener('click',function(){show(x.dataset.s)})});
 
