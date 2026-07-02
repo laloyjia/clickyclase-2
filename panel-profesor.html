@@ -155,7 +155,8 @@
         </div>
         <textarea id="evTxt" rows="16" placeholder="La evaluación generada aparecerá aquí, editable…" style="width:100%;margin-top:14px;font-family:'Inter',sans-serif;font-size:13px;line-height:1.6;color:var(--text);background:var(--surface);border:1px solid var(--border-2);border-radius:9px;padding:12px"></textarea>
         <div style="display:flex;gap:10px;margin-top:14px;justify-content:flex-end;flex-wrap:wrap">
-          <button class="btn ghost" onclick="evWord()"><span class="material-symbols-outlined" style="font-size:18px">description</span> Descargar Word</button>
+          <button class="btn ghost" onclick="evWord()"><span class="material-symbols-outlined" style="font-size:18px">description</span> Word (completo)</button>
+          <button class="btn ghost" onclick="evWordEst()"><span class="material-symbols-outlined" style="font-size:18px">person</span> Word (solo estudiante)</button>
           <button class="btn ghost" onclick="evPDF()"><span class="material-symbols-outlined" style="font-size:18px">picture_as_pdf</span> Descargar PDF</button>
           <button class="btn" onclick="evGuardar()"><span class="material-symbols-outlined" style="font-size:18px">save</span> Guardar en biblioteca</button>
         </div>
@@ -341,8 +342,31 @@ function pfGenerar(){
   .then(function(r){return r.json()}).then(function(d){if(d.error)throw new Error(d.error);document.getElementById('plTxt').value=d.resultado||'(respuesta vacía)';toast('Planificación generada. Revísala y edítala.','success');})
   .catch(function(e){toast('Error de IA: '+e.message,'danger');}).then(function(){b.disabled=false;b.innerHTML=o;});
 }
+// ── Exportación con formato (Word/PDF) ──
+function _docEsc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function _docHTML(txt){
+ var lines=(txt||'').split(/\r?\n/),out=[],inList=false;
+ function closeList(){if(inList){out.push('</ul>');inList=false;}}
+ lines.forEach(function(ln){var t=ln.replace(/\s+$/,'');
+   if(!t.trim()){closeList();out.push('<div style="height:6px"></div>');return;}
+   var isBullet=/^\s*[•\-\*·]\s+/.test(t);
+   if(isBullet){if(!inList){out.push('<ul style="margin:4px 0 4px 20px;padding:0">');inList=true;}out.push('<li style="margin:2px 0">'+_docEsc(t.replace(/^\s*[•\-\*·]\s+/,''))+'</li>');return;}
+   closeList();
+   var letters=t.replace(/[^A-Za-zÁÉÍÓÚÑáéíóúñ]/g,'');
+   var isHeading=(letters.length>2 && letters===letters.toUpperCase()) || /:\s*$/.test(t.trim());
+   if(isHeading)out.push('<div style="font-weight:700;font-size:12pt;margin:12px 0 4px;color:#1f2430">'+_docEsc(t.trim())+'</div>');
+   else out.push('<div style="margin:3px 0;white-space:pre-wrap">'+_docEsc(t)+'</div>');
+ });
+ closeList();
+ return out.join('');
+}
+function _bajarWord(titulo,txt,fname){
+ var body='<div style="font-family:Calibri,Arial,sans-serif;font-size:11pt;color:#111"><h2 style="margin:0 0 10px;font-family:Calibri,Arial">'+_docEsc(titulo)+'</h2>'+_docHTML(txt)+'</div>';
+ var blob=new Blob(['<html xmlns:w="urn:schemas-microsoft-com:office:word"><head><meta charset="utf-8"></head><body>'+body+'</body></html>'],{type:'application/msword'});
+ var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=fname;a.click();toast('Exportado a Word.','success');
+}
 function _plTitulo(){return 'Planificación — '+(document.getElementById('plAsig').value||'clase')+' '+(document.getElementById('plCurso').value||'');}
-function pfWord(){var txt=document.getElementById('plTxt').value||'';if(!txt.trim()){toast('Primero genera la planificación.','danger');return;}var html='<h2>'+_plTitulo()+'</h2><pre style="font-family:Calibri,Arial;font-size:11pt;white-space:pre-wrap">'+txt.replace(/&/g,'&amp;').replace(/</g,'&lt;')+'</pre>';var blob=new Blob(['<html xmlns:w="urn:schemas-microsoft-com:office:word"><head><meta charset="utf-8"></head><body>'+html+'</body></html>'],{type:'application/msword'});var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='planificacion.doc';a.click();toast('Exportado a Word.','success');}
+function pfWord(){var txt=document.getElementById('plTxt').value||'';if(!txt.trim()){toast('Primero genera la planificación.','danger');return;}_bajarWord(_plTitulo(),txt,'planificacion.doc');}
 function pfPDF(){var txt=document.getElementById('plTxt').value||'';if(!txt.trim()){toast('Primero genera la planificación.','danger');return;}
  var J=(window.jspdf&&window.jspdf.jsPDF); if(!J){toast('Generador PDF no disponible.','danger');return;}
  var doc=new J({unit:'pt',format:'letter'}),margin=48,pw=doc.internal.pageSize.getWidth(),ph=doc.internal.pageSize.getHeight(),width=pw-margin*2,y=margin;
@@ -380,7 +404,9 @@ function evGenerar(adaptada){
   .catch(function(e){toast('Error de IA: '+e.message,'danger');}).then(function(){b.disabled=false;b.innerHTML=o;});
 }
 function _evTit(){return 'Evaluación — '+(document.getElementById('evAsig').value||'')+' '+(document.getElementById('evCurso').value||'');}
-function evWord(){var txt=document.getElementById('evTxt').value||'';if(!txt.trim()){toast('Primero genera la evaluación.','danger');return;}var html='<h2>'+_evTit()+'</h2><pre style="font-family:Calibri,Arial;font-size:11pt;white-space:pre-wrap">'+txt.replace(/&/g,'&amp;').replace(/</g,'&lt;')+'</pre>';var blob=new Blob(['<html xmlns:w="urn:schemas-microsoft-com:office:word"><head><meta charset="utf-8"></head><body>'+html+'</body></html>'],{type:'application/msword'});var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='evaluacion.doc';a.click();toast('Exportado a Word.','success');}
+function _evStudentPart(txt){var re=/(VERSI[ÓO]N\s+PROFESOR|PAUTA DE CORRECCI[ÓO]N|TABLA DE ESPECIFICACIONES)/i;var i=(txt||'').search(re);return i>0?txt.slice(0,i).replace(/\s+$/,''):txt;}
+function evWord(){var txt=document.getElementById('evTxt').value||'';if(!txt.trim()){toast('Primero genera la evaluación.','danger');return;}_bajarWord(_evTit(),txt,'evaluacion.doc');}
+function evWordEst(){var txt=document.getElementById('evTxt').value||'';if(!txt.trim()){toast('Primero genera la evaluación.','danger');return;}_bajarWord(_evTit()+' (Estudiante)',_evStudentPart(txt),'evaluacion-estudiante.doc');}
 function evPDF(){var txt=document.getElementById('evTxt').value||'';if(!txt.trim()){toast('Primero genera la evaluación.','danger');return;}var J=(window.jspdf&&window.jspdf.jsPDF);if(!J){toast('Generador PDF no disponible.','danger');return;}var doc=new J({unit:'pt',format:'letter'}),margin=48,ph=doc.internal.pageSize.getHeight(),width=doc.internal.pageSize.getWidth()-margin*2,y=margin;doc.setFont('helvetica','bold');doc.setFontSize(13);doc.text(_evTit(),margin,y);y+=20;doc.setFont('helvetica','normal');doc.setFontSize(10);var lines=doc.splitTextToSize(txt,width);for(var i=0;i<lines.length;i++){if(y>ph-margin){doc.addPage();y=margin;}doc.text(lines[i],margin,y);y+=14;}doc.save('evaluacion.pdf');toast('PDF descargado.','success');}
 function evGuardar(){var txt=document.getElementById('evTxt').value||'';if(!txt.trim()){toast('Primero genera la evaluación.','danger');return;}REG.biblioteca.rows.unshift(['Evaluación — '+(document.getElementById('evAsig').value||''),(document.getElementById('evCurso').value||'')+' · '+(document.getElementById('evFormato').value||'')+' · jun 2026','Guardado']);renderTable('biblioteca');if(window.ccStore)ccStore.setTabla('prof_biblioteca',REG.biblioteca.rows);toast('Evaluación guardada en biblioteca.','success');}
 document.querySelectorAll('.nav-item').forEach(function(x){x.addEventListener('click',function(){show(x.dataset.s)})});
