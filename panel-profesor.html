@@ -30,7 +30,7 @@
 </head>
 <body>
 <div class="topbar">
-  <div><a href="acceso-demo.html" style="color:var(--muted);font-size:13px;margin-right:14px"><span class="material-symbols-outlined" style="font-size:16px;vertical-align:-3px">arrow_back</span> Roles</a><span class="brand">Click&Clase</span><span class="demo-tag">Profesor · demo</span></div>
+  <div><span class="brand">Click&Clase</span><span class="demo-tag" id="roleTag">Profesor</span></div>
   <div class="usr"><span class="av" id="meAv">PR</span><span id="meName" style="font-size:13.5px">Profesor</span><a class="salir" href="login.html">Salir</a></div>
 </div>
 <div class="shell">
@@ -49,7 +49,8 @@
       </div>
       <div class="card"><h3><span class="material-symbols-outlined">bolt</span> Accesos rápidos</h3>
         <div style="display:flex;gap:10px;flex-wrap:wrap">
-          <button class="btn" onclick="show('material')"><span class="material-symbols-outlined" style="font-size:18px">smart_toy</span> Generar material con IA</button>
+          <button class="btn" onclick="show('planificaciones')"><span class="material-symbols-outlined" style="font-size:18px">event_note</span> Planificaciones</button>
+          <button class="btn ghost" onclick="show('evaluaciones')"><span class="material-symbols-outlined" style="font-size:18px">quiz</span> Evaluaciones</button>
           <button class="btn ghost" onclick="show('notas')"><span class="material-symbols-outlined" style="font-size:18px">table_chart</span> Notas y asistencia</button>
           <button class="btn ghost" onclick="show('biblioteca')"><span class="material-symbols-outlined" style="font-size:18px">menu_book</span> Biblioteca</button>
         </div>
@@ -258,7 +259,7 @@ function generarMat(){
 }
 function exportarWord(){var txt=document.getElementById('matTxt').value||'';if(!txt.trim()){toast('Primero genera el material.','danger');return;}var tit=document.getElementById('matTipo').selectedOptions[0].text+' — '+document.getElementById('matTema').value;var html='<h2>'+tit+'</h2><pre style="font-family:Calibri,Arial;font-size:11pt;white-space:pre-wrap">'+txt.replace(/&/g,'&amp;').replace(/</g,'&lt;')+'</pre>';var blob=new Blob(['<html xmlns:w="urn:schemas-microsoft-com:office:word"><head><meta charset="utf-8"></head><body>'+html+'</body></html>'],{type:'application/msword'});var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='material.doc';a.click();toast('Exportado a Word.','success');}
 function guardarMat(){var txt=document.getElementById('matTxt').value||'';if(!txt.trim()){toast('Primero genera el material.','danger');return;}var tipo=document.getElementById('matTipo').selectedOptions[0].text;var tema=document.getElementById('matTema').value||'(sin tema)';var asig=document.getElementById('matAsig').value||'';REG.biblioteca.rows.unshift([tipo+' — '+tema,asig+' · jun 2026','Guardado']);renderTable('biblioteca');if(window.ccStore)ccStore.setTabla('prof_biblioteca',REG.biblioteca.rows);toast('Guardado en biblioteca.','success');show('biblioteca');}
-var NAV=[['dashboard','Inicio','resumen'],['smart_toy','Generar material (IA)','material'],['event_note','Planificaciones','planificaciones'],['quiz','Evaluaciones','evaluaciones'],['groups','Mis cursos','cursos'],['table_chart','Notas y asistencia','notas'],['chat','Anotaciones','anotaciones'],['menu_book','Biblioteca','biblioteca']];
+var NAV=[['dashboard','Inicio','resumen'],['event_note','Planificaciones','planificaciones'],['quiz','Evaluaciones','evaluaciones'],['groups','Mis cursos','cursos'],['table_chart','Notas y asistencia','notas'],['chat','Anotaciones','anotaciones'],['menu_book','Biblioteca','biblioteca']];
 document.getElementById('nav').innerHTML=NAV.map(function(n,i){return '<div class="nav-item'+(i===0?' active':'')+'" data-s="'+n[2]+'">'+ic(n[0])+'<span>'+n[1]+'</span></div>'}).join('');
 function show(s){document.querySelectorAll('.nav-item').forEach(function(x){x.classList.toggle('active',x.dataset.s===s)});document.querySelectorAll('.sec').forEach(function(x){x.classList.toggle('active',x.id==='sec-'+s)});if(s==='planificaciones')pfInit();if(s==='evaluaciones')evInit();}
 
@@ -467,9 +468,13 @@ function cargarAsignaturas(u){
  var indep = u && u.role!=='admin' && (u.tipo==='independiente' || !u.orgId);
  var propiasA = (u && Array.isArray(u.asignaturas) && u.asignaturas.length) ? u.asignaturas : null;
  var propiasN = (u && Array.isArray(u.niveles) && u.niveles.length) ? u.niveles : null;
- if(indep){ if(propiasA){ _setAsig(propiasA,propiasN); return; } _cargarCurriculoLibre(); return; }   // particular: lo que le asignó el admin, o currículo completo
+ var tieneTP = !!(u && Array.isArray(u.modulos) && u.modulos.length);
+ // Si el admin le asignó algo (asignaturas y/o módulos TP), mostrar SOLO eso; nunca el currículo completo.
+ if(indep){ if(propiasA||tieneTP){ _setAsig(propiasA||[],propiasN); return; } _cargarCurriculoLibre(); return; }
  Promise.all([ccStore.getConfig('academico'),ccStore.getConfig('asignaciones')]).then(function(res){var acad=res[0]||{},asign=res[1]||{};var allA=acad.asignaturas||[],allN=acad.niveles||[];var email='';try{if(window.EL_AUTH&&EL_AUTH.currentUser)email=(EL_AUTH.currentUser.email||'');}catch(e){}var misA=allA,misN=allN;if(asign.rows&&email){for(var i=0;i<asign.rows.length;i++){var r=asign.rows[i];if((r[0]||'').toLowerCase().trim()===email.toLowerCase().trim()){var a=(r[1]||'').split(',').map(function(s){return s.trim()}).filter(Boolean);var n=(r[2]||'').split(',').map(function(s){return s.trim()}).filter(Boolean);if(a.length)misA=a;if(n.length)misN=n;break;}}}
-   if(!misA.length){ _cargarCurriculoLibre(); return; }   // colegio sin académico cargado: usar currículo nacional
+   if(propiasA)misA=propiasA; if(propiasN)misN=propiasN;
+   if(!misA.length&&!tieneTP){ _cargarCurriculoLibre(); return; }   // sin nada asignado: currículo nacional
+   if(!misA.length&&tieneTP){ _setAsig([],propiasN||misN); return; } // solo módulos TP
    window._ASIG_META=acad.asignaturasMeta||[];fillSelect('matAsig',misA);fillSelect('matNivel',misN);_profTP();actualizarOAs();}).catch(function(){});}
 function _setProfName(u){ if(!u)return; var nom=u.nombre||(u.email?u.email.split('@')[0]:'')||'Profesor'; var ini=(nom.replace(/[^A-Za-zÁÉÍÓÚÑ ]/g,'').trim().split(/\s+/).map(function(w){return w[0];}).join('').slice(0,2)||'PR').toUpperCase(); var set=function(id,v){var e=document.getElementById(id);if(e)e.textContent=v;}; set('meName',nom); set('meAv',ini); set('meNm',nom); set('meSc', u.tipo==='independiente'?'Profesor particular':(u.especialidad?('Especialidad '+u.especialidad):'Mis cursos')); }
 function _profPermisos(u){ if(!u||!u.permisos)return; function hide(sec){var it=document.querySelector('.nav-item[data-s="'+sec+'"]');if(it)it.style.display='none';var s=document.getElementById('sec-'+sec);if(s)s.classList.remove('active');} if(u.permisos.planificar===false)hide('planificaciones'); if(u.permisos.material===false){hide('material');hide('evaluaciones');} }
