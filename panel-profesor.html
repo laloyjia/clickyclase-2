@@ -42,10 +42,10 @@
     <section class="sec active" id="sec-resumen">
       <div class="h1">Inicio</div><div class="sub">Tu trabajo del día</div>
       <div class="kpis">
-        <div class="kpi"><div class="l">Mis cursos</div><div class="v">5</div></div>
-        <div class="kpi"><div class="l">Material generado</div><div class="v">28</div></div>
-        <div class="kpi"><div class="l">Próx. evaluaciones</div><div class="v">3</div></div>
-        <div class="kpi"><div class="l">Promedio general</div><div class="v">5,8</div></div>
+        <div class="kpi"><div class="l">Mis cursos</div><div class="v" id="kCursos">—</div></div>
+        <div class="kpi"><div class="l">Material en biblioteca</div><div class="v" id="kMat">—</div></div>
+        <div class="kpi"><div class="l">Evaluaciones</div><div class="v" id="kEval">—</div></div>
+        <div class="kpi"><div class="l">Promedio general</div><div class="v" id="kProm">—</div></div>
       </div>
       <div class="card"><h3><span class="material-symbols-outlined">bolt</span> Accesos rápidos</h3>
         <div style="display:flex;gap:10px;flex-wrap:wrap">
@@ -224,7 +224,7 @@ function renderTable(key){var cfg=REG[key],el=document.getElementById('tb-'+key)
    if(key==='notas'){var n1=parseFloat((''+(r[1]||'')).replace(',','.')),n2=parseFloat((''+(r[2]||'')).replace(',','.'));if(!isNaN(n1)&&!isNaN(n2)){var prom=(n1+n2)/2;r[4]=prom<4?'En riesgo':(prom>=6?'Destacado':'Aprobado');}}
    var extra=(key==='anotaciones')?'<button title="Derivar a Convivencia" onclick="derivar('+ri+')" style="background:none;border:none;color:var(--primary);cursor:pointer;padding:2px"><span class="material-symbols-outlined" style="font-size:17px">forward</span></button>':'';
    return '<tr data-txt="'+r.join(' ').toLowerCase()+'">'+r.map(function(c,ci){var st=ci===cfg.statusIdx?(';font-weight:600;color:var(--'+inferTone(c)+')'):'';return '<td contenteditable="true" data-k="'+key+'" data-i="'+ri+'" data-c="'+ci+'" style="outline:none'+st+'">'+c+'</td>'}).join('')+'<td style="width:60px;text-align:center;white-space:nowrap">'+extra+'<button title="Eliminar fila" onclick="profDel(\''+key+'\','+ri+')" style="background:none;border:none;color:var(--muted);cursor:pointer;padding:2px"><span class="material-symbols-outlined" style="font-size:17px">close</span></button></td></tr>'}).join('');}
- var cnt=document.getElementById('cnt-'+key);if(cnt)cnt.textContent=cfg.rows.length;}
+ var cnt=document.getElementById('cnt-'+key);if(cnt)cnt.textContent=cfg.rows.length; if(typeof _profKPIs==='function'&&(key==='biblioteca'||key==='notas'||key==='cursos'))_profKPIs();}
 Object.keys(REG).forEach(renderTable);
 if(window.ccStore)ccStore.hydrate('prof',REG,renderTable);
 
@@ -478,7 +478,27 @@ function cargarAsignaturas(u){
    window._ASIG_META=acad.asignaturasMeta||[];fillSelect('matAsig',misA);fillSelect('matNivel',misN);_profTP();actualizarOAs();}).catch(function(){});}
 function _setProfName(u){ if(!u)return; var nom=u.nombre||(u.email?u.email.split('@')[0]:'')||'Profesor'; var ini=(nom.replace(/[^A-Za-zÁÉÍÓÚÑ ]/g,'').trim().split(/\s+/).map(function(w){return w[0];}).join('').slice(0,2)||'PR').toUpperCase(); var set=function(id,v){var e=document.getElementById(id);if(e)e.textContent=v;}; set('meName',nom); set('meAv',ini); set('meNm',nom); set('meSc', u.tipo==='independiente'?'Profesor particular':(u.especialidad?('Especialidad '+u.especialidad):'Mis cursos')); }
 function _profPermisos(u){ if(!u||!u.permisos)return; function hide(sec){var it=document.querySelector('.nav-item[data-s="'+sec+'"]');if(it)it.style.display='none';var s=document.getElementById('sec-'+sec);if(s)s.classList.remove('active');} if(u.permisos.planificar===false)hide('planificaciones'); if(u.permisos.material===false){hide('material');hide('evaluaciones');} }
-if(typeof ELAuth!=='undefined'&&ELAuth.onUserReady){ELAuth.onUserReady(function(u){window._PROF_U=u;_setProfName(u);_profPermisos(u);cargarAsignaturas(u);});}else{cargarAsignaturas(null);}
+function _profKPIs(){
+ var setV=function(id,v){var e=document.getElementById(id);if(e)e.textContent=v;};
+ setV('kCursos', (REG.cursos&&REG.cursos.rows.length)||0);
+ setV('kMat', (REG.biblioteca&&REG.biblioteca.rows.length)||0);
+ setV('kEval', (REG.biblioteca?REG.biblioteca.rows.filter(function(r){return /evaluaci/i.test(r[0]||'');}).length:0));
+ var proms=[]; (REG.notas?REG.notas.rows:[]).forEach(function(r){var n1=parseFloat((''+(r[1]||'')).replace(',','.')),n2=parseFloat((''+(r[2]||'')).replace(',','.'));if(!isNaN(n1)&&!isNaN(n2))proms.push((n1+n2)/2);});
+ setV('kProm', proms.length?(proms.reduce(function(a,b){return a+b;},0)/proms.length).toFixed(1).replace('.',','):'—');
+}
+function _profRealData(u){
+ if(!u)return;
+ // Reemplaza la data de ejemplo por la del profesor (o vacía si aún no tiene).
+ ['cursos','notas','anotaciones','biblioteca'].forEach(function(k){ if(REG[k])REG[k].rows=[]; });
+ var cursos=(u.cursos||'').split(/[,;/]|\s+y\s+/).map(function(s){return s.trim();}).filter(Boolean);
+ var asigLabel = u.especialidad || (u.asignaturas&&u.asignaturas[0]) || '';
+ cursos.forEach(function(c){ REG.cursos.rows.push([c, asigLabel, '', '']); });
+ ['cursos','notas','anotaciones','biblioteca'].forEach(function(k){ try{renderTable(k);}catch(e){} });
+ if(window.ccStore)ccStore.hydrate('prof',REG,renderTable);   // trae sus datos reales si existen
+ _profKPIs();
+ setTimeout(_profKPIs,1500);   // recomputa tras hidratar
+}
+if(typeof ELAuth!=='undefined'&&ELAuth.onUserReady){ELAuth.onUserReady(function(u){window._PROF_U=u;_setProfName(u);_profPermisos(u);_profRealData(u);cargarAsignaturas(u);});}else{cargarAsignaturas(null);}
 
 // ── Currículum oficial: OAs y unidades por asignatura+nivel ──
 window._NIV2CODE=null;window._OAS_ACTUAL=[];
