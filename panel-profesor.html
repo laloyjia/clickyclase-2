@@ -86,6 +86,7 @@
       <div class="h1">Planificaciones</div><div class="sub">Planificación de clase con formato estándar Mineduc, generada con IA</div>
       <div class="card">
         <div class="frm">
+          <div class="fld"><label>Tipo de clase</label><select id="plTipoClase"><option value="">— General —</option><option>Clase teórica (conceptual)</option><option>Clase práctica / taller</option><option>Clase de laboratorio</option><option>Clase de ejercitación / aplicación</option><option>Clase introductoria (inicio de unidad)</option><option>Clase de repaso / reforzamiento</option><option>Clase de síntesis / cierre de unidad</option><option>Clase de evaluación</option><option>Salida pedagógica / terreno</option></select></div>
           <div class="fld"><label>Asignatura / Módulo</label><select id="plAsig" onchange="pfBuildOA()"><option value="">— Elige —</option></select></div>
           <div class="fld"><label>Nivel / Curso</label><select id="plCurso" onchange="pfBuildOA()"><option value="">— Elige —</option></select></div>
           <div class="fld"><label>Unidad</label><input id="plUnidad" placeholder="Ej. Unidad 2: Fracciones"></div>
@@ -337,7 +338,7 @@ function pfGenerar(){
  var adec=Array.prototype.map.call(document.querySelectorAll('#plPIE input:checked'),function(c){return c.value;});
  var adecTxt=(document.getElementById('plPIEtxt').value||'').trim(); if(adecTxt)adec.push(adecTxt);
  var nee=Array.prototype.map.call(document.querySelectorAll('#plNEE input:checked'),function(c){var it=PL_NEE.filter(function(x){return x.k===c.value;})[0];return it?it.n:c.value;});
- var datos={ asignatura:g.esTP?'':g.asig, nivel:document.getElementById('plCurso').value, curso:document.getElementById('plCurso').value, modulo:g.esTP?(window._PROF_TP[g.asig].nombre||g.asig):'', unidad:document.getElementById('plUnidad').value||'', contenido:document.getElementById('plContenido').value||'', tema:document.getElementById('plContenido').value||'', horas:document.getElementById('plHoras').value||'', ae:g.ae||g.oaChecked.join(' | '), criterios:g.criterios, valores:valores, nee:nee, oaEspecialidad:g.oaEsp, oag:g.oag, adecuaciones:adec.map(function(a){return '• '+a;}).join('\n'), oas_seleccionados:g.oaChecked, oa:g.oaChecked.join(' | ') };
+ var datos={ asignatura:g.esTP?'':g.asig, nivel:document.getElementById('plCurso').value, curso:document.getElementById('plCurso').value, modulo:g.esTP?(window._PROF_TP[g.asig].nombre||g.asig):'', tipoClase:document.getElementById('plTipoClase').value||'', unidad:document.getElementById('plUnidad').value||'', contenido:document.getElementById('plContenido').value||'', tema:document.getElementById('plContenido').value||'', horas:document.getElementById('plHoras').value||'', ae:g.ae||g.oaChecked.join(' | '), criterios:g.criterios, valores:valores, nee:nee, oaEspecialidad:g.oaEsp, oag:g.oag, adecuaciones:adec.map(function(a){return '• '+a;}).join('\n'), oas_seleccionados:g.oaChecked, oa:g.oaChecked.join(' | ') };
  if(!g.asig){toast('Elige una asignatura o módulo.','danger');return;}
  var b=document.getElementById('btnPl');b.disabled=true;var o=b.innerHTML;b.innerHTML='<span class="material-symbols-outlined" style="font-size:18px">hourglass_top</span> Generando…';
  fetch('/api/ia-asistente',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({tipo:'planificacion',datos:datos})})

@@ -178,6 +178,7 @@ ${datos.modulo ? '- Especialidad TP / Módulo: ' + datos.modulo + '\n' : ''}${da
 - Contenido específico de la clase: ${datos.contenido || datos.tema || '___'}
 - Objetivo(s) de Aprendizaje / Aprendizaje Esperado: ${datos.ae || datos.oa || '[identifícalo desde el currículo e indica el código]'}
 - Duración: ${datos.horas ? datos.horas + ' hrs' : '1 clase de 90 min'}
+${datos.tipoClase ? '- Tipo de clase: ' + datos.tipoClase + ' → la metodología y las actividades del DESARROLLO deben ser coherentes con este tipo (práctica/taller o laboratorio = prioriza el hacer, la manipulación y el paso a paso; teórica = construcción conceptual; ejercitación = resolución guiada y progresiva; evaluación = aplicación del instrumento; repaso = consolidación; introductoria = exploración y activación; salida a terreno = observación y registro).\n' : ''}
 ${datos.nee ? '- NEE presentes en el curso: ' + (Array.isArray(datos.nee) ? datos.nee.join(', ') : datos.nee) + '\n' : ''}${datos.criterios ? '- Criterios de evaluación seleccionados:\n' + datos.criterios + '\n' : ''}${datos.valores ? '- Valores / actitudes a promover: ' + datos.valores + '\n' : ''}${datos.adecuaciones ? '- Adecuaciones a considerar:\n' + datos.adecuaciones + '\n' : ''}
 
 ESTRUCTURA OBLIGATORIA DE SALIDA (usa estos títulos en MAYÚSCULAS y respétalos en orden):
