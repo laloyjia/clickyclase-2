@@ -184,15 +184,8 @@ ESTRUCTURA ESTRICTA DE SALIDA (respeta los títulos en MAYÚSCULAS y el orden):
 
 1. ALINEACIÓN CURRICULAR Y DESGLOSE DEL OA
 - OBJETIVO ESPECÍFICO DE LA CLASE: acotado al tiempo indicado, explicitando la HABILIDAD (de alta demanda cognitiva), el CONOCIMIENTO y la ACTITUD (OAT).
-- INDICADORES DE EVALUACIÓN (MINEDUC): 2 o 3, directamente relacionados con el objetivo.
-- CONCEPTOS CLAVE / PRECONCEPTOS: andamiaje conceptual previo que se debe activar.
 
-2. ESTRATEGIA DE DIVERSIFICACIÓN (ENFOQUE DUA)
-- Múltiples formas de PRESENTACIÓN (cómo se entrega la información).
-- Múltiples formas de ACCIÓN / EXPRESIÓN (cómo demuestran lo aprendido).
-- Múltiples formas de MOTIVACIÓN (enganche).
-
-3. ESTRUCTURA DE LA CLASE EN TRES TIEMPOS
+2. ESTRUCTURA DE LA CLASE EN TRES TIEMPOS
 Para cada momento indica el tiempo y separa EXPLÍCITAMENTE las ACCIONES DEL DOCENTE y las ACCIONES DEL ESTUDIANTE (el estudiante debe ser el protagonista activo).
 DISTRIBUCIÓN DEL TIEMPO: considera 1 hora pedagógica = 45 minutos. Reparte el tiempo total de forma realista y coherente (INICIO ≈ 15%, DESARROLLO ≈ 70%, CIERRE ≈ 15%) y verifica que INICIO + DESARROLLO + CIERRE sumen exactamente el tiempo total. Si el total supera 90 minutos, organiza el DESARROLLO en varias sesiones/bloques de máximo 90 minutos, rotulando cada bloque (Sesión 1, Sesión 2…) e incluyendo pausas activas; ningún bloque continuo debe exceder los 90 minutos.
 A) INICIO (___min) — Activación y sentido del aprendizaje.
@@ -205,17 +198,15 @@ C) CIERRE (___min) — Consolidación y metacognición.
    • Docente: cómo guía la síntesis (sin hacer el resumen él mismo) y gestiona la revisión del instrumento de evaluación final.
    • Estudiante: metacognición explícita (qué aprendieron, cómo y para qué) y resolución de la evaluación de cierre.
 
-4. EVALUACIÓN FORMATIVA Y RECURSOS
-- EVIDENCIA DE APRENDIZAJE / INSTRUMENTO: herramienta formativa final (ticket de salida con 2 preguntas clave alineadas al objetivo, rúbrica exprés o escala de apreciación).
-- RECURSOS DIDÁCTICOS: materiales concretos, digitales o guías impresas estructuradas.
-
-5. PLAN DE INCLUSIÓN Y ADECUACIONES DE ACCESO (DECRETO 83)
+3. PLAN DE INCLUSIÓN Y ADECUACIONES DE ACCESO (DECRETO 83)
 IMPORTANTE: aborda ÚNICAMENTE los diagnósticos NEE señalados en los datos de entrada. NO agregues diagnósticos que no fueron indicados. Si dice "Aula diversa estándar", entrega orientaciones generales de acceso.
 Crea UNA SUBSECCIÓN POR CADA diagnóstico señalado (encabezada con el nombre del diagnóstico). Para cada uno detalla, SIN bajar la exigencia del objetivo y priorizando las adecuaciones seleccionadas en los datos:
    • Ajustes en la presentación de la información.
    • Ajustes en la forma de respuesta y expresión.
    • Gestión del tiempo y del entorno.
-Cierra con ACCIÓN DE CO-DOCENCIA (Profesor de aula + Educador/a Diferencial): según la "Estrategia de co-docencia" indicada, define qué hace el/la Educador/a Diferencial en INICIO, DESARROLLO y CIERRE para apoyar el andamiaje sin segregar a los estudiantes PIE. Si no hay Educador/a Diferencial en aula, indica cómo el propio profesor asume estos apoyos.${datos.modulo ? '\n\n6. VINCULACIÓN CON EL PERFIL DE EGRESO / MUNDO LABORAL (TP): cómo la clase conecta con las competencias del perfil de egreso de la especialidad.' : ''}`,
+Cierra con ACCIÓN DE CO-DOCENCIA (Profesor de aula + Educador/a Diferencial): según la "Estrategia de co-docencia" indicada, define qué hace el/la Educador/a Diferencial en INICIO, DESARROLLO y CIERRE para apoyar el andamiaje sin segregar a los estudiantes PIE. Si no hay Educador/a Diferencial en aula, indica cómo el propio profesor asume estos apoyos.
+
+4. CONCEPTOS CLAVE / PRECONCEPTOS: al final del documento, lista el andamiaje conceptual previo (conceptos y preconceptos) que se debe activar para lograr el objetivo.`,
 
     guia: `${intro}Genera una GUÍA DE APRENDIZAJE completa para estudiantes chilenos:
 ${ctx}
