@@ -160,7 +160,7 @@ Conoces el currículum nacional: Educación Básica 1°-8°, Plan Común 1°-4°
 Redactas en español formal chileno, de forma práctica y lista para usar en aula.
 ${hasOAs ? 'FUNDAMENTAL: El documento debe estar ALINEADO CURRICULAMENTE con los OA indicados — citar sus códigos en los objetivos y la evaluación.' : ''}
 Responde SOLO con el documento solicitado, sin saludos ni comentarios adicionales.
-Usa secciones en MAYÚSCULAS, bullets (•) y numeración donde corresponda.
+Usa secciones en MAYÚSCULAS, bullets (•) y numeración donde corresponda. NO uses Markdown (nada de #, ##, ** ni asteriscos/guiones como viñetas): solo texto plano ordenado.
 Para expresiones matemáticas usa notación clara en texto plano con símbolos Unicode legibles: potencias con superíndices (x², 10³), subíndices cuando corresponda, fracciones como a/b, raíz √, multiplicación ×, división ÷, y los signos ≤ ≥ ≠ ± π ° cuando apliquen. Escribe cada ecuación o paso en su propia línea. NO uses LaTeX ni signos $...$.\n\n`;
 
   const ctx = buildContext(datos);
@@ -168,6 +168,7 @@ Para expresiones matemáticas usa notación clara en texto plano con símbolos U
   const prompts = {
 
     planificacion: `Actúa como un asesor pedagógico de élite, experto en el Sistema de Evaluación Docente de Chile (CPEIP) y especialista en el Marco para la Buena Enseñanza. Diseña una planificación de clase de nivel DESTACADO (tramos Experto 1 o 2), con coherencia impecable entre el objetivo, las actividades y la evaluación. Usa lenguaje técnico-pedagógico chileno. NO inventes códigos de OA: si no tienes certeza del código exacto, indícalo y ofrece la redacción aproximada. Para matemática usa notación Unicode legible (x², a/b, √, ×, ÷, ≤, ≥, π), una ecuación por línea, sin LaTeX. Responde SOLO con el documento.
+FORMATO DE SALIDA (obligatorio): NO uses Markdown — nada de #, ##, ###, ni ** para negritas, ni asteriscos ni guiones como viñetas. Escribe en texto plano ordenado: TÍTULOS DE SECCIÓN EN MAYÚSCULAS y numerados (1., 2., 3., 4.); subtítulos en una línea propia terminada en dos puntos; viñetas SOLO con el símbolo • ; y para separar el docente del estudiante usa las etiquetas "Docente:" y "Estudiante:" al inicio de la línea.
 
 DATOS DE ENTRADA (provienen de la plataforma):
 - Asignatura: ${datos.asignatura || (datos.modulo ? 'Módulo TP' : '___')}
@@ -182,8 +183,8 @@ ${datos.criterios ? '- Criterios de evaluación seleccionados:\n' + datos.criter
 
 ESTRUCTURA ESTRICTA DE SALIDA (respeta los títulos en MAYÚSCULAS y el orden):
 
-1. ALINEACIÓN CURRICULAR Y DESGLOSE DEL OA
-- OBJETIVO ESPECÍFICO DE LA CLASE: acotado al tiempo indicado, explicitando la HABILIDAD (de alta demanda cognitiva), el CONOCIMIENTO y la ACTITUD (OAT).
+1. OBJETIVO ESPECÍFICO DE LA CLASE
+Redáctalo acotado al tiempo indicado, explicitando la HABILIDAD (de alta demanda cognitiva), el CONOCIMIENTO y la ACTITUD (OAT).
 
 2. ESTRUCTURA DE LA CLASE EN TRES TIEMPOS
 Para cada momento indica el tiempo y separa EXPLÍCITAMENTE las ACCIONES DEL DOCENTE y las ACCIONES DEL ESTUDIANTE (el estudiante debe ser el protagonista activo).
