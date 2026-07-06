@@ -167,53 +167,35 @@ Para expresiones matemáticas usa notación clara en texto plano con símbolos U
 
   const prompts = {
 
-    planificacion: `${intro}Genera una PLANIFICACIÓN DE CLASE completa con estos datos:
-${ctx}
+    planificacion: `Actúa como especialista en diseño curricular y UTP con amplia experiencia en el sistema educativo chileno, con dominio de las Bases Curriculares Mineduc, el Decreto 67/2018 de evaluación, la Ley de Inclusión Escolar y el Diseño Universal para el Aprendizaje (DUA).
+Redacta en español técnico-pedagógico preciso, sin relleno genérico. Aplica alineamiento constructivo (Biggs): el objetivo de la clase, los indicadores y la evaluación deben ser coherentes entre sí. Usa verbos de la Taxonomía de Bloom apropiados al nivel. NO inventes códigos de OA: si no tienes certeza del código exacto, indícalo y ofrece la redacción aproximada. Prioriza metodologías activas por sobre la exposición pasiva.
+Para expresiones matemáticas usa notación Unicode legible (x², a/b, √, ×, ÷, ≤, ≥, π), una ecuación por línea, sin LaTeX.
 
-ESTRUCTURA REQUERIDA:
-═══════════════════════════════════════════════
-PLANIFICACIÓN DE CLASE
-Institución: [${datos.colegio || '_____________'}]
-Asignatura: ${datos.asignatura || '___'}  |  Nivel/Curso: ${datos.nivel || datos.curso || '___'}  |  Duración: ${datos.horas || '___'} hrs
-${datos.modulo ? 'Módulo (EMTP): ' + datos.modulo + '\n' : ''}${datos.oaEspecialidad ? 'OA de la especialidad: ' + datos.oaEspecialidad + '\n' : ''}${datos.oag ? 'Objetivos de Aprendizaje Genéricos (OAG): ' + datos.oag + '\n' : ''}${hasOAs ? 'Objetivo(s) de Aprendizaje Mineduc: [citar códigos OA aquí]' : 'OA / AE: _______________'}
-${datos.ae ? 'Aprendizaje(s) Esperado(s): ' + datos.ae + '\n' : ''}Unidad: ${datos.unidad || '___'}  |  Tema: ${datos.tema || '___'}
-═══════════════════════════════════════════════
+DATOS DE ENTRADA:
+- Asignatura: ${datos.asignatura || (datos.modulo ? 'Módulo TP' : '___')}
+- Nivel / curso: ${datos.nivel || datos.curso || '___'}
+${datos.modulo ? '- Especialidad TP / Módulo: ' + datos.modulo + '\n' : ''}${datos.oaEspecialidad ? '- OA de la especialidad: ' + datos.oaEspecialidad + '\n' : ''}${datos.oag ? '- OAG (Objetivos de Aprendizaje Genéricos): ' + datos.oag + '\n' : ''}- Unidad: ${datos.unidad || '___'}
+- Contenido específico de la clase: ${datos.contenido || datos.tema || '___'}
+- Objetivo(s) de Aprendizaje / Aprendizaje Esperado: ${datos.ae || datos.oa || '[identifícalo desde el currículo e indica el código]'}
+- Duración: ${datos.horas ? datos.horas + ' hrs' : '1 clase de 90 min'}
+${datos.nee ? '- NEE presentes en el curso: ' + (Array.isArray(datos.nee) ? datos.nee.join(', ') : datos.nee) + '\n' : ''}${datos.criterios ? '- Criterios de evaluación seleccionados:\n' + datos.criterios + '\n' : ''}${datos.valores ? '- Valores / actitudes a promover: ' + datos.valores + '\n' : ''}${datos.adecuaciones ? '- Adecuaciones a considerar:\n' + datos.adecuaciones + '\n' : ''}
 
-OBJETIVO DE LA CLASE (vinculado al OA citado)
-HABILIDADES A DESARROLLAR (según eje curricular)
-ACTITUDES Y VALORES
+ESTRUCTURA OBLIGATORIA DE SALIDA (usa estos títulos en MAYÚSCULAS y respétalos en orden):
+1. ENCABEZADO TÉCNICO — asignatura, nivel, unidad, OA/OAG con código oficial, Objetivo de Aprendizaje Transversal (OAT) asociado, habilidad(es) del siglo XXI si aplica, duración.
+2. OBJETIVO DE LA CLASE — redactado en términos observables y evaluables (verbo + contenido + condición), derivado del OA pero acotado a la sesión.
+3. INDICADORES DE EVALUACIÓN — 3 a 5 indicadores medibles y coherentes con el objetivo (lógica Decreto 67).
+4. ACTITUDES — 1 o 2 actitudes de las Bases Curriculares vinculadas al objetivo.
+5. RECURSOS Y MATERIALES — lista concreta (físicos, digitales, TICs, fichas).
+6. DESARROLLO DE LA CLASE EN 3 MOMENTOS (con tiempos estimados):
+   • INICIO — activación de conocimientos previos, motivación y comunicación del objetivo.
+   • DESARROLLO — estrategias didácticas activas, con AL MENOS UNA metodología explícita (ABP, aula invertida, trabajo colaborativo, etc.) y justificación de por qué se eligió.
+   • CIERRE — síntesis, metacognición y evaluación formativa breve.
+   En cada momento indica: acción del docente, acción del estudiante, tiempo y recurso asociado.
+7. EVALUACIÓN FORMATIVA — instrumento breve (ticket de salida, semáforo, rúbrica simple) coherente con los indicadores.
+8. DIVERSIFICACIÓN / DUA — al menos 2 ajustes concretos para atender la diversidad (NEE, ritmos distintos, estudiantes aventajados), especificando "para qué estudiante" y "qué se ajusta" (contenido, proceso o producto).
+${datos.modulo ? '9. VINCULACIÓN CON EL PERFIL DE EGRESO / MUNDO LABORAL — cómo la clase conecta con las competencias del perfil de egreso de la especialidad TP.\n' : ''}10. OBSERVACIONES PARA EL/LA DOCENTE — dificultades anticipadas y sugerencias de manejo de aula.
 
-INICIO (____min)
-• Activación de conocimientos previos
-• Motivación / problema o pregunta desafiante
-• Conexión con el OA
-
-DESARROLLO (____min)
-• Actividades secuenciadas (al menos 3, cada una con recursos y descripción)
-• Estrategias diferenciadas (trabajo individual, parejas, grupal)
-• Recursos: materiales físicos y/o digitales
-
-CIERRE (____min)
-• Síntesis y plenario
-• Evaluación formativa (ticket de salida, pregunta, autoevaluación)
-
-TAREA / EXTENSIÓN (si aplica)
-
-INDICADORES DE LOGRO (deben ser verificables y corresponder al OA citado):
-• El/la estudiante [verbo observable]...
-• El/la estudiante [verbo observable]...
-
-CRITERIOS DE EVALUACIÓN (observables y medibles, alineados a los OA/AE citados)
-${datos.criterios ? datos.criterios : '• Redacta criterios de evaluación verificables para cada objetivo/aprendizaje esperado.'}
-
-VALORES Y ACTITUDES (Marco de la Buena Enseñanza)
-${datos.valores ? '• Promover explícitamente: ' + datos.valores : '• Señala los valores y actitudes transversales a promover en la clase.'}
-
-ATENCIÓN A LA DIVERSIDAD — NEE (Decreto 170)
-${datos.nee ? 'Diagnóstico(s) presente(s) en el curso: ' + (Array.isArray(datos.nee) ? datos.nee.join(', ') : datos.nee) : 'Indica si hay estudiantes con NEE.'}
-
-ADECUACIONES CURRICULARES (Decreto 83/2015, coherentes con las NEE señaladas)
-${datos.adecuaciones ? datos.adecuaciones : '• Indica adecuaciones de acceso y/o en los objetivos según los diagnósticos del curso (si aplica).'}`,
+Entrega el documento listo para pegar en el formato institucional. No agregues comentarios fuera del documento.`,
 
     guia: `${intro}Genera una GUÍA DE APRENDIZAJE completa para estudiantes chilenos:
 ${ctx}

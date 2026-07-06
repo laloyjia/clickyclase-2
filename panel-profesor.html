@@ -58,10 +58,10 @@
     </section>
 
     <section class="sec" id="sec-material">
-      <div class="h1">Generar material con IA</div><div class="sub">Crea planificaciones, guías y pruebas alineadas al currículum</div>
+      <div class="h1">Generar material con IA</div><div class="sub">Crea guías y apuntes alineados al currículum. Para <b>planificaciones</b> y <b>evaluaciones</b> usa sus pestañas dedicadas.</div>
       <div class="card">
         <div class="frm">
-          <div class="fld"><label>Tipo de material</label><select id="matTipo"><option value="planificacion">Planificación</option><option value="guia">Guía de trabajo</option><option value="prueba">Prueba</option><option value="apunte">Apunte / Resumen</option></select></div>
+          <div class="fld"><label>Tipo de material</label><select id="matTipo"><option value="guia">Guía de trabajo</option><option value="apunte">Apunte / Resumen</option></select></div>
           <div class="fld"><label>Asignatura</label><select id="matAsig"><option value="">— Elige —</option><option>Lenguaje y Comunicación</option><option>Matemática</option><option>Ciencias Naturales</option><option>Historia, Geografía y Cs. Sociales</option><option>Inglés</option><option>Educación Física y Salud</option><option>Artes Visuales</option><option>Música</option><option>Tecnología</option><option>Orientación</option><option>Filosofía</option><option>Biología</option><option>Física</option><option>Química</option><option>Educación Ciudadana</option></select></div>
           <div class="fld"><label>Nivel / Curso</label><select id="matNivel"><option value="">— Elige —</option><option>Pre-Kínder</option><option>Kínder</option><option>1° básico</option><option>2° básico</option><option>3° básico</option><option>4° básico</option><option>5° básico</option><option>6° básico</option><option>7° básico</option><option>8° básico</option><option>I medio</option><option>II medio</option><option>III medio</option><option>IV medio</option></select></div>
           <div class="fld"><label>Tema / Unidad</label><input id="matTema" placeholder="Ej. Fracciones"></div>
@@ -86,10 +86,10 @@
       <div class="card">
         <div class="frm">
           <div class="fld"><label>Asignatura / Módulo</label><select id="plAsig" onchange="pfBuildOA()"><option value="">— Elige —</option></select></div>
-          <div class="fld"><label>Curso / Nivel</label><select id="plCurso" onchange="pfBuildOA()"><option value="">— Elige —</option></select></div>
+          <div class="fld"><label>Nivel / Curso</label><select id="plCurso" onchange="pfBuildOA()"><option value="">— Elige —</option></select></div>
           <div class="fld"><label>Unidad</label><input id="plUnidad" placeholder="Ej. Unidad 2: Fracciones"></div>
-          <div class="fld"><label>Cantidad de horas pedagógicas</label><input id="plHoras" type="number" min="1" placeholder="Ej. 2"></div>
-          <div class="fld"><label>Tema (opcional)</label><input id="plTema" placeholder="Ej. Suma de fracciones"></div>
+          <div class="fld"><label>N° de horas pedagógicas</label><input id="plHoras" type="number" min="1" placeholder="Ej. 2"></div>
+          <div class="fld" style="grid-column:1/-1"><label>Contenido específico de la clase</label><input id="plContenido" placeholder="Ej. Suma y resta de fracciones con distinto denominador"></div>
         </div>
         <div class="card" style="margin-top:12px;padding:14px;background:var(--surface)">
           <div class="sec-title" style="margin-bottom:6px"><span class="material-symbols-outlined" style="vertical-align:-4px;color:var(--primary);font-size:18px">track_changes</span> Objetivos curriculares</div>
@@ -336,7 +336,7 @@ function pfGenerar(){
  var adec=Array.prototype.map.call(document.querySelectorAll('#plPIE input:checked'),function(c){return c.value;});
  var adecTxt=(document.getElementById('plPIEtxt').value||'').trim(); if(adecTxt)adec.push(adecTxt);
  var nee=Array.prototype.map.call(document.querySelectorAll('#plNEE input:checked'),function(c){var it=PL_NEE.filter(function(x){return x.k===c.value;})[0];return it?it.n:c.value;});
- var datos={ asignatura:g.esTP?'':g.asig, nivel:document.getElementById('plCurso').value, curso:document.getElementById('plCurso').value, modulo:g.esTP?(window._PROF_TP[g.asig].nombre||g.asig):'', unidad:document.getElementById('plUnidad').value||'', tema:document.getElementById('plTema').value||'', horas:document.getElementById('plHoras').value||'', ae:g.ae||g.oaChecked.join(' | '), criterios:g.criterios, valores:valores, nee:nee, oaEspecialidad:g.oaEsp, oag:g.oag, adecuaciones:adec.map(function(a){return '• '+a;}).join('\n'), oas_seleccionados:g.oaChecked, oa:g.oaChecked.join(' | ') };
+ var datos={ asignatura:g.esTP?'':g.asig, nivel:document.getElementById('plCurso').value, curso:document.getElementById('plCurso').value, modulo:g.esTP?(window._PROF_TP[g.asig].nombre||g.asig):'', unidad:document.getElementById('plUnidad').value||'', contenido:document.getElementById('plContenido').value||'', tema:document.getElementById('plContenido').value||'', horas:document.getElementById('plHoras').value||'', ae:g.ae||g.oaChecked.join(' | '), criterios:g.criterios, valores:valores, nee:nee, oaEspecialidad:g.oaEsp, oag:g.oag, adecuaciones:adec.map(function(a){return '• '+a;}).join('\n'), oas_seleccionados:g.oaChecked, oa:g.oaChecked.join(' | ') };
  if(!g.asig){toast('Elige una asignatura o módulo.','danger');return;}
  var b=document.getElementById('btnPl');b.disabled=true;var o=b.innerHTML;b.innerHTML='<span class="material-symbols-outlined" style="font-size:18px">hourglass_top</span> Generando…';
  fetch('/api/ia-asistente',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({tipo:'planificacion',datos:datos})})
