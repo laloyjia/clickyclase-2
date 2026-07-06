@@ -194,6 +194,7 @@ ESTRUCTURA ESTRICTA DE SALIDA (respeta los títulos en MAYÚSCULAS y el orden):
 
 3. ESTRUCTURA DE LA CLASE EN TRES TIEMPOS
 Para cada momento indica el tiempo y separa EXPLÍCITAMENTE las ACCIONES DEL DOCENTE y las ACCIONES DEL ESTUDIANTE (el estudiante debe ser el protagonista activo).
+DISTRIBUCIÓN DEL TIEMPO: considera 1 hora pedagógica = 45 minutos. Reparte el tiempo total de forma realista y coherente (INICIO ≈ 15%, DESARROLLO ≈ 70%, CIERRE ≈ 15%) y verifica que INICIO + DESARROLLO + CIERRE sumen exactamente el tiempo total. Si el total supera 90 minutos, organiza el DESARROLLO en varias sesiones/bloques de máximo 90 minutos, rotulando cada bloque (Sesión 1, Sesión 2…) e incluyendo pausas activas; ningún bloque continuo debe exceder los 90 minutos.
 A) INICIO (___min) — Activación y sentido del aprendizaje.
    • Docente: pregunta desafiante o problema cognitivo que plantea; cómo explicita el objetivo y los criterios de evaluación.
    • Estudiante: cómo procesa la pregunta inicial, interacción con pares y toma de conciencia de lo esperado.
@@ -209,11 +210,12 @@ C) CIERRE (___min) — Consolidación y metacognición.
 - RECURSOS DIDÁCTICOS: materiales concretos, digitales o guías impresas estructuradas.
 
 5. PLAN DE INCLUSIÓN Y ADECUACIONES DE ACCESO (DECRETO 83)
-Diseña la respuesta a la diversidad según las NEE indicadas, SIN bajar la exigencia del objetivo, derribando las barreras de acceso:
-- AJUSTES EN LA PRESENTACIÓN DE LA INFORMACIÓN: para dificultades de procesamiento, atención o lectura (organizadores gráficos, textos segmentados, apoyos pictográficos para TEA, etc.).
-- AJUSTES EN LA FORMA DE RESPUESTA Y EXPRESIÓN: alternativas ante dificultades de escritura/expresión oral (software, opción múltiple, esquemas, etc.).
-- GESTIÓN DEL TIEMPO Y DEL ENTORNO: regular ansiedad/frustración/sobrecarga sensorial (pausas activas, anticipación de transiciones para TEA, cronómetros visuales para TDAH, etc.).
-- ACCIÓN DE CO-DOCENCIA (Profesor de aula + Educador/a Diferencial): define qué hace el/la Educador/a Diferencial en INICIO, DESARROLLO y CIERRE para apoyar el andamiaje sin segregar a los estudiantes PIE (apoyo focalizado en la estación de trabajo, mediación del error en grupos específicos, etc.).${datos.modulo ? '\n\n6. VINCULACIÓN CON EL PERFIL DE EGRESO / MUNDO LABORAL (TP): cómo la clase conecta con las competencias del perfil de egreso de la especialidad.' : ''}`,
+IMPORTANTE: aborda ÚNICAMENTE los diagnósticos NEE señalados en los datos de entrada. NO agregues diagnósticos que no fueron indicados. Si dice "Aula diversa estándar", entrega orientaciones generales de acceso.
+Crea UNA SUBSECCIÓN POR CADA diagnóstico señalado (encabezada con el nombre del diagnóstico). Para cada uno detalla, SIN bajar la exigencia del objetivo y priorizando las adecuaciones seleccionadas en los datos:
+   • Ajustes en la presentación de la información.
+   • Ajustes en la forma de respuesta y expresión.
+   • Gestión del tiempo y del entorno.
+Cierra con ACCIÓN DE CO-DOCENCIA (Profesor de aula + Educador/a Diferencial): según la "Estrategia de co-docencia" indicada, define qué hace el/la Educador/a Diferencial en INICIO, DESARROLLO y CIERRE para apoyar el andamiaje sin segregar a los estudiantes PIE. Si no hay Educador/a Diferencial en aula, indica cómo el propio profesor asume estos apoyos.${datos.modulo ? '\n\n6. VINCULACIÓN CON EL PERFIL DE EGRESO / MUNDO LABORAL (TP): cómo la clase conecta con las competencias del perfil de egreso de la especialidad.' : ''}`,
 
     guia: `${intro}Genera una GUÍA DE APRENDIZAJE completa para estudiantes chilenos:
 ${ctx}
