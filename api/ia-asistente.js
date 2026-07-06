@@ -167,36 +167,53 @@ Para expresiones matemáticas usa notación clara en texto plano con símbolos U
 
   const prompts = {
 
-    planificacion: `Actúa como especialista en diseño curricular y UTP con amplia experiencia en el sistema educativo chileno, con dominio de las Bases Curriculares Mineduc, el Decreto 67/2018 de evaluación, la Ley de Inclusión Escolar y el Diseño Universal para el Aprendizaje (DUA).
-Redacta en español técnico-pedagógico preciso, sin relleno genérico. Aplica alineamiento constructivo (Biggs): el objetivo de la clase, los indicadores y la evaluación deben ser coherentes entre sí. Usa verbos de la Taxonomía de Bloom apropiados al nivel. NO inventes códigos de OA: si no tienes certeza del código exacto, indícalo y ofrece la redacción aproximada. Prioriza metodologías activas por sobre la exposición pasiva.
-Para expresiones matemáticas usa notación Unicode legible (x², a/b, √, ×, ÷, ≤, ≥, π), una ecuación por línea, sin LaTeX.
+    planificacion: `Actúa como un asesor pedagógico de élite, experto en el Sistema de Evaluación Docente de Chile (CPEIP) y especialista en el Marco para la Buena Enseñanza. Diseña una planificación de clase de nivel DESTACADO (tramos Experto 1 o 2), con coherencia impecable entre el objetivo, las actividades y la evaluación. Usa lenguaje técnico-pedagógico chileno. NO inventes códigos de OA: si no tienes certeza del código exacto, indícalo y ofrece la redacción aproximada. Para matemática usa notación Unicode legible (x², a/b, √, ×, ÷, ≤, ≥, π), una ecuación por línea, sin LaTeX. Responde SOLO con el documento.
 
-DATOS DE ENTRADA:
+DATOS DE ENTRADA (provienen de la plataforma):
 - Asignatura: ${datos.asignatura || (datos.modulo ? 'Módulo TP' : '___')}
 - Nivel / curso: ${datos.nivel || datos.curso || '___'}
-${datos.modulo ? '- Especialidad TP / Módulo: ' + datos.modulo + '\n' : ''}${datos.oaEspecialidad ? '- OA de la especialidad: ' + datos.oaEspecialidad + '\n' : ''}${datos.oag ? '- OAG (Objetivos de Aprendizaje Genéricos): ' + datos.oag + '\n' : ''}- Unidad: ${datos.unidad || '___'}
+${datos.modulo ? '- Especialidad TP / Módulo: ' + datos.modulo + '\n' : ''}${datos.oaEspecialidad ? '- OA de la especialidad: ' + datos.oaEspecialidad + '\n' : ''}${datos.oag ? '- OAG (Objetivos de Aprendizaje Genéricos): ' + datos.oag + '\n' : ''}- Objetivo(s) de Aprendizaje del Currículum (OA / AE): ${datos.ae || datos.oa || '[identifícalo desde el currículo e indica el código]'}
+- Unidad: ${datos.unidad || '___'}
 - Contenido específico de la clase: ${datos.contenido || datos.tema || '___'}
-- Objetivo(s) de Aprendizaje / Aprendizaje Esperado: ${datos.ae || datos.oa || '[identifícalo desde el currículo e indica el código]'}
-- Duración: ${datos.horas ? datos.horas + ' hrs' : '1 clase de 90 min'}
-${datos.tipoClase ? '- Tipo de clase: ' + datos.tipoClase + ' → la metodología y las actividades del DESARROLLO deben ser coherentes con este tipo (práctica/taller o laboratorio = prioriza el hacer, la manipulación y el paso a paso; teórica = construcción conceptual; ejercitación = resolución guiada y progresiva; evaluación = aplicación del instrumento; repaso = consolidación; introductoria = exploración y activación; salida a terreno = observación y registro).\n' : ''}
-${datos.nee ? '- NEE presentes en el curso: ' + (Array.isArray(datos.nee) ? datos.nee.join(', ') : datos.nee) + '\n' : ''}${datos.criterios ? '- Criterios de evaluación seleccionados:\n' + datos.criterios + '\n' : ''}${datos.valores ? '- Valores / actitudes a promover: ' + datos.valores + '\n' : ''}${datos.adecuaciones ? '- Adecuaciones a considerar:\n' + datos.adecuaciones + '\n' : ''}
+- Tiempo total: ${datos.horas ? datos.horas + ' hrs' : '90 minutos'}
+${datos.tipoClase ? '- Tipo de clase: ' + datos.tipoClase + ' (la metodología del DESARROLLO debe ser coherente con este tipo)\n' : ''}- NEE presentes en el aula (PIE): ${datos.nee ? (Array.isArray(datos.nee) ? datos.nee.join(', ') : datos.nee) : 'Aula diversa estándar'}
+- Estrategia de co-docencia: ${datos.codocencia || 'Sin Educador/a Diferencial en aula'}
+${datos.criterios ? '- Criterios de evaluación seleccionados:\n' + datos.criterios + '\n' : ''}${datos.adecuaciones ? '- Adecuaciones de acceso seleccionadas:\n' + datos.adecuaciones + '\n' : ''}${datos.valores ? '- Valores / actitudes a promover: ' + datos.valores + '\n' : ''}
 
-ESTRUCTURA OBLIGATORIA DE SALIDA (usa estos títulos en MAYÚSCULAS y respétalos en orden):
-1. ENCABEZADO TÉCNICO — asignatura, nivel, unidad, OA/OAG con código oficial, Objetivo de Aprendizaje Transversal (OAT) asociado, habilidad(es) del siglo XXI si aplica, duración.
-2. OBJETIVO DE LA CLASE — redactado en términos observables y evaluables (verbo + contenido + condición), derivado del OA pero acotado a la sesión.
-3. INDICADORES DE EVALUACIÓN — 3 a 5 indicadores medibles y coherentes con el objetivo (lógica Decreto 67).
-4. ACTITUDES — 1 o 2 actitudes de las Bases Curriculares vinculadas al objetivo.
-5. RECURSOS Y MATERIALES — lista concreta (físicos, digitales, TICs, fichas).
-6. DESARROLLO DE LA CLASE EN 3 MOMENTOS (con tiempos estimados):
-   • INICIO — activación de conocimientos previos, motivación y comunicación del objetivo.
-   • DESARROLLO — estrategias didácticas activas, con AL MENOS UNA metodología explícita (ABP, aula invertida, trabajo colaborativo, etc.) y justificación de por qué se eligió.
-   • CIERRE — síntesis, metacognición y evaluación formativa breve.
-   En cada momento indica: acción del docente, acción del estudiante, tiempo y recurso asociado.
-7. EVALUACIÓN FORMATIVA — instrumento breve (ticket de salida, semáforo, rúbrica simple) coherente con los indicadores.
-8. DIVERSIFICACIÓN / DUA — al menos 2 ajustes concretos para atender la diversidad (NEE, ritmos distintos, estudiantes aventajados), especificando "para qué estudiante" y "qué se ajusta" (contenido, proceso o producto).
-${datos.modulo ? '9. VINCULACIÓN CON EL PERFIL DE EGRESO / MUNDO LABORAL — cómo la clase conecta con las competencias del perfil de egreso de la especialidad TP.\n' : ''}10. OBSERVACIONES PARA EL/LA DOCENTE — dificultades anticipadas y sugerencias de manejo de aula.
+ESTRUCTURA ESTRICTA DE SALIDA (respeta los títulos en MAYÚSCULAS y el orden):
 
-Entrega el documento listo para pegar en el formato institucional. No agregues comentarios fuera del documento.`,
+1. ALINEACIÓN CURRICULAR Y DESGLOSE DEL OA
+- OBJETIVO ESPECÍFICO DE LA CLASE: acotado al tiempo indicado, explicitando la HABILIDAD (de alta demanda cognitiva), el CONOCIMIENTO y la ACTITUD (OAT).
+- INDICADORES DE EVALUACIÓN (MINEDUC): 2 o 3, directamente relacionados con el objetivo.
+- CONCEPTOS CLAVE / PRECONCEPTOS: andamiaje conceptual previo que se debe activar.
+
+2. ESTRATEGIA DE DIVERSIFICACIÓN (ENFOQUE DUA)
+- Múltiples formas de PRESENTACIÓN (cómo se entrega la información).
+- Múltiples formas de ACCIÓN / EXPRESIÓN (cómo demuestran lo aprendido).
+- Múltiples formas de MOTIVACIÓN (enganche).
+
+3. ESTRUCTURA DE LA CLASE EN TRES TIEMPOS
+Para cada momento indica el tiempo y separa EXPLÍCITAMENTE las ACCIONES DEL DOCENTE y las ACCIONES DEL ESTUDIANTE (el estudiante debe ser el protagonista activo).
+A) INICIO (___min) — Activación y sentido del aprendizaje.
+   • Docente: pregunta desafiante o problema cognitivo que plantea; cómo explicita el objetivo y los criterios de evaluación.
+   • Estudiante: cómo procesa la pregunta inicial, interacción con pares y toma de conciencia de lo esperado.
+B) DESARROLLO (___min) — Alta demanda cognitiva y práctica guiada/independiente.
+   • Docente: cómo modela la habilidad (sin exposición pasiva), qué preguntas orientadoras de orden superior realiza, cómo monitorea el aula caminando por los puestos y qué retroalimentación formativa inmediata da ante los errores comunes.
+   • Estudiante: trabajo colaborativo o individual autónomo, pensamiento crítico/resolución de problemas y uso del error como oportunidad de aprendizaje.
+C) CIERRE (___min) — Consolidación y metacognición.
+   • Docente: cómo guía la síntesis (sin hacer el resumen él mismo) y gestiona la revisión del instrumento de evaluación final.
+   • Estudiante: metacognición explícita (qué aprendieron, cómo y para qué) y resolución de la evaluación de cierre.
+
+4. EVALUACIÓN FORMATIVA Y RECURSOS
+- EVIDENCIA DE APRENDIZAJE / INSTRUMENTO: herramienta formativa final (ticket de salida con 2 preguntas clave alineadas al objetivo, rúbrica exprés o escala de apreciación).
+- RECURSOS DIDÁCTICOS: materiales concretos, digitales o guías impresas estructuradas.
+
+5. PLAN DE INCLUSIÓN Y ADECUACIONES DE ACCESO (DECRETO 83)
+Diseña la respuesta a la diversidad según las NEE indicadas, SIN bajar la exigencia del objetivo, derribando las barreras de acceso:
+- AJUSTES EN LA PRESENTACIÓN DE LA INFORMACIÓN: para dificultades de procesamiento, atención o lectura (organizadores gráficos, textos segmentados, apoyos pictográficos para TEA, etc.).
+- AJUSTES EN LA FORMA DE RESPUESTA Y EXPRESIÓN: alternativas ante dificultades de escritura/expresión oral (software, opción múltiple, esquemas, etc.).
+- GESTIÓN DEL TIEMPO Y DEL ENTORNO: regular ansiedad/frustración/sobrecarga sensorial (pausas activas, anticipación de transiciones para TEA, cronómetros visuales para TDAH, etc.).
+- ACCIÓN DE CO-DOCENCIA (Profesor de aula + Educador/a Diferencial): define qué hace el/la Educador/a Diferencial en INICIO, DESARROLLO y CIERRE para apoyar el andamiaje sin segregar a los estudiantes PIE (apoyo focalizado en la estación de trabajo, mediación del error en grupos específicos, etc.).${datos.modulo ? '\n\n6. VINCULACIÓN CON EL PERFIL DE EGRESO / MUNDO LABORAL (TP): cómo la clase conecta con las competencias del perfil de egreso de la especialidad.' : ''}`,
 
     guia: `${intro}Genera una GUÍA DE APRENDIZAJE completa para estudiantes chilenos:
 ${ctx}
