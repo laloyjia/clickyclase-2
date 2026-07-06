@@ -31,11 +31,11 @@
 <body>
 <div class="topbar">
   <div><a href="acceso-demo.html" style="color:var(--muted);font-size:13px;margin-right:14px"><span class="material-symbols-outlined" style="font-size:16px;vertical-align:-3px">arrow_back</span> Roles</a><span class="brand">Click&Clase</span><span class="demo-tag">Profesor · demo</span></div>
-  <div class="usr"><span class="av">PR</span><span style="font-size:13.5px">Profesor</span><a class="salir" href="login.html">Salir</a></div>
+  <div class="usr"><span class="av" id="meAv">PR</span><span id="meName" style="font-size:13.5px">Profesor</span><a class="salir" href="login.html">Salir</a></div>
 </div>
 <div class="shell">
   <aside class="sidebar">
-    <div class="side-role"><span class="ico"><span class="material-symbols-outlined">person</span></span><div><div class="nm">Profesor</div><div class="sc">Mis cursos</div></div></div>
+    <div class="side-role"><span class="ico"><span class="material-symbols-outlined">person</span></span><div><div class="nm" id="meNm">Profesor</div><div class="sc" id="meSc">Mis cursos</div></div></div>
     <nav id="nav"></nav>
   </aside>
   <main class="main">
@@ -388,6 +388,9 @@ var EV_TIPOS=['Selección múltiple','Verdadero / Falso','Términos pareados','C
 var EV_ADEC=['Más tiempo para responder','Reducir la cantidad de preguntas','Reducir el número de alternativas (a 3)','Resaltar / ennegrecer los datos esenciales del enunciado','Simplificar el lenguaje y las instrucciones','Una sola instrucción por ítem','Más espacio para responder y letra ampliada','Incluir apoyos visuales o ejemplos','Permitir lectura en voz alta del enunciado','Permitir material de apoyo (calculadora, tabla, formulario)','Fraccionar la evaluación en secciones','Considerar evaluación oral complementaria'];
 function evInit(){
  _pfFillSel('evAsig','evCurso');
+ var caps=(window._PROF_U&&window._PROF_U.capacidades),hasCaps=!!caps; caps=caps||{};
+ var fSel=document.getElementById('evFormato'); if(fSel){var fo='<option value="estandar">Estándar Mineduc</option>';if(!hasCaps||caps.paes)fo+='<option value="paes">PAES</option>';if(!hasCaps||caps.simce)fo+='<option value="simce">SIMCE</option>';var cf=fSel.value;fSel.innerHTML=fo;if(cf&&fSel.querySelector('option[value="'+cf+'"]'))fSel.value=cf;evOnFormato();}
+ var tSel=document.getElementById('evTax'); if(tSel){var to='<option value="bloom">Bloom</option>';if(!hasCaps||caps.marzano)to+='<option value="marzano">Marzano</option>';tSel.innerHTML=to;}
  var t=document.getElementById('evTipos'); if(t&&!t.innerHTML.trim())t.innerHTML='<div style="display:flex;gap:8px;padding:2px 6px;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px"><span style="flex:1">Tipo de ítem</span><span style="width:58px;text-align:center">Cant.</span><span style="width:58px;text-align:center">Pts c/u</span></div>'+EV_TIPOS.map(function(x,i){return '<div style="display:flex;align-items:center;gap:8px;padding:3px 6px"><label style="flex:1;display:flex;align-items:center;gap:8px;font-size:13.5px;cursor:pointer"><input type="checkbox" class="evT" data-tipo="'+x+'"'+(i===0?' checked':'')+'> '+x+'</label><input type="number" min="0" class="evTc" placeholder="'+(i===0?'10':'0')+'" style="width:58px;font-size:12.5px;color:var(--text);background:var(--bg);border:1px solid var(--border-2);border-radius:6px;padding:5px 6px"><input type="number" min="0" class="evTp" placeholder="pts" style="width:58px;font-size:12.5px;color:var(--text);background:var(--bg);border:1px solid var(--border-2);border-radius:6px;padding:5px 6px"></div>';}).join('');
  var n=document.getElementById('evNEE'); if(n&&!n.innerHTML.trim())n.innerHTML=PL_NEE.map(function(x){return '<label><input type="checkbox" value="'+x.k+'" onchange="evAdecSug()"> '+x.n+'</label>';}).join('');
  var a=document.getElementById('evAdec'); if(a&&!a.innerHTML.trim())a.innerHTML=EV_ADEC.map(function(x){return '<label><input type="checkbox" value="'+x+'"> '+x+'</label>';}).join('');
@@ -468,7 +471,9 @@ function cargarAsignaturas(u){
  Promise.all([ccStore.getConfig('academico'),ccStore.getConfig('asignaciones')]).then(function(res){var acad=res[0]||{},asign=res[1]||{};var allA=acad.asignaturas||[],allN=acad.niveles||[];var email='';try{if(window.EL_AUTH&&EL_AUTH.currentUser)email=(EL_AUTH.currentUser.email||'');}catch(e){}var misA=allA,misN=allN;if(asign.rows&&email){for(var i=0;i<asign.rows.length;i++){var r=asign.rows[i];if((r[0]||'').toLowerCase().trim()===email.toLowerCase().trim()){var a=(r[1]||'').split(',').map(function(s){return s.trim()}).filter(Boolean);var n=(r[2]||'').split(',').map(function(s){return s.trim()}).filter(Boolean);if(a.length)misA=a;if(n.length)misN=n;break;}}}
    if(!misA.length){ _cargarCurriculoLibre(); return; }   // colegio sin académico cargado: usar currículo nacional
    window._ASIG_META=acad.asignaturasMeta||[];fillSelect('matAsig',misA);fillSelect('matNivel',misN);_profTP();actualizarOAs();}).catch(function(){});}
-if(typeof ELAuth!=='undefined'&&ELAuth.onUserReady){ELAuth.onUserReady(function(u){cargarAsignaturas(u);});}else{cargarAsignaturas(null);}
+function _setProfName(u){ if(!u)return; var nom=u.nombre||(u.email?u.email.split('@')[0]:'')||'Profesor'; var ini=(nom.replace(/[^A-Za-zÁÉÍÓÚÑ ]/g,'').trim().split(/\s+/).map(function(w){return w[0];}).join('').slice(0,2)||'PR').toUpperCase(); var set=function(id,v){var e=document.getElementById(id);if(e)e.textContent=v;}; set('meName',nom); set('meAv',ini); set('meNm',nom); set('meSc', u.tipo==='independiente'?'Profesor particular':(u.especialidad?('Especialidad '+u.especialidad):'Mis cursos')); }
+function _profPermisos(u){ if(!u||!u.permisos)return; function hide(sec){var it=document.querySelector('.nav-item[data-s="'+sec+'"]');if(it)it.style.display='none';var s=document.getElementById('sec-'+sec);if(s)s.classList.remove('active');} if(u.permisos.planificar===false)hide('planificaciones'); if(u.permisos.material===false){hide('material');hide('evaluaciones');} }
+if(typeof ELAuth!=='undefined'&&ELAuth.onUserReady){ELAuth.onUserReady(function(u){window._PROF_U=u;_setProfName(u);_profPermisos(u);cargarAsignaturas(u);});}else{cargarAsignaturas(null);}
 
 // ── Currículum oficial: OAs y unidades por asignatura+nivel ──
 window._NIV2CODE=null;window._OAS_ACTUAL=[];
