@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reportes UTP — Click&Clase</title>
+<link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg">
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="js/firebase-rest.js"></script>
+<script src="js/firebase-config.js"></script>
+<script src="js/firebase-auth.js"></script>
+<script src="js/firebase-db.js"></script>
+<script src="js/roles-permissions.js"></script>
+<script src="js/roles-router.js"></script>
+<script src="js/cursos.js"></script>
+<script src="js/libro-clases.js"></script>
+<script src="js/notas.js"></script>
+<style>
+:root { --bg: #0b0d1e; --panel: #12162f; --border: rgba(148,163,184,.15); --text: #e5e7eb; --muted: #94a3b8; --cyan: #22d3ee; --violet: #7c3aed; }
+* { box-sizing: border-box; }
+body { margin: 0; font-family: 'Segoe UI', Roboto, Arial, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+.header { padding: 18px 28px; border-bottom: 1px solid var(--border); background: linear-gradient(135deg, rgba(124,58,237,.08), rgba(34,211,238,.06)); display: flex; justify-content: space-between; align-items: center; }
+.header h1 { margin: 0; font-size: 1.35rem; font-weight: 700; }
+.breadcrumb { color: var(--muted); font-size: .82rem; }
+.container { max-width: 1300px; margin: 24px auto; padding: 0 24px; }
+.card { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 18px 22px; margin-bottom: 16px; }
+.filtros { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
+.fld label { display: block; font-size: .72rem; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 4px; }
+input, select { width: 100%; padding: 8px 10px; border-radius: 7px; background: rgba(255,255,255,.04); border: 1px solid rgba(148,163,184,.2); color: var(--text); font-size: .85rem; }
+.btn { padding: 8px 14px; border-radius: 7px; border: 1px solid var(--border); background: rgba(255,255,255,.04); color: var(--text); cursor: pointer; font-size: .82rem; font-weight: 600; text-decoration: none; display: inline-block; }
+.btn.primary { background: linear-gradient(135deg, #7c3aed, #22d3ee); color: #fff; border-color: transparent; }
+.btn:hover { background: rgba(255,255,255,.08); }
+
+.stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 16px 0; }
+.stat { padding: 12px 14px; border-radius: 10px; background: rgba(255,255,255,.02); border: 1px solid var(--border); }
+.stat .v { font-size: 1.7rem; font-weight: 800; }
+.stat .l { font-size: .68rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
+
+table { width: 100%; border-collapse: collapse; font-size: .84rem; }
+th, td { padding: 8px 10px; border-bottom: 1px solid var(--border); text-align: left; }
+th { font-size: .7rem; text-transform: uppercase; letter-spacing: .8px; color: var(--muted); font-weight: 700; background: rgba(255,255,255,.03); }
+.badge-warn { color: #fbbf24; font-weight: 700; }
+.badge-crit { color: #fca5a5; font-weight: 700; }
+.badge-ok   { color: #86efac; font-weight: 700; }
+
+.empty { padding: 40px; text-align: center; color: var(--muted); }
+h2.sec-title { font-size: 1rem; margin: 20px 0 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+
+@media print {
+  body { background: white; color: black; }
+  .header, .no-print { display: none !important; }
+  .card { background: white; border: 1px solid #ccc; }
+  h2.sec-title { color: #333; border-color: #ccc; }
+  table th { color: #333; background: #f2f2f2; }
+}
+</style>
+</head>
+<body>
+
+<div class="header no-print">
+  <div><div class="breadcrumb">UTP · Reportes</div><h1>📊 Reportes Mensuales</h1></div>
+  <div style="display:flex;gap:8px">
+    <a href="panel-utp.html" class="btn">← Panel</a>
+    <button class="btn primary" onclick="window.print()">📄 Descargar PDF</button>
+  </div>
+</div>
+
+<div class="container">
+
+  <div class="card no-print">
+    <div class="filtros">
+      <div class="fld"><label>Curso</label><select id="fCurso"><option value="">Todos</option></select></div>
+      <div class="fld"><label>Mes</label><input type="month" id="fMes"></div>
+      <div class="fld"><label>Semestre</label><select id="fSem"><option value="1">1°</option><option value="2">2°</option></select></div>
+      <div class="fld"><label>&nbsp;</label><button class="btn primary" onclick="generar()" style="width:100%">Generar reporte</button></div>
+    </div>
+  </div>
+
+  <div id="reporte"></div>
+
+</div>
+
+<script>
+if (window.CCRouter && window.CCRouter.guardPanel) {
+  CCRouter.guardPanel(['utp','encargado_area','director','rector','admin_colegio','admin']);
+}
+
+var _cursos = [];
+
+function esc(s) { return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function iniciar() {
+  var hoy = new Date();
+  document.getElementById('fMes').value = hoy.toISOString().slice(0,7);
+  document.getElementById('fSem').value = hoy.getMonth()+1 <= 6 ? '1' : '2';
+  var u = ELAuth.user;
+  var liceo = u.liceoSlug || u.liceoPrincipal || '';
+  CCCursos.listarCursos({ liceoSlug: liceo }).then(function(cs) {
+    _cursos = cs || [];
+    var sel = document.getElementById('fCurso');
+    sel.innerHTML = '<option value="">Todos</option>' +
+      _cursos.map(function(c){ return '<option value="' + esc(c.cursoId) + '">' + esc(c.nombreCompleto) + '</option>'; }).join('');
+  });
+}
+
+function generar() {
+  var cursoIdSel = document.getElementById('fCurso').value;
+  var mes = document.getElementById('fMes').value;
+  var sem = parseInt(document.getElementById('fSem').value, 10);
+  if (!mes) { alert('Elegí un mes'); return; }
+  var cursos = cursoIdSel ? _cursos.filter(function(c){ return c.cursoId === cursoIdSel; }) : _cursos;
+  if (cursos.length === 0) {
+    document.getElementById('reporte').innerHTML = '<div class="card empty">Sin cursos que reportar</div>';
+    return;
+  }
+  var desde = mes + '-01';
+  var d = new Date(mes + '-01'); d.setMonth(d.getMonth()+1); d.setDate(0);
+  var hasta = d.toISOString().slice(0,10);
+
+  var promesas = cursos.map(function(c) {
+    return Promise.all([
+      CCLibroClases.estadisticasCurso({ cursoId: c.cursoId, desde: desde, hasta: hasta }),
+      CCNotas.reporteRiesgo(c.cursoId, sem)
+    ]).then(function(arr) {
+      return { curso: c, asistencia: arr[0], riesgo: arr[1] };
+    });
+  });
+
+  Promise.all(promesas).then(function(datos) {
+    renderReporte(datos, mes, sem, desde, hasta);
+  });
+}
+
+function renderReporte(datos, mes, sem, desde, hasta) {
+  var user = ELAuth.user;
+  var liceo = user.liceoSlug || user.liceoPrincipal || '';
+  var fecha = new Date().toLocaleDateString('es-CL', { day:'2-digit', month:'long', year:'numeric' });
+  var mesNombre = new Date(mes + '-01').toLocaleDateString('es-CL', { month: 'long', year: 'numeric' });
+
+  var totClases = 0, totPres = 0, totAus = 0, totRiesgo = 0;
+  datos.forEach(function(d) {
+    totClases += d.asistencia.totalDias || 0;
+    totPres   += d.asistencia.totales.P || 0;
+    totAus    += d.asistencia.totales.A || 0;
+    totRiesgo += d.riesgo.length || 0;
+  });
+  var pctAsist = (totPres + totAus) > 0 ? Math.round((totPres / (totPres + totAus)) * 100) : 0;
+
+  var html = '<div class="card">' +
+    '<div style="text-align:center;margin-bottom:20px">' +
+      '<div style="font-size:1.5rem;font-weight:800">Reporte Mensual UTP</div>' +
+      '<div style="color:var(--muted);font-size:.9rem;margin-top:4px">' + esc(liceo) + ' · ' + esc(mesNombre) + ' · ' + sem + '° semestre</div>' +
+      '<div style="color:var(--muted);font-size:.75rem;margin-top:2px">Generado el ' + esc(fecha) + '</div>' +
+    '</div>' +
+    '<div class="stats-row">' +
+      '<div class="stat"><div class="v">' + datos.length + '</div><div class="l">Cursos</div></div>' +
+      '<div class="stat"><div class="v">' + totClases + '</div><div class="l">Clases del mes</div></div>' +
+      '<div class="stat"><div class="v" style="color:#86efac">' + pctAsist + '%</div><div class="l">Asistencia global</div></div>' +
+      '<div class="stat"><div class="v" style="color:#fca5a5">' + totRiesgo + '</div><div class="l">Alertas de riesgo</div></div>' +
+    '</div>' +
+  '</div>';
+
+  // Detalle por curso
+  datos.forEach(function(d) {
+    var totalRegClase = d.asistencia.totalDias;
+    var pctAsistCurso = (d.asistencia.totales.P + d.asistencia.totales.A) > 0
+      ? Math.round((d.asistencia.totales.P / (d.asistencia.totales.P + d.asistencia.totales.A)) * 100)
+      : 0;
+    html += '<div class="card" style="page-break-inside:avoid">';
+    html += '<h2 class="sec-title">' + esc(d.curso.nombreCompleto) + '</h2>';
+    html += '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px">' +
+      '<div><strong>Clases:</strong> ' + totalRegClase + '</div>' +
+      '<div><strong>Presentes:</strong> ' + d.asistencia.totales.P + '</div>' +
+      '<div><strong>Ausentes:</strong> ' + d.asistencia.totales.A + '</div>' +
+      '<div><strong>% Asistencia:</strong> ' + pctAsistCurso + '%</div>' +
+    '</div>';
+
+    // Alertas de asistencia
+    var bajaAsist = (d.asistencia.porEstudiante || []).filter(function(e){ return e.porcentajeAsistencia < 85 && e.totalDias > 0; });
+    if (bajaAsist.length > 0) {
+      html += '<h3 style="font-size:.85rem;color:#fbbf24;margin:14px 0 6px">⚠ Baja asistencia (<85%)</h3>';
+      html += '<table><thead><tr><th>N°</th><th>Estudiante</th><th>Presentes</th><th>Ausentes</th><th>% Asistencia</th></tr></thead><tbody>';
+      bajaAsist.forEach(function(e) {
+        var cls = e.porcentajeAsistencia < 70 ? 'badge-crit' : 'badge-warn';
+        html += '<tr><td>' + e.ordinal + '</td><td>' + esc(e.nombreCompleto) + '</td>' +
+                '<td>' + e.P + '</td><td>' + e.A + '</td>' +
+                '<td class="' + cls + '">' + e.porcentajeAsistencia + '%</td></tr>';
+      });
+      html += '</tbody></table>';
+    }
+
+    // Riesgo académico
+    if (d.riesgo.length > 0) {
+      html += '<h3 style="font-size:.85rem;color:#fca5a5;margin:14px 0 6px">🚨 Riesgo académico</h3>';
+      html += '<table><thead><tr><th>N°</th><th>Estudiante</th><th>Asignatura</th><th>Promedio</th><th>Estado</th></tr></thead><tbody>';
+      d.riesgo.forEach(function(r) {
+        var cls = r.aprobado ? 'badge-warn' : 'badge-crit';
+        var lbl = r.aprobado ? 'Al límite' : 'REPROBADO';
+        html += '<tr><td>' + r.ordinal + '</td><td>' + esc(r.nombre) + '</td>' +
+                '<td>' + esc(r.asignatura) + '</td>' +
+                '<td>' + r.promedio.toFixed(1) + '</td>' +
+                '<td class="' + cls + '">' + lbl + '</td></tr>';
+      });
+      html += '</tbody></table>';
+    }
+
+    if (bajaAsist.length === 0 && d.riesgo.length === 0) {
+      html += '<p style="color:var(--muted);font-style:italic;font-size:.85rem">✓ Sin alertas en este período</p>';
+    }
+    html += '</div>';
+  });
+
+  document.getElementById('reporte').innerHTML = html;
+}
+
+if (window.ELAuth && ELAuth.onUserReady) {
+  ELAuth.onUserReady(function(u){ if(u) iniciar(); });
+}
+</script>
+</body>
+</html>
