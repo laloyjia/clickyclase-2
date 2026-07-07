@@ -625,6 +625,9 @@ var ELDB = (function() {
     'asignar_asignatura':          'Asign\u00f3 asignatura a docente',
     // \u2500\u2500 Libro de clases (Fase 2.2) \u2500\u2500
     'firmar_clase':                'Firm\u00f3 registro de clase',
+    // \u2500\u2500 Notas (Fase 2.3) \u2500\u2500
+    'registrar_nota':              'Registr\u00f3 nota',
+    'eliminar_nota':               'Elimin\u00f3 nota',
     'guardar_nomina':              'Guard\u00f3 n\u00f3mina de curso',
     'guardar_notas':               'Guard\u00f3 libro de notas',
     'guardar_asistencia':          'Guard\u00f3 asistencia',

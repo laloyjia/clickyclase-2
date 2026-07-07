@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Notas y Calificaciones — Click&Clase</title>
+<link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg">
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="js/firebase-rest.js"></script>
+<script src="js/firebase-config.js"></script>
+<script src="js/firebase-auth.js"></script>
+<script src="js/firebase-db.js"></script>
+<script src="js/roles-permissions.js"></script>
+<script src="js/roles-router.js"></script>
+<script src="js/cursos.js"></script>
+<script src="js/notas.js"></script>
+<style>
+:root { --bg: #0b0d1e; --panel: #12162f; --border: rgba(148,163,184,.15); --text: #e5e7eb; --muted: #94a3b8; --cyan: #22d3ee; --violet: #7c3aed; --danger: #ef4444; }
+* { box-sizing: border-box; }
+body { margin: 0; font-family: 'Segoe UI', Roboto, Arial, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+.header { padding: 18px 28px; border-bottom: 1px solid var(--border); background: linear-gradient(135deg, rgba(124,58,237,.08), rgba(34,211,238,.06)); display: flex; justify-content: space-between; align-items: center; }
+.header h1 { margin: 0; font-size: 1.35rem; font-weight: 700; }
+.breadcrumb { color: var(--muted); font-size: .82rem; }
+.container { max-width: 1500px; margin: 24px auto; padding: 0 24px; }
+.card { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 16px 20px; margin-bottom: 16px; }
+.filtros { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
+.fld label { display: block; font-size: .72rem; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 4px; }
+input, select, textarea { width: 100%; padding: 8px 10px; border-radius: 7px; background: rgba(255,255,255,.04); border: 1px solid rgba(148,163,184,.2); color: var(--text); font-size: .85rem; font-family: inherit; }
+.btn { padding: 8px 14px; border-radius: 7px; border: 1px solid var(--border); background: rgba(255,255,255,.04); color: var(--text); cursor: pointer; font-size: .82rem; font-weight: 600; text-decoration: none; display: inline-block; }
+.btn.primary { background: linear-gradient(135deg, #7c3aed, #22d3ee); color: #fff; border-color: transparent; }
+.btn:hover { background: rgba(255,255,255,.08); }
+
+.tabla-notas { width: 100%; border-collapse: collapse; font-size: .82rem; }
+.tabla-notas th, .tabla-notas td { padding: 8px 10px; border: 1px solid var(--border); text-align: center; }
+.tabla-notas th.h-est { text-align: left; }
+.tabla-notas td.n-est { text-align: left; font-weight: 600; }
+.tabla-notas th { background: rgba(255,255,255,.04); font-size: .72rem; text-transform: uppercase; letter-spacing: .5px; color: var(--muted); font-weight: 700; }
+.tabla-notas .concepto { writing-mode: vertical-lr; transform: rotate(180deg); height: 100px; font-size: .68rem; }
+.tabla-notas td.nota { min-width: 55px; cursor: pointer; }
+.tabla-notas td.nota:hover { background: rgba(124,58,237,.08); }
+.tabla-notas td.nota input { width: 45px; padding: 3px 5px; text-align: center; font-weight: 700; border: 1px solid transparent; background: transparent; color: inherit; }
+.tabla-notas td.nota input:focus { border-color: var(--violet); background: rgba(255,255,255,.05); }
+.nota-alta { color: #86efac; }
+.nota-media { color: #fbbf24; }
+.nota-baja { color: #fca5a5; }
+.tabla-notas td.promedio { font-weight: 800; background: rgba(255,255,255,.03); }
+.empty { padding: 60px; text-align: center; color: var(--muted); }
+
+.modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,.7); backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 30px; }
+.modal-bg.abierto { display: flex; }
+.modal { background: var(--panel); border: 1px solid var(--border); border-radius: 14px; width: 100%; max-width: 500px; }
+.modal-head { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+.modal-body { padding: 18px 20px; }
+.modal-foot { padding: 14px 20px; border-top: 1px solid var(--border); display: flex; gap: 8px; justify-content: flex-end; }
+.close-x { background: none; border: none; color: var(--muted); font-size: 1.5rem; cursor: pointer; }
+</style>
+</head>
+<body>
+<div class="header">
+  <div><div class="breadcrumb">Docente</div><h1>📊 Notas y Calificaciones</h1></div>
+  <div><a href="panel-profesor.html" class="btn">← Panel</a></div>
+</div>
+
+<div class="container">
+  <div class="card">
+    <div class="filtros">
+      <div class="fld"><label>Curso</label><select id="fCurso" onchange="onCambioCurso()"><option value="">— Elegir —</option></select></div>
+      <div class="fld"><label>Asignatura</label><select id="fAsig" onchange="cargar()"><option value="">— Elegir curso primero —</option></select></div>
+      <div class="fld"><label>Semestre</label><select id="fSem" onchange="cargar()"><option value="1">1° Semestre</option><option value="2">2° Semestre</option></select></div>
+      <div class="fld"><label>&nbsp;</label>
+        <button class="btn primary" onclick="abrirModalConcepto()">➕ Nueva evaluación</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div id="wrapTabla"><div class="empty">Elegí curso, asignatura y semestre para ver las notas</div></div>
+  </div>
+</div>
+
+<!-- Modal nueva evaluación -->
+<div class="modal-bg" id="mConcepto">
+  <div class="modal">
+    <div class="modal-head"><h3 style="margin:0;font-size:1.1rem">➕ Nueva evaluación</h3><button class="close-x" onclick="cerrar('mConcepto')">×</button></div>
+    <div class="modal-body">
+      <div class="fld"><label>Nombre / Concepto</label><input id="cConcepto" placeholder="Prueba unidad 1"></div>
+      <div style="display:flex;gap:10px">
+        <div class="fld" style="flex:1"><label>Tipo</label><select id="cTipo"><option value="coef1">Coef 1</option><option value="coef2">Coef 2</option><option value="semestral">Nota semestral</option></select></div>
+        <div class="fld" style="flex:1"><label>Ponderación (%)</label><input id="cPond" type="number" value="20" min="1" max="100"></div>
+      </div>
+      <div class="fld"><label>Fecha</label><input id="cFecha" type="date"></div>
+      <p style="color:var(--muted);font-size:.78rem;margin:8px 0 0">Se creará una columna en la tabla. Después cargá las notas de cada estudiante haciendo click en su celda.</p>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" onclick="cerrar('mConcepto')">Cancelar</button>
+      <button class="btn primary" onclick="onCrearConcepto()">Crear columna</button>
+    </div>
+  </div>
+</div>
+
+<script>
+if (window.CCRouter && window.CCRouter.guardPanel) {
+  CCRouter.guardPanel(['profesor','jefe_curso','utp','encargado_area']);
+}
+
+var _cursos = [];
+var _cursoSel = null;
+var _tabla = null;
+var _pendientes = [];   // conceptos creados sin notas cargadas (in-memory)
+
+function esc(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function hoyISO() { var d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+
+function iniciar() {
+  document.getElementById('fSem').value = new Date().getMonth()+1 <= 6 ? '1' : '2';
+  document.getElementById('cFecha').value = hoyISO();
+  CCCursos.misCursos().then(function(cursos) {
+    _cursos = cursos;
+    var sel = document.getElementById('fCurso');
+    sel.innerHTML = '<option value="">— Elegir —</option>' +
+      _cursos.map(function(c) {
+        return '<option value="' + esc(c.cursoId) + '">' + esc(c.nombreCompleto) + '</option>';
+      }).join('');
+  });
+}
+
+function onCambioCurso() {
+  var cursoId = document.getElementById('fCurso').value;
+  _cursoSel = _cursos.find(function(c){ return c.cursoId === cursoId; });
+  var selA = document.getElementById('fAsig');
+  if (!_cursoSel) {
+    selA.innerHTML = '<option value="">— Elegir curso primero —</option>';
+    document.getElementById('wrapTabla').innerHTML = '<div class="empty">Elegí curso, asignatura y semestre</div>';
+    return;
+  }
+  var uid = ELAuth.user ? ELAuth.user.uid : '';
+  var misAsigs = (_cursoSel.asignaturasAsignadas || []).filter(function(a) {
+    return a.docenteUid === uid || _cursoSel.jefeUid === uid;
+  });
+  if (misAsigs.length === 0 && _cursoSel.jefeUid === uid) misAsigs = _cursoSel.asignaturasAsignadas || [];
+  selA.innerHTML = '<option value="">— Elegir —</option>' +
+    misAsigs.map(function(a) { return '<option value="' + esc(a.asignatura) + '">' + esc(a.asignatura) + '</option>'; }).join('');
+}
+
+function cargar() {
+  var cursoId = document.getElementById('fCurso').value;
+  var asig = document.getElementById('fAsig').value;
+  var sem = parseInt(document.getElementById('fSem').value, 10);
+  if (!cursoId || !asig) return;
+  CCNotas.tablaCalificaciones({ cursoId: cursoId, asignatura: asig, semestre: sem })
+    .then(function(t) {
+      _tabla = t;
+      renderTabla();
+    })
+    .catch(function(err) {
+      document.getElementById('wrapTabla').innerHTML =
+        '<div class="empty" style="color:#fca5a5">Error: ' + esc(err.message) + '</div>';
+    });
+}
+
+function renderTabla() {
+  if (!_tabla) return;
+  var wrap = document.getElementById('wrapTabla');
+  var conceptos = _tabla.conceptos.concat(_pendientes);
+  if (conceptos.length === 0) {
+    wrap.innerHTML = '<div class="empty">Sin evaluaciones cargadas todavía. Click en <strong>➕ Nueva evaluación</strong> para agregar la primera.</div>';
+    return;
+  }
+  var thConceptos = conceptos.map(function(c) {
+    return '<th><div class="concepto">' + esc(c.concepto) + ' (' + c.ponderacion + '%)</div></th>';
+  }).join('');
+  var filas = _tabla.filas.map(function(fila) {
+    var celdas = conceptos.map(function(c, i) {
+      var n = fila.notas && fila.notas[i];
+      var valor = n ? (n.nota).toFixed(1) : '';
+      var claseColor = '';
+      if (n) claseColor = n.nota >= 5.5 ? ' nota-alta' : n.nota >= 4.0 ? ' nota-media' : ' nota-baja';
+      return '<td class="nota"><input type="number" step="0.1" min="1" max="7" value="' + valor + '" ' +
+             'onblur="guardarNota(' + fila.ordinal + ',\'' + esc(c.concepto) + '\',' + c.ponderacion + ', this.value, this)" ' +
+             'class="' + claseColor + '"></td>';
+    }).join('');
+    var promColor = fila.promedio >= 5.5 ? 'nota-alta' : fila.promedio >= 4.0 ? 'nota-media' : 'nota-baja';
+    return '<tr>' +
+      '<td>' + fila.ordinal + '</td>' +
+      '<td class="n-est">' + esc(fila.nombreCompleto) + '</td>' +
+      celdas +
+      '<td class="promedio ' + promColor + '">' + (fila.promedio > 0 ? fila.promedio.toFixed(1) : '—') + '</td>' +
+    '</tr>';
+  }).join('');
+  wrap.innerHTML =
+    '<div style="margin-bottom:12px;color:var(--muted);font-size:.85rem">' +
+      esc(_tabla.curso.nombreCompleto) + ' · ' + esc(_tabla.asignatura) + ' · ' + _tabla.semestre + '° Semestre' +
+    '</div>' +
+    '<div style="overflow-x:auto"><table class="tabla-notas">' +
+    '<thead><tr><th style="width:40px">N°</th><th class="h-est">Estudiante</th>' + thConceptos + '<th>Promedio</th></tr></thead>' +
+    '<tbody>' + filas + '</tbody>' +
+    '</table></div>';
+}
+
+function guardarNota(ordinal, concepto, ponderacion, valor, inputEl) {
+  var v = parseFloat(valor);
+  if (!valor || isNaN(v)) return;
+  if (v < 1 || v > 7) { alert('La nota debe estar entre 1.0 y 7.0'); inputEl.focus(); return; }
+  var cursoId = document.getElementById('fCurso').value;
+  var asig = document.getElementById('fAsig').value;
+  var sem = parseInt(document.getElementById('fSem').value, 10);
+  var estudiante = (_cursoSel.estudiantes || []).find(function(e){ return e.ordinal === ordinal; });
+  if (!estudiante) return;
+  var nombreCompleto = ((estudiante.apellidoP||'') + ' ' + (estudiante.apellidoM||'') + ', ' + (estudiante.nombre||'')).trim();
+  // Buscar si ya existe una nota (para actualizarla)
+  var existente = null;
+  (_tabla.filas.find(function(f){ return f.ordinal === ordinal; }) || {}).notas.forEach(function(n) {
+    if (n && n.concepto === concepto) existente = n;
+  });
+  var op;
+  if (existente) {
+    op = CCNotas.actualizarNota(existente.notaId, { nota: v });
+  } else {
+    op = CCNotas.registrarNota({
+      cursoId: cursoId, asignatura: asig, semestre: sem, concepto: concepto,
+      ponderacion: ponderacion, nota: v,
+      estudianteOrdinal: ordinal, estudianteNombre: nombreCompleto,
+      liceoSlug: _cursoSel.liceoSlug
+    });
+  }
+  op.then(function() { cargar(); }).catch(function(err) {
+    alert('Error: ' + err.message);
+    inputEl.focus();
+  });
+}
+
+function abrirModalConcepto() {
+  if (!document.getElementById('fCurso').value || !document.getElementById('fAsig').value) {
+    alert('Elegí curso y asignatura primero');
+    return;
+  }
+  document.getElementById('cConcepto').value = '';
+  document.getElementById('cPond').value = '20';
+  document.getElementById('cTipo').value = 'coef1';
+  document.getElementById('cFecha').value = hoyISO();
+  document.getElementById('mConcepto').classList.add('abierto');
+}
+
+function cerrar(id) { document.getElementById(id).classList.remove('abierto'); }
+
+function onCrearConcepto() {
+  var concepto = document.getElementById('cConcepto').value.trim();
+  var pond = parseInt(document.getElementById('cPond').value, 10);
+  var fecha = document.getElementById('cFecha').value;
+  var tipo = document.getElementById('cTipo').value;
+  if (!concepto) { alert('El nombre es obligatorio'); return; }
+  // Solo agregamos a memoria: la columna aparece pero se persiste cuando se
+  // carga la primera nota (en guardarNota).
+  _pendientes.push({ concepto: concepto, ponderacion: pond, fecha: fecha, tipo: tipo });
+  cerrar('mConcepto');
+  renderTabla();
+}
+
+if (window.ELAuth && ELAuth.onUserReady) {
+  ELAuth.onUserReady(function(u){ if(u) iniciar(); });
+}
+</script>
+</body>
+</html>

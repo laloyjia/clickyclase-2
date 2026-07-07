@@ -289,6 +289,29 @@ service cloud.firestore {
         (isProfesor() && resource.data.profesorUid == request.auth.uid);
     }
 
+    // ── notas/{notaId} — Fase 2.3 (nueva) ──────────────────────
+    // Cada documento es una nota individual (estudiante + asignatura + concepto).
+    //   Lectura:  docente que la registró, docentes del mismo liceo con
+    //             asignatura en el curso, directivos/UTP del liceo, admin.
+    //   Escritura: solo el docente que la registró, o admin.
+    //   El jefe de curso ve todas las notas de su curso (para promedio).
+    match /notas/{notaId} {
+      allow read: if isAdmin() ||
+        (isSignedIn() && mismoLiceo() && (
+          resource.data.docenteUid == request.auth.uid ||
+          isDirectivo() ||
+          _hasAnyRole(['profesor','jefe_curso','encargado_area','pie_edu','pie_enc'])
+        ));
+      allow create: if isSignedIn() && mismoLiceoNuevo() &&
+        request.resource.data.docenteUid == request.auth.uid;
+      allow update: if isAdmin() ||
+        (isSignedIn() && mismoLiceo() &&
+         resource.data.docenteUid == request.auth.uid);
+      allow delete: if isAdmin() ||
+        (isSignedIn() && mismoLiceo() &&
+         resource.data.docenteUid == request.auth.uid);
+    }
+
     // ── notas_curso (libro de calificaciones por curso) ────────
     // Mismo criterio que listas_curso: dueño (profesorUid) o admin.
     match /notas_curso/{notasId} {
