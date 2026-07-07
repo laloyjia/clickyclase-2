@@ -93,6 +93,37 @@ service cloud.firestore {
       return ('liceoSlug' in request.resource.data) &&
              request.resource.data.liceoSlug == _userLiceo();
     }
+    // ── Autor del documento (retro-compatible) ─────────────────
+    // Sistema legacy: campo `uid` (autor). Sistema nuevo: `autorUid`.
+    // Aceptamos ambos para no romper docs viejos.
+    function esAutor() {
+      return isSignedIn() && (
+        (('uid' in resource.data) && resource.data.uid == request.auth.uid) ||
+        (('autorUid' in resource.data) && resource.data.autorUid == request.auth.uid)
+      );
+    }
+    // ── Campos que un revisor puede modificar durante aprobación ──
+    // El autor puede modificar todo el contenido; el revisor solo estos:
+    function _cambioSoloRevision() {
+      return request.resource.data.diff(resource.data).affectedKeys()
+        .hasOnly([
+          'estado','estadoFecha',
+          'revisorUid','revisorEmail','revisorNombre',
+          'aprobadoEn','devueltoEn','reenviadoEn',
+          'ultimasObservaciones','historial'
+        ]);
+    }
+    // ── Autor puede cambiar de estado solo en transiciones válidas ──
+    //   borrador -> enviada (envío)
+    //   devuelta -> borrador (retomar)
+    //   devuelta -> enviada  (reenvío directo sin retomar; opcional)
+    function _transicionAutorValida() {
+      return !('estado' in request.resource.data) ||
+             (resource.data.estado == 'borrador' && request.resource.data.estado in ['borrador','enviada']) ||
+             (resource.data.estado == 'devuelta' && request.resource.data.estado in ['borrador','enviada']) ||
+             (resource.data.estado == 'enviada' && request.resource.data.estado == 'enviada') ||
+             (!('estado' in resource.data)); // doc legacy sin estado
+    }
     // Verifica que el doc nuevo/actualizado tenga el uid del autor autenticado
     function authorUidMatches() {
       return isSignedIn() &&
@@ -133,36 +164,61 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
-    // ── materiales (biblioteca compartida) ─────────────────────
-    // Lectura: cualquier autenticado (los estudiantes ven materiales).
-    // Escritura: solo profe/admin, y solo sobre sus propios docs.
+    // ── materiales (biblioteca compartida + flujo aprobación) ──
+    // Lectura: cualquier autenticado (estudiantes ven aprobadas; el
+    // autor y revisores ven en cualquier estado).
+    // Escritura: autor cuando estado ∈ {borrador, devuelta}; revisor
+    // (utp/encargado/director/rector del mismo liceo) puede cambiar
+    // solo campos de flujo cuando estado ∈ {enviada, en_revision}.
     match /materiales/{matId} {
       allow read: if isSignedIn();
       allow create: if isProfesor() && authorUidMatches();
-      allow update, delete: if isAdmin() ||
-        (isProfesor() && resource.data.uid == request.auth.uid);
+      allow update: if isAdmin()
+        // El autor puede modificar cuando estado ∈ {borrador, devuelta}
+        // O si el doc legacy no tiene estado (retrocompat)
+        || (esAutor() && _transicionAutorValida() && (
+             !('estado' in resource.data) ||
+             resource.data.estado in ['borrador','devuelta','enviada']
+           ))
+        // El revisor puede cambiar SOLO los campos de flujo
+        || (puedeAprobarMaterial() && mismoLiceo() && _cambioSoloRevision());
+      allow delete: if isAdmin() || esAutor();
     }
 
-    // ── planificaciones (privadas del profe) ───────────────────
-    // No las ven estudiantes. Solo dueño y admin.
+    // ── planificaciones (con flujo de aprobación) ──────────────
+    // Lectura: autor, revisores del mismo liceo, admin.
+    // Escritura: mismo esquema que materiales.
     match /planificaciones/{planId} {
-      allow read: if isAdmin() ||
-        (isSignedIn() && resource.data.uid == request.auth.uid);
+      allow read: if isAdmin()
+        || esAutor()
+        || (puedeAprobarMaterial() && mismoLiceo());
       allow create: if isProfesor() && authorUidMatches();
-      allow update, delete: if isAdmin() ||
-        (isProfesor() && resource.data.uid == request.auth.uid);
+      allow update: if isAdmin()
+        || (esAutor() && _transicionAutorValida() && (
+             !('estado' in resource.data) ||
+             resource.data.estado in ['borrador','devuelta','enviada']
+           ))
+        || (puedeAprobarMaterial() && mismoLiceo() && _cambioSoloRevision());
+      allow delete: if isAdmin() || esAutor();
     }
 
-    // ── evaluaciones (resultados de estudiantes) ───────────────
-    // Lectura: el propio estudiante ve sus resultados. Profe/admin ven todas
-    // (para ranking, estadísticas, etc.).
-    // Creación: el propio estudiante crea su resultado al terminar evaluación.
-    // Edición/borrado: solo admin.
+    // ── evaluaciones (dual: resultados estudiantes + docs de evaluación) ──
+    // Este esquema soporta 2 usos: docs de resultado de estudiante (legacy)
+    // y docs de evaluación creados por profe con flujo de aprobación (nuevo).
+    // Lectura: admin, profesor, dueño legacy, revisores del liceo.
+    // Escritura: docs de estudiante como antes; docs de profe con flujo.
     match /evaluaciones/{evalId} {
-      allow read: if isAdmin() || isProfesor() ||
-        (isSignedIn() && resource.data.uid == request.auth.uid);
+      allow read: if isAdmin() || isProfesor()
+        || (isSignedIn() && resource.data.uid == request.auth.uid)
+        || (puedeAprobarMaterial() && mismoLiceo());
       allow create: if isSignedIn() && authorUidMatches();
-      allow update, delete: if isAdmin();
+      allow update: if isAdmin()
+        || (esAutor() && _transicionAutorValida() && (
+             !('estado' in resource.data) ||
+             resource.data.estado in ['borrador','devuelta','enviada']
+           ))
+        || (puedeAprobarMaterial() && mismoLiceo() && _cambioSoloRevision());
+      allow delete: if isAdmin() || esAutor();
     }
 
     // ── calendarios_docentes/{uid}/eventos/{evtId} ─────────────

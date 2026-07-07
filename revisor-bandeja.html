@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bandeja de Revisión — Click&Clase</title>
+<link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg">
+
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+
+<script src="js/firebase-rest.js"></script>
+<script src="js/firebase-config.js"></script>
+<script src="js/firebase-auth.js"></script>
+<script src="js/firebase-db.js"></script>
+<script src="js/roles-permissions.js"></script>
+<script src="js/roles-router.js"></script>
+<script src="js/aprobaciones.js"></script>
+
+<style>
+:root {
+  --bg:            #0b0d1e;
+  --panel:         #12162f;
+  --panel2:        #1a1f3a;
+  --border:        rgba(148,163,184,.15);
+  --text:          #e5e7eb;
+  --muted:         #94a3b8;
+  --cyan:          #22d3ee;
+  --violet:        #7c3aed;
+  --success:       #22c55e;
+  --warn:          #fbbf24;
+  --danger:        #ef4444;
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+.header {
+  padding: 18px 28px;
+  border-bottom: 1px solid var(--border);
+  background: linear-gradient(135deg, rgba(124,58,237,.08), rgba(34,211,238,.06));
+  display: flex; align-items: center; justify-content: space-between; gap: 20px;
+}
+.header h1 { margin: 0; font-size: 1.35rem; font-weight: 700; }
+.header .breadcrumb { color: var(--muted); font-size: .82rem; }
+
+.container { max-width: 1500px; margin: 24px auto; padding: 0 24px; }
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 14px;
+  margin-bottom: 22px;
+}
+.stat-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 18px;
+}
+.stat-card .val { font-size: 1.9rem; font-weight: 800; }
+.stat-card .lbl { font-size: .72rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 600; margin-top: 2px; }
+.stat-card.enviada .val    { color: #67e8f9; }
+.stat-card.revision .val   { color: #fbbf24; }
+.stat-card.aprobada .val   { color: #86efac; }
+.stat-card.devuelta .val   { color: #fca5a5; }
+
+.filtros {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px 18px;
+  margin-bottom: 20px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+}
+.filtros .campo label {
+  display: block;
+  font-size: .72rem;
+  color: var(--muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .6px;
+  margin-bottom: 4px;
+}
+.filtros input, .filtros select {
+  width: 100%;
+  padding: 7px 10px;
+  border-radius: 7px;
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(148,163,184,.2);
+  color: var(--text);
+  font-size: .85rem;
+}
+
+.tabla-cont {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+table { width: 100%; border-collapse: collapse; }
+th, td { padding: 11px 14px; text-align: left; border-bottom: 1px solid var(--border); }
+th { background: rgba(255,255,255,.03); font-size: .72rem; text-transform: uppercase; letter-spacing: .8px; color: var(--muted); font-weight: 700; }
+td { font-size: .88rem; vertical-align: top; }
+tr:hover { background: rgba(255,255,255,.02); }
+tbody tr { cursor: pointer; }
+
+.chip { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: .7rem; font-weight: 700; letter-spacing: .5px; text-transform: uppercase; }
+.chip.material     { background: rgba(59,130,246,.12); color: #93c5fd; border: 1px solid rgba(59,130,246,.3); }
+.chip.planificacion{ background: rgba(124,58,237,.12); color: #c4b5fd; border: 1px solid rgba(124,58,237,.3); }
+.chip.evaluacion   { background: rgba(244,114,182,.12); color: #f9a8d4; border: 1px solid rgba(244,114,182,.3); }
+
+.empty { padding: 60px; text-align: center; color: var(--muted); font-size: .95rem; }
+
+/* Modal */
+.modal-bg { position: fixed; top:0; left:0; right:0; bottom:0; background: rgba(0,0,0,.7); backdrop-filter: blur(4px); display:none; align-items:center; justify-content:center; z-index: 1000; padding: 30px; }
+.modal-bg.abierto { display: flex; }
+.modal {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  width: 100%;
+  max-width: 900px;
+  max-height: 90vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.modal-head { padding: 18px 22px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+.modal-head h2 { margin: 0; font-size: 1.15rem; }
+.modal-body { padding: 20px 22px; overflow-y: auto; flex: 1; }
+.modal-foot { padding: 16px 22px; border-top: 1px solid var(--border); display: flex; gap: 10px; justify-content: flex-end; }
+.close-x { background: none; border: none; color: var(--muted); font-size: 1.6rem; cursor: pointer; padding: 0 6px; }
+
+.btn {
+  padding: 9px 16px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,.04);
+  color: var(--text);
+  cursor: pointer;
+  font-size: .85rem;
+  font-weight: 600;
+}
+.btn:hover { background: rgba(255,255,255,.08); }
+.btn.primary { background: linear-gradient(135deg, #7c3aed, #22d3ee); color: #fff; border-color: transparent; }
+.btn.success { background: rgba(34,197,94,.15); border-color: rgba(34,197,94,.4); color: #86efac; }
+.btn.danger  { background: rgba(239,68,68,.12);  border-color: rgba(239,68,68,.35); color: #fca5a5; }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+
+textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(148,163,184,.25);
+  color: var(--text);
+  font-family: inherit;
+  font-size: .9rem;
+  resize: vertical;
+  min-height: 90px;
+  margin-top: 6px;
+}
+
+.doc-preview {
+  background: #ffffff;
+  color: #1a1a2e;
+  border-radius: 10px;
+  padding: 20px 24px;
+  max-height: 45vh;
+  overflow-y: auto;
+  margin-top: 12px;
+  border: 1px solid var(--border);
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px 24px;
+  margin-bottom: 12px;
+}
+.info-grid > div .k { font-size: .7rem; color: var(--muted); text-transform: uppercase; letter-spacing: .8px; font-weight: 600; }
+.info-grid > div .v { font-size: .92rem; color: var(--text); margin-top: 2px; }
+
+h3.mini { font-size: .9rem; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); border-bottom: 1px solid var(--border); padding-bottom: 6px; margin: 22px 0 10px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <div class="breadcrumb">Panel del Encargado</div>
+    <h1>📋 Bandeja de Revisión</h1>
+  </div>
+  <div>
+    <a href="panel-utp.html" class="btn">← Volver al panel</a>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- Estadísticas -->
+  <div class="stats">
+    <div class="stat-card enviada"><div class="val" id="statEnviadas">—</div><div class="lbl">Esperando revisor</div></div>
+    <div class="stat-card revision"><div class="val" id="statRevision">—</div><div class="lbl">En revisión</div></div>
+    <div class="stat-card aprobada"><div class="val" id="statAprobadas">—</div><div class="lbl">Aprobadas (7d)</div></div>
+    <div class="stat-card devuelta"><div class="val" id="statDevueltas">—</div><div class="lbl">Devueltas (7d)</div></div>
+  </div>
+
+  <!-- Filtros -->
+  <div class="filtros">
+    <div class="campo">
+      <label>Autor</label>
+      <input type="text" id="fltAutor" placeholder="Nombre o email">
+    </div>
+    <div class="campo">
+      <label>Tipo</label>
+      <select id="fltTipo">
+        <option value="">Todos</option>
+        <option value="materiales">Material didáctico</option>
+        <option value="planificaciones">Planificación</option>
+        <option value="evaluaciones">Evaluación</option>
+      </select>
+    </div>
+    <div class="campo">
+      <label>Estado</label>
+      <select id="fltEstado">
+        <option value="">Todos los pendientes</option>
+        <option value="enviada">Esperando revisor</option>
+        <option value="en_revision">En revisión</option>
+      </select>
+    </div>
+    <div class="campo">
+      <label>Buscar título</label>
+      <input type="text" id="fltTitulo" placeholder="Palabra clave">
+    </div>
+  </div>
+
+  <!-- Tabla -->
+  <div class="tabla-cont">
+    <table>
+      <thead>
+        <tr>
+          <th style="width:110px">Tipo</th>
+          <th>Título</th>
+          <th style="width:220px">Autor</th>
+          <th style="width:130px">Curso</th>
+          <th style="width:130px">Enviado</th>
+          <th style="width:160px">Estado</th>
+        </tr>
+      </thead>
+      <tbody id="tbody">
+        <tr><td colspan="6" class="empty">⏳ Cargando pendientes…</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<!-- Modal de revisión -->
+<div class="modal-bg" id="modalBg">
+  <div class="modal">
+    <div class="modal-head">
+      <h2 id="modalTitulo">Revisar documento</h2>
+      <button class="close-x" onclick="cerrarModal()">×</button>
+    </div>
+    <div class="modal-body">
+
+      <div class="info-grid" id="modalInfo"></div>
+
+      <div id="modalPreviewWrap" style="display:none">
+        <h3 class="mini">Contenido del documento</h3>
+        <div class="doc-preview" id="modalPreview"></div>
+      </div>
+
+      <h3 class="mini">Historial</h3>
+      <div id="modalHistorial"></div>
+
+      <h3 class="mini">Observaciones (obligatorias al devolver)</h3>
+      <textarea id="txtObservaciones" placeholder="Escribí los cambios que hay que hacer…"></textarea>
+
+    </div>
+    <div class="modal-foot">
+      <button class="btn"          onclick="cerrarModal()">Cancelar</button>
+      <button class="btn danger"   onclick="onDevolver()"  id="btnDevolver">↩ Devolver con observaciones</button>
+      <button class="btn success"  onclick="onAprobar()"   id="btnAprobar">✓ Aprobar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Guard: solo revisores ────────────────────────────────────
+if (window.CCRouter && window.CCRouter.guardPanel) {
+  CCRouter.guardPanel(['utp','encargado_area','director','rector','admin']);
+}
+
+// ── Estado ───────────────────────────────────────────────────
+var _pendientes = [];
+var _filtrados  = [];
+var _docActual  = null;
+
+// ── Escape HTML ──────────────────────────────────────────────
+function esc(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── Cargar pendientes ────────────────────────────────────────
+function cargar() {
+  var user = window.ELAuth && ELAuth.user;
+  if (!user) return;
+  var liceoSlug = user.liceoSlug || user.liceoPrincipal || '';
+
+  CCAprobaciones.listarPendientesRevision({ liceoSlug: liceoSlug, limit: 200 })
+    .then(function(items) {
+      _pendientes = items || [];
+      aplicarFiltros();
+      cargarEstadisticas(liceoSlug);
+    })
+    .catch(function(err) {
+      console.error(err);
+      document.getElementById('tbody').innerHTML =
+        '<tr><td colspan="6" class="empty" style="color:#fca5a5">Error: ' + esc(err.message) + '</td></tr>';
+    });
+}
+
+function cargarEstadisticas(liceoSlug) {
+  CCAprobaciones.estadisticasLiceo(liceoSlug).then(function(res) {
+    var totalEnv=0, totalRev=0, totalAprob=0, totalDev=0;
+    var haceSemana = Date.now() - 7*24*60*60*1000;
+    (res||[]).forEach(function(x) {
+      totalEnv  += (x.stats.enviada     || 0);
+      totalRev  += (x.stats.en_revision || 0);
+      totalAprob+= (x.stats.aprobada    || 0);
+      totalDev  += (x.stats.devuelta    || 0);
+    });
+    document.getElementById('statEnviadas').textContent  = totalEnv;
+    document.getElementById('statRevision').textContent  = totalRev;
+    document.getElementById('statAprobadas').textContent = totalAprob;
+    document.getElementById('statDevueltas').textContent = totalDev;
+  });
+}
+
+// ── Filtros ──────────────────────────────────────────────────
+function aplicarFiltros() {
+  var q_autor = (document.getElementById('fltAutor').value || '').toLowerCase();
+  var q_tipo  = document.getElementById('fltTipo').value;
+  var q_est   = document.getElementById('fltEstado').value;
+  var q_tit   = (document.getElementById('fltTitulo').value || '').toLowerCase();
+
+  _filtrados = _pendientes.filter(function(d) {
+    if (q_tipo && d.coleccion !== q_tipo) return false;
+    if (q_est  && d.estado !== q_est) return false;
+    if (q_autor) {
+      var nm = ((d.autorNombre || '') + ' ' + (d.autorEmail || '')).toLowerCase();
+      if (nm.indexOf(q_autor) === -1) return false;
+    }
+    if (q_tit) {
+      var t = ((d.titulo || d.tema || d.contenido || '') + '').toLowerCase();
+      if (t.indexOf(q_tit) === -1) return false;
+    }
+    return true;
+  });
+  renderTabla();
+}
+
+document.getElementById('fltAutor').addEventListener('input', aplicarFiltros);
+document.getElementById('fltTipo').addEventListener('change', aplicarFiltros);
+document.getElementById('fltEstado').addEventListener('change', aplicarFiltros);
+document.getElementById('fltTitulo').addEventListener('input', aplicarFiltros);
+
+// ── Renderizar tabla ─────────────────────────────────────────
+var TIPO_LABEL = { materiales:'Material', planificaciones:'Planificación', evaluaciones:'Evaluación' };
+var TIPO_CHIP  = { materiales:'material', planificaciones:'planificacion', evaluaciones:'evaluacion' };
+
+function renderTabla() {
+  var tb = document.getElementById('tbody');
+  if (!_filtrados.length) {
+    tb.innerHTML = '<tr><td colspan="6" class="empty">✅ No hay documentos pendientes de revisión</td></tr>';
+    return;
+  }
+  tb.innerHTML = _filtrados.map(function(d, i) {
+    var titulo = d.titulo || d.tema || d.contenido || d.nombre || '(sin título)';
+    if (titulo.length > 80) titulo = titulo.slice(0, 77) + '…';
+    var autor = d.autorNombre || d.autorEmail || '—';
+    var curso = d.curso || d.cursoTexto || d.nivel || '—';
+    var enviado = d.enviadoEn || d.estadoFecha || '';
+    var fEnv = '—';
+    if (enviado) {
+      var dt = new Date(enviado);
+      fEnv = isNaN(dt) ? enviado : dt.toLocaleDateString('es-CL') + ' ' + dt.toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit'});
+    }
+    var chipClase = TIPO_CHIP[d.coleccion] || 'material';
+    var tipoLabel = TIPO_LABEL[d.coleccion] || d.coleccion;
+    var badge = CCAprobaciones.getEstadoBadgeHTML(d.estado);
+    return '<tr onclick="abrirModal(' + i + ')">' +
+      '<td><span class="chip ' + chipClase + '">' + tipoLabel + '</span></td>' +
+      '<td>' + esc(titulo) + '</td>' +
+      '<td>' + esc(autor) + '</td>' +
+      '<td>' + esc(curso) + '</td>' +
+      '<td style="font-size:.78rem;color:var(--muted)">' + esc(fEnv) + '</td>' +
+      '<td>' + badge + '</td>' +
+      '</tr>';
+  }).join('');
+}
+
+// ── Modal ────────────────────────────────────────────────────
+function abrirModal(idx) {
+  var d = _filtrados[idx];
+  if (!d) return;
+  _docActual = d;
+
+  document.getElementById('modalTitulo').textContent = '📄 ' + (d.titulo || d.tema || '(sin título)');
+
+  var autor = d.autorNombre || d.autorEmail || '—';
+  var curso = d.curso || d.cursoTexto || d.nivel || '—';
+  var asig  = d.asignatura || d.modNombre || '—';
+  var tipoDoc = d.tipoDoc || d.tipoNombre || (TIPO_LABEL[d.coleccion] || '—');
+  var enviadoFecha = d.enviadoEn || d.estadoFecha || '';
+  var enviadoTxt = enviadoFecha ? new Date(enviadoFecha).toLocaleString('es-CL') : '—';
+
+  document.getElementById('modalInfo').innerHTML =
+    '<div><div class="k">Autor</div><div class="v">' + esc(autor) + '</div></div>' +
+    '<div><div class="k">Enviado</div><div class="v">' + esc(enviadoTxt) + '</div></div>' +
+    '<div><div class="k">Curso</div><div class="v">' + esc(curso) + '</div></div>' +
+    '<div><div class="k">Asignatura</div><div class="v">' + esc(asig) + '</div></div>' +
+    '<div><div class="k">Tipo</div><div class="v">' + esc(tipoDoc) + '</div></div>' +
+    '<div><div class="k">Estado</div><div class="v">' + CCAprobaciones.getEstadoBadgeHTML(d.estado) + '</div></div>';
+
+  // Preview del contenido si existe
+  var contenidoHTML = d.contenidoHtml || d.contenidoHTML || d.html || d.contenido || '';
+  var wrap = document.getElementById('modalPreviewWrap');
+  if (contenidoHTML && contenidoHTML.length > 40) {
+    document.getElementById('modalPreview').innerHTML = contenidoHTML;
+    wrap.style.display = 'block';
+  } else {
+    wrap.style.display = 'none';
+  }
+
+  document.getElementById('modalHistorial').innerHTML = CCAprobaciones.renderHistorialHTML(d.historial || []);
+  document.getElementById('txtObservaciones').value = '';
+  document.getElementById('modalBg').classList.add('abierto');
+
+  // Si el estado es "enviada" (nadie lo tomó todavía), tomarlo primero
+  if (d.estado === 'enviada') {
+    CCAprobaciones.iniciarRevision(d.coleccion, d.id).catch(function(err) {
+      console.warn('No se pudo iniciar revisión:', err.message);
+    });
+  }
+}
+
+function cerrarModal() {
+  document.getElementById('modalBg').classList.remove('abierto');
+  _docActual = null;
+}
+
+function onAprobar() {
+  if (!_docActual) return;
+  var coment = document.getElementById('txtObservaciones').value.trim();
+  var btn = document.getElementById('btnAprobar');
+  btn.disabled = true;
+  CCAprobaciones.aprobar(_docActual.coleccion, _docActual.id, coment)
+    .then(function() {
+      cerrarModal();
+      cargar();
+      alert('✓ Documento aprobado. El docente ya puede aplicarlo en aula.');
+    })
+    .catch(function(err) {
+      alert('Error: ' + err.message);
+      btn.disabled = false;
+    });
+}
+
+function onDevolver() {
+  if (!_docActual) return;
+  var obs = document.getElementById('txtObservaciones').value.trim();
+  if (!obs) {
+    alert('Escribí las observaciones antes de devolver');
+    document.getElementById('txtObservaciones').focus();
+    return;
+  }
+  var btn = document.getElementById('btnDevolver');
+  btn.disabled = true;
+  CCAprobaciones.devolver(_docActual.coleccion, _docActual.id, obs)
+    .then(function() {
+      cerrarModal();
+      cargar();
+      alert('↩ Documento devuelto al docente con tus observaciones.');
+    })
+    .catch(function(err) {
+      alert('Error: ' + err.message);
+      btn.disabled = false;
+    });
+}
+
+// ── Cerrar modal con Escape ──────────────────────────────────
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') cerrarModal();
+});
+
+// ── Cargar al inicio ─────────────────────────────────────────
+if (window.ELAuth && ELAuth.onUserReady) {
+  ELAuth.onUserReady(function(user) {
+    if (user) cargar();
+  });
+}
+</script>
+
+</body>
+</html>

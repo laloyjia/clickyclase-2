@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mis Envíos — Click&Clase</title>
+<link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg">
+
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+
+<script src="js/firebase-rest.js"></script>
+<script src="js/firebase-config.js"></script>
+<script src="js/firebase-auth.js"></script>
+<script src="js/firebase-db.js"></script>
+<script src="js/roles-permissions.js"></script>
+<script src="js/roles-router.js"></script>
+<script src="js/aprobaciones.js"></script>
+
+<style>
+:root {
+  --bg: #0b0d1e; --panel: #12162f; --panel2: #1a1f3a;
+  --border: rgba(148,163,184,.15); --text: #e5e7eb; --muted: #94a3b8;
+  --cyan: #22d3ee; --violet: #7c3aed;
+}
+* { box-sizing: border-box; }
+body { margin: 0; font-family: 'Segoe UI', Roboto, Arial, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+.header {
+  padding: 18px 28px;
+  border-bottom: 1px solid var(--border);
+  background: linear-gradient(135deg, rgba(124,58,237,.08), rgba(34,211,238,.06));
+  display: flex; align-items: center; justify-content: space-between; gap: 20px;
+}
+.header h1 { margin: 0; font-size: 1.35rem; font-weight: 700; }
+.header .breadcrumb { color: var(--muted); font-size: .82rem; }
+
+.container { max-width: 1400px; margin: 24px auto; padding: 0 24px; }
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+  margin-bottom: 22px;
+}
+.stat-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 14px;
+}
+.stat-card .val { font-size: 1.6rem; font-weight: 800; }
+.stat-card .lbl { font-size: .68rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 600; margin-top: 2px; }
+
+.tabla-cont { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+table { width: 100%; border-collapse: collapse; }
+th, td { padding: 11px 14px; text-align: left; border-bottom: 1px solid var(--border); }
+th { background: rgba(255,255,255,.03); font-size: .72rem; text-transform: uppercase; letter-spacing: .8px; color: var(--muted); font-weight: 700; }
+td { font-size: .86rem; vertical-align: top; }
+tr:hover td { background: rgba(255,255,255,.02); }
+.chip { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: .7rem; font-weight: 700; letter-spacing: .5px; text-transform: uppercase; }
+.chip.material { background: rgba(59,130,246,.12); color: #93c5fd; border: 1px solid rgba(59,130,246,.3); }
+.chip.planificacion { background: rgba(124,58,237,.12); color: #c4b5fd; border: 1px solid rgba(124,58,237,.3); }
+.chip.evaluacion { background: rgba(244,114,182,.12); color: #f9a8d4; border: 1px solid rgba(244,114,182,.3); }
+.btn { padding: 6px 12px; border-radius: 6px; border: 1px solid var(--border); background: rgba(255,255,255,.04); color: var(--text); cursor: pointer; font-size: .78rem; font-weight: 600; margin-right: 4px; }
+.btn:hover { background: rgba(255,255,255,.08); }
+.btn.primary { background: linear-gradient(135deg, #7c3aed, #22d3ee); color: #fff; border-color: transparent; }
+.btn.warn { background: rgba(251,191,36,.12); color: #fbbf24; border-color: rgba(251,191,36,.35); }
+.empty { padding: 60px; text-align: center; color: var(--muted); font-size: .95rem; }
+
+.obs-box { background: rgba(239,68,68,.06); border: 1px solid rgba(239,68,68,.25); border-radius: 8px; padding: 10px 14px; margin-top: 8px; font-size: .82rem; }
+.obs-box .k { font-size: .68rem; color: #fca5a5; text-transform: uppercase; letter-spacing: .8px; font-weight: 700; margin-bottom: 4px; }
+
+/* Modal */
+.modal-bg { position: fixed; top:0; left:0; right:0; bottom:0; background: rgba(0,0,0,.7); backdrop-filter: blur(4px); display:none; align-items:center; justify-content:center; z-index: 1000; padding: 30px; }
+.modal-bg.abierto { display: flex; }
+.modal { background: var(--panel); border: 1px solid var(--border); border-radius: 14px; width: 100%; max-width: 700px; max-height: 90vh; overflow: hidden; display: flex; flex-direction: column; }
+.modal-head { padding: 18px 22px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+.modal-body { padding: 20px 22px; overflow-y: auto; }
+.modal-foot { padding: 16px 22px; border-top: 1px solid var(--border); display: flex; gap: 10px; justify-content: flex-end; }
+.close-x { background: none; border: none; color: var(--muted); font-size: 1.6rem; cursor: pointer; padding: 0 6px; }
+textarea { width: 100%; padding: 10px 12px; border-radius: 8px; background: rgba(255,255,255,.04); border: 1px solid rgba(148,163,184,.25); color: var(--text); font-family: inherit; font-size: .9rem; resize: vertical; min-height: 90px; margin-top: 6px; }
+h3.mini { font-size: .8rem; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin: 18px 0 8px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <div class="breadcrumb">Mi trabajo</div>
+    <h1>📤 Mis Envíos</h1>
+  </div>
+  <div>
+    <a href="panel-profesor.html" class="btn">← Volver al panel</a>
+  </div>
+</div>
+
+<div class="container">
+
+  <div class="stats">
+    <div class="stat-card"><div class="val" style="color:#94a3b8" id="stB">—</div><div class="lbl">Borradores</div></div>
+    <div class="stat-card"><div class="val" style="color:#67e8f9" id="stE">—</div><div class="lbl">Enviados</div></div>
+    <div class="stat-card"><div class="val" style="color:#fbbf24" id="stR">—</div><div class="lbl">En revisión</div></div>
+    <div class="stat-card"><div class="val" style="color:#86efac" id="stA">—</div><div class="lbl">Aprobados</div></div>
+    <div class="stat-card"><div class="val" style="color:#fca5a5" id="stD">—</div><div class="lbl">Devueltos</div></div>
+  </div>
+
+  <div class="tabla-cont">
+    <table>
+      <thead>
+        <tr>
+          <th style="width:110px">Tipo</th>
+          <th>Título</th>
+          <th style="width:130px">Curso</th>
+          <th style="width:180px">Estado</th>
+          <th style="width:280px">Acciones</th>
+        </tr>
+      </thead>
+      <tbody id="tbody"><tr><td colspan="5" class="empty">⏳ Cargando envíos…</td></tr></tbody>
+    </table>
+  </div>
+
+</div>
+
+<!-- Modal historial + acciones -->
+<div class="modal-bg" id="modalBg">
+  <div class="modal">
+    <div class="modal-head">
+      <h2 id="modalTitulo" style="margin:0;font-size:1.1rem">Detalles</h2>
+      <button class="close-x" onclick="cerrarModal()">×</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-foot" id="modalFoot">
+      <button class="btn" onclick="cerrarModal()">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+if (window.CCRouter && window.CCRouter.guardPanel) {
+  CCRouter.guardPanel(['profesor','jefe_curso','utp','encargado_area','pie_edu','amb_prof','aps_prof']);
+}
+
+var _envios = [];
+var _todos  = [];  // todos incluye borradores
+var _docActual = null;
+
+function esc(s) {
+  return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function cargar() {
+  var uid = ELAuth.user ? ELAuth.user.uid : '';
+  if (!uid) return;
+  // Cargar TODOS los docs del user (incluidos borradores) para stats
+  var COLS = ['materiales','planificaciones','evaluaciones'];
+  Promise.all(COLS.map(function(col) {
+    return EL_DB.collection(col).get().then(function(snap) {
+      var items = [];
+      snap.forEach(function(doc) {
+        var d = doc.data() || {};
+        var esMio = (d.autorUid === uid) || (d.uid === uid);
+        if (esMio) items.push(Object.assign({coleccion: col, id: doc.id}, d));
+      });
+      return items;
+    }).catch(function(){ return []; });
+  })).then(function(arrs) {
+    _todos = [].concat.apply([], arrs);
+    _todos.sort(function(a,b){ return String(b.estadoFecha||b.creadoEn||'').localeCompare(a.estadoFecha||a.creadoEn||''); });
+    renderStats();
+    renderTabla();
+  });
+}
+
+function renderStats() {
+  var c = { borrador:0, enviada:0, en_revision:0, aprobada:0, devuelta:0 };
+  _todos.forEach(function(d){
+    var e = d.estado || 'borrador';
+    if (!(e in c)) c.borrador++; else c[e]++;
+  });
+  document.getElementById('stB').textContent = c.borrador;
+  document.getElementById('stE').textContent = c.enviada;
+  document.getElementById('stR').textContent = c.en_revision;
+  document.getElementById('stA').textContent = c.aprobada;
+  document.getElementById('stD').textContent = c.devuelta;
+}
+
+var TIPO_LABEL = { materiales:'Material', planificaciones:'Planificación', evaluaciones:'Evaluación' };
+var TIPO_CHIP  = { materiales:'material', planificaciones:'planificacion', evaluaciones:'evaluacion' };
+
+function renderTabla() {
+  var tb = document.getElementById('tbody');
+  if (!_todos.length) {
+    tb.innerHTML = '<tr><td colspan="5" class="empty">Todavía no has creado ningún documento. Andá al panel para empezar.</td></tr>';
+    return;
+  }
+  tb.innerHTML = _todos.map(function(d, i) {
+    var titulo = d.titulo || d.tema || d.nombre || '(sin título)';
+    if (titulo.length > 90) titulo = titulo.slice(0,87) + '…';
+    var curso = d.curso || d.cursoTexto || d.nivel || '—';
+    var estado = d.estado || 'borrador';
+    var badge = CCAprobaciones.getEstadoBadgeHTML(estado);
+    // Acciones según estado
+    var acciones = '';
+    if (estado === 'borrador') {
+      acciones += '<button class="btn primary" onclick="onEnviar(' + i + ')">📤 Enviar a revisión</button>';
+    } else if (estado === 'devuelta') {
+      acciones += '<button class="btn warn" onclick="verObservaciones(' + i + ')">📝 Ver observaciones</button>';
+      acciones += '<button class="btn" onclick="onRetomar(' + i + ')">↺ Retomar</button>';
+    } else {
+      acciones += '<button class="btn" onclick="verHistorial(' + i + ')">Ver historial</button>';
+    }
+    return '<tr>' +
+      '<td><span class="chip ' + TIPO_CHIP[d.coleccion] + '">' + TIPO_LABEL[d.coleccion] + '</span></td>' +
+      '<td>' + esc(titulo) + '</td>' +
+      '<td>' + esc(curso) + '</td>' +
+      '<td>' + badge + '</td>' +
+      '<td>' + acciones + '</td>' +
+      '</tr>';
+  }).join('');
+}
+
+function onEnviar(idx) {
+  var d = _todos[idx];
+  if (!d) return;
+  var coment = prompt('Comentario opcional al enviar:', '') || '';
+  CCAprobaciones.enviarARevision(d.coleccion, d.id, coment)
+    .then(function() {
+      alert('✓ Enviado a revisión. Vas a recibir aviso cuando esté aprobado o devuelto.');
+      cargar();
+    })
+    .catch(function(err) { alert('Error: ' + err.message); });
+}
+
+function onRetomar(idx) {
+  var d = _todos[idx];
+  if (!d) return;
+  if (!confirm('Retomar como borrador para editar? El estado volverá a borrador.')) return;
+  CCAprobaciones.retomarBorrador(d.coleccion, d.id)
+    .then(function() {
+      alert('✓ Documento en modo borrador. Podés editarlo y reenviarlo.');
+      cargar();
+    })
+    .catch(function(err) { alert('Error: ' + err.message); });
+}
+
+function verObservaciones(idx) {
+  var d = _todos[idx];
+  if (!d) return;
+  _docActual = d;
+  document.getElementById('modalTitulo').textContent = '📝 ' + (d.titulo || d.tema || '(sin título)');
+  var obs = d.ultimasObservaciones || '(sin observaciones)';
+  var revisor = d.revisorNombre || d.revisorEmail || 'revisor';
+  document.getElementById('modalBody').innerHTML =
+    '<div class="obs-box"><div class="k">Observaciones de ' + esc(revisor) + '</div>' +
+    '<div style="white-space:pre-wrap">' + esc(obs) + '</div></div>' +
+    '<h3 class="mini">Historial completo</h3>' +
+    CCAprobaciones.renderHistorialHTML(d.historial || []);
+  document.getElementById('modalFoot').innerHTML =
+    '<button class="btn" onclick="cerrarModal()">Cerrar</button>' +
+    '<button class="btn primary" onclick="onRetomar(' + idx + ');cerrarModal()">↺ Retomar como borrador</button>';
+  document.getElementById('modalBg').classList.add('abierto');
+}
+
+function verHistorial(idx) {
+  var d = _todos[idx];
+  if (!d) return;
+  _docActual = d;
+  document.getElementById('modalTitulo').textContent = '📋 ' + (d.titulo || d.tema || '(sin título)');
+  document.getElementById('modalBody').innerHTML =
+    '<h3 class="mini">Historial de aprobación</h3>' +
+    CCAprobaciones.renderHistorialHTML(d.historial || []);
+  document.getElementById('modalFoot').innerHTML = '<button class="btn" onclick="cerrarModal()">Cerrar</button>';
+  document.getElementById('modalBg').classList.add('abierto');
+}
+
+function cerrarModal() {
+  document.getElementById('modalBg').classList.remove('abierto');
+  _docActual = null;
+}
+document.addEventListener('keydown', function(e) { if (e.key === 'Escape') cerrarModal(); });
+
+if (window.ELAuth && ELAuth.onUserReady) {
+  ELAuth.onUserReady(function(u) { if (u) cargar(); });
+}
+</script>
+
+</body>
+</html>

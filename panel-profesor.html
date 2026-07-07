@@ -16,6 +16,7 @@
 <script src="js/firebase-auth.js"></script>
 <script src="js/roles-permissions.js"></script>
 <script src="js/roles-router.js"></script>
+<script src="js/aprobaciones.js"></script>
 <script src="js/cc-store.js"></script>
 <script src="js/curricula-loader.js"></script>
 <link rel="stylesheet" href="css/panel.css">
@@ -55,8 +56,20 @@
           <button class="btn ghost" onclick="show('evaluaciones')"><span class="material-symbols-outlined" style="font-size:18px">quiz</span> Evaluaciones</button>
           <button class="btn ghost" onclick="show('notas')"><span class="material-symbols-outlined" style="font-size:18px">table_chart</span> Notas y asistencia</button>
           <button class="btn ghost" onclick="show('biblioteca')"><span class="material-symbols-outlined" style="font-size:18px">menu_book</span> Biblioteca</button>
+          <a class="btn ghost" href="mis-envios.html" style="text-decoration:none"><span class="material-symbols-outlined" style="font-size:18px">outbox</span> Mis envíos</a>
         </div>
       </div>
+
+      <!-- Card de aprobaciones pendientes -->
+      <a href="mis-envios.html" style="display:block;text-decoration:none;color:inherit;margin-top:14px;padding:16px 20px;background:linear-gradient(135deg,rgba(124,58,237,.08),rgba(34,211,238,.05));border:1px solid rgba(124,58,237,.25);border-radius:12px">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:14px">
+          <div>
+            <div style="font-size:.72rem;color:#c4b5fd;font-weight:600;letter-spacing:.6px;text-transform:uppercase">Estado de mis envíos</div>
+            <div style="font-size:1.05rem;font-weight:700;margin-top:3px" id="envResumen">Cargando…</div>
+          </div>
+          <div style="font-size:1.5rem">📤</div>
+        </div>
+      </a>
       <div class="card"><div class="sec-title"><span class="material-symbols-outlined" style="vertical-align:-4px;color:var(--primary)">calendar_month</span> Calendario del colegio</div><div id="calColegio"></div></div>
     </section>
 
@@ -267,6 +280,30 @@ function exportarWord(){var txt=document.getElementById('matTxt').value||'';if(!
 if (window.CCRouter && window.CCRouter.guardPanel) {
   CCRouter.guardPanel(['profesor','jefe_curso']);
 }
+
+// Fase 1: resumen del estado de aprobación de los envíos del docente.
+(function () {
+  if (!window.ELAuth || !window.CCAprobaciones) return;
+  ELAuth.onUserReady(function (user) {
+    if (!user) return;
+    CCAprobaciones.listarMisEnvios({ uid: user.uid, limit: 200 }).then(function (items) {
+      var el = document.getElementById('envResumen');
+      if (!el) return;
+      if (!items || !items.length) {
+        el.textContent = 'Aún no enviaste nada a revisión';
+        return;
+      }
+      var c = { enviada:0, en_revision:0, aprobada:0, devuelta:0 };
+      items.forEach(function(x){ if (x.estado in c) c[x.estado]++; });
+      var partes = [];
+      if (c.enviada)     partes.push('📨 ' + c.enviada + ' esperando');
+      if (c.en_revision) partes.push('⏳ ' + c.en_revision + ' en revisión');
+      if (c.aprobada)    partes.push('✅ ' + c.aprobada + ' aprobados');
+      if (c.devuelta)    partes.push('↩ ' + c.devuelta + ' devueltos');
+      el.textContent = partes.join(' · ') || 'Sin novedades';
+    }).catch(function(){});
+  });
+})();
 </script>
 </body></html>'],{type:'application/msword'});var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='material.doc';a.click();toast('Exportado a Word.','success');}
 function guardarMat(){var txt=document.getElementById('matTxt').value||'';if(!txt.trim()){toast('Primero genera el material.','danger');return;}var tipo=document.getElementById('matTipo').selectedOptions[0].text;var tema=document.getElementById('matTema').value||'(sin tema)';var asig=document.getElementById('matAsig').value||'';REG.biblioteca.rows.unshift([tipo+' — '+tema,asig+' · jun 2026','Guardado']);renderTable('biblioteca');if(window.ccStore)ccStore.setTabla('prof_biblioteca',REG.biblioteca.rows);toast('Guardado en biblioteca.','success');show('biblioteca');}

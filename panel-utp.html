@@ -17,6 +17,7 @@
 <script src="js/firebase-auth.js"></script>
 <script src="js/roles-permissions.js"></script>
 <script src="js/roles-router.js"></script>
+<script src="js/aprobaciones.js"></script>
 <script src="js/cc-store.js"></script>
 <link rel="stylesheet" href="css/panel.css">
 <script src="js/cc-ui.js"></script>
@@ -40,6 +41,22 @@
       <div class="h1" id="t-resumen">Resumen</div>
       <div class="sub" id="s-resumen"></div>
       <div class="kpis" id="kpis"></div>
+
+      <!-- Bandeja de revisión (Fase 1) -->
+      <a href="revisor-bandeja.html" style="display:block;text-decoration:none;margin:16px 0;padding:20px 24px;background:linear-gradient(135deg,rgba(124,58,237,.12),rgba(34,211,238,.08));border:1px solid rgba(124,58,237,.3);border-radius:14px;color:inherit;transition:transform .15s ease;">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:16px">
+          <div>
+            <div style="font-size:.8rem;color:#c4b5fd;font-weight:600;letter-spacing:.6px;text-transform:uppercase">Aprobaciones</div>
+            <div style="font-size:1.35rem;font-weight:700;margin-top:4px">📋 Bandeja de Revisión</div>
+            <div style="font-size:.88rem;color:#94a3b8;margin-top:6px" id="bandejaResumen">Revisar y aprobar planificaciones, materiales y evaluaciones enviadas por docentes…</div>
+          </div>
+          <div style="text-align:right">
+            <div style="font-size:2.4rem;font-weight:800;color:#67e8f9" id="bandejaCount">—</div>
+            <div style="font-size:.72rem;color:#94a3b8;text-transform:uppercase;letter-spacing:.6px">Pendientes</div>
+          </div>
+        </div>
+      </a>
+
       <div class="grid2">
         <div class="card"><h3><span class="material-symbols-outlined">notifications_active</span> Alertas pedagógicas</h3><div id="alertas"></div></div>
         <div class="card"><h3><span class="material-symbols-outlined">insights</span> Cobertura del ciclo</h3><div class="chartbox" style="height:220px"><canvas id="chCob"></canvas></div></div>
@@ -254,6 +271,27 @@ renderAll();
 if (window.CCRouter && window.CCRouter.guardPanel) {
   CCRouter.guardPanel(['utp','encargado_area']);
 }
+
+// Fase 1: contar pendientes de revisión para la card del resumen.
+(function () {
+  if (!window.ELAuth || !window.CCAprobaciones) return;
+  ELAuth.onUserReady(function (user) {
+    if (!user) return;
+    var liceo = user.liceoSlug || user.liceoPrincipal || '';
+    CCAprobaciones.listarPendientesRevision({ liceoSlug: liceo, limit: 500 })
+      .then(function (items) {
+        var el = document.getElementById('bandejaCount');
+        var lbl = document.getElementById('bandejaResumen');
+        if (el) el.textContent = (items || []).length;
+        if (lbl && items && items.length) {
+          var enviadas = items.filter(function(x){return x.estado==='enviada';}).length;
+          var revision = items.filter(function(x){return x.estado==='en_revision';}).length;
+          lbl.textContent = enviadas + ' esperando revisor · ' + revision + ' en revisión activa';
+        }
+      })
+      .catch(function () {});
+  });
+})();
 </script>
 </body>
 </html>
