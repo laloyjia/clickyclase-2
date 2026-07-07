@@ -628,6 +628,8 @@ var ELDB = (function() {
     // \u2500\u2500 Notas (Fase 2.3) \u2500\u2500
     'registrar_nota':              'Registr\u00f3 nota',
     'eliminar_nota':               'Elimin\u00f3 nota',
+    // \u2500\u2500 Apoyo Psicosocial (Fase 4) \u2500\u2500
+    'registrar_intervencion_apoyo': 'Registr\u00f3 intervenci\u00f3n psicosocial',
     'guardar_nomina':              'Guard\u00f3 n\u00f3mina de curso',
     'guardar_notas':               'Guard\u00f3 libro de notas',
     'guardar_asistencia':          'Guard\u00f3 asistencia',

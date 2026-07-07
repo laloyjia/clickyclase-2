@@ -3,152 +3,313 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Panel Profesional Apoyo Psicosocial — Click&Clase</title>
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<title>Apoyo Psicosocial — Mis Casos — Click&Clase</title>
+<link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg">
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
 <script src="js/firebase-rest.js"></script>
 <script src="js/firebase-config.js"></script>
 <script src="js/firebase-auth.js"></script>
+<script src="js/firebase-db.js"></script>
 <script src="js/roles-permissions.js"></script>
 <script src="js/roles-router.js"></script>
-<script src="js/cc-store.js"></script>
-<link rel="stylesheet" href="css/panel.css">
-<script src="js/cc-ui.js"></script>
+<script src="js/cursos.js"></script>
+<script src="js/apoyo.js"></script>
+<style>
+:root { --bg: #0b0d1e; --panel: #12162f; --border: rgba(148,163,184,.15); --text: #e5e7eb; --muted: #94a3b8; --cyan: #22d3ee; --violet: #7c3aed; --pink: #f472b6; --teal: #14b8a6; }
+* { box-sizing: border-box; }
+body { margin: 0; font-family: 'Segoe UI', Roboto, Arial, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+.topbar { padding: 16px 28px; border-bottom: 1px solid var(--border); background: linear-gradient(135deg, rgba(20,184,166,.10), rgba(59,130,246,.05)); display: flex; align-items: center; justify-content: space-between; }
+.topbar h1 { margin: 0; font-size: 1.3rem; font-weight: 700; }
+.breadcrumb { color: var(--muted); font-size: .78rem; }
+.usr { font-size: .82rem; color: var(--muted); }
+.usr .salir { color: #fca5a5; text-decoration: none; margin-left: 10px; }
+.container { max-width: 1400px; margin: 22px auto; padding: 0 22px 40px; }
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 22px; }
+.kpi { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; }
+.kpi .l { font-size: .68rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
+.kpi .v { font-size: 1.8rem; font-weight: 800; margin-top: 4px; }
+.kpi.abr .v { color: #c4b5fd; } .kpi.seg .v { color: #fbbf24; } .kpi.cer .v { color: #94a3b8; } .kpi.mes .v { color: #14b8a6; }
+.grid-main { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+@media (max-width: 900px) { .grid-main { grid-template-columns: 1fr; } }
+.card { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 18px 22px; }
+.card h3 { margin: 0 0 12px; font-size: .8rem; text-transform: uppercase; letter-spacing: .8px; color: var(--muted); font-weight: 700; display: flex; align-items: center; gap: 8px; }
+.fld { margin-bottom: 12px; }
+.fld label { display: block; font-size: .72rem; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 4px; }
+input, select, textarea { width: 100%; padding: 8px 10px; border-radius: 7px; background: rgba(255,255,255,.04); border: 1px solid rgba(148,163,184,.2); color: var(--text); font-size: .85rem; font-family: inherit; }
+textarea { resize: vertical; min-height: 60px; }
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+.btn { padding: 9px 15px; border-radius: 8px; border: 1px solid var(--border); background: rgba(255,255,255,.04); color: var(--text); cursor: pointer; font-size: .85rem; font-weight: 600; }
+.btn.primary { background: linear-gradient(135deg, #14b8a6, #22d3ee); color: white; border-color: transparent; }
+.btn:hover { background: rgba(255,255,255,.08); }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+.chk { display: flex; align-items: center; gap: 8px; font-size: .84rem; padding: 8px 10px; border-radius: 6px; background: rgba(255,255,255,.02); border: 1px solid var(--border); cursor: pointer; }
+.chk input { width: auto; margin: 0; }
+table { width: 100%; border-collapse: collapse; }
+th, td { padding: 9px 11px; border-bottom: 1px solid var(--border); font-size: .84rem; text-align: left; vertical-align: top; }
+th { background: rgba(255,255,255,.03); font-size: .68rem; text-transform: uppercase; letter-spacing: .8px; color: var(--muted); font-weight: 700; }
+tr:hover td { background: rgba(255,255,255,.02); }
+.empty { padding: 40px; text-align: center; color: var(--muted); }
+.confidencial-badge { display: inline-block; padding: 2px 6px; background: rgba(239,68,68,.15); color: #fca5a5; border: 1px solid rgba(239,68,68,.3); border-radius: 4px; font-size: .66rem; font-weight: 700; text-transform: uppercase; }
+.filtros { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 14px; }
+</style>
 </head>
 <body>
+
 <div class="topbar">
-  <div><a href="acceso-demo.html" style="color:var(--muted);font-size:13px;margin-right:14px"><span class="material-symbols-outlined" style="font-size:16px;vertical-align:-3px">arrow_back</span> Roles</a><span class="brand">Click&Clase</span><span class="demo-tag">Prof. Apoyo Psicosocial · demo</span></div>
-  <div class="usr"><span class="av">PA</span><span style="font-size:13.5px">Profesional Apoyo Psicosocial</span><a class="salir" href="login.html">Salir</a></div>
+  <div><div class="breadcrumb">Equipo Apoyo Psicosocial</div><h1>💙 Mis Casos e Intervenciones</h1></div>
+  <div class="usr"><span id="userName">—</span><a href="login.html" class="salir">Salir</a></div>
 </div>
-<div class="shell">
-  <aside class="sidebar">
-    <div class="side-role"><span class="ico"><span class="material-symbols-outlined">favorite</span></span><div><div class="nm">Prof. Psicosocial</div><div class="sc">Dupla psicosocial</div></div></div>
-    <nav id="nav"></nav>
-  </aside>
-  <main class="main">
-    <section class="sec active" id="sec-resumen">
-      <div class="h1">Inicio</div><div class="sub">Mis casos e intervenciones</div>
-      <div class="kpis">
-        <div class="kpi"><div class="l">Mis casos</div><div class="v">8</div></div>
-        <div class="kpi"><div class="l">Intervenciones (mes)</div><div class="v">23</div></div>
-        <div class="kpi"><div class="l">Informes por hacer</div><div class="v">2</div></div>
-        <div class="kpi"><div class="l">Derivaciones</div><div class="v">3</div></div>
+
+<div class="container">
+
+  <div class="kpis" id="kpisWrap"><div style="grid-column:1/-1;padding:20px;text-align:center;color:var(--muted)">⏳ Cargando…</div></div>
+
+  <div class="grid-main">
+
+    <div class="card">
+      <h3><span>➕</span> Nueva intervención</h3>
+      <div class="row2">
+        <div class="fld"><label>Curso</label><select id="fCurso" onchange="onCambioCurso()"><option value="">— Elegir —</option></select></div>
+        <div class="fld"><label>Estudiante</label><select id="fEst"><option value="">— Elegir curso primero —</option></select></div>
       </div>
-      <div class="card"><h3><span class="material-symbols-outlined">notifications_active</span> Mis pendientes</h3>
-        <div class="row" style="cursor:pointer" onclick="show('miscasos')"><span class="material-symbols-outlined ic" style="color:var(--danger)">priority_high</span><div style="flex:1"><b>1 caso de alta vulnerabilidad</b> — elaborar informe.</div><span class="material-symbols-outlined" style="color:var(--faint)">chevron_right</span></div>
-        <div class="row" style="cursor:pointer" onclick="show('informes')"><span class="material-symbols-outlined ic" style="color:var(--warning)">description</span><div style="flex:1">2 informes psicosociales por completar.</div><span class="material-symbols-outlined" style="color:var(--faint)">chevron_right</span></div>
+      <div class="row3">
+        <div class="fld"><label>Fecha</label><input type="date" id="fFecha"></div>
+        <div class="fld"><label>Tipo</label><select id="fTipo">
+          <option value="individual">Individual</option>
+          <option value="grupal">Grupal</option>
+          <option value="preventiva">Preventiva</option>
+          <option value="derivacion">Derivación</option>
+        </select></div>
+        <div class="fld"><label>Rol profesional</label><select id="fRol">
+          <option value="psicologo">Psicólogo/a</option>
+          <option value="ts">Trabajador/a social</option>
+          <option value="otro">Otro</option>
+        </select></div>
       </div>
-      <div class="card"><div class="sec-title"><span class="material-symbols-outlined" style="vertical-align:-4px;color:var(--primary)">calendar_month</span> Calendario del colegio</div><div id="calColegio"></div></div>
-    </section>
-    <section class="sec" id="sec-miscasos">
-      <div class="h1">Mis casos</div><div class="sub">Casos asignados · haz clic para generar el informe con IA</div>
-      <div class="card"><div class="cardhead"><h3><span class="material-symbols-outlined">folder</span> Casos <span class="count" id="cnt-miscasos">0</span></h3>
-        <div class="tools"><div class="search"><span class="material-symbols-outlined">search</span><input data-f="miscasos" placeholder="Buscar…"></div></div></div>
-        <table><thead><tr><th>Estudiante</th><th>Motivo</th><th>Últ. intervención</th><th>Estado</th></tr></thead><tbody id="tb-miscasos"></tbody></table>
+      <div class="row2">
+        <div class="fld"><label>Motivo</label><select id="fMotivo">
+          <option value="emocional">Emocional</option>
+          <option value="familiar">Familiar</option>
+          <option value="academico">Académico</option>
+          <option value="conductual">Conductual</option>
+          <option value="salud">Salud</option>
+          <option value="convivencia">Convivencia</option>
+          <option value="sospecha_vulneracion">⚠ Sospecha de vulneración</option>
+          <option value="otro">Otro</option>
+        </select></div>
+        <div class="fld"><label>Estado</label><select id="fEstado">
+          <option value="abierto">Abierto</option>
+          <option value="seguimiento">En seguimiento</option>
+          <option value="cerrado">Cerrado</option>
+          <option value="derivado">Derivado</option>
+        </select></div>
       </div>
-      <div class="legal"><b>⚖ Datos sensibles:</b> los antecedentes de salud mental y situación familiar son protegidos (Ley 19.628). El informe que genera la IA es un borrador: revísalo, ajusta y resguarda la confidencialidad antes de compartirlo.</div>
-    </section>
-    <section class="sec" id="sec-intervenciones">
-      <div class="h1">Intervenciones</div><div class="sub">Bitácora de intervenciones</div>
-      <div class="card"><div class="cardhead"><h3><span class="material-symbols-outlined">history_edu</span> Intervenciones <span class="count" id="cnt-intervenciones">0</span></h3>
-        <div class="tools"><div class="search"><span class="material-symbols-outlined">search</span><input data-f="intervenciones" placeholder="Buscar…"></div>
-        <button class="btn ghost sm" onclick="plantilla('intervenciones')"><span class="material-symbols-outlined" style="font-size:16px">download</span> Plantilla</button>
-        <button class="btn sm" onclick="importar('intervenciones')"><span class="material-symbols-outlined" style="font-size:16px">upload_file</span> Importar</button></div></div>
-        <table><thead><tr><th>Fecha</th><th>Estudiante</th><th>Intervención</th><th>Estado</th></tr></thead><tbody id="tb-intervenciones"></tbody></table>
+      <div class="fld"><label>Detalle del motivo</label><input id="fMotivoDetalle" placeholder="Descripción breve"></div>
+      <div class="fld"><label>Resumen de la sesión (obligatorio)</label><textarea id="fResumen" rows="4" placeholder="Registro del relato, observaciones, evaluación…"></textarea></div>
+      <div class="fld"><label>Compromisos / acuerdos</label><textarea id="fCompromisos" rows="2" placeholder="Compromisos con el estudiante o la familia"></textarea></div>
+      <div class="row2">
+        <label class="chk"><input type="checkbox" id="fSeguimiento"> Requiere seguimiento</label>
+        <div class="fld" style="margin:0"><label>Próxima sesión</label><input type="date" id="fProxima"></div>
       </div>
-    </section>
-    <section class="sec" id="sec-informes">
-      <div class="h1">Informes</div><div class="sub">Informes generados</div>
-      <div class="card"><div class="cardhead"><h3><span class="material-symbols-outlined">description</span> Informes <span class="count" id="cnt-informes">0</span></h3>
-        <div class="tools"><div class="search"><span class="material-symbols-outlined">search</span><input data-f="informes" placeholder="Buscar…"></div></div></div>
-        <div id="tb-informes"></div>
+      <div class="row2">
+        <div class="fld"><label>Derivar a</label><select id="fDerivar">
+          <option value="">— Ninguno —</option>
+          <option value="pie">Equipo PIE</option>
+          <option value="convivencia">Equipo Convivencia</option>
+          <option value="externo">Servicio externo</option>
+        </select></div>
+        <label class="chk"><input type="checkbox" id="fConf"> Confidencial (solo yo)</label>
       </div>
-    </section>
-    <section class="sec" id="sec-estrategias">
-      <div class="h1">Estrategias</div><div class="sub">Mis estrategias de apoyo</div>
-      <div class="card"><div class="cardhead"><h3><span class="material-symbols-outlined">lightbulb</span> Estrategias <span class="count" id="cnt-estrategias">0</span></h3>
-        <div class="tools"><div class="search"><span class="material-symbols-outlined">search</span><input data-f="estrategias" placeholder="Buscar…"></div></div></div>
-        <table><thead><tr><th>Estudiante</th><th>Estrategia</th><th>Estado</th></tr></thead><tbody id="tb-estrategias"></tbody></table>
-      </div>
-    </section>
-  </main>
-</div>
-<input type="file" id="fileImp" accept=".xlsx,.xls,.csv" style="display:none">
-<div id="toast"><span class="material-symbols-outlined" style="color:var(--success)">check_circle</span><span id="toastMsg"></span></div>
-<div class="overlay" id="planOverlay">
-  <div class="modal" style="max-width:680px">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
-      <h3 style="font-size:16px;font-weight:600;display:flex;align-items:center;gap:8px"><span class="material-symbols-outlined" style="color:var(--primary)">smart_toy</span> Informe psicosocial con IA</h3>
-      <span class="material-symbols-outlined" style="cursor:pointer;color:var(--muted)" onclick="cerrarPlan()">close</span>
+      <button class="btn primary" onclick="onGuardar()" id="btnGuardar" style="margin-top:6px">💾 Registrar intervención</button>
     </div>
-    <div id="planCaso" class="sub" style="margin-bottom:8px"></div>
-    <div id="planDocsNote" class="sub" style="margin-bottom:12px;font-size:12px"></div>
-    <button class="btn" id="btnGen" onclick="generarPlan()"><span class="material-symbols-outlined" style="font-size:18px">auto_awesome</span> Generar con IA</button>
-    <textarea id="planTxt" rows="13" placeholder="El informe generado aparecerá aquí, editable…" style="width:100%;margin-top:14px;font-family:'Inter',sans-serif;font-size:13px;line-height:1.6;color:var(--text);background:var(--surface);border:1px solid var(--border-2);border-radius:9px;padding:12px"></textarea>
-    <div style="display:flex;gap:10px;margin-top:14px;justify-content:flex-end;flex-wrap:wrap">
-      <button class="btn ghost" onclick="exportarWord()"><span class="material-symbols-outlined" style="font-size:18px">description</span> Exportar a Word</button>
-      <button class="btn" onclick="guardarPlan()"><span class="material-symbols-outlined" style="font-size:18px">save</span> Guardar informe</button>
+
+    <div class="card">
+      <h3><span>📋</span> Mis casos recientes</h3>
+      <div class="filtros">
+        <select id="fltEstado" onchange="cargarMisCasos()">
+          <option value="">Todos los estados</option>
+          <option value="abierto">Abiertos</option>
+          <option value="seguimiento">En seguimiento</option>
+          <option value="cerrado">Cerrados</option>
+          <option value="derivado">Derivados</option>
+        </select>
+        <select id="fltMotivo" onchange="cargarMisCasos()"><option value="">Todos los motivos</option></select>
+      </div>
+      <table>
+        <thead><tr><th>Fecha</th><th>Estudiante</th><th>Motivo</th><th>Estado</th></tr></thead>
+        <tbody id="tbCasos"><tr><td colspan="4" class="empty">⏳ Cargando…</td></tr></tbody>
+      </table>
     </div>
+
   </div>
 </div>
+
+<div id="mBg" style="position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;padding:30px;z-index:1000;backdrop-filter:blur(4px)">
+  <div style="background:var(--panel);border:1px solid var(--border);border-radius:14px;width:100%;max-width:700px;max-height:90vh;overflow:hidden;display:flex;flex-direction:column">
+    <div style="padding:16px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+      <h2 id="mTit" style="margin:0;font-size:1.1rem">Intervención</h2>
+      <button onclick="cerrarModal()" style="background:none;border:none;color:var(--muted);font-size:1.5rem;cursor:pointer">×</button>
+    </div>
+    <div id="mBody" style="padding:18px 22px;overflow-y:auto;flex:1"></div>
+  </div>
+</div>
+
 <script>
-function ic(n){return '<span class="material-symbols-outlined">'+n+'</span>';}
-function inferTone(s){s=(''+s).toLowerCase();if(/(falta|atrasad|vencid|cr[ií]tico|alta|sin)/.test(s))return 'danger';if(/(pendiente|vence|revisar|seguimiento)/.test(s))return 'warning';if(/(activ|al d[ií]a|completad|registrado|vigente)/.test(s))return 'success';return 'info';}
-function tag(t){return '<span class="tag '+inferTone(t)+'">'+t+'</span>';}
-var REG={
- miscasos:{headers:['Estudiante','Motivo','Últ. intervención','Estado'],statusIdx:3,rows:[
-   ['T. Núñez','Alta vulnerabilidad','15 jun','Crítico'],['M. Rivas','Ausentismo','12 jun','Activo'],['K. Soto','Emocional','10 jun','Activo'],['L. Vera','Familiar','09 jun','Seguimiento']]},
- intervenciones:{headers:['Fecha','Estudiante','Intervención','Estado'],statusIdx:3,rows:[
-   ['12 jun','M. Rivas','Entrevista de acogida','Registrado'],['15 jun','T. Núñez','Contención + derivación','Registrado']]},
- informes:{headers:['Documento','Detalle','Estado'],statusIdx:2,rows:[
-   ['Informe psicosocial — T. Núñez','—','Pendiente'],['Informe psicosocial — M. Rivas','jun 2026','Vigente']]},
- estrategias:{headers:['Estudiante','Estrategia','Estado'],statusIdx:2,rows:[
-   ['K. Soto','Acompañamiento emocional semanal','Activa'],['L. Vera','Coordinación con la familia','Activa']]}
-};
-function renderTable(key){var cfg=REG[key],el=document.getElementById('tb-'+key);
- if(key==='informes'){el.innerHTML=cfg.rows.map(function(r){return '<div class="doc" data-txt="'+r.join(' ').toLowerCase()+'"><span class="di">'+ic('description')+'</span><div style="flex:1"><div class="dn">'+r[0]+'</div><div class="dm">'+(r[1]||'')+'</div></div>'+tag(r[2]||'')+'</div>'}).join('');}
- else{el.innerHTML=cfg.rows.map(function(r,j){var clk=(key==='miscasos')?' style="cursor:pointer" onclick="planIA('+j+')" title="Generar informe con IA"':'';return '<tr data-txt="'+r.join(' ').toLowerCase()+'"'+clk+'>'+r.map(function(c,i){return '<td>'+(i===cfg.statusIdx?tag(c):c)+'</td>'}).join('')+'</tr>'}).join('');}
- var cnt=document.getElementById('cnt-'+key);if(cnt)cnt.textContent=cfg.rows.length;}
-Object.keys(REG).forEach(renderTable);
-if(window.ccStore)ccStore.hydrate('apsp',REG,renderTable);
-window.CC_REG=REG;window.CC_RENDER=renderTable;window.CC_PREFIX='apsp';
-document.addEventListener('input',function(e){var inp=e.target;if(!inp.dataset||!inp.dataset.f)return;var q=inp.value.toLowerCase(),cont=document.getElementById('tb-'+inp.dataset.f);cont.querySelectorAll('[data-txt]').forEach(function(r){r.style.display=r.dataset.txt.indexOf(q)!==-1?'':'none'});});
-var _impKey=null;function importar(k){_impKey=k;var f=document.getElementById('fileImp');f.value='';f.click();}
-function plantilla(k){var ws=XLSX.utils.aoa_to_sheet([REG[k].headers]);var wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Plantilla');XLSX.writeFile(wb,'plantilla-'+k+'.xlsx');toast('Plantilla descargada.','success');}
-function applyRows(rows){rows=rows.filter(function(r){return r&&r.join('').trim()!==''});if(rows.length<2){toast('Sin filas de datos.','danger');return;}var n=REG[_impKey].headers.length;REG[_impKey].rows=rows.slice(1).map(function(r){var o=[];for(var i=0;i<n;i++)o.push(r[i]!=null?String(r[i]):'');return o;});renderTable(_impKey);if(window.ccStore)ccStore.setTabla('apsp_'+_impKey,REG[_impKey].rows);toast(REG[_impKey].rows.length+' filas importadas.','success');}
-document.getElementById('fileImp').addEventListener('change',function(e){var file=e.target.files&&e.target.files[0];if(!file||!_impKey)return;var rd=new FileReader();rd.onload=function(ev){try{var wb=XLSX.read(new Uint8Array(ev.target.result),{type:'array'});applyRows(XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,defval:''}));}catch(err){toast('No se pudo leer el archivo.','danger');}};rd.readAsArrayBuffer(file);});
-var _tt;function toast(msg,tone){var t=document.getElementById('toast');t.style.borderLeftColor='var(--'+(tone==='danger'?'danger':'success')+')';var i=t.querySelector('.material-symbols-outlined');i.style.color='var(--'+(tone==='danger'?'danger':'success')+')';i.textContent=tone==='danger'?'error':'check_circle';document.getElementById('toastMsg').textContent=msg;t.classList.add('show');clearTimeout(_tt);_tt=setTimeout(function(){t.classList.remove('show')},3000);}
-function docsInst(){var o={};try{o=JSON.parse(localStorage.getItem('cc_docs')||'{}');}catch(e){}var k=Object.keys(o);return {n:k.length,txt:k.map(function(x){return '### '+x+'\n'+o[x]}).join('\n\n')};}
-var _c=null,_ci=null;
-function planIA(j){_c=REG.miscasos.rows[j];_ci=j;document.getElementById('planCaso').innerHTML='<b>Estudiante:</b> '+_c[0]+' · '+_c[1];var d=docsInst();document.getElementById('planDocsNote').innerHTML=d.n?('<span class="material-symbols-outlined" style="font-size:14px;vertical-align:-2px;color:var(--success)">check_circle</span> La IA usará '+d.n+' documento(s) institucional(es).'):'<span class="material-symbols-outlined" style="font-size:14px;vertical-align:-2px;color:var(--warning)">info</span> Sin documentos institucionales; la IA usará solo la normativa.';document.getElementById('planTxt').value='';document.getElementById('planOverlay').classList.add('show');}
-function cerrarPlan(){document.getElementById('planOverlay').classList.remove('show');}
-document.getElementById('planOverlay').addEventListener('click',function(e){if(e.target===this)cerrarPlan();});
-function buildPrompt(){var d=docsInst(),c=_c;return 'Eres un profesional psicosocial experto en contexto escolar chileno. Redacta un INFORME PSICOSOCIAL formal para el siguiente estudiante, resguardando la confidencialidad y fundamentado en la normativa chilena (Ley 19.628 de datos; enfoque de derechos del niño, Ley 21.430; protocolos de derivación a la red OPD/CESFAM/Mejor Niñez).\n\nESTUDIANTE / CASO:\n- Estudiante: '+c[0]+'\n- Motivo: '+c[1]+'\n- Última intervención: '+c[2]+'\n- Estado: '+c[3]+'\n\n'+(d.n?('DOCUMENTOS INSTITUCIONALES (úsalos como base):\n'+d.txt+'\n\n'):'No hay documentos institucionales cargados; usa buenas prácticas e indica entre [corchetes] lo que falte.\n\n')+'ESTRUCTURA:\n1. Identificación\n2. Motivo de consulta/derivación\n3. Antecedentes relevantes\n4. Observaciones y evaluación\n5. Plan de intervención (acciones, responsables, plazos)\n6. Derivaciones a la red\n7. Seguimiento\n\nRedacta en español, tono profesional. No inventes datos clínicos; usa [corchetes] donde falte información.';}
-function generarPlan(){var b=document.getElementById('btnGen');b.disabled=true;var o=b.innerHTML;b.innerHTML='<span class="material-symbols-outlined" style="font-size:18px">hourglass_top</span> Generando…';fetch('/api/ia-asistente',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({tipo:'raw',datos:{prompt:buildPrompt()}})}).then(function(r){return r.json()}).then(function(d){if(d.error)throw new Error(d.error);document.getElementById('planTxt').value=d.resultado||'(respuesta vacía)';toast('Informe generado. Revísalo y edítalo.','success');}).catch(function(err){toast('Error de IA: '+err.message,'danger');}).then(function(){b.disabled=false;b.innerHTML=o;});}
-function exportarWord(){var txt=document.getElementById('planTxt').value||'';if(!txt.trim()){toast('Primero genera el informe.','danger');return;}var html='<h2>Informe psicosocial — '+(_c?_c[0]:'')+'</h2><pre style="font-family:Calibri,Arial;font-size:11pt;white-space:pre-wrap">'+txt.replace(/&/g,'&amp;').replace(/</g,'&lt;')+'</pre>';var blob=new Blob(['<html xmlns:w="urn:schemas-microsoft-com:office:word"><head><meta charset="utf-8"></head><body>'+html+'
-<script>
-// Fase 0: proteger la página según rol del usuario.
 if (window.CCRouter && window.CCRouter.guardPanel) {
-  CCRouter.guardPanel(['aps_prof','aps_enc']);
+  CCRouter.guardPanel(['aps_prof','aps_enc','director','rector','admin_colegio','admin']);
 }
-</script>
-</body></html>'],{type:'application/msword'});var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='informe-psicosocial.doc';a.click();toast('Exportado a Word.','success');}
-function guardarPlan(){var txt=document.getElementById('planTxt').value||'';if(!txt.trim()){toast('Primero genera el informe.','danger');return;}REG.informes.rows.unshift(['Informe psicosocial — '+(_c?_c[0]:''),'jun 2026 · IA','Vigente']);renderTable('informes');if(window.ccStore)ccStore.setTabla('apsp_informes',REG.informes.rows);toast('Informe guardado.','success');cerrarPlan();show('informes');}
-var NAV=[['dashboard','Inicio','resumen'],['folder','Mis casos','miscasos'],['history_edu','Intervenciones','intervenciones'],['description','Informes','informes'],['lightbulb','Estrategias','estrategias']];
-document.getElementById('nav').innerHTML=NAV.map(function(n,i){return '<div class="nav-item'+(i===0?' active':'')+'" data-s="'+n[2]+'">'+ic(n[0])+'<span>'+n[1]+'</span></div>'}).join('');
-function show(s){document.querySelectorAll('.nav-item').forEach(function(x){x.classList.toggle('active',x.dataset.s===s)});document.querySelectorAll('.sec').forEach(function(x){x.classList.toggle('active',x.id==='sec-'+s)});}
-document.querySelectorAll('.nav-item').forEach(function(x){x.addEventListener('click',function(){show(x.dataset.s)})});
-if(window.ccStore){ccStore.getDocs();}
-(function(){var el=document.getElementById('calColegio');
- function render(rows){if(!el)return;if(!rows||!rows.length){el.innerHTML='<div class="sub" style="margin:0">Aún no hay calendario institucional cargado.</div>';return;}el.innerHTML=rows.slice(0,8).map(function(r){return '<div class="row"><span class="material-symbols-outlined ic">event</span><div style="flex:1"><div>'+(r[1]||'')+'</div><div class="sub">'+(r[0]||'')+(r[2]?(' · '+r[2]):'')+'</div></div><span class="sub">'+(r[3]||'')+'</span></div>'}).join('');}
- var local=[];try{local=JSON.parse(localStorage.getItem('cc_calendario')||'[]');}catch(e){}
- render(local);
- if(window.ccStore){ccStore.getCalendario().then(render).catch(function(){});}
-})();
+
+var _cursos = [];
+var _cursoActivo = null;
+
+function esc(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function iniciar() {
+  var u = ELAuth.user || {};
+  document.getElementById('userName').textContent = u.nombre || u.email || 'Profesional';
+  document.getElementById('fFecha').value = new Date().toISOString().slice(0,10);
+  cargarKPIs(); cargarCursos(); cargarSelects(); cargarMisCasos();
+}
+
+function cargarKPIs() {
+  CCApoyo.kpisApoyo().then(function(k){
+    var uid = ELAuth.user.uid;
+    var mias = k.porProfesional[uid] ? k.porProfesional[uid].cantidad : 0;
+    document.getElementById('kpisWrap').innerHTML =
+      '<div class="kpi abr"><div class="l">Casos abiertos</div><div class="v">' + k.totalActivos + '</div></div>' +
+      '<div class="kpi seg"><div class="l">En seguimiento</div><div class="v">' + k.totalSeguimiento + '</div></div>' +
+      '<div class="kpi cer"><div class="l">Cerrados</div><div class="v">' + k.totalCerrados + '</div></div>' +
+      '<div class="kpi mes"><div class="l">Intervenciones este mes</div><div class="v">' + k.intervencionesMes + '</div></div>' +
+      '<div class="kpi mes"><div class="l">Mis intervenciones</div><div class="v">' + mias + '</div></div>';
+  });
+}
+
+function cargarCursos() {
+  var u = ELAuth.user;
+  CCCursos.listarCursos({ liceoSlug: u.liceoSlug || u.liceoPrincipal }).then(function(cs){
+    _cursos = cs || [];
+    var sel = document.getElementById('fCurso');
+    sel.innerHTML = '<option value="">— Elegir —</option>' +
+      _cursos.map(function(c){ return '<option value="' + esc(c.cursoId) + '">' + esc(c.nombreCompleto) + '</option>'; }).join('');
+  });
+}
+
+function onCambioCurso() {
+  var cursoId = document.getElementById('fCurso').value;
+  _cursoActivo = _cursos.find(function(c){ return c.cursoId === cursoId; });
+  var selE = document.getElementById('fEst');
+  if (!_cursoActivo) { selE.innerHTML = '<option value="">— Elegir curso primero —</option>'; return; }
+  selE.innerHTML = '<option value="">— Elegir —</option>' +
+    (_cursoActivo.estudiantes || []).map(function(e){
+      var nom = ((e.apellidoP||'') + ' ' + (e.apellidoM||'') + ', ' + (e.nombre||'')).trim();
+      return '<option value="' + e.ordinal + '" data-nom="' + esc(nom) + '">' + esc(nom) + '</option>';
+    }).join('');
+}
+
+function cargarSelects() {
+  var sel = document.getElementById('fltMotivo');
+  var motivos = CCApoyo.MOTIVO_LABEL;
+  var html = '<option value="">Todos los motivos</option>';
+  Object.keys(motivos).forEach(function(k){ html += '<option value="' + k + '">' + motivos[k] + '</option>'; });
+  sel.innerHTML = html;
+}
+
+function onGuardar() {
+  var cursoId = document.getElementById('fCurso').value;
+  var ordSt   = document.getElementById('fEst').value;
+  var resumen = document.getElementById('fResumen').value.trim();
+  var motivo  = document.getElementById('fMotivo').value;
+  if (!resumen) { alert('El resumen de la sesión es obligatorio'); return; }
+  if (!motivo)  { alert('Elegí un motivo'); return; }
+
+  var estEl = document.getElementById('fEst');
+  var estOpt = estEl.options[estEl.selectedIndex];
+  var estNom = estOpt ? (estOpt.dataset.nom || estOpt.text) : '';
+
+  var datos = {
+    liceoSlug: ELAuth.user.liceoSlug || ELAuth.user.liceoPrincipal || '',
+    cursoId: cursoId, cursoNombre: _cursoActivo ? _cursoActivo.nombreCompleto : '',
+    estudianteOrdinal: ordSt ? parseInt(ordSt, 10) : null, estudianteNombre: estNom,
+    tipo: document.getElementById('fTipo').value,
+    motivo: motivo, motivoDetalle: document.getElementById('fMotivoDetalle').value.trim(),
+    resumen: resumen, compromisos: document.getElementById('fCompromisos').value.trim(),
+    fecha: document.getElementById('fFecha').value,
+    profesionalRol: document.getElementById('fRol').value,
+    estado: document.getElementById('fEstado').value,
+    seguimientoRequerido: document.getElementById('fSeguimiento').checked,
+    proximaSesion: document.getElementById('fProxima').value,
+    derivadoA: document.getElementById('fDerivar').value,
+    confidencial: document.getElementById('fConf').checked
+  };
+
+  var btn = document.getElementById('btnGuardar');
+  btn.disabled = true;
+  CCApoyo.registrarIntervencion(datos).then(function() {
+    alert('✓ Intervención registrada');
+    limpiarForm(); cargarKPIs(); cargarMisCasos();
+    btn.disabled = false;
+  }).catch(function(err) { alert('Error: ' + err.message); btn.disabled = false; });
+}
+
+function limpiarForm() {
+  ['fResumen','fCompromisos','fMotivoDetalle','fProxima'].forEach(function(id){ document.getElementById(id).value = ''; });
+  document.getElementById('fSeguimiento').checked = false;
+  document.getElementById('fConf').checked = false;
+  document.getElementById('fDerivar').value = '';
+  document.getElementById('fEstado').value = 'abierto';
+}
+
+function cargarMisCasos() {
+  var uid = ELAuth.user.uid;
+  var opts = { profesionalUid: uid };
+  var e = document.getElementById('fltEstado').value; if (e) opts.estado = e;
+  var m = document.getElementById('fltMotivo').value; if (m) opts.motivo = m;
+  CCApoyo.listarIntervenciones(opts).then(function(items) {
+    var tb = document.getElementById('tbCasos');
+    if (!items.length) { tb.innerHTML = '<tr><td colspan="4" class="empty">Sin casos que coincidan</td></tr>'; return; }
+    tb.innerHTML = items.slice(0, 50).map(function(i) {
+      var conf = i.confidencial ? ' <span class="confidencial-badge">Conf</span>' : '';
+      return '<tr onclick="verDetalle(\'' + esc(i.intId) + '\')" style="cursor:pointer">' +
+        '<td>' + esc(i.fecha) + '</td>' +
+        '<td>' + esc(i.estudianteNombre || '(grupal)') + conf + '<br><span style="font-size:.72rem;color:var(--muted)">' + esc(i.cursoNombre || '') + '</span></td>' +
+        '<td>' + CCApoyo.badgeMotivoHTML(i.motivo) + '</td>' +
+        '<td>' + CCApoyo.badgeEstadoHTML(i.estado) + '</td>' +
+        '</tr>';
+    }).join('');
+  }).catch(function(err) {
+    document.getElementById('tbCasos').innerHTML = '<tr><td colspan="4" class="empty" style="color:#fca5a5">Error: ' + esc(err.message) + '</td></tr>';
+  });
+}
+
+function verDetalle(intId) {
+  CCApoyo.obtenerIntervencion(intId).then(function(d) {
+    if (!d) return;
+    var fecha = new Date(d.fecha);
+    document.getElementById('mTit').textContent = 'Intervención — ' + (isNaN(fecha) ? d.fecha : fecha.toLocaleDateString('es-CL'));
+    document.getElementById('mBody').innerHTML =
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px 20px;margin-bottom:16px">' +
+        '<div><strong style="font-size:.72rem;color:var(--muted);text-transform:uppercase">Estudiante</strong><div>' + esc(d.estudianteNombre || '(grupal)') + '</div></div>' +
+        '<div><strong style="font-size:.72rem;color:var(--muted);text-transform:uppercase">Curso</strong><div>' + esc(d.cursoNombre || '—') + '</div></div>' +
+        '<div><strong style="font-size:.72rem;color:var(--muted);text-transform:uppercase">Tipo</strong><div>' + esc(CCApoyo.TIPO_LABEL[d.tipo] || d.tipo) + '</div></div>' +
+        '<div><strong style="font-size:.72rem;color:var(--muted);text-transform:uppercase">Motivo</strong><div>' + CCApoyo.badgeMotivoHTML(d.motivo) + '</div></div>' +
+        '<div><strong style="font-size:.72rem;color:var(--muted);text-transform:uppercase">Estado</strong><div>' + CCApoyo.badgeEstadoHTML(d.estado) + '</div></div>' +
+        '<div><strong style="font-size:.72rem;color:var(--muted);text-transform:uppercase">Profesional</strong><div>' + esc(d.profesionalNombre) + '</div></div>' +
+      '</div>' +
+      (d.motivoDetalle ? '<h3 style="font-size:.75rem;color:var(--muted);text-transform:uppercase;margin:14px 0 6px">Motivo — detalle</h3><p style="margin:0;color:var(--text)">' + esc(d.motivoDetalle) + '</p>' : '') +
+      '<h3 style="font-size:.75rem;color:var(--muted);text-transform:uppercase;margin:14px 0 6px">Resumen de la sesión</h3><p style="margin:0;white-space:pre-wrap;color:var(--text)">' + esc(d.resumen) + '</p>' +
+      (d.compromisos ? '<h3 style="font-size:.75rem;color:var(--muted);text-transform:uppercase;margin:14px 0 6px">Compromisos / acuerdos</h3><p style="margin:0;white-space:pre-wrap;color:var(--text)">' + esc(d.compromisos) + '</p>' : '') +
+      (d.seguimientoRequerido ? '<p style="margin-top:14px;font-size:.85rem;color:#fbbf24">⚠ Requiere seguimiento' + (d.proximaSesion ? ' — próxima sesión: ' + esc(d.proximaSesion) : '') + '</p>' : '') +
+      (d.derivadoA ? '<p style="margin-top:8px;font-size:.85rem;color:#67e8f9">→ Derivado a: ' + esc(d.derivadoA) + '</p>' : '');
+    document.getElementById('mBg').style.display = 'flex';
+  });
+}
+
+function cerrarModal() { document.getElementById('mBg').style.display = 'none'; }
+document.addEventListener('keydown', function(e){ if (e.key === 'Escape') cerrarModal(); });
+
+if (window.ELAuth && ELAuth.onUserReady) ELAuth.onUserReady(function(u){ if(u) iniciar(); });
 </script>
 </body>
 </html>
