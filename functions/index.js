@@ -2,26 +2,48 @@
  * functions/index.js — Click&Clase
  * Cloud Function que actúa como proxy seguro a Google Gemini API.
  *
- * Secret esperado: GEMINI_API_KEY (puede contener varias keys separadas por coma)
+ * Fuente de API keys y modelo por defecto:
+ *   Firestore → sistema/gemini → { keys: [...], modelo: '...' }
+ *   Las gestiona el admin desde admin.html → sección "Configuración IA".
  *
  * Despliegue:
- *   firebase functions:secrets:set GEMINI_API_KEY
  *   firebase deploy --only functions
  *
  * Endpoint final (vía rewrite en firebase.json):
  *   https://clickyclase.cl/api/ia-asistente
  */
 
-const { onRequest } = require('firebase-functions/v2/https');
-const { defineSecret } = require('firebase-functions/params');
+const { onRequest }    = require('firebase-functions/v2/https');
+const { initializeApp } = require('firebase-admin/app');
+const { getFirestore }  = require('firebase-admin/firestore');
 
-// Secret manejado por Google Secret Manager. NUNCA llega al cliente.
-const GEMINI_API_KEY = defineSecret('GEMINI_API_KEY');
+// Inicializar Firebase Admin (usa credenciales de la propia function)
+try { initializeApp(); } catch (_) { /* ya inicializado */ }
+const _db = getFirestore();
+
+// Cache en memoria de la config IA (se refresca cada 5 min)
+let _cachedIaConfig = null;
+let _cachedAt = 0;
+const _CACHE_TTL_MS = 5 * 60 * 1000;
+
+async function _cargarConfigIA() {
+  const ahora = Date.now();
+  if (_cachedIaConfig && (ahora - _cachedAt) < _CACHE_TTL_MS) return _cachedIaConfig;
+  const snap = await _db.collection('sistema').doc('gemini').get();
+  const data = snap.exists ? (snap.data() || {}) : {};
+  _cachedIaConfig = {
+    keys:   Array.isArray(data.keys) ? data.keys.filter(k => typeof k === 'string' && k.length > 10) : [],
+    modelo: (typeof data.modelo === 'string' && data.modelo.length > 3) ? data.modelo : 'gemini-2.5-flash'
+  };
+  _cachedAt = ahora;
+  return _cachedIaConfig;
+}
 
 const GEMINI_MODEL_DEFAULT = 'gemini-2.5-flash';
 const GEMINI_MODELOS_PERMITIDOS = [
   'gemini-2.5-flash',
   'gemini-2.5-flash-lite',
+  'gemini-2.5-flash-lite-preview-06-17',
   'gemini-2.5-pro'
 ];
 function _geminiUrl(modelo) {
@@ -253,11 +275,11 @@ function getPartesPrueba(datos) {
 exports.iaAsistente = onRequest(
   {
     region: 'us-central1',
-    secrets: [GEMINI_API_KEY],
     timeoutSeconds: 540,    // 9 minutos — sobrado para Gemini
     memory: '1GiB',          // subido de 512MiB para prompts grandes (>40 preguntas)
     cors: true,
-    maxInstances: 10,
+    minInstances: 0,        // sin instancia caliente (costo cero cuando no se usa)
+    maxInstances: 20,       // techo alto para picos de generación simultánea
     invoker: 'public'       // permite llamadas desde el navegador
   },
   async (req, res) => {
@@ -272,16 +294,20 @@ exports.iaAsistente = onRequest(
     if (req.method === 'OPTIONS') return res.status(204).send('');
     if (req.method !== 'POST')   return res.status(405).json({ error: 'Método no permitido' });
 
-    // Pool de API keys
-    const _rawKeys = (GEMINI_API_KEY.value() || '').trim();
-    const apiKeys = _rawKeys.split(',').map(k => k.trim()).filter(k => k.length > 10);
+    // Cargar pool de keys y modelo por defecto desde Firestore (sistema/gemini)
+    // El admin las gestiona desde admin.html → sección "Configuración IA".
+    const iaCfg = await _cargarConfigIA();
+    const apiKeys = iaCfg.keys;
     if (apiKeys.length === 0) {
-      return res.status(500).json({ error: 'GEMINI_API_KEY no configurada en Cloud Functions' });
+      return res.status(500).json({
+        error: 'No hay API keys configuradas en el pool. El admin debe cargarlas en admin.html → Configuración IA.'
+      });
     }
     const apiKeysShuffled = apiKeys
       .map(k => ({ k, r: Math.random() }))
       .sort((a, b) => a.r - b.r)
       .map(x => x.k);
+    const modeloDefectoAdmin = iaCfg.modelo || GEMINI_MODEL_DEFAULT;
 
     const { tipo, datos } = req.body || {};
     if (!tipo) return res.status(400).json({ error: 'Parámetro tipo requerido' });
@@ -309,7 +335,7 @@ exports.iaAsistente = onRequest(
     const modeloPedido = (datos && datos.modelo) ? String(datos.modelo) : '';
     const modeloUsado  = GEMINI_MODELOS_PERMITIDOS.indexOf(modeloPedido) !== -1
                          ? modeloPedido
-                         : GEMINI_MODEL_DEFAULT;
+                         : modeloDefectoAdmin;
 
     // Gemini 2.5 Flash trae "thinking" activo por defecto, que añade 30-60s
     // antes de empezar a escribir. Lo desactivamos para que la prueba formal
