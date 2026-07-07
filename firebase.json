@@ -40,7 +40,8 @@
   },
   "functions": {
     "source": "functions",
-    "runtime": "nodejs22"
+    "runtime": "nodejs22",
+    "serviceAccount": "537489844804-compute@developer.gserviceaccount.com"
   },
   "firestore": {
     "rules": "firestore.rules"
