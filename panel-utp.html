@@ -18,6 +18,7 @@
 <script src="js/roles-permissions.js"></script>
 <script src="js/roles-router.js"></script>
 <script src="js/aprobaciones.js"></script>
+<script src="js/cursos.js"></script>
 <script src="js/cc-store.js"></script>
 <link rel="stylesheet" href="css/panel.css">
 <script src="js/cc-ui.js"></script>
@@ -42,8 +43,16 @@
       <div class="sub" id="s-resumen"></div>
       <div class="kpis" id="kpis"></div>
 
-      <!-- Bandeja de revisión (Fase 1) -->
-      <a href="revisor-bandeja.html" style="display:block;text-decoration:none;margin:16px 0;padding:20px 24px;background:linear-gradient(135deg,rgba(124,58,237,.12),rgba(34,211,238,.08));border:1px solid rgba(124,58,237,.3);border-radius:14px;color:inherit;transition:transform .15s ease;">
+      <!-- Accesos Fase 1 y 2.1 -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0">
+
+        <a href="admin-cursos.html" style="display:block;text-decoration:none;padding:20px 24px;background:linear-gradient(135deg,rgba(16,185,129,.10),rgba(34,197,94,.06));border:1px solid rgba(34,197,94,.3);border-radius:14px;color:inherit">
+          <div style="font-size:.8rem;color:#86efac;font-weight:600;letter-spacing:.6px;text-transform:uppercase">Cursos y roster</div>
+          <div style="font-size:1.35rem;font-weight:700;margin-top:4px">🎓 Gestionar Cursos</div>
+          <div style="font-size:.88rem;color:#94a3b8;margin-top:6px" id="cursosResumen">Crear cursos, cargar estudiantes, asignar docentes por asignatura…</div>
+        </a>
+
+        <a href="revisor-bandeja.html" style="display:block;text-decoration:none;padding:20px 24px;background:linear-gradient(135deg,rgba(124,58,237,.12),rgba(34,211,238,.08));border:1px solid rgba(124,58,237,.3);border-radius:14px;color:inherit;transition:transform .15s ease;">
         <div style="display:flex;align-items:center;justify-content:space-between;gap:16px">
           <div>
             <div style="font-size:.8rem;color:#c4b5fd;font-weight:600;letter-spacing:.6px;text-transform:uppercase">Aprobaciones</div>
@@ -56,6 +65,8 @@
           </div>
         </div>
       </a>
+
+      </div> <!-- fin accesos rápidos Fase 1/2.1 -->
 
       <div class="grid2">
         <div class="card"><h3><span class="material-symbols-outlined">notifications_active</span> Alertas pedagógicas</h3><div id="alertas"></div></div>
@@ -290,6 +301,21 @@ if (window.CCRouter && window.CCRouter.guardPanel) {
         }
       })
       .catch(function () {});
+    // Fase 2.1: contar cursos activos y estudiantes.
+    if (window.CCCursos) {
+      CCCursos.listarCursos({ liceoSlug: liceo }).then(function (cursos) {
+        var lbl = document.getElementById('cursosResumen');
+        if (!lbl) return;
+        var activos = (cursos || []).filter(function(c){ return c.activo !== false; });
+        var totalEst = activos.reduce(function(s, c){ return s + (c.totalEstudiantes || 0); }, 0);
+        if (activos.length === 0) {
+          lbl.textContent = 'Todavía no hay cursos. Creá el primero.';
+        } else {
+          lbl.textContent = activos.length + ' curso' + (activos.length !== 1 ? 's' : '') +
+            ' activos · ' + totalEst + ' estudiantes';
+        }
+      }).catch(function(){});
+    }
   });
 })();
 </script>

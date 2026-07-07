@@ -618,6 +618,11 @@ var ELDB = (function() {
     'aprobacion_material':         'Aprob\u00f3 material',
     'devolucion_material':         'Devolvi\u00f3 material con observaciones',
     'retomar_borrador':            'Retom\u00f3 borrador tras devoluci\u00f3n',
+    // \u2500\u2500 Cursos y roster (Fase 2.1) \u2500\u2500
+    'crear_curso':                 'Cre\u00f3 curso',
+    'editar_curso':                'Edit\u00f3 curso',
+    'editar_roster':               'Edit\u00f3 roster de estudiantes',
+    'asignar_asignatura':          'Asign\u00f3 asignatura a docente',
     'guardar_nomina':              'Guard\u00f3 n\u00f3mina de curso',
     'guardar_notas':               'Guard\u00f3 libro de notas',
     'guardar_asistencia':          'Guard\u00f3 asistencia',

@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cursos y Estudiantes — Click&Clase</title>
+<link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg">
+
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+
+<script src="js/firebase-rest.js"></script>
+<script src="js/firebase-config.js"></script>
+<script src="js/firebase-auth.js"></script>
+<script src="js/firebase-db.js"></script>
+<script src="js/roles-permissions.js"></script>
+<script src="js/roles-router.js"></script>
+<script src="js/cursos.js"></script>
+
+<style>
+:root {
+  --bg: #0b0d1e; --panel: #12162f; --panel2: #1a1f3a;
+  --border: rgba(148,163,184,.15); --text: #e5e7eb; --muted: #94a3b8;
+  --cyan: #22d3ee; --violet: #7c3aed;
+  --success: #22c55e; --warn: #fbbf24; --danger: #ef4444;
+}
+* { box-sizing: border-box; }
+body { margin: 0; font-family: 'Segoe UI', Roboto, Arial, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+.header { padding: 18px 28px; border-bottom: 1px solid var(--border); background: linear-gradient(135deg, rgba(124,58,237,.08), rgba(34,211,238,.06)); display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+.header h1 { margin: 0; font-size: 1.35rem; font-weight: 700; }
+.header .breadcrumb { color: var(--muted); font-size: .82rem; }
+
+.container { max-width: 1500px; margin: 24px auto; padding: 0 24px; }
+
+.grid2 { display: grid; grid-template-columns: 340px 1fr; gap: 24px; }
+@media (max-width: 900px) { .grid2 { grid-template-columns: 1fr; } }
+
+.card { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 16px 18px; }
+.card h3 { margin: 0 0 12px; font-size: .95rem; text-transform: uppercase; letter-spacing: .8px; color: var(--muted); }
+
+.cursos-list { display: flex; flex-direction: column; gap: 6px; max-height: 60vh; overflow-y: auto; }
+.curso-item {
+  padding: 10px 14px; border-radius: 8px; background: rgba(255,255,255,.02);
+  cursor: pointer; border: 1px solid transparent; transition: all .15s;
+}
+.curso-item:hover { background: rgba(255,255,255,.05); }
+.curso-item.active { background: rgba(124,58,237,.12); border-color: rgba(124,58,237,.4); }
+.curso-item .n { font-weight: 700; font-size: 1rem; }
+.curso-item .sub { font-size: .75rem; color: var(--muted); margin-top: 2px; }
+
+.btn { padding: 8px 14px; border-radius: 8px; border: 1px solid var(--border); background: rgba(255,255,255,.04); color: var(--text); cursor: pointer; font-size: .85rem; font-weight: 600; }
+.btn:hover { background: rgba(255,255,255,.08); }
+.btn.primary { background: linear-gradient(135deg, #7c3aed, #22d3ee); color: #fff; border-color: transparent; }
+.btn.success { background: rgba(34,197,94,.15); color: #86efac; border-color: rgba(34,197,94,.35); }
+.btn.danger { background: rgba(239,68,68,.12); color: #fca5a5; border-color: rgba(239,68,68,.35); }
+.btn.small { padding: 4px 8px; font-size: .75rem; }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+
+.tabs { display: flex; gap: 4px; margin-bottom: 16px; border-bottom: 1px solid var(--border); }
+.tab { padding: 10px 16px; background: transparent; border: none; color: var(--muted); cursor: pointer; font-size: .85rem; font-weight: 600; border-bottom: 2px solid transparent; }
+.tab.active { color: var(--cyan); border-bottom-color: var(--cyan); }
+
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+table { width: 100%; border-collapse: collapse; }
+th, td { padding: 8px 12px; text-align: left; border-bottom: 1px solid var(--border); font-size: .85rem; }
+th { background: rgba(255,255,255,.03); font-size: .7rem; text-transform: uppercase; letter-spacing: .8px; color: var(--muted); font-weight: 700; }
+
+input, select, textarea { width: 100%; padding: 8px 10px; border-radius: 7px; background: rgba(255,255,255,.04); border: 1px solid rgba(148,163,184,.2); color: var(--text); font-size: .85rem; font-family: inherit; }
+.fld { margin-bottom: 12px; }
+.fld label { display: block; font-size: .72rem; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 3px; }
+
+.row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
+.row > .fld { flex: 1; min-width: 140px; margin-bottom: 0; }
+
+.empty { padding: 40px; text-align: center; color: var(--muted); font-size: .9rem; }
+
+.badge-rut-ok { color: #86efac; font-size: .72rem; }
+.badge-rut-bad { color: #fca5a5; font-size: .72rem; }
+
+.modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,.7); backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 30px; }
+.modal-bg.abierto { display: flex; }
+.modal { background: var(--panel); border: 1px solid var(--border); border-radius: 14px; width: 100%; max-width: 640px; max-height: 90vh; overflow: hidden; display: flex; flex-direction: column; }
+.modal-head { padding: 18px 22px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+.modal-body { padding: 20px 22px; overflow-y: auto; flex: 1; }
+.modal-foot { padding: 16px 22px; border-top: 1px solid var(--border); display: flex; gap: 10px; justify-content: flex-end; }
+.close-x { background: none; border: none; color: var(--muted); font-size: 1.6rem; cursor: pointer; padding: 0 6px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <div class="breadcrumb">Panel del Encargado</div>
+    <h1>🎓 Cursos y Estudiantes</h1>
+  </div>
+  <div style="display:flex;gap:8px">
+    <a href="panel-utp.html" class="btn">← Panel</a>
+    <button class="btn primary" onclick="abrirModalCurso()">+ Nuevo curso</button>
+  </div>
+</div>
+
+<div class="container">
+  <div class="grid2">
+
+    <!-- Columna izquierda: lista de cursos -->
+    <div class="card">
+      <h3>📚 Cursos del liceo</h3>
+      <div style="margin-bottom:10px">
+        <input type="text" id="filtroCurso" placeholder="Buscar por nivel/letra…" oninput="filtrarCursos()">
+      </div>
+      <div class="cursos-list" id="listaCursos">
+        <div class="empty">⏳ Cargando…</div>
+      </div>
+    </div>
+
+    <!-- Columna derecha: detalle -->
+    <div class="card" id="cardDetalle">
+      <div class="empty" id="detalleVacio">← Elegí un curso para ver su detalle o creá uno nuevo</div>
+
+      <div id="detalle" style="display:none">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:20px;margin-bottom:16px">
+          <div>
+            <h2 style="margin:0;font-size:1.5rem" id="dtNombre"></h2>
+            <div style="color:var(--muted);font-size:.85rem;margin-top:4px" id="dtSubinfo"></div>
+          </div>
+          <div style="display:flex;gap:8px">
+            <button class="btn" onclick="abrirModalCurso(true)">Editar</button>
+            <button class="btn danger" onclick="onDesactivarCurso()">Desactivar</button>
+          </div>
+        </div>
+
+        <div class="tabs">
+          <button class="tab active" onclick="setTab('estudiantes')">👥 Estudiantes</button>
+          <button class="tab" onclick="setTab('asignaturas')">📖 Asignaturas</button>
+          <button class="tab" onclick="setTab('meta')">⚙ Datos generales</button>
+        </div>
+
+        <!-- Tab estudiantes -->
+        <div class="tab-content active" id="tab-estudiantes">
+          <div style="display:flex;justify-content:space-between;gap:10px;margin-bottom:12px;flex-wrap:wrap">
+            <div style="font-size:.9rem;color:var(--muted)" id="totEst">0 estudiantes</div>
+            <div style="display:flex;gap:8px">
+              <button class="btn" onclick="abrirModalImportar()">📥 Importar CSV</button>
+              <button class="btn primary" onclick="abrirModalEstudiante()">+ Agregar</button>
+            </div>
+          </div>
+          <table>
+            <thead><tr><th style="width:40px">N°</th><th>Apellidos y nombre</th><th>RUT</th><th style="width:60px">Sexo</th><th style="width:100px">Acciones</th></tr></thead>
+            <tbody id="tbEst"><tr><td colspan="5" class="empty">Sin estudiantes cargados</td></tr></tbody>
+          </table>
+        </div>
+
+        <!-- Tab asignaturas -->
+        <div class="tab-content" id="tab-asignaturas">
+          <div style="display:flex;justify-content:space-between;gap:10px;margin-bottom:12px">
+            <div style="font-size:.9rem;color:var(--muted)">Docentes asignados por asignatura</div>
+            <button class="btn primary" onclick="abrirModalAsig()">+ Asignar</button>
+          </div>
+          <table>
+            <thead><tr><th>Asignatura</th><th>Docente</th><th style="width:80px">Horas</th><th style="width:80px"></th></tr></thead>
+            <tbody id="tbAsig"><tr><td colspan="4" class="empty">Sin asignaturas asignadas</td></tr></tbody>
+          </table>
+        </div>
+
+        <!-- Tab meta -->
+        <div class="tab-content" id="tab-meta">
+          <div id="metaGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:12px 24px;font-size:.9rem"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Modal crear/editar curso -->
+<div class="modal-bg" id="mCurso">
+  <div class="modal">
+    <div class="modal-head"><h3 style="margin:0;font-size:1.1rem" id="mCursoTit">Nuevo curso</h3><button class="close-x" onclick="cerrar('mCurso')">×</button></div>
+    <div class="modal-body">
+      <div class="row">
+        <div class="fld"><label>Nivel</label><select id="fNivel">
+          <option value="1B">1° Básico</option><option value="2B">2° Básico</option>
+          <option value="3B">3° Básico</option><option value="4B">4° Básico</option>
+          <option value="5B">5° Básico</option><option value="6B">6° Básico</option>
+          <option value="7B">7° Básico</option><option value="8B">8° Básico</option>
+          <option value="1M">1° Medio</option><option value="2M">2° Medio</option>
+          <option value="3M">3° Medio</option><option value="4M">4° Medio</option>
+        </select></div>
+        <div class="fld"><label>Letra</label><input id="fLetra" placeholder="A" maxlength="2" style="text-transform:uppercase"></div>
+        <div class="fld"><label>Año</label><input id="fAnio" type="number" value=""></div>
+      </div>
+      <div class="fld"><label>Profesor/a jefe</label><input id="fJefe" placeholder="Nombre completo del jefe de curso"></div>
+      <div class="fld"><label>Especialidad (solo TP)</label><input id="fEsp" placeholder="Electricidad, Mecánica Automotriz, etc."></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" onclick="cerrar('mCurso')">Cancelar</button>
+      <button class="btn primary" onclick="onGuardarCurso()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal agregar estudiante -->
+<div class="modal-bg" id="mEst">
+  <div class="modal">
+    <div class="modal-head"><h3 style="margin:0;font-size:1.1rem" id="mEstTit">Agregar estudiante</h3><button class="close-x" onclick="cerrar('mEst')">×</button></div>
+    <div class="modal-body">
+      <div class="row">
+        <div class="fld"><label>Nombre(s)</label><input id="eNombre"></div>
+        <div class="fld"><label>Apellido paterno</label><input id="eApP"></div>
+        <div class="fld"><label>Apellido materno</label><input id="eApM"></div>
+      </div>
+      <div class="row">
+        <div class="fld"><label>RUT</label><input id="eRut" placeholder="12.345.678-9"></div>
+        <div class="fld"><label>Sexo</label><select id="eSexo"><option value="">—</option><option>F</option><option>M</option><option>Otro</option></select></div>
+        <div class="fld"><label>Fecha nacimiento</label><input id="eFn" type="date"></div>
+      </div>
+      <div class="fld"><label>Nombre del apoderado</label><input id="eApodN"></div>
+      <div class="row">
+        <div class="fld"><label>Teléfono apoderado</label><input id="eApodT"></div>
+        <div class="fld"><label>Email apoderado</label><input id="eApodE"></div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" onclick="cerrar('mEst')">Cancelar</button>
+      <button class="btn primary" onclick="onGuardarEstudiante()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal importar CSV -->
+<div class="modal-bg" id="mCSV">
+  <div class="modal">
+    <div class="modal-head"><h3 style="margin:0;font-size:1.1rem">Importar estudiantes desde CSV</h3><button class="close-x" onclick="cerrar('mCSV')">×</button></div>
+    <div class="modal-body">
+      <p style="color:var(--muted);font-size:.85rem">Pegá el CSV o subilo. Formato esperado:</p>
+      <pre style="background:rgba(255,255,255,.04);padding:10px;border-radius:6px;font-size:.75rem;color:#c4b5fd">nombre,apellido_p,apellido_m,rut,sexo,fecha_nac
+Ana María,González,Pérez,12345678-9,F,2010-05-14
+Juan,Muñoz,Silva,15678234-K,M,2010-07-22</pre>
+      <div class="fld" style="margin-top:12px">
+        <label>Subir archivo (opcional)</label>
+        <input type="file" id="csvArchivo" accept=".csv,.txt" onchange="onLeerCsvArchivo()">
+      </div>
+      <div class="fld"><label>O pegá el contenido</label><textarea id="csvTexto" rows="10" placeholder="nombre,apellido_p,apellido_m,rut..."></textarea></div>
+      <p style="color:var(--muted);font-size:.78rem">⚠ Esto <strong>reemplaza</strong> el roster completo del curso.</p>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" onclick="cerrar('mCSV')">Cancelar</button>
+      <button class="btn primary" onclick="onImportarCSV()">Importar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal asignar asignatura -->
+<div class="modal-bg" id="mAsig">
+  <div class="modal">
+    <div class="modal-head"><h3 style="margin:0;font-size:1.1rem">Asignar asignatura</h3><button class="close-x" onclick="cerrar('mAsig')">×</button></div>
+    <div class="modal-body">
+      <div class="fld"><label>Asignatura</label><select id="aAsig">
+        <option value="">— Elegir —</option>
+        <option>Lenguaje y Comunicación</option>
+        <option>Matemática</option>
+        <option>Ciencias Naturales</option>
+        <option>Biología</option>
+        <option>Física</option>
+        <option>Química</option>
+        <option>Historia, Geografía y Cs. Sociales</option>
+        <option>Educación Ciudadana</option>
+        <option>Filosofía</option>
+        <option>Inglés</option>
+        <option>Educación Física y Salud</option>
+        <option>Artes Visuales</option>
+        <option>Música</option>
+        <option>Tecnología</option>
+        <option>Orientación</option>
+        <option>Religión</option>
+        <option>Ciencias para la Ciudadanía</option>
+      </select></div>
+      <div class="row">
+        <div class="fld"><label>Nombre del docente</label><input id="aDocenteN" placeholder="Ana Profe"></div>
+        <div class="fld"><label>Horas semanales</label><input id="aHoras" type="number" value="3"></div>
+      </div>
+      <div class="fld"><label>Email del docente (opcional)</label><input id="aDocenteE" placeholder="ana@salesianostalca.cl"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" onclick="cerrar('mAsig')">Cancelar</button>
+      <button class="btn primary" onclick="onGuardarAsig()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+if (window.CCRouter && window.CCRouter.guardPanel) {
+  CCRouter.guardPanel(['admin','director','rector','admin_colegio','utp']);
+}
+
+// ── Estado ───────────────────────────────────────────────────
+var _cursos = [];
+var _cursoActivo = null;
+var _estudianteEditando = null;
+var _modoEdicionCurso = false;
+
+function esc(s) { return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function cargar() {
+  var u = ELAuth.user;
+  if (!u) return;
+  var liceo = u.liceoSlug || u.liceoPrincipal || '';
+  document.getElementById('fAnio').value = new Date().getFullYear();
+  CCCursos.listarCursos({ liceoSlug: liceo, soloActivos: false }).then(function(cs) {
+    _cursos = cs || [];
+    renderLista();
+  }).catch(function(err) {
+    document.getElementById('listaCursos').innerHTML =
+      '<div class="empty" style="color:#fca5a5">Error: ' + esc(err.message) + '</div>';
+  });
+}
+
+function filtrarCursos() {
+  var q = (document.getElementById('filtroCurso').value || '').toLowerCase();
+  renderLista(q);
+}
+
+function renderLista(q) {
+  q = q || '';
+  var cont = document.getElementById('listaCursos');
+  var lista = _cursos.filter(function(c) {
+    if (!q) return true;
+    return ((c.nombreCompleto || '').toLowerCase().indexOf(q) !== -1) ||
+           ((c.nivel + c.letra || '').toLowerCase().indexOf(q) !== -1);
+  });
+  if (!lista.length) {
+    cont.innerHTML = '<div class="empty">Sin cursos. Creá el primero con “+ Nuevo curso”.</div>';
+    return;
+  }
+  cont.innerHTML = lista.map(function(c) {
+    var act = (_cursoActivo && _cursoActivo.cursoId === c.cursoId) ? ' active' : '';
+    var inactivo = c.activo === false ? ' <span style="color:#fca5a5;font-size:.7rem">(inactivo)</span>' : '';
+    return '<div class="curso-item' + act + '" onclick="seleccionarCurso(\'' + c.cursoId + '\')">' +
+      '<div class="n">' + esc(c.nombreCompleto || (c.nivel + c.letra)) + inactivo + '</div>' +
+      '<div class="sub">' + esc(c.anio) + ' · ' + (c.totalEstudiantes || 0) + ' estudiantes' +
+        (c.jefeNombre ? ' · Jefe: ' + esc(c.jefeNombre) : '') + '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function seleccionarCurso(cursoId) {
+  _cursoActivo = _cursos.find(function(c) { return c.cursoId === cursoId; });
+  renderLista(document.getElementById('filtroCurso').value || '');
+  document.getElementById('detalleVacio').style.display = 'none';
+  document.getElementById('detalle').style.display = 'block';
+  renderDetalle();
+}
+
+function renderDetalle() {
+  var c = _cursoActivo;
+  if (!c) return;
+  document.getElementById('dtNombre').textContent = c.nombreCompleto || (c.nivel + c.letra);
+  document.getElementById('dtSubinfo').innerHTML =
+    esc(c.liceoSlug) + ' · Año ' + esc(c.anio) +
+    (c.jefeNombre ? ' · <strong>Jefe:</strong> ' + esc(c.jefeNombre) : '') +
+    (c.especialidad ? ' · ' + esc(c.especialidad) : '');
+
+  // Estudiantes
+  var ests = c.estudiantes || [];
+  document.getElementById('totEst').textContent = ests.length + ' estudiante' + (ests.length !== 1 ? 's' : '');
+  var tbEst = document.getElementById('tbEst');
+  if (!ests.length) {
+    tbEst.innerHTML = '<tr><td colspan="5" class="empty">Sin estudiantes. Agregá manualmente o importá CSV.</td></tr>';
+  } else {
+    tbEst.innerHTML = ests.map(function(e, i) {
+      var nomCompleto = [e.apellidoP, e.apellidoM].filter(Boolean).join(' ') + ', ' + (e.nombre || '');
+      var badge = e.rut ? (e.rutValido ? '<span class="badge-rut-ok">✓</span>' : '<span class="badge-rut-bad">?</span>') : '';
+      return '<tr>' +
+        '<td>' + e.ordinal + '</td>' +
+        '<td>' + esc(nomCompleto) + '</td>' +
+        '<td>' + esc(e.rut || '—') + ' ' + badge + '</td>' +
+        '<td>' + esc(e.sexo || '—') + '</td>' +
+        '<td>' +
+          '<button class="btn small" onclick="abrirModalEstudiante(' + e.ordinal + ')">✎</button> ' +
+          '<button class="btn small danger" onclick="onEliminarEst(' + e.ordinal + ')">×</button>' +
+        '</td>' +
+        '</tr>';
+    }).join('');
+  }
+
+  // Asignaturas
+  var asigs = c.asignaturasAsignadas || [];
+  var tbAsig = document.getElementById('tbAsig');
+  if (!asigs.length) {
+    tbAsig.innerHTML = '<tr><td colspan="4" class="empty">Sin asignaturas asignadas</td></tr>';
+  } else {
+    tbAsig.innerHTML = asigs.map(function(a) {
+      return '<tr>' +
+        '<td>' + esc(a.asignatura) + '</td>' +
+        '<td>' + esc(a.docenteNombre || a.docenteEmail || '—') + '</td>' +
+        '<td>' + (a.horasSemanales || 0) + 'h</td>' +
+        '<td><button class="btn small danger" onclick="onQuitarAsig(\'' + esc(a.asignatura) + '\')">×</button></td>' +
+        '</tr>';
+    }).join('');
+  }
+
+  // Meta
+  document.getElementById('metaGrid').innerHTML =
+    '<div><strong>Nivel:</strong> ' + esc(c.nivel) + '</div>' +
+    '<div><strong>Letra:</strong> ' + esc(c.letra) + '</div>' +
+    '<div><strong>Año:</strong> ' + esc(c.anio) + '</div>' +
+    '<div><strong>Estado:</strong> ' + (c.activo === false ? 'Inactivo' : 'Activo') + '</div>' +
+    '<div><strong>Total estudiantes:</strong> ' + (c.totalEstudiantes || 0) + '</div>' +
+    '<div><strong>Especialidad:</strong> ' + (esc(c.especialidad) || '—') + '</div>' +
+    '<div><strong>Creado:</strong> ' + (c.creadoEn ? new Date(c.creadoEn).toLocaleDateString('es-CL') : '—') + '</div>' +
+    '<div><strong>Actualizado:</strong> ' + (c.actualizadoEn ? new Date(c.actualizadoEn).toLocaleDateString('es-CL') : '—') + '</div>';
+}
+
+// ── Tabs ─────────────────────────────────────────────────────
+function setTab(id) {
+  document.querySelectorAll('.tab').forEach(function(t){ t.classList.remove('active'); });
+  document.querySelectorAll('.tab-content').forEach(function(t){ t.classList.remove('active'); });
+  event.target.classList.add('active');
+  document.getElementById('tab-' + id).classList.add('active');
+}
+
+// ── Modales ─────────────────────────────────────────────────
+function abrir(id) { document.getElementById(id).classList.add('abierto'); }
+function cerrar(id) { document.getElementById(id).classList.remove('abierto'); }
+
+function abrirModalCurso(edicion) {
+  _modoEdicionCurso = !!edicion;
+  document.getElementById('mCursoTit').textContent = edicion ? 'Editar curso' : 'Nuevo curso';
+  if (edicion && _cursoActivo) {
+    document.getElementById('fNivel').value = _cursoActivo.nivel;
+    document.getElementById('fLetra').value = _cursoActivo.letra;
+    document.getElementById('fAnio').value = _cursoActivo.anio;
+    document.getElementById('fJefe').value = _cursoActivo.jefeNombre || '';
+    document.getElementById('fEsp').value = _cursoActivo.especialidad || '';
+    document.getElementById('fNivel').disabled = true;
+    document.getElementById('fLetra').disabled = true;
+    document.getElementById('fAnio').disabled = true;
+  } else {
+    document.getElementById('fNivel').disabled = false;
+    document.getElementById('fLetra').disabled = false;
+    document.getElementById('fAnio').disabled = false;
+    document.getElementById('fNivel').value = '1M';
+    document.getElementById('fLetra').value = '';
+    document.getElementById('fJefe').value = '';
+    document.getElementById('fEsp').value = '';
+    document.getElementById('fAnio').value = new Date().getFullYear();
+  }
+  abrir('mCurso');
+}
+
+function onGuardarCurso() {
+  var u = ELAuth.user;
+  var liceo = u.liceoSlug || u.liceoPrincipal || '';
+  var datos = {
+    liceoSlug:    liceo,
+    nivel:        document.getElementById('fNivel').value,
+    letra:        document.getElementById('fLetra').value.toUpperCase(),
+    anio:         parseInt(document.getElementById('fAnio').value, 10),
+    jefeNombre:   document.getElementById('fJefe').value.trim(),
+    especialidad: document.getElementById('fEsp').value.trim()
+  };
+  var promesa;
+  if (_modoEdicionCurso && _cursoActivo) {
+    promesa = CCCursos.actualizarCurso(_cursoActivo.cursoId, {
+      jefeNombre:   datos.jefeNombre,
+      especialidad: datos.especialidad
+    });
+  } else {
+    promesa = CCCursos.crearCurso(datos);
+  }
+  promesa.then(function() {
+    cerrar('mCurso');
+    cargar();
+  }).catch(function(err) { alert('Error: ' + err.message); });
+}
+
+function onDesactivarCurso() {
+  if (!_cursoActivo) return;
+  if (!confirm('Desactivar el curso ' + _cursoActivo.nombreCompleto + '? No se elimina, solo se marca como inactivo.')) return;
+  CCCursos.actualizarCurso(_cursoActivo.cursoId, { activo: false }).then(cargar);
+}
+
+// ── Estudiantes ─────────────────────────────────────────────
+function abrirModalEstudiante(ordinal) {
+  _estudianteEditando = null;
+  if (ordinal && _cursoActivo) {
+    var e = (_cursoActivo.estudiantes || []).find(function(x){ return x.ordinal === ordinal; });
+    if (e) {
+      _estudianteEditando = e;
+      document.getElementById('mEstTit').textContent = 'Editar estudiante';
+      document.getElementById('eNombre').value = e.nombre || '';
+      document.getElementById('eApP').value = e.apellidoP || '';
+      document.getElementById('eApM').value = e.apellidoM || '';
+      document.getElementById('eRut').value = e.rut || '';
+      document.getElementById('eSexo').value = e.sexo || '';
+      document.getElementById('eFn').value = e.fechaNac || '';
+      document.getElementById('eApodN').value = e.apoderadoNombre || '';
+      document.getElementById('eApodT').value = e.apoderadoTel || '';
+      document.getElementById('eApodE').value = e.apoderadoEmail || '';
+    }
+  } else {
+    document.getElementById('mEstTit').textContent = 'Agregar estudiante';
+    ['eNombre','eApP','eApM','eRut','eSexo','eFn','eApodN','eApodT','eApodE'].forEach(function(id){ document.getElementById(id).value = ''; });
+  }
+  abrir('mEst');
+}
+
+function onGuardarEstudiante() {
+  if (!_cursoActivo) return;
+  var datos = {
+    nombre:          document.getElementById('eNombre').value.trim(),
+    apellidoP:       document.getElementById('eApP').value.trim(),
+    apellidoM:       document.getElementById('eApM').value.trim(),
+    rut:             document.getElementById('eRut').value.trim(),
+    sexo:            document.getElementById('eSexo').value,
+    fechaNac:        document.getElementById('eFn').value,
+    apoderadoNombre: document.getElementById('eApodN').value.trim(),
+    apoderadoTel:    document.getElementById('eApodT').value.trim(),
+    apoderadoEmail:  document.getElementById('eApodE').value.trim()
+  };
+  if (!datos.nombre || !datos.apellidoP) {
+    alert('Nombre y apellido paterno son obligatorios');
+    return;
+  }
+  var promesa = _estudianteEditando
+    ? CCCursos.actualizarEstudiante(_cursoActivo.cursoId, _estudianteEditando.ordinal, datos)
+    : CCCursos.agregarEstudiante(_cursoActivo.cursoId, datos);
+  promesa.then(function() {
+    cerrar('mEst');
+    return CCCursos.obtenerCurso(_cursoActivo.cursoId);
+  }).then(function(c) {
+    _cursoActivo = c;
+    // Reemplazar en el array local para no recargar todo
+    var idx = _cursos.findIndex(function(x){ return x.cursoId === c.cursoId; });
+    if (idx !== -1) _cursos[idx] = c;
+    renderLista(document.getElementById('filtroCurso').value || '');
+    renderDetalle();
+  }).catch(function(err) { alert('Error: ' + err.message); });
+}
+
+function onEliminarEst(ordinal) {
+  if (!_cursoActivo) return;
+  var e = (_cursoActivo.estudiantes || []).find(function(x){ return x.ordinal === ordinal; });
+  if (!e) return;
+  if (!confirm('Eliminar a ' + e.nombre + ' ' + e.apellidoP + ' del roster?')) return;
+  CCCursos.eliminarEstudiante(_cursoActivo.cursoId, ordinal).then(function() {
+    return CCCursos.obtenerCurso(_cursoActivo.cursoId);
+  }).then(function(c) {
+    _cursoActivo = c;
+    var idx = _cursos.findIndex(function(x){ return x.cursoId === c.cursoId; });
+    if (idx !== -1) _cursos[idx] = c;
+    renderLista();
+    renderDetalle();
+  });
+}
+
+// ── CSV ─────────────────────────────────────────────────────
+function abrirModalImportar() {
+  document.getElementById('csvTexto').value = '';
+  document.getElementById('csvArchivo').value = '';
+  abrir('mCSV');
+}
+
+function onLeerCsvArchivo() {
+  var f = document.getElementById('csvArchivo').files[0];
+  if (!f) return;
+  var r = new FileReader();
+  r.onload = function(e) { document.getElementById('csvTexto').value = e.target.result; };
+  r.readAsText(f);
+}
+
+function onImportarCSV() {
+  if (!_cursoActivo) return;
+  var csv = document.getElementById('csvTexto').value;
+  if (!csv.trim()) { alert('Pegá el CSV o subilo'); return; }
+  if (!confirm('Esto reemplaza el roster completo. Confirmás?')) return;
+  CCCursos.importarEstudiantesCSV(_cursoActivo.cursoId, csv).then(function() {
+    cerrar('mCSV');
+    return CCCursos.obtenerCurso(_cursoActivo.cursoId);
+  }).then(function(c) {
+    _cursoActivo = c;
+    var idx = _cursos.findIndex(function(x){ return x.cursoId === c.cursoId; });
+    if (idx !== -1) _cursos[idx] = c;
+    renderLista();
+    renderDetalle();
+    alert('✓ Importados ' + (c.estudiantes||[]).length + ' estudiantes');
+  }).catch(function(err) { alert('Error: ' + err.message); });
+}
+
+// ── Asignaturas ─────────────────────────────────────────────
+function abrirModalAsig() {
+  document.getElementById('aAsig').value = '';
+  document.getElementById('aDocenteN').value = '';
+  document.getElementById('aDocenteE').value = '';
+  document.getElementById('aHoras').value = '3';
+  abrir('mAsig');
+}
+
+function onGuardarAsig() {
+  if (!_cursoActivo) return;
+  var datos = {
+    asignatura:    document.getElementById('aAsig').value,
+    docenteNombre: document.getElementById('aDocenteN').value.trim(),
+    docenteEmail:  document.getElementById('aDocenteE').value.trim(),
+    horasSemanales: parseInt(document.getElementById('aHoras').value, 10) || 0
+  };
+  if (!datos.asignatura) { alert('Elegí una asignatura'); return; }
+  CCCursos.asignarAsignatura(_cursoActivo.cursoId, datos).then(function() {
+    cerrar('mAsig');
+    return CCCursos.obtenerCurso(_cursoActivo.cursoId);
+  }).then(function(c) {
+    _cursoActivo = c;
+    renderDetalle();
+  }).catch(function(err) { alert('Error: ' + err.message); });
+}
+
+function onQuitarAsig(asig) {
+  if (!_cursoActivo) return;
+  if (!confirm('Quitar asignatura ' + asig + ' del curso?')) return;
+  CCCursos.desasignarAsignatura(_cursoActivo.cursoId, asig).then(function() {
+    return CCCursos.obtenerCurso(_cursoActivo.cursoId);
+  }).then(function(c) {
+    _cursoActivo = c;
+    renderDetalle();
+  });
+}
+
+// ── Cerrar modales con Escape ───────────────────────────────
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    ['mCurso','mEst','mCSV','mAsig'].forEach(function(id){ cerrar(id); });
+  }
+});
+
+if (window.ELAuth && ELAuth.onUserReady) {
+  ELAuth.onUserReady(function(u) { if (u) cargar(); });
+}
+</script>
+
+</body>
+</html>
