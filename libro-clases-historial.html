@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Historial del Libro — Click&Clase</title>
+<link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg">
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="js/firebase-rest.js"></script>
+<script src="js/firebase-config.js"></script>
+<script src="js/firebase-auth.js"></script>
+<script src="js/firebase-db.js"></script>
+<script src="js/roles-permissions.js"></script>
+<script src="js/roles-router.js"></script>
+<script src="js/cursos.js"></script>
+<script src="js/libro-clases.js"></script>
+<style>
+:root { --bg: #0b0d1e; --panel: #12162f; --border: rgba(148,163,184,.15); --text: #e5e7eb; --muted: #94a3b8; --cyan: #22d3ee; --violet: #7c3aed; }
+* { box-sizing: border-box; }
+body { margin: 0; font-family: 'Segoe UI', Roboto, Arial, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+.header { padding: 18px 28px; border-bottom: 1px solid var(--border); background: linear-gradient(135deg, rgba(124,58,237,.08), rgba(34,211,238,.06)); display: flex; justify-content: space-between; align-items: center; }
+.header h1 { margin: 0; font-size: 1.35rem; font-weight: 700; }
+.breadcrumb { color: var(--muted); font-size: .82rem; }
+.container { max-width: 1300px; margin: 24px auto; padding: 0 24px; }
+.card { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 16px 20px; }
+.filtros { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 20px; }
+.fld label { display: block; font-size: .72rem; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 4px; }
+input, select { width: 100%; padding: 8px 10px; border-radius: 7px; background: rgba(255,255,255,.04); border: 1px solid rgba(148,163,184,.2); color: var(--text); font-size: .85rem; }
+.btn { padding: 8px 14px; border-radius: 7px; border: 1px solid var(--border); background: rgba(255,255,255,.04); color: var(--text); cursor: pointer; font-size: .82rem; font-weight: 600; text-decoration: none; display: inline-block; }
+.btn:hover { background: rgba(255,255,255,.08); }
+table { width: 100%; border-collapse: collapse; }
+th, td { padding: 10px 12px; border-bottom: 1px solid var(--border); font-size: .86rem; text-align: left; }
+th { background: rgba(255,255,255,.03); font-size: .7rem; text-transform: uppercase; letter-spacing: .8px; color: var(--muted); font-weight: 700; }
+.empty { padding: 60px; text-align: center; color: var(--muted); }
+.chip { display: inline-block; padding: 3px 9px; border-radius: 999px; font-size: .7rem; font-weight: 700; }
+.chip.firmado { background: rgba(34,197,94,.12); color: #86efac; border: 1px solid rgba(34,197,94,.35); }
+.chip.pendiente { background: rgba(251,191,36,.12); color: #fbbf24; border: 1px solid rgba(251,191,36,.35); }
+</style>
+</head>
+<body>
+<div class="header">
+  <div><div class="breadcrumb">Docente</div><h1>📅 Historial del Libro</h1></div>
+  <div style="display:flex;gap:8px">
+    <a href="libro-clases.html" class="btn">← Nueva clase</a>
+    <a href="panel-profesor.html" class="btn">Panel</a>
+  </div>
+</div>
+
+<div class="container">
+  <div class="card">
+    <div class="filtros">
+      <div class="fld"><label>Curso</label><select id="fCurso"><option value="">Todos</option></select></div>
+      <div class="fld"><label>Desde</label><input type="date" id="fDesde"></div>
+      <div class="fld"><label>Hasta</label><input type="date" id="fHasta"></div>
+      <div class="fld"><label>&nbsp;</label><button class="btn" onclick="cargar()" style="width:100%">🔍 Filtrar</button></div>
+    </div>
+    <table>
+      <thead><tr><th>Fecha</th><th>Curso</th><th>Asignatura</th><th style="width:80px">P/A/T/J</th><th>Contenido del día</th><th style="width:120px">Estado</th></tr></thead>
+      <tbody id="tbody"><tr><td colspan="6" class="empty">⏳ Cargando…</td></tr></tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+if (window.CCRouter && window.CCRouter.guardPanel) {
+  CCRouter.guardPanel(['profesor','jefe_curso','utp','encargado_area','pie_edu']);
+}
+
+function esc(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function iniciar() {
+  var hoy = new Date(); var hace30 = new Date(hoy.getTime() - 30*24*60*60*1000);
+  document.getElementById('fDesde').value = hace30.toISOString().slice(0,10);
+  document.getElementById('fHasta').value = hoy.toISOString().slice(0,10);
+  CCCursos.misCursos().then(function(cursos) {
+    var sel = document.getElementById('fCurso');
+    sel.innerHTML = '<option value="">Todos</option>' +
+      (cursos || []).map(function(c) {
+        return '<option value="' + esc(c.cursoId) + '">' + esc(c.nombreCompleto) + '</option>';
+      }).join('');
+  });
+  cargar();
+}
+
+function cargar() {
+  var opts = {
+    docenteUid: ELAuth.user ? ELAuth.user.uid : '',
+    cursoId: document.getElementById('fCurso').value,
+    desde: document.getElementById('fDesde').value,
+    hasta: document.getElementById('fHasta').value
+  };
+  CCLibroClases.listarRegistros(opts).then(function(regs) {
+    var tb = document.getElementById('tbody');
+    if (!regs || !regs.length) {
+      tb.innerHTML = '<tr><td colspan="6" class="empty">Sin registros en el período seleccionado</td></tr>';
+      return;
+    }
+    tb.innerHTML = regs.map(function(r) {
+      var cont = (r.contenidoDelDia || '').substring(0, 80);
+      if ((r.contenidoDelDia || '').length > 80) cont += '…';
+      var chip = r.firmado
+        ? '<span class="chip firmado">✍ Firmado</span>'
+        : '<span class="chip pendiente">Pendiente</span>';
+      return '<tr>' +
+        '<td>' + esc(r.fecha) + '</td>' +
+        '<td>' + esc(r.cursoNombre || r.cursoId) + '</td>' +
+        '<td>' + esc(r.asignatura) + '</td>' +
+        '<td style="font-size:.78rem">' +
+          (r.totalPresentes||0) + '/' + (r.totalAusentes||0) + '/' +
+          (r.totalAtrasados||0) + '/' + (r.totalJustificados||0) +
+        '</td>' +
+        '<td style="color:var(--muted);font-size:.82rem">' + esc(cont) + '</td>' +
+        '<td>' + chip + '</td>' +
+        '</tr>';
+    }).join('');
+  }).catch(function(err) {
+    document.getElementById('tbody').innerHTML =
+      '<tr><td colspan="6" class="empty" style="color:#fca5a5">Error: ' + esc(err.message) + '</td></tr>';
+  });
+}
+
+if (window.ELAuth && ELAuth.onUserReady) {
+  ELAuth.onUserReady(function(u){ if(u) iniciar(); });
+}
+</script>
+</body>
+</html>

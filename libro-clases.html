@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Libro de Clases — Click&Clase</title>
+<link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg">
+
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="js/firebase-rest.js"></script>
+<script src="js/firebase-config.js"></script>
+<script src="js/firebase-auth.js"></script>
+<script src="js/firebase-db.js"></script>
+<script src="js/roles-permissions.js"></script>
+<script src="js/roles-router.js"></script>
+<script src="js/cursos.js"></script>
+<script src="js/libro-clases.js"></script>
+
+<style>
+:root {
+  --bg: #0b0d1e; --panel: #12162f; --panel2: #1a1f3a;
+  --border: rgba(148,163,184,.15); --text: #e5e7eb; --muted: #94a3b8;
+  --cyan: #22d3ee; --violet: #7c3aed;
+  --presente: #86efac; --ausente: #fca5a5; --atrasado: #fbbf24; --justif: #93c5fd;
+}
+* { box-sizing: border-box; }
+body { margin: 0; font-family: 'Segoe UI', Roboto, Arial, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+.header { padding: 18px 28px; border-bottom: 1px solid var(--border); background: linear-gradient(135deg, rgba(124,58,237,.08), rgba(34,211,238,.06)); display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+.header h1 { margin: 0; font-size: 1.35rem; font-weight: 700; }
+.breadcrumb { color: var(--muted); font-size: .82rem; }
+
+.container { max-width: 1400px; margin: 24px auto; padding: 0 24px; }
+
+.card { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 18px 22px; margin-bottom: 18px; }
+
+.selector {
+  display: grid;
+  grid-template-columns: 2fr 2fr 1fr auto;
+  gap: 14px;
+  align-items: flex-end;
+}
+.fld label { display: block; font-size: .72rem; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 4px; }
+input, select, textarea { width: 100%; padding: 9px 11px; border-radius: 8px; background: rgba(255,255,255,.04); border: 1px solid rgba(148,163,184,.2); color: var(--text); font-size: .9rem; font-family: inherit; }
+
+.btn { padding: 10px 18px; border-radius: 8px; border: 1px solid var(--border); background: rgba(255,255,255,.04); color: var(--text); cursor: pointer; font-size: .85rem; font-weight: 600; white-space: nowrap; }
+.btn:hover { background: rgba(255,255,255,.08); }
+.btn.primary { background: linear-gradient(135deg, #7c3aed, #22d3ee); color: #fff; border-color: transparent; }
+.btn.success { background: rgba(34,197,94,.15); color: #86efac; border-color: rgba(34,197,94,.35); }
+.btn.danger { background: rgba(239,68,68,.12); color: #fca5a5; border-color: rgba(239,68,68,.35); }
+.btn.small { padding: 4px 10px; font-size: .74rem; }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+
+.stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 18px; }
+.stat { padding: 12px 14px; border-radius: 10px; background: var(--panel); border: 1px solid var(--border); }
+.stat .v { font-size: 1.8rem; font-weight: 800; }
+.stat .l { font-size: .68rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 600; margin-top: 2px; }
+.stat.P .v { color: var(--presente); }
+.stat.A .v { color: var(--ausente); }
+.stat.T .v { color: var(--atrasado); }
+.stat.J .v { color: var(--justif); }
+
+.asist-tabla { width: 100%; border-collapse: separate; border-spacing: 0; }
+.asist-tabla th, .asist-tabla td { padding: 8px 10px; border-bottom: 1px solid var(--border); font-size: .88rem; text-align: left; }
+.asist-tabla th { background: rgba(255,255,255,.03); font-size: .7rem; text-transform: uppercase; letter-spacing: .8px; color: var(--muted); font-weight: 700; }
+.asist-tabla tr:hover td { background: rgba(255,255,255,.02); }
+
+.estado-btns { display: inline-flex; gap: 4px; }
+.est-btn {
+  width: 34px; height: 34px; border-radius: 8px; border: 1px solid transparent;
+  background: rgba(255,255,255,.04); color: var(--muted); cursor: pointer;
+  font-weight: 800; font-size: .95rem;
+}
+.est-btn:hover { background: rgba(255,255,255,.08); }
+.est-btn.act.P { background: rgba(134,239,172,.2); color: var(--presente); border-color: rgba(134,239,172,.45); }
+.est-btn.act.A { background: rgba(252,165,165,.2); color: var(--ausente); border-color: rgba(252,165,165,.45); }
+.est-btn.act.T { background: rgba(251,191,36,.2); color: var(--atrasado); border-color: rgba(251,191,36,.45); }
+.est-btn.act.J { background: rgba(147,197,253,.2); color: var(--justif); border-color: rgba(147,197,253,.45); }
+
+.firmado-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 4px 10px; border-radius: 999px;
+  background: rgba(34,197,94,.15); color: #86efac;
+  border: 1px solid rgba(34,197,94,.35);
+  font-size: .78rem; font-weight: 700;
+}
+
+.empty { padding: 60px; text-align: center; color: var(--muted); font-size: .95rem; }
+
+.acciones-fila { display: flex; gap: 10px; justify-content: flex-end; align-items: center; padding-top: 16px; border-top: 1px solid var(--border); margin-top: 16px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <div class="breadcrumb">Docente</div>
+    <h1>📖 Libro de Clases</h1>
+  </div>
+  <div style="display:flex;gap:8px">
+    <a href="panel-profesor.html" class="btn">← Panel</a>
+    <a href="libro-clases-historial.html" class="btn">📅 Historial</a>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- Selector curso + asignatura + fecha -->
+  <div class="card">
+    <div class="selector">
+      <div class="fld">
+        <label>Curso</label>
+        <select id="selCurso" onchange="onCambioCurso()">
+          <option value="">— Elegir —</option>
+        </select>
+      </div>
+      <div class="fld">
+        <label>Asignatura</label>
+        <select id="selAsig" onchange="onCambioAsig()">
+          <option value="">— Elegir curso primero —</option>
+        </select>
+      </div>
+      <div class="fld">
+        <label>Fecha</label>
+        <input type="date" id="selFecha">
+      </div>
+      <div class="fld">
+        <button class="btn primary" onclick="abrirRegistro()">📋 Abrir registro</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Registro del día -->
+  <div id="registroWrap" style="display:none">
+
+    <div id="firmadoBanner" style="display:none;margin-bottom:16px;padding:12px 18px;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.35);border-radius:10px">
+      <span class="firmado-badge">✍ Firmado</span>
+      <span style="color:var(--muted);font-size:.86rem;margin-left:12px" id="firmadoDetalle"></span>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat P"><div class="v" id="tP">0</div><div class="l">Presentes</div></div>
+      <div class="stat A"><div class="v" id="tA">0</div><div class="l">Ausentes</div></div>
+      <div class="stat T"><div class="v" id="tT">0</div><div class="l">Atrasados</div></div>
+      <div class="stat J"><div class="v" id="tJ">0</div><div class="l">Justificados</div></div>
+    </div>
+
+    <div class="card">
+      <h3 style="margin:0 0 12px;font-size:.9rem;text-transform:uppercase;letter-spacing:.8px;color:var(--muted)">📝 Contenido del día</h3>
+      <textarea id="txtContenido" rows="3" placeholder="¿Qué se trabajó hoy? Objetivos, temas, actividades…"></textarea>
+      <h3 style="margin:16px 0 8px;font-size:.9rem;text-transform:uppercase;letter-spacing:.8px;color:var(--muted)">🔎 Observaciones generales</h3>
+      <textarea id="txtObs" rows="2" placeholder="Situaciones especiales, tareas pedidas, próximas evaluaciones…"></textarea>
+    </div>
+
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <h3 style="margin:0;font-size:.9rem;text-transform:uppercase;letter-spacing:.8px;color:var(--muted)">👥 Asistencia</h3>
+        <div style="display:flex;gap:6px">
+          <button class="btn small" onclick="marcarTodos('P')">Todos P</button>
+          <button class="btn small" onclick="marcarTodos('A')">Todos A</button>
+        </div>
+      </div>
+      <table class="asist-tabla">
+        <thead>
+          <tr><th style="width:40px">N°</th><th>Estudiante</th><th style="width:200px">Estado</th><th>Motivo / Nota</th></tr>
+        </thead>
+        <tbody id="tbAsist"></tbody>
+      </table>
+
+      <div class="acciones-fila">
+        <button class="btn" onclick="guardarBorrador()" id="btnGuardar">💾 Guardar</button>
+        <button class="btn success" onclick="firmarRegistro()" id="btnFirmar">✍ Firmar y cerrar</button>
+      </div>
+    </div>
+
+  </div>
+
+  <div id="emptyState" class="card empty">
+    Elegí un curso, una asignatura y una fecha, después "Abrir registro" para pasar lista y anotar el contenido del día.
+  </div>
+
+</div>
+
+<script>
+if (window.CCRouter && window.CCRouter.guardPanel) {
+  CCRouter.guardPanel(['profesor','jefe_curso','utp','encargado_area','pie_edu']);
+}
+
+var _cursos = [];
+var _cursoSel = null;
+var _reg = null;
+
+function esc(s) { return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function hoyISO() {
+  var d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+
+function cargar() {
+  document.getElementById('selFecha').value = hoyISO();
+  CCCursos.misCursos().then(function(cursos) {
+    _cursos = cursos || [];
+    var sel = document.getElementById('selCurso');
+    sel.innerHTML = '<option value="">— Elegir —</option>' +
+      _cursos.map(function(c) {
+        return '<option value="' + esc(c.cursoId) + '">' + esc(c.nombreCompleto) +
+               (c.anio ? ' (' + c.anio + ')' : '') + '</option>';
+      }).join('');
+    if (_cursos.length === 0) {
+      document.getElementById('emptyState').innerHTML =
+        'Todavía no estás asignado como jefe de curso ni docente de asignatura. ' +
+        'Pedile al UTP que te asigne en <strong>Cursos y Estudiantes</strong>.';
+    }
+  });
+}
+
+function onCambioCurso() {
+  var cursoId = document.getElementById('selCurso').value;
+  _cursoSel = _cursos.find(function(c) { return c.cursoId === cursoId; });
+  var selA = document.getElementById('selAsig');
+  if (!_cursoSel) {
+    selA.innerHTML = '<option value="">— Elegir curso primero —</option>';
+    return;
+  }
+  var uid = ELAuth.user ? ELAuth.user.uid : '';
+  var misAsigs = (_cursoSel.asignaturasAsignadas || []).filter(function(a) {
+    return a.docenteUid === uid || _cursoSel.jefeUid === uid;
+  });
+  if (misAsigs.length === 0) {
+    // Si es jefe de curso, permitir todas las asignaturas asignadas
+    if (_cursoSel.jefeUid === uid) misAsigs = _cursoSel.asignaturasAsignadas || [];
+  }
+  selA.innerHTML = '<option value="">— Elegir —</option>' +
+    misAsigs.map(function(a) {
+      return '<option value="' + esc(a.asignatura) + '">' + esc(a.asignatura) + '</option>';
+    }).join('');
+}
+
+function onCambioAsig() { /* nada especial por ahora */ }
+
+function abrirRegistro() {
+  var cursoId = document.getElementById('selCurso').value;
+  var asig = document.getElementById('selAsig').value;
+  var fecha = document.getElementById('selFecha').value;
+  if (!cursoId || !asig || !fecha) {
+    alert('Elegí curso, asignatura y fecha');
+    return;
+  }
+  document.getElementById('btnGuardar').disabled = true;
+  CCLibroClases.abrirOCrearRegistro({ cursoId: cursoId, asignatura: asig, fecha: fecha })
+    .then(function(reg) {
+      _reg = reg;
+      renderRegistro();
+      document.getElementById('emptyState').style.display = 'none';
+      document.getElementById('registroWrap').style.display = 'block';
+      document.getElementById('btnGuardar').disabled = false;
+    })
+    .catch(function(err) {
+      alert('Error: ' + err.message);
+      document.getElementById('btnGuardar').disabled = false;
+    });
+}
+
+function renderRegistro() {
+  if (!_reg) return;
+
+  // Contenido y observaciones
+  document.getElementById('txtContenido').value = _reg.contenidoDelDia || '';
+  document.getElementById('txtObs').value = _reg.observacionesGenerales || '';
+
+  // Estados
+  var editable = !_reg.firmado;
+  document.getElementById('txtContenido').disabled = !editable;
+  document.getElementById('txtObs').disabled = !editable;
+  document.getElementById('btnGuardar').style.display = editable ? '' : 'none';
+  document.getElementById('btnFirmar').style.display = editable ? '' : 'none';
+
+  if (_reg.firmado) {
+    document.getElementById('firmadoBanner').style.display = 'block';
+    var dt = new Date(_reg.firmadoEn);
+    document.getElementById('firmadoDetalle').textContent =
+      'Firmado por ' + (_reg.firmadoPor || 'docente') + ' el ' +
+      (isNaN(dt) ? _reg.firmadoEn : dt.toLocaleString('es-CL')) +
+      ' · Hash ' + (_reg.firmaHash || '—');
+  } else {
+    document.getElementById('firmadoBanner').style.display = 'none';
+  }
+
+  // Renderizar tabla
+  var tb = document.getElementById('tbAsist');
+  tb.innerHTML = (_reg.asistencia || []).map(function(a, i) {
+    var btns = ['P','A','T','J'].map(function(e) {
+      var act = (a.estado === e) ? ' act ' + e : '';
+      return '<button class="est-btn' + act + '" onclick="marcarUno(' + i + ',\'' + e + '\')"' +
+        (editable ? '' : ' disabled') + '>' + e + '</button>';
+    }).join('');
+    return '<tr>' +
+      '<td>' + a.ordinal + '</td>' +
+      '<td>' + esc(a.nombreCompleto) + '</td>' +
+      '<td><div class="estado-btns">' + btns + '</div></td>' +
+      '<td><input type="text" value="' + esc(a.motivo || '') + '" onchange="editarMotivo(' + i + ', this.value)"' +
+        (editable ? '' : ' disabled') + ' placeholder="—"></td>' +
+      '</tr>';
+  }).join('');
+
+  actualizarStats();
+}
+
+function marcarUno(idx, estado) {
+  if (!_reg || _reg.firmado) return;
+  _reg.asistencia[idx].estado = estado;
+  renderRegistro();
+}
+
+function marcarTodos(estado) {
+  if (!_reg || _reg.firmado) return;
+  _reg.asistencia.forEach(function(a) { a.estado = estado; });
+  renderRegistro();
+}
+
+function editarMotivo(idx, val) {
+  if (!_reg || _reg.firmado) return;
+  _reg.asistencia[idx].motivo = val;
+}
+
+function actualizarStats() {
+  var t = { P:0, A:0, T:0, J:0 };
+  (_reg.asistencia || []).forEach(function(a){ if (a.estado in t) t[a.estado]++; });
+  document.getElementById('tP').textContent = t.P;
+  document.getElementById('tA').textContent = t.A;
+  document.getElementById('tT').textContent = t.T;
+  document.getElementById('tJ').textContent = t.J;
+}
+
+function guardarBorrador() {
+  if (!_reg) return;
+  document.getElementById('btnGuardar').disabled = true;
+  _reg.contenidoDelDia = document.getElementById('txtContenido').value;
+  _reg.observacionesGenerales = document.getElementById('txtObs').value;
+  CCLibroClases.guardar(_reg.regId, {
+    contenidoDelDia: _reg.contenidoDelDia,
+    observacionesGenerales: _reg.observacionesGenerales,
+    asistencia: _reg.asistencia
+  }).then(function() {
+    document.getElementById('btnGuardar').disabled = false;
+    var b = document.getElementById('btnGuardar');
+    b.textContent = '✓ Guardado';
+    setTimeout(function(){ b.textContent = '💾 Guardar'; }, 1500);
+  }).catch(function(err) {
+    document.getElementById('btnGuardar').disabled = false;
+    alert('Error: ' + err.message);
+  });
+}
+
+function firmarRegistro() {
+  if (!_reg) return;
+  if (!confirm('Firmar el registro? Después de firmado NO se puede editar la asistencia ni el contenido.')) return;
+  // Primero guardar por si hay cambios sin guardar
+  _reg.contenidoDelDia = document.getElementById('txtContenido').value;
+  _reg.observacionesGenerales = document.getElementById('txtObs').value;
+  CCLibroClases.guardar(_reg.regId, {
+    contenidoDelDia: _reg.contenidoDelDia,
+    observacionesGenerales: _reg.observacionesGenerales,
+    asistencia: _reg.asistencia
+  }).then(function() {
+    return CCLibroClases.firmar(_reg.regId);
+  }).then(function(hash) {
+    return EL_DB.collection('libro_clases').doc(_reg.regId).get();
+  }).then(function(snap) {
+    _reg = snap.data();
+    renderRegistro();
+    alert('✍ Registro firmado. Este registro queda como constancia oficial.');
+  }).catch(function(err) {
+    alert('Error al firmar: ' + err.message);
+  });
+}
+
+if (window.ELAuth && ELAuth.onUserReady) {
+  ELAuth.onUserReady(function(u) { if (u) cargar(); });
+}
+</script>
+
+</body>
+</html>
