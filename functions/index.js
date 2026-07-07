@@ -280,7 +280,13 @@ exports.iaAsistente = onRequest(
     cors: true,
     minInstances: 0,        // sin instancia caliente (costo cero cuando no se usa)
     maxInstances: 20,       // techo alto para picos de generación simultánea
-    invoker: 'public'       // permite llamadas desde el navegador
+    invoker: 'public',      // permite llamadas desde el navegador
+    // Service account explícito: usar la Default Compute Service Account
+    // en vez de la @appspot legacy (que no existe en proyectos Firebase-only).
+    // Esta cuenta ya tiene los permisos necesarios (Cloud Build, Artifact
+    // Registry, Registros) y es la recomendación oficial de Firebase para
+    // proyectos sin App Engine.
+    serviceAccount: '537489844804-compute@developer.gserviceaccount.com'
   },
   async (req, res) => {
     // Try/catch top-level: garantizamos que SIEMPRE se devuelva JSON
