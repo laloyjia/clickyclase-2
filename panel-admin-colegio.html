@@ -13,6 +13,8 @@
 <script src="js/firebase-rest.js"></script>
 <script src="js/firebase-config.js"></script>
 <script src="js/firebase-auth.js"></script>
+<script src="js/roles-permissions.js"></script>
+<script src="js/roles-router.js"></script>
 <script src="js/cc-store.js"></script>
 <script src="js/curricula-loader.js"></script>
 <link rel="stylesheet" href="css/panel.css">
@@ -129,6 +131,13 @@ function show(s){document.querySelectorAll('.nav-item').forEach(function(x){x.cl
 document.querySelectorAll('.nav-item').forEach(function(x){x.addEventListener('click',function(){show(x.dataset.s)})});
 cargarAcademico();cargarAsig();
 (function(){var el=document.getElementById('calColegio');function render(rows){if(!el)return;if(!rows||!rows.length){el.innerHTML='<div class="sub" style="margin:0">Aún no hay calendario institucional cargado.</div>';return;}el.innerHTML=rows.slice(0,8).map(function(r){return '<div class="row"><span class="material-symbols-outlined ic">event</span><div style="flex:1"><div>'+(r[1]||'')+'</div><div class="sub">'+(r[0]||'')+(r[2]?(' · '+r[2]):'')+'</div></div><span class="sub">'+(r[3]||'')+'</span></div>'}).join('');}var local=[];try{local=JSON.parse(localStorage.getItem('cc_calendario')||'[]');}catch(e){}render(local);if(window.ccStore)ccStore.getCalendario().then(render).catch(function(){});})();
+</script>
+
+<script>
+// Fase 0: proteger la página según rol del usuario.
+if (window.CCRouter && window.CCRouter.guardPanel) {
+  CCRouter.guardPanel(['admin_colegio']);
+}
 </script>
 </body>
 </html>

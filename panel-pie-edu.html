@@ -13,6 +13,8 @@
 <script src="js/firebase-rest.js"></script>
 <script src="js/firebase-config.js"></script>
 <script src="js/firebase-auth.js"></script>
+<script src="js/roles-permissions.js"></script>
+<script src="js/roles-router.js"></script>
 <script src="js/cc-store.js"></script>
 <link rel="stylesheet" href="css/panel.css">
 <script src="js/cc-ui.js"></script>
@@ -138,7 +140,14 @@ function buildPrompt(){var d=docsInst(),e=_e,tipo=document.getElementById('planT
  return base+'Redacta un INFORME PIE formal: 1) Identificación, 2) Diagnóstico y necesidades, 3) Adecuaciones aplicadas (Decreto 83), 4) Avances y logros, 5) Recomendaciones, 6) Próxima evaluación. Tono profesional. Usa [corchetes] donde falte información.';
 }
 function generarPlan(){var b=document.getElementById('btnGen');b.disabled=true;var o=b.innerHTML;b.innerHTML='<span class="material-symbols-outlined" style="font-size:18px">hourglass_top</span> Generando…';fetch('/api/ia-asistente',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({tipo:'raw',datos:{prompt:buildPrompt()}})}).then(function(r){return r.json()}).then(function(d){if(d.error)throw new Error(d.error);document.getElementById('planTxt').value=d.resultado||'(respuesta vacía)';toast('Generado. Revisa y edita.','success');}).catch(function(err){toast('Error de IA: '+err.message,'danger');}).then(function(){b.disabled=false;b.innerHTML=o;});}
-function exportarWord(){var txt=document.getElementById('planTxt').value||'';if(!txt.trim()){toast('Primero genera el contenido.','danger');return;}var html='<h2>'+document.getElementById('planTipo').selectedOptions[0].text+' — '+(_e?_e[0]:'')+'</h2><pre style="font-family:Calibri,Arial;font-size:11pt;white-space:pre-wrap">'+txt.replace(/&/g,'&amp;').replace(/</g,'&lt;')+'</pre>';var blob=new Blob(['<html xmlns:w="urn:schemas-microsoft-com:office:word"><head><meta charset="utf-8"></head><body>'+html+'</body></html>'],{type:'application/msword'});var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='pie-documento.doc';a.click();toast('Exportado a Word.','success');}
+function exportarWord(){var txt=document.getElementById('planTxt').value||'';if(!txt.trim()){toast('Primero genera el contenido.','danger');return;}var html='<h2>'+document.getElementById('planTipo').selectedOptions[0].text+' — '+(_e?_e[0]:'')+'</h2><pre style="font-family:Calibri,Arial;font-size:11pt;white-space:pre-wrap">'+txt.replace(/&/g,'&amp;').replace(/</g,'&lt;')+'</pre>';var blob=new Blob(['<html xmlns:w="urn:schemas-microsoft-com:office:word"><head><meta charset="utf-8"></head><body>'+html+'
+<script>
+// Fase 0: proteger la página según rol del usuario.
+if (window.CCRouter && window.CCRouter.guardPanel) {
+  CCRouter.guardPanel(['pie_edu','pie_enc']);
+}
+</script>
+</body></html>'],{type:'application/msword'});var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='pie-documento.doc';a.click();toast('Exportado a Word.','success');}
 function guardarPlan(){var txt=document.getElementById('planTxt').value||'';if(!txt.trim()){toast('Primero genera el contenido.','danger');return;}var tipo=document.getElementById('planTipo').value;var _k=(tipo==='informe')?'informes':(tipo==='adecuacion')?'adecuaciones':'actividades';
  if(tipo==='informe'){REG.informes.rows.unshift(['Informe PIE — '+(_e?_e[0]:''),'jun 2026 · IA','Vigente']);}
  else if(tipo==='adecuacion'){REG.adecuaciones.rows.unshift([_e?_e[0]:'','(IA) '+txt.slice(0,50)+'…','Vigente']);}

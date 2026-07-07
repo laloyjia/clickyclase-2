@@ -14,6 +14,8 @@
 <script src="js/firebase-rest.js"></script>
 <script src="js/firebase-config.js"></script>
 <script src="js/firebase-auth.js"></script>
+<script src="js/roles-permissions.js"></script>
+<script src="js/roles-router.js"></script>
 <script src="js/cc-store.js"></script>
 <link rel="stylesheet" href="css/panel.css">
 <script src="js/cc-ui.js"></script>
@@ -199,7 +201,14 @@ function generarPlan(){var b=document.getElementById('btnGen');b.disabled=true;v
 }
 function exportarWord(){var txt=document.getElementById('planTxt').value||'';if(!txt.trim()){toast('Primero genera o escribe el plan.','danger');return;}
  var html='<h2>Plan de acción — '+(_planCaso?_planCaso[0]:'')+'</h2><pre style="font-family:Calibri,Arial;font-size:11pt;white-space:pre-wrap">'+txt.replace(/&/g,'&amp;').replace(/</g,'&lt;')+'</pre>';
- var blob=new Blob(['<html xmlns:w="urn:schemas-microsoft-com:office:word"><head><meta charset="utf-8"></head><body>'+html+'</body></html>'],{type:'application/msword'});
+ var blob=new Blob(['<html xmlns:w="urn:schemas-microsoft-com:office:word"><head><meta charset="utf-8"></head><body>'+html+'
+<script>
+// Fase 0: proteger la página según rol del usuario.
+if (window.CCRouter && window.CCRouter.guardPanel) {
+  CCRouter.guardPanel(['amb_prof','amb_enc']);
+}
+</script>
+</body></html>'],{type:'application/msword'});
  var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='plan-accion.doc';a.click();toast('Exportado a Word.','success');
 }
 function guardarPlan(){var txt=document.getElementById('planTxt').value||'';if(!txt.trim()){toast('Primero genera el plan.','danger');return;}

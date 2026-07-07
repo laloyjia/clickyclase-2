@@ -14,6 +14,8 @@
 <script src="js/firebase-rest.js"></script>
 <script src="js/firebase-config.js"></script>
 <script src="js/firebase-auth.js"></script>
+<script src="js/roles-permissions.js"></script>
+<script src="js/roles-router.js"></script>
 <script src="js/cc-store.js"></script>
 <script src="js/curricula-loader.js"></script>
 <link rel="stylesheet" href="css/panel.css">
@@ -259,7 +261,14 @@ function generarMat(){
   .then(function(r){return r.json()}).then(function(d){if(d.error)throw new Error(d.error);document.getElementById('matTxt').value=d.resultado||'(respuesta vacía)';toast('Material generado. Revisa y edita.','success');})
   .catch(function(err){toast('Error de IA: '+err.message,'danger');}).then(function(){b.disabled=false;b.innerHTML=o;});
 }
-function exportarWord(){var txt=document.getElementById('matTxt').value||'';if(!txt.trim()){toast('Primero genera el material.','danger');return;}var tit=document.getElementById('matTipo').selectedOptions[0].text+' — '+document.getElementById('matTema').value;var html='<h2>'+tit+'</h2><pre style="font-family:Calibri,Arial;font-size:11pt;white-space:pre-wrap">'+txt.replace(/&/g,'&amp;').replace(/</g,'&lt;')+'</pre>';var blob=new Blob(['<html xmlns:w="urn:schemas-microsoft-com:office:word"><head><meta charset="utf-8"></head><body>'+html+'</body></html>'],{type:'application/msword'});var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='material.doc';a.click();toast('Exportado a Word.','success');}
+function exportarWord(){var txt=document.getElementById('matTxt').value||'';if(!txt.trim()){toast('Primero genera el material.','danger');return;}var tit=document.getElementById('matTipo').selectedOptions[0].text+' — '+document.getElementById('matTema').value;var html='<h2>'+tit+'</h2><pre style="font-family:Calibri,Arial;font-size:11pt;white-space:pre-wrap">'+txt.replace(/&/g,'&amp;').replace(/</g,'&lt;')+'</pre>';var blob=new Blob(['<html xmlns:w="urn:schemas-microsoft-com:office:word"><head><meta charset="utf-8"></head><body>'+html+'
+<script>
+// Fase 0: proteger la página según rol del usuario.
+if (window.CCRouter && window.CCRouter.guardPanel) {
+  CCRouter.guardPanel(['profesor','jefe_curso']);
+}
+</script>
+</body></html>'],{type:'application/msword'});var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='material.doc';a.click();toast('Exportado a Word.','success');}
 function guardarMat(){var txt=document.getElementById('matTxt').value||'';if(!txt.trim()){toast('Primero genera el material.','danger');return;}var tipo=document.getElementById('matTipo').selectedOptions[0].text;var tema=document.getElementById('matTema').value||'(sin tema)';var asig=document.getElementById('matAsig').value||'';REG.biblioteca.rows.unshift([tipo+' — '+tema,asig+' · jun 2026','Guardado']);renderTable('biblioteca');if(window.ccStore)ccStore.setTabla('prof_biblioteca',REG.biblioteca.rows);toast('Guardado en biblioteca.','success');show('biblioteca');}
 var NAV=[['dashboard','Inicio','resumen'],['event_note','Planificaciones','planificaciones'],['quiz','Evaluaciones','evaluaciones'],['groups','Mis cursos','cursos'],['table_chart','Notas y asistencia','notas'],['chat','Anotaciones','anotaciones'],['menu_book','Biblioteca','biblioteca']];
 document.getElementById('nav').innerHTML=NAV.map(function(n,i){return '<div class="nav-item'+(i===0?' active':'')+'" data-s="'+n[2]+'">'+ic(n[0])+'<span>'+n[1]+'</span></div>'}).join('');

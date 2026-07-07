@@ -13,6 +13,8 @@
 <script src="js/firebase-rest.js"></script>
 <script src="js/firebase-config.js"></script>
 <script src="js/firebase-auth.js"></script>
+<script src="js/roles-permissions.js"></script>
+<script src="js/roles-router.js"></script>
 <script src="js/cc-store.js"></script>
 <link rel="stylesheet" href="css/panel.css">
 <script src="js/cc-ui.js"></script>
@@ -127,7 +129,14 @@ function cerrarPlan(){document.getElementById('planOverlay').classList.remove('s
 document.getElementById('planOverlay').addEventListener('click',function(e){if(e.target===this)cerrarPlan();});
 function buildPrompt(){var d=docsInst(),c=_c;return 'Eres un profesional psicosocial experto en contexto escolar chileno. Redacta un INFORME PSICOSOCIAL formal para el siguiente estudiante, resguardando la confidencialidad y fundamentado en la normativa chilena (Ley 19.628 de datos; enfoque de derechos del niño, Ley 21.430; protocolos de derivación a la red OPD/CESFAM/Mejor Niñez).\n\nESTUDIANTE / CASO:\n- Estudiante: '+c[0]+'\n- Motivo: '+c[1]+'\n- Última intervención: '+c[2]+'\n- Estado: '+c[3]+'\n\n'+(d.n?('DOCUMENTOS INSTITUCIONALES (úsalos como base):\n'+d.txt+'\n\n'):'No hay documentos institucionales cargados; usa buenas prácticas e indica entre [corchetes] lo que falte.\n\n')+'ESTRUCTURA:\n1. Identificación\n2. Motivo de consulta/derivación\n3. Antecedentes relevantes\n4. Observaciones y evaluación\n5. Plan de intervención (acciones, responsables, plazos)\n6. Derivaciones a la red\n7. Seguimiento\n\nRedacta en español, tono profesional. No inventes datos clínicos; usa [corchetes] donde falte información.';}
 function generarPlan(){var b=document.getElementById('btnGen');b.disabled=true;var o=b.innerHTML;b.innerHTML='<span class="material-symbols-outlined" style="font-size:18px">hourglass_top</span> Generando…';fetch('/api/ia-asistente',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({tipo:'raw',datos:{prompt:buildPrompt()}})}).then(function(r){return r.json()}).then(function(d){if(d.error)throw new Error(d.error);document.getElementById('planTxt').value=d.resultado||'(respuesta vacía)';toast('Informe generado. Revísalo y edítalo.','success');}).catch(function(err){toast('Error de IA: '+err.message,'danger');}).then(function(){b.disabled=false;b.innerHTML=o;});}
-function exportarWord(){var txt=document.getElementById('planTxt').value||'';if(!txt.trim()){toast('Primero genera el informe.','danger');return;}var html='<h2>Informe psicosocial — '+(_c?_c[0]:'')+'</h2><pre style="font-family:Calibri,Arial;font-size:11pt;white-space:pre-wrap">'+txt.replace(/&/g,'&amp;').replace(/</g,'&lt;')+'</pre>';var blob=new Blob(['<html xmlns:w="urn:schemas-microsoft-com:office:word"><head><meta charset="utf-8"></head><body>'+html+'</body></html>'],{type:'application/msword'});var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='informe-psicosocial.doc';a.click();toast('Exportado a Word.','success');}
+function exportarWord(){var txt=document.getElementById('planTxt').value||'';if(!txt.trim()){toast('Primero genera el informe.','danger');return;}var html='<h2>Informe psicosocial — '+(_c?_c[0]:'')+'</h2><pre style="font-family:Calibri,Arial;font-size:11pt;white-space:pre-wrap">'+txt.replace(/&/g,'&amp;').replace(/</g,'&lt;')+'</pre>';var blob=new Blob(['<html xmlns:w="urn:schemas-microsoft-com:office:word"><head><meta charset="utf-8"></head><body>'+html+'
+<script>
+// Fase 0: proteger la página según rol del usuario.
+if (window.CCRouter && window.CCRouter.guardPanel) {
+  CCRouter.guardPanel(['aps_prof','aps_enc']);
+}
+</script>
+</body></html>'],{type:'application/msword'});var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='informe-psicosocial.doc';a.click();toast('Exportado a Word.','success');}
 function guardarPlan(){var txt=document.getElementById('planTxt').value||'';if(!txt.trim()){toast('Primero genera el informe.','danger');return;}REG.informes.rows.unshift(['Informe psicosocial — '+(_c?_c[0]:''),'jun 2026 · IA','Vigente']);renderTable('informes');if(window.ccStore)ccStore.setTabla('apsp_informes',REG.informes.rows);toast('Informe guardado.','success');cerrarPlan();show('informes');}
 var NAV=[['dashboard','Inicio','resumen'],['folder','Mis casos','miscasos'],['history_edu','Intervenciones','intervenciones'],['description','Informes','informes'],['lightbulb','Estrategias','estrategias']];
 document.getElementById('nav').innerHTML=NAV.map(function(n,i){return '<div class="nav-item'+(i===0?' active':'')+'" data-s="'+n[2]+'">'+ic(n[0])+'<span>'+n[1]+'</span></div>'}).join('');

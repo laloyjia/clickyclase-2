@@ -31,12 +31,67 @@ service cloud.firestore {
     function _userRole() {
       return get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data.role;
     }
+    function _userDoc() {
+      return get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data;
+    }
     function isAdmin() {
       return isSignedIn() && _userDocExists() && _userRole() == 'admin';
     }
     function isProfesor() {
       return isSignedIn() && _userDocExists() &&
         (_userRole() == 'profesor' || _userRole() == 'admin');
+    }
+    // ── Helpers para roles múltiples (nuevo formato) ─────────────
+    // Soporta tanto `role: 'string'` (legacy) como `roles: { <id>: {...} }`.
+    function _hasRole(roleId) {
+      return isSignedIn() && _userDocExists() && (
+        (('role' in _userDoc()) && _userDoc().role == roleId) ||
+        (('roles' in _userDoc()) && (roleId in _userDoc().roles))
+      );
+    }
+    function _hasAnyRole(rolesIds) {
+      return isSignedIn() && _userDocExists() && (
+        (('role' in _userDoc()) && _userDoc().role in rolesIds) ||
+        (('roles' in _userDoc()) &&
+          _userDoc().roles.keys().hasAny(rolesIds))
+      );
+    }
+    // Liceo del usuario autenticado (para filtros multi-tenant).
+    function _userLiceo() {
+      return _userDocExists() && ('liceoSlug' in _userDoc()) ? _userDoc().liceoSlug : '';
+    }
+    // Directivo: director, rector, admin_colegio o UTP.
+    function isDirectivo() {
+      return _hasAnyRole(['director','rector','admin_colegio','utp']);
+    }
+    // Encargado de área: encargados de ciclo/TP, además de UTP y directivos.
+    function puedeAprobarMaterial() {
+      return _hasAnyRole([
+        'admin','director','rector','admin_colegio','utp','encargado_area'
+      ]);
+    }
+    // Equipos con acceso a datos sensibles (PIE, apoyo, convivencia).
+    function esEquipoApoyo() {
+      return _hasAnyRole(['aps_enc','aps_prof']);
+    }
+    function esEquipoConvivencia() {
+      return _hasAnyRole(['amb_enc','amb_prof']);
+    }
+    function esEquipoPIE() {
+      return _hasAnyRole(['pie_enc','pie_edu']);
+    }
+    function puedeVerDatosSensibles() {
+      return isAdmin() || isDirectivo() || esEquipoApoyo() ||
+             esEquipoConvivencia() || esEquipoPIE();
+    }
+    // ¿Mismo liceo que el doc consultado? Para filtros multi-tenant.
+    function mismoLiceo() {
+      return ('liceoSlug' in resource.data) &&
+             resource.data.liceoSlug == _userLiceo();
+    }
+    function mismoLiceoNuevo() {
+      return ('liceoSlug' in request.resource.data) &&
+             request.resource.data.liceoSlug == _userLiceo();
     }
     // Verifica que el doc nuevo/actualizado tenga el uid del autor autenticado
     function authorUidMatches() {
@@ -198,6 +253,89 @@ service cloud.firestore {
         (isProfesor() && request.resource.data.profesorUid == request.auth.uid);
       allow update, delete: if isAdmin() ||
         (isProfesor() && resource.data.profesorUid == request.auth.uid);
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    //  COLECCIONES FASE 0/1 — Roles múltiples + multi-tenant + aprobación
+    // ═══════════════════════════════════════════════════════════════
+
+    // ── cursos/{cursoId} ──────────────────────────────────────────
+    // Un curso pertenece a un liceo. Contiene roster de estudiantes,
+    // jefe de curso, asignaturas asignadas.
+    //   Lectura:  cualquier usuario del mismo liceo.
+    //   Escritura: admin plataforma, directivos del liceo, o jefe de curso.
+    match /cursos/{cursoId} {
+      allow read:   if isAdmin() || (isSignedIn() && mismoLiceo());
+      allow create: if (isAdmin() || isDirectivo()) && mismoLiceoNuevo();
+      allow update: if isAdmin() ||
+        (isDirectivo() && mismoLiceo()) ||
+        (isSignedIn() && mismoLiceo() &&
+         'jefeUid' in resource.data && resource.data.jefeUid == request.auth.uid);
+      allow delete: if isAdmin() || (isDirectivo() && mismoLiceo());
+    }
+
+    // ── libro_clases/{regId} ──────────────────────────────────────
+    // Registro diario: asistencia + contenido + observaciones + firma.
+    //   Lectura:  autor, jefe de curso, directivos y UTP del mismo liceo.
+    //   Escritura: solo el autor (docente que hizo la clase).
+    match /libro_clases/{regId} {
+      allow read: if isAdmin() ||
+        (isSignedIn() && mismoLiceo() && (
+          resource.data.docenteUid == request.auth.uid ||
+          isDirectivo() ||
+          _hasAnyRole(['encargado_area','jefe_curso'])
+        ));
+      allow create: if isSignedIn() && mismoLiceoNuevo() &&
+        request.resource.data.docenteUid == request.auth.uid;
+      allow update: if isSignedIn() && mismoLiceo() &&
+        resource.data.docenteUid == request.auth.uid &&
+        // No permitir reeditar después de firmado
+        (!('firmado' in resource.data) || !resource.data.firmado);
+      allow delete: if isAdmin();
+    }
+
+    // ── intervenciones_apoyo/{id} ─────────────────────────────────
+    // Datos sensibles. Solo equipo apoyo psicosocial, directivos y admin.
+    match /intervenciones_apoyo/{intId} {
+      allow read:   if isAdmin() ||
+        (mismoLiceo() && (esEquipoApoyo() || isDirectivo()));
+      allow create: if isAdmin() ||
+        (mismoLiceoNuevo() && esEquipoApoyo() &&
+         request.resource.data.profesionalUid == request.auth.uid);
+      allow update: if isAdmin() ||
+        (mismoLiceo() && esEquipoApoyo() &&
+         resource.data.profesionalUid == request.auth.uid);
+      allow delete: if isAdmin() ||
+        (mismoLiceo() && _hasRole('aps_enc'));
+    }
+
+    // ── entrevistas_convivencia/{id} ──────────────────────────────
+    // Registro de entrevistas con apoderados y alumnos. Datos sensibles.
+    match /entrevistas_convivencia/{entId} {
+      allow read:   if isAdmin() ||
+        (mismoLiceo() && (esEquipoConvivencia() || isDirectivo()));
+      allow create: if isAdmin() ||
+        (mismoLiceoNuevo() && esEquipoConvivencia() &&
+         request.resource.data.profesionalUid == request.auth.uid);
+      allow update: if isAdmin() ||
+        (mismoLiceo() && esEquipoConvivencia() &&
+         resource.data.profesionalUid == request.auth.uid);
+      allow delete: if isAdmin() ||
+        (mismoLiceo() && _hasRole('amb_enc'));
+    }
+
+    // ── pie_estudiantes/{estUid} ──────────────────────────────────
+    // Ficha PIE por estudiante: diagnóstico, decreto, adecuaciones.
+    // Datos altamente sensibles: solo equipo PIE, directivos y admin.
+    match /pie_estudiantes/{estUid} {
+      allow read:   if isAdmin() ||
+        (mismoLiceo() && (esEquipoPIE() || isDirectivo() ||
+          // Jefe del curso del estudiante también puede ver (para adecuaciones)
+          _hasRole('jefe_curso')));
+      allow create, update: if isAdmin() ||
+        (mismoLiceoNuevo() && esEquipoPIE());
+      allow delete: if isAdmin() ||
+        (mismoLiceo() && _hasRole('pie_enc'));
     }
 
     // ── Default deny: cualquier ruta no listada arriba se bloquea ──

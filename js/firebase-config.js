@@ -68,12 +68,116 @@ var EL_ADMIN_EMAILS = [
   'eyanez@salesianostalca.cl'
 ];
 
-// Roles disponibles
+// ─────────────────────────────────────────────────────────────
+//  Roles del sistema Click&Clase
+//
+//  Cada usuario en usuarios/{uid} tiene:
+//   - roles: { <roleId>: { ...datos específicos } }
+//   - liceoSlug: 'salesianos-talca' (multi-tenant)
+//
+//  Retrocompatibilidad: si el doc tiene `role: 'admin'` (string legacy),
+//  se lo interpreta como { roles: { admin: {} } }. Ver firebase-auth.js.
+// ─────────────────────────────────────────────────────────────
 var EL_ROLES = {
-  ADMIN:      'admin',
-  PROFESOR:   'profesor',
-  ESTUDIANTE: 'estudiante'
+  // Rol de plataforma (nivel Click&Clase, no de un colegio específico)
+  ADMIN:            'admin',
+
+  // Roles institucionales (nivel colegio/liceo completo)
+  DIRECTOR:         'director',
+  RECTOR:           'rector',
+  ADMIN_COLEGIO:    'admin_colegio',
+  UTP:              'utp',
+  ENCARGADO_AREA:   'encargado_area',
+
+  // Roles de aula
+  PROFESOR:         'profesor',
+  JEFE_CURSO:       'jefe_curso',
+
+  // Roles de convivencia y apoyo
+  AMB_ENCARGADO:    'amb_enc',
+  AMB_PROFESIONAL:  'amb_prof',
+  APS_ENCARGADO:    'aps_enc',
+  APS_PROFESIONAL:  'aps_prof',
+
+  // Roles PIE
+  PIE_ENCARGADO:    'pie_enc',
+  PIE_EDUCADORA:    'pie_edu',
+
+  // Rol externo (Fase futura)
+  ESTUDIANTE:       'estudiante',
+  APODERADO:        'apoderado'
 };
+
+// Áreas dentro de un colegio (para ENCARGADO_AREA)
+var EL_AREAS = {
+  PRE_KINDER:      'pre_kinder',
+  PRIMER_CICLO:    'primer_ciclo',    // 1° a 4° básico
+  SEGUNDO_CICLO:   'segundo_ciclo',   // 5° a 8° básico
+  MEDIA_HC:        'media_hc',        // 1°-4° medio HC
+  MEDIA_TP:        'media_tp',        // 1°-4° medio TP
+  ESPECIALIDAD_TP: 'especialidad_tp'  // Encargado de una especialidad TP
+};
+
+// Etiquetas amigables por rol (para UI)
+var EL_ROLES_LABEL = {
+  admin:          'Administrador de plataforma',
+  director:       'Director',
+  rector:         'Rector',
+  admin_colegio:  'Administrador de colegio',
+  utp:            'Jefe/a UTP',
+  encargado_area: 'Encargado/a de área',
+  profesor:       'Profesor/a',
+  jefe_curso:     'Profesor/a jefe',
+  amb_enc:        'Encargado/a de Convivencia',
+  amb_prof:       'Profesional de Convivencia',
+  aps_enc:        'Encargado/a de Apoyo Psicosocial',
+  aps_prof:       'Profesional de Apoyo Psicosocial',
+  pie_enc:        'Coordinador/a PIE',
+  pie_edu:        'Educador/a Diferencial',
+  estudiante:     'Estudiante',
+  apoderado:      'Apoderado/a'
+};
+
+// Rol → panel dedicado. Usado por roles-router.js.
+var EL_ROLES_PANEL = {
+  admin:          'admin.html',
+  director:       'panel-director.html',
+  rector:         'panel-rector.html',
+  admin_colegio:  'panel-admin-colegio.html',
+  utp:            'panel-utp.html',
+  encargado_area: 'panel-utp.html',
+  profesor:       'panel-profesor.html',
+  jefe_curso:     'panel-profesor.html',
+  amb_enc:        'panel-ambiente.html',
+  amb_prof:       'panel-ambiente-prof.html',
+  aps_enc:        'panel-apoyo.html',
+  aps_prof:       'panel-apoyo-prof.html',
+  pie_enc:        'panel-pie.html',
+  pie_edu:        'panel-pie-edu.html',
+  estudiante:     'panel-profesor.html',
+  apoderado:      'panel-profesor.html'
+};
+
+// Prioridad de rol para elegir panel por defecto cuando el usuario tiene
+// múltiples roles. Índice bajo = más importante.
+var EL_ROLES_PRIORIDAD = [
+  'admin',            // 0 — nunca hay otro por encima
+  'director',         // 1
+  'rector',           // 2
+  'admin_colegio',    // 3
+  'utp',              // 4
+  'encargado_area',   // 5
+  'pie_enc',          // 6
+  'aps_enc',          // 7
+  'amb_enc',          // 8
+  'jefe_curso',       // 9
+  'profesor',         // 10
+  'pie_edu',          // 11
+  'aps_prof',         // 12
+  'amb_prof',         // 13
+  'apoderado',        // 14
+  'estudiante'        // 15 — nunca hay otro por debajo
+];
 
 // Colecciones Firestore
 var EL_COLLECTIONS = {

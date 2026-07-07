@@ -15,6 +15,8 @@
 <script src="js/firebase-rest.js"></script>
 <script src="js/firebase-config.js"></script>
 <script src="js/firebase-auth.js"></script>
+<script src="js/roles-permissions.js"></script>
+<script src="js/roles-router.js"></script>
 <script src="js/cc-store.js"></script>
 <link rel="stylesheet" href="css/panel.css">
 <script src="js/cc-ui.js"></script>
@@ -245,6 +247,13 @@ document.addEventListener('focusout',function(e){var td=e.target;if(!td||!td.dat
 cargarAsig();
 
 renderAll();
+</script>
+
+<script>
+// Fase 0: proteger la página según rol del usuario.
+if (window.CCRouter && window.CCRouter.guardPanel) {
+  CCRouter.guardPanel(['utp','encargado_area']);
+}
 </script>
 </body>
 </html>

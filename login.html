@@ -33,6 +33,8 @@
 <script src="js/firebase-rest.js"></script>
 <script src="js/firebase-config.js"></script>
 <script src="js/firebase-auth.js"></script>
+<script src="js/roles-permissions.js"></script>
+<script src="js/roles-router.js"></script>
 <script src="js/firebase-db.js"></script>
 
 <style>
@@ -707,10 +709,18 @@ ELAuth.onUserReady(function(user) {
 });
 
 function redirectByRole(user) {
-  // ── Paneles nuevos por rol (clickyclase-2) ──
-  // Cada rol entra a su panel individual. El profesor (de colegio o
-  // independiente) comparte el panel de profesor.
-  // Paneles completos dedicados por rol
+  // ── Router de roles múltiples (Fase 0) ──
+  // Si el usuario tiene el nuevo formato { roles: {...} } o roles: string,
+  // CCRouter lo despacha al panel del rol de mayor prioridad.
+  if (window.CCRouter && window.CCRoles && (user.roles || user.role)) {
+    var rol = window.CCRouter.getRolActivo(user);
+    if (rol) {
+      var mapa = window.EL_ROLES_PANEL || {};
+      var destino = mapa[rol];
+      if (destino) { window.location.href = destino; return; }
+    }
+  }
+  // ── Fallback legacy: mapa directo por user.role ──
   var DEST = {
     admin:        'panel-admin.html',
     admin_colegio:'panel-admin-colegio.html',
