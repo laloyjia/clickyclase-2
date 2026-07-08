@@ -3,232 +3,322 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Panel Profesional de Convivencia — Click&Clase</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<title>Convivencia — Mis Casos — Click&Clase</title>
+<link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg">
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
 <script src="js/firebase-rest.js"></script>
 <script src="js/firebase-config.js"></script>
 <script src="js/firebase-auth.js"></script>
+<script src="js/firebase-db.js"></script>
 <script src="js/roles-permissions.js"></script>
 <script src="js/roles-router.js"></script>
-<script src="js/cc-store.js"></script>
-<link rel="stylesheet" href="css/panel.css">
-<script src="js/cc-ui.js"></script>
+<script src="js/cursos.js"></script>
+<script src="js/convivencia.js"></script>
+<style>
+:root { --bg: #0b0d1e; --panel: #12162f; --border: rgba(148,163,184,.15); --text: #e5e7eb; --muted: #94a3b8; --violet: #7c3aed; --orange: #f97316; }
+* { box-sizing: border-box; }
+body { margin: 0; font-family: 'Segoe UI', Roboto, Arial, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+.topbar { padding: 16px 28px; border-bottom: 1px solid var(--border); background: linear-gradient(135deg, rgba(249,115,22,.09), rgba(124,58,237,.05)); display: flex; align-items: center; justify-content: space-between; }
+.topbar h1 { margin: 0; font-size: 1.3rem; font-weight: 700; }
+.breadcrumb { color: var(--muted); font-size: .78rem; }
+.usr { font-size: .82rem; color: var(--muted); }
+.usr .salir { color: #fca5a5; text-decoration: none; margin-left: 10px; }
+.container { max-width: 1400px; margin: 22px auto; padding: 0 22px 40px; }
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 22px; }
+.kpi { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; }
+.kpi .l { font-size: .68rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
+.kpi .v { font-size: 1.8rem; font-weight: 800; margin-top: 4px; }
+.kpi.abr .v { color: #c4b5fd; } .kpi.seg .v { color: #fbbf24; }
+.kpi.grave .v { color: #fca5a5; } .kpi.mes .v { color: #f97316; }
+.grid-main { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+@media (max-width: 900px) { .grid-main { grid-template-columns: 1fr; } }
+.card { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 18px 22px; }
+.card h3 { margin: 0 0 12px; font-size: .8rem; text-transform: uppercase; letter-spacing: .8px; color: var(--muted); font-weight: 700; display: flex; align-items: center; gap: 8px; }
+.fld { margin-bottom: 12px; }
+.fld label { display: block; font-size: .72rem; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 4px; }
+input, select, textarea { width: 100%; padding: 8px 10px; border-radius: 7px; background: rgba(255,255,255,.04); border: 1px solid rgba(148,163,184,.2); color: var(--text); font-size: .85rem; font-family: inherit; }
+textarea { resize: vertical; min-height: 60px; }
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+.btn { padding: 9px 15px; border-radius: 8px; border: 1px solid var(--border); background: rgba(255,255,255,.04); color: var(--text); cursor: pointer; font-size: .85rem; font-weight: 600; }
+.btn.primary { background: linear-gradient(135deg, #f97316, #ef4444); color: white; border-color: transparent; }
+.btn:hover { background: rgba(255,255,255,.08); }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+.chk { display: flex; align-items: center; gap: 8px; font-size: .84rem; padding: 8px 10px; border-radius: 6px; background: rgba(255,255,255,.02); border: 1px solid var(--border); cursor: pointer; }
+.chk input { width: auto; margin: 0; }
+table { width: 100%; border-collapse: collapse; }
+th, td { padding: 9px 11px; border-bottom: 1px solid var(--border); font-size: .84rem; text-align: left; vertical-align: top; }
+th { background: rgba(255,255,255,.03); font-size: .68rem; text-transform: uppercase; letter-spacing: .8px; color: var(--muted); font-weight: 700; }
+tr:hover td { background: rgba(255,255,255,.02); }
+.empty { padding: 40px; text-align: center; color: var(--muted); }
+.filtros { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 14px; }
+</style>
 </head>
 <body>
+
 <div class="topbar">
-  <div><a href="acceso-demo.html" style="color:var(--muted);font-size:13px;margin-right:14px"><span class="material-symbols-outlined" style="font-size:16px;vertical-align:-3px">arrow_back</span> Roles</a><span class="brand">Click&Clase</span><span class="demo-tag">Profesional de Convivencia · demo</span></div>
-  <div class="usr"><span class="av">PC</span><span style="font-size:13.5px">Profesional de Ambiente</span><a class="salir" href="login.html">Salir</a></div>
+  <div><div class="breadcrumb">Equipo Convivencia Escolar</div><h1>🤝 Mis Entrevistas e Intervenciones</h1></div>
+  <div class="usr"><span id="userName">—</span><a href="login.html" class="salir">Salir</a></div>
 </div>
 
-<div class="shell">
-  <aside class="sidebar">
-    <div class="side-role"><span class="ico"><span class="material-symbols-outlined">mood</span></span><div><div class="nm">Prof. de Convivencia</div><div class="sc">Área de Ambiente</div></div></div>
-    <nav id="nav"></nav>
-  </aside>
-  <main class="main">
+<div class="container">
 
-    <section class="sec active" id="sec-resumen">
-      <div class="h1">Inicio</div>
-      <div class="sub">Mis casos y actividades asignadas</div>
-      <div class="kpis">
-        <div class="kpi"><div class="l">Mis casos</div><div class="v">5</div></div>
-        <div class="kpi"><div class="l">Actividades</div><div class="v">6</div></div>
-        <div class="kpi"><div class="l">Registros (mes)</div><div class="v">17</div></div>
-        <div class="kpi"><div class="l">Pendientes</div><div class="v">3</div></div>
-      </div>
-      <div class="card"><h3><span class="material-symbols-outlined">notifications_active</span> Mis pendientes</h3>
-        <div class="row" style="cursor:pointer" onclick="show('miscasos')"><span class="material-symbols-outlined ic" style="color:var(--danger)">priority_high</span><div style="flex:1"><b>1 caso crítico</b> asignado — diseñar plan de acción.</div><span class="material-symbols-outlined" style="color:var(--faint)">chevron_right</span></div>
-        <div class="row" style="cursor:pointer" onclick="show('actividades')"><span class="material-symbols-outlined ic" style="color:var(--warning)">today</span><div style="flex:1">1 actividad programada para hoy.</div><span class="material-symbols-outlined" style="color:var(--faint)">chevron_right</span></div>
-        <div class="row" style="cursor:pointer" onclick="show('registro')"><span class="material-symbols-outlined ic" style="color:var(--warning)">edit_note</span><div style="flex:1">2 intervenciones sin registrar.</div><span class="material-symbols-outlined" style="color:var(--faint)">chevron_right</span></div>
-      </div>
-      <div class="card"><div class="sec-title"><span class="material-symbols-outlined" style="vertical-align:-4px;color:var(--primary)">calendar_month</span> Calendario del colegio</div><div id="calColegio"></div></div>
-    </section>
+  <div class="kpis" id="kpisWrap"><div style="grid-column:1/-1;padding:20px;text-align:center;color:var(--muted)">⏳ Cargando…</div></div>
 
-    <section class="sec" id="sec-miscasos">
-      <div class="h1">Mis casos</div>
-      <div class="sub">Casos asignados · haz clic en un caso para diseñar su plan de acción con IA</div>
-      <div class="card">
-        <div class="cardhead"><h3><span class="material-symbols-outlined">folder</span> Casos <span class="count" id="cnt-miscasos">0</span></h3>
-          <div class="tools"><div class="search"><span class="material-symbols-outlined">search</span><input data-f="miscasos" placeholder="Buscar…"></div></div>
-        </div>
-        <table><thead><tr><th>Curso / Estudiante</th><th>Tipo</th><th>Asignado por</th><th>Fecha</th><th>Estado</th></tr></thead><tbody id="tb-miscasos"></tbody></table>
-      </div>
-      <div class="legal"><b>⚖ Ley 20.536:</b> aplica los protocolos del Reglamento Interno dentro de los plazos. El plan de acción que genera la IA se basa en el PEI, los protocolos del colegio y la normativa vigente — revísalo siempre antes de oficializarlo.</div>
-    </section>
+  <div class="grid-main">
 
-    <section class="sec" id="sec-actividades">
-      <div class="h1">Actividades</div>
-      <div class="sub">Actividades de convivencia asignadas</div>
-      <div class="card">
-        <div class="cardhead"><h3><span class="material-symbols-outlined">event</span> Actividades <span class="count" id="cnt-actividades">0</span></h3>
-          <div class="tools"><div class="search"><span class="material-symbols-outlined">search</span><input data-f="actividades" placeholder="Buscar…"></div>
-            <button class="btn ghost sm" onclick="plantilla('actividades')"><span class="material-symbols-outlined" style="font-size:16px">download</span> Plantilla</button>
-            <button class="btn sm" onclick="importar('actividades')"><span class="material-symbols-outlined" style="font-size:16px">upload_file</span> Importar</button></div>
-        </div>
-        <table><thead><tr><th>Día</th><th>Actividad</th><th>Curso</th><th>Estado</th></tr></thead><tbody id="tb-actividades"></tbody></table>
+    <div class="card">
+      <h3><span>➕</span> Nueva entrevista / intervención</h3>
+      <div class="row2">
+        <div class="fld"><label>Tipo</label><select id="fTipo" onchange="onCambioTipo()">
+          <option value="apoderado">Con apoderado</option>
+          <option value="estudiante">Con estudiante</option>
+          <option value="grupo">Grupal</option>
+          <option value="reunion_equipo">Reunión de equipo</option>
+        </select></div>
+        <div class="fld"><label>Fecha</label><input type="date" id="fFecha"></div>
       </div>
-    </section>
-
-    <section class="sec" id="sec-registro">
-      <div class="h1">Registro</div>
-      <div class="sub">Bitácora de intervenciones</div>
-      <div class="card">
-        <div class="cardhead"><h3><span class="material-symbols-outlined">history_edu</span> Intervenciones <span class="count" id="cnt-registro">0</span></h3>
-          <div class="tools"><div class="search"><span class="material-symbols-outlined">search</span><input data-f="registro" placeholder="Buscar…"></div>
-            <button class="btn ghost sm" onclick="plantilla('registro')"><span class="material-symbols-outlined" style="font-size:16px">download</span> Plantilla</button>
-            <button class="btn sm" onclick="importar('registro')"><span class="material-symbols-outlined" style="font-size:16px">upload_file</span> Importar</button></div>
-        </div>
-        <table><thead><tr><th>Fecha</th><th>Caso / Curso</th><th>Intervención</th><th>Estado</th></tr></thead><tbody id="tb-registro"></tbody></table>
+      <div class="row2">
+        <div class="fld"><label>Curso</label><select id="fCurso" onchange="onCambioCurso()"><option value="">— Elegir —</option></select></div>
+        <div class="fld"><label>Estudiante</label><select id="fEst"><option value="">— Elegir curso primero —</option></select></div>
       </div>
-    </section>
+      <div class="fld"><label>Otros participantes (opcional)</label><input id="fParticipantes" placeholder="Ej: madre, hermano, apoderado suplente"></div>
 
-    <section class="sec" id="sec-reglamento">
-      <div class="h1">Reglamento</div>
-      <div class="sub">Documentos de convivencia para consulta</div>
-      <div class="card">
-        <div class="cardhead"><h3><span class="material-symbols-outlined">menu_book</span> Documentos <span class="count" id="cnt-reglamento">0</span></h3>
-          <div class="tools"><div class="search"><span class="material-symbols-outlined">search</span><input data-f="reglamento" placeholder="Buscar…"></div></div>
-        </div>
-        <div id="tb-reglamento"></div>
+      <div class="row3">
+        <div class="fld"><label>Motivo</label><select id="fMotivo"></select></div>
+        <div class="fld"><label>Gravedad</label><select id="fGravedad">
+          <option value="">— Sin clasificar —</option>
+          <option value="leve">Leve</option>
+          <option value="grave">Grave</option>
+          <option value="gravisima">Gravísima</option>
+        </select></div>
+        <div class="fld"><label>Estado</label><select id="fEstado">
+          <option value="abierto">Abierto</option>
+          <option value="seguimiento">En seguimiento</option>
+          <option value="cerrado">Cerrado</option>
+          <option value="derivado">Derivado</option>
+        </select></div>
       </div>
-    </section>
 
-  </main>
+      <div class="fld"><label>Detalle del motivo</label><input id="fMotivoDetalle" placeholder="Descripción breve"></div>
+      <div class="fld"><label>Resumen de la entrevista (obligatorio)</label><textarea id="fResumen" rows="4" placeholder="Relato de la conversación, hechos, observaciones…"></textarea></div>
+      <div class="fld"><label>Acuerdos y compromisos</label><textarea id="fAcuerdos" rows="2" placeholder="Qué se acordó, quién hará qué, plazos"></textarea></div>
+
+      <div class="fld"><label>Medida aplicada (Reglamento Interno)</label><select id="fMedida"></select></div>
+
+      <div class="row2">
+        <label class="chk"><input type="checkbox" id="fSeguimiento"> Requiere seguimiento</label>
+        <div class="fld" style="margin:0"><label>Próxima reunión</label><input type="date" id="fProxima"></div>
+      </div>
+      <label class="chk" style="margin-top:6px"><input type="checkbox" id="fConf"> Confidencial (solo yo)</label>
+
+      <button class="btn primary" onclick="onGuardar()" id="btnGuardar" style="margin-top:12px">💾 Registrar entrevista</button>
+    </div>
+
+    <div class="card">
+      <h3><span>📋</span> Mis casos recientes</h3>
+      <div class="filtros">
+        <select id="fltEstado" onchange="cargarMisCasos()">
+          <option value="">Todos los estados</option>
+          <option value="abierto">Abiertos</option>
+          <option value="seguimiento">En seguimiento</option>
+          <option value="cerrado">Cerrados</option>
+          <option value="derivado">Derivados</option>
+        </select>
+        <select id="fltGravedad" onchange="cargarMisCasos()">
+          <option value="">Toda gravedad</option>
+          <option value="leve">Leve</option>
+          <option value="grave">Grave</option>
+          <option value="gravisima">Gravísima</option>
+        </select>
+      </div>
+      <table>
+        <thead><tr><th>Fecha</th><th>Estudiante</th><th>Motivo</th><th>Estado</th></tr></thead>
+        <tbody id="tbCasos"><tr><td colspan="4" class="empty">⏳ Cargando…</td></tr></tbody>
+      </table>
+    </div>
+
+  </div>
 </div>
 
-<input type="file" id="fileImp" accept=".xlsx,.xls,.csv,.docx" style="display:none">
-<div id="toast"><span class="material-symbols-outlined" style="color:var(--success)">check_circle</span><span id="toastMsg"></span></div>
-
-<div class="overlay" id="planOverlay">
-  <div class="modal" style="max-width:680px">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
-      <h3 style="font-size:16px;font-weight:600;display:flex;align-items:center;gap:8px"><span class="material-symbols-outlined" style="color:var(--primary)">smart_toy</span> Plan de acción con IA</h3>
-      <span class="material-symbols-outlined" style="cursor:pointer;color:var(--muted)" onclick="cerrarPlan()">close</span>
+<div id="mBg" style="position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;padding:30px;z-index:1000;backdrop-filter:blur(4px)">
+  <div style="background:var(--panel);border:1px solid var(--border);border-radius:14px;width:100%;max-width:700px;max-height:90vh;overflow:hidden;display:flex;flex-direction:column">
+    <div style="padding:16px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+      <h2 id="mTit" style="margin:0;font-size:1.1rem">Entrevista</h2>
+      <button onclick="cerrarModal()" style="background:none;border:none;color:var(--muted);font-size:1.5rem;cursor:pointer">×</button>
     </div>
-    <div id="planCaso" class="sub" style="margin-bottom:8px"></div>
-    <div id="planDocsNote" class="sub" style="margin-bottom:12px;font-size:12px"></div>
-    <button class="btn" id="btnGen" onclick="generarPlan()"><span class="material-symbols-outlined" style="font-size:18px">auto_awesome</span> Generar con IA</button>
-    <textarea id="planTxt" rows="13" placeholder="El plan generado aparecerá aquí, editable…" style="width:100%;margin-top:14px;font-family:'Inter',sans-serif;font-size:13px;line-height:1.6;color:var(--text);background:var(--surface);border:1px solid var(--border-2);border-radius:9px;padding:12px"></textarea>
-    <div style="display:flex;gap:10px;margin-top:14px;justify-content:flex-end;flex-wrap:wrap">
-      <button class="btn ghost" onclick="exportarWord()"><span class="material-symbols-outlined" style="font-size:18px">description</span> Exportar a Word</button>
-      <button class="btn" onclick="guardarPlan()"><span class="material-symbols-outlined" style="font-size:18px">save</span> Marcar como atendido</button>
-    </div>
+    <div id="mBody" style="padding:18px 22px;overflow-y:auto;flex:1"></div>
   </div>
 </div>
 
 <script>
-function ic(n){return '<span class="material-symbols-outlined">'+n+'</span>';}
-function inferTone(s){s=(''+s).toLowerCase();
-  if(/(falta|atrasad|vencid|cr[ií]tico|grave|sin registrar)/.test(s))return 'danger';
-  if(/(pendiente|hoy|vence|revisar|seguimiento|abierto)/.test(s))return 'warning';
-  if(/(activ|al d[ií]a|cerrado|completad|realizada|resuelto|atendido|registrado)/.test(s))return 'success';
-  return 'info';}
-function tag(t){return '<span class="tag '+inferTone(t)+'">'+t+'</span>';}
-
-var REG={
- miscasos:{headers:['Curso / Estudiante','Tipo','Asignado por','Fecha','Estado'],statusIdx:4,rows:[
-   ['4°A · E. Pérez','Conducta','M. Lagos','15 jun','Crítico'],
-   ['7°B · grupo','Conflicto entre pares','M. Lagos','12 jun','En seguimiento'],
-   ['2°A · grupo','Prevención','M. Lagos','10 jun','Resuelto'],
-   ['I°B · M. Rivas','Acoso escolar','M. Lagos','18 jun','Abierto']]},
- actividades:{headers:['Día','Actividad','Curso','Estado'],statusIdx:3,rows:[
-   ['05 jun','Taller de buen trato','7°B','Realizada'],
-   ['20 jun','Mediación entre pares','4°A','Hoy'],
-   ['25 jun','Recreos dirigidos','2°A','Pendiente']]},
- registro:{headers:['Fecha','Caso / Curso','Intervención','Estado'],statusIdx:3,rows:[
-   ['12 jun','7°B','Entrevista grupal','Registrado'],
-   ['15 jun','4°A · E. Pérez','Entrevista individual','Sin registrar'],
-   ['18 jun','I°B','Activación de protocolo','Sin registrar']]},
- reglamento:{headers:['Documento','Versión / fecha','Estado'],statusIdx:2,rows:[
-   ['Reglamento Interno de Convivencia','v1 · 2024','Vigente'],
-   ['Protocolo de acoso escolar','2026','Vigente'],
-   ['Protocolo de maltrato','2025','Vigente'],
-   ['Plan de Gestión de la Convivencia','2026','Vigente']]}
-};
-
-function renderTable(key){
- var cfg=REG[key], el=document.getElementById('tb-'+key);
- if(key==='reglamento'){
-   el.innerHTML=cfg.rows.map(function(r){return '<div class="doc" data-txt="'+r.join(' ').toLowerCase()+'"><span class="di">'+ic('description')+'</span><div style="flex:1"><div class="dn">'+r[0]+'</div><div class="dm">'+(r[1]||'')+'</div></div>'+tag(r[2]||'')+'</div>'}).join('');
- } else {
-   el.innerHTML=cfg.rows.map(function(r,j){var clk=(key==='miscasos')?' style="cursor:pointer" onclick="planIA('+j+')" title="Diseñar plan de acción con IA"':'';return '<tr data-txt="'+r.join(' ').toLowerCase()+'"'+clk+'>'+r.map(function(c,i){return '<td>'+(i===cfg.statusIdx?tag(c):c)+'</td>'}).join('')+'</tr>'}).join('');
- }
- var cnt=document.getElementById('cnt-'+key); if(cnt)cnt.textContent=cfg.rows.length;
-}
-Object.keys(REG).forEach(renderTable);
-if(window.ccStore)ccStore.hydrate('ambp',REG,renderTable);
-window.CC_REG=REG;window.CC_RENDER=renderTable;window.CC_PREFIX='ambp';
-
-document.addEventListener('input',function(e){var inp=e.target;if(!inp.dataset||!inp.dataset.f)return;var q=inp.value.toLowerCase(),cont=document.getElementById('tb-'+inp.dataset.f);cont.querySelectorAll('[data-txt]').forEach(function(r){r.style.display=r.dataset.txt.indexOf(q)!==-1?'':'none'});});
-
-var _impKey=null;
-function importar(k){_impKey=k;var f=document.getElementById('fileImp');f.value='';f.click();}
-function plantilla(k){var ws=XLSX.utils.aoa_to_sheet([REG[k].headers]);var wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Plantilla');XLSX.writeFile(wb,'plantilla-'+k+'.xlsx');toast('Plantilla descargada.','success');}
-function applyRows(rows){rows=rows.filter(function(r){return r&&r.join('').trim()!==''});if(rows.length<2){toast('Sin filas de datos.','danger');return;}var n=REG[_impKey].headers.length;REG[_impKey].rows=rows.slice(1).map(function(r){var o=[];for(var i=0;i<n;i++)o.push(r[i]!=null?String(r[i]):'');return o;});renderTable(_impKey);if(window.ccStore)ccStore.setTabla('ambp_'+_impKey,REG[_impKey].rows);toast(REG[_impKey].rows.length+' filas importadas.','success');}
-document.getElementById('fileImp').addEventListener('change',function(e){var file=e.target.files&&e.target.files[0];if(!file||!_impKey)return;var rd=new FileReader();rd.onload=function(ev){try{var wb=XLSX.read(new Uint8Array(ev.target.result),{type:'array'});applyRows(XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,defval:''}));}catch(err){toast('No se pudo leer el archivo.','danger');}};rd.readAsArrayBuffer(file);});
-
-var _tt;function toast(msg,tone){var t=document.getElementById('toast');t.style.borderLeftColor='var(--'+(tone==='danger'?'danger':'success')+')';var i=t.querySelector('.material-symbols-outlined');i.style.color='var(--'+(tone==='danger'?'danger':'success')+')';i.textContent=tone==='danger'?'error':'check_circle';document.getElementById('toastMsg').textContent=msg;t.classList.add('show');clearTimeout(_tt);_tt=setTimeout(function(){t.classList.remove('show')},3000);}
-
-// ── IA: Plan de acción ──
-var LEYES='Normativa chilena de convivencia escolar a considerar: Ley 20.536 sobre violencia escolar (protocolos obligatorios y Encargado de Convivencia); Política Nacional de Convivencia Escolar (Mineduc); Ley 21.128 "Aula Segura" cuando aplique; enfoque de derechos del niño (Ley 21.430). Si hay estudiantes con NEE, considerar Decreto 83.';
-function docsInst(){var o={};try{o=JSON.parse(localStorage.getItem('cc_docs')||'{}');}catch(e){}var k=Object.keys(o);return {n:k.length,txt:k.map(function(x){return '### '+x+'\n'+o[x]}).join('\n\n')};}
-var _planCaso=null,_planIdx=null;
-function planIA(j){_planCaso=REG.miscasos.rows[j];_planIdx=j;
- document.getElementById('planCaso').innerHTML='<b>Caso:</b> '+_planCaso[0]+' · '+_planCaso[1]+' · asignado por '+_planCaso[2]+' · '+_planCaso[3];
- var d=docsInst();
- document.getElementById('planDocsNote').innerHTML=d.n?('<span class="material-symbols-outlined" style="font-size:14px;vertical-align:-2px;color:var(--success)">check_circle</span> La IA usará '+d.n+' documento(s) institucional(es).'):'<span class="material-symbols-outlined" style="font-size:14px;vertical-align:-2px;color:var(--warning)">info</span> Sin documentos institucionales cargados; la IA usará solo la normativa.';
- document.getElementById('planTxt').value='';
- document.getElementById('planOverlay').classList.add('show');
-}
-function cerrarPlan(){document.getElementById('planOverlay').classList.remove('show');}
-document.getElementById('planOverlay').addEventListener('click',function(e){if(e.target===this)cerrarPlan();});
-function buildPrompt(){var d=docsInst(),c=_planCaso;
- return 'Eres un asesor experto en convivencia escolar en Chile. Redacta un PLAN DE ACCIÓN formal y aplicable para el siguiente caso, fundamentado en la normativa chilena y en los documentos institucionales del colegio.\n\n'+
- 'CASO:\n- Curso/Estudiante: '+c[0]+'\n- Tipo: '+c[1]+'\n- Asignado por: '+c[2]+'\n- Fecha: '+c[3]+'\n- Estado: '+c[4]+'\n\n'+LEYES+'\n\n'+
- (d.n?('DOCUMENTOS INSTITUCIONALES (úsalos como base — PEI, Reglamento Interno de Convivencia, protocolos):\n'+d.txt+'\n\n'):'No hay documentos institucionales cargados; básate en la normativa y buenas prácticas, e indica entre [corchetes] lo que el colegio debe completar.\n\n')+
- 'ESTRUCTURA DE SALIDA:\n1. Identificación del caso\n2. Antecedentes y descripción\n3. Marco normativo e institucional aplicable\n4. Objetivos del plan\n5. Acciones (cada una con responsable y plazo)\n6. Seguimiento y evaluación\n7. Comunicación a la familia\n\nRedacta en español, tono profesional, listo para imprimir. No inventes datos; usa [corchetes] donde falte información.';
-}
-function generarPlan(){var b=document.getElementById('btnGen');b.disabled=true;var o=b.innerHTML;b.innerHTML='<span class="material-symbols-outlined" style="font-size:18px">hourglass_top</span> Generando…';
- fetch('/api/ia-asistente',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({tipo:'raw',datos:{prompt:buildPrompt()}})})
-  .then(function(r){return r.json()}).then(function(d){if(d.error)throw new Error(d.error);document.getElementById('planTxt').value=d.resultado||'(respuesta vacía)';toast('Plan generado. Revísalo y edítalo.','success');})
-  .catch(function(err){toast('Error de IA: '+err.message,'danger');}).then(function(){b.disabled=false;b.innerHTML=o;});
-}
-function exportarWord(){var txt=document.getElementById('planTxt').value||'';if(!txt.trim()){toast('Primero genera o escribe el plan.','danger');return;}
- var html='<h2>Plan de acción — '+(_planCaso?_planCaso[0]:'')+'</h2><pre style="font-family:Calibri,Arial;font-size:11pt;white-space:pre-wrap">'+txt.replace(/&/g,'&amp;').replace(/</g,'&lt;')+'</pre>';
- var blob=new Blob(['<html xmlns:w="urn:schemas-microsoft-com:office:word"><head><meta charset="utf-8"></head><body>'+html+'
-<script>
-// Fase 0: proteger la página según rol del usuario.
 if (window.CCRouter && window.CCRouter.guardPanel) {
-  CCRouter.guardPanel(['amb_prof','amb_enc']);
+  CCRouter.guardPanel(['amb_prof','amb_enc','director','rector','admin_colegio','admin']);
 }
-</script>
-</body></html>'],{type:'application/msword'});
- var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='plan-accion.doc';a.click();toast('Exportado a Word.','success');
-}
-function guardarPlan(){var txt=document.getElementById('planTxt').value||'';if(!txt.trim()){toast('Primero genera el plan.','danger');return;}
- if(_planIdx!=null){REG.miscasos.rows[_planIdx][4]='En seguimiento';renderTable('miscasos');}
- REG.registro.rows.unshift([ '20 jun', (_planCaso?_planCaso[0]:''), 'Plan de acción diseñado con IA', 'Registrado']);renderTable('registro');
- toast('Plan registrado en tu bitácora.','success');cerrarPlan();
+function esc(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+var _cursos = [];
+var _cursoActivo = null;
+
+function iniciar() {
+  var u = ELAuth.user || {};
+  document.getElementById('userName').textContent = u.nombre || u.email || 'Profesional';
+  document.getElementById('fFecha').value = new Date().toISOString().slice(0,10);
+  // Motivos
+  var opts = Object.keys(CCConvivencia.MOTIVO_LABEL).map(function(k) {
+    return '<option value="' + k + '">' + CCConvivencia.MOTIVO_LABEL[k] + '</option>';
+  });
+  document.getElementById('fMotivo').innerHTML = opts.join('');
+  // Medidas
+  var meds = Object.keys(CCConvivencia.MEDIDA_LABEL).map(function(k) {
+    return '<option value="' + k + '">' + CCConvivencia.MEDIDA_LABEL[k] + '</option>';
+  });
+  document.getElementById('fMedida').innerHTML = meds.join('');
+  document.getElementById('fMedida').value = 'ninguna';
+
+  cargarKPIs(); cargarCursos(); cargarMisCasos();
 }
 
-var NAV=[['dashboard','Inicio','resumen'],['folder','Mis casos','miscasos'],['event','Actividades','actividades'],['history_edu','Registro','registro'],['menu_book','Reglamento','reglamento']];
-document.getElementById('nav').innerHTML=NAV.map(function(n,i){return '<div class="nav-item'+(i===0?' active':'')+'" data-s="'+n[2]+'">'+ic(n[0])+'<span>'+n[1]+'</span></div>'}).join('');
-function show(s){document.querySelectorAll('.nav-item').forEach(function(x){x.classList.toggle('active',x.dataset.s===s)});document.querySelectorAll('.sec').forEach(function(x){x.classList.toggle('active',x.id==='sec-'+s)});}
-document.querySelectorAll('.nav-item').forEach(function(x){x.addEventListener('click',function(){show(x.dataset.s)})});
+function cargarKPIs() {
+  CCConvivencia.kpisConvivencia().then(function(k){
+    var uid = ELAuth.user.uid;
+    var mias = k.porProfesional[uid] ? k.porProfesional[uid].cantidad : 0;
+    document.getElementById('kpisWrap').innerHTML =
+      '<div class="kpi abr"><div class="l">Casos abiertos</div><div class="v">' + k.totalAbiertos + '</div></div>' +
+      '<div class="kpi seg"><div class="l">En seguimiento</div><div class="v">' + k.totalSeguimiento + '</div></div>' +
+      '<div class="kpi grave"><div class="l">Casos graves activos</div><div class="v">' + k.casosGravesActivos + '</div></div>' +
+      '<div class="kpi mes"><div class="l">Entrevistas este mes</div><div class="v">' + k.entrevistasMes + '</div></div>' +
+      '<div class="kpi mes"><div class="l">Mis entrevistas</div><div class="v">' + mias + '</div></div>';
+  });
+}
 
-if(window.ccStore){ccStore.getDocs();}
-(function(){var el=document.getElementById('calColegio');
- function render(rows){if(!el)return;if(!rows||!rows.length){el.innerHTML='<div class="sub" style="margin:0">Aún no hay calendario institucional cargado.</div>';return;}el.innerHTML=rows.slice(0,8).map(function(r){return '<div class="row"><span class="material-symbols-outlined ic">event</span><div style="flex:1"><div>'+(r[1]||'')+'</div><div class="sub">'+(r[0]||'')+(r[2]?(' · '+r[2]):'')+'</div></div><span class="sub">'+(r[3]||'')+'</span></div>'}).join('');}
- var local=[];try{local=JSON.parse(localStorage.getItem('cc_calendario')||'[]');}catch(e){}
- render(local);
- if(window.ccStore){ccStore.getCalendario().then(render).catch(function(){});}
-})();
+function cargarCursos() {
+  var u = ELAuth.user;
+  CCCursos.listarCursos({ liceoSlug: u.liceoSlug || u.liceoPrincipal }).then(function(cs){
+    _cursos = cs || [];
+    var sel = document.getElementById('fCurso');
+    sel.innerHTML = '<option value="">— Elegir —</option>' +
+      _cursos.map(function(c){ return '<option value="' + esc(c.cursoId) + '">' + esc(c.nombreCompleto) + '</option>'; }).join('');
+  });
+}
+
+function onCambioCurso() {
+  var cursoId = document.getElementById('fCurso').value;
+  _cursoActivo = _cursos.find(function(c){ return c.cursoId === cursoId; });
+  var selE = document.getElementById('fEst');
+  if (!_cursoActivo) { selE.innerHTML = '<option value="">— Elegir curso primero —</option>'; return; }
+  selE.innerHTML = '<option value="">— Elegir —</option>' +
+    (_cursoActivo.estudiantes || []).map(function(e){
+      var nom = ((e.apellidoP||'') + ' ' + (e.apellidoM||'') + ', ' + (e.nombre||'')).trim();
+      return '<option value="' + e.ordinal + '" data-nom="' + esc(nom) + '">' + esc(nom) + '</option>';
+    }).join('');
+}
+
+function onCambioTipo() {
+  var t = document.getElementById('fTipo').value;
+  var estWrap = document.getElementById('fEst').parentElement;
+  var curWrap = document.getElementById('fCurso').parentElement;
+  if (t === 'reunion_equipo') {
+    estWrap.style.opacity = '.4'; curWrap.style.opacity = '.4';
+  } else {
+    estWrap.style.opacity = '1'; curWrap.style.opacity = '1';
+  }
+}
+
+function onGuardar() {
+  var resumen = document.getElementById('fResumen').value.trim();
+  var motivo = document.getElementById('fMotivo').value;
+  if (!resumen) { alert('El resumen es obligatorio'); return; }
+  var ordSt = document.getElementById('fEst').value;
+  var estEl = document.getElementById('fEst');
+  var estOpt = estEl.options[estEl.selectedIndex];
+  var estNom = estOpt ? (estOpt.dataset.nom || estOpt.text) : '';
+  var participantesRaw = document.getElementById('fParticipantes').value.trim();
+  var participantes = participantesRaw ? participantesRaw.split(',').map(function(x){ return { nombre: x.trim(), rol: '' }; }) : [];
+
+  var datos = {
+    liceoSlug: ELAuth.user.liceoSlug || ELAuth.user.liceoPrincipal || '',
+    tipo: document.getElementById('fTipo').value,
+    cursoId: document.getElementById('fCurso').value,
+    cursoNombre: _cursoActivo ? _cursoActivo.nombreCompleto : '',
+    estudianteOrdinal: ordSt ? parseInt(ordSt, 10) : null,
+    estudianteNombre: estNom,
+    participantes: participantes,
+    motivo: motivo,
+    motivoDetalle: document.getElementById('fMotivoDetalle').value.trim(),
+    resumen: resumen,
+    acuerdos: document.getElementById('fAcuerdos').value.trim(),
+    fecha: document.getElementById('fFecha').value,
+    gravedad: document.getElementById('fGravedad').value,
+    medida: document.getElementById('fMedida').value,
+    estado: document.getElementById('fEstado').value,
+    seguimientoRequerido: document.getElementById('fSeguimiento').checked,
+    proximaReunion: document.getElementById('fProxima').value,
+    confidencial: document.getElementById('fConf').checked
+  };
+  var btn = document.getElementById('btnGuardar');
+  btn.disabled = true;
+  CCConvivencia.registrarEntrevista(datos).then(function() {
+    alert('✓ Entrevista registrada');
+    limpiar(); cargarKPIs(); cargarMisCasos();
+    btn.disabled = false;
+  }).catch(function(err) { alert('Error: ' + err.message); btn.disabled = false; });
+}
+
+function limpiar() {
+  ['fResumen','fAcuerdos','fMotivoDetalle','fProxima','fParticipantes'].forEach(function(id){ document.getElementById(id).value = ''; });
+  document.getElementById('fSeguimiento').checked = false;
+  document.getElementById('fConf').checked = false;
+  document.getElementById('fEstado').value = 'abierto';
+  document.getElementById('fMedida').value = 'ninguna';
+  document.getElementById('fGravedad').value = '';
+}
+
+function cargarMisCasos() {
+  var opts = { profesionalUid: ELAuth.user.uid };
+  var e = document.getElementById('fltEstado').value; if (e) opts.estado = e;
+  var g = document.getElementById('fltGravedad').value; if (g) opts.gravedad = g;
+  CCConvivencia.listarEntrevistas(opts).then(function(items) {
+    var tb = document.getElementById('tbCasos');
+    if (!items.length) { tb.innerHTML = '<tr><td colspan="4" class="empty">Sin casos que coincidan</td></tr>'; return; }
+    tb.innerHTML = items.slice(0, 50).map(function(i) {
+      return '<tr onclick="verDetalle(\'' + esc(i.entId) + '\')" style="cursor:pointer">' +
+        '<td>' + esc(i.fecha) + '</td>' +
+        '<td>' + esc(i.estudianteNombre || CCConvivencia.TIPO_LABEL[i.tipo]) + '<br><span style="font-size:.72rem;color:var(--muted)">' + esc(i.cursoNombre || '') + '</span></td>' +
+        '<td>' + CCConvivencia.badgeMotivoHTML(i.motivo) + (i.gravedad ? ' ' + CCConvivencia.badgeGravedadHTML(i.gravedad) : '') + '</td>' +
+        '<td>' + CCConvivencia.badgeEstadoHTML(i.estado) + '</td>' +
+        '</tr>';
+    }).join('');
+  });
+}
+
+function verDetalle(entId) {
+  CCConvivencia.obtenerEntrevista(entId).then(function(d) {
+    if (!d) return;
+    document.getElementById('mTit').textContent = 'Entrevista — ' + esc(d.fecha);
+    document.getElementById('mBody').innerHTML =
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px 20px;margin-bottom:16px">' +
+        '<div><strong style="font-size:.72rem;color:var(--muted);text-transform:uppercase">Tipo</strong><div>' + esc(CCConvivencia.TIPO_LABEL[d.tipo] || d.tipo) + '</div></div>' +
+        '<div><strong style="font-size:.72rem;color:var(--muted);text-transform:uppercase">Estudiante</strong><div>' + esc(d.estudianteNombre || '—') + '</div></div>' +
+        '<div><strong style="font-size:.72rem;color:var(--muted);text-transform:uppercase">Curso</strong><div>' + esc(d.cursoNombre || '—') + '</div></div>' +
+        '<div><strong style="font-size:.72rem;color:var(--muted);text-transform:uppercase">Motivo</strong><div>' + CCConvivencia.badgeMotivoHTML(d.motivo) + '</div></div>' +
+        (d.gravedad ? '<div><strong style="font-size:.72rem;color:var(--muted);text-transform:uppercase">Gravedad</strong><div>' + CCConvivencia.badgeGravedadHTML(d.gravedad) + '</div></div>' : '') +
+        '<div><strong style="font-size:.72rem;color:var(--muted);text-transform:uppercase">Medida</strong><div>' + esc(CCConvivencia.MEDIDA_LABEL[d.medida] || d.medida) + '</div></div>' +
+        '<div><strong style="font-size:.72rem;color:var(--muted);text-transform:uppercase">Estado</strong><div>' + CCConvivencia.badgeEstadoHTML(d.estado) + '</div></div>' +
+        '<div><strong style="font-size:.72rem;color:var(--muted);text-transform:uppercase">Profesional</strong><div>' + esc(d.profesionalNombre) + '</div></div>' +
+      '</div>' +
+      (d.motivoDetalle ? '<h3 style="font-size:.75rem;color:var(--muted);text-transform:uppercase;margin:14px 0 6px">Motivo — detalle</h3><p style="margin:0">' + esc(d.motivoDetalle) + '</p>' : '') +
+      '<h3 style="font-size:.75rem;color:var(--muted);text-transform:uppercase;margin:14px 0 6px">Resumen</h3><p style="margin:0;white-space:pre-wrap">' + esc(d.resumen) + '</p>' +
+      (d.acuerdos ? '<h3 style="font-size:.75rem;color:var(--muted);text-transform:uppercase;margin:14px 0 6px">Acuerdos y compromisos</h3><p style="margin:0;white-space:pre-wrap">' + esc(d.acuerdos) + '</p>' : '') +
+      (d.seguimientoRequerido ? '<p style="margin-top:14px;font-size:.85rem;color:#fbbf24">⚠ Requiere seguimiento' + (d.proximaReunion ? ' — próxima: ' + esc(d.proximaReunion) : '') + '</p>' : '');
+    document.getElementById('mBg').style.display = 'flex';
+  });
+}
+function cerrarModal() { document.getElementById('mBg').style.display = 'none'; }
+document.addEventListener('keydown', function(e){ if (e.key === 'Escape') cerrarModal(); });
+
+if (window.ELAuth && ELAuth.onUserReady) ELAuth.onUserReady(function(u){ if(u) iniciar(); });
 </script>
 </body>
 </html>
