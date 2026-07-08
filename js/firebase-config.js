@@ -140,7 +140,7 @@ var EL_ROLES_LABEL = {
 
 // Rol → panel dedicado. Usado por roles-router.js.
 var EL_ROLES_PANEL = {
-  admin:          'admin.html',
+  admin:          'panel-superadmin.html',   // Fase 7: SuperAdmin como landing principal
   director:       'panel-director.html',
   rector:         'panel-rector.html',
   admin_colegio:  'panel-admin-colegio.html',
@@ -189,7 +189,38 @@ var EL_COLLECTIONS = {
   CURRICULA:       'curricula',
   RECURSOS:        'recursos_curricula',
   LICEOS:          'liceos',
+  PLANES:          'planes',           // Fase 7 — catálogo comercial
+  CONTACTOS_LEADS: 'contactos_leads',  // Fase 7 — form 'Solicitar demo'
+  PAGOS_LICEO:     'pagos_liceo',      // Fase 7 — historial de facturación
   ACTIVIDAD:       'actividad'  // Audit log: 1 doc por evento del usuario
+};
+
+// Definición canónica de features por plan (usado en runtime para
+// habilitar/deshabilitar módulos según el plan contratado por el liceo).
+var EL_PLAN_FEATURES = {
+  basic: [
+    'planificaciones', 'libro_clases', 'notas', 'asistencia',
+    'materiales', 'reportes_utp', 'panel_director_basico'
+  ],
+  pro: [
+    'planificaciones', 'libro_clases', 'notas', 'asistencia',
+    'materiales', 'reportes_utp', 'panel_director_basico',
+    'ia_asistente', 'dashboards_avanzados', 'aprobaciones', 'panel_rector'
+  ],
+  enterprise: [
+    'planificaciones', 'libro_clases', 'notas', 'asistencia',
+    'materiales', 'reportes_utp', 'panel_director_basico',
+    'ia_asistente', 'dashboards_avanzados', 'aprobaciones', 'panel_rector',
+    'apoyo_psicosocial', 'convivencia', 'pie_completo', 'exportes_avanzados'
+  ]
+};
+
+// Precios de referencia (CLP anual). Editables al crear cada colegio
+// para negociar caso a caso.
+var EL_PLAN_PRECIOS = {
+  basic:       800000,
+  pro:        1500000,
+  enterprise: 2500000
 };
 
 // ─────────────────────────────────────────────────────────────

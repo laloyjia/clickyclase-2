@@ -245,9 +245,56 @@ service cloud.firestore {
       allow create, update, delete: if isAdmin();
     }
 
-    // ── liceos (catálogo institucional) ────────────────────────
+    // ── liceos (catálogo institucional multi-tenant) ───────────
+    //
+    // Cada doc representa un colegio contratado. Contiene datos
+    // institucionales, plan contratado, admin principal y estado.
+    // Fuente de verdad para el aislamiento por liceoSlug.
+    //
+    //   Lectura:  cualquier autenticado puede LEER liceos (necesario
+    //             para el switcher de rol y visualización de nombre/logo).
+    //   Escritura: solo admin plataforma crea/elimina. El admin_colegio
+    //             puede actualizar su propio doc (para cambiar logo,
+    //             colores, datos de contacto — pero NO plan ni límites).
     match /liceos/{liceoId} {
-      allow read: if isSignedIn();
+      allow read:   if isSignedIn();
+      allow create: if isAdmin();
+      allow update: if isAdmin() ||
+        // admin_colegio puede editar su propio liceo pero solo campos permitidos
+        (_hasRole('admin_colegio') &&
+         liceoId == _userLiceo() &&
+         request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+           'nombre','direccion','telefono','email','sitio',
+           'logoUrl','colores','descripcion'
+         ]));
+      allow delete: if isAdmin();
+    }
+
+    // ── planes (catálogo comercial: basic, pro, enterprise) ────
+    // Definición formal de los planes contratables. Solo admin edita.
+    // Cualquier autenticado los lee (para mostrar en admin colegio) y
+    // los usuarios NO autenticados también (para landing pública).
+    match /planes/{planId} {
+      allow read:  if true;                     // acceso público
+      allow write: if isAdmin();
+    }
+
+    // ── contactos_leads (formulario 'Solicitar demo' de la landing) ──
+    // Cualquier visitante puede crear un lead (form público). Solo admin
+    // los lee/gestiona.
+    match /contactos_leads/{leadId} {
+      allow create: if true;                    // form público
+      allow read:   if isAdmin();
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // ── pagos_liceo (historial de facturación por colegio) ─────
+    // Registro de cada pago recibido/pendiente. Solo admin gestiona.
+    // El admin_colegio puede leer los pagos de su propio liceo.
+    match /pagos_liceo/{pagoId} {
+      allow read:   if isAdmin() ||
+        (_hasRole('admin_colegio') && resource.data.liceoSlug == _userLiceo());
       allow create, update, delete: if isAdmin();
     }
 

@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SuperAdmin — Gestión de colegios — Click&Clase</title>
+<link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg">
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="js/firebase-rest.js"></script>
+<script src="js/firebase-config.js"></script>
+<script src="js/firebase-auth.js"></script>
+<script src="js/firebase-db.js"></script>
+<script src="js/roles-permissions.js"></script>
+<script src="js/roles-router.js"></script>
+<script src="js/liceos.js"></script>
+<style>
+:root {
+  --bg: #0b0d1e; --panel: #12162f; --border: rgba(148,163,184,.15);
+  --text: #e5e7eb; --muted: #94a3b8;
+  --violet: #7c3aed; --gold: #f59e0b; --green: #22c55e; --danger: #ef4444;
+  --cyan: #22d3ee;
+}
+* { box-sizing: border-box; }
+body { margin: 0; font-family: 'Segoe UI', Roboto, Arial, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+/* ─── Topbar ─── */
+.topbar { padding: 16px 32px; border-bottom: 1px solid var(--border);
+  background: linear-gradient(135deg, rgba(124,58,237,.12), rgba(245,158,11,.06));
+  display: flex; align-items: center; justify-content: space-between; }
+.topbar .brand { display: flex; align-items: center; gap: 14px; }
+.topbar .logo { width: 40px; height: 40px; border-radius: 10px;
+  background: linear-gradient(135deg, #7c3aed, #f59e0b);
+  display: flex; align-items: center; justify-content: center; font-size: 1.3rem; }
+.topbar .brand h1 { margin: 0; font-size: 1.15rem; font-weight: 800; }
+.topbar .brand .sub { color: var(--muted); font-size: .72rem; letter-spacing: .5px; text-transform: uppercase; }
+.topbar .usr { font-size: .82rem; color: var(--muted); }
+.topbar .usr .salir { color: #fca5a5; text-decoration: none; margin-left: 12px; }
+.topbar .usr .btn-admin { color: #c4b5fd; text-decoration: none; margin-right: 12px; padding: 4px 10px; border-radius: 6px; border: 1px solid rgba(196,181,253,.3); }
+.topbar .usr .btn-admin:hover { background: rgba(196,181,253,.08); }
+
+/* ─── Container ─── */
+.container { max-width: 1600px; margin: 24px auto; padding: 0 24px 60px; }
+
+/* ─── KPIs plataforma ─── */
+.kpis-plataforma { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-bottom: 26px; }
+.kpi { background: var(--panel); border: 1px solid var(--border); border-radius: 14px; padding: 18px 20px; position: relative; overflow: hidden; }
+.kpi::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--violet); opacity: .6; }
+.kpi.mrr::before { background: var(--gold); }
+.kpi.arr::before { background: var(--green); }
+.kpi.prueba::before { background: var(--cyan); }
+.kpi.suspendidos::before { background: var(--danger); }
+.kpi .l { font-size: .7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
+.kpi .v { font-size: 2rem; font-weight: 800; margin-top: 6px; letter-spacing: -.5px; }
+.kpi .s { font-size: .72rem; color: var(--muted); margin-top: 4px; }
+
+/* ─── Acciones top ─── */
+.acciones-top { display: flex; justify-content: space-between; align-items: center; gap: 14px; margin-bottom: 18px; flex-wrap: wrap; }
+.filtros { display: flex; gap: 10px; flex: 1; flex-wrap: wrap; }
+.filtros input, .filtros select { padding: 9px 12px; border-radius: 8px; background: rgba(255,255,255,.04); border: 1px solid rgba(148,163,184,.25); color: var(--text); font-size: .88rem; font-family: inherit; }
+.filtros input { min-width: 240px; }
+.btn { padding: 10px 18px; border-radius: 8px; border: 1px solid var(--border); background: rgba(255,255,255,.04); color: var(--text); cursor: pointer; font-size: .88rem; font-family: inherit; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; }
+.btn:hover { background: rgba(255,255,255,.08); }
+.btn.primary { background: linear-gradient(135deg, var(--violet), var(--gold)); color: #fff; border-color: transparent; box-shadow: 0 4px 20px rgba(124,58,237,.3); }
+.btn.primary:hover { transform: translateY(-1px); box-shadow: 0 8px 28px rgba(124,58,237,.45); }
+.btn.small { padding: 5px 10px; font-size: .78rem; }
+.btn.danger { color: #fca5a5; border-color: rgba(239,68,68,.3); }
+.btn.danger:hover { background: rgba(239,68,68,.1); }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+
+/* ─── Tabla de liceos ─── */
+.card { background: var(--panel); border: 1px solid var(--border); border-radius: 14px; padding: 20px 24px; }
+.card h2 { margin: 0 0 16px; font-size: .85rem; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); font-weight: 700; }
+table { width: 100%; border-collapse: collapse; }
+th, td { padding: 12px 12px; border-bottom: 1px solid var(--border); font-size: .87rem; text-align: left; vertical-align: top; }
+th { background: rgba(255,255,255,.03); font-size: .7rem; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); font-weight: 700; }
+tr:hover td { background: rgba(255,255,255,.02); }
+.nombre-cell { display: flex; align-items: center; gap: 10px; }
+.nombre-cell .logo { width: 32px; height: 32px; border-radius: 8px; background: linear-gradient(135deg, #7c3aed, #f59e0b); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: .85rem; }
+.nombre-cell .info b { display: block; }
+.nombre-cell .info .slug { font-size: .72rem; color: var(--muted); }
+.plan-badge { display: inline-block; padding: 3px 9px; border-radius: 999px; font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; }
+.plan-badge.basic { background: rgba(34,197,94,.15); color: #86efac; border: 1px solid rgba(34,197,94,.3); }
+.plan-badge.pro { background: rgba(124,58,237,.15); color: #c4b5fd; border: 1px solid rgba(124,58,237,.3); }
+.plan-badge.enterprise { background: rgba(245,158,11,.15); color: #fcd34d; border: 1px solid rgba(245,158,11,.3); }
+.estado-badge { display: inline-block; padding: 3px 9px; border-radius: 999px; font-size: .7rem; font-weight: 700; }
+.estado-badge.activo { background: rgba(34,197,94,.15); color: #86efac; }
+.estado-badge.prueba { background: rgba(34,211,238,.15); color: #67e8f9; }
+.estado-badge.suspendido { background: rgba(239,68,68,.15); color: #fca5a5; }
+.acciones-cell { display: flex; gap: 4px; flex-wrap: wrap; }
+.empty { padding: 60px 30px; text-align: center; color: var(--muted); }
+.empty .icon { font-size: 3rem; margin-bottom: 12px; }
+
+/* ─── Modal wizard ─── */
+.modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.75); z-index: 100; display: none; align-items: flex-start; justify-content: center; overflow-y: auto; padding: 30px 20px; }
+.modal-backdrop.show { display: flex; }
+.modal { background: var(--panel); border: 1px solid var(--border); border-radius: 16px; width: 100%; max-width: 720px; padding: 32px; box-shadow: 0 20px 60px rgba(0,0,0,.6); }
+.modal-title { font-size: 1.25rem; font-weight: 800; margin: 0 0 6px; }
+.modal-sub { color: var(--muted); font-size: .86rem; margin: 0 0 26px; }
+
+/* Wizard steps indicator */
+.wiz-steps { display: flex; align-items: center; gap: 6px; margin-bottom: 28px; }
+.wiz-step { flex: 1; height: 4px; border-radius: 4px; background: rgba(148,163,184,.2); position: relative; }
+.wiz-step.done { background: linear-gradient(90deg, var(--violet), var(--gold)); }
+.wiz-step.active { background: linear-gradient(90deg, var(--violet), rgba(148,163,184,.2)); }
+
+.paso { display: none; }
+.paso.active { display: block; }
+
+.fld { margin-bottom: 14px; }
+.fld label { display: block; font-size: .74rem; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 5px; }
+.fld input, .fld select, .fld textarea { width: 100%; padding: 10px 12px; border-radius: 8px; background: rgba(255,255,255,.04); border: 1px solid rgba(148,163,184,.2); color: var(--text); font-size: .9rem; font-family: inherit; }
+.fld input:focus, .fld select:focus, .fld textarea:focus { outline: none; border-color: var(--violet); background: rgba(124,58,237,.06); }
+.fld textarea { resize: vertical; min-height: 60px; }
+.fld .hint { font-size: .74rem; color: var(--muted); margin-top: 4px; }
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+@media (max-width: 620px) { .row2, .row3 { grid-template-columns: 1fr; } }
+
+/* Plan cards en el paso 2 */
+.plan-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px; }
+@media (max-width: 620px) { .plan-cards { grid-template-columns: 1fr; } }
+.plan-card { padding: 16px; border-radius: 12px; border: 2px solid rgba(148,163,184,.15); background: rgba(255,255,255,.02); cursor: pointer; transition: all .2s; position: relative; }
+.plan-card:hover { border-color: rgba(148,163,184,.4); }
+.plan-card.selected { border-color: var(--violet); background: rgba(124,58,237,.08); }
+.plan-card .titulo { font-size: 1rem; font-weight: 800; margin-bottom: 4px; }
+.plan-card .precio { font-size: 1.35rem; font-weight: 800; color: var(--gold); margin: 8px 0; }
+.plan-card .precio .u { font-size: .65rem; color: var(--muted); font-weight: 500; }
+.plan-card .desc { font-size: .78rem; color: var(--muted); margin-bottom: 10px; }
+.plan-card .features { font-size: .75rem; line-height: 1.6; color: var(--text); opacity: .85; }
+.plan-card.destacado { border-color: var(--violet); }
+.plan-card.destacado::before { content: '★ Recomendado'; position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: var(--violet); color: #fff; font-size: .65rem; padding: 3px 10px; border-radius: 999px; font-weight: 700; letter-spacing: .5px; }
+
+/* Resumen del paso 4 */
+.resumen { padding: 20px; background: rgba(255,255,255,.03); border-radius: 12px; margin-bottom: 20px; }
+.resumen .grupo { margin-bottom: 14px; }
+.resumen .grupo h4 { margin: 0 0 6px; font-size: .72rem; text-transform: uppercase; letter-spacing: .8px; color: var(--muted); font-weight: 700; }
+.resumen .grupo .linea { padding: 3px 0; font-size: .88rem; }
+.resumen .grupo .linea b { display: inline-block; min-width: 140px; color: var(--muted); font-weight: 500; }
+
+/* Éxito final */
+.exito-card { text-align: center; padding: 20px; }
+.exito-card .ico { font-size: 3.5rem; margin-bottom: 12px; }
+.exito-card h3 { font-size: 1.3rem; margin: 0 0 6px; color: var(--green); }
+.exito-card p { color: var(--muted); font-size: .88rem; margin: 0 0 24px; }
+.credenciales { background: rgba(34,197,94,.06); border: 1px solid rgba(34,197,94,.2); border-radius: 12px; padding: 20px; text-align: left; margin-bottom: 20px; }
+.credenciales .row { display: flex; align-items: center; gap: 12px; padding: 8px 0; border-bottom: 1px dashed rgba(148,163,184,.15); }
+.credenciales .row:last-child { border-bottom: none; }
+.credenciales .row .k { color: var(--muted); font-size: .78rem; text-transform: uppercase; letter-spacing: .5px; min-width: 100px; }
+.credenciales .row .v { flex: 1; font-family: 'Courier New', monospace; font-size: .95rem; word-break: break-all; }
+.credenciales .row .btn-copy { padding: 4px 10px; font-size: .72rem; }
+.aviso { background: rgba(245,158,11,.08); border: 1px solid rgba(245,158,11,.25); border-radius: 10px; padding: 12px 16px; font-size: .82rem; color: #fcd34d; margin-bottom: 16px; }
+
+/* Wizard nav */
+.wiz-nav { display: flex; justify-content: space-between; align-items: center; margin-top: 24px; gap: 12px; }
+.wiz-nav .izq, .wiz-nav .der { display: flex; gap: 8px; }
+
+/* Error box */
+.err-box { background: rgba(239,68,68,.08); border: 1px solid rgba(239,68,68,.3); border-radius: 8px; padding: 10px 14px; color: #fca5a5; font-size: .84rem; margin-bottom: 14px; display: none; }
+.err-box.show { display: block; }
+
+/* Spin */
+.spin { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(255,255,255,.25); border-top-color: #fff; border-radius: 50%; animation: rot .6s linear infinite; }
+@keyframes rot { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand">
+    <div class="logo">👑</div>
+    <div>
+      <div class="brand-txt">
+        <h1>Click&Clase SuperAdmin</h1>
+        <div class="sub">Gestión SaaS · Colegios</div>
+      </div>
+    </div>
+  </div>
+  <div class="usr">
+    <a href="admin.html" class="btn-admin">Panel Admin →</a>
+    <span id="userName">—</span>
+    <a href="login.html" class="salir">Salir</a>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- KPIs de plataforma -->
+  <div class="kpis-plataforma" id="kpisWrap">
+    <div class="kpi"><div class="l">Colegios totales</div><div class="v">—</div></div>
+    <div class="kpi mrr"><div class="l">MRR estimado</div><div class="v">—</div></div>
+    <div class="kpi arr"><div class="l">ARR estimado</div><div class="v">—</div></div>
+    <div class="kpi prueba"><div class="l">En periodo prueba</div><div class="v">—</div></div>
+  </div>
+
+  <!-- Acciones -->
+  <div class="acciones-top">
+    <div class="filtros">
+      <input type="text" id="fltBuscar" placeholder="🔎 Buscar colegio por nombre..." oninput="renderLista()">
+      <select id="fltEstado" onchange="renderLista()">
+        <option value="">Todos los estados</option>
+        <option value="activo">Activo</option>
+        <option value="prueba">En prueba</option>
+        <option value="suspendido">Suspendido</option>
+      </select>
+      <select id="fltPlan" onchange="renderLista()">
+        <option value="">Todos los planes</option>
+        <option value="basic">Basic</option>
+        <option value="pro">Pro</option>
+        <option value="enterprise">Enterprise</option>
+      </select>
+    </div>
+    <button class="btn primary" onclick="abrirWizard()">+ Nuevo colegio</button>
+  </div>
+
+  <!-- Tabla de liceos -->
+  <div class="card">
+    <h2>📋 Colegios contratados</h2>
+    <div id="tablaWrap">
+      <div class="empty"><div class="icon">⏳</div>Cargando colegios…</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════════════
+     MODAL WIZARD — NUEVO COLEGIO
+═════════════════════════════════════ -->
+<div class="modal-backdrop" id="modalWizard">
+  <div class="modal">
+    <h2 class="modal-title" id="wizTitulo">Nuevo colegio</h2>
+    <p class="modal-sub" id="wizSubtitulo">Paso 1 de 4 — Datos institucionales</p>
+
+    <div class="wiz-steps">
+      <div class="wiz-step" data-step="1"></div>
+      <div class="wiz-step" data-step="2"></div>
+      <div class="wiz-step" data-step="3"></div>
+      <div class="wiz-step" data-step="4"></div>
+    </div>
+
+    <div class="err-box" id="wizError"></div>
+
+    <!-- ─ PASO 1: Datos institucionales ─ -->
+    <div class="paso" data-paso="1">
+      <div class="fld">
+        <label>Nombre del colegio *</label>
+        <input type="text" id="wNombre" placeholder="Ej: Colegio Salesiano de Talca" oninput="actualizarSlug()">
+        <div class="hint">Slug automático: <span id="wSlugPreview" style="color:var(--violet);font-family:monospace">—</span></div>
+      </div>
+      <div class="row2">
+        <div class="fld"><label>RUT institucional</label><input type="text" id="wRut" placeholder="77.123.456-7"></div>
+        <div class="fld"><label>Sitio web</label><input type="text" id="wSitio" placeholder="https://..."></div>
+      </div>
+      <div class="fld"><label>Dirección</label><input type="text" id="wDireccion" placeholder="Av. Colin 3145"></div>
+      <div class="row2">
+        <div class="fld"><label>Ciudad</label><input type="text" id="wCiudad" placeholder="Talca"></div>
+        <div class="fld"><label>Región</label><input type="text" id="wRegion" placeholder="Maule"></div>
+      </div>
+      <div class="row2">
+        <div class="fld"><label>Teléfono</label><input type="text" id="wTelefono" placeholder="+56 71 2 234567"></div>
+        <div class="fld"><label>Email institucional</label><input type="email" id="wEmailLiceo" placeholder="contacto@colegio.cl"></div>
+      </div>
+    </div>
+
+    <!-- ─ PASO 2: Plan contratado ─ -->
+    <div class="paso" data-paso="2">
+      <div class="plan-cards" id="planCards">
+        <div class="empty" style="grid-column:1/-1"><div class="icon">⏳</div>Cargando planes…</div>
+      </div>
+      <div class="row2">
+        <div class="fld">
+          <label>Precio negociado (CLP anual) *</label>
+          <input type="number" id="wPrecio" placeholder="800000" min="0" step="10000">
+          <div class="hint">Podés ajustar el precio para este contrato específico.</div>
+        </div>
+        <div class="fld">
+          <label>Duración (meses)</label>
+          <input type="number" id="wDuracion" value="12" min="1" max="60">
+        </div>
+      </div>
+      <div class="fld">
+        <label>Fecha de inicio del contrato</label>
+        <input type="date" id="wFechaInicio">
+      </div>
+    </div>
+
+    <!-- ─ PASO 3: Admin del colegio ─ -->
+    <div class="paso" data-paso="3">
+      <div class="aviso">💡 Este será el <b>primer usuario admin</b> del colegio (director/rector). Él/Ella recibirá una contraseña temporal y podrá cargar al resto de su equipo.</div>
+      <div class="fld"><label>Nombre completo *</label><input type="text" id="wAdminNombre" placeholder="María Jesús González"></div>
+      <div class="row2">
+        <div class="fld"><label>Email *</label><input type="email" id="wAdminEmail" placeholder="director@colegio.cl"></div>
+        <div class="fld"><label>Teléfono</label><input type="text" id="wAdminTelefono" placeholder="+56 9 8765 4321"></div>
+      </div>
+      <div class="fld">
+        <label>Cargo *</label>
+        <select id="wAdminCargo">
+          <option value="Director/a">Director/a</option>
+          <option value="Rector/a">Rector/a</option>
+          <option value="Coordinador/a General">Coordinador/a General</option>
+          <option value="Sostenedor/a">Sostenedor/a</option>
+          <option value="Otro">Otro</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- ─ PASO 4: Confirmar y crear ─ -->
+    <div class="paso" data-paso="4">
+      <div class="resumen" id="resumenWrap">
+        <!-- Se llena en JS -->
+      </div>
+      <div class="aviso">
+        <b>Importante:</b> al confirmar, se creará automáticamente el registro del colegio + la cuenta del admin en Firebase Auth con una contraseña temporal segura. La contraseña se mostrará una sola vez en la pantalla siguiente — copiala y envíala al admin por WhatsApp o mail.
+      </div>
+    </div>
+
+    <!-- ─ PASO 5: Éxito ─ -->
+    <div class="paso" data-paso="5">
+      <div class="exito-card">
+        <div class="ico">✅</div>
+        <h3>¡Colegio creado exitosamente!</h3>
+        <p>Compartí estas credenciales con el admin del colegio para su primer ingreso.</p>
+      </div>
+
+      <div class="credenciales">
+        <div class="row">
+          <div class="k">Colegio</div>
+          <div class="v" id="okNombreLiceo">—</div>
+        </div>
+        <div class="row">
+          <div class="k">Login URL</div>
+          <div class="v" id="okLoginUrl">https://clickyclase.cl/login.html</div>
+          <button class="btn small btn-copy" onclick="copiarTexto('okLoginUrl',this)">Copiar</button>
+        </div>
+        <div class="row">
+          <div class="k">Email</div>
+          <div class="v" id="okEmail">—</div>
+          <button class="btn small btn-copy" onclick="copiarTexto('okEmail',this)">Copiar</button>
+        </div>
+        <div class="row">
+          <div class="k">Password</div>
+          <div class="v" id="okPassword">—</div>
+          <button class="btn small btn-copy" onclick="copiarTexto('okPassword',this)">Copiar</button>
+        </div>
+        <div class="row">
+          <div class="k">Todo junto</div>
+          <div class="v" id="okTodoJunto" style="font-size:.78rem"></div>
+          <button class="btn small btn-copy" onclick="copiarTexto('okTodoJunto',this)">Copiar</button>
+        </div>
+      </div>
+
+      <div class="aviso">🔒 Esta contraseña NO se volverá a mostrar. Al primer ingreso el usuario deberá cambiarla.</div>
+    </div>
+
+    <!-- Navegación -->
+    <div class="wiz-nav">
+      <div class="izq">
+        <button class="btn" id="btnAtras" onclick="pasoAnterior()">← Atrás</button>
+      </div>
+      <div class="der">
+        <button class="btn" id="btnCancelar" onclick="cerrarWizard()">Cancelar</button>
+        <button class="btn primary" id="btnSiguiente" onclick="pasoSiguiente()">Siguiente →</button>
+        <button class="btn primary" id="btnCrear" onclick="crearColegio()" style="display:none">✓ Crear colegio</button>
+        <button class="btn primary" id="btnCerrar" onclick="cerrarWizard()" style="display:none">Cerrar y ver lista</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════
+// AUTH GATE — solo admin plataforma
+// ══════════════════════════════════════════════
+if (window.CCRouter && CCRouter.guardPanel) {
+  CCRouter.guardPanel(['admin']);
+}
+
+var _todosLosLiceos = [];
+var _todosLosPlanes = [];
+var _wizPaso = 1;
+var _wizPlanSel = null;
+
+function esc(s) { return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+// ══════════════════════════════════════════════
+// INICIO
+// ══════════════════════════════════════════════
+function iniciar() {
+  var u = ELAuth.user || {};
+  document.getElementById('userName').textContent = u.nombre || u.email || 'Super Admin';
+
+  cargarKpis();
+  cargarLista();
+  precargarPlanes();
+}
+
+function precargarPlanes() {
+  CCLiceos.listarPlanes().then(function (planes) {
+    _todosLosPlanes = planes;
+    if (planes.length === 0) {
+      console.warn('[SuperAdmin] No hay planes cargados. Ejecutar setup-usuarios/inicializar-planes.mjs');
+    }
+  }).catch(function (err) {
+    console.error('[SuperAdmin] Error cargando planes:', err);
+  });
+}
+
+function cargarKpis() {
+  CCLiceos.kpisPlataforma().then(function (k) {
+    var html = ''
+      + '<div class="kpi"><div class="l">Colegios totales</div><div class="v">' + k.totalLiceos + '</div><div class="s">' + k.liceosActivos + ' activos</div></div>'
+      + '<div class="kpi mrr"><div class="l">MRR estimado</div><div class="v">' + CCLiceos.formatoCLP(k.mrr) + '</div><div class="s">Ingreso mensual recurrente</div></div>'
+      + '<div class="kpi arr"><div class="l">ARR estimado</div><div class="v">' + CCLiceos.formatoCLP(k.arr) + '</div><div class="s">Ingreso anual recurrente</div></div>'
+      + '<div class="kpi prueba"><div class="l">En prueba</div><div class="v">' + k.liceosPrueba + '</div><div class="s">' + k.liceosSuspendidos + ' suspendidos</div></div>';
+    document.getElementById('kpisWrap').innerHTML = html;
+  }).catch(function (err) {
+    console.error('[SuperAdmin] Error KPIs:', err);
+  });
+}
+
+function cargarLista() {
+  CCLiceos.listar().then(function (liceos) {
+    _todosLosLiceos = liceos;
+    renderLista();
+  }).catch(function (err) {
+    console.error(err);
+    document.getElementById('tablaWrap').innerHTML = '<div class="empty"><div class="icon">⚠</div>Error cargando colegios: ' + esc(err.message) + '</div>';
+  });
+}
+
+function renderLista() {
+  var buscar = (document.getElementById('fltBuscar').value || '').toLowerCase().trim();
+  var estado = document.getElementById('fltEstado').value;
+  var plan   = document.getElementById('fltPlan').value;
+
+  var lista = _todosLosLiceos.filter(function (l) {
+    if (estado && l.estado !== estado) return false;
+    if (plan && l.planId !== plan) return false;
+    if (buscar) {
+      var texto = ((l.nombre || '') + ' ' + (l.slug || '') + ' ' + (l.ciudad || '')).toLowerCase();
+      if (texto.indexOf(buscar) === -1) return false;
+    }
+    return true;
+  });
+
+  if (lista.length === 0) {
+    var msg = _todosLosLiceos.length === 0
+      ? '<div class="empty"><div class="icon">🏫</div><b>Aún no hay colegios contratados</b><br><br>Empezá creando el primer colegio con el botón <b>"+ Nuevo colegio"</b>.</div>'
+      : '<div class="empty"><div class="icon">🔍</div>Ningún colegio coincide con los filtros.</div>';
+    document.getElementById('tablaWrap').innerHTML = msg;
+    return;
+  }
+
+  var html = '<table><thead><tr>'
+    + '<th>Colegio</th>'
+    + '<th>Ubicación</th>'
+    + '<th>Plan</th>'
+    + '<th>Vence</th>'
+    + '<th>Estado</th>'
+    + '<th>Acciones</th>'
+    + '</tr></thead><tbody>';
+
+  lista.forEach(function (l) {
+    var inicial = (l.nombre || '?').charAt(0).toUpperCase();
+    var vence = l.planFechaFin ? new Date(l.planFechaFin).toLocaleDateString('es-CL') : '—';
+    var diasVence = l.planFechaFin ? Math.round((new Date(l.planFechaFin) - new Date()) / (1000*60*60*24)) : null;
+    var venceLabel = vence;
+    if (diasVence !== null) {
+      if (diasVence < 0) venceLabel = '<span style="color:#fca5a5">' + vence + ' <br><small>(vencido)</small></span>';
+      else if (diasVence < 30) venceLabel = '<span style="color:#fcd34d">' + vence + ' <br><small>(en ' + diasVence + ' días)</small></span>';
+    }
+
+    html += '<tr>'
+      + '<td><div class="nombre-cell"><div class="logo">' + esc(inicial) + '</div><div class="info"><b>' + esc(l.nombre) + '</b><div class="slug">' + esc(l.slug) + '</div></div></div></td>'
+      + '<td>' + esc(l.ciudad || '—') + '<br><small style="color:var(--muted)">' + esc(l.region || '') + '</small></td>'
+      + '<td><span class="plan-badge ' + esc(l.planId || 'basic') + '">' + esc((l.planId || 'basic').toUpperCase()) + '</span><br><small style="color:var(--muted)">' + CCLiceos.formatoCLP(l.planPrecio || 0) + '/año</small></td>'
+      + '<td>' + venceLabel + '</td>'
+      + '<td><span class="estado-badge ' + esc(l.estado || 'activo') + '">' + esc((l.estado || 'activo').toUpperCase()) + '</span></td>'
+      + '<td><div class="acciones-cell">'
+      +   '<button class="btn small" title="Ver detalles" onclick="verDetalles(\'' + esc(l.slug) + '\')">👁</button>'
+      +   (l.estado === 'suspendido'
+          ? '<button class="btn small" title="Reactivar" onclick="reactivarLiceo(\'' + esc(l.slug) + '\')">▶</button>'
+          : '<button class="btn small danger" title="Suspender" onclick="suspenderLiceo(\'' + esc(l.slug) + '\')">⏸</button>')
+      + '</div></td>'
+      + '</tr>';
+  });
+  html += '</tbody></table>';
+  document.getElementById('tablaWrap').innerHTML = html;
+}
+
+// ══════════════════════════════════════════════
+// ACCIONES SOBRE UN LICEO
+// ══════════════════════════════════════════════
+function verDetalles(slug) {
+  var l = _todosLosLiceos.find(function (x) { return x.slug === slug; });
+  if (!l) return;
+  var kpisTxt = 'Cargando KPIs…';
+  var msg = '🏫 ' + l.nombre + '\n\nSlug: ' + l.slug
+    + '\nCiudad: ' + (l.ciudad || '—')
+    + '\nPlan: ' + (l.planId || 'basic').toUpperCase()
+    + '\nPrecio: ' + CCLiceos.formatoCLP(l.planPrecio || 0) + '/año'
+    + '\nVence: ' + (l.planFechaFin ? new Date(l.planFechaFin).toLocaleDateString('es-CL') : '—')
+    + '\nEstado: ' + (l.estado || 'activo')
+    + '\nAdmin: ' + (l.adminNombre || '—') + ' (' + (l.adminEmail || '—') + ')';
+  alert(msg);
+  // TODO: reemplazar por modal de detalles con KPIs vivos
+}
+
+function suspenderLiceo(slug) {
+  var motivo = prompt('¿Motivo de suspensión?\n(Ej: pago pendiente, contrato vencido)');
+  if (motivo === null) return;
+  CCLiceos.suspender(slug, motivo).then(function () {
+    cargarLista(); cargarKpis();
+  }).catch(function (err) { alert('Error: ' + err.message); });
+}
+
+function reactivarLiceo(slug) {
+  if (!confirm('¿Reactivar el colegio? Volverá a tener acceso.')) return;
+  CCLiceos.reactivar(slug).then(function () {
+    cargarLista(); cargarKpis();
+  }).catch(function (err) { alert('Error: ' + err.message); });
+}
+
+// ══════════════════════════════════════════════
+// WIZARD — NUEVO COLEGIO
+// ══════════════════════════════════════════════
+function abrirWizard() {
+  _wizPaso = 1;
+  _wizPlanSel = null;
+  document.getElementById('modalWizard').classList.add('show');
+  // Limpiar campos
+  ['wNombre','wRut','wSitio','wDireccion','wCiudad','wRegion','wTelefono','wEmailLiceo',
+   'wPrecio','wDuracion','wFechaInicio',
+   'wAdminNombre','wAdminEmail','wAdminTelefono']
+    .forEach(function (id) { document.getElementById(id).value = ''; });
+  document.getElementById('wSlugPreview').textContent = '—';
+  document.getElementById('wDuracion').value = 12;
+  document.getElementById('wFechaInicio').value = new Date().toISOString().slice(0,10);
+  document.getElementById('wAdminCargo').value = 'Director/a';
+  renderPlanCards();
+  actualizarPaso();
+}
+
+function cerrarWizard() {
+  document.getElementById('modalWizard').classList.remove('show');
+  cargarLista(); cargarKpis();
+}
+
+function actualizarPaso() {
+  // Indicadores
+  document.querySelectorAll('.wiz-step').forEach(function (el) {
+    var n = parseInt(el.getAttribute('data-step'), 10);
+    el.classList.remove('done', 'active');
+    if (n < _wizPaso) el.classList.add('done');
+    if (n === _wizPaso) el.classList.add('active');
+  });
+  // Contenido
+  document.querySelectorAll('.paso').forEach(function (el) {
+    el.classList.remove('active');
+    if (parseInt(el.getAttribute('data-paso'), 10) === _wizPaso) el.classList.add('active');
+  });
+  // Nav
+  var titulos = ['', 'Nuevo colegio', 'Elegir plan', 'Datos del admin', 'Confirmar', '¡Listo!'];
+  var subs    = ['', 'Paso 1 de 4 — Datos institucionales', 'Paso 2 de 4 — Plan contratado',
+                 'Paso 3 de 4 — Admin principal', 'Paso 4 de 4 — Revisar y crear',
+                 'Colegio creado exitosamente'];
+  document.getElementById('wizTitulo').textContent = titulos[_wizPaso];
+  document.getElementById('wizSubtitulo').textContent = subs[_wizPaso];
+
+  document.getElementById('btnAtras').style.display    = (_wizPaso > 1 && _wizPaso < 5) ? '' : 'none';
+  document.getElementById('btnCancelar').style.display = (_wizPaso < 5) ? '' : 'none';
+  document.getElementById('btnSiguiente').style.display = (_wizPaso >= 1 && _wizPaso <= 3) ? '' : 'none';
+  document.getElementById('btnCrear').style.display     = (_wizPaso === 4) ? '' : 'none';
+  document.getElementById('btnCerrar').style.display    = (_wizPaso === 5) ? '' : 'none';
+  document.getElementById('wizError').classList.remove('show');
+}
+
+function pasoSiguiente() {
+  if (!validarPaso(_wizPaso)) return;
+  if (_wizPaso === 3) prepararResumen();
+  _wizPaso++;
+  actualizarPaso();
+}
+function pasoAnterior() {
+  if (_wizPaso > 1) { _wizPaso--; actualizarPaso(); }
+}
+
+function mostrarError(msg) {
+  var el = document.getElementById('wizError');
+  el.textContent = '⚠ ' + msg;
+  el.classList.add('show');
+}
+
+function validarPaso(paso) {
+  if (paso === 1) {
+    var nom = document.getElementById('wNombre').value.trim();
+    if (!nom) { mostrarError('El nombre del colegio es obligatorio.'); return false; }
+    if (nom.length < 3) { mostrarError('El nombre debe tener al menos 3 caracteres.'); return false; }
+    return true;
+  }
+  if (paso === 2) {
+    if (!_wizPlanSel) { mostrarError('Elegí un plan.'); return false; }
+    var precio = parseInt(document.getElementById('wPrecio').value, 10);
+    if (isNaN(precio) || precio < 0) { mostrarError('El precio debe ser un número válido.'); return false; }
+    return true;
+  }
+  if (paso === 3) {
+    var nom = document.getElementById('wAdminNombre').value.trim();
+    var em  = document.getElementById('wAdminEmail').value.trim();
+    if (!nom) { mostrarError('El nombre del admin es obligatorio.'); return false; }
+    if (!em || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)) { mostrarError('Email del admin inválido.'); return false; }
+    return true;
+  }
+  return true;
+}
+
+function actualizarSlug() {
+  var nom = document.getElementById('wNombre').value;
+  document.getElementById('wSlugPreview').textContent = CCLiceos.slugify(nom) || '—';
+}
+
+function renderPlanCards() {
+  var wrap = document.getElementById('planCards');
+  if (!_todosLosPlanes.length) {
+    wrap.innerHTML = '<div class="empty" style="grid-column:1/-1"><div class="icon">⚠</div>No hay planes cargados en la base.<br><small>Ejecutar <code>node inicializar-planes.mjs</code></small></div>';
+    return;
+  }
+  var html = '';
+  _todosLosPlanes.forEach(function (p) {
+    var destacado = p.destacado ? ' destacado' : '';
+    var features = (p.modulosIncluidos || []).slice(0, 4).map(function (f) { return '✓ ' + esc(f); }).join('<br>');
+    html += '<div class="plan-card' + destacado + '" data-plan="' + esc(p.id) + '" onclick="seleccionarPlan(\'' + esc(p.id) + '\')">'
+      + '<div class="titulo" style="color:' + esc(p.color || '#7c3aed') + '">' + esc(p.nombre) + '</div>'
+      + '<div class="desc">' + esc(p.descripcion || '') + '</div>'
+      + '<div class="precio">' + CCLiceos.formatoCLP(p.precioAnual) + ' <span class="u">/año</span></div>'
+      + '<div class="features">' + features + '</div>'
+      + '</div>';
+  });
+  wrap.innerHTML = html;
+}
+
+function seleccionarPlan(planId) {
+  _wizPlanSel = planId;
+  document.querySelectorAll('.plan-card').forEach(function (c) {
+    c.classList.toggle('selected', c.getAttribute('data-plan') === planId);
+  });
+  var p = _todosLosPlanes.find(function (x) { return x.id === planId; });
+  if (p) document.getElementById('wPrecio').value = p.precioAnual;
+}
+
+function prepararResumen() {
+  var plan = _todosLosPlanes.find(function (p) { return p.id === _wizPlanSel; }) || {};
+  var wrap = document.getElementById('resumenWrap');
+  var slug = CCLiceos.slugify(document.getElementById('wNombre').value);
+  var precio = parseInt(document.getElementById('wPrecio').value, 10) || 0;
+  var duracion = parseInt(document.getElementById('wDuracion').value, 10) || 12;
+  wrap.innerHTML = ''
+    + '<div class="grupo"><h4>🏫 Colegio</h4>'
+    +   '<div class="linea"><b>Nombre:</b> ' + esc(document.getElementById('wNombre').value) + '</div>'
+    +   '<div class="linea"><b>Slug:</b> <code style="color:var(--violet)">' + esc(slug) + '</code></div>'
+    +   '<div class="linea"><b>Ciudad:</b> ' + esc(document.getElementById('wCiudad').value || '—') + '</div>'
+    + '</div>'
+    + '<div class="grupo"><h4>💰 Plan contratado</h4>'
+    +   '<div class="linea"><b>Plan:</b> ' + esc(plan.nombre || _wizPlanSel) + '</div>'
+    +   '<div class="linea"><b>Precio:</b> ' + CCLiceos.formatoCLP(precio) + ' CLP</div>'
+    +   '<div class="linea"><b>Duración:</b> ' + duracion + ' meses</div>'
+    +   '<div class="linea"><b>Fecha inicio:</b> ' + esc(document.getElementById('wFechaInicio').value) + '</div>'
+    + '</div>'
+    + '<div class="grupo"><h4>👤 Admin del colegio</h4>'
+    +   '<div class="linea"><b>Nombre:</b> ' + esc(document.getElementById('wAdminNombre').value) + '</div>'
+    +   '<div class="linea"><b>Email:</b> ' + esc(document.getElementById('wAdminEmail').value) + '</div>'
+    +   '<div class="linea"><b>Cargo:</b> ' + esc(document.getElementById('wAdminCargo').value) + '</div>'
+    + '</div>';
+}
+
+function crearColegio() {
+  var btn = document.getElementById('btnCrear');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spin"></span> Creando…';
+  document.getElementById('wizError').classList.remove('show');
+
+  var datos = {
+    nombre:       document.getElementById('wNombre').value.trim(),
+    rut:          document.getElementById('wRut').value.trim(),
+    sitio:        document.getElementById('wSitio').value.trim(),
+    direccion:    document.getElementById('wDireccion').value.trim(),
+    ciudad:       document.getElementById('wCiudad').value.trim(),
+    region:       document.getElementById('wRegion').value.trim(),
+    telefono:     document.getElementById('wTelefono').value.trim(),
+    email:        document.getElementById('wEmailLiceo').value.trim(),
+    planId:       _wizPlanSel,
+    planPrecio:   parseInt(document.getElementById('wPrecio').value, 10) || 0,
+    planDuracionMeses: parseInt(document.getElementById('wDuracion').value, 10) || 12,
+    planFechaInicio:   document.getElementById('wFechaInicio').value,
+    adminNombre:  document.getElementById('wAdminNombre').value.trim(),
+    adminEmail:   document.getElementById('wAdminEmail').value.trim(),
+    adminTelefono: document.getElementById('wAdminTelefono').value.trim(),
+    adminCargo:   document.getElementById('wAdminCargo').value
+  };
+
+  CCLiceos.crearConAdmin(datos).then(function (result) {
+    btn.disabled = false;
+    btn.innerHTML = '✓ Crear colegio';
+    document.getElementById('okNombreLiceo').textContent = result.liceo.nombre;
+    document.getElementById('okEmail').textContent    = result.admin.email;
+    document.getElementById('okPassword').textContent = result.admin.password;
+    var todoJunto = '🏫 ' + result.liceo.nombre + '\n\n'
+      + 'Login: https://clickyclase.cl/login.html\n'
+      + 'Email: ' + result.admin.email + '\n'
+      + 'Password: ' + result.admin.password + '\n\n'
+      + '(Cambiala en tu primer ingreso)';
+    document.getElementById('okTodoJunto').textContent = todoJunto;
+    _wizPaso = 5;
+    actualizarPaso();
+  }).catch(function (err) {
+    btn.disabled = false;
+    btn.innerHTML = '✓ Crear colegio';
+    var msg = err.message || 'Error desconocido';
+    if (/email-already-in-use|already exists/i.test(msg)) msg = 'Ya existe una cuenta con ese email.';
+    else if (/weak-password/i.test(msg)) msg = 'La contraseña generada fue rechazada — reintentar.';
+    else if (/network/i.test(msg)) msg = 'Sin conexión con Firebase.';
+    mostrarError(msg);
+  });
+}
+
+function copiarTexto(elId, btn) {
+  var texto = document.getElementById(elId).textContent;
+  navigator.clipboard.writeText(texto).then(function () {
+    var t = btn.textContent;
+    btn.textContent = '✓ Copiado';
+    setTimeout(function () { btn.textContent = t; }, 1200);
+  });
+}
+
+// ══════════════════════════════════════════════
+// INICIAR
+// ══════════════════════════════════════════════
+if (typeof ELAuth !== 'undefined' && ELAuth.onUserReady) {
+  ELAuth.onUserReady(iniciar);
+} else {
+  window.addEventListener('load', iniciar);
+}
+</script>
+
+</body>
+</html>
