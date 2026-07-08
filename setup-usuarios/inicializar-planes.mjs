@@ -17,9 +17,25 @@
  */
 
 import admin from 'firebase-admin';
-import { readFileSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
 
-const cred = JSON.parse(readFileSync(new URL('./serviceAccountKey.json', import.meta.url)));
+const keyPath = new URL('./serviceAccountKey.json', import.meta.url);
+if (!existsSync(keyPath)) {
+  console.error('\n✗ ERROR: no se encontró serviceAccountKey.json en esta carpeta.');
+  console.error('  Descargá la clave desde:');
+  console.error('    https://console.firebase.google.com/project/electrolearn-prod/settings/serviceaccounts/adminsdk\n');
+  process.exit(1);
+}
+
+const cred = JSON.parse(readFileSync(keyPath));
+
+if (cred.project_id !== 'electrolearn-prod') {
+  console.error('\n✗ ERROR: serviceAccountKey.json apunta a proyecto "' + cred.project_id + '"');
+  console.error('  Debe ser de electrolearn-prod. Descargá la key correcta y reemplazala.\n');
+  console.error('  Link: https://console.firebase.google.com/project/electrolearn-prod/settings/serviceaccounts/adminsdk\n');
+  process.exit(1);
+}
+
 admin.initializeApp({ credential: admin.credential.cert(cred) });
 const db = admin.firestore();
 

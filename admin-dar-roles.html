@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Darme todos los roles · Admin Setup · Click&Clase</title>
+<link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg">
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="js/firebase-rest.js"></script>
+<script src="js/firebase-config.js"></script>
+<script src="js/firebase-auth.js"></script>
+<script src="js/firebase-db.js"></script>
+<script src="js/roles-permissions.js"></script>
+<script src="js/roles-router.js"></script>
+<style>
+:root {
+  --bg: #0a0d1c; --panel: #151b35; --border: rgba(148,163,184,.15);
+  --text: #f1f5f9; --muted: #7b8aa5; --violet: #8b5cf6;
+  --green: #34d399; --gold: #fbbf24; --danger: #f87171; --cyan: #22d3ee;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Inter', 'Segoe UI', Roboto, Arial, sans-serif;
+  background: var(--bg); color: var(--text); min-height: 100vh;
+  padding: 40px 24px; line-height: 1.6;
+}
+.wrap { max-width: 720px; margin: 0 auto; }
+.back { color: var(--violet); text-decoration: none; font-size: .88rem; }
+h1 { font-size: 1.9rem; font-weight: 800; margin: 12px 0 8px; letter-spacing: -.5px; }
+.sub { color: var(--muted); margin-bottom: 32px; }
+.card { background: var(--panel); border: 1px solid var(--border); border-radius: 16px; padding: 32px; margin-bottom: 20px; }
+.card h2 { font-size: 1.1rem; font-weight: 700; margin-bottom: 8px; }
+.card p { color: var(--muted); margin-bottom: 20px; font-size: .92rem; }
+.roles-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 20px; }
+.rol {
+  background: rgba(139,92,246,.06); border: 1px solid rgba(139,92,246,.2);
+  border-radius: 8px; padding: 10px 14px; font-size: .85rem;
+  display: flex; align-items: center; gap: 8px;
+}
+.rol .ico { font-size: 1.1rem; }
+.btn {
+  background: linear-gradient(135deg, var(--violet), #6d28d9);
+  color: white; border: none; padding: 14px 28px;
+  font-size: 1rem; font-weight: 700; border-radius: 12px;
+  cursor: pointer; font-family: inherit;
+  box-shadow: 0 4px 20px rgba(139,92,246,.35);
+  transition: transform .15s; width: 100%;
+}
+.btn:hover:not(:disabled) { transform: translateY(-1px); }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+.log {
+  background: #05070f; border: 1px solid var(--border);
+  border-radius: 10px; padding: 20px;
+  font-family: 'Courier New', monospace; font-size: .85rem;
+  line-height: 1.7; min-height: 100px;
+  color: var(--text); white-space: pre-wrap;
+  max-height: 400px; overflow-y: auto;
+}
+.log .ok { color: var(--green); }
+.log .err { color: var(--danger); }
+.log .info { color: var(--gold); }
+.log .dim { color: var(--muted); }
+.auth-check { padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; font-size: .88rem; }
+.auth-check.ok { background: rgba(52,211,153,.08); border: 1px solid rgba(52,211,153,.25); color: var(--green); }
+.auth-check.no { background: rgba(248,113,113,.08); border: 1px solid rgba(248,113,113,.25); color: var(--danger); }
+.info-box { background: rgba(34,211,238,.06); border: 1px solid rgba(34,211,238,.2); border-radius: 8px; padding: 12px 16px; font-size: .86rem; color: var(--cyan); margin-top: 16px; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <a href="panel-superadmin.html" class="back">← SuperAdmin</a>
+  <h1>🎭 Darme todos los roles</h1>
+  <p class="sub">Agrega los 14 roles del sistema a tu cuenta admin. Sirve para probar cada panel (director, UTP, PIE, Apoyo, etc.) desde la misma sesión sin logout.</p>
+
+  <div id="authCheck" class="auth-check no">⏳ Verificando permisos…</div>
+
+  <div class="card">
+    <h2>🎭 Roles que se te asignarán</h2>
+    <p>Estos se agregan al campo <code>roles</code> de tu documento en <code>usuarios</code>. Tu rol legacy <code>role: 'admin'</code> queda intacto.</p>
+
+    <div class="roles-grid">
+      <div class="rol"><span class="ico">👑</span> admin</div>
+      <div class="rol"><span class="ico">🎓</span> director</div>
+      <div class="rol"><span class="ico">✝️</span> rector</div>
+      <div class="rol"><span class="ico">🏛</span> admin_colegio</div>
+      <div class="rol"><span class="ico">📋</span> utp</div>
+      <div class="rol"><span class="ico">🎯</span> encargado_area</div>
+      <div class="rol"><span class="ico">👨‍🏫</span> profesor</div>
+      <div class="rol"><span class="ico">📚</span> jefe_curso</div>
+      <div class="rol"><span class="ico">🤝</span> amb_enc</div>
+      <div class="rol"><span class="ico">🤝</span> amb_prof</div>
+      <div class="rol"><span class="ico">💙</span> aps_enc</div>
+      <div class="rol"><span class="ico">💙</span> aps_prof</div>
+      <div class="rol"><span class="ico">♿</span> pie_enc</div>
+      <div class="rol"><span class="ico">♿</span> pie_edu</div>
+    </div>
+
+    <button class="btn" id="btnAsignar" onclick="asignarRoles()">
+      🎭 Asignarme los 14 roles
+    </button>
+
+    <div class="info-box">
+      💡 Después de esto, cuando entres a cualquier panel vas a ver un dropdown "Ver como:" arriba que te deja saltar entre roles sin logout.
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>📋 Resultado</h2>
+    <div class="log" id="log"><span class="dim">Esperando ejecución…</span></div>
+  </div>
+</div>
+
+<script>
+if (window.CCRouter && CCRouter.guardPanel) {
+  CCRouter.guardPanel(['admin']);
+}
+
+var TODOS_LOS_ROLES = {
+  admin:          {},
+  director:       {},
+  rector:         {},
+  admin_colegio:  {},
+  utp:            {},
+  encargado_area: { areas: ['primer_ciclo','segundo_ciclo','media_hc','media_tp','especialidad_tp'] },
+  profesor:       {},
+  jefe_curso:     { cursos: [] },
+  amb_enc:        {},
+  amb_prof:       {},
+  aps_enc:        {},
+  aps_prof:       {},
+  pie_enc:        {},
+  pie_edu:        {}
+};
+
+function log(msg, cls) {
+  var el = document.getElementById('log');
+  if (el.querySelector('.dim')) el.innerHTML = '';
+  var line = document.createElement('div');
+  if (cls) line.className = cls;
+  line.textContent = msg;
+  el.appendChild(line);
+  el.scrollTop = el.scrollHeight;
+}
+
+var _userReady = null;
+if (typeof ELAuth !== 'undefined' && ELAuth.onUserReady) {
+  ELAuth.onUserReady(function (u) {
+    _userReady = u;
+    var authCheck = document.getElementById('authCheck');
+    if (u && (u.role === 'admin' || (u.roles && u.roles.admin))) {
+      authCheck.className = 'auth-check ok';
+      authCheck.innerHTML = '✓ Autenticado como admin: <b>' + (u.email || 'admin') + '</b> (UID: <code>' + u.uid + '</code>)';
+    } else {
+      authCheck.className = 'auth-check no';
+      authCheck.innerHTML = '✗ Solo el rol admin puede usar esto.';
+    }
+  });
+}
+
+function asignarRoles() {
+  if (!_userReady) {
+    log('✗ Usuario aún no cargado. Esperá unos segundos y reintentá.', 'err');
+    return;
+  }
+
+  var btn = document.getElementById('btnAsignar');
+  btn.disabled = true;
+  btn.textContent = '⏳ Asignando…';
+  document.getElementById('log').innerHTML = '';
+
+  log('▸ Actualizando doc usuarios/' + _userReady.uid, 'info');
+  log('  Email:  ' + (_userReady.email || '—'), 'dim');
+  log('  Roles: ' + Object.keys(TODOS_LOS_ROLES).length + ' → ' + Object.keys(TODOS_LOS_ROLES).join(', '), 'dim');
+  log('');
+
+  EL_DB.collection('usuarios').doc(_userReady.uid).update({
+    roles: TODOS_LOS_ROLES,
+    liceoSlug: _userReady.liceoSlug || 'salesianos-talca',
+    role: 'admin'  // legacy retro-compat
+  }).then(function () {
+    log('✅ LISTO. Los 14 roles fueron asignados a tu cuenta.', 'ok');
+    log('');
+    log('Ahora podés:', 'info');
+    log('  1. Hacer Ctrl+F5 en cualquier panel', 'dim');
+    log('  2. Vas a ver el dropdown "Ver como:" arriba', 'dim');
+    log('  3. Elegir cualquier rol para probar ese panel', 'dim');
+    log('');
+    log('Los paneles disponibles:', 'info');
+    log('  · panel-director.html  · panel-rector.html', 'dim');
+    log('  · panel-utp.html       · panel-profesor.html', 'dim');
+    log('  · panel-apoyo.html     · panel-apoyo-prof.html', 'dim');
+    log('  · panel-ambiente.html  · panel-ambiente-prof.html', 'dim');
+    log('  · panel-pie.html       · panel-pie-edu.html', 'dim');
+    btn.textContent = '✓ Completado';
+  }).catch(function (err) {
+    log('✗ ERROR: ' + err.message, 'err');
+    if (err.code) log('  Código: ' + err.code, 'dim');
+    btn.disabled = false;
+    btn.textContent = '🔄 Reintentar';
+  });
+}
+</script>
+
+</body>
+</html>

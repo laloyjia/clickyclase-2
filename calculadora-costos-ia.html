@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculadora Costos IA · Click&Clase</title>
+<style>
+:root {
+  --bg: #0a0d1c;
+  --bg-2: #0e1226;
+  --panel: #151b35;
+  --panel-2: #1b2242;
+  --border: rgba(148,163,184,.12);
+  --border-strong: rgba(148,163,184,.22);
+  --text: #f1f5f9;
+  --text-2: #cbd5e1;
+  --muted: #7b8aa5;
+  --violet: #8b5cf6;
+  --violet-2: #a78bfa;
+  --gold: #fbbf24;
+  --green: #34d399;
+  --danger: #f87171;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Inter', 'Segoe UI', Roboto, Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  font-size: 15px;
+  line-height: 1.6;
+  padding: 40px 24px;
+}
+.wrap { max-width: 1240px; margin: 0 auto; }
+
+/* ─── Header ─── */
+.header { margin-bottom: 40px; }
+.header h1 { font-size: 1.9rem; font-weight: 800; letter-spacing: -.5px; margin-bottom: 6px; }
+.header .sub { color: var(--muted); font-size: .95rem; }
+.header .back { color: var(--violet-2); text-decoration: none; font-size: .88rem; font-weight: 500; }
+.header .back:hover { color: var(--violet); }
+
+/* ─── Hero de resultado ─── */
+.hero {
+  background: linear-gradient(135deg, var(--panel), var(--panel-2));
+  border: 1px solid var(--border-strong);
+  border-radius: 20px;
+  padding: 40px 44px;
+  margin-bottom: 32px;
+  text-align: center;
+}
+.hero .l {
+  color: var(--muted);
+  font-size: .82rem;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin-bottom: 14px;
+}
+.hero .n {
+  font-size: 3.5rem;
+  font-weight: 800;
+  letter-spacing: -1.5px;
+  line-height: 1;
+  color: var(--green);
+  margin-bottom: 8px;
+}
+.hero .p {
+  color: var(--text-2);
+  font-size: 1rem;
+  max-width: 620px;
+  margin: 12px auto 0;
+}
+.hero .badge {
+  display: inline-block;
+  margin-top: 14px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: .82rem;
+  font-weight: 700;
+}
+.hero .badge.good { background: rgba(52,211,153,.15); color: var(--green); }
+.hero .badge.med { background: rgba(251,191,36,.15); color: var(--gold); }
+.hero .badge.bad { background: rgba(248,113,113,.15); color: var(--danger); }
+
+/* ─── Grid principal ─── */
+.grid {
+  display: grid;
+  grid-template-columns: 380px 1fr;
+  gap: 28px;
+  margin-bottom: 32px;
+}
+@media (max-width: 960px) { .grid { grid-template-columns: 1fr; } }
+
+/* ─── Cards ─── */
+.card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 28px 30px;
+}
+.card + .card { margin-top: 24px; }
+.card h2 {
+  font-size: .78rem;
+  font-weight: 700;
+  color: var(--muted);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin-bottom: 22px;
+  display: flex; align-items: center; gap: 8px;
+}
+.card h2 .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--violet); }
+
+/* ─── Grupos de parámetros ─── */
+.grp { margin-bottom: 22px; }
+.grp:last-child { margin-bottom: 0; }
+.grp label {
+  display: block;
+  font-size: .75rem;
+  color: var(--muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .8px;
+  margin-bottom: 8px;
+}
+.grp .h { font-size: .75rem; color: var(--muted); margin-top: 6px; }
+
+input[type=number], select {
+  width: 100%;
+  padding: 11px 14px;
+  border-radius: 10px;
+  background: var(--bg-2);
+  border: 1px solid var(--border-strong);
+  color: var(--text);
+  font-family: inherit;
+  font-size: .95rem;
+  font-weight: 500;
+  transition: border-color .15s, background .15s;
+}
+input[type=number]:focus, select:focus {
+  outline: none;
+  border-color: var(--violet);
+  background: var(--panel-2);
+}
+
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+
+/* ─── Botones de modelo ─── */
+.model-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.mbtn {
+  flex: 1;
+  min-width: 140px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: var(--bg-2);
+  border: 1px solid var(--border-strong);
+  color: var(--text-2);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: .88rem;
+  font-weight: 600;
+  transition: all .15s;
+}
+.mbtn:hover { border-color: var(--muted); color: var(--text); }
+.mbtn.active {
+  background: linear-gradient(135deg, var(--violet), #6d28d9);
+  border-color: var(--violet);
+  color: white;
+  box-shadow: 0 4px 20px rgba(139,92,246,.3);
+}
+
+/* ─── Presets colegio ─── */
+.presets { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.pset {
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: transparent;
+  border: 1px solid var(--border-strong);
+  color: var(--text-2);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: .84rem;
+  font-weight: 500;
+  text-align: left;
+  transition: all .15s;
+}
+.pset:hover { background: var(--bg-2); color: var(--text); }
+.pset .n { display: block; font-size: .74rem; color: var(--muted); }
+
+/* ─── Cards de planes ─── */
+.planes-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+@media (max-width: 960px) { .planes-grid { grid-template-columns: 1fr; } }
+.plan {
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 24px;
+  transition: transform .15s, border-color .15s;
+}
+.plan:hover { transform: translateY(-2px); border-color: var(--border-strong); }
+.plan.basic { border-top: 3px solid var(--green); }
+.plan.pro { border-top: 3px solid var(--violet); }
+.plan.ent { border-top: 3px solid var(--gold); }
+.plan h3 {
+  font-size: 1.15rem;
+  font-weight: 800;
+  margin-bottom: 4px;
+}
+.plan .tag {
+  color: var(--muted);
+  font-size: .78rem;
+  margin-bottom: 20px;
+}
+.plan .precio-input {
+  background: var(--bg-2);
+  border-radius: 10px;
+  padding: 4px 4px 4px 12px;
+  border: 1px solid var(--border-strong);
+  display: flex; align-items: center;
+  margin-bottom: 20px;
+}
+.plan .precio-input .curr {
+  color: var(--muted);
+  font-size: .85rem;
+  font-weight: 600;
+  padding-right: 6px;
+}
+.plan .precio-input input {
+  border: none; background: transparent; padding: 8px 4px;
+  font-size: 1.1rem; font-weight: 700; color: var(--text);
+}
+.plan .precio-input .u {
+  color: var(--muted);
+  font-size: .72rem;
+  padding-right: 8px;
+}
+.plan .metric {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 8px 0;
+  font-size: .88rem;
+}
+.plan .metric .l { color: var(--muted); }
+.plan .metric .v { font-weight: 600; color: var(--text-2); font-variant-numeric: tabular-nums; }
+.plan .margen {
+  margin-top: 16px;
+  padding: 14px 16px;
+  border-radius: 10px;
+  text-align: center;
+  font-size: .82rem;
+  font-weight: 700;
+}
+.plan .margen.good { background: rgba(52,211,153,.1); color: var(--green); border: 1px solid rgba(52,211,153,.25); }
+.plan .margen.med { background: rgba(251,191,36,.1); color: var(--gold); border: 1px solid rgba(251,191,36,.25); }
+.plan .margen.bad { background: rgba(248,113,113,.1); color: var(--danger); border: 1px solid rgba(248,113,113,.25); }
+.plan .margen .pct { font-size: 1.4rem; font-weight: 800; display: block; margin-bottom: 2px; }
+.plan .margen .estado { font-size: .72rem; font-weight: 500; opacity: .85; }
+
+/* ─── Detalles ─── */
+details { margin-top: 24px; }
+details summary {
+  cursor: pointer;
+  padding: 16px 20px;
+  border-radius: 12px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  font-size: .88rem;
+  font-weight: 600;
+  color: var(--text-2);
+  list-style: none;
+  display: flex; align-items: center; gap: 10px;
+}
+details summary::-webkit-details-marker { display: none; }
+details summary::before { content: '›'; font-size: 1.4rem; color: var(--muted); transition: transform .15s; }
+details[open] summary::before { transform: rotate(90deg); }
+details[open] summary { background: var(--panel-2); }
+details .content {
+  padding: 24px 28px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-top: none;
+  border-radius: 0 0 12px 12px;
+  margin-top: -1px;
+}
+details .content h4 {
+  font-size: .74rem;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin: 16px 0 10px;
+}
+details .content h4:first-child { margin-top: 0; }
+table.doc-costos {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: .88rem;
+}
+table.doc-costos th, table.doc-costos td {
+  text-align: left; padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+}
+table.doc-costos th {
+  font-size: .7rem; font-weight: 700; color: var(--muted);
+  text-transform: uppercase; letter-spacing: 1px;
+}
+table.doc-costos td.num { text-align: right; font-variant-numeric: tabular-nums; }
+table.doc-costos tr:last-child td { border-bottom: none; }
+table.doc-costos .costo { color: var(--gold); font-weight: 600; }
+
+.stats-row {
+  display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px;
+  margin-top: 16px;
+}
+.stat { text-align: left; }
+.stat .l {
+  font-size: .72rem; color: var(--muted); text-transform: uppercase;
+  letter-spacing: 1px; font-weight: 600; margin-bottom: 4px;
+}
+.stat .v {
+  font-size: 1.35rem; font-weight: 700; color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+.warn {
+  background: rgba(251,191,36,.05);
+  border: 1px solid rgba(251,191,36,.2);
+  border-radius: 10px;
+  padding: 12px 16px;
+  color: var(--gold);
+  font-size: .82rem;
+  margin-bottom: 24px;
+}
+.warn a { color: var(--gold); font-weight: 600; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <!-- Header -->
+  <div class="header">
+    <a href="panel-superadmin.html" class="back">← SuperAdmin</a>
+    <h1 style="margin-top:8px">Calculadora de costos IA</h1>
+    <div class="sub">Simulá cuánto te cuesta la IA por colegio y validá que tus planes tengan margen sano.</div>
+  </div>
+
+  <div class="warn">
+    ⚠ Precios Gemini a mayo 2025. Verificá los actuales en <a href="https://ai.google.dev/pricing" target="_blank">ai.google.dev/pricing</a>.
+  </div>
+
+  <!-- ═══════════════════ HERO ═══════════════════ -->
+  <div class="hero">
+    <div class="l">Con estos parámetros, el margen del plan Pro es</div>
+    <div class="n" id="heroPct">—</div>
+    <div class="badge good" id="heroBadge">Calculando…</div>
+    <div class="p" id="heroDesc">Ajustá el modelo Gemini, el tamaño del colegio y los precios de tus planes en los paneles de abajo. Todo se recalcula al instante.</div>
+  </div>
+
+  <!-- ═══════════════════ GRID PRINCIPAL ═══════════════════ -->
+  <div class="grid">
+
+    <!-- Columna izquierda: Parámetros -->
+    <div>
+      <div class="card">
+        <h2><span class="dot"></span> Modelo Gemini</h2>
+        <div class="model-row">
+          <button class="mbtn active" onclick="cargarModelo(0.075, 0.30, this)">Flash 1.5<br><small style="opacity:.6">$0.075/$0.30</small></button>
+          <button class="mbtn" onclick="cargarModelo(0.10, 0.40, this)">Flash 2.0<br><small style="opacity:.6">$0.10/$0.40</small></button>
+          <button class="mbtn" onclick="cargarModelo(1.25, 5.00, this)">Pro 1.5<br><small style="opacity:.6">$1.25/$5.00</small></button>
+          <button class="mbtn" onclick="cargarModelo(1.25, 10.00, this)">Pro 2.5<br><small style="opacity:.6">$1.25/$10.00</small></button>
+        </div>
+        <div class="grp" style="margin-top:20px">
+          <label>Precio input (USD × 1M tok)</label>
+          <input type="number" id="precioInput" value="0.075" step="0.001" oninput="recalcular()">
+        </div>
+        <div class="grp">
+          <label>Precio output (USD × 1M tok)</label>
+          <input type="number" id="precioOutput" value="0.30" step="0.01" oninput="recalcular()">
+        </div>
+      </div>
+
+      <div class="card">
+        <h2><span class="dot" style="background:var(--gold)"></span> Colegio ejemplo</h2>
+        <div class="grp">
+          <label>Tamaño rápido</label>
+          <div class="presets">
+            <button class="pset" onclick="preset(10, 15)"><b>Pequeño</b><span class="n">10 profes · 15 docs</span></button>
+            <button class="pset" onclick="preset(20, 20)"><b>Mediano</b><span class="n">20 profes · 20 docs</span></button>
+            <button class="pset" onclick="preset(40, 25)"><b>Grande</b><span class="n">40 profes · 25 docs</span></button>
+            <button class="pset" onclick="preset(80, 30)"><b>Mega</b><span class="n">80 profes · 30 docs</span></button>
+          </div>
+        </div>
+        <div class="row2">
+          <div class="grp">
+            <label>Docentes activos</label>
+            <input type="number" id="docentes" value="20" min="1" oninput="recalcular()">
+          </div>
+          <div class="grp">
+            <label>Docs/mes por docente</label>
+            <input type="number" id="docsMes" value="20" min="0" oninput="recalcular()">
+          </div>
+        </div>
+        <div class="grp">
+          <label>Meses lectivos/año</label>
+          <input type="number" id="mesesAno" value="10" min="1" max="12" oninput="recalcular()">
+          <div class="h">Chile: 10 meses.</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2><span class="dot" style="background:var(--green)"></span> Otros parámetros</h2>
+        <div class="grp">
+          <label>Tipo de cambio USD → CLP</label>
+          <input type="number" id="usdclp" value="950" step="1" oninput="recalcular()">
+        </div>
+        <div class="grp">
+          <label>Costos fijos por colegio (CLP/año)</label>
+          <input type="number" id="costosFijos" value="150000" step="10000" oninput="recalcular()">
+          <div class="h">Hosting + dominio + soporte prorrateado.</div>
+        </div>
+        <div class="grp">
+          <label>Modelo IA para Enterprise</label>
+          <select id="modeloEnt" onchange="recalcular()">
+            <option value="flash">Mismo que Pro (Flash)</option>
+            <option value="pro" selected>Gemini 1.5 Pro (15× más caro)</option>
+            <option value="pro25">Gemini 2.5 Pro (25× más caro)</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Columna derecha: Planes y análisis -->
+    <div>
+      <div class="card">
+        <h2><span class="dot"></span> Márgenes por plan</h2>
+        <div class="planes-grid" id="planesGrid"></div>
+
+        <div class="stats-row">
+          <div class="stat">
+            <div class="l">Docs/año generados</div>
+            <div class="v" id="statDocs">—</div>
+          </div>
+          <div class="stat">
+            <div class="l">Costo/docente/año (Pro)</div>
+            <div class="v" id="statCostoDocente">—</div>
+          </div>
+          <div class="stat">
+            <div class="l">Precio/docente/año (Pro)</div>
+            <div class="v" id="statPrecioDocente">—</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ═══════════════════ DETALLES ═══════════════════ -->
+  <details>
+    <summary>Ver costo por tipo de documento</summary>
+    <div class="content">
+      <h4>Con el modelo Gemini seleccionado</h4>
+      <table class="doc-costos">
+        <thead><tr><th>Documento</th><th>Input tokens</th><th>Output tokens</th><th>Costo USD</th><th>Costo CLP</th></tr></thead>
+        <tbody id="tablaDocs"></tbody>
+      </table>
+      <p style="color:var(--muted); font-size:.82rem; margin-top:12px">
+        Tokens son estimaciones. Verificá con el SDK de Gemini <code>countTokens()</code> sobre tu prompt real.
+      </p>
+    </div>
+  </details>
+
+  <details>
+    <summary>Estrategias para maximizar margen</summary>
+    <div class="content">
+      <ul style="line-height:1.9; font-size:.9rem; color:var(--text-2); padding-left: 20px;">
+        <li><b>Usá Gemini Flash por defecto.</b> Pro es 10-30× más caro. Reservá Pro solo para adecuaciones PIE.</li>
+        <li><b>Rate limits por plan:</b> Basic 20 docs/mes/docente, Pro 60/mes, Enterprise 200 con alerta.</li>
+        <li><b>Cache de docs similares:</b> ahorra ~90% en docs repetidos entre docentes.</li>
+        <li><b>Context caching Gemini:</b> system prompt cacheado tiene 75% descuento.</li>
+        <li><b>BYOK Enterprise:</b> el colegio grande paga su propia cuenta Google Cloud.</li>
+        <li><b>Alertas presupuesto Google Cloud:</b> $50/$100/$200 USD por colegio, si dispara avisa por email.</li>
+      </ul>
+    </div>
+  </details>
+
+</div>
+
+<script>
+// Documentos con estimación de tokens
+var TIPOS_DOC = [
+  { id:'plan',  nombre:'📚 Planificación de clase',  inp: 2000, out: 5000 },
+  { id:'eval',  nombre:'📝 Evaluación/prueba',       inp: 1500, out: 3000 },
+  { id:'guia',  nombre:'📖 Guía de estudio',         inp: 1000, out: 2000 },
+  { id:'rub',   nombre:'📊 Rúbrica de evaluación',   inp:  800, out: 1500 },
+  { id:'pie',   nombre:'♿ Adecuación PIE',           inp: 2500, out: 6000 }
+];
+
+// Mix típico ponderado (planif 45%, eval 30%, guías+rúbricas 25%)
+var MIX = { plan: 45, eval: 30, otro: 25 };
+
+// Multiplicadores modelo IA para Enterprise
+var MULT_MODELO = { flash: 1, pro: 15, pro25: 25 };
+
+// Planes (precios editables)
+var PLANES_INFO = [
+  { id:'basic', nombre:'Basic',      tag:'Docencia esencial',              precioDef: 800000,  incluyeIA:false, clase:'basic' },
+  { id:'pro',   nombre:'Pro',        tag:'+ IA + Dashboards',              precioDef:1500000,  incluyeIA:true,  clase:'pro' },
+  { id:'ent',   nombre:'Enterprise', tag:'+ PIE + Apoyo + Convivencia',    precioDef:2500000,  incluyeIA:true,  clase:'ent' }
+];
+
+function costoDoc(inp, out, pInp, pOut) {
+  return (inp * pInp / 1e6) + (out * pOut / 1e6);
+}
+function fmtCLP(n) { return '$' + Math.round(n).toLocaleString('es-CL'); }
+function fmtUSD(n) { return '$' + n.toFixed(4); }
+
+function renderPlanes() {
+  var wrap = document.getElementById('planesGrid');
+  var html = '';
+  PLANES_INFO.forEach(function (p) {
+    html += '<div class="plan ' + p.clase + '">'
+      + '<h3>' + p.nombre + '</h3>'
+      + '<div class="tag">' + p.tag + '</div>'
+      + '<div class="precio-input">'
+      +   '<span class="curr">$</span>'
+      +   '<input type="number" id="precio_' + p.id + '" value="' + p.precioDef + '" step="50000" oninput="recalcular()">'
+      +   '<span class="u">/año</span>'
+      + '</div>'
+      + '<div class="metric"><span class="l">Costo IA anual</span><span class="v" id="costoIA_' + p.id + '">—</span></div>'
+      + '<div class="metric"><span class="l">Costos fijos</span><span class="v" id="fijos_' + p.id + '">—</span></div>'
+      + '<div class="metric"><span class="l">Margen neto</span><span class="v" id="margen_' + p.id + '">—</span></div>'
+      + '<div class="margen" id="badge_' + p.id + '"><span class="pct">—</span><span class="estado">—</span></div>'
+      + '</div>';
+  });
+  wrap.innerHTML = html;
+}
+
+function recalcular() {
+  var pInp   = parseFloat(document.getElementById('precioInput').value) || 0;
+  var pOut   = parseFloat(document.getElementById('precioOutput').value) || 0;
+  var usdclp = parseFloat(document.getElementById('usdclp').value) || 950;
+  var docentes = parseInt(document.getElementById('docentes').value, 10) || 0;
+  var docsMes  = parseInt(document.getElementById('docsMes').value, 10) || 0;
+  var meses    = parseInt(document.getElementById('mesesAno').value, 10) || 10;
+  var costosFijos = parseInt(document.getElementById('costosFijos').value, 10) || 0;
+  var modeloEnt = document.getElementById('modeloEnt').value;
+
+  // Costo por tipo
+  var costoPorTipo = {};
+  var htmlDocs = '';
+  TIPOS_DOC.forEach(function (t) {
+    var c = costoDoc(t.inp, t.out, pInp, pOut);
+    costoPorTipo[t.id] = c;
+    htmlDocs += '<tr>'
+      + '<td>' + t.nombre + '</td>'
+      + '<td class="num">' + t.inp.toLocaleString('es-CL') + '</td>'
+      + '<td class="num">' + t.out.toLocaleString('es-CL') + '</td>'
+      + '<td class="num costo">' + fmtUSD(c) + '</td>'
+      + '<td class="num">' + fmtCLP(c * usdclp) + '</td>'
+      + '</tr>';
+  });
+  document.getElementById('tablaDocs').innerHTML = htmlDocs;
+
+  // Costo promedio ponderado
+  var costoOtro = (costoPorTipo.guia + costoPorTipo.rub) / 2;
+  var costoProm = (
+    costoPorTipo.plan * MIX.plan +
+    costoPorTipo.eval * MIX.eval +
+    costoOtro * MIX.otro
+  ) / 100;
+
+  var docsMesTotal = docentes * docsMes;
+  var docsAno = docsMesTotal * meses;
+  var costoAnualUSD = docsAno * costoProm;
+  var costoAnualCLP = costoAnualUSD * usdclp;
+
+  document.getElementById('statDocs').textContent = docsAno.toLocaleString('es-CL');
+
+  // Actualizar cada plan
+  var pctPro = 0;
+  PLANES_INFO.forEach(function (p) {
+    var precio = parseInt(document.getElementById('precio_' + p.id).value, 10) || 0;
+    var costoIA = 0;
+    if (p.incluyeIA) {
+      if (p.id === 'ent') costoIA = costoAnualCLP * (MULT_MODELO[modeloEnt] || 1);
+      else costoIA = costoAnualCLP;
+    }
+    var margenNeto = precio - costoIA - costosFijos;
+    var pctMargen = precio > 0 ? (margenNeto / precio * 100) : 0;
+
+    document.getElementById('costoIA_' + p.id).textContent = fmtCLP(costoIA);
+    document.getElementById('fijos_' + p.id).textContent = fmtCLP(costosFijos);
+    document.getElementById('margen_' + p.id).textContent = fmtCLP(margenNeto);
+
+    var badge = document.getElementById('badge_' + p.id);
+    var clase = pctMargen > 70 ? 'good' : (pctMargen > 40 ? 'med' : 'bad');
+    var estado = pctMargen > 70 ? '💚 Margen saludable' : (pctMargen > 40 ? '⚠ Margen ajustado' : '🚨 Margen bajo');
+    badge.className = 'margen ' + clase;
+    badge.innerHTML = '<span class="pct">' + pctMargen.toFixed(0) + '%</span><span class="estado">' + estado + '</span>';
+
+    if (p.id === 'pro') pctPro = pctMargen;
+  });
+
+  // Stats de docente (basado en Pro)
+  var precioPro = parseInt(document.getElementById('precio_pro').value, 10) || 0;
+  var costoPorDocAno = docentes > 0 ? costoAnualCLP / docentes : 0;
+  var precioPorDocAno = docentes > 0 ? precioPro / docentes : 0;
+  document.getElementById('statCostoDocente').textContent = fmtCLP(costoPorDocAno);
+  document.getElementById('statPrecioDocente').textContent = fmtCLP(precioPorDocAno);
+
+  // Hero
+  document.getElementById('heroPct').textContent = pctPro.toFixed(0) + '%';
+  var heroBadge = document.getElementById('heroBadge');
+  var heroDesc  = document.getElementById('heroDesc');
+  if (pctPro > 70) {
+    heroBadge.className = 'badge good';
+    heroBadge.textContent = '💚 Margen saludable — modelo escala bien';
+    heroDesc.textContent = 'Con ' + docentes + ' profes generando ' + docsMes + ' docs/mes cada uno, el plan Pro deja ' + fmtCLP(precioPro - costoAnualCLP - costosFijos) + ' de margen neto por colegio al año.';
+  } else if (pctPro > 40) {
+    heroBadge.className = 'badge med';
+    heroBadge.textContent = '⚠ Margen aceptable pero justo';
+    heroDesc.textContent = 'Con este volumen, el margen es aceptable pero se aprieta. Considerá subir precio del plan Pro o limitar docs/mes por docente.';
+  } else {
+    heroBadge.className = 'badge bad';
+    heroBadge.textContent = '🚨 Margen bajo o negativo';
+    heroDesc.textContent = 'El costo IA supera lo que dejás. Subí el precio del plan Pro, cambiá a Gemini Flash, o limitá el volumen mensual.';
+  }
+}
+
+function cargarModelo(pInp, pOut, btn) {
+  document.getElementById('precioInput').value = pInp;
+  document.getElementById('precioOutput').value = pOut;
+  document.querySelectorAll('.mbtn').forEach(function (b) { b.classList.remove('active'); });
+  btn.classList.add('active');
+  recalcular();
+}
+function preset(profes, docs) {
+  document.getElementById('docentes').value = profes;
+  document.getElementById('docsMes').value = docs;
+  recalcular();
+}
+
+renderPlanes();
+recalcular();
+</script>
+
+</body>
+</html>
