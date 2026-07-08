@@ -3,260 +3,210 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Panel PIE — Click&Clase</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0">
+<title>PIE — Panel Coordinación — Click&Clase</title>
+<link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
 <script src="js/firebase-rest.js"></script>
 <script src="js/firebase-config.js"></script>
 <script src="js/firebase-auth.js"></script>
+<script src="js/firebase-db.js"></script>
 <script src="js/roles-permissions.js"></script>
 <script src="js/roles-router.js"></script>
-<script src="js/cc-store.js"></script>
-<link rel="stylesheet" href="css/panel.css">
-<script src="js/cc-ui.js"></script>
+<script src="js/cursos.js"></script>
+<script src="js/pie.js"></script>
+<style>
+:root { --bg: #0b0d1e; --panel: #12162f; --border: rgba(148,163,184,.15); --text: #e5e7eb; --muted: #94a3b8; --violet: #7c3aed; --pink: #f472b6; }
+* { box-sizing: border-box; }
+body { margin: 0; font-family: 'Segoe UI', Roboto, Arial, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+.topbar { padding: 16px 28px; border-bottom: 1px solid var(--border); background: linear-gradient(135deg, rgba(244,114,182,.10), rgba(124,58,237,.05)); display: flex; align-items: center; justify-content: space-between; }
+.topbar h1 { margin: 0; font-size: 1.3rem; font-weight: 700; }
+.breadcrumb { color: var(--muted); font-size: .78rem; }
+.usr { font-size: .82rem; color: var(--muted); }
+.usr .salir { color: #fca5a5; text-decoration: none; margin-left: 10px; }
+.container { max-width: 1500px; margin: 22px auto; padding: 0 22px 40px; }
+.accesos { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-bottom: 22px; }
+.acceso { padding: 14px 16px; border-radius: 10px; text-decoration: none; background: linear-gradient(135deg, rgba(244,114,182,.08), rgba(124,58,237,.05)); border: 1px solid rgba(244,114,182,.25); color: var(--text); display: flex; align-items: center; gap: 12px; font-weight: 600; }
+.acceso:hover { background: linear-gradient(135deg, rgba(244,114,182,.15), rgba(124,58,237,.10)); }
+.acceso .ico { font-size: 1.5rem; }
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 22px; }
+.kpi { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 14px 18px; }
+.kpi .l { font-size: .68rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
+.kpi .v { font-size: 1.9rem; font-weight: 800; margin-top: 4px; }
+.kpi.act .v { color: #86efac; } .kpi.perm .v { color: #f472b6; } .kpi.trans .v { color: #c4b5fd; }
+.kpi.egres .v { color: #94a3b8; } .kpi.adec .v { color: #67e8f9; } .kpi.edu .v { color: #fbbf24; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 22px; }
+@media (max-width: 900px) { .grid2 { grid-template-columns: 1fr; } }
+.card { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 18px 22px; }
+.card h3 { margin: 0 0 14px; font-size: .8rem; text-transform: uppercase; letter-spacing: .8px; color: var(--muted); font-weight: 700; display: flex; align-items: center; gap: 8px; }
+.chart-cont { position: relative; height: 260px; }
+table { width: 100%; border-collapse: collapse; }
+th, td { padding: 9px 11px; border-bottom: 1px solid var(--border); font-size: .84rem; text-align: left; vertical-align: top; }
+th { background: rgba(255,255,255,.03); font-size: .68rem; text-transform: uppercase; letter-spacing: .8px; color: var(--muted); font-weight: 700; }
+tr:hover td { background: rgba(255,255,255,.02); cursor: pointer; }
+.filtros { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 14px; }
+select, input { padding: 7px 10px; border-radius: 7px; background: rgba(255,255,255,.04); border: 1px solid rgba(148,163,184,.2); color: var(--text); font-size: .84rem; width: 100%; font-family: inherit; }
+.empty { padding: 30px; text-align: center; color: var(--muted); }
+.btn { padding: 8px 14px; border-radius: 7px; border: 1px solid var(--border); background: rgba(255,255,255,.04); color: var(--text); cursor: pointer; font-size: .82rem; font-weight: 600; text-decoration: none; display: inline-block; }
+.btn.primary { background: linear-gradient(135deg, #f472b6, #7c3aed); color: white; border-color: transparent; }
+</style>
 </head>
 <body>
+
 <div class="topbar">
-  <div><a href="acceso-demo.html" style="color:var(--muted);font-size:13px;margin-right:14px"><span class="material-symbols-outlined" style="font-size:16px;vertical-align:-3px">arrow_back</span> Roles</a><span class="brand">Click&Clase</span><span class="demo-tag">PIE · demo</span></div>
-  <div class="usr"><span class="av">EP</span><span style="font-size:13.5px">Encargada PIE</span><a class="salir" href="login.html">Salir</a></div>
+  <div><div class="breadcrumb">Coordinación PIE</div><h1>♿ Panel de Coordinación PIE</h1></div>
+  <div class="usr"><span id="userName">—</span><a href="login.html" class="salir">Salir</a></div>
 </div>
 
-<div class="shell">
-  <aside class="sidebar">
-    <div class="side-role"><span class="ico"><span class="material-symbols-outlined">accessible</span></span><div><div class="nm">Encargada PIE</div><div class="sc">Programa de Integración</div></div></div>
-    <nav id="nav"></nav>
-  </aside>
-  <main class="main">
+<div class="container">
 
-    <section class="sec active" id="sec-resumen">
-      <div class="h1">Resumen PIE</div>
-      <div class="sub">Gestión del Programa de Integración Escolar</div>
-      <div class="kpis">
-        <div class="kpi"><div class="l">Estudiantes PIE</div><div class="v">64</div></div>
-        <div class="kpi"><div class="l">Educadoras</div><div class="v">6</div></div>
-        <div class="kpi"><div class="l">PACI vigentes</div><div class="v">58</div></div>
-        <div class="kpi"><div class="l">Informes pend.</div><div class="v">9</div></div>
-      </div>
-      <div class="grid2">
-        <div class="card"><h3><span class="material-symbols-outlined">notifications_active</span> Alertas</h3>
-          <div class="row" style="cursor:pointer" onclick="show('evaluaciones')"><span class="material-symbols-outlined ic" style="color:var(--danger)">event_busy</span><div style="flex:1"><b>4 reevaluaciones</b> vencen este mes (Decreto 170).</div><span class="material-symbols-outlined" style="color:var(--faint)">chevron_right</span></div>
-          <div class="row" style="cursor:pointer" onclick="show('paci')"><span class="material-symbols-outlined ic" style="color:var(--warning)">assignment_late</span><div style="flex:1">9 informes/PACI pendientes de completar.</div><span class="material-symbols-outlined" style="color:var(--faint)">chevron_right</span></div>
-          <div class="row" style="cursor:pointer" onclick="show('niveles')"><span class="material-symbols-outlined ic" style="color:var(--warning)">groups</span><div style="flex:1">1 curso supera el cupo de transitorios (Decreto 170).</div><span class="material-symbols-outlined" style="color:var(--faint)">chevron_right</span></div>
-        </div>
-        <div class="card"><h3><span class="material-symbols-outlined">monitoring</span> Estudiantes por nivel</h3><div class="chartbox" style="height:220px"><canvas id="chNiv"></canvas></div></div>
-      </div>
-    </section>
-
-    <section class="sec" id="sec-estudiantes">
-      <div class="h1">Estudiantes PIE</div>
-      <div class="sub">Listado de estudiantes del programa</div>
-      <div class="card">
-        <div class="cardhead"><h3><span class="material-symbols-outlined">person</span> Estudiantes <span class="count" id="cnt-estudiantes">0</span></h3>
-          <div class="tools"><div class="search"><span class="material-symbols-outlined">search</span><input data-f="estudiantes" placeholder="Buscar…"></div>
-            <button class="btn ghost sm" onclick="plantilla('estudiantes')"><span class="material-symbols-outlined" style="font-size:16px">download</span> Plantilla</button>
-            <button class="btn sm" onclick="importar('estudiantes')"><span class="material-symbols-outlined" style="font-size:16px">upload_file</span> Importar</button></div>
-        </div>
-        <table><thead><tr><th>Estudiante</th><th>Curso</th><th>Diagnóstico</th><th>Tipo NEE</th><th>Estado</th></tr></thead><tbody id="tb-estudiantes"></tbody></table>
-      </div>
-      <div class="legal"><b>⚖ Dato sensible (salud):</b> el diagnóstico es información protegida (Ley 19.628 / Ley de Protección de Datos). <b>Decreto 170:</b> los diagnósticos y la cantidad de profesionales deben cumplir la norma; reevaluación según corresponda.</div>
-    </section>
-
-    <section class="sec" id="sec-educadoras">
-      <div class="h1">Educadoras</div>
-      <div class="sub">Control de gestión sobre el equipo PIE</div>
-      <div class="card">
-        <div class="cardhead"><h3><span class="material-symbols-outlined">diversity_1</span> Equipo <span class="count" id="cnt-educadoras">0</span></h3>
-          <div class="tools"><div class="search"><span class="material-symbols-outlined">search</span><input data-f="educadoras" placeholder="Buscar…"></div></div>
-        </div>
-        <table><thead><tr><th>Educadora</th><th>Cursos</th><th>Estudiantes</th><th>Informes</th><th>Estado</th></tr></thead><tbody id="tb-educadoras"></tbody></table>
-      </div>
-    </section>
-
-    <section class="sec" id="sec-paci">
-      <div class="h1">PACI / Informes</div>
-      <div class="sub">Planes de adecuación e informes por estudiante</div>
-      <div class="card">
-        <div class="cardhead"><h3><span class="material-symbols-outlined">folder_shared</span> Documentos <span class="count" id="cnt-paci">0</span></h3>
-          <div class="tools"><div class="search"><span class="material-symbols-outlined">search</span><input data-f="paci" placeholder="Buscar…"></div>
-            <button class="btn sm" onclick="importar('paci')"><span class="material-symbols-outlined" style="font-size:16px">upload_file</span> Importar lista</button></div>
-        </div>
-        <div id="tb-paci"></div>
-      </div>
-      <div class="legal"><b>⚖ Decreto 83/2015:</b> las adecuaciones curriculares (PACI) deben registrarse y actualizarse. El profesor de aula ve la <b>adecuación</b>, no el diagnóstico clínico completo.</div>
-    </section>
-
-    <section class="sec" id="sec-evaluaciones">
-      <div class="h1">Evaluaciones</div>
-      <div class="sub">Evaluaciones y reevaluaciones diferenciadas</div>
-      <div class="card">
-        <div class="cardhead"><h3><span class="material-symbols-outlined">event_note</span> Evaluaciones <span class="count" id="cnt-evaluaciones">0</span></h3>
-          <div class="tools"><div class="search"><span class="material-symbols-outlined">search</span><input data-f="evaluaciones" placeholder="Buscar…"></div>
-            <button class="btn ghost sm" onclick="plantilla('evaluaciones')"><span class="material-symbols-outlined" style="font-size:16px">download</span> Plantilla</button>
-            <button class="btn sm" onclick="importar('evaluaciones')"><span class="material-symbols-outlined" style="font-size:16px">upload_file</span> Importar</button></div>
-        </div>
-        <table><thead><tr><th>Día</th><th>Evaluación</th><th>Estudiante / Curso</th><th>Estado</th></tr></thead><tbody id="tb-evaluaciones"></tbody></table>
-      </div>
-    </section>
-
-    <section class="sec" id="sec-niveles">
-      <div class="h1">Niveles</div>
-      <div class="sub">Distribución y cupos por nivel (Decreto 170)</div>
-      <div class="card">
-        <div class="cardhead"><h3><span class="material-symbols-outlined">category</span> Por nivel <span class="count" id="cnt-niveles">0</span></h3>
-          <div class="tools"><div class="search"><span class="material-symbols-outlined">search</span><input data-f="niveles" placeholder="Buscar…"></div></div>
-        </div>
-        <table><thead><tr><th>Curso</th><th>PIE</th><th>Permanentes</th><th>Transitorios</th><th>Estado</th></tr></thead><tbody id="tb-niveles"></tbody></table>
-      </div>
-      <div class="legal"><b>⚖ Decreto 170:</b> por curso se financian hasta <b>2 estudiantes permanentes</b> y <b>5 transitorios</b> (con excepciones autorizadas). El estado en rojo indica cursos que superan el cupo.</div>
-    </section>
-
-  </main>
-</div>
-
-<input type="file" id="fileImp" accept=".xlsx,.xls,.csv,.docx" style="display:none">
-<input type="file" id="fileDoc" style="display:none">
-<div id="toast"><span class="material-symbols-outlined" style="color:var(--success)">check_circle</span><span id="toastMsg"></span></div>
-
-<div class="overlay" id="carpOverlay">
-  <div class="modal" style="max-width:640px">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
-      <h3 style="font-size:16px;font-weight:600;display:flex;align-items:center;gap:8px"><span class="material-symbols-outlined" style="color:var(--primary)">folder_shared</span> Carpeta del estudiante</h3>
-      <span class="material-symbols-outlined" style="cursor:pointer;color:var(--muted)" onclick="cerrarCarp()">close</span>
-    </div>
-    <div id="carpBody"></div>
+  <div class="accesos">
+    <a class="acceso" href="pie-ficha.html"><span class="ico">➕</span> Nueva ficha / Adecuaciones</a>
+    <a class="acceso" href="panel-pie-edu.html"><span class="ico">👩‍🏫</span> Vista Educadora</a>
+    <a class="acceso" href="admin-cursos.html"><span class="ico">🎓</span> Cursos y estudiantes</a>
+    <a class="acceso" href="panel-apoyo.html"><span class="ico">💙</span> Coordinar Apoyo</a>
+    <a class="acceso" href="panel-ambiente.html"><span class="ico">🤝</span> Coordinar Convivencia</a>
   </div>
+
+  <div class="kpis" id="kpisWrap"><div style="grid-column:1/-1;padding:20px;text-align:center;color:var(--muted)">⏳ Cargando…</div></div>
+
+  <div class="grid2">
+    <div class="card">
+      <h3><span>🧠</span> Distribución por diagnóstico</h3>
+      <div class="chart-cont"><canvas id="chDiag"></canvas></div>
+    </div>
+    <div class="card">
+      <h3><span>👥</span> Educadoras diferenciales</h3>
+      <div id="tEdu"><div class="empty">…</div></div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:22px">
+    <h3><span>📋</span> Estudiantes en PIE</h3>
+    <div class="filtros">
+      <select id="fltDiag" onchange="cargarLista()"><option value="">Todos los diagnósticos</option></select>
+      <select id="fltNEE" onchange="cargarLista()">
+        <option value="">NEE Perm. + Trans.</option>
+        <option value="permanente">NEE Permanente</option>
+        <option value="transitoria">NEE Transitoria</option>
+      </select>
+      <select id="fltEstado" onchange="cargarLista()">
+        <option value="">Todos los estados</option>
+        <option value="activo">Activo</option>
+        <option value="egresado">Egresado</option>
+        <option value="suspendido">Suspendido</option>
+      </select>
+      <input type="text" id="fltNombre" placeholder="Buscar por nombre" oninput="cargarLista()">
+    </div>
+    <table>
+      <thead><tr><th>Estudiante</th><th>Curso</th><th>Diagnóstico</th><th>Decreto</th><th>Educadora</th><th>Estado</th></tr></thead>
+      <tbody id="tbody"><tr><td colspan="6" class="empty">⏳ Cargando…</td></tr></tbody>
+    </table>
+  </div>
+
 </div>
 
 <script>
-function ic(n){return '<span class="material-symbols-outlined">'+n+'</span>';}
-function inferTone(s){s=(''+s).toLowerCase();
-  if(/(falta|atrasad|vencid|cr[ií]tico|supera|excede|rechaz)/.test(s))return 'danger';
-  if(/(por actualizar|pendiente|vence|revisar|transitorio)/.test(s))return 'warning';
-  if(/(vigente|activ|al d[ií]a|completad|realizada|cargad|permanente|\bok\b)/.test(s))return 'success';
-  return 'info';}
-function tag(t){return '<span class="tag '+inferTone(t)+'">'+t+'</span>';}
-
-var REG={
- estudiantes:{headers:['Estudiante','Curso','Diagnóstico','Tipo NEE','Estado'],statusIdx:4,rows:[
-   ['Juan Pérez','5°A','TEA nivel 1','Permanente','Vigente'],
-   ['Sofía Díaz','6°B','TDAH','Transitoria','Vigente'],
-   ['Mateo Soto','4°A','Dislexia','Transitoria','Reevaluar'],
-   ['Lucas Vera','I°B','Discapacidad intelectual','Permanente','Vigente'],
-   ['Emma Rojas','3°A','Trastorno del lenguaje','Transitoria','Vigente']]},
- educadoras:{headers:['Educadora','Cursos','Estudiantes','Informes','Estado'],statusIdx:4,rows:[
-   ['C. Rojas','4','12','2 pend.','Activo'],
-   ['V. Pinto','3','10','Al día','Activo'],
-   ['D. Salas','4','14','3 pend.','Activo']]},
- paci:{headers:['Documento','Detalle','Estado'],statusIdx:2,rows:[
-   ['PACI — Juan Pérez (5°A)','v2 · mar 2026','Vigente'],
-   ['PACI — Sofía Díaz (6°B)','v1 · 2026','Vigente'],
-   ['Informe psicopedagógico — Mateo Soto','—','Pendiente'],
-   ['PACI — Lucas Vera (I°B)','v3 · 2026','Vigente'],
-   ['Informe a la familia — Emma Rojas','—','Pendiente']]},
- evaluaciones:{headers:['Día','Evaluación','Estudiante / Curso','Estado'],statusIdx:3,rows:[
-   ['10 jun','Evaluación diferenciada','Juan Pérez · 5°A','Realizada'],
-   ['24 jun','Reevaluación diagnóstica','Mateo Soto · 4°A','Pendiente'],
-   ['27 jun','Evaluación de progreso','Emma Rojas · 3°A','Pendiente']]},
- niveles:{headers:['Curso','PIE','Permanentes','Transitorios','Estado'],statusIdx:4,rows:[
-   ['3°A','6','1','5','Al día'],
-   ['4°A','7','2','5','Al día'],
-   ['5°A','8','2','6','Supera cupo'],
-   ['I°B','5','2','3','Al día']]},
- historial:{headers:['Estudiante','Fecha','Hito / Nota'],statusIdx:-1,rows:[
-   ['Juan Pérez','mar 2026','Ingreso al programa con diagnóstico TEA nivel 1.'],
-   ['Juan Pérez','may 2026','Actualización de PACI v2; avances en autonomía.'],
-   ['Mateo Soto','abr 2026','Derivación a evaluación fonoaudiológica.']]}
-};
-
-function renderTable(key){
- var cfg=REG[key], el=document.getElementById('tb-'+key);
- if(!el)return;
- if(key==='estudiantes'){
-   el.innerHTML=cfg.rows.map(function(r,j){return '<tr data-txt="'+r.join(' ').toLowerCase()+'" style="cursor:pointer" onclick="carpeta('+j+')" title="Abrir carpeta del estudiante">'+r.map(function(c,i){return '<td>'+(i===cfg.statusIdx?tag(c):c)+'</td>'}).join('')+'</tr>'}).join('');
-   var ce=document.getElementById('cnt-estudiantes'); if(ce)ce.textContent=cfg.rows.length; return;
- }
- if(key==='paci'){
-   el.innerHTML=cfg.rows.map(function(r,i){var sub=r[3]?('<span class="material-symbols-outlined" style="font-size:14px;vertical-align:-2px">attach_file</span> '+r[3]):(r[1]||'');return '<div class="doc" data-txt="'+r.join(' ').toLowerCase()+'"><span class="di">'+ic('description')+'</span><div style="flex:1"><div class="dn">'+r[0]+'</div><div class="dm">'+sub+'</div></div>'+tag(r[3]?'Cargado':(r[2]||''))+'<button class="btn ghost sm" style="margin-left:12px" title="Subir archivo" onclick="docUpload('+i+')">'+ic('upload')+'</button></div>'}).join('');
- } else {
-   el.innerHTML=cfg.rows.map(function(r){return '<tr data-txt="'+r.join(' ').toLowerCase()+'">'+r.map(function(c,i){return '<td>'+(i===cfg.statusIdx?tag(c):c)+'</td>'}).join('')+'</tr>'}).join('');
- }
- var cnt=document.getElementById('cnt-'+key); if(cnt)cnt.textContent=cfg.rows.length;
-}
-Object.keys(REG).forEach(renderTable);
-if(window.ccStore)ccStore.hydrate('pie',REG,renderTable);
-window.CC_REG=REG;window.CC_RENDER=renderTable;window.CC_PREFIX='pie';
-
-document.addEventListener('input',function(e){var inp=e.target;if(!inp.dataset||!inp.dataset.f)return;var q=inp.value.toLowerCase(),cont=document.getElementById('tb-'+inp.dataset.f);cont.querySelectorAll('[data-txt]').forEach(function(r){r.style.display=r.dataset.txt.indexOf(q)!==-1?'':'none'});});
-
-var _impKey=null;
-function importar(k){_impKey=k;var f=document.getElementById('fileImp');f.value='';f.click();}
-function plantilla(k){var ws=XLSX.utils.aoa_to_sheet([REG[k].headers]);var wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Plantilla');XLSX.writeFile(wb,'plantilla-'+k+'.xlsx');toast('Plantilla descargada.','success');}
-function applyRows(rows){rows=rows.filter(function(r){return r&&r.join('').trim()!==''});if(rows.length<2){toast('Sin filas de datos.','danger');return;}var n=REG[_impKey].headers.length;REG[_impKey].rows=rows.slice(1).map(function(r){var o=[];for(var i=0;i<n;i++)o.push(r[i]!=null?String(r[i]):'');return o;});renderTable(_impKey);if(_impKey==='niveles')mkNiv();if(window.ccStore)ccStore.setTabla('pie_'+_impKey,REG[_impKey].rows);toast(REG[_impKey].rows.length+' filas importadas.','success');}
-document.getElementById('fileImp').addEventListener('change',function(e){var file=e.target.files&&e.target.files[0];if(!file||!_impKey)return;var ext=(file.name.split('.').pop()||'').toLowerCase(),rd=new FileReader();
- if(ext==='docx'){rd.onload=function(ev){if(typeof mammoth==='undefined'){toast('Lector Word no disponible.','danger');return;}mammoth.extractRawText({arrayBuffer:ev.target.result}).then(function(res){var rows=res.value.split(/\r?\n/).filter(function(l){return l.trim()!==''}).map(function(l){return l.split(/\t|\s{2,}| - |;|\|/).map(function(c){return c.trim()})});if(rows.length)rows.unshift(REG[_impKey].headers);applyRows(rows);}).catch(function(){toast('No se pudo leer el Word.','danger');});};rd.readAsArrayBuffer(file);}
- else{rd.onload=function(ev){try{var wb=XLSX.read(new Uint8Array(ev.target.result),{type:'array'});applyRows(XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,defval:''}));}catch(err){toast('No se pudo leer el archivo.','danger');}};rd.readAsArrayBuffer(file);}
-});
-
-var _docIdx=null;
-function docUpload(i){_docIdx=i;var f=document.getElementById('fileDoc');f.value='';f.click();}
-document.getElementById('fileDoc').addEventListener('change',function(e){var file=e.target.files&&e.target.files[0];if(file==null||_docIdx==null)return;REG.paci.rows[_docIdx][3]=file.name;renderTable('paci');toast('Documento "'+file.name+'" cargado.','success');_docIdx=null;});
-
-var _tt;function toast(msg,tone){var t=document.getElementById('toast');t.style.borderLeftColor='var(--'+(tone==='danger'?'danger':'success')+')';var i=t.querySelector('.material-symbols-outlined');i.style.color='var(--'+(tone==='danger'?'danger':'success')+')';i.textContent=tone==='danger'?'error':'check_circle';document.getElementById('toastMsg').textContent=msg;t.classList.add('show');clearTimeout(_tt);_tt=setTimeout(function(){t.classList.remove('show')},3000);}
-
-var _chN=null;
-function mkNiv(){var el=document.getElementById('chNiv');if(!el||typeof Chart==='undefined')return;if(_chN)_chN.destroy();
- Chart.defaults.color='#6B7280';Chart.defaults.borderColor='#E6E9F1';Chart.defaults.font.family='Inter';
- _chN=new Chart(el,{type:'bar',data:{labels:REG.niveles.rows.map(function(r){return r[0]}),datasets:[{label:'Permanentes',data:REG.niveles.rows.map(function(r){return +r[2]||0}),backgroundColor:'#5B4BE0'},{label:'Transitorios',data:REG.niveles.rows.map(function(r){return +r[3]||0}),backgroundColor:'#0FB5A8'}]},options:{responsive:true,maintainAspectRatio:false,scales:{x:{stacked:true},y:{stacked:true}}}});}
-
-// ── Carpeta por estudiante ──
-var _carpIdx=null;
-function _match(rows,name){var n=(name||'').toLowerCase().split(' ')[0];return rows.filter(function(r){return r.join(' ').toLowerCase().indexOf(n)!==-1;});}
-function _hoyPie(){var m=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'],d=new Date();return m[d.getMonth()]+' '+d.getFullYear();}
-function carpeta(j){_carpIdx=j;var e=REG.estudiantes.rows[j];if(!e)return;
- var name=e[0];
- var pacis=_match(REG.paci.rows,name), evals=_match(REG.evaluaciones.rows,name), hist=_match(REG.historial.rows,name);
- var html='';
- html+='<div style="display:flex;align-items:center;gap:12px;margin-bottom:12px"><span class="av" style="width:42px;height:42px;font-size:15px">'+name.split(' ').map(function(x){return x[0]}).slice(0,2).join('')+'</span><div><div style="font-weight:600;font-size:15px">'+name+'</div><div class="sub" style="margin:0">'+e[1]+' · '+tag(e[4])+'</div></div></div>';
- html+='<div class="card" style="margin:0 0 10px;padding:11px 13px;background:var(--surface)"><div class="sub" style="margin:0;font-size:12px">⚠ Dato sensible (salud)</div><div style="margin-top:3px"><b>Diagnóstico:</b> '+e[2]+' &nbsp;·&nbsp; <b>NEE:</b> '+e[3]+'</div></div>';
- html+='<div class="sec-title" style="margin:12px 0 6px"><span class="material-symbols-outlined" style="vertical-align:-4px;font-size:18px;color:var(--primary)">description</span> Documentos (PACI / informes)</div>';
- html+=pacis.length?pacis.map(function(r){return '<div class="row"><span class="material-symbols-outlined ic">folder</span><div style="flex:1">'+r[0]+'<div class="sub" style="margin:0">'+(r[1]||r[3]||'')+'</div></div>'+tag(r[3]?'Cargado':r[2])+'</div>'}).join(''):'<div class="sub" style="margin:0">Sin documentos asociados.</div>';
- html+='<div class="sec-title" style="margin:12px 0 6px"><span class="material-symbols-outlined" style="vertical-align:-4px;font-size:18px;color:var(--primary)">event_note</span> Evaluaciones</div>';
- html+=evals.length?evals.map(function(r){return '<div class="row"><span class="material-symbols-outlined ic">fact_check</span><div style="flex:1">'+r[1]+'<div class="sub" style="margin:0">'+r[0]+'</div></div>'+tag(r[3])+'</div>'}).join(''):'<div class="sub" style="margin:0">Sin evaluaciones registradas.</div>';
- html+='<div class="sec-title" style="margin:12px 0 6px"><span class="material-symbols-outlined" style="vertical-align:-4px;font-size:18px;color:var(--primary)">timeline</span> Historial</div>';
- html+='<div id="carpHist"></div>';
- html+='<div style="display:flex;gap:8px;margin-top:10px"><input id="carpNota" placeholder="Agregar hito o nota al historial…" style="flex:1;font-size:13px;color:var(--text);background:var(--bg);border:1px solid var(--border-2);border-radius:8px;padding:9px 11px"><button class="btn ghost sm" onclick="addNota()"><span class="material-symbols-outlined" style="font-size:16px">add</span> Nota</button></div>';
- document.getElementById('carpBody').innerHTML=html;
- renderCarpHist(name);
- document.getElementById('carpOverlay').classList.add('show');
-}
-function renderCarpHist(name){var el=document.getElementById('carpHist');if(!el)return;var hist=_match(REG.historial.rows,name);
- el.innerHTML=hist.length?('<div style="border-left:2px solid var(--border-2);margin-left:6px;padding-left:14px">'+hist.map(function(r){return '<div style="position:relative;padding-bottom:10px"><span style="position:absolute;left:-21px;top:3px;width:9px;height:9px;border-radius:50%;background:var(--primary)"></span><div style="font-size:12px;color:var(--muted)">'+(r[1]||'')+'</div><div style="font-size:13.5px">'+(r[2]||'')+'</div></div>'}).join('')+'</div>'):'<div class="sub" style="margin:0">Sin historial aún.</div>';
-}
-function addNota(){var inp=document.getElementById('carpNota'),txt=(inp.value||'').trim();if(!txt){toast('Escribe la nota.','danger');return;}var e=REG.estudiantes.rows[_carpIdx];if(!e)return;
- REG.historial.rows.push([e[0],_hoyPie(),txt]);if(window.ccStore)ccStore.setTabla('pie_historial',REG.historial.rows);inp.value='';renderCarpHist(e[0]);toast('Nota agregada al historial.','success');
-}
-function cerrarCarp(){document.getElementById('carpOverlay').classList.remove('show');}
-document.getElementById('carpOverlay').addEventListener('click',function(e){if(e.target===this)cerrarCarp();});
-
-var NAV=[['dashboard','Resumen','resumen'],['person','Estudiantes PIE','estudiantes'],['diversity_1','Educadoras','educadoras'],['folder_shared','PACI / Informes','paci'],['event_note','Evaluaciones','evaluaciones'],['category','Niveles','niveles']];
-document.getElementById('nav').innerHTML=NAV.map(function(n,i){return '<div class="nav-item'+(i===0?' active':'')+'" data-s="'+n[2]+'">'+ic(n[0])+'<span>'+n[1]+'</span></div>'}).join('');
-function show(s){document.querySelectorAll('.nav-item').forEach(function(x){x.classList.toggle('active',x.dataset.s===s)});document.querySelectorAll('.sec').forEach(function(x){x.classList.toggle('active',x.id==='sec-'+s)});if(s==='resumen')mkNiv();}
-document.querySelectorAll('.nav-item').forEach(function(x){x.addEventListener('click',function(){show(x.dataset.s)})});
-mkNiv();
-</script>
-
-<script>
-// Fase 0: proteger la página según rol del usuario.
 if (window.CCRouter && window.CCRouter.guardPanel) {
-  CCRouter.guardPanel(['pie_enc']);
+  CCRouter.guardPanel(['pie_enc','director','rector','admin_colegio','admin']);
 }
+function esc(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+var _fichas = [];
+
+function iniciar() {
+  var u = ELAuth.user || {};
+  document.getElementById('userName').textContent = u.nombre || u.email || 'Coord PIE';
+  var sel = document.getElementById('fltDiag');
+  var opts = Object.keys(CCPie.DIAGNOSTICO_LABEL).map(function(k){ return '<option value="' + k + '">' + CCPie.DIAGNOSTICO_LABEL[k] + '</option>'; });
+  sel.innerHTML = '<option value="">Todos los diagnósticos</option>' + opts.join('');
+  cargarKPIs();
+  cargarEducadoras();
+  cargarLista();
+}
+
+function cargarKPIs() {
+  CCPie.kpisPIE().then(function(k){
+    document.getElementById('kpisWrap').innerHTML =
+      '<div class="kpi act"><div class="l">PIE activos</div><div class="v">' + k.activos + '</div></div>' +
+      '<div class="kpi perm"><div class="l">NEE Permanentes</div><div class="v">' + k.neePermanentes + '</div></div>' +
+      '<div class="kpi trans"><div class="l">NEE Transitorias</div><div class="v">' + k.neeTransitorias + '</div></div>' +
+      '<div class="kpi egres"><div class="l">Egresados</div><div class="v">' + k.egresados + '</div></div>' +
+      '<div class="kpi adec"><div class="l">Con adecuaciones activas</div><div class="v">' + k.conAdecuaciones + '</div></div>' +
+      '<div class="kpi edu"><div class="l">Total fichas</div><div class="v">' + k.totalFichas + '</div></div>';
+
+    var labels = [], data = [], colors = [];
+    Object.keys(k.porDiagnostico).forEach(function(d) {
+      labels.push(CCPie.DIAGNOSTICO_LABEL[d] || d);
+      data.push(k.porDiagnostico[d]);
+      var tipo = CCPie.NEE_TIPO[d];
+      colors.push(tipo === 'permanente' ? '#f472b6' : tipo === 'transitoria' ? '#c4b5fd' : '#94a3b8');
+    });
+    if (!labels.length) {
+      document.getElementById('chDiag').parentNode.innerHTML = '<div class="empty">Sin fichas cargadas</div>';
+      return;
+    }
+    new Chart(document.getElementById('chDiag').getContext('2d'), {
+      type: 'doughnut',
+      data: { labels: labels, datasets: [{ data: data, backgroundColor: colors, borderWidth: 0 }] },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { position: 'right', labels: { color: '#94a3b8', font: { size: 10 } } } }
+      }
+    });
+  });
+}
+
+function cargarEducadoras() {
+  CCPie.listarEducadoras().then(function(edus) {
+    if (!edus.length) { document.getElementById('tEdu').innerHTML = '<div class="empty">Sin educadoras registradas con rol PIE</div>'; return; }
+    CCPie.listarFichas().then(function(fichas) {
+      var casosPorEdu = {};
+      fichas.forEach(function(f) {
+        if (f.educadoraUid) casosPorEdu[f.educadoraUid] = (casosPorEdu[f.educadoraUid] || 0) + 1;
+      });
+      var html = '<table><thead><tr><th>Educadora</th><th style="text-align:right;width:80px">Casos</th></tr></thead><tbody>';
+      html += edus.map(function(e) {
+        return '<tr><td>' + esc(e.nombre) + '<br><span style="font-size:.72rem;color:var(--muted)">' + esc(e.email) + '</span></td>' +
+               '<td style="text-align:right;font-weight:700;color:#f472b6">' + (casosPorEdu[e.uid] || 0) + '</td></tr>';
+      }).join('');
+      html += '</tbody></table>';
+      document.getElementById('tEdu').innerHTML = html;
+    });
+  });
+}
+
+function cargarLista() {
+  var opts = {};
+  var d = document.getElementById('fltDiag').value; if (d) opts.diagnostico = d;
+  var n = document.getElementById('fltNEE').value; if (n) opts.tipoNEE = n;
+  var e = document.getElementById('fltEstado').value; if (e) opts.estadoPIE = e;
+  var q = (document.getElementById('fltNombre').value || '').toLowerCase().trim();
+
+  CCPie.listarFichas(opts).then(function(items) {
+    _fichas = items;
+    if (q) items = items.filter(function(f) { return (f.estudianteNombre || '').toLowerCase().indexOf(q) !== -1; });
+    var tb = document.getElementById('tbody');
+    if (!items.length) { tb.innerHTML = '<tr><td colspan="6" class="empty">Sin fichas que coincidan</td></tr>'; return; }
+    tb.innerHTML = items.map(function(f) {
+      return '<tr onclick="verFicha(\'' + esc(f.estUid) + '\')">' +
+        '<td>' + esc(f.estudianteNombre) + '</td>' +
+        '<td>' + esc(f.cursoNombre) + '</td>' +
+        '<td>' + CCPie.badgeDiagnostico(f.diagnostico) + '</td>' +
+        '<td style="font-size:.78rem">' + esc(CCPie.DECRETO_LABEL[f.decreto] || f.decreto) + '</td>' +
+        '<td>' + esc(f.educadoraNombre || '—') + '</td>' +
+        '<td>' + CCPie.badgeEstadoPIE(f.estadoPIE) + '</td>' +
+        '</tr>';
+    }).join('');
+  });
+}
+
+function verFicha(estUid) {
+  window.location.href = 'pie-ficha.html?estUid=' + encodeURIComponent(estUid);
+}
+
+if (window.ELAuth && ELAuth.onUserReady) ELAuth.onUserReady(function(u){ if(u) iniciar(); });
 </script>
 </body>
 </html>

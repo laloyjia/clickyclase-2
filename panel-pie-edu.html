@@ -3,167 +3,233 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Panel Educadora PIE — Click&Clase</title>
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<title>PIE — Educadora Diferencial — Click&Clase</title>
+<link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg">
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
 <script src="js/firebase-rest.js"></script>
 <script src="js/firebase-config.js"></script>
 <script src="js/firebase-auth.js"></script>
+<script src="js/firebase-db.js"></script>
 <script src="js/roles-permissions.js"></script>
 <script src="js/roles-router.js"></script>
-<script src="js/cc-store.js"></script>
-<link rel="stylesheet" href="css/panel.css">
-<script src="js/cc-ui.js"></script>
+<script src="js/cursos.js"></script>
+<script src="js/pie.js"></script>
+<style>
+:root { --bg: #0b0d1e; --panel: #12162f; --border: rgba(148,163,184,.15); --text: #e5e7eb; --muted: #94a3b8; --violet: #7c3aed; --pink: #f472b6; --cyan: #22d3ee; }
+* { box-sizing: border-box; }
+body { margin: 0; font-family: 'Segoe UI', Roboto, Arial, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+.topbar { padding: 16px 28px; border-bottom: 1px solid var(--border); background: linear-gradient(135deg, rgba(244,114,182,.10), rgba(124,58,237,.05)); display: flex; align-items: center; justify-content: space-between; }
+.topbar h1 { margin: 0; font-size: 1.3rem; font-weight: 700; }
+.breadcrumb { color: var(--muted); font-size: .78rem; }
+.usr { font-size: .82rem; color: var(--muted); }
+.usr .salir { color: #fca5a5; text-decoration: none; margin-left: 10px; }
+.container { max-width: 1400px; margin: 22px auto; padding: 0 22px 40px; }
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 22px; }
+.kpi { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 14px 18px; }
+.kpi .l { font-size: .68rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
+.kpi .v { font-size: 1.9rem; font-weight: 800; margin-top: 4px; }
+.kpi.mis .v { color: #f472b6; } .kpi.sesion .v { color: #67e8f9; } .kpi.perm .v { color: #f472b6; } .kpi.trans .v { color: #c4b5fd; }
+.card { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 18px 22px; margin-bottom: 18px; }
+.card h3 { margin: 0 0 14px; font-size: .8rem; text-transform: uppercase; letter-spacing: .8px; color: var(--muted); font-weight: 700; display: flex; align-items: center; gap: 8px; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+@media (max-width: 900px) { .grid2 { grid-template-columns: 1fr; } }
+.fld { margin-bottom: 12px; }
+.fld label { display: block; font-size: .72rem; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 4px; }
+input, select, textarea { width: 100%; padding: 8px 10px; border-radius: 7px; background: rgba(255,255,255,.04); border: 1px solid rgba(148,163,184,.2); color: var(--text); font-size: .85rem; font-family: inherit; }
+textarea { resize: vertical; min-height: 60px; }
+.row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+.btn { padding: 9px 15px; border-radius: 8px; border: 1px solid var(--border); background: rgba(255,255,255,.04); color: var(--text); cursor: pointer; font-size: .85rem; font-weight: 600; text-decoration: none; display: inline-block; }
+.btn.primary { background: linear-gradient(135deg, #f472b6, #7c3aed); color: white; border-color: transparent; }
+.btn:hover:not(:disabled) { background: rgba(255,255,255,.08); }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+table { width: 100%; border-collapse: collapse; }
+th, td { padding: 9px 11px; border-bottom: 1px solid var(--border); font-size: .84rem; text-align: left; vertical-align: top; }
+th { background: rgba(255,255,255,.03); font-size: .68rem; text-transform: uppercase; letter-spacing: .8px; color: var(--muted); font-weight: 700; }
+tr:hover td { background: rgba(255,255,255,.02); cursor: pointer; }
+.empty { padding: 30px; text-align: center; color: var(--muted); }
+.filtros { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 14px; }
+</style>
 </head>
 <body>
+
 <div class="topbar">
-  <div><a href="acceso-demo.html" style="color:var(--muted);font-size:13px;margin-right:14px"><span class="material-symbols-outlined" style="font-size:16px;vertical-align:-3px">arrow_back</span> Roles</a><span class="brand">Click&Clase</span><span class="demo-tag">Educadora PIE · demo</span></div>
-  <div class="usr"><span class="av">ED</span><span style="font-size:13.5px">Educadora Diferencial</span><a class="salir" href="login.html">Salir</a></div>
+  <div><div class="breadcrumb">Educadora Diferencial</div><h1>♿ Mis Estudiantes PIE</h1></div>
+  <div class="usr"><span id="userName">—</span><a href="login.html" class="salir">Salir</a></div>
 </div>
-<div class="shell">
-  <aside class="sidebar">
-    <div class="side-role"><span class="ico"><span class="material-symbols-outlined">psychology</span></span><div><div class="nm">Educadora PIE</div><div class="sc">Mis cursos asignados</div></div></div>
-    <nav id="nav"></nav>
-  </aside>
-  <main class="main">
-    <section class="sec active" id="sec-resumen">
-      <div class="h1">Inicio</div><div class="sub">Mis cursos y estudiantes PIE</div>
-      <div class="kpis">
-        <div class="kpi"><div class="l">Mis cursos</div><div class="v">4</div></div>
-        <div class="kpi"><div class="l">Mis estudiantes</div><div class="v">12</div></div>
-        <div class="kpi"><div class="l">Informes por hacer</div><div class="v">3</div></div>
-        <div class="kpi"><div class="l">Actividades (IA)</div><div class="v">19</div></div>
+
+<div class="container">
+
+  <div class="kpis" id="kpisWrap"><div style="grid-column:1/-1;padding:20px;text-align:center;color:var(--muted)">⏳ Cargando…</div></div>
+
+  <div class="grid2">
+    <div class="card">
+      <h3><span>👥</span> Mis estudiantes asignados</h3>
+      <div class="filtros">
+        <select id="fltNEE" onchange="cargarMisEst()">
+          <option value="">Todas las NEE</option>
+          <option value="permanente">Permanentes</option>
+          <option value="transitoria">Transitorias</option>
+        </select>
+        <input type="text" id="fltNombre" placeholder="Buscar" oninput="cargarMisEst()">
       </div>
-      <div class="card"><h3><span class="material-symbols-outlined">notifications_active</span> Mis pendientes</h3>
-        <div class="row" style="cursor:pointer" onclick="show('estudiantes')"><span class="material-symbols-outlined ic" style="color:var(--warning)">assignment_late</span><div style="flex:1"><b>3 informes</b> por completar.</div><span class="material-symbols-outlined" style="color:var(--faint)">chevron_right</span></div>
-        <div class="row" style="cursor:pointer" onclick="show('estudiantes')"><span class="material-symbols-outlined ic" style="color:var(--warning)">event_repeat</span><div style="flex:1">1 reevaluación próxima (Decreto 170).</div><span class="material-symbols-outlined" style="color:var(--faint)">chevron_right</span></div>
-      </div>
-      <div class="card"><div class="sec-title"><span class="material-symbols-outlined" style="vertical-align:-4px;color:var(--primary)">calendar_month</span> Calendario del colegio</div><div id="calColegio"></div></div>
-    </section>
-    <section class="sec" id="sec-estudiantes">
-      <div class="h1">Mis estudiantes</div><div class="sub">Carpeta por estudiante · haz clic para generar actividad o informe con IA</div>
-      <div class="card"><div class="cardhead"><h3><span class="material-symbols-outlined">person</span> Estudiantes <span class="count" id="cnt-estudiantes">0</span></h3>
-        <div class="tools"><div class="search"><span class="material-symbols-outlined">search</span><input data-f="estudiantes" placeholder="Buscar…"></div></div></div>
-        <table><thead><tr><th>Estudiante</th><th>Curso</th><th>Diagnóstico</th><th>Estado</th></tr></thead><tbody id="tb-estudiantes"></tbody></table>
-      </div>
-      <div class="legal"><b>⚖ Decreto 83/2015 (PACI)</b> y <b>Decreto 170</b>: las adecuaciones e informes deben registrarse y reevaluarse. El diagnóstico es dato sensible de salud; el profesor de aula ve la adecuación, no el diagnóstico clínico.</div>
-    </section>
-    <section class="sec" id="sec-actividades">
-      <div class="h1">Actividades</div><div class="sub">Actividades según diagnóstico</div>
-      <div class="card"><div class="cardhead"><h3><span class="material-symbols-outlined">extension</span> Actividades <span class="count" id="cnt-actividades">0</span></h3>
-        <div class="tools"><div class="search"><span class="material-symbols-outlined">search</span><input data-f="actividades" placeholder="Buscar…"></div>
-        <button class="btn ghost sm" onclick="plantilla('actividades')"><span class="material-symbols-outlined" style="font-size:16px">download</span> Plantilla</button>
-        <button class="btn sm" onclick="importar('actividades')"><span class="material-symbols-outlined" style="font-size:16px">upload_file</span> Importar</button></div></div>
-        <table><thead><tr><th>Estudiante</th><th>Actividad</th><th>Fecha</th><th>Estado</th></tr></thead><tbody id="tb-actividades"></tbody></table>
-      </div>
-    </section>
-    <section class="sec" id="sec-informes">
-      <div class="h1">Informes</div><div class="sub">Informes PIE generados</div>
-      <div class="card"><div class="cardhead"><h3><span class="material-symbols-outlined">description</span> Informes <span class="count" id="cnt-informes">0</span></h3>
-        <div class="tools"><div class="search"><span class="material-symbols-outlined">search</span><input data-f="informes" placeholder="Buscar…"></div></div></div>
-        <div id="tb-informes"></div>
-      </div>
-    </section>
-    <section class="sec" id="sec-adecuaciones">
-      <div class="h1">Adecuaciones</div><div class="sub">Adecuaciones de aula (las ve el profesor)</div>
-      <div class="card"><div class="cardhead"><h3><span class="material-symbols-outlined">tune</span> Adecuaciones <span class="count" id="cnt-adecuaciones">0</span></h3>
-        <div class="tools"><div class="search"><span class="material-symbols-outlined">search</span><input data-f="adecuaciones" placeholder="Buscar…"></div>
-        <button class="btn ghost sm" onclick="plantilla('adecuaciones')"><span class="material-symbols-outlined" style="font-size:16px">download</span> Plantilla</button>
-        <button class="btn sm" onclick="importar('adecuaciones')"><span class="material-symbols-outlined" style="font-size:16px">upload_file</span> Importar</button></div></div>
-        <table><thead><tr><th>Estudiante</th><th>Adecuación de aula</th><th>Estado</th></tr></thead><tbody id="tb-adecuaciones"></tbody></table>
-      </div>
-    </section>
-  </main>
-</div>
-<input type="file" id="fileImp" accept=".xlsx,.xls,.csv" style="display:none">
-<div id="toast"><span class="material-symbols-outlined" style="color:var(--success)">check_circle</span><span id="toastMsg"></span></div>
-<div class="overlay" id="planOverlay">
-  <div class="modal" style="max-width:680px">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
-      <h3 style="font-size:16px;font-weight:600;display:flex;align-items:center;gap:8px"><span class="material-symbols-outlined" style="color:var(--primary)">smart_toy</span> Generar con IA</h3>
-      <span class="material-symbols-outlined" style="cursor:pointer;color:var(--muted)" onclick="cerrarPlan()">close</span>
+      <div id="tMisEst"><div class="empty">⏳ Cargando…</div></div>
     </div>
-    <div id="planCaso" class="sub" style="margin-bottom:10px"></div>
-    <div style="display:flex;gap:10px;align-items:center;margin-bottom:6px;flex-wrap:wrap">
-      <label style="font-size:12.5px;color:var(--muted)">¿Qué generar?</label>
-      <select id="planTipo" style="min-width:240px"><option value="actividad">Actividad según diagnóstico</option><option value="informe">Informe PIE</option><option value="adecuacion">Adecuación de aula</option></select>
-      <button class="btn" id="btnGen" onclick="generarPlan()"><span class="material-symbols-outlined" style="font-size:18px">auto_awesome</span> Generar</button>
-    </div>
-    <div id="planDocsNote" class="sub" style="margin-bottom:8px;font-size:12px"></div>
-    <textarea id="planTxt" rows="12" placeholder="El resultado aparecerá aquí, editable…" style="width:100%;font-family:'Inter',sans-serif;font-size:13px;line-height:1.6;color:var(--text);background:var(--surface);border:1px solid var(--border-2);border-radius:9px;padding:12px"></textarea>
-    <div style="display:flex;gap:10px;margin-top:14px;justify-content:flex-end;flex-wrap:wrap">
-      <button class="btn ghost" onclick="exportarWord()"><span class="material-symbols-outlined" style="font-size:18px">description</span> Exportar a Word</button>
-      <button class="btn" onclick="guardarPlan()"><span class="material-symbols-outlined" style="font-size:18px">save</span> Guardar</button>
+
+    <div class="card">
+      <h3><span>➕</span> Registrar sesión PIE</h3>
+      <div class="fld"><label>Estudiante</label><select id="fEst"><option value="">— Elegir de mis casos —</option></select></div>
+      <div class="row3">
+        <div class="fld"><label>Fecha</label><input type="date" id="fFecha"></div>
+        <div class="fld"><label>Tipo</label><select id="fTipo">
+          <option value="individual">Individual</option>
+          <option value="grupal_pie">Grupal PIE</option>
+          <option value="coensenanza">Co-enseñanza</option>
+          <option value="evaluacion_dua">Evaluación DUA</option>
+        </select></div>
+        <div class="fld"><label>Asignatura</label><input id="fAsig" placeholder="Ej: Matemática"></div>
+      </div>
+      <div class="fld"><label>Tema trabajado</label><input id="fTema" placeholder="Ej: Fracciones equivalentes"></div>
+      <div class="fld"><label>Actividades realizadas</label><textarea id="fActividades" rows="2" placeholder="Qué se hizo en la sesión…"></textarea></div>
+      <div class="fld"><label>Logros observados</label><textarea id="fLogros" rows="2" placeholder="Avances del estudiante"></textarea></div>
+      <div class="fld"><label>Observaciones adicionales</label><textarea id="fObs" rows="2"></textarea></div>
+      <div class="row3">
+        <div class="fld"><label>Próxima sesión</label><input type="date" id="fProxima"></div>
+        <label style="margin-top:22px;font-size:.85rem"><input type="checkbox" id="fAsist" checked style="width:auto"> Estudiante asistió</label>
+        <div></div>
+      </div>
+      <button class="btn primary" onclick="onGuardarSesion()" id="btnGuardar">💾 Registrar sesión</button>
     </div>
   </div>
+
+  <div class="card">
+    <h3><span>📅</span> Últimas sesiones</h3>
+    <table>
+      <thead><tr><th>Fecha</th><th>Estudiante</th><th>Tipo</th><th>Asignatura</th><th>Tema</th></tr></thead>
+      <tbody id="tSesiones"><tr><td colspan="5" class="empty">Elegí un estudiante en el registro para ver sus sesiones anteriores</td></tr></tbody>
+    </table>
+  </div>
+
 </div>
+
 <script>
-function ic(n){return '<span class="material-symbols-outlined">'+n+'</span>';}
-function inferTone(s){s=(''+s).toLowerCase();if(/(falta|atrasad|vencid|reevaluar|sin)/.test(s))return 'danger';if(/(pendiente|vence|revisar|transitoria)/.test(s))return 'warning';if(/(vigente|activ|al d[ií]a|completad|realizada|permanente)/.test(s))return 'success';return 'info';}
-function tag(t){return '<span class="tag '+inferTone(t)+'">'+t+'</span>';}
-var REG={
- estudiantes:{headers:['Estudiante','Curso','Diagnóstico','Estado'],statusIdx:3,rows:[
-   ['Juan Pérez','5°A','TEA nivel 1','Vigente'],['Sofía Díaz','6°B','TDAH','Vigente'],['Mateo Soto','4°A','Dislexia','Reevaluar'],['Emma Rojas','3°A','Trastorno del lenguaje','Vigente']]},
- actividades:{headers:['Estudiante','Actividad','Fecha','Estado'],statusIdx:3,rows:[
-   ['Juan Pérez','Secuencias visuales paso a paso','12 jun','Realizada'],['Sofía Díaz','Rutina con pausas activas','15 jun','Pendiente']]},
- informes:{headers:['Documento','Detalle','Estado'],statusIdx:2,rows:[
-   ['Informe PIE — Juan Pérez','jun 2026','Vigente'],['Informe PIE — Mateo Soto','—','Pendiente']]},
- adecuaciones:{headers:['Estudiante','Adecuación de aula','Estado'],statusIdx:2,rows:[
-   ['Juan Pérez','Tiempo extra + apoyo visual','Vigente'],['Sofía Díaz','Instrucciones cortas + pausas','Vigente'],['Mateo Soto','Lectura en voz alta como alternativa','Vigente']]}
-};
-function renderTable(key){var cfg=REG[key],el=document.getElementById('tb-'+key);
- if(key==='informes'){el.innerHTML=cfg.rows.map(function(r){return '<div class="doc" data-txt="'+r.join(' ').toLowerCase()+'"><span class="di">'+ic('description')+'</span><div style="flex:1"><div class="dn">'+r[0]+'</div><div class="dm">'+(r[1]||'')+'</div></div>'+tag(r[2]||'')+'</div>'}).join('');}
- else{el.innerHTML=cfg.rows.map(function(r,j){var clk=(key==='estudiantes')?' style="cursor:pointer" onclick="planIA('+j+')" title="Generar con IA"':'';return '<tr data-txt="'+r.join(' ').toLowerCase()+'"'+clk+'>'+r.map(function(c,i){return '<td>'+(i===cfg.statusIdx?tag(c):c)+'</td>'}).join('')+'</tr>'}).join('');}
- var cnt=document.getElementById('cnt-'+key);if(cnt)cnt.textContent=cfg.rows.length;}
-Object.keys(REG).forEach(renderTable);
-if(window.ccStore)ccStore.hydrate('pieed',REG,renderTable);
-window.CC_REG=REG;window.CC_RENDER=renderTable;window.CC_PREFIX='pieed';
-document.addEventListener('input',function(e){var inp=e.target;if(!inp.dataset||!inp.dataset.f)return;var q=inp.value.toLowerCase(),cont=document.getElementById('tb-'+inp.dataset.f);cont.querySelectorAll('[data-txt]').forEach(function(r){r.style.display=r.dataset.txt.indexOf(q)!==-1?'':'none'});});
-var _impKey=null;function importar(k){_impKey=k;var f=document.getElementById('fileImp');f.value='';f.click();}
-function plantilla(k){var ws=XLSX.utils.aoa_to_sheet([REG[k].headers]);var wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Plantilla');XLSX.writeFile(wb,'plantilla-'+k+'.xlsx');toast('Plantilla descargada.','success');}
-function applyRows(rows){rows=rows.filter(function(r){return r&&r.join('').trim()!==''});if(rows.length<2){toast('Sin filas de datos.','danger');return;}var n=REG[_impKey].headers.length;REG[_impKey].rows=rows.slice(1).map(function(r){var o=[];for(var i=0;i<n;i++)o.push(r[i]!=null?String(r[i]):'');return o;});renderTable(_impKey);if(window.ccStore)ccStore.setTabla('pieed_'+_impKey,REG[_impKey].rows);toast(REG[_impKey].rows.length+' filas importadas.','success');}
-document.getElementById('fileImp').addEventListener('change',function(e){var file=e.target.files&&e.target.files[0];if(!file||!_impKey)return;var rd=new FileReader();rd.onload=function(ev){try{var wb=XLSX.read(new Uint8Array(ev.target.result),{type:'array'});applyRows(XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,defval:''}));}catch(err){toast('No se pudo leer el archivo.','danger');}};rd.readAsArrayBuffer(file);});
-var _tt;function toast(msg,tone){var t=document.getElementById('toast');t.style.borderLeftColor='var(--'+(tone==='danger'?'danger':'success')+')';var i=t.querySelector('.material-symbols-outlined');i.style.color='var(--'+(tone==='danger'?'danger':'success')+')';i.textContent=tone==='danger'?'error':'check_circle';document.getElementById('toastMsg').textContent=msg;t.classList.add('show');clearTimeout(_tt);_tt=setTimeout(function(){t.classList.remove('show')},3000);}
-function docsInst(){var o={};try{o=JSON.parse(localStorage.getItem('cc_docs')||'{}');}catch(e){}var k=Object.keys(o);return {n:k.length,txt:k.map(function(x){return '### '+x+'\n'+o[x]}).join('\n\n')};}
-var _e=null;
-function planIA(j){_e=REG.estudiantes.rows[j];document.getElementById('planCaso').innerHTML='<b>Estudiante:</b> '+_e[0]+' · '+_e[1]+' · diagnóstico: '+_e[2];var d=docsInst();document.getElementById('planDocsNote').innerHTML=d.n?('<span class="material-symbols-outlined" style="font-size:14px;vertical-align:-2px;color:var(--success)">check_circle</span> La IA usará '+d.n+' documento(s) institucional(es) + el Decreto 83.'):'<span class="material-symbols-outlined" style="font-size:14px;vertical-align:-2px;color:var(--warning)">info</span> Sin documentos institucionales; la IA usará el Decreto 83 y buenas prácticas.';document.getElementById('planTxt').value='';document.getElementById('planOverlay').classList.add('show');}
-function cerrarPlan(){document.getElementById('planOverlay').classList.remove('show');}
-document.getElementById('planOverlay').addEventListener('click',function(e){if(e.target===this)cerrarPlan();});
-function buildPrompt(){var d=docsInst(),e=_e,tipo=document.getElementById('planTipo').value;
- var base='Eres educadora diferencial experta en el sistema escolar chileno (PIE, Decreto 83/2015 de adecuaciones, Decreto 170). Trabaja para el estudiante:\n- Nombre: '+e[0]+'\n- Curso: '+e[1]+'\n- Diagnóstico/NEE: '+e[2]+'\n\n'+(d.n?('DOCUMENTOS INSTITUCIONALES (úsalos como base):\n'+d.txt+'\n\n'):'');
- if(tipo==='actividad')return base+'Diseña una ACTIVIDAD pedagógica adaptada al diagnóstico, con objetivo, materiales, paso a paso, y criterios de logro. Lenguaje claro, lista para aplicar en aula. Usa [corchetes] donde falte información.';
- if(tipo==='adecuacion')return base+'Propón las ADECUACIONES DE ACCESO Y CURRICULARES (Decreto 83) para este estudiante: qué ajustar en presentación, respuesta, tiempo, entorno y evaluación. Redacta lo que el profesor de aula debe aplicar (sin exponer el diagnóstico clínico). Usa [corchetes] donde falte información.';
- return base+'Redacta un INFORME PIE formal: 1) Identificación, 2) Diagnóstico y necesidades, 3) Adecuaciones aplicadas (Decreto 83), 4) Avances y logros, 5) Recomendaciones, 6) Próxima evaluación. Tono profesional. Usa [corchetes] donde falte información.';
-}
-function generarPlan(){var b=document.getElementById('btnGen');b.disabled=true;var o=b.innerHTML;b.innerHTML='<span class="material-symbols-outlined" style="font-size:18px">hourglass_top</span> Generando…';fetch('/api/ia-asistente',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({tipo:'raw',datos:{prompt:buildPrompt()}})}).then(function(r){return r.json()}).then(function(d){if(d.error)throw new Error(d.error);document.getElementById('planTxt').value=d.resultado||'(respuesta vacía)';toast('Generado. Revisa y edita.','success');}).catch(function(err){toast('Error de IA: '+err.message,'danger');}).then(function(){b.disabled=false;b.innerHTML=o;});}
-function exportarWord(){var txt=document.getElementById('planTxt').value||'';if(!txt.trim()){toast('Primero genera el contenido.','danger');return;}var html='<h2>'+document.getElementById('planTipo').selectedOptions[0].text+' — '+(_e?_e[0]:'')+'</h2><pre style="font-family:Calibri,Arial;font-size:11pt;white-space:pre-wrap">'+txt.replace(/&/g,'&amp;').replace(/</g,'&lt;')+'</pre>';var blob=new Blob(['<html xmlns:w="urn:schemas-microsoft-com:office:word"><head><meta charset="utf-8"></head><body>'+html+'
-<script>
-// Fase 0: proteger la página según rol del usuario.
 if (window.CCRouter && window.CCRouter.guardPanel) {
-  CCRouter.guardPanel(['pie_edu','pie_enc']);
+  CCRouter.guardPanel(['pie_edu','pie_enc','director','rector','admin_colegio','admin']);
 }
-</script>
-</body></html>'],{type:'application/msword'});var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='pie-documento.doc';a.click();toast('Exportado a Word.','success');}
-function guardarPlan(){var txt=document.getElementById('planTxt').value||'';if(!txt.trim()){toast('Primero genera el contenido.','danger');return;}var tipo=document.getElementById('planTipo').value;var _k=(tipo==='informe')?'informes':(tipo==='adecuacion')?'adecuaciones':'actividades';
- if(tipo==='informe'){REG.informes.rows.unshift(['Informe PIE — '+(_e?_e[0]:''),'jun 2026 · IA','Vigente']);}
- else if(tipo==='adecuacion'){REG.adecuaciones.rows.unshift([_e?_e[0]:'','(IA) '+txt.slice(0,50)+'…','Vigente']);}
- else{REG.actividades.rows.unshift([_e?_e[0]:'','(IA) '+txt.slice(0,50)+'…','20 jun','Pendiente']);}
- renderTable(_k);if(window.ccStore)ccStore.setTabla('pieed_'+_k,REG[_k].rows);show(_k);toast('Guardado.','success');cerrarPlan();}
-var NAV=[['dashboard','Inicio','resumen'],['person','Mis estudiantes','estudiantes'],['extension','Actividades','actividades'],['description','Informes','informes'],['tune','Adecuaciones','adecuaciones']];
-document.getElementById('nav').innerHTML=NAV.map(function(n,i){return '<div class="nav-item'+(i===0?' active':'')+'" data-s="'+n[2]+'">'+ic(n[0])+'<span>'+n[1]+'</span></div>'}).join('');
-function show(s){document.querySelectorAll('.nav-item').forEach(function(x){x.classList.toggle('active',x.dataset.s===s)});document.querySelectorAll('.sec').forEach(function(x){x.classList.toggle('active',x.id==='sec-'+s)});}
-document.querySelectorAll('.nav-item').forEach(function(x){x.addEventListener('click',function(){show(x.dataset.s)})});
-if(window.ccStore){ccStore.getDocs();}
-(function(){var el=document.getElementById('calColegio');
- function render(rows){if(!el)return;if(!rows||!rows.length){el.innerHTML='<div class="sub" style="margin:0">Aún no hay calendario institucional cargado.</div>';return;}el.innerHTML=rows.slice(0,8).map(function(r){return '<div class="row"><span class="material-symbols-outlined ic">event</span><div style="flex:1"><div>'+(r[1]||'')+'</div><div class="sub">'+(r[0]||'')+(r[2]?(' · '+r[2]):'')+'</div></div><span class="sub">'+(r[3]||'')+'</span></div>'}).join('');}
- var local=[];try{local=JSON.parse(localStorage.getItem('cc_calendario')||'[]');}catch(e){}
- render(local);
- if(window.ccStore){ccStore.getCalendario().then(render).catch(function(){});}
-})();
+function esc(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+var _misFichas = [];
+var _estActivo = null;
+
+function iniciar() {
+  var u = ELAuth.user || {};
+  document.getElementById('userName').textContent = u.nombre || u.email || 'Educadora';
+  document.getElementById('fFecha').value = new Date().toISOString().slice(0,10);
+  cargarKPIs();
+  cargarMisEst();
+}
+
+function cargarKPIs() {
+  CCPie.listarFichas({ educadoraUid: ELAuth.user.uid }).then(function(fichas) {
+    _misFichas = fichas;
+    var perm = fichas.filter(function(f){ return f.tipoNEE === 'permanente'; }).length;
+    var trans = fichas.filter(function(f){ return f.tipoNEE === 'transitoria'; }).length;
+
+    // Contar sesiones del mes por todos mis casos
+    var mes = new Date().toISOString().slice(0, 7);
+    var promesas = fichas.map(function(f) { return CCPie.listarSesiones(f.estUid).catch(function(){ return []; }); });
+    Promise.all(promesas).then(function(arrs) {
+      var todo = [].concat.apply([], arrs);
+      var mesSesiones = todo.filter(function(s){ return (s.fecha || '').slice(0,7) === mes && s.educadoraUid === ELAuth.user.uid; }).length;
+      document.getElementById('kpisWrap').innerHTML =
+        '<div class="kpi mis"><div class="l">Mis estudiantes</div><div class="v">' + fichas.length + '</div></div>' +
+        '<div class="kpi perm"><div class="l">NEE Permanentes</div><div class="v">' + perm + '</div></div>' +
+        '<div class="kpi trans"><div class="l">NEE Transitorias</div><div class="v">' + trans + '</div></div>' +
+        '<div class="kpi sesion"><div class="l">Sesiones este mes</div><div class="v">' + mesSesiones + '</div></div>';
+    });
+  });
+}
+
+function cargarMisEst() {
+  var q = (document.getElementById('fltNombre').value || '').toLowerCase().trim();
+  var nee = document.getElementById('fltNEE').value;
+  var items = _misFichas.filter(function(f) {
+    if (nee && f.tipoNEE !== nee) return false;
+    if (q && (f.estudianteNombre || '').toLowerCase().indexOf(q) === -1) return false;
+    return true;
+  });
+  var wrap = document.getElementById('tMisEst');
+  if (!items.length) { wrap.innerHTML = '<div class="empty">Sin estudiantes asignados' + (q ? ' que coincidan' : '') + '</div>'; return; }
+  wrap.innerHTML = '<table><thead><tr><th>Estudiante</th><th>Curso</th><th>Diagnóstico</th></tr></thead><tbody>' +
+    items.map(function(f) {
+      return '<tr onclick="verEst(\'' + esc(f.estUid) + '\')">' +
+        '<td>' + esc(f.estudianteNombre) + '</td>' +
+        '<td>' + esc(f.cursoNombre) + '</td>' +
+        '<td>' + CCPie.badgeDiagnostico(f.diagnostico) + '</td>' +
+        '</tr>';
+    }).join('') + '</tbody></table>';
+
+  // Poblar select de sesion
+  var sel = document.getElementById('fEst');
+  sel.innerHTML = '<option value="">— Elegir de mis casos —</option>' +
+    _misFichas.map(function(f){ return '<option value="' + esc(f.estUid) + '" data-nom="' + esc(f.estudianteNombre) + '">' + esc(f.estudianteNombre) + ' (' + esc(f.cursoNombre) + ')</option>'; }).join('');
+  sel.addEventListener('change', cargarSesionesDelEst);
+}
+
+function verEst(estUid) {
+  window.location.href = 'pie-ficha.html?estUid=' + encodeURIComponent(estUid);
+}
+
+function cargarSesionesDelEst() {
+  var estUid = document.getElementById('fEst').value;
+  if (!estUid) return;
+  CCPie.listarSesiones(estUid).then(function(sesiones) {
+    var tb = document.getElementById('tSesiones');
+    if (!sesiones.length) { tb.innerHTML = '<tr><td colspan="5" class="empty">Sin sesiones registradas todavía</td></tr>'; return; }
+    var f = _misFichas.find(function(x) { return x.estUid === estUid; });
+    tb.innerHTML = sesiones.slice(0, 30).map(function(s) {
+      return '<tr>' +
+        '<td>' + esc(s.fecha) + '</td>' +
+        '<td>' + esc(f ? f.estudianteNombre : '—') + '</td>' +
+        '<td>' + esc(CCPie.TIPO_SESION_LABEL[s.tipo] || s.tipo) + '</td>' +
+        '<td>' + esc(s.asignatura || '—') + '</td>' +
+        '<td>' + esc(s.tema || '—') + '</td>' +
+        '</tr>';
+    }).join('');
+  });
+}
+
+function onGuardarSesion() {
+  var estUid = document.getElementById('fEst').value;
+  if (!estUid) { alert('Elegí un estudiante'); return; }
+  var tema = document.getElementById('fTema').value.trim();
+  var acts = document.getElementById('fActividades').value.trim();
+  if (!tema && !acts) { alert('Indicá al menos el tema o las actividades'); return; }
+  var datos = {
+    liceoSlug: ELAuth.user.liceoSlug || ELAuth.user.liceoPrincipal || '',
+    pieEstUid: estUid,
+    fecha: document.getElementById('fFecha').value,
+    tipo: document.getElementById('fTipo').value,
+    asignatura: document.getElementById('fAsig').value.trim(),
+    tema: tema,
+    actividades: acts,
+    logros: document.getElementById('fLogros').value.trim(),
+    observaciones: document.getElementById('fObs').value.trim(),
+    asistenciaEstudiante: document.getElementById('fAsist').checked,
+    proximaSesion: document.getElementById('fProxima').value
+  };
+  var btn = document.getElementById('btnGuardar');
+  btn.disabled = true;
+  CCPie.registrarSesion(datos).then(function() {
+    alert('✓ Sesión registrada');
+    ['fTema','fActividades','fLogros','fObs','fProxima'].forEach(function(id){ document.getElementById(id).value = ''; });
+    cargarSesionesDelEst();
+    cargarKPIs();
+    btn.disabled = false;
+  }).catch(function(err) { alert('Error: ' + err.message); btn.disabled = false; });
+}
+
+if (window.ELAuth && ELAuth.onUserReady) ELAuth.onUserReady(function(u){ if(u) iniciar(); });
 </script>
 </body>
 </html>

@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ficha PIE — Click&Clase</title>
+<link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg">
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="js/firebase-rest.js"></script>
+<script src="js/firebase-config.js"></script>
+<script src="js/firebase-auth.js"></script>
+<script src="js/firebase-db.js"></script>
+<script src="js/roles-permissions.js"></script>
+<script src="js/roles-router.js"></script>
+<script src="js/cursos.js"></script>
+<script src="js/pie.js"></script>
+<style>
+:root { --bg: #0b0d1e; --panel: #12162f; --border: rgba(148,163,184,.15); --text: #e5e7eb; --muted: #94a3b8; --violet: #7c3aed; --pink: #f472b6; --cyan: #22d3ee; }
+* { box-sizing: border-box; }
+body { margin: 0; font-family: 'Segoe UI', Roboto, Arial, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+.topbar { padding: 16px 28px; border-bottom: 1px solid var(--border); background: linear-gradient(135deg, rgba(244,114,182,.10), rgba(124,58,237,.05)); display: flex; align-items: center; justify-content: space-between; }
+.topbar h1 { margin: 0; font-size: 1.3rem; font-weight: 700; }
+.breadcrumb { color: var(--muted); font-size: .78rem; }
+.container { max-width: 1400px; margin: 22px auto; padding: 0 22px 40px; }
+.card { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 18px 22px; margin-bottom: 18px; }
+.card h3 { margin: 0 0 14px; font-size: .8rem; text-transform: uppercase; letter-spacing: .8px; color: var(--muted); font-weight: 700; display: flex; align-items: center; gap: 8px; }
+.fld { margin-bottom: 12px; }
+.fld label { display: block; font-size: .72rem; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 4px; }
+input, select, textarea { width: 100%; padding: 8px 10px; border-radius: 7px; background: rgba(255,255,255,.04); border: 1px solid rgba(148,163,184,.2); color: var(--text); font-size: .85rem; font-family: inherit; }
+textarea { resize: vertical; min-height: 60px; }
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+.btn { padding: 9px 15px; border-radius: 8px; border: 1px solid var(--border); background: rgba(255,255,255,.04); color: var(--text); cursor: pointer; font-size: .85rem; font-weight: 600; text-decoration: none; display: inline-block; }
+.btn.primary { background: linear-gradient(135deg, #f472b6, #7c3aed); color: white; border-color: transparent; }
+.btn.ia { background: linear-gradient(135deg, #7c3aed, #22d3ee); color: white; border-color: transparent; }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+.btn:hover:not(:disabled) { background: rgba(255,255,255,.08); }
+.chk { display: flex; align-items: center; gap: 8px; font-size: .84rem; padding: 8px 10px; border-radius: 6px; background: rgba(255,255,255,.02); border: 1px solid var(--border); cursor: pointer; }
+.chk input { width: auto; margin: 0; }
+
+.ia-out { background: rgba(255,255,255,.02); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; margin-top: 10px; }
+.ia-out h3 { color: #c4b5fd; font-size: .9rem; letter-spacing: 0; text-transform: none; margin: 14px 0 6px; }
+.ia-out ul { padding-left: 20px; }
+.ia-out li { margin-bottom: 4px; font-size: .88rem; }
+
+.adec-item { padding: 12px 14px; border-radius: 8px; background: rgba(124,58,237,.06); border-left: 3px solid #7c3aed; margin-bottom: 8px; }
+.adec-item .h { font-weight: 700; color: #c4b5fd; font-size: .78rem; text-transform: uppercase; letter-spacing: .5px; }
+.adec-item .d { margin-top: 4px; font-size: .87rem; }
+
+.spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(124,58,237,.3); border-top-color: #7c3aed; border-radius: 50%; animation: sp 1s linear infinite; vertical-align: middle; margin-right: 6px; }
+@keyframes sp { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div><div class="breadcrumb">Ficha PIE</div><h1>♿ Ficha del Estudiante PIE</h1></div>
+  <div><a href="panel-pie.html" class="btn">← Panel PIE</a></div>
+</div>
+
+<div class="container">
+
+  <!-- Datos generales del estudiante -->
+  <div class="card">
+    <h3><span>👤</span> Identificación</h3>
+    <div class="row3">
+      <div class="fld"><label>Curso</label><select id="fCurso" onchange="onCambioCurso()"><option value="">— Elegir —</option></select></div>
+      <div class="fld"><label>Estudiante</label><select id="fEst"><option value="">— Elegir curso primero —</option></select></div>
+      <div class="fld"><label>Estado PIE</label><select id="fEstado">
+        <option value="activo">Activo</option>
+        <option value="egresado">Egresado</option>
+        <option value="suspendido">Suspendido</option>
+      </select></div>
+    </div>
+    <div class="row3">
+      <div class="fld"><label>Diagnóstico principal</label><select id="fDiag"></select></div>
+      <div class="fld"><label>Decreto marco</label><select id="fDec">
+        <option value="170_transitoria">Decreto 170 — NEE Transitoria</option>
+        <option value="170_permanente">Decreto 170 — NEE Permanente</option>
+        <option value="83">Decreto 83 — Adecuaciones curriculares</option>
+        <option value="ambos_170_83">Decreto 170 + 83 combinados</option>
+      </select></div>
+      <div class="fld"><label>Fecha ingreso al PIE</label><input type="date" id="fIngreso"></div>
+    </div>
+    <div class="row2">
+      <div class="fld"><label>Educadora diferencial asignada</label><select id="fEdu"><option value="">— Sin asignar —</option></select></div>
+      <label class="chk" style="margin-top:22px"><input type="checkbox" id="fConf"> Ficha confidencial (solo equipo PIE)</label>
+    </div>
+    <div class="fld"><label>Resumen del caso</label><textarea id="fResumen" rows="3" placeholder="Historial breve, red familiar, situación actual…"></textarea></div>
+  </div>
+
+  <!-- Generador IA de adecuaciones -->
+  <div class="card">
+    <h3><span>🤖</span> Sugerir adecuaciones con IA</h3>
+    <p style="color:var(--muted);font-size:.85rem;margin-top:-6px">Genera propuestas de adecuaciones curriculares según diagnóstico, asignatura y objetivo. Podés editarlas antes de guardar.</p>
+    <div class="row3">
+      <div class="fld"><label>Asignatura</label><input id="iaAsig" placeholder="Ej: Matemática"></div>
+      <div class="fld"><label>Curso (etiqueta)</label><input id="iaCurso" placeholder="Ej: 3° Medio"></div>
+      <div class="fld"><label>Tema específico (opcional)</label><input id="iaTema" placeholder="Ej: Ecuaciones cuadráticas"></div>
+    </div>
+    <div class="fld"><label>Objetivo de aprendizaje</label><input id="iaOA" placeholder="Ej: Resolver problemas usando ecuaciones cuadráticas"></div>
+    <button class="btn ia" onclick="onGenerarIA()" id="btnIA">✨ Generar sugerencias con IA</button>
+    <div id="iaEstado" style="margin-top:10px;font-size:.85rem;color:var(--muted)"></div>
+    <div id="iaOut" class="ia-out" style="display:none"></div>
+  </div>
+
+  <!-- Adecuaciones activas -->
+  <div class="card">
+    <h3><span>📝</span> Adecuaciones activas</h3>
+    <div id="adecList"><div style="color:var(--muted);text-align:center;padding:16px">Sin adecuaciones cargadas todavía. Podés generarlas con IA arriba o agregar manualmente.</div></div>
+    <details style="margin-top:14px">
+      <summary style="cursor:pointer;color:var(--muted);font-size:.85rem">+ Agregar adecuación manualmente</summary>
+      <div style="padding:12px;background:rgba(255,255,255,.02);border-radius:8px;margin-top:8px">
+        <div class="row2">
+          <div class="fld"><label>Tipo</label><select id="mAdecTipo"></select></div>
+          <div class="fld"><label>Aplica a asignatura</label><input id="mAdecAsig" placeholder="Ej: Todas / Matemática"></div>
+        </div>
+        <div class="fld"><label>Descripción</label><textarea id="mAdecDesc" rows="2" placeholder="Descripción concreta de la adecuación"></textarea></div>
+        <button class="btn" onclick="onAgregarAdec()">Agregar</button>
+      </div>
+    </details>
+  </div>
+
+  <!-- Botón guardar ficha -->
+  <div style="text-align:right">
+    <button class="btn primary" onclick="onGuardar()" id="btnGuardar" style="padding:12px 22px;font-size:.95rem">💾 Guardar ficha PIE</button>
+  </div>
+
+</div>
+
+<script>
+if (window.CCRouter && window.CCRouter.guardPanel) {
+  CCRouter.guardPanel(['pie_enc','pie_edu','director','rector','admin_colegio','admin']);
+}
+function esc(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+var _cursos = [];
+var _cursoActivo = null;
+var _adecuaciones = [];
+var _fichaExistente = null;
+
+function iniciar() {
+  document.getElementById('fIngreso').value = new Date().toISOString().slice(0,10);
+  // Poblar selects
+  var diag = Object.keys(CCPie.DIAGNOSTICO_LABEL).map(function(k){ return '<option value="' + k + '">' + CCPie.DIAGNOSTICO_LABEL[k] + '</option>'; });
+  document.getElementById('fDiag').innerHTML = diag.join('');
+  var tipos = Object.keys(CCPie.TIPO_ADEC_LABEL).map(function(k){ return '<option value="' + k + '">' + CCPie.TIPO_ADEC_LABEL[k] + '</option>'; });
+  document.getElementById('mAdecTipo').innerHTML = tipos.join('');
+
+  // Cursos
+  var u = ELAuth.user;
+  CCCursos.listarCursos({ liceoSlug: u.liceoSlug || u.liceoPrincipal }).then(function(cs){
+    _cursos = cs || [];
+    var sel = document.getElementById('fCurso');
+    sel.innerHTML = '<option value="">— Elegir —</option>' +
+      _cursos.map(function(c){ return '<option value="' + esc(c.cursoId) + '">' + esc(c.nombreCompleto) + '</option>'; }).join('');
+  });
+
+  // Educadoras
+  CCPie.listarEducadoras().then(function(edus) {
+    var sel = document.getElementById('fEdu');
+    sel.innerHTML = '<option value="">— Sin asignar —</option>' +
+      edus.map(function(e){ return '<option value="' + esc(e.uid) + '" data-nombre="' + esc(e.nombre) + '">' + esc(e.nombre) + '</option>'; }).join('');
+  });
+
+  // Cargar por URL param
+  var q = new URLSearchParams(window.location.search);
+  var estUid = q.get('estUid');
+  if (estUid) cargarFichaExistente(estUid);
+}
+
+function cargarFichaExistente(estUid) {
+  CCPie.obtenerFichaPorId(estUid).then(function(f) {
+    if (!f) return;
+    _fichaExistente = f;
+    setTimeout(function() {
+      document.getElementById('fCurso').value = f.cursoId;
+      onCambioCurso();
+      setTimeout(function() {
+        document.getElementById('fEst').value = f.estudianteOrdinal;
+      }, 400);
+    }, 400);
+    document.getElementById('fEstado').value = f.estadoPIE || 'activo';
+    document.getElementById('fDiag').value = f.diagnostico;
+    document.getElementById('fDec').value = f.decreto || '170_transitoria';
+    document.getElementById('fIngreso').value = f.fechaIngresoPIE || '';
+    document.getElementById('fEdu').value = f.educadoraUid || '';
+    document.getElementById('fConf').checked = f.confidencial === true;
+    document.getElementById('fResumen').value = f.resumenCaso || '';
+    _adecuaciones = Array.isArray(f.adecuaciones) ? f.adecuaciones.slice() : [];
+    renderAdecuaciones();
+  });
+}
+
+function onCambioCurso() {
+  var cursoId = document.getElementById('fCurso').value;
+  _cursoActivo = _cursos.find(function(c){ return c.cursoId === cursoId; });
+  var selE = document.getElementById('fEst');
+  if (!_cursoActivo) { selE.innerHTML = '<option value="">— Elegir curso primero —</option>'; return; }
+  selE.innerHTML = '<option value="">— Elegir —</option>' +
+    (_cursoActivo.estudiantes || []).map(function(e){
+      var nom = ((e.apellidoP||'') + ' ' + (e.apellidoM||'') + ', ' + (e.nombre||'')).trim();
+      return '<option value="' + e.ordinal + '" data-nom="' + esc(nom) + '">' + esc(nom) + '</option>';
+    }).join('');
+}
+
+function onGenerarIA() {
+  var diag = document.getElementById('fDiag').value;
+  var dec  = document.getElementById('fDec').value;
+  if (!diag) { alert('Elegí un diagnóstico primero'); return; }
+  var opts = {
+    diagnostico: diag,
+    decreto:     dec,
+    curso:       document.getElementById('iaCurso').value,
+    asignatura:  document.getElementById('iaAsig').value,
+    objetivo:    document.getElementById('iaOA').value,
+    temaEspecifico: document.getElementById('iaTema').value
+  };
+  var btn = document.getElementById('btnIA');
+  btn.disabled = true;
+  document.getElementById('iaEstado').innerHTML = '<span class="spinner"></span> Generando propuestas con IA…';
+  document.getElementById('iaOut').style.display = 'none';
+
+  CCPie.generarAdecuacionesIA(opts).then(function(res) {
+    document.getElementById('iaOut').innerHTML =
+      res.html +
+      '<div style="margin-top:14px;text-align:right;border-top:1px solid var(--border);padding-top:10px">' +
+      '<button class="btn" onclick="onExtraerAdec()">📋 Convertir en adecuaciones activas</button>' +
+      '</div>';
+    document.getElementById('iaOut').style.display = 'block';
+    document.getElementById('iaEstado').textContent = '';
+    btn.disabled = false;
+  }).catch(function(err) {
+    document.getElementById('iaEstado').innerHTML = '<span style="color:#fca5a5">Error: ' + esc(err.message) + '</span>';
+    btn.disabled = false;
+  });
+}
+
+function onExtraerAdec() {
+  // Parsear el HTML generado para extraer bullets por sección
+  var wrap = document.createElement('div');
+  wrap.innerHTML = document.getElementById('iaOut').innerHTML;
+  var tipoActual = 'metodologia';
+  var mapaH = {
+    'acceso':                'acceso',
+    'objetivos':             'objetivos_aprendizaje',
+    'metodolog':             'metodologia',
+    'dua':                   'metodologia',
+    'evaluac':               'evaluacion',
+    'temporal':              'temporalizacion'
+  };
+  var asig = document.getElementById('iaAsig').value || 'Todas';
+  var nuevos = 0;
+  wrap.querySelectorAll('h3, li').forEach(function(el) {
+    if (el.tagName === 'H3') {
+      var texto = el.textContent.toLowerCase();
+      Object.keys(mapaH).forEach(function(k) { if (texto.indexOf(k) !== -1) tipoActual = mapaH[k]; });
+    } else if (el.tagName === 'LI') {
+      _adecuaciones.push({
+        id:                 'adec-' + Date.now() + '-' + Math.random().toString(36).slice(2,6),
+        tipo:               tipoActual,
+        aplicaAsignaturas:  asig,
+        descripcion:        el.textContent.trim(),
+        activa:             true,
+        creadoEn:           new Date().toISOString(),
+        origenIA:           true
+      });
+      nuevos++;
+    }
+  });
+  renderAdecuaciones();
+  alert('✓ ' + nuevos + ' adecuaciones agregadas al listado. Revisá y guardá la ficha.');
+}
+
+function onAgregarAdec() {
+  var tipo = document.getElementById('mAdecTipo').value;
+  var asig = document.getElementById('mAdecAsig').value.trim();
+  var desc = document.getElementById('mAdecDesc').value.trim();
+  if (!desc) { alert('Descripción obligatoria'); return; }
+  _adecuaciones.push({
+    id: 'adec-' + Date.now(),
+    tipo: tipo,
+    aplicaAsignaturas: asig,
+    descripcion: desc,
+    activa: true,
+    creadoEn: new Date().toISOString()
+  });
+  document.getElementById('mAdecDesc').value = '';
+  document.getElementById('mAdecAsig').value = '';
+  renderAdecuaciones();
+}
+
+function renderAdecuaciones() {
+  var wrap = document.getElementById('adecList');
+  if (!_adecuaciones.length) {
+    wrap.innerHTML = '<div style="color:var(--muted);text-align:center;padding:16px">Sin adecuaciones cargadas todavía.</div>';
+    return;
+  }
+  wrap.innerHTML = _adecuaciones.map(function(a, i) {
+    var lbl = CCPie.TIPO_ADEC_LABEL[a.tipo] || a.tipo;
+    var origen = a.origenIA ? ' <span style="font-size:.68rem;color:#c4b5fd;background:rgba(124,58,237,.15);padding:1px 6px;border-radius:4px">IA</span>' : '';
+    var asig = a.aplicaAsignaturas ? ' · ' + esc(a.aplicaAsignaturas) : '';
+    return '<div class="adec-item">' +
+      '<div class="h">' + esc(lbl) + origen + asig +
+      ' <button onclick="quitarAdec(' + i + ')" style="float:right;background:none;border:none;color:#fca5a5;cursor:pointer;font-size:.9rem">✕</button></div>' +
+      '<div class="d">' + esc(a.descripcion) + '</div>' +
+      '</div>';
+  }).join('');
+}
+
+function quitarAdec(idx) {
+  _adecuaciones.splice(idx, 1);
+  renderAdecuaciones();
+}
+
+function onGuardar() {
+  var cursoId = document.getElementById('fCurso').value;
+  var ord = document.getElementById('fEst').value;
+  if (!cursoId || !ord) { alert('Elegí curso y estudiante'); return; }
+  var estEl = document.getElementById('fEst');
+  var estOpt = estEl.options[estEl.selectedIndex];
+  var nom = estOpt ? (estOpt.dataset.nom || estOpt.text) : '';
+
+  var eduEl = document.getElementById('fEdu');
+  var eduOpt = eduEl.options[eduEl.selectedIndex];
+  var eduNom = eduOpt ? (eduOpt.dataset.nombre || '') : '';
+
+  var datos = {
+    liceoSlug:          ELAuth.user.liceoSlug || ELAuth.user.liceoPrincipal || '',
+    cursoId:            cursoId,
+    cursoNombre:        _cursoActivo ? _cursoActivo.nombreCompleto : '',
+    estudianteOrdinal:  parseInt(ord, 10),
+    estudianteNombre:   nom,
+    diagnostico:        document.getElementById('fDiag').value,
+    decreto:            document.getElementById('fDec').value,
+    fechaIngresoPIE:    document.getElementById('fIngreso').value,
+    estadoPIE:          document.getElementById('fEstado').value,
+    educadoraUid:       document.getElementById('fEdu').value,
+    educadoraNombre:    eduNom,
+    confidencial:       document.getElementById('fConf').checked,
+    resumenCaso:        document.getElementById('fResumen').value.trim(),
+    adecuaciones:       _adecuaciones
+  };
+
+  var btn = document.getElementById('btnGuardar');
+  btn.disabled = true;
+  CCPie.guardarFichaEstudiante(datos).then(function() {
+    alert('✓ Ficha PIE guardada');
+    btn.disabled = false;
+  }).catch(function(err) {
+    alert('Error: ' + err.message);
+    btn.disabled = false;
+  });
+}
+
+if (window.ELAuth && ELAuth.onUserReady) ELAuth.onUserReady(function(u){ if(u) iniciar(); });
+</script>
+</body>
+</html>
