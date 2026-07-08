@@ -211,6 +211,10 @@ tr:hover td{background:rgba(99,102,241,.05)}
       <span>🏫</span> Liceos / Colegios
       <span id="sbCntLiceos" style="margin-left:auto;background:rgba(245,158,11,.2);color:var(--gold);font-size:.68rem;padding:1px 7px;border-radius:10px;font-weight:700"></span>
     </div>
+    <div class="nav-item" onclick="window.location.href='panel-superadmin.html'" style="background:linear-gradient(90deg,rgba(139,92,246,.15),transparent);border-left:3px solid #8b5cf6;cursor:pointer">
+      <span>🚀</span> SaaS · Colegios
+      <span style="margin-left:auto;background:#8b5cf6;color:white;font-size:.6rem;padding:1px 6px;border-radius:6px;font-weight:700">NUEVO</span>
+    </div>
     <div class="nav-item" data-sec="codigos" onclick="showSec(this,'codigos')">🔑 Códigos de Acceso</div>
     <div class="nav-item" data-sec="comunicados" onclick="showSec(this,'comunicados')">📣 Comunicados</div>
 
@@ -364,6 +368,30 @@ tr:hover td{background:rgba(99,102,241,.05)}
     <!-- LICEOS / COLEGIOS -->
     <section id="sec-liceos" class="tab-section" style="display:none">
       <div class="page-header"><h1>🏫 Liceos / Colegios</h1><p>Catálogo institucional. Cada liceo se asigna a uno o más profesores y su logo aparece en el encabezado de los documentos generados.</p></div>
+
+      <!-- ═══ WIZARD SAAS: contratar colegio nuevo ═══ -->
+      <div class="card" style="background:linear-gradient(135deg,rgba(139,92,246,.14),rgba(245,158,11,.06));border:2px solid rgba(139,92,246,.4);margin-bottom:14px">
+        <div style="display:flex;gap:18px;align-items:center;flex-wrap:wrap">
+          <div style="font-size:2.6rem;flex-shrink:0">🚀</div>
+          <div style="flex:1;min-width:280px">
+            <div style="font-weight:800;font-size:1.15rem;margin-bottom:6px;color:#c4b5fd">Contratar un colegio nuevo (Wizard SaaS)</div>
+            <div style="font-size:.9rem;color:var(--muted);line-height:1.55;margin-bottom:14px">
+              Wizard de 4 pasos que crea el colegio, le asigna un plan comercial (<b>Basic $800k</b> · <b>Pro $1.5M</b> · <b>Enterprise $2.5M</b> al año), genera la cuenta del director con contraseña temporal y te la muestra lista para copiar y enviar por WhatsApp o mail.
+            </div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap">
+              <a href="panel-superadmin.html?wizard=1" class="btn btn-primary" style="text-decoration:none;display:inline-flex;align-items:center;gap:6px;padding:10px 18px">
+                ➕ Nuevo colegio (Wizard)
+              </a>
+              <a href="panel-superadmin.html" class="btn btn-outline" style="text-decoration:none;display:inline-flex;align-items:center;gap:6px;padding:10px 18px">
+                📋 Ver todos los colegios contratados
+              </a>
+              <a href="calculadora-costos-ia.html" class="btn btn-outline" style="text-decoration:none;display:inline-flex;align-items:center;gap:6px;padding:10px 18px" target="_blank">
+                💰 Calculadora de costos IA
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
 
       <!-- Banner informativo -->
       <div class="card" style="background:rgba(99,102,241,.06);border-color:rgba(99,102,241,.25)">

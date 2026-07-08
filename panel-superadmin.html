@@ -392,6 +392,15 @@ function iniciar() {
   cargarKpis();
   cargarLista();
   precargarPlanes();
+
+  // Auto-abrir wizard si viene con ?wizard=1 (desde admin.html)
+  var params = new URLSearchParams(window.location.search);
+  if (params.get('wizard') === '1') {
+    // Esperamos un tick para que los planes se precarguen
+    setTimeout(function () { abrirWizard(); }, 600);
+    // Limpiamos el query param para que el reload no reabra el wizard
+    history.replaceState({}, '', window.location.pathname);
+  }
 }
 
 function precargarPlanes() {
