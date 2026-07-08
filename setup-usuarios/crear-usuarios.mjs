@@ -1,11 +1,11 @@
 /**
- * crear-usuarios.mjs — Click&Clase (clickyclase-2)
+ * crear-usuarios.mjs — Click&Clase (electrolearn-prod)
  * Crea los usuarios de prueba (1 por rol) en Firebase Authentication,
  * les asigna su rol y deja su documento en Firestore (colección usuarios).
  *
  * Requisitos:
  *   1) Tener el archivo serviceAccountKey.json en esta carpeta (ver LEEME.md).
- *   2) Tener Firestore creado en el proyecto clickyclase-2.
+ *   2) Tener Firestore creado en el proyecto electrolearn-prod.
  *   3) npm install   (instala firebase-admin)
  *
  * Ejecutar:
@@ -91,7 +91,7 @@ async function upsertUsuario(u) {
 }
 
 async function main() {
-  console.log('\nCreando usuarios de prueba en clickyclase-2…\n');
+  console.log('\nCreando usuarios de prueba en electrolearn-prod…\n');
   for (const u of USUARIOS) {
     await upsertUsuario(u);
   }

@@ -1,4 +1,4 @@
-# Click&Clase — Checklist de pruebas (clickyclase-2)
+# Click&Clase — Checklist de pruebas (electrolearn-prod)
 
 Prueba todo de una pasada. Marca `[x]` lo que funcione, anota lo que falle.
 Requisitos previos: reglas de Firestore publicadas (las del panel de admin) y

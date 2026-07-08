@@ -1,17 +1,17 @@
-# Crear los usuarios de prueba — clickyclase-2
+# Crear los usuarios de prueba — electrolearn-prod
 
 Crea 11 usuarios (uno por rol) en Firebase Authentication, con su rol asignado
 y su documento en Firestore. Cada uno entra a su propio panel.
 
 ## Paso 1 — Crear la base de datos Firestore (si aún no existe)
 
-En la consola de Firebase de **clickyclase-2** → menú **Firestore Database** →
+En la consola de Firebase de **electrolearn-prod** → menú **Firestore Database** →
 **Crear base de datos** → modo producción → región `southamerica-west1` (Santiago)
 o la que prefieras.
 
 ## Paso 2 — Descargar la llave de servicio (service account)
 
-En la consola de Firebase de **clickyclase-2**:
+En la consola de Firebase de **electrolearn-prod**:
 
 1. Engranaje ⚙️ (arriba a la izquierda) → **Configuración del proyecto**.
 2. Pestaña **Cuentas de servicio**.

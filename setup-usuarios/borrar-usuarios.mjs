@@ -1,5 +1,5 @@
 /**
- * borrar-usuarios.mjs — Click&Clase (clickyclase-2)
+ * borrar-usuarios.mjs — Click&Clase (electrolearn-prod)
  * Borra TODOS los usuarios (Authentication + documento en Firestore "usuarios")
  * EXCEPTO las cuentas de administrador, para partir de cero.
  *

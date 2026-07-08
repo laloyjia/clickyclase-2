@@ -102,7 +102,7 @@ Puntos: 58–62.
 ## Cómo avanzamos (método)
 
 1. Tomamos **un sprint a la vez**, y dentro de él **un punto a la vez**.
-2. Yo implemento → tú **pruebas en clickyclase-2** → confirmamos → marcamos `[x]`.
+2. Yo implemento → tú **pruebas en electrolearn-prod** → confirmamos → marcamos `[x]`.
 3. Al cerrar cada sprint, corremos el **checklist de pruebas** completo.
 4. Solo entonces pasamos al siguiente sprint.
 
