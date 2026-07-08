@@ -12,7 +12,7 @@
 //  Configuración del proyecto Firebase
 // ─────────────────────────────────────────────────────────────
 var FIREBASE_CONFIG = {
-  apiKey:            "AIzaSyBnF5NyEVijpds9EnECSXiiYL31tvJ4Y5M",
+  apiKey:            "AIzaSyBnF5NyEVijpds9EnEC5XiiYl31tvJ4Y5M",
   authDomain:        "electrolearn-prod.firebaseapp.com",
   projectId:         "electrolearn-prod",
   storageBucket:     "electrolearn-prod.firebasestorage.app",
