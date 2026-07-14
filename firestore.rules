@@ -137,31 +137,43 @@ service cloud.firestore {
     }
 
     // ── usuarios/{uid} ─────────────────────────────────────────
-    // Lectura: el dueño o un admin. Profes pueden leer otros profes
-    // (necesario para el dashboard que lista profes en admin).
+    // Lectura: el dueño, admin plataforma, profesor (para dashboards),
+    //          o admin_colegio del mismo liceo (para gestionar su personal).
     match /usuarios/{uid} {
-      allow read: if isOwner(uid) || isAdmin() || isProfesor();
+      allow read: if isOwner(uid) || isAdmin() || isProfesor()
+        || (_hasRole('admin_colegio') && mismoLiceo());
       // Create:
-      //   - admin crea profesores
-      //   - self-signup: el propio user crea su perfil inicial
+      //   - admin plataforma crea cualquier usuario
+      //   - self-signup: el propio user crea su perfil inicial (rol limitado)
+      //   - admin_colegio crea usuarios de SU liceo (nunca admin plataforma)
       allow create: if isAdmin()
         || (isOwner(uid)
-            && request.resource.data.role in ['estudiante','profesor','admin']);
+            && request.resource.data.role in ['estudiante','profesor','admin'])
+        || (_hasRole('admin_colegio')
+            && request.resource.data.liceoSlug == _userLiceo()
+            && request.resource.data.role != 'admin');
       // Update:
-      //   - admin puede todo
+      //   - admin plataforma puede todo
       //   - el dueño puede actualizar pero NO cambiar role, permisos, activo,
       //     formatoPAES, taxonomiaMarzano, liceos, tipoProfesor, tiposProfesor
-      //     ni xp/badges (esos los gestiona el sistema)
-      allow update: if isAdmin() || (
-        isOwner(uid) &&
-        roleUnchanged() &&
-        !request.resource.data.diff(resource.data).affectedKeys().hasAny([
-          'role','permisos','activo','formatoPAES','taxonomiaMarzano',
-          'tipoProfesor','tiposProfesor','liceos','liceoPrincipal',
-          'especialidad','asignaturas','niveles','modulos','cursos'
-        ])
-      );
-      allow delete: if isAdmin();
+      //   - admin_colegio puede editar personal de su liceo pero NO cambiar
+      //     liceoSlug (no puede llevárselo) ni ascender a admin plataforma
+      allow update: if isAdmin()
+        || (
+          isOwner(uid) &&
+          roleUnchanged() &&
+          !request.resource.data.diff(resource.data).affectedKeys().hasAny([
+            'role','permisos','activo','formatoPAES','taxonomiaMarzano',
+            'tipoProfesor','tiposProfesor','liceos','liceoPrincipal',
+            'especialidad','asignaturas','niveles','modulos','cursos'
+          ])
+        )
+        || (
+          _hasRole('admin_colegio') && mismoLiceo() &&
+          request.resource.data.liceoSlug == resource.data.liceoSlug &&
+          request.resource.data.role != 'admin'
+        );
+      allow delete: if isAdmin() || (_hasRole('admin_colegio') && mismoLiceo());
     }
 
     // ── materiales (biblioteca compartida + flujo aprobación) ──

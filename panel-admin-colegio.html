@@ -3,148 +3,666 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Panel Administrador de Colegio — Click&Clase</title>
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<title>Administración del Colegio · Click&Clase</title>
+<link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg">
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
 <script src="js/firebase-rest.js"></script>
 <script src="js/firebase-config.js"></script>
 <script src="js/firebase-auth.js"></script>
+<script src="js/firebase-db.js"></script>
 <script src="js/roles-permissions.js"></script>
 <script src="js/roles-router.js"></script>
-<script src="js/aprobaciones.js"></script>
-<script src="js/cursos.js"></script>
-<script src="js/notas.js"></script>
-<script src="js/dashboard.js"></script>
-<script src="js/apoyo.js"></script>
-<script src="js/convivencia.js"></script>
-<script src="js/pie.js"></script>
-<script src="js/cc-store.js"></script>
-<script src="js/curricula-loader.js"></script>
-<link rel="stylesheet" href="css/panel.css">
-<script src="js/cc-ui.js"></script>
+<script src="js/liceos.js"></script>
+<script src="js/personal.js"></script>
+<style>
+:root {
+  --bg: #0a0d1c; --bg-2: #0e1226; --panel: #151b35; --panel-2: #1b2242;
+  --border: rgba(148,163,184,.14); --border-strong: rgba(148,163,184,.22);
+  --text: #f1f5f9; --text-2: #cbd5e1; --muted: #7b8aa5;
+  --violet: #8b5cf6; --gold: #fbbf24; --green: #34d399;
+  --danger: #f87171; --cyan: #22d3ee;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Inter','Segoe UI',Roboto,Arial,sans-serif;
+  background: var(--bg); color: var(--text); min-height: 100vh;
+  font-size: 15px; line-height: 1.55;
+}
+.wrap { max-width: 1500px; margin: 0 auto; padding: 24px; }
+
+/* ─── Header institucional ─── */
+.header-liceo {
+  background: linear-gradient(135deg, var(--panel), var(--panel-2));
+  border: 1px solid var(--border-strong);
+  border-radius: 20px;
+  padding: 28px 32px;
+  margin-bottom: 24px;
+  display: flex; align-items: center; gap: 22px;
+  flex-wrap: wrap;
+}
+.header-liceo .logo-wrap {
+  width: 68px; height: 68px; border-radius: 16px;
+  background: linear-gradient(135deg, var(--violet), var(--gold));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 2rem; font-weight: 800; color: #fff;
+  flex-shrink: 0;
+}
+.header-liceo .logo-wrap img { width: 100%; height: 100%; border-radius: 16px; object-fit: cover; }
+.header-liceo .info { flex: 1; min-width: 240px; }
+.header-liceo .sub {
+  font-size: .72rem; color: var(--muted); letter-spacing: 1.2px;
+  text-transform: uppercase; font-weight: 600; margin-bottom: 3px;
+}
+.header-liceo h1 {
+  font-size: 1.6rem; font-weight: 800; letter-spacing: -.4px; margin-bottom: 6px;
+}
+.header-liceo .plan-badge {
+  display: inline-block; padding: 4px 12px; border-radius: 999px;
+  font-size: .74rem; font-weight: 700; letter-spacing: .5px;
+  background: rgba(139,92,246,.15); color: #c4b5fd;
+  border: 1px solid rgba(139,92,246,.3);
+}
+.header-liceo .plan-badge.basic { background: rgba(52,211,153,.15); color: var(--green); border-color: rgba(52,211,153,.3); }
+.header-liceo .plan-badge.enterprise { background: rgba(251,191,36,.15); color: var(--gold); border-color: rgba(251,191,36,.3); }
+.header-liceo .user-info { text-align: right; font-size: .85rem; color: var(--text-2); }
+.header-liceo .user-info .name { font-weight: 700; color: var(--text); }
+.header-liceo .user-info .salir { color: #fca5a5; text-decoration: none; margin-left: 12px; font-size: .8rem; }
+
+/* ─── KPIs ─── */
+.kpis {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px;
+  margin-bottom: 24px;
+}
+.kpi { background: var(--panel); border: 1px solid var(--border); border-radius: 14px; padding: 18px 22px; }
+.kpi .l { font-size: .7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
+.kpi .v { font-size: 1.9rem; font-weight: 800; margin-top: 6px; letter-spacing: -.5px; font-variant-numeric: tabular-nums; }
+.kpi.usu .v { color: var(--violet); }
+.kpi.cur .v { color: var(--cyan); }
+.kpi.act .v { color: var(--green); }
+.kpi.ven .v { color: var(--gold); }
+.kpi .s { font-size: .74rem; color: var(--muted); margin-top: 4px; }
+
+/* ─── Cards y tabla ─── */
+.card { background: var(--panel); border: 1px solid var(--border); border-radius: 16px; padding: 24px 28px; margin-bottom: 20px; }
+.card h2 { font-size: .82rem; color: var(--muted); font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
+.card .sub { color: var(--muted); font-size: .85rem; margin-bottom: 18px; }
+
+.filtros-row { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; flex-wrap: wrap; }
+.filtros-row input, .filtros-row select { padding: 9px 13px; border-radius: 9px; background: var(--bg-2); border: 1px solid var(--border-strong); color: var(--text); font-size: .88rem; font-family: inherit; }
+.filtros-row input { min-width: 240px; }
+.btn { padding: 10px 18px; border-radius: 9px; border: 1px solid var(--border-strong); background: var(--bg-2); color: var(--text); cursor: pointer; font-family: inherit; font-size: .88rem; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; text-decoration: none; }
+.btn:hover { background: var(--panel-2); }
+.btn.primary { background: linear-gradient(135deg, var(--violet), #6d28d9); border-color: transparent; color: white; box-shadow: 0 4px 20px rgba(139,92,246,.3); }
+.btn.primary:hover { transform: translateY(-1px); box-shadow: 0 8px 28px rgba(139,92,246,.45); }
+.btn.small { padding: 5px 10px; font-size: .78rem; }
+.btn.danger { color: #fca5a5; border-color: rgba(248,113,113,.3); }
+.btn.danger:hover { background: rgba(248,113,113,.1); }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+
+.asientos {
+  padding: 10px 14px; border-radius: 8px; background: rgba(52,211,153,.06);
+  border: 1px solid rgba(52,211,153,.2); font-size: .85rem; color: var(--green); font-weight: 600;
+  margin-left: auto;
+}
+.asientos.warn { background: rgba(251,191,36,.06); border-color: rgba(251,191,36,.25); color: var(--gold); }
+.asientos.full { background: rgba(248,113,113,.06); border-color: rgba(248,113,113,.25); color: var(--danger); }
+
+table { width: 100%; border-collapse: collapse; font-size: .9rem; }
+th, td { padding: 12px 14px; text-align: left; border-bottom: 1px solid var(--border); vertical-align: middle; }
+th { font-size: .7rem; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); font-weight: 700; background: rgba(255,255,255,.02); }
+tr:hover td { background: rgba(255,255,255,.02); }
+.tag {
+  display: inline-block; padding: 2px 8px; border-radius: 999px;
+  font-size: .7rem; font-weight: 600; margin: 2px 3px 2px 0;
+  background: rgba(139,92,246,.1); color: #c4b5fd; border: 1px solid rgba(139,92,246,.2);
+}
+.tag.inactivo { background: rgba(248,113,113,.1); color: var(--danger); border-color: rgba(248,113,113,.2); }
+.miembro-cell { display: flex; align-items: center; gap: 10px; }
+.miembro-cell .avatar { width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg, var(--violet), #6d28d9); display: flex; align-items: center; justify-content: center; font-size: .85rem; font-weight: 700; color: #fff; flex-shrink: 0; }
+.miembro-cell .info b { display: block; font-size: .92rem; }
+.miembro-cell .info .em { font-size: .76rem; color: var(--muted); }
+.acciones-cell { display: flex; gap: 4px; }
+
+.empty { padding: 60px 30px; text-align: center; color: var(--muted); }
+.empty .icon { font-size: 3rem; margin-bottom: 12px; }
+
+/* ─── Modal ─── */
+.modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,.75); z-index: 100; display: none; align-items: flex-start; justify-content: center; padding: 30px 20px; overflow-y: auto; }
+.modal-bg.show { display: flex; }
+.modal { background: var(--panel); border: 1px solid var(--border-strong); border-radius: 18px; max-width: 640px; width: 100%; padding: 32px; box-shadow: 0 20px 60px rgba(0,0,0,.6); }
+.modal .modal-title { font-size: 1.3rem; font-weight: 800; margin-bottom: 4px; }
+.modal .modal-sub { color: var(--muted); font-size: .88rem; margin-bottom: 24px; }
+
+.fld { margin-bottom: 14px; }
+.fld label { display: block; font-size: .74rem; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 6px; }
+.fld input, .fld select, .fld textarea { width: 100%; padding: 10px 13px; border-radius: 9px; background: var(--bg-2); border: 1px solid var(--border-strong); color: var(--text); font-family: inherit; font-size: .92rem; }
+.fld input:focus, .fld select:focus { outline: none; border-color: var(--violet); }
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+/* Roles multiselect */
+.roles-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 6px;
+  margin-top: 8px;
+}
+.role-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 12px;
+  background: var(--bg-2);
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: .85rem;
+  transition: all .15s;
+}
+.role-item:hover { border-color: var(--muted); }
+.role-item.selected { background: rgba(139,92,246,.12); border-color: var(--violet); }
+.role-item input { width: auto; margin: 0; accent-color: var(--violet); }
+.role-item .ico { font-size: 1rem; }
+.role-grupo { font-size: .68rem; color: var(--muted); text-transform: uppercase; letter-spacing: .8px; margin: 12px 0 6px; font-weight: 700; }
+.role-grupo:first-child { margin-top: 0; }
+
+.err-box { background: rgba(248,113,113,.08); border: 1px solid rgba(248,113,113,.25); border-radius: 8px; padding: 10px 14px; color: var(--danger); font-size: .84rem; margin-bottom: 14px; display: none; }
+.err-box.show { display: block; }
+
+.modal-nav { display: flex; justify-content: flex-end; gap: 10px; margin-top: 22px; }
+
+/* Credenciales éxito */
+.exito { text-align: center; padding: 12px 4px; }
+.exito .ico { font-size: 3rem; margin-bottom: 10px; }
+.exito h3 { color: var(--green); margin-bottom: 6px; }
+.exito p { color: var(--muted); font-size: .88rem; margin-bottom: 20px; }
+.credenciales-box { background: rgba(52,211,153,.05); border: 1px solid rgba(52,211,153,.25); border-radius: 12px; padding: 18px 20px; text-align: left; margin-bottom: 16px; }
+.credenciales-box .row { display: flex; align-items: center; gap: 12px; padding: 8px 0; border-bottom: 1px dashed rgba(148,163,184,.15); }
+.credenciales-box .row:last-child { border-bottom: none; }
+.credenciales-box .k { color: var(--muted); font-size: .76rem; text-transform: uppercase; letter-spacing: .5px; min-width: 90px; }
+.credenciales-box .v { flex: 1; font-family: 'Courier New', monospace; font-size: .92rem; word-break: break-all; }
+.aviso { background: rgba(251,191,36,.06); border: 1px solid rgba(251,191,36,.25); border-radius: 8px; padding: 10px 14px; font-size: .82rem; color: var(--gold); }
+
+.spin { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(255,255,255,.25); border-top-color: #fff; border-radius: 50%; animation: rot .6s linear infinite; }
+@keyframes rot { to { transform: rotate(360deg); } }
+</style>
 </head>
 <body>
-<div class="topbar">
-  <div><a href="acceso-demo.html" style="color:var(--muted);font-size:13px;margin-right:14px"><span class="material-symbols-outlined" style="font-size:16px;vertical-align:-3px">arrow_back</span> Roles</a><span class="brand">Click&Clase</span><span class="demo-tag">Admin de Colegio · demo</span></div>
-  <div class="usr"><span class="av">AC</span><span style="font-size:13.5px">Administrador de Colegio</span><a class="salir" href="login.html">Salir</a></div>
+
+<div class="wrap">
+
+  <!-- ═══ Header institucional ═══ -->
+  <div class="header-liceo">
+    <div class="logo-wrap" id="logoWrap">🏫</div>
+    <div class="info">
+      <div class="sub">Administración del colegio</div>
+      <h1 id="nombreLiceo">Cargando…</h1>
+      <span class="plan-badge" id="planBadge">—</span>
+    </div>
+    <div class="user-info">
+      <div><span class="name" id="userName">—</span></div>
+      <div style="color:var(--muted);font-size:.76rem" id="userRol">—</div>
+      <a href="login.html" class="salir">Salir</a>
+    </div>
+  </div>
+
+  <!-- ═══ KPIs ═══ -->
+  <div class="kpis" id="kpisWrap">
+    <div class="kpi usu"><div class="l">Personal cargado</div><div class="v" id="kpiPersonal">—</div><div class="s" id="kpiPersonalSub">—</div></div>
+    <div class="kpi cur"><div class="l">Cursos activos</div><div class="v" id="kpiCursos">—</div></div>
+    <div class="kpi act"><div class="l">Miembros activos</div><div class="v" id="kpiActivos">—</div></div>
+    <div class="kpi ven"><div class="l">Plan vence en</div><div class="v" id="kpiVence">—</div></div>
+  </div>
+
+  <!-- ═══ Accesos rápidos ═══ -->
+  <div style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap">
+    <a href="admin-cursos.html" class="btn">🎓 Cursos y estudiantes</a>
+    <a href="panel-director.html" class="btn">📊 Dashboard Director</a>
+    <a href="panel-utp.html" class="btn">📋 Panel UTP</a>
+    <button class="btn" onclick="editarLiceo()">⚙ Configuración del colegio</button>
+  </div>
+
+  <!-- ═══ Personal ═══ -->
+  <div class="card">
+    <h2><span>👥</span> Personal del colegio</h2>
+    <div class="sub">Agregá docentes, coordinadores UTP, encargados y equipos PIE / Apoyo / Convivencia. Cada uno recibirá su cuenta con contraseña temporal.</div>
+
+    <div class="filtros-row">
+      <input type="text" id="fltBuscar" placeholder="🔎 Buscar por nombre o email…" oninput="renderPersonal()">
+      <select id="fltRol" onchange="renderPersonal()">
+        <option value="">Todos los roles</option>
+      </select>
+      <select id="fltEstado" onchange="renderPersonal()">
+        <option value="">Todos los estados</option>
+        <option value="activo">Activos</option>
+        <option value="inactivo">Desactivados</option>
+      </select>
+      <div class="asientos" id="asientosBadge">— asientos</div>
+      <button class="btn primary" onclick="abrirModalCrear()">➕ Agregar personal</button>
+    </div>
+
+    <div id="tablaWrap">
+      <div class="empty"><div class="icon">⏳</div>Cargando personal…</div>
+    </div>
+  </div>
+
 </div>
-<div class="shell">
-  <aside class="sidebar">
-    <div class="side-role"><span class="ico"><span class="material-symbols-outlined">admin_panel_settings</span></span><div><div class="nm">Admin de Colegio</div><div class="sc">Gestión del establecimiento</div></div></div>
-    <nav id="nav"></nav>
-  </aside>
-  <main class="main">
-    <section class="sec active" id="sec-resumen">
-      <div class="h1">Resumen del colegio</div><div class="sub">Gestión administrativa del establecimiento</div>
-      <div class="kpis">
-        <div class="kpi"><div class="l">Personal</div><div class="v" id="kPers">—</div></div>
-        <div class="kpi"><div class="l">Asignaturas</div><div class="v" id="kAsig">—</div></div>
-        <div class="kpi"><div class="l">Niveles</div><div class="v" id="kNiv">—</div></div>
-        <div class="kpi"><div class="l">Profesores asignados</div><div class="v" id="kAsign">—</div></div>
+
+<!-- ═══════════════════════════════════
+     MODAL: AGREGAR / EDITAR MIEMBRO
+═══════════════════════════════════ -->
+<div class="modal-bg" id="modalMiembro">
+  <div class="modal">
+    <div class="modal-title" id="modalTitulo">Agregar miembro</div>
+    <div class="modal-sub" id="modalSub">Completá los datos y elegí uno o más roles.</div>
+
+    <div class="err-box" id="errBox"></div>
+
+    <div id="formPaso">
+      <div class="row2">
+        <div class="fld"><label>Nombre completo *</label><input type="text" id="fNombre" placeholder="Ej: María González Rojas"></div>
+        <div class="fld"><label>Cargo (opcional)</label><input type="text" id="fCargo" placeholder="Ej: Profesor de Matemática"></div>
       </div>
-      <div class="card"><div class="sec-title"><span class="material-symbols-outlined" style="vertical-align:-4px;color:var(--primary)">calendar_month</span> Calendario del colegio</div><div id="calColegio"></div></div>
-    </section>
-    <section class="sec" id="sec-personal">
-      <div class="h1">Personal</div><div class="sub">Personal del colegio (compartido con dirección)</div>
-      <div class="card"><div class="cardhead"><h3><span class="material-symbols-outlined">badge</span> Personal <span class="count" id="cnt-personal">0</span></h3>
-        <div class="tools"><div class="search"><span class="material-symbols-outlined">search</span><input data-f="personal" placeholder="Buscar…"></div></div></div>
-        <table><thead><tr><th>Nombre</th><th>Cargo</th><th>Área</th><th>Contrato</th><th>Horas</th><th>Estado</th></tr></thead><tbody id="tb-personal"></tbody></table>
+      <div class="row2">
+        <div class="fld"><label>Email *</label><input type="email" id="fEmail" placeholder="usuario@colegio.cl"></div>
+        <div class="fld"><label>Teléfono</label><input type="text" id="fTelefono" placeholder="+56 9 8765 4321"></div>
       </div>
-    </section>
-    <section class="sec" id="sec-accesos">
-      <div class="h1">Accesos y cuentas</div><div class="sub">Cuentas del personal del colegio y su estado de acceso</div>
-      <div class="card"><div class="cardhead"><h3><span class="material-symbols-outlined">key</span> Cuentas <span class="count" id="cnt-accesos">0</span></h3>
-        <div class="tools"><div class="search"><span class="material-symbols-outlined">search</span><input data-f="accesos" placeholder="Buscar…"></div></div></div>
-        <table><thead><tr><th>Cargo</th><th>Nombre</th><th>Correo</th><th>Acceso</th></tr></thead><tbody id="tb-accesos"></tbody></table>
+      <div class="fld"><label>RUT (opcional)</label><input type="text" id="fRut" placeholder="12.345.678-9"></div>
+
+      <div class="fld">
+        <label>Roles asignados *</label>
+        <div id="rolesWrap"></div>
       </div>
-      <div class="legal"><b>ℹ Gestión de accesos:</b> cambia el estado a <i>Suspendido</i> para bloquear temporalmente a un usuario. Para restablecer contraseñas o crear nuevas cuentas se usa el panel de Administración general. Toda cuenta pertenece solo a este colegio (aislamiento multi-tenant).</div>
-    </section>
-    <section class="sec" id="sec-cursos">
-      <div class="h1">Cursos / Matrícula</div><div class="sub">Cursos del establecimiento y su matrícula</div>
-      <div class="card"><div class="cardhead"><h3><span class="material-symbols-outlined">meeting_room</span> Cursos <span class="count" id="cnt-cursos">0</span></h3>
-        <div class="tools"><div class="search"><span class="material-symbols-outlined">search</span><input data-f="cursos" placeholder="Buscar…"></div></div></div>
-        <table><thead><tr><th>Curso</th><th>Profesor jefe</th><th>Matrícula</th><th>Sala</th><th>Estado</th></tr></thead><tbody id="tb-cursos"></tbody></table>
+    </div>
+
+    <!-- Pantalla éxito -->
+    <div id="exitoPaso" style="display:none">
+      <div class="exito">
+        <div class="ico">✅</div>
+        <h3>Miembro agregado</h3>
+        <p>Compartí estas credenciales con la persona para su primer ingreso.</p>
       </div>
-    </section>
-    <section class="sec" id="sec-academico">
-      <div class="h1">Académico</div><div class="sub">Niveles y asignaturas que imparte el colegio</div>
-      <div class="grid2">
-        <div class="card"><h3><span class="material-symbols-outlined">stairs</span> Niveles</h3><div class="sub">Uno por línea.</div><textarea id="acNiveles" rows="9" style="width:100%;font-family:'Inter',sans-serif;font-size:13.5px;color:var(--text);background:var(--surface);border:1px solid var(--border-2);border-radius:9px;padding:10px"></textarea></div>
-        <div class="card"><h3><span class="material-symbols-outlined">menu_book</span> Asignaturas</h3><div class="sub">Una por línea.</div><textarea id="acAsig" rows="9" style="width:100%;font-family:'Inter',sans-serif;font-size:13.5px;color:var(--text);background:var(--surface);border:1px solid var(--border-2);border-radius:9px;padding:10px"></textarea></div>
+      <div class="credenciales-box">
+        <div class="row">
+          <div class="k">Login URL</div>
+          <div class="v" id="okLoginUrl">https://clickyclase.cl/login.html</div>
+          <button class="btn small" onclick="copiar('okLoginUrl',this)">Copiar</button>
+        </div>
+        <div class="row">
+          <div class="k">Email</div>
+          <div class="v" id="okEmail">—</div>
+          <button class="btn small" onclick="copiar('okEmail',this)">Copiar</button>
+        </div>
+        <div class="row">
+          <div class="k">Password</div>
+          <div class="v" id="okPass">—</div>
+          <button class="btn small" onclick="copiar('okPass',this)">Copiar</button>
+        </div>
+        <div class="row">
+          <div class="k">Todo</div>
+          <div class="v" style="font-size:.78rem" id="okTodo">—</div>
+          <button class="btn small" onclick="copiar('okTodo',this)">Copiar</button>
+        </div>
       </div>
-      <div style="margin-top:6px;display:flex;gap:10px;flex-wrap:wrap">
-        <button class="btn ghost" onclick="cargarCurriculumOficial()"><span class="material-symbols-outlined" style="font-size:18px">auto_stories</span> Cargar currículum oficial (Mineduc)</button>
-        <button class="btn" onclick="guardarAcademico()"><span class="material-symbols-outlined" style="font-size:18px">save</span> Guardar académico</button>
-      </div>
-      <div class="legal" style="margin-top:12px">El currículum oficial trae las asignaturas del Plan Común (Básica 1°–8° y Media 1°–4°) con sus niveles y Objetivos de Aprendizaje. Al guardarlo, cada profesor recibe los OA de las asignaturas que UTP/Dirección le asignen.</div>
-    </section>
-    <section class="sec" id="sec-asignar">
-      <div class="h1">Asignar a profesores</div><div class="sub">Asigna a cada profesor sus asignaturas y niveles.</div>
-      <div class="card"><div class="cardhead"><h3><span class="material-symbols-outlined">assignment_ind</span> Asignaciones <span class="count" id="cnt-asignar">0</span></h3>
-        <div class="tools"><button class="btn ghost sm" onclick="addAsig()"><span class="material-symbols-outlined" style="font-size:16px">add</span> Agregar profesor</button></div></div>
-        <table><thead><tr><th>Correo del profesor</th><th>Asignaturas (coma)</th><th>Niveles (coma)</th><th>Cursos (coma)</th><th></th></tr></thead><tbody id="tb-asignar"></tbody></table>
-      </div>
-      <div class="legal" id="asigHint">Asignaturas disponibles del colegio…</div>
-    </section>
-  </main>
+      <div class="aviso">🔒 Esta contraseña NO se volverá a mostrar. Al primer ingreso el usuario deberá cambiarla.</div>
+    </div>
+
+    <div class="modal-nav">
+      <button class="btn" onclick="cerrarModal()" id="btnCancelar">Cancelar</button>
+      <button class="btn primary" onclick="guardarMiembro()" id="btnGuardar">💾 Crear miembro</button>
+      <button class="btn primary" onclick="cerrarModal()" id="btnCerrarExito" style="display:none">✓ Cerrar</button>
+    </div>
+  </div>
 </div>
-<input type="file" id="fileImp" accept=".xlsx,.xls,.csv" style="display:none">
-<div id="toast"><span class="material-symbols-outlined" style="color:var(--success)">check_circle</span><span id="toastMsg"></span></div>
-<script>
-function ic(n){return '<span class="material-symbols-outlined">'+n+'</span>';}
-function inferTone(s){s=(''+s).toLowerCase();if(/(falta|atrasad|vencid)/.test(s))return 'danger';if(/(pendiente|vence|revisar)/.test(s))return 'warning';if(/(vigente|activ|al d[ií]a)/.test(s))return 'success';return 'info';}
-function tag(t){return '<span class="tag '+inferTone(t)+'">'+t+'</span>';}
-var ACAD_DEF={niveles:['Pre-Kínder','Kínder','1° básico','2° básico','3° básico','4° básico','5° básico','6° básico','7° básico','8° básico','I medio','II medio','III medio','IV medio'],asignaturas:['Lenguaje y Comunicación','Matemática','Ciencias Naturales','Historia, Geografía y Cs. Sociales','Inglés','Educación Física y Salud','Artes Visuales','Música','Tecnología','Orientación']};
-var REG={
- personal:{headers:['Nombre','Cargo','Área','Contrato','Horas','Estado'],statusIdx:5,rows:[['R. Soto','Jefe UTP','Académica','Indefinido','30 / 14','Activo'],['J. Fuentes','Profesor','Académica','Indefinido','38 / 6','Activo'],['M. Lagos','Enc. Convivencia','Ambiente','Indefinido','38 / 14','Activo']]},
- accesos:{headers:['Cargo','Nombre','Correo','Acceso'],statusIdx:3,rows:[
-   ['Director','C. Director','director@colegio.cl','Activo'],
-   ['Jefe UTP','R. Soto','utp@colegio.cl','Activo'],
-   ['Enc. Convivencia','M. Lagos','convivencia@colegio.cl','Activo'],
-   ['Coord. PIE','C. Rojas','pie@colegio.cl','Activo'],
-   ['Profesor','J. Fuentes','j.fuentes@colegio.cl','Activo']]},
- cursos:{headers:['Curso','Profesor jefe','Matrícula','Sala','Estado'],statusIdx:4,rows:[
-   ['5°A','J. Fuentes','32','Sala 12','Activo'],
-   ['6°A','P. Núñez','31','Sala 14','Activo'],
-   ['I medio A','R. Soto','34','Sala 21','Activo']]}
-};
-function renderTable(key){var cfg=REG[key],el=document.getElementById('tb-'+key);if(!el)return;el.innerHTML=cfg.rows.map(function(r){return '<tr data-txt="'+r.join(' ').toLowerCase()+'">'+r.map(function(c,i){return '<td>'+(i===cfg.statusIdx?tag(c):c)+'</td>'}).join('')+'</tr>'}).join('');var cnt=document.getElementById('cnt-'+key);if(cnt)cnt.textContent=cfg.rows.length;var p=document.getElementById('kPers');if(p)p.textContent=REG.personal.rows.length;}
-Object.keys(REG).forEach(renderTable);
-if(window.ccStore)ccStore.hydrate('dir',REG,renderTable);
-window.CC_REG=REG;window.CC_RENDER=renderTable;window.CC_PREFIX='dir';
-document.addEventListener('input',function(e){var inp=e.target;if(!inp.dataset||!inp.dataset.f)return;var q=inp.value.toLowerCase(),cont=document.getElementById('tb-'+inp.dataset.f);cont.querySelectorAll('[data-txt]').forEach(function(r){r.style.display=r.dataset.txt.indexOf(q)!==-1?'':'none'});});
-var _tt;function toast(msg,tone){var t=document.getElementById('toast');t.style.borderLeftColor='var(--'+(tone==='danger'?'danger':'success')+')';var i=t.querySelector('.material-symbols-outlined');i.style.color='var(--'+(tone==='danger'?'danger':'success')+')';i.textContent=tone==='danger'?'error':'check_circle';document.getElementById('toastMsg').textContent=msg;t.classList.add('show');clearTimeout(_tt);_tt=setTimeout(function(){t.classList.remove('show')},3000);}
-// Académico
-function cargarAcademico(){if(!window.ccStore)return;ccStore.getConfig('academico').then(function(o){o=o||ACAD_DEF;document.getElementById('acNiveles').value=(o.niveles||ACAD_DEF.niveles).join('\n');document.getElementById('acAsig').value=(o.asignaturas||ACAD_DEF.asignaturas).join('\n');document.getElementById('kAsig').textContent=(o.asignaturas||ACAD_DEF.asignaturas).length;document.getElementById('kNiv').textContent=(o.niveles||ACAD_DEF.niveles).length;var h=document.getElementById('asigHint');if(h)h.innerHTML='<b>Asignaturas del colegio:</b> '+(o.asignaturas||ACAD_DEF.asignaturas).join(' · ');});_buildCurMeta();}
-window._CUR_BYNAME=null;
-function _buildCurMeta(){if(typeof getCurriculumNacional==='undefined')return Promise.resolve(null);return getCurriculumNacional().then(function(d){var m={};(d.asignaturas||[]).forEach(function(a){m[a.nombre.toLowerCase()]={sigla:a.sigla,niveles:a.niveles};});window._CUR_BYNAME=m;return d;}).catch(function(){return null;});}
-function cargarCurriculumOficial(){if(typeof getCurriculumNacional==='undefined'){toast('Currículum no disponible.','danger');return;}toast('Cargando currículum oficial…','success');_buildCurMeta().then(function(d){if(!d||!d.asignaturas||!d.asignaturas.length){toast('No se pudo leer el currículum.','danger');return;}document.getElementById('acNiveles').value=(d.niveles||[]).join('\n');document.getElementById('acAsig').value=d.asignaturas.map(function(a){return a.nombre}).join('\n');document.getElementById('kAsig').textContent=d.asignaturas.length;document.getElementById('kNiv').textContent=(d.niveles||[]).length;var h=document.getElementById('asigHint');if(h)h.innerHTML='<b>Asignaturas del colegio:</b> '+d.asignaturas.map(function(a){return a.nombre}).join(' · ');toast(d.asignaturas.length+' asignaturas del currículo cargadas. Revisa y guarda.','success');});}
-function guardarAcademico(){var niv=document.getElementById('acNiveles').value.split('\n').map(function(s){return s.trim()}).filter(Boolean);var asig=document.getElementById('acAsig').value.split('\n').map(function(s){return s.trim()}).filter(Boolean);var meta=asig.map(function(name){var hit=window._CUR_BYNAME&&window._CUR_BYNAME[name.toLowerCase()];return {nombre:name,sigla:hit?hit.sigla:'',niveles:hit?hit.niveles:[]};});if(window.ccStore)ccStore.setConfig('academico',{niveles:niv,asignaturas:asig,asignaturasMeta:meta});document.getElementById('kAsig').textContent=asig.length;document.getElementById('kNiv').textContent=niv.length;var conOA=meta.filter(function(m){return m.sigla;}).length;toast('Académico guardado: '+asig.length+' asignaturas ('+conOA+' con OA), '+niv.length+' niveles.','success');}
-// Asignaciones
-var ASIG={rows:[]};
-function persistAsig(){if(window.ccStore)ccStore.setConfig('asignaciones',{rows:ASIG.rows});document.getElementById('kAsign').textContent=ASIG.rows.length;}
-function renderAsig(){var el=document.getElementById('tb-asignar');if(!el)return;el.innerHTML=ASIG.rows.map(function(r,i){return '<tr>'+[0,1,2,3].map(function(c){return '<td contenteditable="true" data-ag="'+i+'" data-agc="'+c+'" style="outline:none">'+(r[c]||'')+'</td>'}).join('')+'<td style="width:34px;text-align:center"><button onclick="delAsig('+i+')" title="Eliminar" style="background:none;border:none;color:var(--muted);cursor:pointer"><span class="material-symbols-outlined" style="font-size:17px">close</span></button></td></tr>'}).join('');var c=document.getElementById('cnt-asignar');if(c)c.textContent=ASIG.rows.length;document.getElementById('kAsign').textContent=ASIG.rows.length;}
-function addAsig(){ASIG.rows.push(['','','','']);renderAsig();persistAsig();}
-function delAsig(i){ASIG.rows.splice(i,1);renderAsig();persistAsig();}
-function cargarAsig(){if(!window.ccStore)return;ccStore.getConfig('asignaciones').then(function(o){ASIG.rows=((o&&o.rows)||[]).map(function(r){r=r.slice();while(r.length<4)r.push('');return r;});renderAsig();});}
-document.addEventListener('focusout',function(e){var td=e.target;if(!td||!td.dataset||td.dataset.ag===undefined)return;var i=+td.dataset.ag,c=+td.dataset.agc;if(ASIG.rows[i]){ASIG.rows[i][c]=td.textContent.trim();persistAsig();}});
-var NAV=[['dashboard','Resumen','resumen'],['badge','Personal','personal'],['key','Accesos','accesos'],['meeting_room','Cursos','cursos'],['menu_book','Académico','academico'],['assignment_ind','Asignar profesores','asignar']];
-document.getElementById('nav').innerHTML=NAV.map(function(n,i){return '<div class="nav-item'+(i===0?' active':'')+'" data-s="'+n[2]+'">'+ic(n[0])+'<span>'+n[1]+'</span></div>'}).join('');
-function show(s){document.querySelectorAll('.nav-item').forEach(function(x){x.classList.toggle('active',x.dataset.s===s)});document.querySelectorAll('.sec').forEach(function(x){x.classList.toggle('active',x.id==='sec-'+s)});}
-document.querySelectorAll('.nav-item').forEach(function(x){x.addEventListener('click',function(){show(x.dataset.s)})});
-cargarAcademico();cargarAsig();
-(function(){var el=document.getElementById('calColegio');function render(rows){if(!el)return;if(!rows||!rows.length){el.innerHTML='<div class="sub" style="margin:0">Aún no hay calendario institucional cargado.</div>';return;}el.innerHTML=rows.slice(0,8).map(function(r){return '<div class="row"><span class="material-symbols-outlined ic">event</span><div style="flex:1"><div>'+(r[1]||'')+'</div><div class="sub">'+(r[0]||'')+(r[2]?(' · '+r[2]):'')+'</div></div><span class="sub">'+(r[3]||'')+'</span></div>'}).join('');}var local=[];try{local=JSON.parse(localStorage.getItem('cc_calendario')||'[]');}catch(e){}render(local);if(window.ccStore)ccStore.getCalendario().then(render).catch(function(){});})();
-</script>
 
 <script>
-// Fase 0: proteger la página según rol del usuario.
-if (window.CCRouter && window.CCRouter.guardPanel) {
-  CCRouter.guardPanel(['admin_colegio']);
+if (window.CCRouter && CCRouter.guardPanel) {
+  CCRouter.guardPanel(['admin_colegio','director','rector','admin']);
+}
+
+var _liceo = null;
+var _miembros = [];
+var _editandoUid = null;
+
+function esc(s) { return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function iniciar() {
+  var u = ELAuth.user || {};
+  document.getElementById('userName').textContent = u.nombre || u.email || '—';
+  var roles = u.roles ? Object.keys(u.roles).join(', ') : (u.role || '—');
+  document.getElementById('userRol').textContent = roles;
+
+  var slug = u.liceoSlug;
+  if (!slug) {
+    document.getElementById('nombreLiceo').textContent = 'Sin liceo asignado';
+    document.getElementById('tablaWrap').innerHTML = '<div class="empty"><div class="icon">⚠</div>Tu usuario no tiene liceoSlug asignado. Contactá a soporte.</div>';
+    return;
+  }
+
+  CCLiceos.obtener(slug).then(function (liceo) {
+    if (!liceo) {
+      document.getElementById('nombreLiceo').textContent = 'Colegio no encontrado';
+      return;
+    }
+    _liceo = liceo;
+    renderHeader(liceo);
+    cargarKpis();
+    cargarPersonal();
+    renderFiltroRoles();
+    renderRolesForm();
+  }).catch(function (err) {
+    document.getElementById('nombreLiceo').textContent = 'Error cargando colegio';
+    console.error(err);
+  });
+}
+
+function renderHeader(liceo) {
+  document.getElementById('nombreLiceo').textContent = liceo.nombre || 'Colegio';
+  var inicial = (liceo.nombre || '?').charAt(0).toUpperCase();
+  var logoWrap = document.getElementById('logoWrap');
+  if (liceo.logoUrl) {
+    logoWrap.innerHTML = '<img src="' + esc(liceo.logoUrl) + '" alt="Logo" onerror="this.parentNode.textContent=\'' + esc(inicial) + '\'">';
+  } else {
+    logoWrap.textContent = inicial;
+  }
+  var badge = document.getElementById('planBadge');
+  badge.textContent = 'Plan ' + (liceo.planId || 'basic').toUpperCase();
+  badge.className = 'plan-badge ' + (liceo.planId || 'basic');
+}
+
+function cargarKpis() {
+  CCPersonal.contarMiembros(_liceo.slug).then(function (c) {
+    var limite = _liceo.limiteUsuarios || 100;
+    document.getElementById('kpiPersonal').textContent = c.total + '/' + limite;
+    document.getElementById('kpiPersonalSub').textContent = c.activos + ' activos, ' + c.inactivos + ' desactivados';
+    document.getElementById('kpiActivos').textContent = c.activos;
+
+    var badge = document.getElementById('asientosBadge');
+    var pct = (c.total / limite) * 100;
+    badge.textContent = c.total + '/' + limite + ' asientos';
+    if (pct >= 100) badge.className = 'asientos full';
+    else if (pct >= 80) badge.className = 'asientos warn';
+    else badge.className = 'asientos';
+  });
+
+  var vence = _liceo.planFechaFin ? Math.max(0, Math.round((new Date(_liceo.planFechaFin) - new Date()) / 86400000)) : null;
+  var venceEl = document.getElementById('kpiVence');
+  if (vence === null) { venceEl.textContent = '—'; }
+  else {
+    venceEl.textContent = vence + ' días';
+    if (vence < 30) venceEl.style.color = 'var(--danger)';
+    else if (vence < 90) venceEl.style.color = 'var(--gold)';
+  }
+
+  EL_DB.collection('cursos').where('liceoSlug', '==', _liceo.slug).get().then(function (snap) {
+    document.getElementById('kpiCursos').textContent = snap.size || 0;
+  }).catch(function () {
+    document.getElementById('kpiCursos').textContent = '0';
+  });
+}
+
+function cargarPersonal() {
+  CCPersonal.listarMiembros(_liceo.slug).then(function (arr) {
+    _miembros = arr;
+    renderPersonal();
+  }).catch(function (err) {
+    document.getElementById('tablaWrap').innerHTML = '<div class="empty"><div class="icon">⚠</div>Error: ' + esc(err.message) + '</div>';
+  });
+}
+
+function renderFiltroRoles() {
+  var sel = document.getElementById('fltRol');
+  CCPersonal.ROLES_ASIGNABLES.forEach(function (r) {
+    var opt = document.createElement('option');
+    opt.value = r.id; opt.textContent = r.ico + ' ' + r.label;
+    sel.appendChild(opt);
+  });
+}
+
+function renderPersonal() {
+  var buscar = (document.getElementById('fltBuscar').value || '').toLowerCase().trim();
+  var rol = document.getElementById('fltRol').value;
+  var estado = document.getElementById('fltEstado').value;
+
+  var lista = _miembros.filter(function (m) {
+    if (estado === 'activo' && m.activo === false) return false;
+    if (estado === 'inactivo' && m.activo !== false) return false;
+    if (rol) {
+      var roles = m.roles ? Object.keys(m.roles) : (m.role ? [m.role] : []);
+      if (roles.indexOf(rol) === -1) return false;
+    }
+    if (buscar) {
+      var txt = ((m.nombre || '') + ' ' + (m.email || '')).toLowerCase();
+      if (txt.indexOf(buscar) === -1) return false;
+    }
+    return true;
+  });
+
+  if (lista.length === 0) {
+    var msg = _miembros.length === 0
+      ? '<div class="empty"><div class="icon">👥</div><b>Sin personal aún</b><br><br>Agregá tu primer docente, coordinador o profesional con el botón <b>"➕ Agregar personal"</b> arriba.</div>'
+      : '<div class="empty"><div class="icon">🔍</div>Nadie coincide con los filtros.</div>';
+    document.getElementById('tablaWrap').innerHTML = msg;
+    return;
+  }
+
+  var html = '<table><thead><tr>'
+    + '<th>Miembro</th><th>Cargo</th><th>Roles</th><th>Estado</th><th>Acciones</th>'
+    + '</tr></thead><tbody>';
+
+  lista.forEach(function (m) {
+    var inicial = (m.nombre || m.email || '?').charAt(0).toUpperCase();
+    var roles = m.roles ? Object.keys(m.roles) : (m.role ? [m.role] : []);
+    var rolesTags = roles.map(function (rid) {
+      var r = CCPersonal.ROLES_ASIGNABLES.find(function (x) { return x.id === rid; });
+      var lbl = r ? (r.ico + ' ' + r.label) : rid;
+      return '<span class="tag">' + esc(lbl) + '</span>';
+    }).join('');
+    var estadoTxt = m.activo === false
+      ? '<span class="tag inactivo">Desactivado</span>'
+      : '<span style="color:var(--green);font-weight:600">● Activo</span>';
+    var acciones = m.activo === false
+      ? '<button class="btn small" onclick="reactivar(\'' + esc(m.uid) + '\')" title="Reactivar">▶ Reactivar</button>'
+      : '<button class="btn small" onclick="editar(\'' + esc(m.uid) + '\')" title="Editar">✎</button>'
+      + '<button class="btn small danger" onclick="desactivar(\'' + esc(m.uid) + '\')" title="Desactivar">⏸</button>';
+
+    html += '<tr>'
+      + '<td><div class="miembro-cell"><div class="avatar">' + esc(inicial) + '</div><div class="info"><b>' + esc(m.nombre || '—') + '</b><div class="em">' + esc(m.email || '') + '</div></div></div></td>'
+      + '<td>' + esc(m.cargo || '—') + '</td>'
+      + '<td>' + rolesTags + '</td>'
+      + '<td>' + estadoTxt + '</td>'
+      + '<td><div class="acciones-cell">' + acciones + '</div></td>'
+      + '</tr>';
+  });
+  html += '</tbody></table>';
+  document.getElementById('tablaWrap').innerHTML = html;
+}
+
+function renderRolesForm() {
+  var wrap = document.getElementById('rolesWrap');
+  var grupos = { directivo: 'Directivos', aula: 'Aula', pie: 'PIE', apoyo: 'Apoyo psicosocial', convivencia: 'Convivencia' };
+  var html = '';
+  Object.keys(grupos).forEach(function (g) {
+    var roles = CCPersonal.ROLES_ASIGNABLES.filter(function (r) { return r.grupo === g; });
+    if (!roles.length) return;
+    html += '<div class="role-grupo">' + grupos[g] + '</div>';
+    html += '<div class="roles-grid">';
+    roles.forEach(function (r) {
+      html += '<label class="role-item" data-rol="' + r.id + '">'
+        + '<input type="checkbox" name="rol" value="' + r.id + '" onchange="toggleRolCheck(this)">'
+        + '<span class="ico">' + r.ico + '</span>'
+        + '<span>' + esc(r.label) + '</span>'
+        + '</label>';
+    });
+    html += '</div>';
+  });
+  wrap.innerHTML = html;
+}
+
+function toggleRolCheck(cb) {
+  cb.closest('.role-item').classList.toggle('selected', cb.checked);
+}
+
+function abrirModalCrear() {
+  var activos = _miembros.filter(function (m) { return m.activo !== false; }).length;
+  if (_liceo.limiteUsuarios && activos >= _liceo.limiteUsuarios) {
+    alert('Alcanzaste el límite de ' + _liceo.limiteUsuarios + ' asientos de tu plan. Contactá a soporte para ampliarlo.');
+    return;
+  }
+  _editandoUid = null;
+  document.getElementById('modalTitulo').textContent = 'Agregar miembro';
+  document.getElementById('modalSub').textContent = 'Completá los datos. Se generará una contraseña temporal.';
+  document.getElementById('btnGuardar').innerHTML = '💾 Crear miembro';
+  ['fNombre','fCargo','fEmail','fTelefono','fRut'].forEach(function (id) {
+    document.getElementById(id).value = '';
+  });
+  document.getElementById('fEmail').disabled = false;
+  document.querySelectorAll('.role-item').forEach(function (el) {
+    el.classList.remove('selected');
+    el.querySelector('input').checked = false;
+  });
+  document.getElementById('formPaso').style.display = 'block';
+  document.getElementById('exitoPaso').style.display = 'none';
+  document.getElementById('btnGuardar').style.display = '';
+  document.getElementById('btnCancelar').style.display = '';
+  document.getElementById('btnCerrarExito').style.display = 'none';
+  document.getElementById('errBox').classList.remove('show');
+  document.getElementById('modalMiembro').classList.add('show');
+}
+
+function editar(uid) {
+  var m = _miembros.find(function (x) { return x.uid === uid; });
+  if (!m) return;
+  _editandoUid = uid;
+  document.getElementById('modalTitulo').textContent = 'Editar miembro';
+  document.getElementById('modalSub').textContent = 'Modificá los datos y roles. El email no se puede cambiar.';
+  document.getElementById('btnGuardar').innerHTML = '💾 Guardar cambios';
+  document.getElementById('fNombre').value = m.nombre || '';
+  document.getElementById('fCargo').value = m.cargo || '';
+  document.getElementById('fEmail').value = m.email || '';
+  document.getElementById('fEmail').disabled = true;
+  document.getElementById('fTelefono').value = m.telefono || '';
+  document.getElementById('fRut').value = m.rut || '';
+  var roles = m.roles ? Object.keys(m.roles) : (m.role ? [m.role] : []);
+  document.querySelectorAll('.role-item').forEach(function (el) {
+    var rid = el.getAttribute('data-rol');
+    var checked = roles.indexOf(rid) !== -1;
+    el.classList.toggle('selected', checked);
+    el.querySelector('input').checked = checked;
+  });
+  document.getElementById('formPaso').style.display = 'block';
+  document.getElementById('exitoPaso').style.display = 'none';
+  document.getElementById('btnGuardar').style.display = '';
+  document.getElementById('btnCancelar').style.display = '';
+  document.getElementById('btnCerrarExito').style.display = 'none';
+  document.getElementById('errBox').classList.remove('show');
+  document.getElementById('modalMiembro').classList.add('show');
+}
+
+function cerrarModal() {
+  document.getElementById('modalMiembro').classList.remove('show');
+  cargarPersonal();
+  cargarKpis();
+}
+
+function mostrarError(msg) {
+  var el = document.getElementById('errBox');
+  el.textContent = '⚠ ' + msg;
+  el.classList.add('show');
+}
+
+function guardarMiembro() {
+  document.getElementById('errBox').classList.remove('show');
+  var datos = {
+    nombre:    document.getElementById('fNombre').value.trim(),
+    cargo:     document.getElementById('fCargo').value.trim(),
+    email:     document.getElementById('fEmail').value.trim(),
+    telefono:  document.getElementById('fTelefono').value.trim(),
+    rut:       document.getElementById('fRut').value.trim(),
+    roles:     Array.from(document.querySelectorAll('.role-item input:checked')).map(function (c) { return c.value; })
+  };
+
+  if (!datos.nombre) { mostrarError('El nombre es obligatorio.'); return; }
+  if (!datos.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(datos.email)) { mostrarError('Email inválido.'); return; }
+  if (datos.roles.length === 0) { mostrarError('Elegí al menos un rol.'); return; }
+
+  var btn = document.getElementById('btnGuardar');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spin"></span> Guardando…';
+
+  if (_editandoUid) {
+    CCPersonal.actualizarMiembro(_editandoUid, datos).then(function () {
+      btn.disabled = false;
+      btn.innerHTML = '💾 Guardar cambios';
+      cerrarModal();
+    }).catch(function (err) {
+      btn.disabled = false;
+      btn.innerHTML = '💾 Guardar cambios';
+      mostrarError(err.message);
+    });
+  } else {
+    var activos = _miembros.filter(function (m) { return m.activo !== false; }).length;
+    CCPersonal.crearMiembro(_liceo.slug, datos, {
+      limiteUsuarios: _liceo.limiteUsuarios,
+      actual: activos
+    }).then(function (result) {
+      btn.disabled = false;
+      btn.innerHTML = '💾 Crear miembro';
+      document.getElementById('okEmail').textContent = result.email;
+      document.getElementById('okPass').textContent  = result.password;
+      var todo = '🏫 ' + (_liceo.nombre || 'Colegio') + '\n\n'
+        + 'Login: https://clickyclase.cl/login.html\n'
+        + 'Email: ' + result.email + '\n'
+        + 'Password: ' + result.password + '\n\n'
+        + 'Cambia tu contraseña en el primer ingreso.';
+      document.getElementById('okTodo').textContent = todo;
+      document.getElementById('formPaso').style.display = 'none';
+      document.getElementById('exitoPaso').style.display = 'block';
+      document.getElementById('btnGuardar').style.display = 'none';
+      document.getElementById('btnCancelar').style.display = 'none';
+      document.getElementById('btnCerrarExito').style.display = '';
+    }).catch(function (err) {
+      btn.disabled = false;
+      btn.innerHTML = '💾 Crear miembro';
+      var msg = err.message || 'Error desconocido';
+      if (/email-already-in-use|already exists/i.test(msg)) msg = 'Ya existe una cuenta con ese email.';
+      mostrarError(msg);
+    });
+  }
+}
+
+function desactivar(uid) {
+  if (!confirm('¿Desactivar a este miembro? No podrá ingresar hasta ser reactivado.')) return;
+  CCPersonal.desactivar(uid).then(function () {
+    cargarPersonal(); cargarKpis();
+  }).catch(function (err) { alert('Error: ' + err.message); });
+}
+function reactivar(uid) {
+  CCPersonal.reactivar(uid).then(function () {
+    cargarPersonal(); cargarKpis();
+  }).catch(function (err) { alert('Error: ' + err.message); });
+}
+
+function editarLiceo() {
+  var nuevo = prompt('Nombre del colegio:', _liceo.nombre);
+  if (!nuevo || nuevo === _liceo.nombre) return;
+  CCLiceos.actualizar(_liceo.slug, { nombre: nuevo }).then(function () {
+    _liceo.nombre = nuevo;
+    renderHeader(_liceo);
+  }).catch(function (err) { alert('Error: ' + err.message); });
+}
+
+function copiar(id, btn) {
+  var texto = document.getElementById(id).textContent;
+  navigator.clipboard.writeText(texto).then(function () {
+    var t = btn.textContent;
+    btn.textContent = '✓';
+    setTimeout(function () { btn.textContent = t; }, 1200);
+  });
+}
+
+if (typeof ELAuth !== 'undefined' && ELAuth.onUserReady) {
+  ELAuth.onUserReady(iniciar);
+} else {
+  window.addEventListener('load', iniciar);
 }
 </script>
+
 </body>
 </html>

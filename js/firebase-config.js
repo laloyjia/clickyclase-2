@@ -160,11 +160,14 @@ var EL_ROLES_PANEL = {
 
 // Prioridad de rol para elegir panel por defecto cuando el usuario tiene
 // múltiples roles. Índice bajo = más importante.
+// Nota Fase 8: admin_colegio arriba de director/rector porque quien administra
+// el colegio (crea usuarios, gestiona cursos) NECESITA caer al panel de admin
+// del colegio como landing, no al dashboard académico.
 var EL_ROLES_PRIORIDAD = [
   'admin',            // 0 — nunca hay otro por encima
-  'director',         // 1
-  'rector',           // 2
-  'admin_colegio',    // 3
+  'admin_colegio',    // 1 — quien administra el colegio (Fase 8)
+  'director',         // 2
+  'rector',           // 3
   'utp',              // 4
   'encargado_area',   // 5
   'pie_enc',          // 6
