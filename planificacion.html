@@ -1027,10 +1027,14 @@
         var _tieneAsigsNvas  = Array.isArray(user.asignaturas) && user.asignaturas.length > 0;
         var _tieneCursosNvos = Array.isArray(user.cursosAsignados) && user.cursosAsignados.length > 0;
 
+        // Modo híbrido: profesor con AMBOS (asignaturas plan común + especialidades TP)
+        var _esHibridoP = _tieneAsigsNvas && (_tieneEspsNuevas || _tieneModsTP);
         if (!user.tipoProfesor) {
-            if (_tieneEspsNuevas || _tieneModsTP) user.tipoProfesor = 'tecnico';
-            else if (_tieneAsigsNvas) user.tipoProfesor = 'media';
+            if (_esHibridoP)                           user.tipoProfesor = 'media';   // muestra ambos
+            else if (_tieneEspsNuevas || _tieneModsTP) user.tipoProfesor = 'tecnico';
+            else if (_tieneAsigsNvas)                  user.tipoProfesor = 'media';
         }
+        user._modoHibrido = _esHibridoP;
         if (!user.especialidad && _tieneEspsNuevas) {
             var _espIdP = user.especialidades[0];
             if (typeof CCTPCatalogo !== 'undefined' && CCTPCatalogo.SLUG_CURRICULA && CCTPCatalogo.SLUG_CURRICULA[_espIdP]) {
@@ -1109,7 +1113,28 @@
         var secTP     = document.getElementById('sec-tp-obj');
         var secReg    = document.getElementById('sec-regular-obj');
 
-        if (isTP) {
+        if (user._modoHibrido) {
+            // ═══ MODO HÍBRIDO: profesor con asignaturas plan común Y especialidades TP ═══
+            if (campoAsig) campoAsig.style.display = '';
+            if (secTP)  secTP.style.display  = '';
+            if (secReg) secReg.style.display = '';
+
+            var selAsigH = document.getElementById('selectAsignatura');
+            if (selAsigH) {
+                selAsigH.innerHTML = '<option value="">-- Seleccionar asignatura (plan común) --</option>';
+                (user.asignaturas || []).forEach(function (a) {
+                    var opt = document.createElement('option');
+                    opt.value = a; opt.textContent = a;
+                    selAsigH.appendChild(opt);
+                });
+                if ((user.asignaturas || []).length === 1) selAsigH.value = user.asignaturas[0];
+            }
+            actualizarMencion();
+            filtrarModulos();
+            if ((user.asignaturas || []).length === 1 && niveles.length === 1) {
+                cargarOAsRegular();
+            }
+        } else if (isTP) {
             if (campoAsig) campoAsig.style.display = 'none';
             if (secTP)  secTP.style.display  = '';
             if (secReg) secReg.style.display = 'none';

@@ -74,10 +74,15 @@
       var _tieneCursosNuevos = Array.isArray(u.cursosAsignados) && u.cursosAsignados.length > 0;
 
       // 1) tipoProfesor: si tiene TP → tecnico; si solo asignaturas → media
+      //    Si tiene AMBOS (asignaturas plan común + especialidades TP), activar
+      //    modo HÍBRIDO: mostrar los dos bloques a la vez.
+      var _esHibrido = _tieneAsigsNuevas && (_tieneEspsNuevas || _tieneModulosTP);
       if (!u.tipoProfesor) {
-          if (_tieneEspsNuevas || _tieneModulosTP) u.tipoProfesor = 'tecnico';
-          else if (_tieneAsigsNuevas) u.tipoProfesor = 'media';
+          if (_esHibrido)                            u.tipoProfesor = 'media';   // se muestra ambos
+          else if (_tieneEspsNuevas || _tieneModulosTP) u.tipoProfesor = 'tecnico';
+          else if (_tieneAsigsNuevas)                u.tipoProfesor = 'media';
       }
+      u._modoHibrido = _esHibrido;
 
       // 2) especialidad legacy: mapear del ID interno al slug del catálogo
       //    (ej: 'tp_electronica' → 'electronica' que es la clave en CURRICULA_FULL)
@@ -271,7 +276,34 @@
       var secTP      = document.getElementById('sec-tp-mat');
       var secReg     = document.getElementById('sec-regular-mat');
 
-      if (isTP) {
+      if (u._modoHibrido) {
+          // ═══ MODO HÍBRIDO: profesor con asignaturas plan común Y especialidades TP ═══
+          //     Mostramos AMBOS: dropdown asignatura + dropdown módulo
+          if (campoAsig)  campoAsig.style.display  = '';
+          if (campoMod)   campoMod.style.display   = '';
+          if (secTP)      secTP.style.display       = '';
+          if (secReg)     secReg.style.display      = '';
+
+          // Poblar selectAsignatura con las asignaturas plan común
+          var selAsigH = document.getElementById('selectAsignatura');
+          if (selAsigH) {
+              selAsigH.innerHTML = '<option value="">-- Seleccionar asignatura (plan común) --</option>';
+              (u.asignaturas || []).forEach(function (a) {
+                  var opt = document.createElement('option');
+                  opt.value = a; opt.textContent = a;
+                  selAsigH.appendChild(opt);
+              });
+              if ((u.asignaturas || []).length === 1) selAsigH.value = u.asignaturas[0];
+          }
+
+          // Poblar selectModulo con módulos TP
+          actualizarMencion();
+          filtrarModulos();
+
+          if ((u.asignaturas || []).length === 1 && (u.niveles || []).length === 1) {
+              cargarOAsRegularMat();
+          }
+      } else if (isTP) {
           if (campoAsig)  campoAsig.style.display  = 'none';
           if (campoMod)   campoMod.style.display   = '';
           if (secTP)      secTP.style.display       = '';
