@@ -15,6 +15,7 @@
 <script src="js/roles-router.js"></script>
 <script src="js/liceos.js"></script>
 <script src="js/personal.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 :root {
   --bg: #0a0d1c; --bg-2: #0e1226; --panel: #151b35; --panel-2: #1b2242;
@@ -234,6 +235,9 @@ tr:hover td { background: rgba(255,255,255,.02); }
         <option value="inactivo">Desactivados</option>
       </select>
       <div class="asientos" id="asientosBadge">— asientos</div>
+      <button class="btn" onclick="descargarPlantilla()" title="Descargar plantilla Excel">📥 Plantilla</button>
+      <button class="btn" onclick="document.getElementById('inputExcel').click()">📤 Cargar Excel</button>
+      <input type="file" id="inputExcel" accept=".xlsx,.xls" style="display:none" onchange="procesarExcel(this)">
       <button class="btn primary" onclick="abrirModalCrear()">➕ Agregar personal</button>
     </div>
 
@@ -242,6 +246,46 @@ tr:hover td { background: rgba(255,255,255,.02); }
     </div>
   </div>
 
+</div>
+
+<!-- ═══════════════════════════════════
+     MODAL: CARGA MASIVA EXCEL
+═══════════════════════════════════ -->
+<div class="modal-bg" id="modalCarga">
+  <div class="modal" style="max-width:900px">
+    <div class="modal-title">📤 Carga masiva de personal desde Excel</div>
+    <div class="modal-sub" id="cargaSub">Previsualización del archivo. Verificá los datos antes de confirmar la carga.</div>
+
+    <div class="aviso" style="background:rgba(34,211,238,.06);border:1px solid rgba(34,211,238,.25);color:var(--cyan);margin-bottom:16px">
+      <b>💡 Roles válidos:</b> profesor, jefe_curso, utp, encargado_area, director, rector, aps_enc, aps_prof, amb_enc, amb_prof, pie_enc, pie_edu. Separá múltiples con coma (ej: <code>profesor,jefe_curso</code>).
+    </div>
+
+    <div id="cargaResumen" style="margin-bottom:14px"></div>
+
+    <div style="max-height:400px;overflow-y:auto;border:1px solid var(--border);border-radius:8px">
+      <table style="font-size:.82rem">
+        <thead style="position:sticky;top:0;z-index:2;background:var(--panel-2)"><tr>
+          <th>#</th><th>Nombre</th><th>Email</th><th>Cargo</th><th>Roles</th><th>Teléfono</th><th>RUT</th><th>Estado</th>
+        </tr></thead>
+        <tbody id="tCarga"></tbody>
+      </table>
+    </div>
+
+    <div id="cargaProgress" style="display:none;margin-top:16px">
+      <div style="display:flex;justify-content:space-between;font-size:.86rem;margin-bottom:6px">
+        <span>Cargando… <span id="cargaCont">0 / 0</span></span>
+        <span id="cargaPct">0%</span>
+      </div>
+      <div style="height:8px;background:var(--bg-2);border-radius:4px;overflow:hidden">
+        <div id="cargaBar" style="height:100%;background:linear-gradient(90deg,var(--violet),var(--gold));width:0;transition:width .2s"></div>
+      </div>
+    </div>
+
+    <div class="modal-nav">
+      <button class="btn" onclick="document.getElementById('modalCarga').classList.remove('show')">Cancelar</button>
+      <button class="btn primary" id="btnConfirmarCarga" onclick="confirmarCarga()">✓ Confirmar carga</button>
+    </div>
+  </div>
 </div>
 
 <!-- ═══════════════════════════════════
@@ -655,6 +699,187 @@ function copiar(id, btn) {
     btn.textContent = '✓';
     setTimeout(function () { btn.textContent = t; }, 1200);
   });
+}
+
+// ══════════════════════════════════════════════
+// CARGA MASIVA EXCEL
+// ══════════════════════════════════════════════
+var _filasCarga = [];
+var ROLES_VALIDOS = ['profesor','jefe_curso','utp','encargado_area','director','rector','aps_enc','aps_prof','amb_enc','amb_prof','pie_enc','pie_edu'];
+
+function descargarPlantilla() {
+  var data = [
+    ['nombre','email','cargo','roles','telefono','rut'],
+    ['María González Rojas','maria.gonzalez@colegio.cl','Profesora de Matemática','profesor,jefe_curso','+56 9 1234 5678','12.345.678-9'],
+    ['Pedro Silva Martínez','pedro.silva@colegio.cl','Coordinador UTP','utp,encargado_area','+56 9 8765 4321','15.678.234-5'],
+    ['Ana Rojas López','ana.rojas@colegio.cl','Psicóloga','aps_prof','','16.789.345-6'],
+    ['Diego Muñoz Pérez','diego.munoz@colegio.cl','Educador Diferencial','pie_edu','','17.890.456-7']
+  ];
+  var ws = XLSX.utils.aoa_to_sheet(data);
+  ws['!cols'] = [{wch:28},{wch:32},{wch:26},{wch:24},{wch:18},{wch:14}];
+  var wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Personal');
+  XLSX.writeFile(wb, 'plantilla-personal-' + (_liceo ? _liceo.slug : 'colegio') + '.xlsx');
+}
+
+function procesarExcel(input) {
+  var file = input.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function (e) {
+    try {
+      var wb = XLSX.read(e.target.result, { type: 'array' });
+      var ws = wb.Sheets[wb.SheetNames[0]];
+      var filas = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+      // Primera fila = headers
+      var headers = (filas[0] || []).map(function (h) { return String(h).toLowerCase().trim(); });
+      var rows = filas.slice(1).filter(function (r) { return r.some(function (c) { return c !== ''; }); });
+
+      var iN = headers.indexOf('nombre');
+      var iE = headers.indexOf('email');
+      var iC = headers.indexOf('cargo');
+      var iR = headers.indexOf('roles');
+      var iT = headers.indexOf('telefono');
+      var iU = headers.indexOf('rut');
+      if (iN < 0 || iE < 0 || iR < 0) {
+        alert('El Excel debe tener columnas: nombre, email, roles (obligatorias). Descargá la plantilla primero.');
+        input.value = ''; return;
+      }
+
+      _filasCarga = rows.map(function (r, idx) {
+        var nombre = String(r[iN] || '').trim();
+        var email  = String(r[iE] || '').trim().toLowerCase();
+        var cargo  = iC >= 0 ? String(r[iC] || '').trim() : '';
+        var rolesStr = String(r[iR] || '').trim();
+        var telefono = iT >= 0 ? String(r[iT] || '').trim() : '';
+        var rut = iU >= 0 ? String(r[iU] || '').trim() : '';
+        var roles = rolesStr.split(/[,;]/).map(function (s) { return s.trim().toLowerCase(); }).filter(Boolean);
+        var errores = [];
+        if (!nombre) errores.push('Falta nombre');
+        if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errores.push('Email inválido');
+        if (!roles.length) errores.push('Falta rol');
+        roles.forEach(function (rid) {
+          if (ROLES_VALIDOS.indexOf(rid) === -1) errores.push('Rol desconocido: ' + rid);
+        });
+        return {
+          numero: idx + 2,  // +2 porque fila 1 = header, y en Excel se cuenta desde 1
+          nombre: nombre, email: email, cargo: cargo, roles: roles,
+          telefono: telefono, rut: rut,
+          errores: errores, ok: errores.length === 0, procesado: false, resultado: null
+        };
+      });
+
+      renderPreviewCarga();
+      document.getElementById('modalCarga').classList.add('show');
+    } catch (err) {
+      alert('Error leyendo Excel: ' + err.message);
+    }
+    input.value = '';
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function renderPreviewCarga() {
+  var validas = _filasCarga.filter(function (f) { return f.ok; }).length;
+  var invalidas = _filasCarga.length - validas;
+  var activos = _miembros.filter(function (m) { return m.activo !== false; }).length;
+  var limite = _liceo.limiteUsuarios || 100;
+  var disponibles = limite - activos;
+
+  var resumen = '<div style="display:flex;gap:10px;flex-wrap:wrap;font-size:.86rem">'
+    + '<div style="padding:8px 14px;background:rgba(52,211,153,.08);border:1px solid rgba(52,211,153,.25);color:var(--green);border-radius:8px"><b>' + validas + '</b> filas válidas</div>';
+  if (invalidas > 0) resumen += '<div style="padding:8px 14px;background:rgba(248,113,113,.08);border:1px solid rgba(248,113,113,.25);color:var(--danger);border-radius:8px"><b>' + invalidas + '</b> con errores (no se cargarán)</div>';
+  resumen += '<div style="padding:8px 14px;background:rgba(139,92,246,.08);border:1px solid rgba(139,92,246,.25);color:#c4b5fd;border-radius:8px"><b>' + disponibles + '</b> asientos disponibles</div>';
+  if (validas > disponibles) resumen += '<div style="padding:8px 14px;background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.25);color:var(--gold);border-radius:8px">⚠ Excedés el límite en <b>' + (validas - disponibles) + '</b>. Solo se cargarán las primeras ' + disponibles + '.</div>';
+  resumen += '</div>';
+  document.getElementById('cargaResumen').innerHTML = resumen;
+
+  var html = '';
+  _filasCarga.forEach(function (f) {
+    var estado = f.errores.length
+      ? '<span style="color:var(--danger)" title="' + f.errores.join(' · ') + '">⚠ ' + f.errores.length + ' error(es)</span>'
+      : '<span style="color:var(--green)">✓ OK</span>';
+    if (f.procesado) {
+      estado = f.resultado === 'ok'
+        ? '<span style="color:var(--green)">✅ Creado</span>'
+        : '<span style="color:var(--danger)" title="' + esc(f.errorFinal || '') + '">❌ Falló</span>';
+    }
+    html += '<tr>'
+      + '<td>' + f.numero + '</td>'
+      + '<td>' + esc(f.nombre) + '</td>'
+      + '<td>' + esc(f.email) + '</td>'
+      + '<td>' + esc(f.cargo) + '</td>'
+      + '<td>' + f.roles.map(function(r){ return '<span class="tag">' + esc(r) + '</span>'; }).join('') + '</td>'
+      + '<td>' + esc(f.telefono) + '</td>'
+      + '<td>' + esc(f.rut) + '</td>'
+      + '<td>' + estado + '</td>'
+      + '</tr>';
+  });
+  document.getElementById('tCarga').innerHTML = html;
+}
+
+function confirmarCarga() {
+  var pendientes = _filasCarga.filter(function (f) { return f.ok && !f.procesado; });
+  if (!pendientes.length) { alert('Nada nuevo para cargar.'); return; }
+
+  var activos = _miembros.filter(function (m) { return m.activo !== false; }).length;
+  var limite = _liceo.limiteUsuarios || 100;
+  var disponibles = limite - activos;
+  var procesar = pendientes.slice(0, disponibles);
+
+  if (!confirm('Se crearán ' + procesar.length + ' usuarios. Las contraseñas temporales se descargarán como Excel al terminar. ¿Continuar?')) return;
+
+  document.getElementById('btnConfirmarCarga').disabled = true;
+  document.getElementById('cargaProgress').style.display = 'block';
+  document.getElementById('cargaBar').style.width = '0%';
+
+  var total = procesar.length;
+  var completos = 0;
+  var credenciales = [['nombre','email','password_temporal']];
+
+  function siguiente(i) {
+    if (i >= total) {
+      // Al terminar, generar Excel con credenciales
+      if (credenciales.length > 1) {
+        var ws = XLSX.utils.aoa_to_sheet(credenciales);
+        ws['!cols'] = [{wch:28},{wch:32},{wch:18}];
+        var wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'Credenciales');
+        XLSX.writeFile(wb, 'credenciales-' + _liceo.slug + '-' + new Date().toISOString().slice(0,10) + '.xlsx');
+      }
+      document.getElementById('btnConfirmarCarga').innerHTML = '✓ Completado';
+      cargarPersonal(); cargarKpis();
+      setTimeout(function () {
+        document.getElementById('modalCarga').classList.remove('show');
+        document.getElementById('btnConfirmarCarga').disabled = false;
+        document.getElementById('btnConfirmarCarga').innerHTML = '✓ Confirmar carga';
+      }, 2000);
+      return;
+    }
+    var f = procesar[i];
+    CCPersonal.crearMiembro(_liceo.slug, {
+      nombre: f.nombre, email: f.email, cargo: f.cargo,
+      roles: f.roles, telefono: f.telefono, rut: f.rut
+    }, { limiteUsuarios: limite, actual: activos + i })
+    .then(function (r) {
+      f.procesado = true; f.resultado = 'ok';
+      credenciales.push([f.nombre, f.email, r.password]);
+    })
+    .catch(function (err) {
+      f.procesado = true; f.resultado = 'error';
+      f.errorFinal = err.message;
+    })
+    .then(function () {
+      completos++;
+      document.getElementById('cargaCont').textContent = completos + ' / ' + total;
+      var pct = Math.round(completos / total * 100);
+      document.getElementById('cargaPct').textContent = pct + '%';
+      document.getElementById('cargaBar').style.width = pct + '%';
+      renderPreviewCarga();
+      setTimeout(function () { siguiente(i + 1); }, 100);
+    });
+  }
+  siguiente(0);
 }
 
 if (typeof ELAuth !== 'undefined' && ELAuth.onUserReady) {

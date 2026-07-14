@@ -486,7 +486,7 @@ function renderLista() {
       + '<td>' + venceLabel + '</td>'
       + '<td><span class="estado-badge ' + esc(l.estado || 'activo') + '">' + esc((l.estado || 'activo').toUpperCase()) + '</span></td>'
       + '<td><div class="acciones-cell">'
-      +   '<button class="btn small" title="Ver detalles" onclick="verDetalles(\'' + esc(l.slug) + '\')">👁</button>'
+      +   '<a class="btn small" title="Editar" href="panel-superadmin-colegio.html?slug=' + encodeURIComponent(l.slug) + '" style="text-decoration:none">✎ Editar</a>'
       +   (l.estado === 'suspendido'
           ? '<button class="btn small" title="Reactivar" onclick="reactivarLiceo(\'' + esc(l.slug) + '\')">▶</button>'
           : '<button class="btn small danger" title="Suspender" onclick="suspenderLiceo(\'' + esc(l.slug) + '\')">⏸</button>')
