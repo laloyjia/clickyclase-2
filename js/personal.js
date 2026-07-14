@@ -167,25 +167,33 @@
         var espsArr  = Array.isArray(datos.especialidades) ? datos.especialidades
                        : (datos.especialidad ? [datos.especialidad] : []);
         var modulosTP = (datos.modulosTP && typeof datos.modulosTP === 'object') ? datos.modulosTP : {};
+        var cursosArr = Array.isArray(datos.cursosAsignados) ? datos.cursosAsignados : [];
+        var permisosDoc = (datos.permisos && typeof datos.permisos === 'object') ? datos.permisos
+          : { planificar: true, crearMaterial: true };
+        var capacidadesDoc = (datos.capacidades && typeof datos.capacidades === 'object') ? datos.capacidades
+          : { formatoPAES: false, formatoSIMCE: false, taxonomiaMarzano: false, dua: false };
         var userDoc = {
-          uid:            newUid,
-          email:          datos.email,
-          nombre:         datos.nombre,
-          telefono:       datos.telefono || '',
-          rut:            datos.rut || '',
-          role:           rolLegacy,           // legacy string
-          roles:          rolesMap,             // formato nuevo
-          liceoSlug:      liceoSlug,
-          cargo:          datos.cargo || '',       // opcional (legacy)
-          asignaturas:    asigsArr,                 // ARRAY
-          especialidades: espsArr,                  // ARRAY
-          modulosTP:      modulosTP,                // MAP {esp: [moduloId,...]}
-          asignatura:     asigsArr[0] || '',        // primer valor (retrocompat)
-          especialidad:   espsArr[0] || '',         // primer valor (retrocompat)
-          activo:         true,
-          primerIngreso:  true,
-          creadoEn:       new Date().toISOString(),
-          creadoPor:      (window.ELAuth && ELAuth.user) ? ELAuth.user.uid : '',
+          uid:             newUid,
+          email:           datos.email,
+          nombre:          datos.nombre,
+          telefono:        datos.telefono || '',
+          rut:             datos.rut || '',
+          role:            rolLegacy,           // legacy string
+          roles:           rolesMap,             // formato nuevo
+          liceoSlug:       liceoSlug,
+          cargo:           datos.cargo || '',
+          asignaturas:     asigsArr,
+          especialidades:  espsArr,
+          modulosTP:       modulosTP,
+          cursosAsignados: cursosArr,
+          permisos:        permisosDoc,
+          capacidades:     capacidadesDoc,
+          asignatura:      asigsArr[0] || '',
+          especialidad:    espsArr[0] || '',
+          activo:          true,
+          primerIngreso:   true,
+          creadoEn:        new Date().toISOString(),
+          creadoPor:       (window.ELAuth && ELAuth.user) ? ELAuth.user.uid : '',
           xp: 0, nivel: 1, badges: [], evaluaciones: []
         };
         return EL_DB.collection(COL_USERS).doc(newUid).set(userDoc)
@@ -227,6 +235,21 @@
     // Módulos TP: map {especialidad: [modulos]}
     if (cambios.modulosTP && typeof cambios.modulosTP === 'object') {
       update.modulosTP = cambios.modulosTP;
+    }
+
+    // Cursos asignados
+    if (Array.isArray(cambios.cursosAsignados)) {
+      update.cursosAsignados = cambios.cursosAsignados;
+    }
+
+    // Permisos (planificar, crearMaterial)
+    if (cambios.permisos && typeof cambios.permisos === 'object') {
+      update.permisos = cambios.permisos;
+    }
+
+    // Capacidades pedagógicas avanzadas
+    if (cambios.capacidades && typeof cambios.capacidades === 'object') {
+      update.capacidades = cambios.capacidades;
     }
 
     // Roles: si se pasa array, reconstruimos el map

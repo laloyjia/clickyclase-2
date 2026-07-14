@@ -1373,68 +1373,75 @@
     var tieneNuevo = asigsNuevo.length || espsNuevo.length || Object.keys(modulosTP).length;
 
     if (tieneNuevo) {
-      var htmlNuevo = '';
+      // Función que arma el HTML — se ejecuta 2 veces: primero sin catálogo (labels básicos),
+      // luego cuando carga el catálogo TP para enriquecer con OAs/AEs.
+      function armarHtml() {
+        var html = '';
 
-      // Bloque de asignaturas plan común
-      if (asigsNuevo.length) {
-        htmlNuevo += '<div class="card-pro" style="margin-bottom:18px">'
-          + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px">'
-          +   '<div style="font-weight:800;font-size:1.05rem">🎓 Asignaturas del plan común</div>'
-          +   '<span class="chip is-active">' + asigsNuevo.length + '</span>'
-          + '</div>'
-          + '<div class="mod-grid">'
-          + asigsNuevo.map(function (a) {
-              return '<div class="mod-card-pro">'
-                + '<div class="mc-code">PC</div>'
-                + '<div class="mc-name">' + escTxt(_ASIG_LABELS_DP[a] || a) + '</div>'
-                + '<div class="mc-meta">Plan común</div>'
+        // Bloque asignaturas plan común
+        if (asigsNuevo.length) {
+          html += '<div class="card-pro" style="margin-bottom:18px">'
+            + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px">'
+            +   '<div style="font-weight:800;font-size:1.05rem">🎓 Asignaturas del plan común</div>'
+            +   '<span class="chip is-active">' + asigsNuevo.length + '</span>'
+            + '</div>'
+            + '<div class="mod-grid">'
+            + asigsNuevo.map(function (a) {
+                return '<div class="mod-card-pro">'
+                  + '<div class="mc-code">PC</div>'
+                  + '<div class="mc-name">' + escTxt(_ASIG_LABELS_DP[a] || a) + '</div>'
+                  + '<div class="mc-meta">Plan común</div>'
+                  + '</div>';
+              }).join('')
+            + '</div></div>';
+        }
+
+        // Bloque por cada especialidad TP
+        var _cat = (typeof CCTPCatalogo !== 'undefined') ? CCTPCatalogo : null;
+        espsNuevo.forEach(function (espId) {
+          var espLabel = _cat ? _cat.labelEspecialidad(espId) : espId;
+          var modIds = modulosTP[espId] || [];
+          html += '<div class="card-pro" style="margin-bottom:18px">'
+            + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px">'
+            +   '<div style="font-weight:800;font-size:1.05rem">🔧 ' + escTxt(espLabel) + '</div>'
+            +   '<span class="chip is-active">' + modIds.length + ' módulos</span>'
+            + '</div>';
+          if (!modIds.length) {
+            html += '<div style="padding:12px;color:#94a3b8;font-size:.86rem">Sin módulos específicos. El admin del colegio puede asignártelos.</div>';
+          } else {
+            html += '<div class="mod-grid">' + modIds.map(function (mid) {
+              var m = _cat ? _cat.moduloCompleto(espId, mid) : null;
+              var nombre = m ? m.nombre : mid;
+              var num = m ? (m.num || mid) : mid;
+              var nivel = m ? m.nivel : '';
+              var horas = m ? m.horas : 0;
+              var oasCount = (m && m.oas) ? Object.keys(m.oas).length : 0;
+              var aesCount = (m && m.aes) ? Object.keys(m.aes).length : 0;
+              var metaTxt = (nivel ? nivel + ' · ' : '') + (horas ? horas + ' hrs' : '') + (oasCount || aesCount ? ' · ' + oasCount + ' OA · ' + aesCount + ' AE' : '');
+              var onclick = m ? 'verModuloTP(\'' + escAttr(espId) + '\',\'' + escAttr(mid) + '\')' : '';
+              return '<div class="mod-card-pro" ' + (m ? 'style="cursor:pointer" onclick="' + onclick + '" title="Ver OAs y AEs"' : '') + '>'
+                + '<div class="mc-code">' + escTxt(num) + '</div>'
+                + '<div class="mc-name">' + escTxt(nombre) + '</div>'
+                + (metaTxt ? '<div class="mc-meta">' + escTxt(metaTxt) + '</div>' : '')
                 + '</div>';
-            }).join('')
-          + '</div></div>';
+            }).join('') + '</div>';
+          }
+          html += '</div>';
+        });
+
+        return html || '<div class="empty-pro"><span class="e-emoji">📦</span><p>Sin módulos asignados. Pedile al admin de tu colegio que te asigne asignaturas o especialidades.</p></div>';
       }
 
-      // Bloque por cada especialidad TP con sus módulos asignados
+      // Render inmediato con lo que tenemos
+      el.innerHTML = armarHtml();
+
+      // Cargar catálogo TP en background y re-renderizar cuando termine
       if (espsNuevo.length && typeof CCTPCatalogo !== 'undefined') {
-        // Asegurar catálogo TP cargado
         CCTPCatalogo.cargarCatalogo().then(function () {
-          var htmlEsp = htmlNuevo;
-          espsNuevo.forEach(function (espId) {
-            var espLabel = CCTPCatalogo.labelEspecialidad(espId);
-            var modIds = modulosTP[espId] || [];
-            var modsFull = modIds.map(function (mid) {
-              return CCTPCatalogo.moduloCompleto(espId, mid);
-            }).filter(Boolean);
-
-            htmlEsp += '<div class="card-pro" style="margin-bottom:18px">'
-              + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px">'
-              +   '<div style="font-weight:800;font-size:1.05rem">🔧 ' + escTxt(espLabel) + '</div>'
-              +   '<span class="chip is-active">' + modIds.length + ' módulos</span>'
-              + '</div>';
-
-            if (!modsFull.length) {
-              htmlEsp += '<div style="padding:12px;color:#94a3b8;font-size:.86rem">Sin módulos específicos asignados. Pedile al admin de tu colegio que te asigne los módulos que dictás.</div>';
-            } else {
-              htmlEsp += '<div class="mod-grid">'
-                + modsFull.map(function (m, i) {
-                    var mid = modIds[i];
-                    var oasCount = m.oas ? Object.keys(m.oas).length : 0;
-                    var aesCount = m.aes ? Object.keys(m.aes).length : 0;
-                    return '<div class="mod-card-pro" style="cursor:pointer" onclick="verModuloTP(\'' + escAttr(espId) + '\',\'' + escAttr(mid) + '\')" title="Click para ver OAs y AEs">'
-                      + '<div class="mc-code">' + escTxt(m.num || mid) + '</div>'
-                      + '<div class="mc-name">' + escTxt(m.nombre) + '</div>'
-                      + '<div class="mc-meta">' + (m.nivel ? escTxt(m.nivel) + ' · ' : '') + (m.horas ? m.horas + ' hrs · ' : '') + oasCount + ' OA · ' + aesCount + ' AE</div>'
-                      + '</div>';
-                  }).join('')
-                + '</div>';
-            }
-            htmlEsp += '</div>';
-          });
-          el.innerHTML = htmlEsp || '<div class="empty-pro"><span class="e-emoji">📦</span><p>Sin módulos asignados. Pedile al admin de tu colegio que te asigne asignaturas o especialidades.</p></div>';
-        }).catch(function () {
-          el.innerHTML = htmlNuevo || '<div class="empty-pro"><span class="e-emoji">⚠️</span><p>Error cargando el catálogo TP.</p></div>';
+          el.innerHTML = armarHtml();
+        }).catch(function (err) {
+          console.warn('[dashboard-profesor] catálogo TP falló:', err);
         });
-      } else {
-        el.innerHTML = htmlNuevo || '<div class="empty-pro"><span class="e-emoji">📦</span><p>Sin módulos asignados.</p></div>';
       }
       return;
     }

@@ -379,6 +379,56 @@ tr:hover td { background: rgba(255,255,255,.02); }
       </div>
 
       <div class="fld">
+        <label>Cursos asignados (donde dicta clases)</label>
+        <div id="cursosGridWrap"></div>
+        <div class="h">Marcá los cursos donde este docente da clases. Después vas a poder asignar cada asignatura a un curso específico.</div>
+      </div>
+
+      <div class="fld" style="padding:14px 16px;background:rgba(139,92,246,.04);border:1px solid rgba(139,92,246,.2);border-radius:10px;margin-top:8px">
+        <label style="color:#c4b5fd">🔐 Permisos del docente</label>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
+          <label class="role-item" data-perm="planificar">
+            <input type="checkbox" id="permPlanificar" checked onchange="onPermCheck(this)">
+            <span class="ico">📅</span>
+            <span>Puede planificar</span>
+          </label>
+          <label class="role-item" data-perm="material">
+            <input type="checkbox" id="permMaterial" checked onchange="onPermCheck(this)">
+            <span class="ico">📚</span>
+            <span>Puede crear material</span>
+          </label>
+        </div>
+        <div class="h" style="margin-top:8px">Si desmarcás alguno, el docente no verá ese botón en su panel.</div>
+      </div>
+
+      <div class="fld" style="padding:14px 16px;background:rgba(34,211,238,.04);border:1px solid rgba(34,211,238,.2);border-radius:10px;margin-top:8px">
+        <label style="color:#67e8f9">🧠 Capacidades pedagógicas avanzadas</label>
+        <div class="h" style="margin-bottom:8px">Habilitá formatos y taxonomías especiales para este docente al crear material o evaluaciones con IA.</div>
+        <div style="display:grid;grid-template-columns:1fr;gap:8px">
+          <label class="role-item" data-cap="paes">
+            <input type="checkbox" id="capPAES" onchange="onPermCheck(this)">
+            <span class="ico">🎯</span>
+            <span><b>Formato PAES</b> — pruebas y guías en estructura oficial PAES (5 alternativas, estímulos, especificaciones)</span>
+          </label>
+          <label class="role-item" data-cap="simce">
+            <input type="checkbox" id="capSIMCE" onchange="onPermCheck(this)">
+            <span class="ico">📊</span>
+            <span><b>Formato SIMCE</b> — evaluaciones en estructura SIMCE (4 alternativas, estándares, niveles de logro)</span>
+          </label>
+          <label class="role-item" data-cap="marzano">
+            <input type="checkbox" id="capMarzano" onchange="onPermCheck(this)">
+            <span class="ico">🧩</span>
+            <span><b>Taxonomía Marzano</b> — habilita el uso de la taxonomía Marzano en objetivos y actividades</span>
+          </label>
+          <label class="role-item" data-cap="dua">
+            <input type="checkbox" id="capDUA" onchange="onPermCheck(this)">
+            <span class="ico">♿</span>
+            <span><b>DUA (Diseño Universal)</b> — adaptaciones DUA en planificaciones y material</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="fld">
         <label>Contraseña inicial</label>
         <div style="display:flex;gap:8px;flex-wrap:wrap">
           <input type="text" id="fPassword" placeholder="Se autogenerará si dejás vacío" style="flex:1;min-width:200px">
@@ -475,6 +525,7 @@ function iniciar() {
     renderRolesForm();
     renderAsignaturasForm();
     renderEspecialidadesForm();
+    renderCursosForm();
   }).catch(function (err) {
     document.getElementById('nombreLiceo').textContent = 'Error cargando colegio';
     console.error(err);
@@ -846,6 +897,68 @@ function onModCheck(cb) {
   }
 }
 
+function onPermCheck(cb) {
+  cb.closest('.role-item').classList.toggle('selected', cb.checked);
+}
+
+// ── Render de cursos del liceo (para asignar al docente) ──
+var _cursosDelLiceo = null;
+
+function renderCursosForm() {
+  var wrap = document.getElementById('cursosGridWrap');
+  if (!wrap || !_liceo) return;
+
+  if (_cursosDelLiceo) {
+    _renderCursosHTML(wrap, _cursosDelLiceo);
+    return;
+  }
+
+  wrap.innerHTML = '<div style="padding:10px;color:var(--muted);font-size:.85rem">⏳ Cargando cursos del colegio…</div>';
+
+  EL_DB.collection('cursos').get().then(function (snap) {
+    var arr = [];
+    snap.forEach(function (doc) {
+      var c = doc.data();
+      if (c.liceoSlug === _liceo.slug && c.activo !== false) arr.push(c);
+    });
+    // Ordenar por nivel y letra
+    var ORDEN = ['1B','2B','3B','4B','5B','6B','7B','8B','1M','2M','3M','4M'];
+    arr.sort(function (a, b) {
+      var na = ORDEN.indexOf(a.nivel), nb = ORDEN.indexOf(b.nivel);
+      if (na !== nb) return na - nb;
+      return (a.letra || '').localeCompare(b.letra || '');
+    });
+    _cursosDelLiceo = arr;
+    _renderCursosHTML(wrap, arr);
+  }).catch(function () {
+    wrap.innerHTML = '<div style="padding:10px;color:var(--muted);font-size:.85rem">⚠ Aún no hay cursos creados en el colegio. Creá cursos primero desde <a href="admin-cursos.html" style="color:var(--violet)">Cursos y estudiantes</a>.</div>';
+  });
+}
+
+function _renderCursosHTML(wrap, cursos) {
+  if (!cursos.length) {
+    wrap.innerHTML = '<div style="padding:10px;color:var(--muted);font-size:.85rem">Sin cursos creados aún. <a href="admin-cursos.html" style="color:var(--violet)">Crearlos →</a></div>';
+    return;
+  }
+  var html = '<div class="roles-grid">';
+  cursos.forEach(function (c) {
+    var label = c.nombreCompleto || (c.nivel + ' ' + c.letra);
+    if (c.anio) label += ' · ' + c.anio;
+    if (c.especialidad) label += ' (' + c.especialidad + ')';
+    html += '<label class="role-item" data-curso="' + esc(c.cursoId) + '">'
+      + '<input type="checkbox" data-curso="' + esc(c.cursoId) + '" onchange="onCursoCheck(this)">'
+      + '<span class="ico">🎓</span>'
+      + '<span>' + esc(label) + '</span>'
+      + '</label>';
+  });
+  html += '</div>';
+  wrap.innerHTML = html;
+}
+
+function onCursoCheck(cb) {
+  cb.closest('.role-item').classList.toggle('selected', cb.checked);
+}
+
 // ── Handlers de cambios en el formulario ──
 function onRutChange() {
   // Si el campo password está vacío, sugerir el RUT limpio como placeholder
@@ -911,15 +1024,25 @@ function _limpiarModal() {
   ['fNombre','fEmail','fTelefono','fRut','fPassword','fNewPass'].forEach(function (id) {
     var el = document.getElementById(id); if (el) el.value = '';
   });
-  document.querySelectorAll('#rolesGridWrap input, #asigGridWrap input, #espGridWrap input').forEach(function (cb) {
+  document.querySelectorAll('#rolesGridWrap input, #asigGridWrap input, #espGridWrap input, #cursosGridWrap input').forEach(function (cb) {
     cb.checked = false;
     var lbl = cb.closest('.role-item'); if (lbl) lbl.classList.remove('selected');
   });
-  // Vaciar módulos TP
+  // Módulos TP
   var modWrap = document.getElementById('modulosTPWrap');
   if (modWrap) modWrap.innerHTML = '';
   var modFld = document.getElementById('fldModulosTPWrap');
   if (modFld) modFld.style.display = 'none';
+  // Permisos por defecto: planificar y material activados
+  ['permPlanificar','permMaterial'].forEach(function (id) {
+    var el = document.getElementById(id);
+    if (el) { el.checked = true; el.closest('.role-item').classList.add('selected'); }
+  });
+  // Capacidades por defecto: desactivadas
+  ['capPAES','capSIMCE','capMarzano','capDUA'].forEach(function (id) {
+    var el = document.getElementById(id);
+    if (el) { el.checked = false; el.closest('.role-item').classList.remove('selected'); }
+  });
   document.getElementById('fEmail').disabled = false;
   document.getElementById('formPaso').style.display = 'block';
   document.getElementById('exitoPaso').style.display = 'none';
@@ -983,7 +1106,7 @@ function editar(uid) {
   });
 
   // Renderizar módulos TP y marcar los ya asignados
-  renderModulosTP(false);   // false = no preservar selección del DOM anterior
+  renderModulosTP(false);
   var modulosTP = m.modulosTP || {};
   setTimeout(function () {
     Object.keys(modulosTP).forEach(function (espId) {
@@ -992,7 +1115,29 @@ function editar(uid) {
         if (cb) { cb.checked = true; onModCheck(cb); }
       });
     });
-  }, 500);   // esperar a que renderModulosTP termine (carga async del catálogo)
+  }, 500);
+
+  // Marcar cursos asignados
+  var cursosAsig = Array.isArray(m.cursosAsignados) ? m.cursosAsignados : [];
+  document.querySelectorAll('#cursosGridWrap input').forEach(function (cb) {
+    var marcada = cursosAsig.indexOf(cb.getAttribute('data-curso')) !== -1;
+    cb.checked = marcada;
+    if (marcada) cb.closest('.role-item').classList.add('selected');
+  });
+
+  // Cargar permisos y capacidades
+  var permisos = m.permisos || {};
+  var caps = m.capacidades || {};
+  document.getElementById('permPlanificar').checked = permisos.planificar !== false;
+  document.getElementById('permMaterial').checked   = permisos.crearMaterial !== false;
+  document.getElementById('capPAES').checked        = !!caps.formatoPAES;
+  document.getElementById('capSIMCE').checked       = !!caps.formatoSIMCE;
+  document.getElementById('capMarzano').checked     = !!caps.taxonomiaMarzano;
+  document.getElementById('capDUA').checked         = !!caps.dua;
+  ['permPlanificar','permMaterial','capPAES','capSIMCE','capMarzano','capDUA'].forEach(function (id) {
+    var el = document.getElementById(id);
+    if (el) el.closest('.role-item').classList.toggle('selected', el.checked);
+  });
 
   document.getElementById('fldResetPass').style.display = 'block';
   document.getElementById('modalMiembro').classList.add('show');
@@ -1023,17 +1168,31 @@ function guardarMiembro() {
     if (!modulosTP[esp]) modulosTP[esp] = [];
     modulosTP[esp].push(mod);
   });
+  var cursos = Array.from(document.querySelectorAll('#cursosGridWrap input:checked')).map(function (c) { return c.getAttribute('data-curso'); });
+  var permisos = {
+    planificar:    document.getElementById('permPlanificar').checked,
+    crearMaterial: document.getElementById('permMaterial').checked
+  };
+  var capacidades = {
+    formatoPAES:      document.getElementById('capPAES').checked,
+    formatoSIMCE:     document.getElementById('capSIMCE').checked,
+    taxonomiaMarzano: document.getElementById('capMarzano').checked,
+    dua:              document.getElementById('capDUA').checked
+  };
   var datos = {
-    nombre:       document.getElementById('fNombre').value.trim(),
-    email:        document.getElementById('fEmail').value.trim(),
-    telefono:     document.getElementById('fTelefono').value.trim(),
-    rut:          document.getElementById('fRut').value.trim(),
-    asignaturas:   asigs,
-    especialidades: esps,
-    modulosTP:     modulosTP,
-    password:     document.getElementById('fPassword') ? document.getElementById('fPassword').value.trim() : '',
+    nombre:          document.getElementById('fNombre').value.trim(),
+    email:           document.getElementById('fEmail').value.trim(),
+    telefono:        document.getElementById('fTelefono').value.trim(),
+    rut:             document.getElementById('fRut').value.trim(),
+    asignaturas:     asigs,
+    especialidades:  esps,
+    modulosTP:       modulosTP,
+    cursosAsignados: cursos,
+    permisos:        permisos,
+    capacidades:     capacidades,
+    password:        document.getElementById('fPassword') ? document.getElementById('fPassword').value.trim() : '',
     usarRutComoPass: true,
-    roles:        roles
+    roles:           roles
   };
 
   if (!datos.nombre) { mostrarError('El nombre es obligatorio.'); return; }
