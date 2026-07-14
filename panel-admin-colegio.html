@@ -162,6 +162,50 @@ tr:hover td { background: rgba(255,255,255,.02); }
 .role-item.selected { background: rgba(139,92,246,.12); border-color: var(--violet); }
 .role-item input { width: auto; margin: 0; accent-color: var(--violet); }
 .role-item .ico { font-size: 1rem; }
+
+/* ── Módulos TP: layout compacto y prolijo ── */
+#modulosTPWrap input[type="checkbox"],
+#modulosTPWrap input[type="radio"],
+#asigGridWrap input[type="checkbox"],
+#espGridWrap input[type="checkbox"],
+#rolesGridWrap input[type="checkbox"] {
+  width: 16px !important;
+  height: 16px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+.tp-mod-item {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  padding: 10px 12px !important;
+  border-radius: 8px !important;
+  cursor: pointer;
+  transition: all .15s;
+  min-height: 44px;
+}
+.tp-mod-item:hover { border-color: var(--muted) !important; }
+.tp-mod-item .mod-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.tp-mod-item .mod-nombre {
+  font-weight: 600; font-size: .84rem;
+  color: var(--text); line-height: 1.35;
+  white-space: normal; word-break: normal;
+}
+.tp-mod-item .mod-meta {
+  font-size: .68rem; color: var(--muted); font-weight: 500;
+  letter-spacing: .3px; text-transform: uppercase;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.tp-mod-item .mod-badges { display: flex; gap: 6px; flex-wrap: wrap; }
+.tp-mod-item .mod-badge {
+  display: inline-block; padding: 1px 7px; border-radius: 4px;
+  font-size: .65rem; font-weight: 700; letter-spacing: .3px;
+  background: rgba(148,163,184,.12); color: var(--muted);
+}
+.tp-mod-item .mod-badge.nivel { background: rgba(139,92,246,.15); color: #c4b5fd; }
+.tp-mod-item .mod-badge.horas { background: rgba(52,211,153,.12); color: var(--green); }
 .role-grupo { font-size: .68rem; color: var(--muted); text-transform: uppercase; letter-spacing: .8px; margin: 12px 0 6px; font-weight: 700; }
 .role-grupo:first-child { margin-top: 0; }
 
@@ -758,22 +802,26 @@ function renderModulosTP(preservarSeleccion) {
       var yaMarcados = seleccion[espId] || [];
       var totalHoras = mods.reduce(function (s, m) { return s + (m.horas || 0); }, 0);
 
-      html += '<div style="margin-bottom:12px;padding:14px 16px;background:rgba(251,191,36,.04);border:1px solid rgba(251,191,36,.2);border-radius:10px">'
-        + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">'
-        +   '<div style="font-weight:700;font-size:.9rem;color:var(--gold)">🔧 ' + esc(espLabel) + '</div>'
-        +   '<span style="font-size:.72rem;color:var(--muted);padding:3px 10px;background:rgba(255,255,255,.03);border-radius:999px">' + mods.length + ' módulos · ' + totalHoras + 'h totales</span>'
+      html += '<div style="margin-bottom:14px;padding:16px 18px;background:rgba(251,191,36,.04);border:1px solid rgba(251,191,36,.22);border-radius:12px">'
+        + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:10px;flex-wrap:wrap">'
+        +   '<div style="font-weight:700;font-size:.92rem;color:var(--gold)">🔧 ' + esc(espLabel) + '</div>'
+        +   '<span style="font-size:.7rem;color:var(--muted);padding:4px 12px;background:rgba(255,255,255,.04);border-radius:999px;font-weight:600">' + mods.length + ' módulos · ' + totalHoras + 'h totales</span>'
         + '</div>'
-        + '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:6px">';
+        + '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:8px">';
       mods.forEach(function (m) {
         var marcado = yaMarcados.indexOf(m.id) !== -1;
-        var bg = marcado ? 'rgba(251,191,36,.1)' : 'var(--bg-2)';
-        var bd = marcado ? 'rgba(251,191,36,.4)' : 'var(--border)';
-        html += '<label class="tp-mod-item" style="display:flex;align-items:flex-start;gap:8px;padding:8px 10px;background:' + bg + ';border:1px solid ' + bd + ';border-radius:6px;cursor:pointer;font-size:.82rem">'
+        var bg = marcado ? 'rgba(251,191,36,.10)' : 'var(--bg-2)';
+        var bd = marcado ? 'rgba(251,191,36,.45)' : 'var(--border)';
+        var badges = '';
+        if (m.num)   badges += '<span class="mod-badge">' + esc(m.num) + '</span>';
+        if (m.nivel) badges += '<span class="mod-badge nivel">' + esc(m.nivel) + '</span>';
+        if (m.horas) badges += '<span class="mod-badge horas">' + m.horas + 'h</span>';
+        html += '<label class="tp-mod-item" style="background:' + bg + ';border:1px solid ' + bd + '">'
           + '<input type="checkbox" data-esp="' + esc(espId) + '" data-mod="' + esc(m.id) + '"' + (marcado ? ' checked' : '')
-          + ' onchange="onModCheck(this)" style="accent-color:var(--gold);margin-top:2px;flex-shrink:0">'
-          + '<div style="flex:1;min-width:0">'
-          +   '<div style="font-weight:600">' + esc(m.nombre) + '</div>'
-          +   '<div style="font-size:.7rem;color:var(--muted);margin-top:2px">' + esc(m.num || '') + (m.nivel ? ' · ' + esc(m.nivel) : '') + (m.horas ? ' · ' + m.horas + ' hrs' : '') + '</div>'
+          + ' onchange="onModCheck(this)" style="accent-color:var(--gold)">'
+          + '<div class="mod-info">'
+          +   '<div class="mod-nombre">' + esc(m.nombre) + '</div>'
+          +   '<div class="mod-badges">' + badges + '</div>'
           + '</div>'
           + '</label>';
       });
@@ -790,8 +838,8 @@ function onModCheck(cb) {
   var item = cb.closest('.tp-mod-item');
   if (!item) return;
   if (cb.checked) {
-    item.style.background = 'rgba(251,191,36,.1)';
-    item.style.borderColor = 'rgba(251,191,36,.4)';
+    item.style.background = 'rgba(251,191,36,.10)';
+    item.style.borderColor = 'rgba(251,191,36,.45)';
   } else {
     item.style.background = 'var(--bg-2)';
     item.style.borderColor = 'var(--border)';
