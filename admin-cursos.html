@@ -16,6 +16,7 @@
 <script src="js/roles-permissions.js"></script>
 <script src="js/roles-router.js"></script>
 <script src="js/cursos.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
 <style>
 :root {
@@ -142,8 +143,11 @@ input, select, textarea { width: 100%; padding: 8px 10px; border-radius: 7px; ba
         <div class="tab-content active" id="tab-estudiantes">
           <div style="display:flex;justify-content:space-between;gap:10px;margin-bottom:12px;flex-wrap:wrap">
             <div style="font-size:.9rem;color:var(--muted)" id="totEst">0 estudiantes</div>
-            <div style="display:flex;gap:8px">
-              <button class="btn" onclick="abrirModalImportar()">📥 Importar CSV</button>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <button class="btn" onclick="descargarPlantillaEst()" title="Descargar plantilla Excel">📊 Plantilla Excel</button>
+              <button class="btn" onclick="document.getElementById('inputExcelEst').click()">📤 Cargar Excel</button>
+              <input type="file" id="inputExcelEst" accept=".xlsx,.xls" style="display:none" onchange="procesarExcelEst(this)">
+              <button class="btn" onclick="abrirModalImportar()">📥 CSV</button>
               <button class="btn primary" onclick="abrirModalEstudiante()">+ Agregar</button>
             </div>
           </div>
@@ -637,6 +641,119 @@ document.addEventListener('keydown', function(e) {
 
 if (window.ELAuth && ELAuth.onUserReady) {
   ELAuth.onUserReady(function(u) { if (u) cargar(); });
+}
+
+// ══════════════════════════════════════════════
+// CARGA MASIVA ESTUDIANTES desde Excel
+// ══════════════════════════════════════════════
+function descargarPlantillaEst() {
+  var data = [
+    ['rut','apellidos','nombres','sexo','email','fecha_nacimiento'],
+    ['12.345.678-9','González Rojas','María Fernanda','F','maria.gonzalez@estudiante.cl','2010-05-15'],
+    ['15.678.234-5','Silva Martínez','Pedro Antonio','M','pedro.silva@estudiante.cl','2010-08-22'],
+    ['16.789.345-6','Rojas López','Ana Belén','F','','2011-01-10'],
+    ['17.890.456-7','Muñoz Pérez','Diego Alejandro','M','','2010-11-03']
+  ];
+  var ws = XLSX.utils.aoa_to_sheet(data);
+  ws['!cols'] = [{wch:14},{wch:24},{wch:24},{wch:6},{wch:32},{wch:16}];
+  var wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Estudiantes');
+  var nombreArchivo = 'plantilla-estudiantes' + (_cursoActivo ? ('-' + _cursoActivo.cursoId) : '') + '.xlsx';
+  XLSX.writeFile(wb, nombreArchivo);
+}
+
+function procesarExcelEst(input) {
+  var file = input.files[0];
+  if (!file) return;
+  if (!_cursoActivo) { alert('Elegí un curso primero.'); input.value = ''; return; }
+
+  var reader = new FileReader();
+  reader.onload = function (e) {
+    try {
+      var wb = XLSX.read(e.target.result, { type: 'array' });
+      var ws = wb.Sheets[wb.SheetNames[0]];
+      var filas = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+      var headers = (filas[0] || []).map(function (h) { return String(h).toLowerCase().trim(); });
+      var rows = filas.slice(1).filter(function (r) { return r.some(function (c) { return c !== ''; }); });
+
+      var iR = headers.indexOf('rut');
+      var iA = headers.indexOf('apellidos');
+      var iN = headers.indexOf('nombres');
+      var iS = headers.indexOf('sexo');
+      var iE = headers.indexOf('email');
+      var iF = headers.indexOf('fecha_nacimiento');
+      if (iR < 0 || iA < 0 || iN < 0) {
+        alert('El Excel debe tener columnas: rut, apellidos, nombres (obligatorias). Descargá la plantilla primero.');
+        input.value = ''; return;
+      }
+
+      var estudiantes = [];
+      var errores = [];
+      rows.forEach(function (r, idx) {
+        var rut = String(r[iR] || '').trim();
+        var apellidos = String(r[iA] || '').trim();
+        var nombres = String(r[iN] || '').trim();
+        var sexo = iS >= 0 ? String(r[iS] || '').trim().toUpperCase() : '';
+        var email = iE >= 0 ? String(r[iE] || '').trim() : '';
+        var fecNac = iF >= 0 ? String(r[iF] || '').trim() : '';
+
+        var errFila = [];
+        if (!rut) errFila.push('Falta RUT');
+        else if (typeof CCCursos !== 'undefined' && CCCursos.validarRut && !CCCursos.validarRut(rut)) errFila.push('RUT inválido');
+        if (!apellidos) errFila.push('Faltan apellidos');
+        if (!nombres) errFila.push('Faltan nombres');
+        if (sexo && ['F','M','O'].indexOf(sexo) === -1) errFila.push('Sexo debe ser F/M/O');
+
+        if (errFila.length) {
+          errores.push('Fila ' + (idx + 2) + ': ' + errFila.join(', '));
+        } else {
+          estudiantes.push({
+            rut: rut, apellidos: apellidos, nombres: nombres,
+            sexo: sexo || '', email: email, fechaNacimiento: fecNac
+          });
+        }
+      });
+
+      var msg = '✓ ' + estudiantes.length + ' estudiantes válidos';
+      if (errores.length) msg += '\n\n⚠ ' + errores.length + ' con errores:\n' + errores.slice(0, 10).join('\n');
+      if (errores.length > 10) msg += '\n… y ' + (errores.length - 10) + ' más';
+      msg += '\n\n¿Cargar los ' + estudiantes.length + ' estudiantes al curso "' + (_cursoActivo.nombreCompleto || _cursoActivo.nombre || '') + '"?';
+
+      if (!confirm(msg)) { input.value = ''; return; }
+
+      // Guardar en el curso — merge con los existentes
+      var actualesRuts = ((_cursoActivo.estudiantes || []).map(function(e){return e.rut;}));
+      var nuevos = estudiantes.filter(function(e){ return actualesRuts.indexOf(e.rut) === -1; });
+      var actualizados = estudiantes.filter(function(e){ return actualesRuts.indexOf(e.rut) !== -1; });
+
+      var listaFinal = (_cursoActivo.estudiantes || []).slice();
+      // Agregar nuevos con ordinal
+      var maxOrdinal = listaFinal.reduce(function(m,e){return Math.max(m, e.ordinal || 0);}, 0);
+      nuevos.forEach(function(e, i){ e.ordinal = maxOrdinal + i + 1; listaFinal.push(e); });
+      // Actualizar existentes (por RUT)
+      actualizados.forEach(function(e){
+        var idx = listaFinal.findIndex(function(x){return x.rut === e.rut;});
+        if (idx >= 0) listaFinal[idx] = Object.assign(listaFinal[idx], e);
+      });
+
+      CCCursos.actualizarCurso(_cursoActivo.cursoId, {
+        estudiantes: listaFinal,
+        totalEstudiantes: listaFinal.length
+      }).then(function () {
+        alert('✅ Listo.\n' + nuevos.length + ' nuevos + ' + actualizados.length + ' actualizados.');
+        return CCCursos.obtenerCurso(_cursoActivo.cursoId);
+      }).then(function (c) {
+        if (c) { _cursoActivo = c; abrirCurso(c.cursoId); }
+        if (typeof cargar === 'function') cargar();
+      }).catch(function (err) {
+        alert('Error guardando: ' + err.message);
+      });
+    } catch (err) {
+      alert('Error leyendo Excel: ' + err.message);
+    }
+    input.value = '';
+  };
+  reader.readAsArrayBuffer(file);
 }
 </script>
 

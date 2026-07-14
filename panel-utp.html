@@ -17,21 +17,27 @@
 <script src="js/firebase-auth.js"></script>
 <script src="js/roles-permissions.js"></script>
 <script src="js/roles-router.js"></script>
+<script src="js/firebase-db.js"></script>
 <script src="js/aprobaciones.js"></script>
 <script src="js/cursos.js"></script>
 <script src="js/notas.js"></script>
 <script src="js/dashboard.js"></script>
+<script src="js/liceos.js"></script>
+<script src="js/personal.js"></script>
 <script src="js/cc-store.js"></script>
 <link rel="stylesheet" href="css/panel.css">
 <script src="js/cc-ui.js"></script>
 </head>
 <body>
 <div class="topbar">
-  <div><a href="acceso-demo.html" style="color:var(--muted);font-size:13px;margin-right:14px"><span class="material-symbols-outlined" style="font-size:16px;vertical-align:-3px">arrow_back</span> Roles</a><span class="brand">Click&Clase</span><span class="demo-tag">UTP · demo</span></div>
+  <div style="display:flex;align-items:center;gap:14px">
+    <span class="brand">Click&Clase</span>
+    <span id="topLiceoNombre" style="color:var(--muted);font-size:13px;padding-left:14px;border-left:1px solid rgba(148,163,184,.2)">Cargando…</span>
+  </div>
   <div class="switcher">
     <label for="segSel">Encargado de:</label>
     <select id="segSel"></select>
-    <span class="usr" style="margin-left:8px"><span class="av">UT</span><a class="salir" href="login.html">Salir</a></span>
+    <span class="usr" style="margin-left:8px"><span class="av" id="topAv">UT</span><span id="topUserName" style="margin-left:6px;font-size:.86rem;color:var(--text)">—</span><a class="salir" href="login.html" style="margin-left:10px">Salir</a></span>
   </div>
 </div>
 <div class="shell">
@@ -324,6 +330,64 @@ if (window.CCRouter && window.CCRouter.guardPanel) {
         }
       }).catch(function(){});
     }
+  });
+})();
+
+// ══════════════════════════════════════════════════════════════
+// Modernización panel UTP: header institucional + KPIs reales
+// ══════════════════════════════════════════════════════════════
+(function initHeaderYKpisReales() {
+  if (typeof ELAuth === 'undefined' || !ELAuth.onUserReady) return;
+  ELAuth.onUserReady(function (u) {
+    if (!u) return;
+    // Nombre y avatar del user
+    var nom = u.nombre || u.email || 'Encargado';
+    document.getElementById('topUserName').textContent = nom;
+    document.getElementById('topAv').textContent = nom.charAt(0).toUpperCase();
+
+    var slug = u.liceoSlug;
+    if (!slug) {
+      document.getElementById('topLiceoNombre').textContent = 'Sin liceo asignado';
+      return;
+    }
+    // Nombre del colegio
+    if (typeof CCLiceos !== 'undefined') {
+      CCLiceos.obtener(slug).then(function (liceo) {
+        if (liceo) {
+          document.getElementById('topLiceoNombre').textContent = liceo.nombre + ' · UTP';
+          document.title = liceo.nombre + ' · UTP · Click&Clase';
+        }
+      }).catch(function () {});
+    }
+
+    // Sobrescribir KPIs con datos reales del liceo
+    setTimeout(function () {
+      Promise.all([
+        (typeof CCPersonal !== 'undefined') ? CCPersonal.contarMiembros(slug) : Promise.resolve(null),
+        EL_DB.collection('planificaciones').where('liceoSlug','==',slug).where('estado','==','enviada').get().catch(function(){return {size:0};}),
+        EL_DB.collection('evaluaciones').where('liceoSlug','==',slug).get().catch(function(){return {size:0};}),
+        EL_DB.collection('cursos').where('liceoSlug','==',slug).get().catch(function(){return {size:0};})
+      ]).then(function (r) {
+        var kpisEl = document.getElementById('kpis');
+        if (!kpisEl) return;
+        var docentes = 0;
+        if (r[0]) {
+          docentes = (r[0].porRol.profesor || 0) + (r[0].porRol.jefe_curso || 0);
+        }
+        var kpis = [
+          ['Docentes',        String(docentes)],
+          ['Planif. por revisar', String(r[1].size || 0)],
+          ['Cursos activos',  String(r[3].size || 0)],
+          ['Evaluaciones',    String(r[2].size || 0)]
+        ];
+        kpisEl.innerHTML = kpis.map(function (k) {
+          return '<div class="kpi"><div class="l">' + k[0] + '</div><div class="v">' + k[1] + '</div></div>';
+        }).join('');
+        // Bandeja count
+        var bc = document.getElementById('bandejaCount');
+        if (bc) bc.textContent = r[1].size || 0;
+      }).catch(function (err) { console.warn('KPIs UTP:', err); });
+    }, 800);
   });
 })();
 </script>

@@ -156,6 +156,7 @@ table.tabla th { font-size: .68rem; text-transform: uppercase; letter-spacing: 1
     <button class="tab" onclick="tab('plan', this)">💰 Plan y facturación</button>
     <button class="tab" onclick="tab('asig', this)">📚 Asignaturas y niveles</button>
     <button class="tab" onclick="tab('limites', this)">🎯 Límites</button>
+    <button class="tab" onclick="tab('tp', this)">🔧 TP (Técnico-Profesional)</button>
     <button class="tab" onclick="tab('personal', this)">👥 Personal</button>
     <button class="tab" onclick="tab('peligro', this)">⚠ Zona peligrosa</button>
   </div>
@@ -301,6 +302,38 @@ table.tabla th { font-size: .68rem; text-transform: uppercase; letter-spacing: 1
     </div>
   </div>
 
+  <!-- ═════ SECCIÓN: TP (Técnico-Profesional) ═════ -->
+  <div class="section" id="sec-tp">
+    <div class="card">
+      <h2><span>🔧</span> Configuración Técnico-Profesional</h2>
+      <div class="sub">Activá TP si el colegio ofrece formación técnico-profesional y marcá las especialidades del catálogo Mineduc chileno.</div>
+
+      <div class="fld" style="margin-bottom:20px">
+        <label style="display:flex;align-items:center;gap:12px;cursor:pointer;padding:14px 18px;background:var(--panel-2);border-radius:10px;border:1px solid var(--border-strong)">
+          <input type="checkbox" id="tpActivo" onchange="toggleTP()" style="width:18px;height:18px;accent-color:var(--violet);cursor:pointer">
+          <div>
+            <div style="font-weight:700;color:var(--text);font-size:.95rem">Este colegio ofrece formación Técnico-Profesional</div>
+            <div style="color:var(--muted);font-size:.82rem;margin-top:2px">Habilita las especialidades TP en planificaciones y libro de clases de 3° y 4° medio</div>
+          </div>
+        </label>
+      </div>
+
+      <div id="tpEspecialidades" style="display:none">
+        <div class="matriz-controles">
+          <button class="btn" onclick="marcarTodoTP(true)">✓ Marcar todo</button>
+          <button class="btn" onclick="marcarTodoTP(false)">✗ Desmarcar todo</button>
+          <span class="chip" id="tpChip">0 especialidades</span>
+        </div>
+
+        <div id="areasTPWrap"></div>
+
+        <div class="acciones-guardar">
+          <button class="btn primary" onclick="guardarTP()" id="btnGuardarTP">💾 Guardar configuración TP</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- ═════ SECCIÓN: PERSONAL ═════ -->
   <div class="section" id="sec-personal">
     <div class="card">
@@ -386,6 +419,84 @@ var NIVELES = [
   { id: '2m',  label: '2M', full: '2° Medio' },
   { id: '3m',  label: '3M', full: '3° Medio' },
   { id: '4m',  label: '4M', full: '4° Medio' }
+];
+
+// ══════════════════════════════════════════════
+// Catálogo oficial de Áreas y Especialidades TP
+// (Decreto 546/2020 Mineduc Chile actualizado)
+// ══════════════════════════════════════════════
+var AREAS_TP = [
+  { area: 'Administración', ico: '📊', especialidades: [
+    { id: 'tp_administracion', nombre: 'Administración' }
+  ]},
+  { area: 'Agropecuaria', ico: '🌾', especialidades: [
+    { id: 'tp_agropecuaria', nombre: 'Agropecuaria' }
+  ]},
+  { area: 'Alimentación', ico: '🍽', especialidades: [
+    { id: 'tp_elab_alim',    nombre: 'Elaboración Industrial de Alimentos' },
+    { id: 'tp_serv_alim',    nombre: 'Servicios de Alimentación Colectiva' },
+    { id: 'tp_gastronomia',  nombre: 'Gastronomía' }
+  ]},
+  { area: 'Comercio', ico: '🛒', especialidades: [
+    { id: 'tp_ventas',       nombre: 'Ventas' },
+    { id: 'tp_contabilidad', nombre: 'Contabilidad' },
+    { id: 'tp_logistica',    nombre: 'Logística' }
+  ]},
+  { area: 'Confección', ico: '👕', especialidades: [
+    { id: 'tp_confeccion', nombre: 'Vestuario y Confección Textil' }
+  ]},
+  { area: 'Construcción', ico: '🏗', especialidades: [
+    { id: 'tp_const_metal',  nombre: 'Construcciones Metálicas' },
+    { id: 'tp_edificacion',  nombre: 'Edificación' },
+    { id: 'tp_sanitarias',   nombre: 'Instalaciones Sanitarias' },
+    { id: 'tp_montaje',      nombre: 'Montaje Industrial' },
+    { id: 'tp_obras_viales', nombre: 'Obras Viales y de Infraestructura' },
+    { id: 'tp_refrig',       nombre: 'Refrigeración y Climatización' },
+    { id: 'tp_terminaciones',nombre: 'Terminaciones de Construcción' }
+  ]},
+  { area: 'Electricidad', ico: '⚡', especialidades: [
+    { id: 'tp_electricidad', nombre: 'Electricidad' },
+    { id: 'tp_electronica',  nombre: 'Electrónica' },
+    { id: 'tp_telecom',      nombre: 'Telecomunicaciones' }
+  ]},
+  { area: 'Gráfica', ico: '🎨', especialidades: [
+    { id: 'tp_dibujo',       nombre: 'Dibujo Técnico' },
+    { id: 'tp_grafica',      nombre: 'Gráfica' }
+  ]},
+  { area: 'Hotelería y Turismo', ico: '🏨', especialidades: [
+    { id: 'tp_turismo',      nombre: 'Servicios de Turismo' },
+    { id: 'tp_hoteleria',    nombre: 'Servicios Hoteleros' }
+  ]},
+  { area: 'Maderero', ico: '🌲', especialidades: [
+    { id: 'tp_forestal',     nombre: 'Forestal' },
+    { id: 'tp_madera',       nombre: 'Productos de la Madera' }
+  ]},
+  { area: 'Marítimo', ico: '⚓', especialidades: [
+    { id: 'tp_acuicultura',  nombre: 'Acuicultura' },
+    { id: 'tp_naves',        nombre: 'Naves Mercantes y Especiales' },
+    { id: 'tp_op_portuaria', nombre: 'Operación Portuaria' },
+    { id: 'tp_pesqueria',    nombre: 'Pesquería' },
+    { id: 'tp_tripulacion',  nombre: 'Tripulación de Naves Mercantes' }
+  ]},
+  { area: 'Metalmecánica', ico: '⚙', especialidades: [
+    { id: 'tp_mec_auto',     nombre: 'Mecánica Automotriz' },
+    { id: 'tp_mec_ind',      nombre: 'Mecánica Industrial' },
+    { id: 'tp_matriceria',   nombre: 'Matricería' }
+  ]},
+  { area: 'Minero', ico: '⛏', especialidades: [
+    { id: 'tp_explot_min',   nombre: 'Explotación Minera' },
+    { id: 'tp_metalurgia',   nombre: 'Metalurgia Extractiva' },
+    { id: 'tp_geologia',     nombre: 'Asistencia en Geología' }
+  ]},
+  { area: 'Química e Industria', ico: '🧪', especialidades: [
+    { id: 'tp_lab_quim',     nombre: 'Laboratorio Químico' },
+    { id: 'tp_planta_quim',  nombre: 'Operación de Planta Química' }
+  ]},
+  { area: 'Salud y Educación', ico: '⚕', especialidades: [
+    { id: 'tp_enfermeria',   nombre: 'Atención de Enfermería' },
+    { id: 'tp_adulto_mayor', nombre: 'Atención de Adulto Mayor' },
+    { id: 'tp_parvulos',     nombre: 'Atención de Párvulos' }
+  ]}
 ];
 
 // Presets por plan
@@ -486,6 +597,7 @@ function cargarLiceo() {
 
     renderPlanes(liceo.planId);
     renderMatriz(liceo.asignaturasPermitidas || [], liceo.nivelesPermitidos || []);
+    renderTP(liceo);
   }).catch(function (err) {
     document.getElementById('tituloLiceo').textContent = 'Error cargando: ' + err.message;
   });
@@ -673,6 +785,78 @@ function guardarLimites() {
     mostrarOk('Límites actualizados');
   }).catch(function (err) {
     btn.disabled = false; btn.innerHTML = '💾 Guardar límites';
+    mostrarErr(err.message);
+  });
+}
+
+// ══════════════════════════════════════════════
+// TP · Técnico-Profesional
+// ══════════════════════════════════════════════
+function renderTP(liceo) {
+  var esTP = !!liceo.esTP;
+  var especialidadesMarcadas = liceo.especialidadesTP || [];
+  document.getElementById('tpActivo').checked = esTP;
+  document.getElementById('tpEspecialidades').style.display = esTP ? 'block' : 'none';
+
+  var html = '';
+  AREAS_TP.forEach(function (a) {
+    html += '<div style="margin-bottom:20px;padding:16px 20px;background:var(--panel-2);border-radius:12px;border:1px solid var(--border)">'
+      + '<div style="font-weight:700;font-size:.95rem;margin-bottom:10px;color:var(--violet)">' + a.ico + ' ' + esc(a.area) + '</div>'
+      + '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:6px">';
+    a.especialidades.forEach(function (e) {
+      var marcada = especialidadesMarcadas.indexOf(e.id) !== -1;
+      html += '<label style="display:flex;align-items:center;gap:8px;padding:6px 10px;background:var(--bg-2);border:1px solid var(--border);border-radius:6px;cursor:pointer;font-size:.85rem;transition:all .15s"'
+        + ' onmouseover="this.style.borderColor=\'var(--border-strong)\'" onmouseout="this.style.borderColor=\'var(--border)\'">'
+        + '<input type="checkbox" data-esp="' + esc(e.id) + '"' + (marcada ? ' checked' : '') + ' onchange="updateTPChip()" style="accent-color:var(--violet)">'
+        + '<span>' + esc(e.nombre) + '</span>'
+        + '</label>';
+    });
+    html += '</div></div>';
+  });
+  document.getElementById('areasTPWrap').innerHTML = html;
+  updateTPChip();
+}
+
+function toggleTP() {
+  var checked = document.getElementById('tpActivo').checked;
+  document.getElementById('tpEspecialidades').style.display = checked ? 'block' : 'none';
+}
+
+function updateTPChip() {
+  var total = document.querySelectorAll('#areasTPWrap input:checked').length;
+  document.getElementById('tpChip').textContent = total + ' especialidades marcadas';
+}
+
+function marcarTodoTP(estado) {
+  document.querySelectorAll('#areasTPWrap input').forEach(function (cb) { cb.checked = estado; });
+  updateTPChip();
+}
+
+function guardarTP() {
+  var btn = document.getElementById('btnGuardarTP');
+  btn.disabled = true; btn.innerHTML = '<span class="spin"></span> Guardando…';
+  var esTP = document.getElementById('tpActivo').checked;
+  var especialidades = [];
+  var areasSet = new Set();
+  if (esTP) {
+    document.querySelectorAll('#areasTPWrap input:checked').forEach(function (cb) {
+      var id = cb.getAttribute('data-esp');
+      especialidades.push(id);
+      // Encontrar área
+      AREAS_TP.forEach(function (a) {
+        if (a.especialidades.some(function (e) { return e.id === id; })) areasSet.add(a.area);
+      });
+    });
+  }
+  CCLiceos.actualizar(_slug, {
+    esTP: esTP,
+    especialidadesTP: especialidades,
+    areasTP: Array.from(areasSet)
+  }).then(function () {
+    btn.disabled = false; btn.innerHTML = '💾 Guardar configuración TP';
+    mostrarOk(esTP ? (especialidades.length + ' especialidades TP guardadas') : 'TP desactivado');
+  }).catch(function (err) {
+    btn.disabled = false; btn.innerHTML = '💾 Guardar configuración TP';
     mostrarErr(err.message);
   });
 }
