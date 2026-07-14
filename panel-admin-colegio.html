@@ -15,6 +15,8 @@
 <script src="js/roles-router.js"></script>
 <script src="js/liceos.js"></script>
 <script src="js/personal.js"></script>
+<script src="js/curricula-loader.js"></script>
+<script src="js/tp-catalogo.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 :root {
@@ -326,6 +328,12 @@ tr:hover td { background: rgba(255,255,255,.02); }
         <div class="h">Solo aparece si el colegio tiene formación TP habilitada.</div>
       </div>
 
+      <div class="fld" id="fldModulosTPWrap" style="display:none">
+        <label>Módulos TP que dicta</label>
+        <div id="modulosTPWrap"></div>
+        <div class="h">Marcá los módulos que este docente dicta dentro de cada especialidad seleccionada.</div>
+      </div>
+
       <div class="fld">
         <label>Contraseña inicial</label>
         <div style="display:flex;gap:8px;flex-wrap:wrap">
@@ -548,7 +556,19 @@ function renderPersonal() {
     var espTags = espsArr.map(function (e) {
       return '<span class="tag" style="background:rgba(251,191,36,.1);color:#fcd34d;border-color:rgba(251,191,36,.2)">🔧 ' + esc(TP_LABELS[e] || e) + '</span>';
     }).join('');
-    var asigEsp = (asigTags + espTags) || '<span style="color:var(--muted)">—</span>';
+    // Módulos TP por especialidad — como tags más chicos debajo
+    var modulosTagsHtml = '';
+    var mods = m.modulosTP || {};
+    Object.keys(mods).forEach(function (espId) {
+      var arr = mods[espId] || [];
+      arr.forEach(function (modId) {
+        var label = (typeof CCTPCatalogo !== 'undefined')
+          ? CCTPCatalogo.labelModulo(espId, modId)
+          : modId;
+        modulosTagsHtml += '<span class="tag" style="background:rgba(139,92,246,.08);color:#c4b5fd;border-color:rgba(139,92,246,.2);font-size:.65rem">📖 ' + esc(label) + '</span>';
+      });
+    });
+    var asigEsp = (asigTags + espTags + (modulosTagsHtml ? '<div style="margin-top:4px">' + modulosTagsHtml + '</div>' : '')) || '<span style="color:var(--muted)">—</span>';
 
     html += '<tr>'
       + '<td><div class="miembro-cell"><div class="avatar">' + esc(inicial) + '</div><div class="info"><b>' + esc(m.nombre || '—') + '</b><div class="em">' + esc(m.email || '') + '</div></div></div></td>'
@@ -699,6 +719,83 @@ function renderEspecialidadesForm() {
 
 function onEspCheck(cb) {
   cb.closest('.role-item').classList.toggle('selected', cb.checked);
+  renderModulosTP();  // re-renderizar módulos disponibles según especialidades marcadas
+}
+
+// ── Render módulos TP según especialidades marcadas ──
+// El catálogo real vive en window.CURRICULA_FULL (cargado por curricula-loader.js)
+function renderModulosTP(preservarSeleccion) {
+  var fld = document.getElementById('fldModulosTPWrap');
+  var wrap = document.getElementById('modulosTPWrap');
+  if (!fld || !wrap) return;
+  if (typeof CCTPCatalogo === 'undefined') { fld.style.display = 'none'; return; }
+
+  var seleccion = {};
+  if (preservarSeleccion !== false) {
+    wrap.querySelectorAll('input:checked').forEach(function (cb) {
+      var esp = cb.getAttribute('data-esp');
+      var mod = cb.getAttribute('data-mod');
+      if (!seleccion[esp]) seleccion[esp] = [];
+      seleccion[esp].push(mod);
+    });
+  }
+
+  var espsMarcadas = Array.from(document.querySelectorAll('#espGridWrap input:checked')).map(function (cb) { return cb.value; });
+  if (espsMarcadas.length === 0) {
+    fld.style.display = 'none';
+    wrap.innerHTML = '';
+    return;
+  }
+  fld.style.display = 'block';
+  wrap.innerHTML = '<div style="padding:12px;color:var(--muted);font-size:.85rem">⏳ Cargando catálogo oficial de módulos…</div>';
+
+  // Asegurar que el catálogo TP esté cargado antes de renderizar
+  CCTPCatalogo.cargarCatalogo().then(function () {
+    var html = '';
+    espsMarcadas.forEach(function (espId) {
+      var espLabel = CCTPCatalogo.labelEspecialidad(espId);
+      var mods = CCTPCatalogo.modulos(espId);
+      var yaMarcados = seleccion[espId] || [];
+      var totalHoras = mods.reduce(function (s, m) { return s + (m.horas || 0); }, 0);
+
+      html += '<div style="margin-bottom:12px;padding:14px 16px;background:rgba(251,191,36,.04);border:1px solid rgba(251,191,36,.2);border-radius:10px">'
+        + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">'
+        +   '<div style="font-weight:700;font-size:.9rem;color:var(--gold)">🔧 ' + esc(espLabel) + '</div>'
+        +   '<span style="font-size:.72rem;color:var(--muted);padding:3px 10px;background:rgba(255,255,255,.03);border-radius:999px">' + mods.length + ' módulos · ' + totalHoras + 'h totales</span>'
+        + '</div>'
+        + '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:6px">';
+      mods.forEach(function (m) {
+        var marcado = yaMarcados.indexOf(m.id) !== -1;
+        var bg = marcado ? 'rgba(251,191,36,.1)' : 'var(--bg-2)';
+        var bd = marcado ? 'rgba(251,191,36,.4)' : 'var(--border)';
+        html += '<label class="tp-mod-item" style="display:flex;align-items:flex-start;gap:8px;padding:8px 10px;background:' + bg + ';border:1px solid ' + bd + ';border-radius:6px;cursor:pointer;font-size:.82rem">'
+          + '<input type="checkbox" data-esp="' + esc(espId) + '" data-mod="' + esc(m.id) + '"' + (marcado ? ' checked' : '')
+          + ' onchange="onModCheck(this)" style="accent-color:var(--gold);margin-top:2px;flex-shrink:0">'
+          + '<div style="flex:1;min-width:0">'
+          +   '<div style="font-weight:600">' + esc(m.nombre) + '</div>'
+          +   '<div style="font-size:.7rem;color:var(--muted);margin-top:2px">' + esc(m.num || '') + (m.nivel ? ' · ' + esc(m.nivel) : '') + (m.horas ? ' · ' + m.horas + ' hrs' : '') + '</div>'
+          + '</div>'
+          + '</label>';
+      });
+      html += '</div></div>';
+    });
+    wrap.innerHTML = html;
+  }).catch(function (err) {
+    console.warn('[TP] No se pudo cargar el catálogo:', err);
+    wrap.innerHTML = '<div style="padding:14px;color:var(--danger);font-size:.86rem">⚠ No se pudo cargar el catálogo oficial. Reintentá recargando la página.</div>';
+  });
+}
+
+function onModCheck(cb) {
+  var item = cb.closest('.tp-mod-item');
+  if (!item) return;
+  if (cb.checked) {
+    item.style.background = 'rgba(251,191,36,.1)';
+    item.style.borderColor = 'rgba(251,191,36,.4)';
+  } else {
+    item.style.background = 'var(--bg-2)';
+    item.style.borderColor = 'var(--border)';
+  }
 }
 
 // ── Handlers de cambios en el formulario ──
@@ -766,11 +863,15 @@ function _limpiarModal() {
   ['fNombre','fEmail','fTelefono','fRut','fPassword','fNewPass'].forEach(function (id) {
     var el = document.getElementById(id); if (el) el.value = '';
   });
-  // Desmarcar todos los checkboxes de roles/asignaturas/especialidades
   document.querySelectorAll('#rolesGridWrap input, #asigGridWrap input, #espGridWrap input').forEach(function (cb) {
     cb.checked = false;
     var lbl = cb.closest('.role-item'); if (lbl) lbl.classList.remove('selected');
   });
+  // Vaciar módulos TP
+  var modWrap = document.getElementById('modulosTPWrap');
+  if (modWrap) modWrap.innerHTML = '';
+  var modFld = document.getElementById('fldModulosTPWrap');
+  if (modFld) modFld.style.display = 'none';
   document.getElementById('fEmail').disabled = false;
   document.getElementById('formPaso').style.display = 'block';
   document.getElementById('exitoPaso').style.display = 'none';
@@ -833,6 +934,18 @@ function editar(uid) {
     if (marcada) cb.closest('.role-item').classList.add('selected');
   });
 
+  // Renderizar módulos TP y marcar los ya asignados
+  renderModulosTP(false);   // false = no preservar selección del DOM anterior
+  var modulosTP = m.modulosTP || {};
+  setTimeout(function () {
+    Object.keys(modulosTP).forEach(function (espId) {
+      (modulosTP[espId] || []).forEach(function (modId) {
+        var cb = document.querySelector('#modulosTPWrap input[data-esp="' + espId + '"][data-mod="' + modId + '"]');
+        if (cb) { cb.checked = true; onModCheck(cb); }
+      });
+    });
+  }, 500);   // esperar a que renderModulosTP termine (carga async del catálogo)
+
   document.getElementById('fldResetPass').style.display = 'block';
   document.getElementById('modalMiembro').classList.add('show');
 }
@@ -854,6 +967,14 @@ function guardarMiembro() {
   var roles = Array.from(document.querySelectorAll('#rolesGridWrap input:checked')).map(function (c) { return c.value; });
   var asigs = Array.from(document.querySelectorAll('#asigGridWrap input:checked')).map(function (c) { return c.value; });
   var esps  = Array.from(document.querySelectorAll('#espGridWrap input:checked')).map(function (c) { return c.value; });
+  // Módulos TP: agrupar por especialidad → {tp_mec_auto: ['MA1','MA3'], ...}
+  var modulosTP = {};
+  document.querySelectorAll('#modulosTPWrap input:checked').forEach(function (cb) {
+    var esp = cb.getAttribute('data-esp');
+    var mod = cb.getAttribute('data-mod');
+    if (!modulosTP[esp]) modulosTP[esp] = [];
+    modulosTP[esp].push(mod);
+  });
   var datos = {
     nombre:       document.getElementById('fNombre').value.trim(),
     email:        document.getElementById('fEmail').value.trim(),
@@ -861,6 +982,7 @@ function guardarMiembro() {
     rut:          document.getElementById('fRut').value.trim(),
     asignaturas:   asigs,
     especialidades: esps,
+    modulosTP:     modulosTP,
     password:     document.getElementById('fPassword') ? document.getElementById('fPassword').value.trim() : '',
     usarRutComoPass: true,
     roles:        roles

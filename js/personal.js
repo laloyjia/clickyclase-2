@@ -166,6 +166,7 @@
                        : (datos.asignatura ? [datos.asignatura] : []);
         var espsArr  = Array.isArray(datos.especialidades) ? datos.especialidades
                        : (datos.especialidad ? [datos.especialidad] : []);
+        var modulosTP = (datos.modulosTP && typeof datos.modulosTP === 'object') ? datos.modulosTP : {};
         var userDoc = {
           uid:            newUid,
           email:          datos.email,
@@ -176,8 +177,9 @@
           roles:          rolesMap,             // formato nuevo
           liceoSlug:      liceoSlug,
           cargo:          datos.cargo || '',       // opcional (legacy)
-          asignaturas:    asigsArr,                 // ARRAY nuevo
-          especialidades: espsArr,                  // ARRAY nuevo
+          asignaturas:    asigsArr,                 // ARRAY
+          especialidades: espsArr,                  // ARRAY
+          modulosTP:      modulosTP,                // MAP {esp: [moduloId,...]}
           asignatura:     asigsArr[0] || '',        // primer valor (retrocompat)
           especialidad:   espsArr[0] || '',         // primer valor (retrocompat)
           activo:         true,
@@ -220,6 +222,11 @@
     } else if (cambios.especialidad !== undefined) {
       update.especialidades = cambios.especialidad ? [cambios.especialidad] : [];
       update.especialidad   = cambios.especialidad || '';
+    }
+
+    // Módulos TP: map {especialidad: [modulos]}
+    if (cambios.modulosTP && typeof cambios.modulosTP === 'object') {
+      update.modulosTP = cambios.modulosTP;
     }
 
     // Roles: si se pasa array, reconstruimos el map
