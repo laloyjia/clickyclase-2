@@ -301,17 +301,99 @@ tr:hover td { background: rgba(255,255,255,.02); }
     <div id="formPaso">
       <div class="row2">
         <div class="fld"><label>Nombre completo *</label><input type="text" id="fNombre" placeholder="Ej: María González Rojas"></div>
-        <div class="fld"><label>Cargo (opcional)</label><input type="text" id="fCargo" placeholder="Ej: Profesor de Matemática"></div>
+        <div class="fld"><label>RUT (recomendado)</label><input type="text" id="fRut" placeholder="12.345.678-9" oninput="onRutChange()"></div>
       </div>
       <div class="row2">
         <div class="fld"><label>Email *</label><input type="email" id="fEmail" placeholder="usuario@colegio.cl"></div>
         <div class="fld"><label>Teléfono</label><input type="text" id="fTelefono" placeholder="+56 9 8765 4321"></div>
       </div>
-      <div class="fld"><label>RUT (opcional)</label><input type="text" id="fRut" placeholder="12.345.678-9"></div>
+
+      <div class="row2">
+        <div class="fld">
+          <label>Roles asignados *</label>
+          <select id="fRolesSelect" multiple size="6" style="min-height:150px" onchange="onRolesChange()"></select>
+          <div class="h">Mantené <b>Ctrl</b> (o <b>Cmd</b> en Mac) presionado para elegir varios.</div>
+        </div>
+        <div class="fld">
+          <label>Cargo específico</label>
+          <select id="fCargo" onchange="onCargoChange()">
+            <option value="">— Seleccionar cargo —</option>
+            <optgroup label="Directivos">
+              <option>Director/a</option>
+              <option>Rector/a</option>
+              <option>Sub-Director/a</option>
+              <option>Inspector/a General</option>
+              <option>Jefe/a UTP</option>
+              <option>Coordinador/a Académico</option>
+              <option>Sostenedor/a</option>
+            </optgroup>
+            <optgroup label="Aula">
+              <option>Profesor/a de asignatura</option>
+              <option>Profesor/a jefe</option>
+              <option>Educador/a de Párvulos</option>
+              <option>Docente en práctica</option>
+            </optgroup>
+            <optgroup label="PIE">
+              <option>Coordinador/a PIE</option>
+              <option>Educador/a Diferencial</option>
+              <option>Fonoaudiólogo/a</option>
+              <option>Terapeuta Ocupacional</option>
+              <option>Psicopedagogo/a</option>
+            </optgroup>
+            <optgroup label="Apoyo Psicosocial">
+              <option>Psicólogo/a</option>
+              <option>Trabajador/a Social</option>
+              <option>Orientador/a</option>
+              <option>Terapeuta</option>
+            </optgroup>
+            <optgroup label="Convivencia">
+              <option>Encargado/a de Convivencia</option>
+              <option>Mediador/a Escolar</option>
+              <option>Inspector/a</option>
+            </optgroup>
+            <optgroup label="Otros">
+              <option>Asistente de la Educación</option>
+              <option>Administrativo</option>
+              <option>Otro</option>
+            </optgroup>
+          </select>
+        </div>
+      </div>
+
+      <div class="row2">
+        <div class="fld">
+          <label>Asignatura principal (si es docente)</label>
+          <select id="fAsignatura">
+            <option value="">— Sin asignatura —</option>
+          </select>
+          <div class="h" id="fAsigHint">Solo se ven las asignaturas contratadas por el colegio.</div>
+        </div>
+        <div class="fld" id="fldEspecialidad" style="display:none">
+          <label>Especialidad TP (si aplica)</label>
+          <select id="fEspecialidad">
+            <option value="">— Sin especialidad —</option>
+          </select>
+          <div class="h">Solo aparece si el colegio tiene formación TP habilitada.</div>
+        </div>
+      </div>
 
       <div class="fld">
-        <label>Roles asignados *</label>
-        <div id="rolesWrap"></div>
+        <label>Contraseña inicial</label>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <input type="text" id="fPassword" placeholder="Se autogenerará si dejás vacío" style="flex:1;min-width:200px">
+          <button type="button" class="btn small" onclick="usarRutPass()">🪪 Usar RUT</button>
+          <button type="button" class="btn small" onclick="generarPass()">🎲 Generar</button>
+        </div>
+        <div class="h">Por defecto podés usar el RUT sin puntos ni guiones. El usuario podrá cambiarla en su primer ingreso.</div>
+      </div>
+
+      <div class="fld" id="fldResetPass" style="display:none;padding:14px;background:rgba(251,191,36,.05);border:1px solid rgba(251,191,36,.2);border-radius:10px">
+        <label style="color:var(--gold)">🔑 Restablecer contraseña</label>
+        <div class="h" style="margin-bottom:8px">Marca el usuario para que en su próximo login DEBA cambiar contraseña. Si escribís una nueva contraseña abajo, se la asignaremos vía Firebase Auth Console.</div>
+        <div style="display:flex;gap:8px">
+          <input type="text" id="fNewPass" placeholder="Nueva contraseña temporal" style="flex:1">
+          <button type="button" class="btn" onclick="resetearPasswordUsuario()">🔑 Resetear ahora</button>
+        </div>
       </div>
     </div>
 
@@ -390,6 +472,8 @@ function iniciar() {
     cargarPersonal();
     renderFiltroRoles();
     renderRolesForm();
+    renderAsignaturasForm();
+    renderEspecialidadesForm();
   }).catch(function (err) {
     document.getElementById('nombreLiceo').textContent = 'Error cargando colegio';
     console.error(err);
@@ -487,7 +571,7 @@ function renderPersonal() {
   }
 
   var html = '<table><thead><tr>'
-    + '<th>Miembro</th><th>Cargo</th><th>Roles</th><th>Estado</th><th>Acciones</th>'
+    + '<th>Miembro</th><th>Cargo</th><th>Asignatura / Especialidad</th><th>Roles</th><th>Estado</th><th>Acciones</th>'
     + '</tr></thead><tbody>';
 
   lista.forEach(function (m) {
@@ -506,9 +590,16 @@ function renderPersonal() {
       : '<button class="btn small" onclick="editar(\'' + esc(m.uid) + '\')" title="Editar">✎</button>'
       + '<button class="btn small danger" onclick="desactivar(\'' + esc(m.uid) + '\')" title="Desactivar">⏸</button>';
 
+    // Asignatura / Especialidad combinadas
+    var asigEsp = '';
+    if (m.asignatura) asigEsp += '<div>' + esc(m.asignatura) + '</div>';
+    if (m.especialidad) asigEsp += '<div style="font-size:.78rem;color:var(--muted)">🔧 ' + esc(m.especialidad) + '</div>';
+    if (!asigEsp) asigEsp = '<span style="color:var(--muted)">—</span>';
+
     html += '<tr>'
       + '<td><div class="miembro-cell"><div class="avatar">' + esc(inicial) + '</div><div class="info"><b>' + esc(m.nombre || '—') + '</b><div class="em">' + esc(m.email || '') + '</div></div></div></td>'
       + '<td>' + esc(m.cargo || '—') + '</td>'
+      + '<td>' + asigEsp + '</td>'
       + '<td>' + rolesTags + '</td>'
       + '<td>' + estadoTxt + '</td>'
       + '<td><div class="acciones-cell">' + acciones + '</div></td>'
@@ -518,29 +609,188 @@ function renderPersonal() {
   document.getElementById('tablaWrap').innerHTML = html;
 }
 
+// ── Poblar dropdowns del modal ──
 function renderRolesForm() {
-  var wrap = document.getElementById('rolesWrap');
-  var grupos = { directivo: 'Directivos', aula: 'Aula', pie: 'PIE', apoyo: 'Apoyo psicosocial', convivencia: 'Convivencia' };
+  var sel = document.getElementById('fRolesSelect');
+  if (!sel) return;
+  var grupos = { directivo: 'Directivos', aula: 'Aula', pie: 'PIE', apoyo: 'Apoyo Psicosocial', convivencia: 'Convivencia' };
   var html = '';
   Object.keys(grupos).forEach(function (g) {
     var roles = CCPersonal.ROLES_ASIGNABLES.filter(function (r) { return r.grupo === g; });
     if (!roles.length) return;
-    html += '<div class="role-grupo">' + grupos[g] + '</div>';
-    html += '<div class="roles-grid">';
+    html += '<optgroup label="' + esc(grupos[g]) + '">';
     roles.forEach(function (r) {
-      html += '<label class="role-item" data-rol="' + r.id + '">'
-        + '<input type="checkbox" name="rol" value="' + r.id + '" onchange="toggleRolCheck(this)">'
-        + '<span class="ico">' + r.ico + '</span>'
-        + '<span>' + esc(r.label) + '</span>'
-        + '</label>';
+      html += '<option value="' + r.id + '">' + r.ico + ' ' + esc(r.label) + '</option>';
     });
-    html += '</div>';
+    html += '</optgroup>';
   });
-  wrap.innerHTML = html;
+  sel.innerHTML = html;
 }
 
-function toggleRolCheck(cb) {
-  cb.closest('.role-item').classList.toggle('selected', cb.checked);
+// Nombres de asignaturas Mineduc (para dropdown)
+var ASIGNATURAS_LABELS = {
+  lenguaje: 'Lenguaje y Comunicación',
+  matematica: 'Matemática',
+  ciencias_nat: 'Ciencias Naturales',
+  historia: 'Historia, Geografía y CCSS',
+  ingles: 'Inglés',
+  ed_fisica: 'Educación Física y Salud',
+  artes_vis: 'Artes Visuales',
+  musica: 'Música',
+  tecnologia: 'Tecnología',
+  orientacion: 'Orientación',
+  religion: 'Religión',
+  biologia: 'Biología',
+  fisica: 'Física',
+  quimica: 'Química',
+  cs_ciudadania: 'Ciencias para la Ciudadanía',
+  filosofia: 'Filosofía',
+  ed_ciudadana: 'Educación Ciudadana',
+  ling_liter: 'Lengua y Literatura',
+  artes_esc: 'Artes Escénicas'
+};
+
+function renderAsignaturasForm() {
+  var sel = document.getElementById('fAsignatura');
+  if (!sel || !_liceo) return;
+  // Extraer asignaturas únicas de asignaturasPermitidas (formato: 'asig_id__nivel_id')
+  var asigIds = _liceo.asignaturasIds || [];
+  if (!asigIds.length && Array.isArray(_liceo.asignaturasPermitidas)) {
+    var set = new Set();
+    _liceo.asignaturasPermitidas.forEach(function (k) { set.add(k.split('__')[0]); });
+    asigIds = Array.from(set);
+  }
+  var html = '<option value="">— Sin asignatura —</option>';
+  if (!asigIds.length) {
+    html += '<option value="" disabled>(el admin del sistema aún no ha asignado asignaturas)</option>';
+    // Fallback: mostrar todas
+    Object.keys(ASIGNATURAS_LABELS).forEach(function (id) {
+      html += '<option value="' + id + '">' + esc(ASIGNATURAS_LABELS[id]) + '</option>';
+    });
+  } else {
+    asigIds.forEach(function (id) {
+      html += '<option value="' + id + '">' + esc(ASIGNATURAS_LABELS[id] || id) + '</option>';
+    });
+  }
+  sel.innerHTML = html;
+}
+
+function renderEspecialidadesForm() {
+  var fld = document.getElementById('fldEspecialidad');
+  var sel = document.getElementById('fEspecialidad');
+  if (!fld || !sel || !_liceo) return;
+  if (!_liceo.esTP || !Array.isArray(_liceo.especialidadesTP) || _liceo.especialidadesTP.length === 0) {
+    fld.style.display = 'none';
+    return;
+  }
+  fld.style.display = 'block';
+  // Etiquetas legibles de especialidades TP
+  var TP_LABELS = {
+    tp_administracion: 'Administración',
+    tp_agropecuaria: 'Agropecuaria',
+    tp_elab_alim: 'Elaboración Industrial de Alimentos',
+    tp_serv_alim: 'Servicios de Alimentación Colectiva',
+    tp_gastronomia: 'Gastronomía',
+    tp_ventas: 'Ventas', tp_contabilidad: 'Contabilidad', tp_logistica: 'Logística',
+    tp_confeccion: 'Vestuario y Confección Textil',
+    tp_const_metal: 'Construcciones Metálicas', tp_edificacion: 'Edificación',
+    tp_sanitarias: 'Instalaciones Sanitarias', tp_montaje: 'Montaje Industrial',
+    tp_obras_viales: 'Obras Viales', tp_refrig: 'Refrigeración y Climatización',
+    tp_terminaciones: 'Terminaciones de Construcción',
+    tp_electricidad: 'Electricidad', tp_electronica: 'Electrónica', tp_telecom: 'Telecomunicaciones',
+    tp_dibujo: 'Dibujo Técnico', tp_grafica: 'Gráfica',
+    tp_turismo: 'Servicios de Turismo', tp_hoteleria: 'Servicios Hoteleros',
+    tp_forestal: 'Forestal', tp_madera: 'Productos de la Madera',
+    tp_acuicultura: 'Acuicultura', tp_naves: 'Naves Mercantes',
+    tp_op_portuaria: 'Operación Portuaria', tp_pesqueria: 'Pesquería',
+    tp_tripulacion: 'Tripulación de Naves',
+    tp_mec_auto: 'Mecánica Automotriz', tp_mec_ind: 'Mecánica Industrial', tp_matriceria: 'Matricería',
+    tp_explot_min: 'Explotación Minera', tp_metalurgia: 'Metalurgia Extractiva', tp_geologia: 'Asistencia en Geología',
+    tp_lab_quim: 'Laboratorio Químico', tp_planta_quim: 'Operación de Planta Química',
+    tp_enfermeria: 'Atención de Enfermería', tp_adulto_mayor: 'Atención de Adulto Mayor', tp_parvulos: 'Atención de Párvulos'
+  };
+  var html = '<option value="">— Sin especialidad —</option>';
+  _liceo.especialidadesTP.forEach(function (id) {
+    html += '<option value="' + id + '">' + esc(TP_LABELS[id] || id) + '</option>';
+  });
+  sel.innerHTML = html;
+}
+
+// ── Handlers de cambios en el formulario ──
+function onRutChange() {
+  // Si el campo password está vacío, sugerir el RUT limpio como placeholder
+  var rut = document.getElementById('fRut').value.trim();
+  var pw = document.getElementById('fPassword');
+  if (rut && !pw.value) {
+    pw.placeholder = 'Sugerido: ' + rut.replace(/[.\-\s]/g, '') + ' (RUT sin puntos ni guión)';
+  }
+}
+function onRolesChange() {
+  // Ajustar cargo sugerido según el primer rol
+  var sel = document.getElementById('fRolesSelect');
+  var rolesSel = Array.from(sel.selectedOptions).map(function (o) { return o.value; });
+  var cargoSel = document.getElementById('fCargo');
+  if (!cargoSel.value && rolesSel.length) {
+    var mapa = {
+      profesor: 'Profesor/a de asignatura',
+      jefe_curso: 'Profesor/a jefe',
+      utp: 'Jefe/a UTP',
+      director: 'Director/a',
+      rector: 'Rector/a',
+      pie_enc: 'Coordinador/a PIE',
+      pie_edu: 'Educador/a Diferencial',
+      aps_enc: 'Encargado/a Apoyo Psicosocial',
+      aps_prof: 'Psicólogo/a',
+      amb_enc: 'Encargado/a de Convivencia',
+      amb_prof: 'Mediador/a Escolar',
+      encargado_area: 'Coordinador/a Académico'
+    };
+    if (mapa[rolesSel[0]]) cargoSel.value = mapa[rolesSel[0]];
+  }
+}
+function onCargoChange() {
+  // (reservado para lógica futura)
+}
+function usarRutPass() {
+  var rut = document.getElementById('fRut').value.trim();
+  if (!rut) { alert('Ingresá el RUT primero.'); return; }
+  var clean = rut.replace(/[.\-\s]/g, '');
+  if (clean.length < 6) clean = clean + '2026';
+  document.getElementById('fPassword').value = clean;
+}
+function generarPass() {
+  if (typeof CCPersonal !== 'undefined' && CCPersonal.generarPassword) {
+    document.getElementById('fPassword').value = CCPersonal.generarPassword();
+  }
+}
+function resetearPasswordUsuario() {
+  var nuevaPass = document.getElementById('fNewPass').value.trim();
+  if (!nuevaPass || nuevaPass.length < 6) {
+    alert('La contraseña nueva debe tener al menos 6 caracteres.');
+    return;
+  }
+  if (!_editandoUid) return;
+  // No podemos cambiar la password de Auth desde el cliente (requiere admin SDK).
+  // Marcamos primerIngreso: true y avisamos al usuario para acción manual en Firebase Console.
+  CCPersonal.actualizarMiembro(_editandoUid, { primerIngreso: true }).then(function () {
+    alert('✓ Usuario marcado como primer-ingreso.\n\nPara asignar la contraseña "' + nuevaPass + '" hacé lo siguiente:\n\n1. Andá a https://console.firebase.google.com/project/electrolearn-prod/authentication/users\n2. Buscá el email del usuario\n3. En los ⋮ elegí "Restablecer contraseña"\n\n(En una próxima versión, esto lo haremos automático desde una Cloud Function.)');
+  }).catch(function (err) { alert('Error: ' + err.message); });
+}
+
+function _limpiarModal() {
+  ['fNombre','fEmail','fTelefono','fRut','fCargo','fAsignatura','fEspecialidad','fPassword','fNewPass'].forEach(function (id) {
+    var el = document.getElementById(id); if (el) el.value = '';
+  });
+  var sel = document.getElementById('fRolesSelect');
+  if (sel) Array.from(sel.options).forEach(function (o) { o.selected = false; });
+  document.getElementById('fEmail').disabled = false;
+  document.getElementById('formPaso').style.display = 'block';
+  document.getElementById('exitoPaso').style.display = 'none';
+  document.getElementById('btnGuardar').style.display = '';
+  document.getElementById('btnCancelar').style.display = '';
+  document.getElementById('btnCerrarExito').style.display = 'none';
+  document.getElementById('errBox').classList.remove('show');
+  document.getElementById('fldResetPass').style.display = 'none';
 }
 
 function abrirModalCrear() {
@@ -551,22 +801,9 @@ function abrirModalCrear() {
   }
   _editandoUid = null;
   document.getElementById('modalTitulo').textContent = 'Agregar miembro';
-  document.getElementById('modalSub').textContent = 'Completá los datos. Se generará una contraseña temporal.';
+  document.getElementById('modalSub').textContent = 'Completá los datos. La contraseña inicial puede ser el RUT.';
   document.getElementById('btnGuardar').innerHTML = '💾 Crear miembro';
-  ['fNombre','fCargo','fEmail','fTelefono','fRut'].forEach(function (id) {
-    document.getElementById(id).value = '';
-  });
-  document.getElementById('fEmail').disabled = false;
-  document.querySelectorAll('.role-item').forEach(function (el) {
-    el.classList.remove('selected');
-    el.querySelector('input').checked = false;
-  });
-  document.getElementById('formPaso').style.display = 'block';
-  document.getElementById('exitoPaso').style.display = 'none';
-  document.getElementById('btnGuardar').style.display = '';
-  document.getElementById('btnCancelar').style.display = '';
-  document.getElementById('btnCerrarExito').style.display = 'none';
-  document.getElementById('errBox').classList.remove('show');
+  _limpiarModal();
   document.getElementById('modalMiembro').classList.add('show');
 }
 
@@ -577,25 +814,24 @@ function editar(uid) {
   document.getElementById('modalTitulo').textContent = 'Editar miembro';
   document.getElementById('modalSub').textContent = 'Modificá los datos y roles. El email no se puede cambiar.';
   document.getElementById('btnGuardar').innerHTML = '💾 Guardar cambios';
+  _limpiarModal();
   document.getElementById('fNombre').value = m.nombre || '';
-  document.getElementById('fCargo').value = m.cargo || '';
   document.getElementById('fEmail').value = m.email || '';
   document.getElementById('fEmail').disabled = true;
   document.getElementById('fTelefono').value = m.telefono || '';
   document.getElementById('fRut').value = m.rut || '';
+  document.getElementById('fCargo').value = m.cargo || '';
+  var asigEl = document.getElementById('fAsignatura');
+  if (asigEl && m.asignatura) asigEl.value = m.asignatura;
+  var espEl = document.getElementById('fEspecialidad');
+  if (espEl && m.especialidad) espEl.value = m.especialidad;
   var roles = m.roles ? Object.keys(m.roles) : (m.role ? [m.role] : []);
-  document.querySelectorAll('.role-item').forEach(function (el) {
-    var rid = el.getAttribute('data-rol');
-    var checked = roles.indexOf(rid) !== -1;
-    el.classList.toggle('selected', checked);
-    el.querySelector('input').checked = checked;
+  var sel = document.getElementById('fRolesSelect');
+  if (sel) Array.from(sel.options).forEach(function (o) {
+    o.selected = roles.indexOf(o.value) !== -1;
   });
-  document.getElementById('formPaso').style.display = 'block';
-  document.getElementById('exitoPaso').style.display = 'none';
-  document.getElementById('btnGuardar').style.display = '';
-  document.getElementById('btnCancelar').style.display = '';
-  document.getElementById('btnCerrarExito').style.display = 'none';
-  document.getElementById('errBox').classList.remove('show');
+  // Mostrar sección de reset password solo en edición
+  document.getElementById('fldResetPass').style.display = 'block';
   document.getElementById('modalMiembro').classList.add('show');
 }
 
@@ -613,13 +849,18 @@ function mostrarError(msg) {
 
 function guardarMiembro() {
   document.getElementById('errBox').classList.remove('show');
+  var rolesSel = document.getElementById('fRolesSelect');
   var datos = {
-    nombre:    document.getElementById('fNombre').value.trim(),
-    cargo:     document.getElementById('fCargo').value.trim(),
-    email:     document.getElementById('fEmail').value.trim(),
-    telefono:  document.getElementById('fTelefono').value.trim(),
-    rut:       document.getElementById('fRut').value.trim(),
-    roles:     Array.from(document.querySelectorAll('.role-item input:checked')).map(function (c) { return c.value; })
+    nombre:       document.getElementById('fNombre').value.trim(),
+    cargo:        document.getElementById('fCargo').value.trim(),
+    email:        document.getElementById('fEmail').value.trim(),
+    telefono:     document.getElementById('fTelefono').value.trim(),
+    rut:          document.getElementById('fRut').value.trim(),
+    asignatura:   document.getElementById('fAsignatura') ? document.getElementById('fAsignatura').value : '',
+    especialidad: document.getElementById('fEspecialidad') ? document.getElementById('fEspecialidad').value : '',
+    password:     document.getElementById('fPassword') ? document.getElementById('fPassword').value.trim() : '',
+    usarRutComoPass: true,   // fallback: si no hay password custom, usa el RUT
+    roles:        rolesSel ? Array.from(rolesSel.selectedOptions).map(function (o) { return o.value; }) : []
   };
 
   if (!datos.nombre) { mostrarError('El nombre es obligatorio.'); return; }

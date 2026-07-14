@@ -134,7 +134,17 @@
       ));
     }
 
-    var passwordTemp = generarPassword();
+    // Password: si viene 'password' en datos, usar esa; si viene 'usarRutComoPass' y hay RUT,
+    // limpiar el RUT (sin puntos ni guiones) y usarlo; si no, generar aleatoria.
+    var passwordTemp;
+    if (datos.password && datos.password.length >= 6) {
+      passwordTemp = datos.password;
+    } else if (datos.usarRutComoPass && datos.rut) {
+      passwordTemp = String(datos.rut).replace(/[.\-\s]/g, '');
+      if (passwordTemp.length < 6) passwordTemp = passwordTemp + '2026';
+    } else {
+      passwordTemp = generarPassword();
+    }
     var newUid = null;
 
     // 1) Crear Auth con app secundaria (no cierra sesión del rector)
@@ -162,6 +172,8 @@
           roles:          rolesMap,             // formato nuevo
           liceoSlug:      liceoSlug,
           cargo:          datos.cargo || '',
+          asignatura:     datos.asignatura || '',       // asignatura principal si es docente
+          especialidad:   datos.especialidad || '',     // especialidad TP si aplica
           activo:         true,
           primerIngreso:  true,
           creadoEn:       new Date().toISOString(),
@@ -180,7 +192,7 @@
   function actualizarMiembro(uid, cambios) {
     if (!uid) return Promise.reject(new Error('uid requerido'));
 
-    var permitidos = ['nombre', 'telefono', 'rut', 'cargo', 'activo'];
+    var permitidos = ['nombre', 'telefono', 'rut', 'cargo', 'activo', 'asignatura', 'especialidad'];
     var update = {};
     permitidos.forEach(function (k) {
       if (cambios[k] !== undefined) update[k] = cambios[k];

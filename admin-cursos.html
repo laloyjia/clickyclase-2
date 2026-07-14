@@ -457,28 +457,60 @@ function abrirModalCurso(edicion) {
 
 function onGuardarCurso() {
   var u = ELAuth.user;
+  console.log('[Cursos] Usuario actual:', u);
+
+  if (!u) { alert('⚠ No hay usuario logueado. Recargá la página.'); return; }
   var liceo = u.liceoSlug || u.liceoPrincipal || '';
+  if (!liceo) {
+    alert('⚠ Tu usuario no tiene liceoSlug asignado.\n\nEsto pasa si el usuario fue creado sin colegio o si es admin plataforma sin colegio propio.\n\nPara crear cursos, iniciá sesión con una cuenta que tenga un colegio asignado (director/rector/UTP/admin_colegio).');
+    return;
+  }
+
+  var letraVal = document.getElementById('fLetra').value.trim().toUpperCase();
+  if (!letraVal) { alert('⚠ La letra es obligatoria (ej: A, B, C).'); return; }
+  var anioVal = parseInt(document.getElementById('fAnio').value, 10);
+  if (!anioVal || anioVal < 2020 || anioVal > 2035) { alert('⚠ El año debe estar entre 2020 y 2035.'); return; }
+
   var datos = {
     liceoSlug:    liceo,
     nivel:        document.getElementById('fNivel').value,
-    letra:        document.getElementById('fLetra').value.toUpperCase(),
-    anio:         parseInt(document.getElementById('fAnio').value, 10),
+    letra:        letraVal,
+    anio:         anioVal,
     jefeNombre:   document.getElementById('fJefe').value.trim(),
     especialidad: document.getElementById('fEsp').value.trim()
   };
+  console.log('[Cursos] Datos a guardar:', datos, 'Modo edición:', _modoEdicionCurso);
+
   var promesa;
-  if (_modoEdicionCurso && _cursoActivo) {
-    promesa = CCCursos.actualizarCurso(_cursoActivo.cursoId, {
-      jefeNombre:   datos.jefeNombre,
-      especialidad: datos.especialidad
-    });
-  } else {
-    promesa = CCCursos.crearCurso(datos);
+  try {
+    if (_modoEdicionCurso && _cursoActivo) {
+      promesa = CCCursos.actualizarCurso(_cursoActivo.cursoId, {
+        jefeNombre:   datos.jefeNombre,
+        especialidad: datos.especialidad
+      });
+    } else {
+      promesa = CCCursos.crearCurso(datos);
+    }
+  } catch (syncErr) {
+    console.error('[Cursos] Error sincrónico:', syncErr);
+    alert('❌ Error de validación: ' + syncErr.message);
+    return;
   }
-  promesa.then(function() {
+
+  promesa.then(function(doc) {
+    console.log('[Cursos] Guardado OK:', doc);
     cerrar('mCurso');
     cargar();
-  }).catch(function(err) { alert('Error: ' + err.message); });
+  }).catch(function(err) {
+    console.error('[Cursos] Error al guardar:', err);
+    var msg = err.message || String(err);
+    if (/permission|denied/i.test(msg)) {
+      msg = 'Permiso denegado. Tu rol no puede crear cursos en este liceo.\n\nRoles permitidos: admin, director, rector, admin_colegio, utp.\n\nTu rol actual: ' + (u.role || (u.roles ? Object.keys(u.roles).join(',') : '—')) + '\nTu liceoSlug: ' + liceo;
+    } else if (/already exists|already-exists/i.test(msg)) {
+      msg = 'Ya existe un curso con esa combinación de nivel + letra + año en este colegio.';
+    }
+    alert('❌ Error: ' + msg);
+  });
 }
 
 function onDesactivarCurso() {
