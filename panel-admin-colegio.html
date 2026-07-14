@@ -672,10 +672,18 @@ function renderEspecialidadesForm() {
   var fld = document.getElementById('fldEspecialidadesWrap');
   var wrap = document.getElementById('espGridWrap');
   if (!fld || !wrap || !_liceo) return;
-  if (!_liceo.esTP || !Array.isArray(_liceo.especialidadesTP) || _liceo.especialidadesTP.length === 0) {
+  console.log('[Personal] renderEspecialidades — esTP:', _liceo.esTP,
+              '· especialidadesTP:', _liceo.especialidadesTP);
+  // Normalizar: puede venir como array o como objeto/map
+  var esps = _liceo.especialidadesTP;
+  if (esps && !Array.isArray(esps) && typeof esps === 'object') {
+    esps = Object.keys(esps);   // por si Firestore lo devolvió como map
+  }
+  if (!_liceo.esTP || !Array.isArray(esps) || esps.length === 0) {
     fld.style.display = 'none';
     return;
   }
+  _liceo.especialidadesTP = esps;   // normalizar de vuelta
   fld.style.display = 'block';
   var html = '<div class="roles-grid">';
   _liceo.especialidadesTP.forEach(function (id) {

@@ -400,10 +400,13 @@ service cloud.firestore {
     // ── cursos/{cursoId} ──────────────────────────────────────────
     // Un curso pertenece a un liceo. Contiene roster de estudiantes,
     // jefe de curso, asignaturas asignadas.
-    //   Lectura:  cualquier usuario del mismo liceo.
+    //   Lectura:  cualquier autenticado (filtrado client-side por liceoSlug).
+    //             Los cursos NO son datos sensibles, así que abrimos el read
+    //             para permitir queries sin where. El filtrado por liceo se
+    //             hace en el cliente en CCCursos.listarCursos().
     //   Escritura: admin plataforma, directivos del liceo, o jefe de curso.
     match /cursos/{cursoId} {
-      allow read:   if isAdmin() || (isSignedIn() && mismoLiceo());
+      allow read:   if isSignedIn();
       allow create: if (isAdmin() || isDirectivo()) && mismoLiceoNuevo();
       allow update: if isAdmin() ||
         (isDirectivo() && mismoLiceo()) ||

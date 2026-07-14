@@ -320,12 +320,16 @@ table.tabla th { font-size: .68rem; text-transform: uppercase; letter-spacing: 1
 
       <div id="tpEspecialidades" style="display:none">
         <div class="matriz-controles">
-          <button class="btn" onclick="marcarTodoTP(true)">✓ Marcar todo</button>
-          <button class="btn" onclick="marcarTodoTP(false)">✗ Desmarcar todo</button>
+          <input type="text" id="tpBuscar" placeholder="🔎 Buscar especialidad..." oninput="filtrarTP()" style="padding:8px 12px;border-radius:8px;background:var(--bg-2);border:1px solid var(--border-strong);color:var(--text);font-family:inherit;min-width:240px">
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:.86rem;color:var(--muted)">
+            <input type="checkbox" id="tpSoloMarcadas" onchange="filtrarTP()" style="accent-color:var(--violet)"> Solo áreas con marcadas
+          </label>
+          <button class="btn" onclick="marcarTodoTP(true)">✓ Todo</button>
+          <button class="btn" onclick="marcarTodoTP(false)">✗ Nada</button>
           <span class="chip" id="tpChip">0 especialidades</span>
         </div>
 
-        <div id="areasTPWrap"></div>
+        <div id="areasTPWrap" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:12px;margin-top:12px"></div>
 
         <div class="acciones-guardar">
           <button class="btn primary" onclick="guardarTP()" id="btnGuardarTP">💾 Guardar configuración TP</button>
@@ -795,19 +799,39 @@ function guardarLimites() {
 function renderTP(liceo) {
   var esTP = !!liceo.esTP;
   var especialidadesMarcadas = liceo.especialidadesTP || [];
+  // Normalizar por si Firestore devolvió como objeto/map
+  if (!Array.isArray(especialidadesMarcadas) && typeof especialidadesMarcadas === 'object') {
+    especialidadesMarcadas = Object.keys(especialidadesMarcadas);
+  }
   document.getElementById('tpActivo').checked = esTP;
   document.getElementById('tpEspecialidades').style.display = esTP ? 'block' : 'none';
 
   var html = '';
   AREAS_TP.forEach(function (a) {
-    html += '<div style="margin-bottom:20px;padding:16px 20px;background:var(--panel-2);border-radius:12px;border:1px solid var(--border)">'
-      + '<div style="font-weight:700;font-size:.95rem;margin-bottom:10px;color:var(--violet)">' + a.ico + ' ' + esc(a.area) + '</div>'
-      + '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:6px">';
+    var marcadasCount = a.especialidades.filter(function (e) {
+      return especialidadesMarcadas.indexOf(e.id) !== -1;
+    }).length;
+    var borderColor = marcadasCount ? 'rgba(139,92,246,.4)' : 'var(--border)';
+    var bgColor = marcadasCount ? 'linear-gradient(135deg,rgba(139,92,246,.06),var(--panel-2))' : 'var(--panel-2)';
+    var titColor = marcadasCount ? '#c4b5fd' : 'var(--text-2)';
+    var badgeBg = marcadasCount ? 'rgba(139,92,246,.2)' : 'rgba(148,163,184,.1)';
+    var badgeCol = marcadasCount ? '#c4b5fd' : 'var(--muted)';
+
+    html += '<div class="tp-area-card" data-area="' + esc(a.area) + '" data-count="' + marcadasCount + '"'
+      + ' style="padding:14px 16px;background:' + bgColor + ';border-radius:10px;border:1px solid ' + borderColor + ';transition:all .15s">'
+      + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">'
+      +   '<div style="font-weight:700;font-size:.9rem;color:' + titColor + '">' + a.ico + ' ' + esc(a.area) + '</div>'
+      +   '<span class="tp-area-count" style="font-size:.7rem;padding:2px 8px;border-radius:999px;background:' + badgeBg + ';color:' + badgeCol + ';font-weight:700">' + marcadasCount + '/' + a.especialidades.length + '</span>'
+      + '</div>'
+      + '<div style="display:flex;flex-direction:column;gap:5px">';
     a.especialidades.forEach(function (e) {
       var marcada = especialidadesMarcadas.indexOf(e.id) !== -1;
-      html += '<label style="display:flex;align-items:center;gap:8px;padding:6px 10px;background:var(--bg-2);border:1px solid var(--border);border-radius:6px;cursor:pointer;font-size:.85rem;transition:all .15s"'
-        + ' onmouseover="this.style.borderColor=\'var(--border-strong)\'" onmouseout="this.style.borderColor=\'var(--border)\'">'
-        + '<input type="checkbox" data-esp="' + esc(e.id) + '"' + (marcada ? ' checked' : '') + ' onchange="updateTPChip()" style="accent-color:var(--violet)">'
+      var itemBg = marcada ? 'rgba(139,92,246,.08)' : 'var(--bg-2)';
+      var itemBd = marcada ? 'rgba(139,92,246,.3)' : 'var(--border)';
+      html += '<label class="tp-esp-item" data-nombre="' + esc(e.nombre.toLowerCase()) + '"'
+        + ' style="display:flex;align-items:center;gap:8px;padding:5px 8px;background:' + itemBg + ';border:1px solid ' + itemBd + ';border-radius:6px;cursor:pointer;font-size:.83rem">'
+        + '<input type="checkbox" data-esp="' + esc(e.id) + '"' + (marcada ? ' checked' : '')
+        + ' onchange="updateTPChip();updateTPAreaCount(this)" style="accent-color:var(--violet)">'
         + '<span>' + esc(e.nombre) + '</span>'
         + '</label>';
     });
@@ -815,6 +839,53 @@ function renderTP(liceo) {
   });
   document.getElementById('areasTPWrap').innerHTML = html;
   updateTPChip();
+}
+
+function updateTPAreaCount(cb) {
+  var card = cb.closest('.tp-area-card');
+  if (!card) return;
+  var checked = card.querySelectorAll('input[type=checkbox]:checked').length;
+  var total = card.querySelectorAll('input[type=checkbox]').length;
+  var badge = card.querySelector('.tp-area-count');
+  if (badge) badge.textContent = checked + '/' + total;
+  card.setAttribute('data-count', checked);
+  if (checked) {
+    card.style.borderColor = 'rgba(139,92,246,.4)';
+    card.style.background = 'linear-gradient(135deg,rgba(139,92,246,.06),var(--panel-2))';
+    if (badge) { badge.style.background = 'rgba(139,92,246,.2)'; badge.style.color = '#c4b5fd'; }
+  } else {
+    card.style.borderColor = 'var(--border)';
+    card.style.background = 'var(--panel-2)';
+    if (badge) { badge.style.background = 'rgba(148,163,184,.1)'; badge.style.color = 'var(--muted)'; }
+  }
+  var item = cb.closest('.tp-esp-item');
+  if (item) {
+    if (cb.checked) {
+      item.style.background = 'rgba(139,92,246,.08)';
+      item.style.borderColor = 'rgba(139,92,246,.3)';
+    } else {
+      item.style.background = 'var(--bg-2)';
+      item.style.borderColor = 'var(--border)';
+    }
+  }
+}
+
+function filtrarTP() {
+  var q = (document.getElementById('tpBuscar').value || '').toLowerCase().trim();
+  var soloMarcadas = document.getElementById('tpSoloMarcadas').checked;
+  document.querySelectorAll('.tp-area-card').forEach(function (card) {
+    var matchArea = !q || (card.getAttribute('data-area') || '').toLowerCase().indexOf(q) !== -1;
+    var hasMatch = false;
+    card.querySelectorAll('.tp-esp-item').forEach(function (item) {
+      var nom = item.getAttribute('data-nombre') || '';
+      var visible = !q || matchArea || nom.indexOf(q) !== -1;
+      item.style.display = visible ? 'flex' : 'none';
+      if (visible) hasMatch = true;
+    });
+    var count = parseInt(card.getAttribute('data-count'), 10) || 0;
+    var cumpleSolo = !soloMarcadas || count > 0;
+    card.style.display = (hasMatch && cumpleSolo) ? 'block' : 'none';
+  });
 }
 
 function toggleTP() {
