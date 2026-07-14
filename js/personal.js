@@ -162,6 +162,10 @@
         var rolLegacy = datos.roles[0];
 
         // 3) Crear doc Firestore
+        var asigsArr = Array.isArray(datos.asignaturas) ? datos.asignaturas
+                       : (datos.asignatura ? [datos.asignatura] : []);
+        var espsArr  = Array.isArray(datos.especialidades) ? datos.especialidades
+                       : (datos.especialidad ? [datos.especialidad] : []);
         var userDoc = {
           uid:            newUid,
           email:          datos.email,
@@ -171,9 +175,11 @@
           role:           rolLegacy,           // legacy string
           roles:          rolesMap,             // formato nuevo
           liceoSlug:      liceoSlug,
-          cargo:          datos.cargo || '',
-          asignatura:     datos.asignatura || '',       // asignatura principal si es docente
-          especialidad:   datos.especialidad || '',     // especialidad TP si aplica
+          cargo:          datos.cargo || '',       // opcional (legacy)
+          asignaturas:    asigsArr,                 // ARRAY nuevo
+          especialidades: espsArr,                  // ARRAY nuevo
+          asignatura:     asigsArr[0] || '',        // primer valor (retrocompat)
+          especialidad:   espsArr[0] || '',         // primer valor (retrocompat)
           activo:         true,
           primerIngreso:  true,
           creadoEn:       new Date().toISOString(),
@@ -192,11 +198,29 @@
   function actualizarMiembro(uid, cambios) {
     if (!uid) return Promise.reject(new Error('uid requerido'));
 
-    var permitidos = ['nombre', 'telefono', 'rut', 'cargo', 'activo', 'asignatura', 'especialidad'];
+    var permitidos = ['nombre', 'telefono', 'rut', 'cargo', 'activo'];
     var update = {};
     permitidos.forEach(function (k) {
       if (cambios[k] !== undefined) update[k] = cambios[k];
     });
+
+    // Asignaturas como array
+    if (Array.isArray(cambios.asignaturas)) {
+      update.asignaturas = cambios.asignaturas;
+      update.asignatura  = cambios.asignaturas[0] || '';
+    } else if (cambios.asignatura !== undefined) {
+      update.asignaturas = cambios.asignatura ? [cambios.asignatura] : [];
+      update.asignatura  = cambios.asignatura || '';
+    }
+
+    // Especialidades como array
+    if (Array.isArray(cambios.especialidades)) {
+      update.especialidades = cambios.especialidades;
+      update.especialidad   = cambios.especialidades[0] || '';
+    } else if (cambios.especialidad !== undefined) {
+      update.especialidades = cambios.especialidad ? [cambios.especialidad] : [];
+      update.especialidad   = cambios.especialidad || '';
+    }
 
     // Roles: si se pasa array, reconstruimos el map
     if (Array.isArray(cambios.roles)) {

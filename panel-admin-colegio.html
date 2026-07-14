@@ -308,73 +308,22 @@ tr:hover td { background: rgba(255,255,255,.02); }
         <div class="fld"><label>Teléfono</label><input type="text" id="fTelefono" placeholder="+56 9 8765 4321"></div>
       </div>
 
-      <div class="row2">
-        <div class="fld">
-          <label>Roles asignados *</label>
-          <select id="fRolesSelect" multiple size="6" style="min-height:150px" onchange="onRolesChange()"></select>
-          <div class="h">Mantené <b>Ctrl</b> (o <b>Cmd</b> en Mac) presionado para elegir varios.</div>
-        </div>
-        <div class="fld">
-          <label>Cargo específico</label>
-          <select id="fCargo" onchange="onCargoChange()">
-            <option value="">— Seleccionar cargo —</option>
-            <optgroup label="Directivos">
-              <option>Director/a</option>
-              <option>Rector/a</option>
-              <option>Sub-Director/a</option>
-              <option>Inspector/a General</option>
-              <option>Jefe/a UTP</option>
-              <option>Coordinador/a Académico</option>
-              <option>Sostenedor/a</option>
-            </optgroup>
-            <optgroup label="Aula">
-              <option>Profesor/a de asignatura</option>
-              <option>Profesor/a jefe</option>
-              <option>Educador/a de Párvulos</option>
-              <option>Docente en práctica</option>
-            </optgroup>
-            <optgroup label="PIE">
-              <option>Coordinador/a PIE</option>
-              <option>Educador/a Diferencial</option>
-              <option>Fonoaudiólogo/a</option>
-              <option>Terapeuta Ocupacional</option>
-              <option>Psicopedagogo/a</option>
-            </optgroup>
-            <optgroup label="Apoyo Psicosocial">
-              <option>Psicólogo/a</option>
-              <option>Trabajador/a Social</option>
-              <option>Orientador/a</option>
-              <option>Terapeuta</option>
-            </optgroup>
-            <optgroup label="Convivencia">
-              <option>Encargado/a de Convivencia</option>
-              <option>Mediador/a Escolar</option>
-              <option>Inspector/a</option>
-            </optgroup>
-            <optgroup label="Otros">
-              <option>Asistente de la Educación</option>
-              <option>Administrativo</option>
-              <option>Otro</option>
-            </optgroup>
-          </select>
-        </div>
+      <div class="fld">
+        <label>Roles (podés marcar más de uno) *</label>
+        <div id="rolesGridWrap"></div>
+        <div class="h">Podés combinar: por ejemplo un profesor puede ser también jefe de curso, o un director puede dar clases.</div>
       </div>
 
-      <div class="row2">
-        <div class="fld">
-          <label>Asignatura principal (si es docente)</label>
-          <select id="fAsignatura">
-            <option value="">— Sin asignatura —</option>
-          </select>
-          <div class="h" id="fAsigHint">Solo se ven las asignaturas contratadas por el colegio.</div>
-        </div>
-        <div class="fld" id="fldEspecialidad" style="display:none">
-          <label>Especialidad TP (si aplica)</label>
-          <select id="fEspecialidad">
-            <option value="">— Sin especialidad —</option>
-          </select>
-          <div class="h">Solo aparece si el colegio tiene formación TP habilitada.</div>
-        </div>
+      <div class="fld" id="fldAsignaturasWrap">
+        <label>Asignaturas que dicta (si es docente)</label>
+        <div id="asigGridWrap"></div>
+        <div class="h" id="fAsigHint">Solo se muestran las asignaturas contratadas por el colegio.</div>
+      </div>
+
+      <div class="fld" id="fldEspecialidadesWrap" style="display:none">
+        <label>Especialidades TP (si aplica)</label>
+        <div id="espGridWrap"></div>
+        <div class="h">Solo aparece si el colegio tiene formación TP habilitada.</div>
       </div>
 
       <div class="fld">
@@ -389,10 +338,10 @@ tr:hover td { background: rgba(255,255,255,.02); }
 
       <div class="fld" id="fldResetPass" style="display:none;padding:14px;background:rgba(251,191,36,.05);border:1px solid rgba(251,191,36,.2);border-radius:10px">
         <label style="color:var(--gold)">🔑 Restablecer contraseña</label>
-        <div class="h" style="margin-bottom:8px">Marca el usuario para que en su próximo login DEBA cambiar contraseña. Si escribís una nueva contraseña abajo, se la asignaremos vía Firebase Auth Console.</div>
+        <div class="h" style="margin-bottom:8px">Marca el usuario para que en su próximo login DEBA cambiar contraseña.</div>
         <div style="display:flex;gap:8px">
           <input type="text" id="fNewPass" placeholder="Nueva contraseña temporal" style="flex:1">
-          <button type="button" class="btn" onclick="resetearPasswordUsuario()">🔑 Resetear ahora</button>
+          <button type="button" class="btn" onclick="resetearPasswordUsuario()">🔑 Marcar reset</button>
         </div>
       </div>
     </div>
@@ -571,7 +520,7 @@ function renderPersonal() {
   }
 
   var html = '<table><thead><tr>'
-    + '<th>Miembro</th><th>Cargo</th><th>Asignatura / Especialidad</th><th>Roles</th><th>Estado</th><th>Acciones</th>'
+    + '<th>Miembro</th><th>Roles</th><th>Asignaturas / Especialidades</th><th>Estado</th><th>Acciones</th>'
     + '</tr></thead><tbody>';
 
   lista.forEach(function (m) {
@@ -590,17 +539,21 @@ function renderPersonal() {
       : '<button class="btn small" onclick="editar(\'' + esc(m.uid) + '\')" title="Editar">✎</button>'
       + '<button class="btn small danger" onclick="desactivar(\'' + esc(m.uid) + '\')" title="Desactivar">⏸</button>';
 
-    // Asignatura / Especialidad combinadas
-    var asigEsp = '';
-    if (m.asignatura) asigEsp += '<div>' + esc(m.asignatura) + '</div>';
-    if (m.especialidad) asigEsp += '<div style="font-size:.78rem;color:var(--muted)">🔧 ' + esc(m.especialidad) + '</div>';
-    if (!asigEsp) asigEsp = '<span style="color:var(--muted)">—</span>';
+    // Asignaturas + Especialidades como arrays de tags
+    var asigsArr = Array.isArray(m.asignaturas) ? m.asignaturas : (m.asignatura ? [m.asignatura] : []);
+    var espsArr  = Array.isArray(m.especialidades) ? m.especialidades : (m.especialidad ? [m.especialidad] : []);
+    var asigTags = asigsArr.map(function (a) {
+      return '<span class="tag" style="background:rgba(34,211,238,.1);color:#67e8f9;border-color:rgba(34,211,238,.2)">📚 ' + esc(ASIGNATURAS_LABELS[a] || a) + '</span>';
+    }).join('');
+    var espTags = espsArr.map(function (e) {
+      return '<span class="tag" style="background:rgba(251,191,36,.1);color:#fcd34d;border-color:rgba(251,191,36,.2)">🔧 ' + esc(TP_LABELS[e] || e) + '</span>';
+    }).join('');
+    var asigEsp = (asigTags + espTags) || '<span style="color:var(--muted)">—</span>';
 
     html += '<tr>'
       + '<td><div class="miembro-cell"><div class="avatar">' + esc(inicial) + '</div><div class="info"><b>' + esc(m.nombre || '—') + '</b><div class="em">' + esc(m.email || '') + '</div></div></div></td>'
-      + '<td>' + esc(m.cargo || '—') + '</td>'
-      + '<td>' + asigEsp + '</td>'
       + '<td>' + rolesTags + '</td>'
+      + '<td>' + asigEsp + '</td>'
       + '<td>' + estadoTxt + '</td>'
       + '<td><div class="acciones-cell">' + acciones + '</div></td>'
       + '</tr>';
@@ -609,22 +562,31 @@ function renderPersonal() {
   document.getElementById('tablaWrap').innerHTML = html;
 }
 
-// ── Poblar dropdowns del modal ──
+// ── Renderers de checkboxes tipo card (múltiple selección visual) ──
 function renderRolesForm() {
-  var sel = document.getElementById('fRolesSelect');
-  if (!sel) return;
+  var wrap = document.getElementById('rolesGridWrap');
+  if (!wrap) return;
   var grupos = { directivo: 'Directivos', aula: 'Aula', pie: 'PIE', apoyo: 'Apoyo Psicosocial', convivencia: 'Convivencia' };
   var html = '';
   Object.keys(grupos).forEach(function (g) {
     var roles = CCPersonal.ROLES_ASIGNABLES.filter(function (r) { return r.grupo === g; });
     if (!roles.length) return;
-    html += '<optgroup label="' + esc(grupos[g]) + '">';
+    html += '<div class="role-grupo">' + esc(grupos[g]) + '</div>';
+    html += '<div class="roles-grid">';
     roles.forEach(function (r) {
-      html += '<option value="' + r.id + '">' + r.ico + ' ' + esc(r.label) + '</option>';
+      html += '<label class="role-item" data-rol="' + esc(r.id) + '">'
+        + '<input type="checkbox" name="rolChk" value="' + esc(r.id) + '" onchange="onRolCheck(this)">'
+        + '<span class="ico">' + r.ico + '</span>'
+        + '<span>' + esc(r.label) + '</span>'
+        + '</label>';
     });
-    html += '</optgroup>';
+    html += '</div>';
   });
-  sel.innerHTML = html;
+  wrap.innerHTML = html;
+}
+
+function onRolCheck(cb) {
+  cb.closest('.role-item').classList.toggle('selected', cb.checked);
 }
 
 // Nombres de asignaturas Mineduc (para dropdown)
@@ -650,70 +612,85 @@ var ASIGNATURAS_LABELS = {
   artes_esc: 'Artes Escénicas'
 };
 
+// Etiquetas de especialidades TP (compartido)
+var TP_LABELS = {
+  tp_administracion: 'Administración',
+  tp_agropecuaria: 'Agropecuaria',
+  tp_elab_alim: 'Elab. Industrial de Alimentos',
+  tp_serv_alim: 'Servicios de Alimentación',
+  tp_gastronomia: 'Gastronomía',
+  tp_ventas: 'Ventas', tp_contabilidad: 'Contabilidad', tp_logistica: 'Logística',
+  tp_confeccion: 'Vestuario y Confección',
+  tp_const_metal: 'Construcciones Metálicas', tp_edificacion: 'Edificación',
+  tp_sanitarias: 'Instalaciones Sanitarias', tp_montaje: 'Montaje Industrial',
+  tp_obras_viales: 'Obras Viales', tp_refrig: 'Refrigeración y Climatización',
+  tp_terminaciones: 'Terminaciones',
+  tp_electricidad: 'Electricidad', tp_electronica: 'Electrónica', tp_telecom: 'Telecomunicaciones',
+  tp_dibujo: 'Dibujo Técnico', tp_grafica: 'Gráfica',
+  tp_turismo: 'Servicios de Turismo', tp_hoteleria: 'Servicios Hoteleros',
+  tp_forestal: 'Forestal', tp_madera: 'Productos de la Madera',
+  tp_acuicultura: 'Acuicultura', tp_naves: 'Naves Mercantes',
+  tp_op_portuaria: 'Operación Portuaria', tp_pesqueria: 'Pesquería',
+  tp_tripulacion: 'Tripulación de Naves',
+  tp_mec_auto: 'Mecánica Automotriz', tp_mec_ind: 'Mecánica Industrial', tp_matriceria: 'Matricería',
+  tp_explot_min: 'Explotación Minera', tp_metalurgia: 'Metalurgia Extractiva', tp_geologia: 'Geología',
+  tp_lab_quim: 'Laboratorio Químico', tp_planta_quim: 'Operación de Planta Química',
+  tp_enfermeria: 'Atención de Enfermería', tp_adulto_mayor: 'Atención de Adulto Mayor', tp_parvulos: 'Atención de Párvulos'
+};
+
 function renderAsignaturasForm() {
-  var sel = document.getElementById('fAsignatura');
-  if (!sel || !_liceo) return;
-  // Extraer asignaturas únicas de asignaturasPermitidas (formato: 'asig_id__nivel_id')
+  var wrap = document.getElementById('asigGridWrap');
+  if (!wrap || !_liceo) return;
   var asigIds = _liceo.asignaturasIds || [];
   if (!asigIds.length && Array.isArray(_liceo.asignaturasPermitidas)) {
     var set = new Set();
     _liceo.asignaturasPermitidas.forEach(function (k) { set.add(k.split('__')[0]); });
     asigIds = Array.from(set);
   }
-  var html = '<option value="">— Sin asignatura —</option>';
+  var html = '';
   if (!asigIds.length) {
-    html += '<option value="" disabled>(el admin del sistema aún no ha asignado asignaturas)</option>';
-    // Fallback: mostrar todas
-    Object.keys(ASIGNATURAS_LABELS).forEach(function (id) {
-      html += '<option value="' + id + '">' + esc(ASIGNATURAS_LABELS[id]) + '</option>';
-    });
+    html = '<div style="padding:14px;color:var(--muted);font-size:.85rem;background:var(--bg-2);border-radius:8px">⚠ Todavía no hay asignaturas contratadas por el colegio. Pedile al admin del sistema que las active en el panel superadmin.</div>';
   } else {
+    html = '<div class="roles-grid">';
     asigIds.forEach(function (id) {
-      html += '<option value="' + id + '">' + esc(ASIGNATURAS_LABELS[id] || id) + '</option>';
+      html += '<label class="role-item" data-asig="' + esc(id) + '">'
+        + '<input type="checkbox" name="asigChk" value="' + esc(id) + '" onchange="onAsigCheck(this)">'
+        + '<span class="ico">📚</span>'
+        + '<span>' + esc(ASIGNATURAS_LABELS[id] || id) + '</span>'
+        + '</label>';
     });
+    html += '</div>';
   }
-  sel.innerHTML = html;
+  wrap.innerHTML = html;
+}
+
+function onAsigCheck(cb) {
+  cb.closest('.role-item').classList.toggle('selected', cb.checked);
 }
 
 function renderEspecialidadesForm() {
-  var fld = document.getElementById('fldEspecialidad');
-  var sel = document.getElementById('fEspecialidad');
-  if (!fld || !sel || !_liceo) return;
+  var fld = document.getElementById('fldEspecialidadesWrap');
+  var wrap = document.getElementById('espGridWrap');
+  if (!fld || !wrap || !_liceo) return;
   if (!_liceo.esTP || !Array.isArray(_liceo.especialidadesTP) || _liceo.especialidadesTP.length === 0) {
     fld.style.display = 'none';
     return;
   }
   fld.style.display = 'block';
-  // Etiquetas legibles de especialidades TP
-  var TP_LABELS = {
-    tp_administracion: 'Administración',
-    tp_agropecuaria: 'Agropecuaria',
-    tp_elab_alim: 'Elaboración Industrial de Alimentos',
-    tp_serv_alim: 'Servicios de Alimentación Colectiva',
-    tp_gastronomia: 'Gastronomía',
-    tp_ventas: 'Ventas', tp_contabilidad: 'Contabilidad', tp_logistica: 'Logística',
-    tp_confeccion: 'Vestuario y Confección Textil',
-    tp_const_metal: 'Construcciones Metálicas', tp_edificacion: 'Edificación',
-    tp_sanitarias: 'Instalaciones Sanitarias', tp_montaje: 'Montaje Industrial',
-    tp_obras_viales: 'Obras Viales', tp_refrig: 'Refrigeración y Climatización',
-    tp_terminaciones: 'Terminaciones de Construcción',
-    tp_electricidad: 'Electricidad', tp_electronica: 'Electrónica', tp_telecom: 'Telecomunicaciones',
-    tp_dibujo: 'Dibujo Técnico', tp_grafica: 'Gráfica',
-    tp_turismo: 'Servicios de Turismo', tp_hoteleria: 'Servicios Hoteleros',
-    tp_forestal: 'Forestal', tp_madera: 'Productos de la Madera',
-    tp_acuicultura: 'Acuicultura', tp_naves: 'Naves Mercantes',
-    tp_op_portuaria: 'Operación Portuaria', tp_pesqueria: 'Pesquería',
-    tp_tripulacion: 'Tripulación de Naves',
-    tp_mec_auto: 'Mecánica Automotriz', tp_mec_ind: 'Mecánica Industrial', tp_matriceria: 'Matricería',
-    tp_explot_min: 'Explotación Minera', tp_metalurgia: 'Metalurgia Extractiva', tp_geologia: 'Asistencia en Geología',
-    tp_lab_quim: 'Laboratorio Químico', tp_planta_quim: 'Operación de Planta Química',
-    tp_enfermeria: 'Atención de Enfermería', tp_adulto_mayor: 'Atención de Adulto Mayor', tp_parvulos: 'Atención de Párvulos'
-  };
-  var html = '<option value="">— Sin especialidad —</option>';
+  var html = '<div class="roles-grid">';
   _liceo.especialidadesTP.forEach(function (id) {
-    html += '<option value="' + id + '">' + esc(TP_LABELS[id] || id) + '</option>';
+    html += '<label class="role-item" data-esp="' + esc(id) + '">'
+      + '<input type="checkbox" name="espChk" value="' + esc(id) + '" onchange="onEspCheck(this)">'
+      + '<span class="ico">🔧</span>'
+      + '<span>' + esc(TP_LABELS[id] || id) + '</span>'
+      + '</label>';
   });
-  sel.innerHTML = html;
+  html += '</div>';
+  wrap.innerHTML = html;
+}
+
+function onEspCheck(cb) {
+  cb.closest('.role-item').classList.toggle('selected', cb.checked);
 }
 
 // ── Handlers de cambios en el formulario ──
@@ -778,11 +755,14 @@ function resetearPasswordUsuario() {
 }
 
 function _limpiarModal() {
-  ['fNombre','fEmail','fTelefono','fRut','fCargo','fAsignatura','fEspecialidad','fPassword','fNewPass'].forEach(function (id) {
+  ['fNombre','fEmail','fTelefono','fRut','fPassword','fNewPass'].forEach(function (id) {
     var el = document.getElementById(id); if (el) el.value = '';
   });
-  var sel = document.getElementById('fRolesSelect');
-  if (sel) Array.from(sel.options).forEach(function (o) { o.selected = false; });
+  // Desmarcar todos los checkboxes de roles/asignaturas/especialidades
+  document.querySelectorAll('#rolesGridWrap input, #asigGridWrap input, #espGridWrap input').forEach(function (cb) {
+    cb.checked = false;
+    var lbl = cb.closest('.role-item'); if (lbl) lbl.classList.remove('selected');
+  });
   document.getElementById('fEmail').disabled = false;
   document.getElementById('formPaso').style.display = 'block';
   document.getElementById('exitoPaso').style.display = 'none';
@@ -820,17 +800,31 @@ function editar(uid) {
   document.getElementById('fEmail').disabled = true;
   document.getElementById('fTelefono').value = m.telefono || '';
   document.getElementById('fRut').value = m.rut || '';
-  document.getElementById('fCargo').value = m.cargo || '';
-  var asigEl = document.getElementById('fAsignatura');
-  if (asigEl && m.asignatura) asigEl.value = m.asignatura;
-  var espEl = document.getElementById('fEspecialidad');
-  if (espEl && m.especialidad) espEl.value = m.especialidad;
+
+  // Marcar roles
   var roles = m.roles ? Object.keys(m.roles) : (m.role ? [m.role] : []);
-  var sel = document.getElementById('fRolesSelect');
-  if (sel) Array.from(sel.options).forEach(function (o) {
-    o.selected = roles.indexOf(o.value) !== -1;
+  document.querySelectorAll('#rolesGridWrap input').forEach(function (cb) {
+    var marcada = roles.indexOf(cb.value) !== -1;
+    cb.checked = marcada;
+    if (marcada) cb.closest('.role-item').classList.add('selected');
   });
-  // Mostrar sección de reset password solo en edición
+
+  // Marcar asignaturas (array o singular legacy)
+  var asigs = Array.isArray(m.asignaturas) ? m.asignaturas : (m.asignatura ? [m.asignatura] : []);
+  document.querySelectorAll('#asigGridWrap input').forEach(function (cb) {
+    var marcada = asigs.indexOf(cb.value) !== -1;
+    cb.checked = marcada;
+    if (marcada) cb.closest('.role-item').classList.add('selected');
+  });
+
+  // Marcar especialidades TP (array o singular legacy)
+  var esps = Array.isArray(m.especialidades) ? m.especialidades : (m.especialidad ? [m.especialidad] : []);
+  document.querySelectorAll('#espGridWrap input').forEach(function (cb) {
+    var marcada = esps.indexOf(cb.value) !== -1;
+    cb.checked = marcada;
+    if (marcada) cb.closest('.role-item').classList.add('selected');
+  });
+
   document.getElementById('fldResetPass').style.display = 'block';
   document.getElementById('modalMiembro').classList.add('show');
 }
@@ -849,18 +843,19 @@ function mostrarError(msg) {
 
 function guardarMiembro() {
   document.getElementById('errBox').classList.remove('show');
-  var rolesSel = document.getElementById('fRolesSelect');
+  var roles = Array.from(document.querySelectorAll('#rolesGridWrap input:checked')).map(function (c) { return c.value; });
+  var asigs = Array.from(document.querySelectorAll('#asigGridWrap input:checked')).map(function (c) { return c.value; });
+  var esps  = Array.from(document.querySelectorAll('#espGridWrap input:checked')).map(function (c) { return c.value; });
   var datos = {
     nombre:       document.getElementById('fNombre').value.trim(),
-    cargo:        document.getElementById('fCargo').value.trim(),
     email:        document.getElementById('fEmail').value.trim(),
     telefono:     document.getElementById('fTelefono').value.trim(),
     rut:          document.getElementById('fRut').value.trim(),
-    asignatura:   document.getElementById('fAsignatura') ? document.getElementById('fAsignatura').value : '',
-    especialidad: document.getElementById('fEspecialidad') ? document.getElementById('fEspecialidad').value : '',
+    asignaturas:   asigs,
+    especialidades: esps,
     password:     document.getElementById('fPassword') ? document.getElementById('fPassword').value.trim() : '',
-    usarRutComoPass: true,   // fallback: si no hay password custom, usa el RUT
-    roles:        rolesSel ? Array.from(rolesSel.selectedOptions).map(function (o) { return o.value; }) : []
+    usarRutComoPass: true,
+    roles:        roles
   };
 
   if (!datos.nombre) { mostrarError('El nombre es obligatorio.'); return; }

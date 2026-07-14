@@ -16,6 +16,8 @@
 <script src="js/roles-permissions.js"></script>
 <script src="js/roles-router.js"></script>
 <script src="js/cursos.js"></script>
+<script src="js/liceos.js"></script>
+<script src="js/personal.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
 <style>
@@ -97,8 +99,11 @@ input, select, textarea { width: 100%; padding: 8px 10px; border-radius: 7px; ba
     <div class="breadcrumb">Panel del Encargado</div>
     <h1>🎓 Cursos y Estudiantes</h1>
   </div>
-  <div style="display:flex;gap:8px">
+  <div style="display:flex;gap:8px;flex-wrap:wrap">
     <a href="panel-utp.html" class="btn">← Panel</a>
+    <button class="btn" onclick="descargarPlantillaCursos()">📊 Plantilla cursos</button>
+    <button class="btn" onclick="document.getElementById('inputExcelCursos').click()">📤 Cargar Excel cursos</button>
+    <input type="file" id="inputExcelCursos" accept=".xlsx,.xls" style="display:none" onchange="procesarExcelCursos(this)">
     <button class="btn primary" onclick="abrirModalCurso()">+ Nuevo curso</button>
   </div>
 </div>
@@ -196,8 +201,19 @@ input, select, textarea { width: 100%; padding: 8px 10px; border-radius: 7px; ba
         <div class="fld"><label>Letra</label><input id="fLetra" placeholder="A" maxlength="2" style="text-transform:uppercase"></div>
         <div class="fld"><label>Año</label><input id="fAnio" type="number" value=""></div>
       </div>
-      <div class="fld"><label>Profesor/a jefe</label><input id="fJefe" placeholder="Nombre completo del jefe de curso"></div>
-      <div class="fld"><label>Especialidad (solo TP)</label><input id="fEsp" placeholder="Electricidad, Mecánica Automotriz, etc."></div>
+      <div class="fld">
+        <label>Profesor/a jefe</label>
+        <select id="fJefe">
+          <option value="">— Sin asignar (podés asignarlo después) —</option>
+        </select>
+        <div style="font-size:.75rem;color:var(--muted);margin-top:4px">Solo se listan los docentes ya cargados en el colegio.</div>
+      </div>
+      <div class="fld"><label>Especialidad TP</label>
+        <select id="fEsp">
+          <option value="">— Sin especialidad —</option>
+        </select>
+        <div style="font-size:.75rem;color:var(--muted);margin-top:4px">Aparece solo si el colegio tiene formación TP habilitada.</div>
+      </div>
     </div>
     <div class="modal-foot">
       <button class="btn" onclick="cerrar('mCurso')">Cancelar</button>
@@ -433,11 +449,14 @@ function cerrar(id) { document.getElementById(id).classList.remove('abierto'); }
 function abrirModalCurso(edicion) {
   _modoEdicionCurso = !!edicion;
   document.getElementById('mCursoTit').textContent = edicion ? 'Editar curso' : 'Nuevo curso';
+  // Poblar dropdowns antes de asignar valores
+  poblarSelectJefes();
+  poblarSelectEspecialidades();
   if (edicion && _cursoActivo) {
     document.getElementById('fNivel').value = _cursoActivo.nivel;
     document.getElementById('fLetra').value = _cursoActivo.letra;
     document.getElementById('fAnio').value = _cursoActivo.anio;
-    document.getElementById('fJefe').value = _cursoActivo.jefeNombre || '';
+    document.getElementById('fJefe').value = _cursoActivo.jefeUid || '';
     document.getElementById('fEsp').value = _cursoActivo.especialidad || '';
     document.getElementById('fNivel').disabled = true;
     document.getElementById('fLetra').disabled = true;
@@ -471,13 +490,23 @@ function onGuardarCurso() {
   var anioVal = parseInt(document.getElementById('fAnio').value, 10);
   if (!anioVal || anioVal < 2020 || anioVal > 2035) { alert('⚠ El año debe estar entre 2020 y 2035.'); return; }
 
+  var jefeSel = document.getElementById('fJefe');
+  var jefeUid = jefeSel ? jefeSel.value : '';
+  var jefeNombre = '';
+  if (jefeUid && jefeSel.selectedOptions[0]) {
+    jefeNombre = jefeSel.selectedOptions[0].getAttribute('data-nombre') || jefeSel.selectedOptions[0].textContent || '';
+  }
+  var espSel = document.getElementById('fEsp');
+  var especialidad = espSel ? (espSel.tagName === 'SELECT' ? espSel.value : espSel.value.trim()) : '';
+
   var datos = {
     liceoSlug:    liceo,
     nivel:        document.getElementById('fNivel').value,
     letra:        letraVal,
     anio:         anioVal,
-    jefeNombre:   document.getElementById('fJefe').value.trim(),
-    especialidad: document.getElementById('fEsp').value.trim()
+    jefeUid:      jefeUid,
+    jefeNombre:   jefeNombre,
+    especialidad: especialidad
   };
   console.log('[Cursos] Datos a guardar:', datos, 'Modo edición:', _modoEdicionCurso);
 
@@ -780,6 +809,205 @@ function procesarExcelEst(input) {
       }).catch(function (err) {
         alert('Error guardando: ' + err.message);
       });
+    } catch (err) {
+      alert('Error leyendo Excel: ' + err.message);
+    }
+    input.value = '';
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+// ══════════════════════════════════════════════════════════════
+// POBLAR DROPDOWNS DEL MODAL NUEVO CURSO
+// ══════════════════════════════════════════════════════════════
+var _liceoCache = null, _docentesCache = null;
+var TP_LABELS_CURSOS = {
+  tp_administracion: 'Administración', tp_agropecuaria: 'Agropecuaria',
+  tp_elab_alim: 'Elab. Industrial de Alimentos', tp_serv_alim: 'Servicios de Alimentación',
+  tp_gastronomia: 'Gastronomía',
+  tp_ventas: 'Ventas', tp_contabilidad: 'Contabilidad', tp_logistica: 'Logística',
+  tp_confeccion: 'Vestuario y Confección',
+  tp_const_metal: 'Construcciones Metálicas', tp_edificacion: 'Edificación',
+  tp_sanitarias: 'Instalaciones Sanitarias', tp_montaje: 'Montaje Industrial',
+  tp_obras_viales: 'Obras Viales', tp_refrig: 'Refrigeración', tp_terminaciones: 'Terminaciones',
+  tp_electricidad: 'Electricidad', tp_electronica: 'Electrónica', tp_telecom: 'Telecomunicaciones',
+  tp_dibujo: 'Dibujo Técnico', tp_grafica: 'Gráfica',
+  tp_turismo: 'Servicios de Turismo', tp_hoteleria: 'Servicios Hoteleros',
+  tp_forestal: 'Forestal', tp_madera: 'Productos de la Madera',
+  tp_acuicultura: 'Acuicultura', tp_naves: 'Naves Mercantes',
+  tp_op_portuaria: 'Operación Portuaria', tp_pesqueria: 'Pesquería', tp_tripulacion: 'Tripulación',
+  tp_mec_auto: 'Mecánica Automotriz', tp_mec_ind: 'Mecánica Industrial', tp_matriceria: 'Matricería',
+  tp_explot_min: 'Explotación Minera', tp_metalurgia: 'Metalurgia', tp_geologia: 'Geología',
+  tp_lab_quim: 'Laboratorio Químico', tp_planta_quim: 'Planta Química',
+  tp_enfermeria: 'Atención de Enfermería', tp_adulto_mayor: 'Atención de Adulto Mayor', tp_parvulos: 'Atención de Párvulos'
+};
+
+function _liceoDelUsuario() {
+  var u = ELAuth.user || {};
+  return u.liceoSlug || u.liceoPrincipal || '';
+}
+
+function poblarSelectJefes() {
+  var sel = document.getElementById('fJefe');
+  if (!sel) return;
+  var liceo = _liceoDelUsuario();
+  if (!liceo) return;
+  sel.innerHTML = '<option value="">— Sin asignar —</option>';
+  if (typeof CCPersonal === 'undefined') return;
+  CCPersonal.listarMiembros(liceo).then(function (arr) {
+    _docentesCache = arr;
+    var jefes = arr.filter(function (m) {
+      if (m.activo === false) return false;
+      var roles = m.roles ? Object.keys(m.roles) : (m.role ? [m.role] : []);
+      return roles.some(function (r) {
+        return ['profesor','jefe_curso','utp','director','rector','encargado_area'].indexOf(r) !== -1;
+      });
+    });
+    if (!jefes.length) {
+      var opt = document.createElement('option');
+      opt.value = ''; opt.disabled = true;
+      opt.textContent = '(no hay docentes cargados aún)';
+      sel.appendChild(opt);
+      return;
+    }
+    jefes.forEach(function (m) {
+      var opt = document.createElement('option');
+      opt.value = m.uid;
+      opt.setAttribute('data-nombre', m.nombre || '');
+      var asigs = Array.isArray(m.asignaturas) ? m.asignaturas.join(', ')
+                  : (m.asignatura || '');
+      opt.textContent = (m.nombre || m.email) + (asigs ? ' · ' + asigs : '');
+      sel.appendChild(opt);
+    });
+  }).catch(function (err) { console.warn('poblarSelectJefes:', err); });
+}
+
+function poblarSelectEspecialidades() {
+  var sel = document.getElementById('fEsp');
+  if (!sel) return;
+  var liceo = _liceoDelUsuario();
+  if (!liceo || typeof CCLiceos === 'undefined') return;
+  sel.innerHTML = '<option value="">— Sin especialidad —</option>';
+  CCLiceos.obtener(liceo).then(function (l) {
+    _liceoCache = l;
+    var wrap = sel.closest('.fld');
+    if (!l || !l.esTP || !Array.isArray(l.especialidadesTP) || !l.especialidadesTP.length) {
+      if (wrap) wrap.style.display = 'none';
+      return;
+    }
+    if (wrap) wrap.style.display = '';
+    l.especialidadesTP.forEach(function (id) {
+      var opt = document.createElement('option');
+      opt.value = id;
+      opt.textContent = TP_LABELS_CURSOS[id] || id;
+      sel.appendChild(opt);
+    });
+  }).catch(function () {});
+}
+
+// ══════════════════════════════════════════════════════════════
+// CARGA MASIVA EXCEL DE CURSOS
+// ══════════════════════════════════════════════════════════════
+function descargarPlantillaCursos() {
+  var data = [
+    ['nivel','letra','anio','jefe_email','especialidad'],
+    ['1M','A',2026,'maria.gonzalez@colegio.cl',''],
+    ['1M','B',2026,'',''],
+    ['2M','A',2026,'pedro.silva@colegio.cl',''],
+    ['3M','A',2026,'','tp_mec_auto'],
+    ['4M','A',2026,'','tp_electricidad']
+  ];
+  var ws = XLSX.utils.aoa_to_sheet(data);
+  ws['!cols'] = [{wch:8},{wch:8},{wch:8},{wch:32},{wch:22}];
+  var wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Cursos');
+  var liceo = _liceoDelUsuario() || 'colegio';
+  XLSX.writeFile(wb, 'plantilla-cursos-' + liceo + '.xlsx');
+}
+
+function procesarExcelCursos(input) {
+  var file = input.files[0];
+  if (!file) return;
+  var liceo = _liceoDelUsuario();
+  if (!liceo) { alert('Sin liceo asignado.'); input.value = ''; return; }
+
+  var reader = new FileReader();
+  reader.onload = function (e) {
+    try {
+      var wb = XLSX.read(e.target.result, { type: 'array' });
+      var ws = wb.Sheets[wb.SheetNames[0]];
+      var filas = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+      var headers = (filas[0] || []).map(function (h) { return String(h).toLowerCase().trim(); });
+      var rows = filas.slice(1).filter(function (r) { return r.some(function (c) { return c !== ''; }); });
+
+      var iN = headers.indexOf('nivel');
+      var iL = headers.indexOf('letra');
+      var iA = headers.indexOf('anio');
+      var iJ = headers.indexOf('jefe_email');
+      var iE = headers.indexOf('especialidad');
+      if (iN < 0 || iL < 0 || iA < 0) {
+        alert('El Excel debe tener columnas: nivel, letra, anio (obligatorias). Descargá la plantilla.');
+        input.value = ''; return;
+      }
+
+      var proceder = function (docentes) {
+        var mapaEmail = {};
+        (docentes || []).forEach(function (d) {
+          if (d.email) mapaEmail[d.email.toLowerCase()] = d;
+        });
+
+        var cursosACrear = [];
+        var errores = [];
+        rows.forEach(function (r, idx) {
+          var nivel = String(r[iN] || '').trim().toUpperCase();
+          var letra = String(r[iL] || '').trim().toUpperCase();
+          var anio  = parseInt(r[iA], 10);
+          var jefeEmail = String(r[iJ] || '').trim().toLowerCase();
+          var esp = iE >= 0 ? String(r[iE] || '').trim() : '';
+
+          var errFila = [];
+          if (['1B','2B','3B','4B','5B','6B','7B','8B','1M','2M','3M','4M'].indexOf(nivel) === -1) errFila.push('Nivel inválido: ' + nivel);
+          if (!letra) errFila.push('Falta letra');
+          if (!anio || anio < 2020 || anio > 2035) errFila.push('Año inválido');
+          var jefeUid = '', jefeNombre = '';
+          if (jefeEmail) {
+            var d = mapaEmail[jefeEmail];
+            if (!d) errFila.push('Docente no encontrado: ' + jefeEmail);
+            else { jefeUid = d.uid; jefeNombre = d.nombre || ''; }
+          }
+
+          if (errFila.length) {
+            errores.push('Fila ' + (idx + 2) + ': ' + errFila.join(', '));
+          } else {
+            cursosACrear.push({
+              liceoSlug: liceo, nivel: nivel, letra: letra, anio: anio,
+              jefeUid: jefeUid, jefeNombre: jefeNombre, especialidad: esp
+            });
+          }
+        });
+
+        var msg = '✓ ' + cursosACrear.length + ' cursos válidos';
+        if (errores.length) msg += '\n\n⚠ ' + errores.length + ' con errores:\n' + errores.slice(0, 10).join('\n');
+        msg += '\n\n¿Crear los ' + cursosACrear.length + ' cursos?';
+        if (!confirm(msg)) { input.value = ''; return; }
+
+        var okCount = 0, errCount = 0;
+        cursosACrear.reduce(function (prom, c) {
+          return prom.then(function () {
+            return CCCursos.crearCurso(c).then(function () { okCount++; })
+              .catch(function (e) { errCount++; console.warn('curso', c, e); });
+          });
+        }, Promise.resolve()).then(function () {
+          alert('✅ Terminado.\n' + okCount + ' cursos creados' + (errCount ? ', ' + errCount + ' fallaron' : ''));
+          cargar();
+        });
+      };
+
+      if (typeof CCPersonal !== 'undefined') {
+        CCPersonal.listarMiembros(liceo).then(proceder).catch(function () { proceder([]); });
+      } else {
+        proceder([]);
+      }
     } catch (err) {
       alert('Error leyendo Excel: ' + err.message);
     }
