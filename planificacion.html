@@ -597,6 +597,31 @@
             </div>
         </div>
 
+        <!-- ========== TOGGLE MODO PLAN / TP (solo profesores híbridos) ========== -->
+        <div id="modoToggleWrap" class="seccion-plan" style="display:none;background:linear-gradient(135deg,rgba(139,92,246,.06),rgba(251,191,36,.04));border:1px solid rgba(139,92,246,.25)">
+            <h2><span class="icono">🎯</span> ¿Qué vas a planificar hoy?</h2>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px">
+                <button type="button" id="btnModoPC" class="modo-btn" onclick="setModoPlanif('planComun')" style="padding:20px 22px;background:rgba(34,211,238,.05);border:2px solid rgba(34,211,238,.25);border-radius:14px;cursor:pointer;text-align:left;color:inherit;font-family:inherit;transition:all .15s">
+                    <div style="display:flex;align-items:flex-start;gap:14px">
+                        <div style="font-size:2rem">🎓</div>
+                        <div>
+                            <div style="font-weight:800;font-size:1.05rem;color:var(--text)">Plan Común</div>
+                            <div id="btnModoPCSub" style="color:var(--text-muted);font-size:.85rem;margin-top:2px">Cargando…</div>
+                        </div>
+                    </div>
+                </button>
+                <button type="button" id="btnModoTP" class="modo-btn" onclick="setModoPlanif('tp')" style="padding:20px 22px;background:rgba(251,191,36,.05);border:2px solid rgba(251,191,36,.25);border-radius:14px;cursor:pointer;text-align:left;color:inherit;font-family:inherit;transition:all .15s">
+                    <div style="display:flex;align-items:flex-start;gap:14px">
+                        <div style="font-size:2rem">⚙️</div>
+                        <div>
+                            <div style="font-weight:800;font-size:1.05rem;color:var(--text)">Técnico-Profesional</div>
+                            <div id="btnModoTPSub" style="color:var(--text-muted);font-size:.85rem;margin-top:2px">Cargando…</div>
+                        </div>
+                    </div>
+                </button>
+            </div>
+        </div>
+
         <!-- ========== SECCION 2: OBJETIVOS CURRICULARES ========== -->
         <div class="seccion-plan">
             <h2><span class="icono">&#127919;</span> Objetivos Curriculares</h2>
@@ -1114,11 +1139,19 @@
         var secReg    = document.getElementById('sec-regular-obj');
 
         if (user._modoHibrido) {
-            // ═══ MODO HÍBRIDO: profesor con asignaturas plan común Y especialidades TP ═══
-            if (campoAsig) campoAsig.style.display = '';
-            if (secTP)  secTP.style.display  = '';
-            if (secReg) secReg.style.display = '';
-
+            // ═══ MODO HÍBRIDO: mostrar toggle grande + arrancar en Plan Común ═══
+            var togWrap = document.getElementById('modoToggleWrap');
+            if (togWrap) {
+                togWrap.style.display = '';
+                // Subtítulos dinámicos según lo asignado
+                var subPC = (user.asignaturas || []).map(function (a) { return a; }).join(', ') || 'Sin asignaturas';
+                var subTP = (user.especialidades || []).map(function (e) {
+                    return (typeof CCTPCatalogo !== 'undefined') ? CCTPCatalogo.labelEspecialidad(e) : e;
+                }).join(', ') || 'Sin especialidad TP';
+                var sPC = document.getElementById('btnModoPCSub'); if (sPC) sPC.textContent = subPC;
+                var sTP2 = document.getElementById('btnModoTPSub'); if (sTP2) sTP2.textContent = subTP;
+            }
+            // Poblar selectAsignatura con las asignaturas plan común
             var selAsigH = document.getElementById('selectAsignatura');
             if (selAsigH) {
                 selAsigH.innerHTML = '<option value="">-- Seleccionar asignatura (plan común) --</option>';
@@ -1129,8 +1162,11 @@
                 });
                 if ((user.asignaturas || []).length === 1) selAsigH.value = user.asignaturas[0];
             }
+            // Módulos TP (se llenan por si acaso, pero solo se ven cuando el toggle está en TP)
             actualizarMencion();
             filtrarModulos();
+            // Arrancar en Plan Común (default)
+            setModoPlanif('planComun');
             if ((user.asignaturas || []).length === 1 && niveles.length === 1) {
                 cargarOAsRegular();
             }
@@ -1166,6 +1202,32 @@
             }
         }
     }
+
+    // ═══════════════════════════════════════════════════════════════
+    // TOGGLE MODO PLAN COMÚN vs TP (solo profesores híbridos)
+    // ═══════════════════════════════════════════════════════════════
+    function setModoPlanif(modo) {
+        var campoAsig = document.getElementById('campoAsignatura');
+        var secTP     = document.getElementById('sec-tp-obj');
+        var secReg    = document.getElementById('sec-regular-obj');
+        var btnPC     = document.getElementById('btnModoPC');
+        var btnTP     = document.getElementById('btnModoTP');
+
+        if (modo === 'planComun') {
+            if (campoAsig) campoAsig.style.display = '';
+            if (secReg)    secReg.style.display    = '';
+            if (secTP)     secTP.style.display     = 'none';
+            if (btnPC) { btnPC.style.background = 'rgba(34,211,238,.15)'; btnPC.style.borderColor = '#22d3ee'; btnPC.style.boxShadow = '0 4px 20px rgba(34,211,238,.25)'; }
+            if (btnTP) { btnTP.style.background = 'rgba(251,191,36,.05)'; btnTP.style.borderColor = 'rgba(251,191,36,.25)'; btnTP.style.boxShadow = 'none'; }
+        } else if (modo === 'tp') {
+            if (campoAsig) campoAsig.style.display = 'none';
+            if (secReg)    secReg.style.display    = 'none';
+            if (secTP)     secTP.style.display     = '';
+            if (btnTP) { btnTP.style.background = 'rgba(251,191,36,.15)'; btnTP.style.borderColor = '#fbbf24'; btnTP.style.boxShadow = '0 4px 20px rgba(251,191,36,.25)'; }
+            if (btnPC) { btnPC.style.background = 'rgba(34,211,238,.05)'; btnPC.style.borderColor = 'rgba(34,211,238,.25)'; btnPC.style.boxShadow = 'none'; }
+        }
+    }
+    window.setModoPlanif = setModoPlanif;
 
     // Llamado cuando cambia asignatura o nivel en modo regular
     function onCambioAsigNivel() {

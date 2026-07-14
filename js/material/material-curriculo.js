@@ -277,14 +277,18 @@
       var secReg     = document.getElementById('sec-regular-mat');
 
       if (u._modoHibrido) {
-          // ═══ MODO HÍBRIDO: profesor con asignaturas plan común Y especialidades TP ═══
-          //     Mostramos AMBOS: dropdown asignatura + dropdown módulo
-          if (campoAsig)  campoAsig.style.display  = '';
-          if (campoMod)   campoMod.style.display   = '';
-          if (secTP)      secTP.style.display       = '';
-          if (secReg)     secReg.style.display      = '';
-
-          // Poblar selectAsignatura con las asignaturas plan común
+          // ═══ MODO HÍBRIDO: mostrar toggle grande, arrancar en Plan Común ═══
+          var togWrap = document.getElementById('modoToggleWrapMat');
+          if (togWrap) {
+              togWrap.style.display = '';
+              var subPC = (u.asignaturas || []).join(', ') || 'Sin asignaturas';
+              var subTP = (u.especialidades || []).map(function (e) {
+                  return (typeof CCTPCatalogo !== 'undefined') ? CCTPCatalogo.labelEspecialidad(e) : e;
+              }).join(', ') || 'Sin especialidad TP';
+              var sPC = document.getElementById('btnMatModoPCSub'); if (sPC) sPC.textContent = subPC;
+              var sTP2 = document.getElementById('btnMatModoTPSub'); if (sTP2) sTP2.textContent = subTP;
+          }
+          // Poblar selectAsignatura
           var selAsigH = document.getElementById('selectAsignatura');
           if (selAsigH) {
               selAsigH.innerHTML = '<option value="">-- Seleccionar asignatura (plan común) --</option>';
@@ -295,11 +299,11 @@
               });
               if ((u.asignaturas || []).length === 1) selAsigH.value = u.asignaturas[0];
           }
-
-          // Poblar selectModulo con módulos TP
+          // Poblar módulos TP (invisibles por default)
           actualizarMencion();
           filtrarModulos();
-
+          // Arrancar en Plan Común
+          setModoMat('planComun');
           if ((u.asignaturas || []).length === 1 && (u.niveles || []).length === 1) {
               cargarOAsRegularMat();
           }
@@ -922,4 +926,33 @@
   window.cargarAE                = cargarAE;
   window.cargarCE                = cargarCE;
   window.actualizarOAG           = actualizarOAG;
+
+  // ═══════════════════════════════════════════════════════════════
+  // TOGGLE MODO PLAN COMÚN vs TP (solo profesores híbridos)
+  // ═══════════════════════════════════════════════════════════════
+  function setModoMat(modo) {
+      var campoAsig = document.getElementById('campoAsignatura');
+      var campoMod  = document.getElementById('campoModulo');
+      var secTP     = document.getElementById('sec-tp-mat');
+      var secReg    = document.getElementById('sec-regular-mat');
+      var btnPC     = document.getElementById('btnMatModoPC');
+      var btnTP     = document.getElementById('btnMatModoTP');
+
+      if (modo === 'planComun') {
+          if (campoAsig) campoAsig.style.display = '';
+          if (campoMod)  campoMod.style.display  = 'none';
+          if (secReg)    secReg.style.display    = '';
+          if (secTP)     secTP.style.display     = 'none';
+          if (btnPC) { btnPC.style.background = 'rgba(34,211,238,.15)'; btnPC.style.borderColor = '#22d3ee'; btnPC.style.boxShadow = '0 4px 20px rgba(34,211,238,.25)'; }
+          if (btnTP) { btnTP.style.background = 'rgba(251,191,36,.05)'; btnTP.style.borderColor = 'rgba(251,191,36,.25)'; btnTP.style.boxShadow = 'none'; }
+      } else if (modo === 'tp') {
+          if (campoAsig) campoAsig.style.display = 'none';
+          if (campoMod)  campoMod.style.display  = '';
+          if (secReg)    secReg.style.display    = 'none';
+          if (secTP)     secTP.style.display     = '';
+          if (btnTP) { btnTP.style.background = 'rgba(251,191,36,.15)'; btnTP.style.borderColor = '#fbbf24'; btnTP.style.boxShadow = '0 4px 20px rgba(251,191,36,.25)'; }
+          if (btnPC) { btnPC.style.background = 'rgba(34,211,238,.05)'; btnPC.style.borderColor = 'rgba(34,211,238,.25)'; btnPC.style.boxShadow = 'none'; }
+      }
+  }
+  window.setModoMat = setModoMat;
 })();

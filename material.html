@@ -1483,6 +1483,31 @@
             </div>
         </div>
 
+        <!-- ==== TOGGLE MODO PLAN / TP (solo profesores híbridos) ==== -->
+        <div id="modoToggleWrapMat" class="seccion-mat" style="display:none;background:linear-gradient(135deg,rgba(139,92,246,.06),rgba(251,191,36,.04));border:1px solid rgba(139,92,246,.25)">
+            <h2><span>🎯</span> ¿Qué vas a preparar hoy?</h2>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px">
+                <button type="button" id="btnMatModoPC" class="modo-btn" onclick="setModoMat('planComun')" style="padding:20px 22px;background:rgba(34,211,238,.05);border:2px solid rgba(34,211,238,.25);border-radius:14px;cursor:pointer;text-align:left;color:inherit;font-family:inherit;transition:all .15s">
+                    <div style="display:flex;align-items:flex-start;gap:14px">
+                        <div style="font-size:2rem">🎓</div>
+                        <div>
+                            <div style="font-weight:800;font-size:1.05rem">Plan Común</div>
+                            <div id="btnMatModoPCSub" style="color:var(--text-muted);font-size:.85rem;margin-top:2px">Cargando…</div>
+                        </div>
+                    </div>
+                </button>
+                <button type="button" id="btnMatModoTP" class="modo-btn" onclick="setModoMat('tp')" style="padding:20px 22px;background:rgba(251,191,36,.05);border:2px solid rgba(251,191,36,.25);border-radius:14px;cursor:pointer;text-align:left;color:inherit;font-family:inherit;transition:all .15s">
+                    <div style="display:flex;align-items:flex-start;gap:14px">
+                        <div style="font-size:2rem">⚙️</div>
+                        <div>
+                            <div style="font-weight:800;font-size:1.05rem">Técnico-Profesional</div>
+                            <div id="btnMatModoTPSub" style="color:var(--text-muted);font-size:.85rem;margin-top:2px">Cargando…</div>
+                        </div>
+                    </div>
+                </button>
+            </div>
+        </div>
+
         <!-- SECCION 2: OBJETIVOS CURRICULARES -->
         <div class="seccion-mat" id="seccionOAs">
             <h2><span>&#127919;</span> Objetivos Curriculares</h2>
