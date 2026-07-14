@@ -62,6 +62,72 @@
       //    y nuevo (tipoProfesor/niveles). Siempre trabajamos con el nuevo.
       var u = Object.assign({}, user);
 
+      // ═════════════════════════════════════════════════════════════════
+      // FASE 8 — ADAPTADOR: si el user viene con el schema nuevo
+      // (especialidades[], modulosTP{}, cursosAsignados[]), derivar campos
+      // legacy (tipoProfesor, especialidad, modulos, niveles, cursos) para
+      // que el resto del código legacy siga funcionando.
+      // ═════════════════════════════════════════════════════════════════
+      var _tieneModulosTP    = u.modulosTP && Object.keys(u.modulosTP).length > 0;
+      var _tieneEspsNuevas   = Array.isArray(u.especialidades) && u.especialidades.length > 0;
+      var _tieneAsigsNuevas  = Array.isArray(u.asignaturas) && u.asignaturas.length > 0 && u.asignaturas.some(function(a){return typeof a === 'string';});
+      var _tieneCursosNuevos = Array.isArray(u.cursosAsignados) && u.cursosAsignados.length > 0;
+
+      // 1) tipoProfesor: si tiene TP → tecnico; si solo asignaturas → media
+      if (!u.tipoProfesor) {
+          if (_tieneEspsNuevas || _tieneModulosTP) u.tipoProfesor = 'tecnico';
+          else if (_tieneAsigsNuevas) u.tipoProfesor = 'media';
+      }
+
+      // 2) especialidad legacy: primera de user.especialidades
+      if (!u.especialidad && _tieneEspsNuevas) {
+          u.especialidad = u.especialidades[0];
+      }
+
+      // 3) modulos legacy: aplanar user.modulosTP en array de IDs
+      if ((!u.modulos || !u.modulos.length) && _tieneModulosTP) {
+          u.modulos = [];
+          Object.keys(u.modulosTP).forEach(function (espId) {
+              (u.modulosTP[espId] || []).forEach(function (modId) {
+                  u.modulos.push(modId);
+              });
+          });
+      }
+
+      // 4) niveles legacy: derivar de cursosAsignados (formato "liceo-1b-a-2026")
+      //    o setear default según tipoProfesor si no hay cursos
+      if ((!u.niveles || !u.niveles.length) && _tieneCursosNuevos) {
+          var nivelesSet = {};
+          u.cursosAsignados.forEach(function (cid) {
+              // parsear nivel del ID: "colegio-demo1-1b-a-2026" → "1B"
+              var partes = String(cid).split('-');
+              // Buscar el pattern nivel (1b..4b, 1m..4m, nt1, nt2)
+              partes.forEach(function (p) {
+                  if (/^(nt[12]|[1-8]b|[1-4]m)$/.test(p)) {
+                      nivelesSet[p.toUpperCase()] = true;
+                  }
+              });
+          });
+          u.niveles = Object.keys(nivelesSet);
+      }
+      // Fallback: si es TP y no tiene niveles, usar 3M+4M (típicos TP)
+      if ((!u.niveles || !u.niveles.length) && u.tipoProfesor === 'tecnico') {
+          u.niveles = ['3M', '4M'];
+      }
+      // Fallback: si es media/basica y no tiene niveles, poner rango completo
+      if ((!u.niveles || !u.niveles.length) && u.tipoProfesor === 'media') {
+          u.niveles = ['1M','2M','3M','4M'];
+      }
+      if ((!u.niveles || !u.niveles.length) && u.tipoProfesor === 'basica') {
+          u.niveles = ['1B','2B','3B','4B','5B','6B','7B','8B'];
+      }
+
+      // 5) cursos legacy = cursosAsignados
+      if ((!u.cursos || !u.cursos.length) && _tieneCursosNuevos) {
+          u.cursos = u.cursosAsignados.slice();
+      }
+      // ═════════════════════════════════════════════════════════════════
+
       // Si no tiene tipoProfesor pero tiene especialidad → inferir TP
       if (!u.tipoProfesor && u.especialidad) {
           u.tipoProfesor = 'tecnico';

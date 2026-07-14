@@ -1016,6 +1016,42 @@
     }
 
     function initCurriculo(user) {
+        // ═════════════════════════════════════════════════════════════════
+        // FASE 8 — ADAPTADOR: si el user viene con el schema nuevo
+        // (especialidades[], modulosTP{}, cursosAsignados[]), derivar campos
+        // legacy (tipoProfesor, especialidad, modulos, niveles, cursos).
+        // ═════════════════════════════════════════════════════════════════
+        var _tieneModsTP     = user.modulosTP && Object.keys(user.modulosTP).length > 0;
+        var _tieneEspsNuevas = Array.isArray(user.especialidades) && user.especialidades.length > 0;
+        var _tieneAsigsNvas  = Array.isArray(user.asignaturas) && user.asignaturas.length > 0;
+        var _tieneCursosNvos = Array.isArray(user.cursosAsignados) && user.cursosAsignados.length > 0;
+
+        if (!user.tipoProfesor) {
+            if (_tieneEspsNuevas || _tieneModsTP) user.tipoProfesor = 'tecnico';
+            else if (_tieneAsigsNvas) user.tipoProfesor = 'media';
+        }
+        if (!user.especialidad && _tieneEspsNuevas) user.especialidad = user.especialidades[0];
+        if ((!user.modulos || !user.modulos.length) && _tieneModsTP) {
+            user.modulos = [];
+            Object.keys(user.modulosTP).forEach(function (espId) {
+                (user.modulosTP[espId] || []).forEach(function (modId) { user.modulos.push(modId); });
+            });
+        }
+        if ((!user.niveles || !user.niveles.length) && _tieneCursosNvos) {
+            var nivelesSet = {};
+            user.cursosAsignados.forEach(function (cid) {
+                String(cid).split('-').forEach(function (p) {
+                    if (/^(nt[12]|[1-8]b|[1-4]m)$/.test(p)) nivelesSet[p.toUpperCase()] = true;
+                });
+            });
+            user.niveles = Object.keys(nivelesSet);
+        }
+        if ((!user.niveles || !user.niveles.length) && user.tipoProfesor === 'tecnico') user.niveles = ['3M', '4M'];
+        if ((!user.niveles || !user.niveles.length) && user.tipoProfesor === 'media')   user.niveles = ['1M','2M','3M','4M'];
+        if ((!user.niveles || !user.niveles.length) && user.tipoProfesor === 'basica')  user.niveles = ['1B','2B','3B','4B','5B','6B','7B','8B'];
+        if ((!user.cursos || !user.cursos.length) && _tieneCursosNvos) user.cursos = user.cursosAsignados.slice();
+        // ═════════════════════════════════════════════════════════════════
+
         // Mostrar barra de contexto del profesor
         // ── Deduplicar asignaturas: básica y media usan a veces nombres
         //    distintos para la misma asignatura (Lengua y Literatura vs
