@@ -79,12 +79,19 @@
           else if (_tieneAsigsNuevas) u.tipoProfesor = 'media';
       }
 
-      // 2) especialidad legacy: primera de user.especialidades
+      // 2) especialidad legacy: mapear del ID interno al slug del catálogo
+      //    (ej: 'tp_electronica' → 'electronica' que es la clave en CURRICULA_FULL)
       if (!u.especialidad && _tieneEspsNuevas) {
-          u.especialidad = u.especialidades[0];
+          var _espId = u.especialidades[0];
+          if (typeof CCTPCatalogo !== 'undefined' && CCTPCatalogo.SLUG_CURRICULA && CCTPCatalogo.SLUG_CURRICULA[_espId]) {
+              u.especialidad = CCTPCatalogo.SLUG_CURRICULA[_espId];
+          } else {
+              // Fallback: quitar prefijo tp_
+              u.especialidad = String(_espId).replace(/^tp_/, '').replace(/_/g, '-');
+          }
       }
 
-      // 3) modulos legacy: aplanar user.modulosTP en array de IDs
+      // 3) modulos legacy: aplanar user.modulosTP → array de IDs (['EN1','EN11'])
       if ((!u.modulos || !u.modulos.length) && _tieneModulosTP) {
           u.modulos = [];
           Object.keys(u.modulosTP).forEach(function (espId) {
@@ -224,6 +231,40 @@
           selCurso.appendChild(opt);
       });
       if ((u.niveles || []).length === 1) selCurso.value = u.niveles[0];
+
+      // ── Enriquecer con cursosAsignados si están (schema Fase 8) ──
+      // Reemplaza los "3M" genéricos por "1° Medio A · 2026" del curso real.
+      if (u.cursosAsignados && u.cursosAsignados.length && typeof EL_DB !== 'undefined') {
+          EL_DB.collection('cursos').get().then(function (snap) {
+              var cursosMap = {};
+              snap.forEach(function (doc) {
+                  var c = doc.data();
+                  if (u.cursosAsignados.indexOf(c.cursoId) !== -1) cursosMap[c.cursoId] = c;
+              });
+              var cursosArr = Object.values(cursosMap);
+              if (!cursosArr.length) return;
+              // Limpiar y repoblar con cursos reales
+              var prevVal = selCurso.value;
+              selCurso.innerHTML = '<option value="">-- Seleccionar curso --</option>';
+              var ORDEN_NIV = ['1B','2B','3B','4B','5B','6B','7B','8B','1M','2M','3M','4M'];
+              cursosArr.sort(function (a, b) {
+                  var na = ORDEN_NIV.indexOf(a.nivel), nb = ORDEN_NIV.indexOf(b.nivel);
+                  if (na !== nb) return na - nb;
+                  return (a.letra || '').localeCompare(b.letra || '');
+              });
+              cursosArr.forEach(function (c) {
+                  var opt = document.createElement('option');
+                  opt.value = c.nivel;   // mantener nivel como value (retrocompat)
+                  opt.setAttribute('data-curso-id', c.cursoId);
+                  opt.textContent = (c.nombreCompleto || (c.nivel + ' ' + c.letra))
+                                    + (c.anio ? ' · ' + c.anio : '')
+                                    + (c.especialidad ? ' 🔧' : '');
+                  selCurso.appendChild(opt);
+              });
+              if (prevVal) selCurso.value = prevVal;
+              if (cursosArr.length === 1) selCurso.value = cursosArr[0].nivel;
+          }).catch(function () {});
+      }
 
       var campoAsig  = document.getElementById('campoAsignatura');
       var campoMod   = document.getElementById('campoModulo');
