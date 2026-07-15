@@ -271,6 +271,10 @@
           }).catch(function () {});
       }
 
+      // CRÍTICO: setear _matUser ANTES de que las funciones (filtrarModulos, etc.)
+      // lo consulten con los campos legacy ya derivados.
+      _matUser = u;
+
       var campoAsig  = document.getElementById('campoAsignatura');
       var campoMod   = document.getElementById('campoModulo');
       var secTP      = document.getElementById('sec-tp-mat');
