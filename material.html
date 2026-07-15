@@ -116,7 +116,31 @@
         .campo select option {
             background: #1a1a3e;
             color: var(--text);
+            padding: 10px 12px;
         }
+
+        /* Optgroups del dropdown Asignatura/Módulo — dark mode */
+        .campo select optgroup {
+            background: #0e1226;
+            color: #a78bfa;
+            font-weight: 700;
+            font-style: normal;
+            padding: 6px 8px;
+            font-size: .9rem;
+            letter-spacing: .5px;
+        }
+        .campo select optgroup option {
+            background: #151b35;
+            color: #f1f5f9;
+            font-weight: 500;
+            padding-left: 24px;
+        }
+        .campo select optgroup option:checked,
+        .campo select optgroup option:hover {
+            background: linear-gradient(90deg, #7c3aed, #a78bfa);
+            color: #fff;
+        }
+
         .campo textarea {
             min-height: 80px;
             resize: vertical;
