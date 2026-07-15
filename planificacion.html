@@ -337,7 +337,7 @@
             box-shadow: 0 8px 25px rgba(108,92,231,0.4);
         }
 
-        /* --- RESULTADO LIRMI --- */
+        /* --- RESULTADO PLANIFICACIÓN GENERADA --- */
         .resultado-container {
             display: none;
             margin-top: 2rem;
@@ -348,63 +348,94 @@
         }
 
         .resultado-campo {
-            background: var(--glass);
-            border: 1px solid var(--glass-border);
-            border-radius: var(--radius-md);
-            padding: 1rem 1.2rem;
-            margin-bottom: 1rem;
+            background: linear-gradient(135deg, rgba(139,92,246,.06), rgba(34,211,238,.03));
+            border: 1px solid rgba(139,92,246,.22);
+            border-radius: 14px;
+            padding: 20px 24px;
+            margin-bottom: 16px;
+            transition: all .2s;
+            position: relative;
+            overflow: hidden;
+        }
+        .resultado-campo::before {
+            content: '';
+            position: absolute;
+            left: 0; top: 0; bottom: 0;
+            width: 4px;
+            background: linear-gradient(180deg, #7c3aed, #22d3ee);
+            border-radius: 4px 0 0 4px;
+        }
+        .resultado-campo:hover {
+            border-color: rgba(139,92,246,.4);
+            transform: translateY(-1px);
+            box-shadow: 0 8px 24px rgba(0,0,0,.15);
         }
 
         .resultado-campo-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 0.5rem;
+            margin-bottom: 14px;
+            padding-bottom: 12px;
+            border-bottom: 1px dashed rgba(148,163,184,.15);
         }
 
         .resultado-campo-header h3 {
-            font-size: 0.9rem;
-            color: var(--secondary);
-            font-weight: 600;
+            font-size: .82rem;
+            color: #a78bfa;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .btn-copiar {
             display: inline-flex;
             align-items: center;
-            gap: 0.3rem;
-            padding: 0.3rem 0.7rem;
-            background: rgba(0,206,201,0.15);
-            border: 1px solid var(--secondary);
-            border-radius: var(--radius-sm);
-            color: var(--secondary);
-            font-size: 0.8rem;
+            gap: 6px;
+            padding: 6px 14px;
+            background: linear-gradient(135deg, rgba(34,211,238,.15), rgba(139,92,246,.12));
+            border: 1px solid rgba(34,211,238,.35);
+            border-radius: 8px;
+            color: #67e8f9;
+            font-size: .78rem;
+            font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all .2s;
+            font-family: inherit;
         }
 
         .btn-copiar:hover {
-            background: rgba(0,206,201,0.3);
+            background: linear-gradient(135deg, rgba(34,211,238,.25), rgba(139,92,246,.22));
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(34,211,238,.2);
         }
 
         .btn-copiar.copiado {
-            background: rgba(0,184,148,0.3);
-            border-color: var(--success);
-            color: var(--success);
+            background: linear-gradient(135deg, rgba(52,211,153,.2), rgba(52,211,153,.12));
+            border-color: rgba(52,211,153,.5);
+            color: #86efac;
         }
 
         .resultado-texto {
-            background: rgba(0,0,0,0.3);
-            border: 1px solid rgba(255,255,255,0.05);
-            border-radius: var(--radius-sm);
-            padding: 0.8rem 1rem;
-            color: var(--text);
-            font-size: 0.85rem;
-            line-height: 1.6;
+            background: rgba(0,0,0,.35);
+            border: 1px solid rgba(148,163,184,.08);
+            border-radius: 10px;
+            padding: 14px 18px;
+            color: #e5e7eb;
+            font-size: .88rem;
+            line-height: 1.7;
             white-space: pre-wrap;
-            font-family: 'Segoe UI', sans-serif;
-            max-height: 300px;
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+            max-height: 340px;
             overflow-y: auto;
         }
+        .resultado-texto::-webkit-scrollbar { width: 8px; }
+        .resultado-texto::-webkit-scrollbar-track { background: rgba(0,0,0,.2); border-radius: 4px; }
+        .resultado-texto::-webkit-scrollbar-thumb { background: rgba(139,92,246,.4); border-radius: 4px; }
+        .resultado-texto::-webkit-scrollbar-thumb:hover { background: rgba(139,92,246,.6); }
 
         .btn-copiar-todo {
             display: block;
@@ -831,9 +862,9 @@
         <!-- ========== RESULTADO ========== -->
         <div class="resultado-container" id="resultadoContainer">
             <div class="seccion-plan">
-                <h2><span class="icono">&#128196;</span> Planificacion Generada - Copiar a LIRMI</h2>
+                <h2><span class="icono">&#128196;</span> Planificación Generada</h2>
                 <p style="color: var(--text-muted); font-size:0.85rem; margin-bottom:1rem;">
-                    Haz clic en "Copiar" en cada campo para pegarlo directamente en LIRMI.
+                    Haz clic en "Copiar" en cada campo para llevarlo a Word, PDF o donde necesites.
                 </p>
 
                 <div id="camposLIRMI">
