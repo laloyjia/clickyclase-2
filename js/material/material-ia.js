@@ -903,7 +903,27 @@
       if (!tipoDocSeleccionado) { setIAStatus('error', '&#10007; Selecciona el tipo de documento primero.'); return; }
 
       var user     = _matUser || {};
-      var isTP     = user.tipoProfesor === 'tecnico';
+
+      // ── Fase 8: detectar modo por lo que el user eligió en el dropdown
+      //    unificado (asig:: o mod::), NO por tipoProfesor (que puede ser
+      //    'media' aunque el user haya elegido un módulo TP).
+      var selUnif = document.getElementById('selectAsigOModMat');
+      var valUnif = selUnif ? selUnif.value : '';
+      var isTP;
+      if (valUnif.indexOf('mod::') === 0) {
+          isTP = true;
+          // Si el user eligió módulo TP, asegurar user.especialidad correcto
+          var partes = valUnif.split('::');
+          if (partes[1] && typeof CCTPCatalogo !== 'undefined' && CCTPCatalogo.SLUG_CURRICULA[partes[1]]) {
+              user.especialidad = CCTPCatalogo.SLUG_CURRICULA[partes[1]];
+          }
+      } else if (valUnif.indexOf('asig::') === 0) {
+          isTP = false;
+      } else {
+          // Fallback legacy
+          isTP = user.tipoProfesor === 'tecnico';
+      }
+
       var curso    = document.getElementById('selectCurso').value;
       var contenido = document.getElementById('inputContenido').value;
       var dificultad= document.getElementById('selectDificultad').value;
@@ -944,7 +964,19 @@
               }
           });
           oaTexto = oaId + ': ' + oaTxt + (aeTxt ? '\nAE ' + aeNum + ': ' + aeTxt : '') + (ceTexts.length ? '\nCriterios:\n' + ceTexts.join('\n') : '');
-          asigNombre = 'Especialidad ' + (user.especialidad || '') + ' EMTP';
+          var _espLabel = '';
+          if (typeof CCTPCatalogo !== 'undefined' && user.especialidades && user.especialidades[0]) {
+              _espLabel = CCTPCatalogo.labelEspecialidad(user.especialidades[0]);
+          } else if (typeof CCTPCatalogo !== 'undefined' && user.especialidad) {
+              // Buscar el ID interno a partir del slug
+              var _idInt = Object.keys(CCTPCatalogo.SLUG_CURRICULA).find(function (k) {
+                  return CCTPCatalogo.SLUG_CURRICULA[k] === user.especialidad;
+              });
+              _espLabel = _idInt ? CCTPCatalogo.labelEspecialidad(_idInt) : user.especialidad;
+          } else {
+              _espLabel = user.especialidad || '';
+          }
+          asigNombre = 'Especialidad ' + _espLabel + ' EMTP';
       }
 
       var valoresArr = [];

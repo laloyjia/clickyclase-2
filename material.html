@@ -2257,7 +2257,21 @@
     function generarMaterial() {
         if (!tipoDocSeleccionado) { showToast('Selecciona un tipo de documento.', 'warn'); return; }
         var user      = _matUser || {};
-        var isTP      = user.tipoProfesor === 'tecnico';
+        // Fase 8: detectar modo por el dropdown unificado, no por tipoProfesor
+        var _selUnifG = document.getElementById('selectAsigOModMat');
+        var _valUnifG = _selUnifG ? _selUnifG.value : '';
+        var isTP;
+        if (_valUnifG.indexOf('mod::') === 0) {
+            isTP = true;
+            var _partesG = _valUnifG.split('::');
+            if (_partesG[1] && typeof CCTPCatalogo !== 'undefined' && CCTPCatalogo.SLUG_CURRICULA[_partesG[1]]) {
+                user.especialidad = CCTPCatalogo.SLUG_CURRICULA[_partesG[1]];
+            }
+        } else if (_valUnifG.indexOf('asig::') === 0) {
+            isTP = false;
+        } else {
+            isTP = user.tipoProfesor === 'tecnico';
+        }
         var curso     = document.getElementById('selectCurso').value;
         var contenido = document.getElementById('inputContenido').value;
         var dificultad= document.getElementById('selectDificultad').value;
