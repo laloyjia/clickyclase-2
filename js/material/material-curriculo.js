@@ -280,62 +280,78 @@
       var secTP      = document.getElementById('sec-tp-mat');
       var secReg     = document.getElementById('sec-regular-mat');
 
-      if (u._modoHibrido) {
-          // ═══ MODO HÍBRIDO: mostrar toggle grande, arrancar en Plan Común ═══
-          var togWrap = document.getElementById('modoToggleWrapMat');
-          if (togWrap) {
-              togWrap.style.display = '';
-              var subPC = (u.asignaturas || []).join(', ') || 'Sin asignaturas';
-              var subTP = (u.especialidades || []).map(function (e) {
-                  return (typeof CCTPCatalogo !== 'undefined') ? CCTPCatalogo.labelEspecialidad(e) : e;
-              }).join(', ') || 'Sin especialidad TP';
-              var sPC = document.getElementById('btnMatModoPCSub'); if (sPC) sPC.textContent = subPC;
-              var sTP2 = document.getElementById('btnMatModoTPSub'); if (sTP2) sTP2.textContent = subTP;
-          }
-          // Poblar selectAsignatura
-          var selAsigH = document.getElementById('selectAsignatura');
-          if (selAsigH) {
-              selAsigH.innerHTML = '<option value="">-- Seleccionar asignatura (plan común) --</option>';
-              (u.asignaturas || []).forEach(function (a) {
-                  var opt = document.createElement('option');
-                  opt.value = a; opt.textContent = a;
-                  selAsigH.appendChild(opt);
+      // ─── NUEVO: dropdown unificado Asignatura / Módulo ───
+      var selAOMM = document.getElementById('selectAsigOModMat');
+      if (selAOMM) {
+          selAOMM.innerHTML = '<option value="">-- Seleccionar --</option>';
+          var totalOpts = 0;
+          var asigsListM = u.asignaturas || [];
+          if (asigsListM.length) {
+              var og1 = document.createElement('optgroup');
+              og1.label = '🎓 Plan Común';
+              asigsListM.forEach(function (a) {
+                  var o = document.createElement('option');
+                  o.value = 'asig::' + a;
+                  o.textContent = a;
+                  og1.appendChild(o);
+                  totalOpts++;
               });
-              if ((u.asignaturas || []).length === 1) selAsigH.value = u.asignaturas[0];
+              selAOMM.appendChild(og1);
           }
-          // Poblar módulos TP (invisibles por default)
-          actualizarMencion();
-          filtrarModulos();
-          // Arrancar en Plan Común
-          setModoMat('planComun');
-          if ((u.asignaturas || []).length === 1 && (u.niveles || []).length === 1) {
-              cargarOAsRegularMat();
+          var modsMap = u.modulosTP || {};
+          var espsListM = u.especialidades || [];
+          espsListM.forEach(function (espId) {
+              var modIds = modsMap[espId] || [];
+              if (!modIds.length) return;
+              var espLabel = (typeof CCTPCatalogo !== 'undefined') ? CCTPCatalogo.labelEspecialidad(espId) : espId;
+              var og2 = document.createElement('optgroup');
+              og2.label = '⚙️ ' + espLabel;
+              modIds.forEach(function (mid) {
+                  var m = (typeof CCTPCatalogo !== 'undefined') ? CCTPCatalogo.moduloCompleto(espId, mid) : null;
+                  var lbl = m
+                      ? (m.num || mid) + ' — ' + m.nombre + (m.horas ? ' (' + m.horas + 'h)' : '')
+                      : mid;
+                  var o = document.createElement('option');
+                  o.value = 'mod::' + espId + '::' + mid;
+                  o.textContent = lbl;
+                  og2.appendChild(o);
+                  totalOpts++;
+              });
+              selAOMM.appendChild(og2);
+          });
+          if (totalOpts === 0) {
+              var oNone = document.createElement('option');
+              oNone.disabled = true;
+              oNone.textContent = '⚠ Sin asignaturas ni módulos asignados';
+              selAOMM.appendChild(oNone);
           }
-      } else if (isTP) {
-          if (campoAsig)  campoAsig.style.display  = 'none';
-          if (campoMod)   campoMod.style.display   = '';
-          if (secTP)      secTP.style.display       = '';
-          if (secReg)     secReg.style.display      = 'none';
-          actualizarMencion();
-          filtrarModulos();
-      } else {
-          if (campoAsig) campoAsig.style.display = '';
-          if (campoMod)  campoMod.style.display  = 'none';
-          if (secTP)     secTP.style.display      = 'none';
-          if (secReg)    secReg.style.display     = '';
 
-          var selAsig = document.getElementById('selectAsignatura');
-          if (selAsig) {
-              selAsig.innerHTML = '<option value="">-- Seleccionar asignatura --</option>';
-              (u.asignaturas || []).forEach(function(a) {
+          // Pre-llenar los selects legacy internos
+          var selAsigLeg = document.getElementById('selectAsignatura');
+          if (selAsigLeg) {
+              selAsigLeg.innerHTML = '<option value="">--</option>';
+              asigsListM.forEach(function (a) {
                   var opt = document.createElement('option');
                   opt.value = a; opt.textContent = a;
-                  selAsig.appendChild(opt);
+                  selAsigLeg.appendChild(opt);
               });
-              if ((u.asignaturas || []).length === 1) selAsig.value = u.asignaturas[0];
           }
-          if ((u.asignaturas || []).length === 1 && (u.niveles || []).length === 1) {
-              cargarOAsRegularMat();
+          actualizarMencion();
+          filtrarModulos();
+
+          // Ocultar ambas secciones hasta elegir
+          if (secTP)  secTP.style.display  = 'none';
+          if (secReg) secReg.style.display = 'none';
+          if (campoAsig) campoAsig.style.display = 'none';
+          if (campoMod)  campoMod.style.display  = 'none';
+
+          // Auto-seleccionar si solo hay una opción
+          if (totalOpts === 1) {
+              var firstOpt = selAOMM.querySelector('option[value]:not([value=""])');
+              if (firstOpt) {
+                  selAOMM.value = firstOpt.value;
+                  onCambioAsigOModMat();
+              }
           }
       }
       // Actualizar _matUser con datos normalizados para que el resto de la página los use
@@ -932,7 +948,44 @@
   window.actualizarOAG           = actualizarOAG;
 
   // ═══════════════════════════════════════════════════════════════
-  // TOGGLE MODO PLAN COMÚN vs TP (solo profesores híbridos)
+  // Handler del dropdown unificado Asignatura/Módulo (Material)
+  // ═══════════════════════════════════════════════════════════════
+  function onCambioAsigOModMat() {
+      var val = document.getElementById('selectAsigOModMat').value;
+      var secTP  = document.getElementById('sec-tp-mat');
+      var secReg = document.getElementById('sec-regular-mat');
+
+      if (!val) {
+          if (secTP)  secTP.style.display  = 'none';
+          if (secReg) secReg.style.display = 'none';
+          return;
+      }
+
+      var partes = val.split('::');
+      if (partes[0] === 'asig') {
+          var asig = partes[1];
+          var selAsig = document.getElementById('selectAsignatura');
+          if (selAsig) selAsig.value = asig;
+          if (secTP)  secTP.style.display  = 'none';
+          if (secReg) secReg.style.display = '';
+          if (typeof cargarOAsRegularMat === 'function') cargarOAsRegularMat();
+      } else if (partes[0] === 'mod') {
+          var modId = partes[2];
+          var selMod = document.getElementById('selectModulo');
+          if (selMod) {
+              var opt = selMod.querySelector('option[value="' + modId + '"]');
+              if (!opt) filtrarModulos();
+              selMod.value = modId;
+          }
+          if (secTP)  secTP.style.display  = '';
+          if (secReg) secReg.style.display = 'none';
+          if (typeof cargarOA === 'function') cargarOA();
+      }
+  }
+  window.onCambioAsigOModMat = onCambioAsigOModMat;
+
+  // ═══════════════════════════════════════════════════════════════
+  // (Deprecated pero mantenido por compatibilidad) TOGGLE MODO
   // ═══════════════════════════════════════════════════════════════
   function setModoMat(modo) {
       var campoAsig = document.getElementById('campoAsignatura');

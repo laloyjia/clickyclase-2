@@ -1483,81 +1483,54 @@
             </div>
         </div>
 
-        <!-- ==== TOGGLE MODO PLAN / TP (solo profesores híbridos) ==== -->
-        <div id="modoToggleWrapMat" class="seccion-mat" style="display:none;background:linear-gradient(135deg,rgba(139,92,246,.06),rgba(251,191,36,.04));border:1px solid rgba(139,92,246,.25)">
-            <h2><span>🎯</span> ¿Qué vas a preparar hoy?</h2>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px">
-                <button type="button" id="btnMatModoPC" class="modo-btn" onclick="setModoMat('planComun')" style="padding:20px 22px;background:rgba(34,211,238,.05);border:2px solid rgba(34,211,238,.25);border-radius:14px;cursor:pointer;text-align:left;color:inherit;font-family:inherit;transition:all .15s">
-                    <div style="display:flex;align-items:flex-start;gap:14px">
-                        <div style="font-size:2rem">🎓</div>
-                        <div>
-                            <div style="font-weight:800;font-size:1.05rem">Plan Común</div>
-                            <div id="btnMatModoPCSub" style="color:var(--text-muted);font-size:.85rem;margin-top:2px">Cargando…</div>
-                        </div>
-                    </div>
-                </button>
-                <button type="button" id="btnMatModoTP" class="modo-btn" onclick="setModoMat('tp')" style="padding:20px 22px;background:rgba(251,191,36,.05);border:2px solid rgba(251,191,36,.25);border-radius:14px;cursor:pointer;text-align:left;color:inherit;font-family:inherit;transition:all .15s">
-                    <div style="display:flex;align-items:flex-start;gap:14px">
-                        <div style="font-size:2rem">⚙️</div>
-                        <div>
-                            <div style="font-weight:800;font-size:1.05rem">Técnico-Profesional</div>
-                            <div id="btnMatModoTPSub" style="color:var(--text-muted);font-size:.85rem;margin-top:2px">Cargando…</div>
-                        </div>
-                    </div>
-                </button>
-            </div>
-        </div>
-
         <!-- SECCION 2: OBJETIVOS CURRICULARES -->
         <div class="seccion-mat" id="seccionOAs">
             <h2><span>&#127919;</span> Objetivos Curriculares</h2>
 
-            <!-- Asignatura: visible sólo para básica/media -->
-            <div class="campo-row" id="campoAsignatura" style="display:none">
+            <!-- 1. CURSO -->
+            <div class="campo-row">
                 <div class="campo" style="grid-column:1/-1">
-                    <label>Asignatura</label>
-                    <select id="selectAsignatura" onchange="onCambioAsigNivelMat()">
-                        <option value="">-- Seleccionar asignatura --</option>
+                    <label>Curso</label>
+                    <select id="selectCurso" onchange="onCambioAsigNivelMat()">
+                        <option value="">-- Seleccionar curso --</option>
                     </select>
                 </div>
             </div>
 
-            <!-- Electivo HC: visible sólo si 3M/4M y la asignatura tiene electivos -->
+            <!-- 2. ASIGNATURA / MÓDULO (dropdown unificado) -->
+            <div class="campo-row">
+                <div class="campo" style="grid-column:1/-1">
+                    <label>Asignatura / Módulo</label>
+                    <select id="selectAsigOModMat" onchange="onCambioAsigOModMat()">
+                        <option value="">-- Seleccionar --</option>
+                    </select>
+                    <div style="font-size:.72rem;color:var(--text-muted);margin-top:4px">Elegí la asignatura o módulo TP sobre el que vas a preparar el material.</div>
+                </div>
+            </div>
+
+            <!-- Electivo HC: aparece sólo si 3M/4M y la asignatura tiene electivos -->
             <div class="campo-row" id="campoElectivoHC" style="display:none">
                 <div class="campo" style="grid-column:1/-1">
                     <label>Plan diferenciado HC <span style="font-size:.72rem;color:var(--text-muted);font-weight:400">(opcional — sólo 3°M y 4°M)</span></label>
                     <select id="selectElectivoHC" onchange="onCambioElectivoHCMat()">
                         <option value="">📘 Formación General (Plan Común)</option>
                     </select>
-                    <div style="font-size:.72rem;color:var(--text-muted);margin-top:4px">Selecciona un electivo del Plan Diferenciado para generar material con OAs específicos del DS 193/2019.</div>
                 </div>
             </div>
 
             <!-- Mención: aparece sólo si la especialidad TP tiene menciones -->
             <div class="campo-row" id="campoMencion" style="display:none">
                 <div class="campo" style="grid-column:1/-1">
-                    <label>Mención <span style="font-size:.72rem;color:var(--text-muted);font-weight:400">(de tu especialidad)</span></label>
+                    <label>Mención</label>
                     <select id="selectMencion" onchange="filtrarModulos()">
                     </select>
-                    <div style="font-size:.72rem;color:var(--text-muted);margin-top:4px">Tu especialidad tiene menciones. Elige la tuya para ver los módulos comunes y los específicos de esa mención.</div>
                 </div>
             </div>
 
-            <div class="campo-row">
-                <div class="campo">
-                    <label>Curso / Nivel</label>
-                    <select id="selectCurso" onchange="onCambioAsigNivelMat()">
-                        <option value="">-- Seleccionar curso --</option>
-                    </select>
-                </div>
-
-                <!-- TP: Módulo -->
-                <div class="campo" id="campoModulo">
-                    <label>Modulo</label>
-                    <select id="selectModulo" onchange="cargarOA()">
-                        <option value="">-- Primero selecciona un curso --</option>
-                    </select>
-                </div>
+            <!-- Campos legacy ocultos (para compatibilidad) -->
+            <div style="display:none">
+                <div id="campoAsignatura"><select id="selectAsignatura"></select></div>
+                <div id="campoModulo"><select id="selectModulo" onchange="cargarOA()"></select></div>
             </div>
 
             <!-- ── Flujo TP: OA → AE → CE ── -->

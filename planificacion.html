@@ -547,42 +547,28 @@
             <p>Crea planificaciones alineadas con el currículo Mineduc · __</p>
         </div>
 
-        <!-- ========== TOGGLE MODO PLAN / TP (solo profesores híbridos) ========== -->
-        <div id="modoToggleWrap" class="seccion-plan" style="display:none;background:linear-gradient(135deg,rgba(139,92,246,.06),rgba(251,191,36,.04));border:1px solid rgba(139,92,246,.25)">
-            <h2><span class="icono">🎯</span> ¿Qué vas a planificar hoy?</h2>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px">
-                <button type="button" id="btnModoPC" class="modo-btn" onclick="setModoPlanif('planComun')" style="padding:20px 22px;background:rgba(34,211,238,.05);border:2px solid rgba(34,211,238,.25);border-radius:14px;cursor:pointer;text-align:left;color:inherit;font-family:inherit;transition:all .15s">
-                    <div style="display:flex;align-items:flex-start;gap:14px">
-                        <div style="font-size:2rem">🎓</div>
-                        <div>
-                            <div style="font-weight:800;font-size:1.05rem;color:var(--text)">Plan Común</div>
-                            <div id="btnModoPCSub" style="color:var(--text-muted);font-size:.85rem;margin-top:2px">Cargando…</div>
-                        </div>
-                    </div>
-                </button>
-                <button type="button" id="btnModoTP" class="modo-btn" onclick="setModoPlanif('tp')" style="padding:20px 22px;background:rgba(251,191,36,.05);border:2px solid rgba(251,191,36,.25);border-radius:14px;cursor:pointer;text-align:left;color:inherit;font-family:inherit;transition:all .15s">
-                    <div style="display:flex;align-items:flex-start;gap:14px">
-                        <div style="font-size:2rem">⚙️</div>
-                        <div>
-                            <div style="font-weight:800;font-size:1.05rem;color:var(--text)">Técnico-Profesional</div>
-                            <div id="btnModoTPSub" style="color:var(--text-muted);font-size:.85rem;margin-top:2px">Cargando…</div>
-                        </div>
-                    </div>
-                </button>
-            </div>
-        </div>
-
         <!-- ========== SECCION 1: DATOS GENERALES ========== -->
         <div class="seccion-plan">
             <h2><span class="icono">&#128204;</span> Datos Generales</h2>
 
-            <!-- Asignatura: visible sólo para profesores de básica/media -->
-            <div class="campo-row" id="campoAsignatura" style="display:none">
+            <!-- 1. CURSO -->
+            <div class="campo-row">
                 <div class="campo" style="grid-column:1/-1">
-                    <label>Asignatura</label>
-                    <select id="selectAsignatura" onchange="onCambioAsigNivel()">
-                        <option value="">-- Seleccionar asignatura --</option>
+                    <label>Curso</label>
+                    <select id="selectCurso" onchange="onCambioAsigNivel()">
+                        <option value="">-- Seleccionar curso --</option>
                     </select>
+                </div>
+            </div>
+
+            <!-- 2. ASIGNATURA / MÓDULO (dropdown unificado con optgroups) -->
+            <div class="campo-row">
+                <div class="campo" style="grid-column:1/-1">
+                    <label>Asignatura / Módulo</label>
+                    <select id="selectAsigOMod" onchange="onCambioAsigOMod()">
+                        <option value="">-- Seleccionar --</option>
+                    </select>
+                    <div id="hintAsigOMod" style="font-size:.72rem;color:var(--text-muted);margin-top:4px">Elegí la asignatura o módulo TP sobre el que vas a planificar.</div>
                 </div>
             </div>
 
@@ -597,28 +583,29 @@
                 </div>
             </div>
 
+            <!-- 3. FECHA + 4. HORAS -->
             <div class="campo-row">
-                <div class="campo">
-                    <label>Curso / Nivel</label>
-                    <select id="selectCurso" onchange="onCambioAsigNivel()">
-                        <option value="">-- Seleccionar curso --</option>
-                    </select>
-                </div>
                 <div class="campo">
                     <label>Fecha de la clase</label>
                     <input type="date" id="inputFecha">
                 </div>
-            </div>
-
-            <div class="campo-row">
                 <div class="campo">
                     <label>Numero de horas</label>
                     <input type="number" id="inputHoras" min="1" max="10" value="2" placeholder="Ej: 2">
                 </div>
-                <div class="campo">
+            </div>
+
+            <!-- Nombre del profesor (auto-llenado) -->
+            <div class="campo-row">
+                <div class="campo" style="grid-column:1/-1">
                     <label>Nombre del profesor</label>
                     <input type="text" id="inputProfesor" placeholder="Ej: Eduardo Yanez">
                 </div>
+            </div>
+
+            <!-- Campos legacy ocultos (para retrocompat con código existente) -->
+            <div style="display:none">
+                <select id="selectAsignatura"></select>
             </div>
         </div>
 
@@ -1138,70 +1125,132 @@
         var secTP     = document.getElementById('sec-tp-obj');
         var secReg    = document.getElementById('sec-regular-obj');
 
-        if (user._modoHibrido) {
-            // ═══ MODO HÍBRIDO: mostrar toggle grande + arrancar en Plan Común ═══
-            var togWrap = document.getElementById('modoToggleWrap');
-            if (togWrap) {
-                togWrap.style.display = '';
-                // Subtítulos dinámicos según lo asignado
-                var subPC = (user.asignaturas || []).map(function (a) { return a; }).join(', ') || 'Sin asignaturas';
-                var subTP = (user.especialidades || []).map(function (e) {
-                    return (typeof CCTPCatalogo !== 'undefined') ? CCTPCatalogo.labelEspecialidad(e) : e;
-                }).join(', ') || 'Sin especialidad TP';
-                var sPC = document.getElementById('btnModoPCSub'); if (sPC) sPC.textContent = subPC;
-                var sTP2 = document.getElementById('btnModoTPSub'); if (sTP2) sTP2.textContent = subTP;
+        // ─── NUEVO: poblar dropdown unificado Asignatura / Módulo ───
+        //     con optgroups (Plan Común / TP) según lo asignado al profesor
+        var selAOM = document.getElementById('selectAsigOMod');
+        if (selAOM) {
+            selAOM.innerHTML = '<option value="">-- Seleccionar --</option>';
+            var totalOpts = 0;
+            // Plan Común
+            var asigsList = user.asignaturas || [];
+            if (asigsList.length) {
+                var og1 = document.createElement('optgroup');
+                og1.label = '🎓 Plan Común';
+                asigsList.forEach(function (a) {
+                    var o = document.createElement('option');
+                    o.value = 'asig::' + a;
+                    o.textContent = a;
+                    og1.appendChild(o);
+                    totalOpts++;
+                });
+                selAOM.appendChild(og1);
             }
-            // Poblar selectAsignatura con las asignaturas plan común
-            var selAsigH = document.getElementById('selectAsignatura');
-            if (selAsigH) {
-                selAsigH.innerHTML = '<option value="">-- Seleccionar asignatura (plan común) --</option>';
-                (user.asignaturas || []).forEach(function (a) {
+            // TP: por cada especialidad, listar sus módulos asignados
+            var mods = user.modulosTP || {};
+            var espsList = user.especialidades || [];
+            espsList.forEach(function (espId) {
+                var modIds = mods[espId] || [];
+                if (!modIds.length) return;
+                var espLabel = (typeof CCTPCatalogo !== 'undefined') ? CCTPCatalogo.labelEspecialidad(espId) : espId;
+                var og2 = document.createElement('optgroup');
+                og2.label = '⚙️ ' + espLabel;
+                modIds.forEach(function (mid) {
+                    var m = (typeof CCTPCatalogo !== 'undefined') ? CCTPCatalogo.moduloCompleto(espId, mid) : null;
+                    var lbl = m
+                        ? (m.num || mid) + ' — ' + m.nombre + (m.horas ? ' (' + m.horas + 'h)' : '')
+                        : mid;
+                    var o = document.createElement('option');
+                    o.value = 'mod::' + espId + '::' + mid;
+                    o.textContent = lbl;
+                    og2.appendChild(o);
+                    totalOpts++;
+                });
+                selAOM.appendChild(og2);
+            });
+            if (totalOpts === 0) {
+                var oNone = document.createElement('option');
+                oNone.disabled = true;
+                oNone.textContent = '⚠ Sin asignaturas ni módulos asignados. Pedile al admin del colegio que te asigne.';
+                selAOM.appendChild(oNone);
+            }
+            // Ocultar el dropdown de Módulo interno (ya no se necesita)
+            var oldModCampo = document.querySelector('#sec-tp-obj .campo:has(#selectModulo)');
+            if (oldModCampo) oldModCampo.style.display = 'none';
+            var modCampoAlt = document.getElementById('selectModulo');
+            if (modCampoAlt && modCampoAlt.parentElement) modCampoAlt.parentElement.style.display = 'none';
+            // Ocultar ambas secciones hasta que elija algo
+            if (secTP)  secTP.style.display  = 'none';
+            if (secReg) secReg.style.display = 'none';
+
+            // Pre-poblar selectAsignatura legacy (se usa internamente en cargarOAsRegular)
+            var selAsigLegacy = document.getElementById('selectAsignatura');
+            if (selAsigLegacy) {
+                selAsigLegacy.innerHTML = '<option value="">-- Seleccionar asignatura --</option>';
+                asigsList.forEach(function (a) {
                     var opt = document.createElement('option');
                     opt.value = a; opt.textContent = a;
-                    selAsigH.appendChild(opt);
+                    selAsigLegacy.appendChild(opt);
                 });
-                if ((user.asignaturas || []).length === 1) selAsigH.value = user.asignaturas[0];
             }
-            // Módulos TP (se llenan por si acaso, pero solo se ven cuando el toggle está en TP)
+            // Pre-poblar módulos legacy (los usa filtrarModulos internamente)
             actualizarMencion();
             filtrarModulos();
-            // Arrancar en Plan Común (default)
-            setModoPlanif('planComun');
-            if ((user.asignaturas || []).length === 1 && niveles.length === 1) {
-                cargarOAsRegular();
-            }
-        } else if (isTP) {
-            if (campoAsig) campoAsig.style.display = 'none';
-            if (secTP)  secTP.style.display  = '';
-            if (secReg) secReg.style.display = 'none';
-            // Pre-cargar selector de mención (si la especialidad tiene) y módulos
-            actualizarMencion();
-            filtrarModulos();
-        } else {
-            if (campoAsig) campoAsig.style.display = '';
-            if (secTP)  secTP.style.display  = 'none';
-            if (secReg) secReg.style.display = '';
 
-            // ── Poblar selector de asignatura ─────────────────────
-            var selAsig = document.getElementById('selectAsignatura');
-            if (selAsig) {
-                selAsig.innerHTML = '<option value="">-- Seleccionar asignatura --</option>';
-                (user.asignaturas || []).forEach(function(a) {
-                    var opt = document.createElement('option');
-                    opt.value = a;
-                    opt.textContent = a;
-                    selAsig.appendChild(opt);
-                });
-                if ((user.asignaturas || []).length === 1) {
-                    selAsig.value = user.asignaturas[0];
+            // Auto-seleccionar si solo hay una opción
+            if (totalOpts === 1) {
+                var firstOpt = selAOM.querySelector('option[value]:not([value=""])');
+                if (firstOpt) {
+                    selAOM.value = firstOpt.value;
+                    onCambioAsigOMod();
                 }
-            }
-            // Auto-cargar OA si ya hay asig + nivel
-            if ((user.asignaturas || []).length === 1 && niveles.length === 1) {
-                cargarOAsRegular();
             }
         }
     }
+
+    // ═══════════════════════════════════════════════════════════════
+    // Handler del dropdown unificado Asignatura/Módulo
+    // ═══════════════════════════════════════════════════════════════
+    function onCambioAsigOMod() {
+        var val = document.getElementById('selectAsigOMod').value;
+        var secTP  = document.getElementById('sec-tp-obj');
+        var secReg = document.getElementById('sec-regular-obj');
+
+        if (!val) {
+            if (secTP)  secTP.style.display  = 'none';
+            if (secReg) secReg.style.display = 'none';
+            return;
+        }
+
+        var partes = val.split('::');
+        if (partes[0] === 'asig') {
+            // ── PLAN COMÚN ── mostrar OA + Unidad
+            var asig = partes[1];
+            var selAsig = document.getElementById('selectAsignatura');
+            if (selAsig) selAsig.value = asig;
+            if (secTP)  secTP.style.display  = 'none';
+            if (secReg) secReg.style.display = '';
+            cargarOAsRegular();
+        } else if (partes[0] === 'mod') {
+            // ── TÉCNICO-PROFESIONAL ── mostrar OA + AE + CE + OAG
+            var espId = partes[1];
+            var modId = partes[2];
+            // Setear módulo en el select interno (que activa la cadena OA→AE→CE)
+            var selMod = document.getElementById('selectModulo');
+            if (selMod) {
+                // Asegurar que la opción existe
+                var opt = selMod.querySelector('option[value="' + modId + '"]');
+                if (!opt) {
+                    // Repoblar filtrando por esta especialidad
+                    filtrarModulos();
+                }
+                selMod.value = modId;
+            }
+            if (secTP)  secTP.style.display  = '';
+            if (secReg) secReg.style.display = 'none';
+            if (typeof cargarOA === 'function') cargarOA();
+        }
+    }
+    window.onCambioAsigOMod = onCambioAsigOMod;
 
     // ═══════════════════════════════════════════════════════════════
     // TOGGLE MODO PLAN COMÚN vs TP (solo profesores híbridos)
