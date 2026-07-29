@@ -1206,7 +1206,7 @@
       '</div>';
     }
     if (typeof toast === 'function') {
-      toast('Firebase no responde — revisa extensiones/firewall', 'error');
+      toast('Firebase no responde — revisá extensiones/firewall', 'error');
     }
   }, 15000);
 
@@ -1807,9 +1807,28 @@
     ling_liter:'Lengua y Literatura', artes_esc:'Artes Escénicas'
   };
 
+  // Oculta combinaciones asignatura·nivel imposibles (ej. "ciencias_nat__nt1").
+  // Las asignaturas de plan común/básica/media no existen en NT1/NT2 (Educación
+  // Parvularia se organiza por Núcleos de Aprendizaje, no por asignaturas).
+  function _sinCombosParvulariaDP(asigs){
+    if (!Array.isArray(asigs)) return asigs || [];
+    var NUCLEOS = ['parvularia','nucleo','exploracion','lenguaje_verbal','convivencia',
+                   'corporalidad','pensamiento','artistico','entorno','identidad','comunicacion'];
+    return asigs.filter(function(slug){
+      var s = String(slug||'').toLowerCase();
+      if (s.indexOf('nt1') === -1 && s.indexOf('nt2') === -1) return true;
+      return NUCLEOS.some(function(n){ return s.indexOf(n) !== -1; });
+    });
+  }
+
   function renderAsignacionResumen(user) {
     var el = document.getElementById('asignacionResumen');
     if (!el) return;
+    // Ocultar combinaciones asignatura·nivel imposibles (ej. "ciencias_nat__nt1").
+    // Las asignaturas de plan común no existen en NT1/NT2 (Parvularia usa Núcleos).
+    if (Array.isArray(user.asignaturas)) {
+      user.asignaturas = _sinCombosParvulariaDP(user.asignaturas);
+    }
     var bloques = [];
 
     // ── Schema NUEVO (Fase 8): asignaturas + especialidades + modulosTP ──
@@ -3354,7 +3373,6 @@
 })();
 </script>
 <script src="js/ia-widget.js" defer></script>
-<script src="js/session-guard.js" defer></script>
 <script src="js/search-global.js" defer></script>
 </body>
 </html>

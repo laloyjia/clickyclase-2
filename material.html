@@ -2193,6 +2193,18 @@
                 && Array.isArray(user.asignaturas) && user.asignaturas.length) {
                 user.niveles = user.niveles.filter(function (n) { return n !== 'NT1' && n !== 'NT2'; });
             }
+            // Limpiar combos "asignatura__nt1/nt2" dentro de asignaturas.
+            if (Array.isArray(user.asignaturas)) {
+                user.asignaturas = (function(asigs){
+                    var NUCLEOS = ['parvularia','nucleo','exploracion','lenguaje_verbal','convivencia',
+                                   'corporalidad','pensamiento','artistico','entorno','identidad','comunicacion'];
+                    return asigs.filter(function(slug){
+                        var s = String(slug||'').toLowerCase();
+                        if (s.indexOf('nt1') === -1 && s.indexOf('nt2') === -1) return true;
+                        return NUCLEOS.some(function(n){ return s.indexOf(n) !== -1; });
+                    });
+                })(user.asignaturas);
+            }
 
 
             var inProf = document.getElementById('inputProfesor');

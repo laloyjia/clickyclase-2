@@ -1795,6 +1795,18 @@
         return null;
     }
 
+    // Oculta combinaciones asignatura·nivel imposibles (ej. "ciencias_nat__nt1").
+    function _sinCombosPlan(asigs){
+        if (!Array.isArray(asigs)) return asigs || [];
+        var NUCLEOS = ['parvularia','nucleo','exploracion','lenguaje_verbal','convivencia',
+                       'corporalidad','pensamiento','artistico','entorno','identidad','comunicacion'];
+        return asigs.filter(function(slug){
+            var s = String(slug||'').toLowerCase();
+            if (s.indexOf('nt1') === -1 && s.indexOf('nt2') === -1) return true;
+            return NUCLEOS.some(function(n){ return s.indexOf(n) !== -1; });
+        });
+    }
+
     function initCurriculo(user) {
         // ═════════════════════════════════════════════════════════════════
         // FASE 8 — ADAPTADOR: si el user viene con el schema nuevo
@@ -1848,6 +1860,10 @@
             && Array.isArray(user.asignaturas) && user.asignaturas.length) {
             user.niveles = user.niveles.filter(function (n) { return n !== 'NT1' && n !== 'NT2'; });
         }
+        // También limpiar combos "asignatura__nt1/nt2" dentro de asignaturas.
+        if (Array.isArray(user.asignaturas)) {
+            user.asignaturas = _sinCombosPlan(user.asignaturas);
+        }
 
         // ═════════════════════════════════════════════════════════════════
 
@@ -1873,7 +1889,7 @@
             document.getElementById('ctxNombre').textContent = user.nombre || user.email || '—';
             document.getElementById('ctxTipo').textContent = tipos[user.tipoProfesor] || '—';
             if (user.especialidad) document.getElementById('ctxEsp').textContent = '⚙️ ' + user.especialidad;
-            if (user.asignaturas && user.asignaturas.length) document.getElementById('ctxEsp').textContent = user.asignaturas.join(', ');
+            if (user.asignaturas && user.asignaturas.length) document.getElementById('ctxEsp').textContent = _sinCombosPlan(user.asignaturas).join(', ');
             if (user.niveles && user.niveles.length) document.getElementById('ctxNiveles').textContent = 'Niveles: ' + user.niveles.join(', ');
         }
         var navInfo = document.getElementById('navProfesorInfo');
