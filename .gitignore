@@ -1,44 +1,34 @@
-# Archivos sensibles — NUNCA subir al repositorio
-.env
-.env.local
-.env.production
-service-account*.json
-firebase-adminsdk*.json
+# ─── Credenciales y llaves (NUNCA subir) ───
+serviceAccountKey.json
+*serviceAccountKey*
+*.serviceAccount*
+**/serviceAccountKey.json*
+setup-usuarios/serviceAccountKey*
+*.pem
+*.key
 
-# Sistemas operativos
+# ─── Variables de entorno ───
+.env
+.env.*
+functions/.env
+functions/.env.*
+
+# ─── Dependencias ───
+node_modules/
+functions/node_modules/
+
+# ─── Firebase local ───
+.firebase/
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
+
+# ─── Respaldos y temporales ───
+*.bak
+*.bak-*
+*.OLD-*
+*~
+
+# ─── Sistema operativo ───
 .DS_Store
 Thumbs.db
-desktop.ini
-
-# Editores
-.vscode/
-.idea/
-*.suo
-*.user
-
-# Node (si se usa en el futuro)
-node_modules/
-npm-debug.log*
-yarn-error.log
-
-# Vercel
-.vercel/
-
-# Logs
-*.log
-
-# Archivos de respaldo
-*.bak
-*.backup
-*.orig
-.firebase/
-.firebase/
-
-# Textos extraidos de PDFs Mineduc (referencia interna, no parte del producto)
-pdf-text/
-pdf-text-new/
-extract-unidades.py
-
-# Artefacto Windows (nombre reservado, no es un archivo válido)
-nul
-log.txt

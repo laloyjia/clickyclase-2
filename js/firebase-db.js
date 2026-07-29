@@ -43,12 +43,68 @@ var ELDB = (function() {
   //  MATERIALES
   // ────────────────────────────────────────────────────────────
   var materiales = {
+    // Helpers de contexto del usuario logueado
+    _user: function() { return (window.ELAuth && ELAuth.user) || {}; },
+    _liceo: function() { return this._user().liceoSlug || ''; },
+    _uid: function() { return this._user().uid || ''; },
+    _nombre: function() { var u = this._user(); return u.nombre || u.displayName || u.email || ''; },
+    _misDepartamentos: function() {
+      // Retorna un Set con las asignaturas/especialidades del usuario.
+      // Un material "de departamento" es visible si su .departamento está acá.
+      var u = this._user();
+      var deptos = [];
+      (u.asignaturas || []).forEach(function(a) { deptos.push(String(a).toLowerCase().trim()); });
+      (u.especialidades || []).forEach(function(e) { deptos.push(String(e).toLowerCase().trim()); });
+      // Compat: user.asignatura (string), user.especialidad (string)
+      if (u.asignatura)   deptos.push(String(u.asignatura).toLowerCase().trim());
+      if (u.especialidad) deptos.push(String(u.especialidad).toLowerCase().trim());
+      return deptos;
+    },
+    _esDirectivoOUTP: function() {
+      var u = this._user();
+      var roles = u.roles || {};
+      if (u.role === 'admin' || u.role === 'director' || u.role === 'rector' ||
+          u.role === 'utp' || u.role === 'admin_colegio' || u.role === 'encargado_area' ||
+          u.role === 'jefe_departamento' || u.role === 'jefe_tp') return true;
+      return !!(roles.admin || roles.director || roles.rector || roles.utp ||
+                roles.admin_colegio || roles.encargado_area ||
+                roles.jefe_departamento || roles.jefe_tp);
+    },
+    // Roles de apoyo (educadora diferencial, psicopedagoga, PIE, convivencia,
+    // psicosocial). Ven material y planificaciones compartidas a nivel de liceo
+    // para poder acompañar a los estudiantes de los cursos donde trabajan.
+    _esApoyo: function() {
+      var u = this._user();
+      var roles = u.roles || {};
+      var r = String(u.role || '').toLowerCase();
+      var apoyos = ['pie','educadora_diferencial','educador_diferencial','diferencial',
+                    'psicopedagoga','psicopedagogo','psicopedagogia','psicologo','psicologa',
+                    'psicosocial','apoyo','convivencia','educadora','fonoaudiologo','fonoaudiologa'];
+      if (apoyos.indexOf(r) !== -1) return true;
+      return !!(roles.pie || roles.educadora_diferencial || roles.diferencial ||
+                roles.psicopedagoga || roles.psicopedagogo || roles.psicosocial ||
+                roles.apoyo || roles.convivencia);
+    },
+
     /**
-     * Guardar material en Firestore
-     * @param {object} data - { titulo, tipo, modulo, ae, oa, curso, contenido, descripcion, profesor, email }
+     * Guardar material en Firestore. Añade automáticamente:
+     *   - liceoSlug (multi-tenant)
+     *   - autorUid, autorNombre (identidad del autor)
+     *   - departamento (= asignatura o especialidad TP para agrupar por área)
+     *   - visibilidad: 'privada' | 'departamento' | 'liceo'  (default: 'liceo')
+     * @param {object} data - { titulo, tipo, modulo, ae, oa, curso, contenido, descripcion,
+     *                          profesor, email, asignatura?, especialidad?, visibilidad? }
      */
     guardar: function(data) {
+      var departamento = (data.especialidad || data.asignatura || data.modulo || 'general')
+                         .toString().toLowerCase().trim();
+      var visibilidad  = data.visibilidad || 'liceo';
       var entrada = Object.assign({}, data, {
+        liceoSlug:    data.liceoSlug || this._liceo(),
+        autorUid:     data.autorUid  || this._uid(),
+        autorNombre:  data.autorNombre || this._nombre(),
+        departamento: departamento,
+        visibilidad:  visibilidad,
         publicadoEn:  EL_DB.FieldValue.serverTimestamp(),
         fechaISO:     new Date().toISOString(),
         activo:       true,
@@ -61,26 +117,71 @@ var ELDB = (function() {
     },
 
     /**
-     * Listar materiales con filtros opcionales
-     * @param {object} filtros - { profesor, modulo, tipo, curso, asignatura, especialidad }
+     * Listar materiales con filtros opcionales + control de visibilidad multi-tenant.
+     * Aplica las reglas:
+     *   - Solo materiales del mismo liceo (excepto admin global).
+     *   - visibilidad='liceo'         → visible para cualquier docente del liceo
+     *   - visibilidad='departamento'  → visible si el depto del material está entre los del user
+     *   - visibilidad='privada'       → solo autor
+     *   - Directivos/UTP/encargado_area ven todo del liceo (todas las visibilidades)
+     * @param {object} filtros - { profesor, modulo, tipo, curso, asignatura, especialidad, incluirTodosLiceos? }
      */
     listar: function(filtros) {
       filtros = filtros || {};
-      // Evitamos índices compuestos: traemos todos los activos y filtramos en cliente.
-      // Si la colección crece mucho (>2k docs), conviene crear índices en Firestore.
+      var self = this;
+      var miLiceo = this._liceo();
+      var miUid   = this._uid();
+      var misDeptos = this._misDepartamentos();
+      var esDirectivo = this._esDirectivoOUTP();
+      var esApoyo = this._esApoyo();
+      var incluirTodosLiceos = !!filtros.incluirTodosLiceos && esDirectivo;
+
       return EL_DB.collection(EL_COLLECTIONS.MATERIALES).where('activo', '==', true).get()
         .then(function(snap) {
           var items = [];
           snap.forEach(function(doc) { items.push(Object.assign({ id: doc.id }, doc.data())); });
-          // Normalizador (case-insensitive y trim para campos string)
           var eq = function(a, b) { return String(a || '').trim().toLowerCase() === String(b || '').trim().toLowerCase(); };
+
+          // ── FILTRO MULTI-TENANT: mismo liceo (a menos que admin global) ──
+          if (miLiceo && !incluirTodosLiceos) {
+            items = items.filter(function(m) {
+              // Legacy: materiales sin liceoSlug se consideran del liceo actual (para no romper migración)
+              if (!m.liceoSlug) return true;
+              return m.liceoSlug === miLiceo;
+            });
+          }
+
+          // ── FILTRO DE VISIBILIDAD ──
+          // Directivos (UTP, director, jefe depto) ven todo.
+          // Roles de apoyo (educadora diferencial, psicopedagoga, PIE, convivencia)
+          // ven todo lo compartido a nivel de liceo o departamento, para poder
+          // acompañar a los estudiantes; solo se les ocultan las privadas ajenas.
+          if (!esDirectivo) {
+            items = items.filter(function(m) {
+              var vis = m.visibilidad || 'liceo';   // default liceo (legacy)
+              var esAutor = m.autorUid === miUid || m.uid === miUid;
+              if (vis === 'privada')      return esAutor || esApoyo;
+              if (vis === 'liceo')        return true;   // ya filtrado por liceoSlug arriba
+              if (vis === 'departamento') {
+                if (esAutor || esApoyo) return true;
+                var dep = (m.departamento || '').toString().toLowerCase().trim();
+                return dep && misDeptos.indexOf(dep) !== -1;
+              }
+              return true;
+            });
+          }
+
+          // ── FILTROS OPCIONALES DEL LLAMADOR ──
           if (filtros.profesor)     items = items.filter(function(m) { return eq(m.email, filtros.profesor) || (m.uid && m.uid === filtros.profesor); });
-          if (filtros.uid)          items = items.filter(function(m) { return m.uid === filtros.uid; });
+          if (filtros.uid)          items = items.filter(function(m) { return m.uid === filtros.uid || m.autorUid === filtros.uid; });
           if (filtros.modulo)       items = items.filter(function(m) { return m.modulo === filtros.modulo; });
           if (filtros.tipo)         items = items.filter(function(m) { return m.tipo === filtros.tipo; });
           if (filtros.curso)        items = items.filter(function(m) { return m.curso === filtros.curso || m.nivel === filtros.curso; });
           if (filtros.asignatura)   items = items.filter(function(m) { return eq(m.asignatura, filtros.asignatura); });
           if (filtros.especialidad) items = items.filter(function(m) { return eq(m.especialidad, filtros.especialidad); });
+          if (filtros.departamento) items = items.filter(function(m) { return eq(m.departamento, filtros.departamento); });
+          if (filtros.visibilidad)  items = items.filter(function(m) { return (m.visibilidad || 'liceo') === filtros.visibilidad; });
+
           // Orden descendente por fecha más fiable disponible
           items.sort(function(a, b) {
             var ta = (a.publicadoEn && a.publicadoEn.toMillis) ? a.publicadoEn.toMillis() : (a.fechaISO ? Date.parse(a.fechaISO) : 0);
@@ -138,7 +239,19 @@ var ELDB = (function() {
   // ────────────────────────────────────────────────────────────
   var planificaciones = {
     guardar: function(data) {
-      var entrada = Object.assign({}, data, {
+      data = data || {};
+      // Departamento = asignatura o especialidad/módulo, para agrupar por área.
+      var departamento = (data.departamento || data.especialidad || data.asignatura || data.modulo || 'general')
+                         .toString().toLowerCase().trim();
+      var entrada = Object.assign({
+        // Campos multi-tenant + identidad + visibilidad (para compartir).
+        liceoSlug:   data.liceoSlug   || materiales._liceo(),
+        autorUid:    data.autorUid    || materiales._uid(),
+        autorNombre: data.autorNombre || materiales._nombre(),
+        uid:         data.uid         || materiales._uid(),
+        departamento: departamento,
+        visibilidad: data.visibilidad || 'liceo'   // por defecto visible al liceo
+      }, data, {
         publicadoEn: EL_DB.FieldValue.serverTimestamp(),
         fechaISO:    new Date().toISOString(),
         activo:      true
@@ -151,22 +264,60 @@ var ELDB = (function() {
 
     listar: function(filtros) {
       filtros = filtros || {};
-      // SEGURIDAD: las reglas estrictas requieren que la query filtre por uid
-      // del autor (a menos que sea admin). Si pasaron uid o profesor (email),
-      // intentamos resolver el uid del usuario actual cuando aplica.
-      var miUid = (typeof ELAuth !== 'undefined' && ELAuth.user && ELAuth.user.uid) ? ELAuth.user.uid : null;
-      var filtroUid = filtros.uid || (filtros.profesor && miUid ? miUid : null);
+      // Contexto del usuario (reusa los helpers de `materiales`).
+      var miLiceo   = materiales._liceo();
+      var miUid     = materiales._uid();
+      var misDeptos = materiales._misDepartamentos();
+      var esDirectivo = materiales._esDirectivoOUTP();
+      var esApoyo     = materiales._esApoyo();
+      var incluirTodosLiceos = !!filtros.incluirTodosLiceos && esDirectivo;
+
+      // Si el llamador pide explícitamente SOLO las de un autor (p.ej. "mis
+      // planificaciones"), filtramos por ese uid en el servidor. Si no, traemos
+      // las activas y aplicamos visibilidad en cliente (compartir por liceo/depto).
+      var filtroUidExplicito = filtros.uid || null;
       var coll = EL_DB.collection(EL_COLLECTIONS.PLANIFICACIONES);
-      var query = filtroUid ? coll.where('uid', '==', filtroUid) : coll.where('activo', '==', true);
+      var query = filtroUidExplicito
+        ? coll.where('uid', '==', filtroUidExplicito)
+        : coll.where('activo', '==', true);
+
       return query.get()
         .then(function(snap) {
           var items = [];
           snap.forEach(function(doc) { items.push(Object.assign({ id: doc.id }, doc.data())); });
-          // Filtros adicionales en cliente
           var eq = function(a, b) { return String(a || '').trim().toLowerCase() === String(b || '').trim().toLowerCase(); };
-          // Si filtramos por uid en server, igual respetamos el flag activo en cliente
-          if (filtroUid) items = items.filter(function(p) { return p.activo !== false; });
-          if (filtros.profesor && !filtroUid) items = items.filter(function(p) { return eq(p.email, filtros.profesor); });
+
+          // Respetar flag activo siempre
+          items = items.filter(function(p) { return p.activo !== false; });
+
+          // ── FILTRO MULTI-TENANT: mismo liceo (salvo admin global) ──
+          if (miLiceo && !incluirTodosLiceos) {
+            items = items.filter(function(p) {
+              if (!p.liceoSlug) return true;          // legacy sin liceo → se asume del actual
+              return p.liceoSlug === miLiceo;
+            });
+          }
+
+          // ── FILTRO DE VISIBILIDAD (mismo criterio que materiales) ──
+          // Directivos y roles de apoyo ven todo lo del liceo. El resto ve lo
+          // propio + lo compartido a nivel de liceo o de su departamento.
+          if (!esDirectivo) {
+            items = items.filter(function(p) {
+              var vis = p.visibilidad || 'liceo';     // default liceo (comparte por defecto)
+              var esAutor = p.uid === miUid || p.autorUid === miUid;
+              if (vis === 'privada')      return esAutor || esApoyo;
+              if (vis === 'liceo')        return true;
+              if (vis === 'departamento') {
+                if (esAutor || esApoyo) return true;
+                var dep = (p.departamento || p.asignatura || p.modulo || '').toString().toLowerCase().trim();
+                return dep && misDeptos.indexOf(dep) !== -1;
+              }
+              return true;
+            });
+          }
+
+          // Compat: si el llamador pasó profesor (email) como filtro suave
+          if (filtros.profesor) items = items.filter(function(p) { return eq(p.email, filtros.profesor); });
           if (filtros.modulo)      items = items.filter(function(p) { return p.modulo === filtros.modulo; });
           if (filtros.asignatura)  items = items.filter(function(p) { return eq(p.asignatura, filtros.asignatura); });
           if (filtros.mes) {
