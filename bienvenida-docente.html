@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>¡Bienvenido a Click&Clase! · Prueba gratis activa</title>
+
+<!-- Open Graph -->
+<meta property="og:title" content="Bienvenido a Click&Clase">
+<meta property="og:description" content="Tu prueba gratis está activa. Descubrí todo lo que puedes hacer.">
+<meta property="og:type" content="website">
+
+<link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="styles.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --azul-cielo: #F0F7FF;
+    --azul: #2563EB;
+    --azul-dark: #1D4ED8;
+    --rojo: #DC2626;
+    --amarillo: #F59E0B;
+    --verde: #059669;
+    --whatsapp: #25D366;
+    --whatsapp-dark: #128C7E;
+    --text: #0C1E3B;
+    --text-muted: #64748B;
+    --border: rgba(37,99,235,.14);
+  }
+
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background: linear-gradient(180deg, var(--azul-cielo) 0%, #FFFFFF 100%);
+    color: var(--text);
+    margin: 0;
+    min-height: 100vh;
+    line-height: 1.5;
+  }
+
+  /* Header simple */
+  .top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 32px;
+    background: rgba(255,255,255,.75);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 800;
+    font-size: 1.05rem;
+    color: var(--text);
+    text-decoration: none;
+  }
+  .brand-ico {
+    width: 34px;
+    height: 34px;
+    background: linear-gradient(135deg, var(--azul), var(--azul-dark));
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 1.15rem;
+  }
+  .btn-skip {
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: .88rem;
+    font-weight: 500;
+    padding: 8px 14px;
+    border-radius: 8px;
+    transition: all .18s;
+  }
+  .btn-skip:hover { background: rgba(37,99,235,.06); color: var(--azul); }
+
+  /* Wrap */
+  .wrap {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+  }
+
+  /* HERO */
+  .hero {
+    text-align: center;
+    margin-bottom: 48px;
+    padding: 40px 20px;
+    background: white;
+    border-radius: 24px;
+    box-shadow: 0 12px 40px rgba(37,99,235,.10);
+    border: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -60px;
+    right: -60px;
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, rgba(37,99,235,.12), transparent 70%);
+    border-radius: 50%;
+  }
+  .hero::after {
+    content: '';
+    position: absolute;
+    bottom: -80px;
+    left: -80px;
+    width: 240px;
+    height: 240px;
+    background: radial-gradient(circle, rgba(245,158,11,.10), transparent 70%);
+    border-radius: 50%;
+  }
+  .hero-emoji {
+    font-size: 4.5rem;
+    line-height: 1;
+    margin-bottom: 12px;
+    display: inline-block;
+    animation: bounce 2s ease-in-out infinite;
+  }
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-10px); }
+  }
+  .hero h1 {
+    font-size: clamp(1.8rem, 4vw, 2.8rem);
+    font-weight: 900;
+    margin: 0 0 14px;
+    background: linear-gradient(135deg, var(--azul), var(--azul-dark));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1.1;
+    position: relative;
+    z-index: 1;
+  }
+  .hero .sub {
+    font-size: 1.1rem;
+    color: var(--text-muted);
+    max-width: 640px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+  }
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 18px;
+    background: linear-gradient(135deg, #FEF3C7, #FDE68A);
+    color: #92400E;
+    border-radius: 100px;
+    font-size: .85rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+    border: 1px solid #FCD34D;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Sección título */
+  .section-title {
+    text-align: center;
+    font-size: 1.6rem;
+    font-weight: 800;
+    margin: 48px 0 8px;
+    color: var(--text);
+  }
+  .section-sub {
+    text-align: center;
+    color: var(--text-muted);
+    margin-bottom: 32px;
+    font-size: 1rem;
+  }
+
+  /* Grid de features */
+  .features {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 18px;
+    margin-bottom: 40px;
+  }
+  .feature-card {
+    background: white;
+    padding: 24px 22px;
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    transition: all .25s;
+    position: relative;
+  }
+  .feature-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 14px 32px rgba(37,99,235,.14);
+    border-color: rgba(37,99,235,.3);
+  }
+  .feature-ico {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.7rem;
+    margin-bottom: 14px;
+  }
+  .fico-1 { background: linear-gradient(135deg, #DBEAFE, #BFDBFE); }
+  .fico-2 { background: linear-gradient(135deg, #FEF3C7, #FDE68A); }
+  .fico-3 { background: linear-gradient(135deg, #DCFCE7, #BBF7D0); }
+  .fico-4 { background: linear-gradient(135deg, #FCE7F3, #FBCFE8); }
+  .fico-5 { background: linear-gradient(135deg, #E0E7FF, #C7D2FE); }
+  .fico-6 { background: linear-gradient(135deg, #FED7AA, #FDBA74); }
+
+  .feature-card h3 {
+    font-size: 1.05rem;
+    font-weight: 700;
+    margin: 0 0 8px;
+    color: var(--text);
+  }
+  .feature-card p {
+    color: var(--text-muted);
+    font-size: .92rem;
+    margin: 0;
+    line-height: 1.5;
+  }
+
+  /* Banner prueba gratis */
+  .trial-banner {
+    background: linear-gradient(135deg, #FEF3C7, #FDE68A);
+    border: 2px solid #F59E0B;
+    border-radius: 20px;
+    padding: 28px 32px;
+    margin: 48px 0 40px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 24px;
+    align-items: center;
+  }
+  .trial-banner h2 {
+    margin: 0 0 6px;
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: #92400E;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .trial-banner p {
+    margin: 0;
+    color: #78350F;
+    font-size: .94rem;
+    line-height: 1.55;
+  }
+  .trial-banner ul {
+    margin: 12px 0 0;
+    padding-left: 20px;
+    color: #78350F;
+    font-size: .9rem;
+  }
+  .trial-banner ul li { margin-bottom: 4px; }
+
+  @media (max-width: 700px) {
+    .trial-banner { grid-template-columns: 1fr; text-align: center; }
+  }
+
+  /* CTA soporte */
+  .cta-support {
+    background: linear-gradient(135deg, #1E293B, #0C1E3B);
+    color: #F0F7FF;
+    padding: 40px 32px;
+    border-radius: 20px;
+    text-align: center;
+    margin-bottom: 32px;
+    position: relative;
+    overflow: hidden;
+  }
+  .cta-support::before {
+    content: '🌟';
+    position: absolute;
+    top: 20px;
+    right: 24px;
+    font-size: 1.6rem;
+    opacity: .4;
+  }
+  .cta-support h2 {
+    margin: 0 0 8px;
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #FFFFFF;
+  }
+  .cta-support p {
+    color: #CBD5E1;
+    margin: 0 0 24px;
+    font-size: 1rem;
+    max-width: 560px;
+    margin-inline: auto;
+  }
+  .cta-buttons {
+    display: flex;
+    gap: 14px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .cta-btn {
+    padding: 14px 24px;
+    border-radius: 12px;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: .98rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    transition: all .2s;
+    border: 0;
+    cursor: pointer;
+  }
+  .cta-btn.wapp {
+    background: linear-gradient(135deg, var(--whatsapp), var(--whatsapp-dark));
+    color: #fff;
+  }
+  .cta-btn.wapp:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 24px rgba(37,211,102,.35);
+  }
+  .cta-btn.mail {
+    background: rgba(255,255,255,.10);
+    color: #FFFFFF;
+    border: 1px solid rgba(255,255,255,.20);
+  }
+  .cta-btn.mail:hover {
+    background: rgba(255,255,255,.16);
+    transform: translateY(-2px);
+  }
+
+  /* Botón "Empezar" final */
+  .start-panel {
+    text-align: center;
+    padding: 32px 0;
+  }
+  .btn-start {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 40px;
+    background: linear-gradient(135deg, var(--azul), var(--azul-dark));
+    color: white;
+    text-decoration: none;
+    font-weight: 800;
+    font-size: 1.05rem;
+    border-radius: 14px;
+    transition: all .2s;
+    box-shadow: 0 10px 28px rgba(37,99,235,.32);
+    border: 0;
+    cursor: pointer;
+  }
+  .btn-start:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 16px 40px rgba(37,99,235,.4);
+  }
+  .start-panel .hint {
+    display: block;
+    margin-top: 14px;
+    color: var(--text-muted);
+    font-size: .85rem;
+  }
+</style>
+</head>
+<body>
+
+<!-- Top bar -->
+<div class="top-bar">
+  <a href="index.html" class="brand">
+    <div class="brand-ico">⚡</div>
+    <span>Click&Clase</span>
+  </a>
+  <a href="dashboard-profesor.html" class="btn-skip" id="btnSkip">Ir al panel →</a>
+</div>
+
+<div class="wrap">
+
+  <!-- HERO -->
+  <div class="hero">
+    <span class="hero-badge">🎁 Prueba gratis activa</span>
+    <div class="hero-emoji">👋</div>
+    <h1>¡Bienvenido, <span id="userName">Docente</span>!</h1>
+    <p class="sub">Ya eres parte de Click&Clase. Te mostramos en 30 segundos todo lo que puedes hacer con la plataforma.</p>
+  </div>
+
+  <!-- FEATURES GRID -->
+  <div class="section-title">Todo esto ya está disponible en tu cuenta</div>
+  <p class="section-sub">Explorá cada herramienta desde el menú lateral cuando entres al panel</p>
+
+  <div class="features">
+    <div class="feature-card">
+      <div class="feature-ico fico-1">✨</div>
+      <h3>Crear material con IA</h3>
+      <p>Guías, ejercicios, evaluaciones y rúbricas generadas por IA a partir del OA del currículum chileno. Podés editarlas y descargarlas en Word o PDF.</p>
+    </div>
+
+    <div class="feature-card">
+      <div class="feature-ico fico-2">📝</div>
+      <h3>Planificar clases</h3>
+      <p>Planificaciones por unidad, semana o clase con actividades alineadas al currículum MINEDUC. La IA propone estructura y objetivos.</p>
+    </div>
+
+    <div class="feature-card">
+      <div class="feature-ico fico-3">📖</div>
+      <h3>Libro de clases digital</h3>
+      <p>Tomá asistencia, registrá objetivos trabajados y anotaciones. Historial completo por curso y por alumno.</p>
+    </div>
+
+    <div class="feature-card">
+      <div class="feature-ico fico-4">💯</div>
+      <h3>Notas y evaluaciones</h3>
+      <p>Registro de notas con cálculo automático de promedios, escala configurable y exportación a Excel.</p>
+    </div>
+
+    <div class="feature-card">
+      <div class="feature-ico fico-5">📚</div>
+      <h3>Biblioteca personal</h3>
+      <p>Guardá y organizá todo tu material creado. Buscá por asignatura, nivel u objetivo de aprendizaje.</p>
+    </div>
+
+    <div class="feature-card">
+      <div class="feature-ico fico-6">🤖</div>
+      <h3>Asistente IA pedagógico</h3>
+      <p>Preguntale a Click&Clase cómo abordar un tema, ideas de actividades o cómo trabajar con un curso complicado. Está siempre a un click.</p>
+    </div>
+  </div>
+
+  <!-- BANNER PRUEBA GRATIS -->
+  <div class="trial-banner">
+    <div>
+      <h2>🎁 Tu prueba gratis incluye:</h2>
+      <p style="font-size:1.05rem;font-weight:700;color:#92400E;margin:6px 0 10px">
+        2 materiales generados con IA para que pruebes la calidad.
+      </p>
+      <ul>
+        <li>Acceso al panel completo para explorar todas las funciones</li>
+        <li>Libro de clases digital, notas y biblioteca visible</li>
+        <li>Después de usar tus 2 materiales, contactanos para desbloquear un plan</li>
+      </ul>
+      <p style="font-size:.82rem;color:#78350F;margin-top:10px;font-style:italic">
+        💡 Es una prueba corta a propósito: queremos que veas la calidad de la IA sin compromiso.
+      </p>
+    </div>
+    <div style="text-align:center">
+      <div style="font-size:3.4rem;line-height:1;font-weight:900;color:#92400E">2</div>
+      <div style="font-weight:800;color:#92400E;font-size:.95rem;margin-top:4px">materiales<br>con IA gratis</div>
+      <div style="font-size:.78rem;color:#78350F;margin-top:8px">Sin tarjeta requerida</div>
+    </div>
+  </div>
+
+  <!-- CTA A SOPORTE -->
+  <div class="cta-support">
+    <h2>¿Querés más? Hablemos.</h2>
+    <p>
+      Si necesitas <strong>más generaciones de IA</strong>, <strong>reportes avanzados</strong>, o quieres que
+      <strong>tu colegio complete</strong> use Click&Clase, escribinos. Te acompañamos personalmente y te damos
+      una demo enfocada en tu contexto.
+    </p>
+    <div class="cta-buttons">
+      <a class="cta-btn wapp"
+         href="https://wa.me/56942532644?text=Hola%2C%20me%20acabo%20de%20registrar%20en%20Click%26Clase%20y%20quiero%20info%20de%20los%20planes"
+         target="_blank" rel="noopener">
+        💬 Escribinos por WhatsApp
+      </a>
+      <a class="cta-btn mail"
+         href="mailto:soporte.learn0@gmail.com?subject=Consulta%20sobre%20planes%20Click%26Clase&body=Hola%2C%20me%20registr%C3%A9%20como%20docente%20particular%20y%20quiero%20saber%20m%C3%A1s%20sobre%20los%20planes%20disponibles.">
+        ✉ soporte.learn0@gmail.com
+      </a>
+    </div>
+  </div>
+
+  <!-- BOTÓN EMPEZAR -->
+  <div class="start-panel">
+    <button class="btn-start" id="btnEmpezar" type="button">
+      🚀 Empezar a usar Click&Clase
+    </button>
+    <span class="hint">Podés volver a esta pantalla desde el menú de tu perfil</span>
+  </div>
+
+</div>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="js/firebase-config.js"></script>
+
+<script>
+(function () {
+  'use strict';
+
+  // Lee el nombre del usuario logueado (si hay sesión) para personalizar el hero
+  function setNombre(nom) {
+    if (!nom) return;
+    var primer = String(nom).trim().split(/\s+/)[0];
+    var el = document.getElementById('userName');
+    if (el && primer) el.textContent = primer;
+  }
+
+  // Espera Firebase Auth listo y marca primerIngreso=false al empezar
+  if (window.firebase && firebase.auth) {
+    firebase.auth().onAuthStateChanged(function (u) {
+      if (!u) return;
+      var displayName = u.displayName || '';
+      setNombre(displayName);
+
+      // Enriquecer con Firestore si es posible
+      try {
+        firebase.firestore().collection('usuarios').doc(u.uid).get().then(function (snap) {
+          if (snap.exists) {
+            var data = snap.data() || {};
+            setNombre(data.nombre || displayName);
+          }
+        });
+      } catch (e) { /* silent */ }
+    });
+  }
+
+  // Botón "Empezar" → marca primerIngreso=false y va al dashboard
+  function irAlPanel() {
+    var btn = document.getElementById('btnEmpezar');
+    if (btn) { btn.disabled = true; btn.textContent = '⏳ Preparando tu panel…'; }
+
+    var goto = function () { location.href = 'dashboard-profesor.html'; };
+
+    try {
+      var u = firebase.auth().currentUser;
+      if (u) {
+        firebase.firestore().collection('usuarios').doc(u.uid).update({
+          primerIngreso: false,
+          bienvenidaVistaEn: new Date().toISOString()
+        }).then(goto).catch(goto);
+      } else {
+        goto();
+      }
+    } catch (e) {
+      goto();
+    }
+  }
+
+  document.getElementById('btnEmpezar').addEventListener('click', irAlPanel);
+  document.getElementById('btnSkip').addEventListener('click', function (e) {
+    e.preventDefault();
+    irAlPanel();
+  });
+})();
+</script>
+
+</body>
+</html>

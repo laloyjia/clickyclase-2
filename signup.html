@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Crear cuenta · Click&Clase</title>
+<link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg">
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="js/firebase-rest.js"></script>
+<script src="js/firebase-config.js"></script>
+<script src="js/firebase-auth.js"></script>
+<script src="js/firebase-db.js"></script>
+<script src="js/tp-catalogo.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #F0F7FF; --bg-2: #E0EDFF; --panel: #FFFFFF; --panel-2: #FAFCFF;
+  --border: rgba(37,99,235,.18); --text: #0C1E3B; --text-2: #334155; --muted: #475569;
+  --violet: #2563EB; --violet-2: #1E40AF; --green: #34d399; --cyan: #38BDF8; --danger: #DC2626;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding: 24px; }
+.orbs { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+.orbs::before, .orbs::after { content: ''; position: absolute; border-radius: 50%; filter: blur(120px); opacity: .30; }
+.orbs::before { width: 500px; height: 500px; background: radial-gradient(circle, var(--violet), transparent 65%); top: -140px; left: -100px; }
+.orbs::after  { width: 400px; height: 400px; background: radial-gradient(circle, var(--cyan),   transparent 65%); bottom: -140px; right: -100px; }
+
+.wrap { position: relative; z-index: 1; max-width: 720px; margin: 30px auto; }
+.brand { display: flex; align-items: center; justify-content: center; gap: 10px; font-weight: 800; font-size: 1.1rem; margin-bottom: 24px; }
+.brand .ico { width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(135deg, var(--violet), var(--violet-2)); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
+
+.card {
+  background: linear-gradient(180deg, var(--panel), var(--bg-2));
+  border: 1px solid var(--border); border-radius: 22px;
+  padding: 40px 44px; box-shadow: 0 20px 60px rgba(37,99,235,.07);
+}
+
+/* Stepper */
+.stepper { display: flex; justify-content: space-between; margin-bottom: 32px; position: relative; }
+.stepper::before { content: ''; position: absolute; top: 16px; left: 20px; right: 20px; height: 2px; background: var(--border); z-index: 0; }
+.step { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.step .n { width: 34px; height: 34px; border-radius: 50%; background: var(--bg-2); border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; font-weight: 800; color: #475569; font-size: .9rem; }
+.step .l { font-size: .74rem; color: #475569; font-weight: 600; }
+.step.active .n { background: linear-gradient(135deg, var(--violet), var(--violet-2)); border-color: transparent; color: white; box-shadow: 0 8px 20px rgba(37,99,235,.4); }
+.step.active .l { color: var(--text); }
+.step.done .n { background: var(--green); border-color: transparent; color: #F0F7FF; }
+
+h2 { font-family: 'Space Grotesk', sans-serif; font-size: 1.6rem; font-weight: 700; margin-bottom: 6px; }
+.sub { color: #475569; margin-bottom: 24px; font-size: .92rem; }
+
+.fld { margin-bottom: 14px; }
+.fld label { display: block; font-size: .78rem; color: #475569; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 6px; }
+.fld input, .fld select {
+  width: 100%; padding: 12px 15px; border-radius: 10px;
+  background: rgba(37,99,235,.06); border: 1px solid var(--border); color: var(--text);
+  font-family: inherit; font-size: .95rem;
+}
+.fld input:focus, .fld select:focus { outline: none; border-color: var(--violet); box-shadow: 0 0 0 3px rgba(37,99,235,.15); }
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 500px) { .row2 { grid-template-columns: 1fr; } }
+
+.chip-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 8px; }
+.chip-option {
+  padding: 12px 14px; background: rgba(37,99,235,.03); border: 1px solid var(--border);
+  border-radius: 10px; cursor: pointer; text-align: center; font-size: .88rem;
+  display: flex; align-items: center; gap: 8px; transition: all .15s;
+}
+.chip-option:hover { background: rgba(37,99,235,.06); border-color: rgba(37,99,235,.3); }
+.chip-option.selected { background: rgba(37,99,235,.15); border-color: var(--violet); color: var(--violet); font-weight: 600; }
+.chip-option input { position: absolute; opacity: 0; pointer-events: none; }
+
+.nav-btns { display: flex; justify-content: space-between; margin-top: 30px; gap: 10px; }
+.btn { padding: 13px 26px; border-radius: 12px; border: 1px solid var(--border); background: rgba(37,99,235,.05); color: var(--text); font-family: inherit; font-weight: 700; font-size: .95rem; cursor: pointer; }
+.btn.primary { background: linear-gradient(135deg, var(--violet), var(--violet-2)); border-color: transparent; color: white; box-shadow: 0 8px 20px rgba(37,99,235,.35); }
+.btn.primary:hover { transform: translateY(-1px); box-shadow: 0 12px 28px rgba(37,99,235,.45); }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+
+.err { background: rgba(220,38,38,.08); border: 1px solid rgba(220,38,38,.28); color: var(--danger); padding: 10px 14px; border-radius: 8px; margin-bottom: 14px; font-size: .88rem; display: none; }
+.err.show { display: block; }
+.ok-msg { background: rgba(52,211,153,.08); border: 1px solid rgba(52,211,153,.3); color: var(--green); padding: 12px 16px; border-radius: 10px; margin-bottom: 16px; font-size: .92rem; }
+
+.plan-card {
+  padding: 20px; border: 2px solid var(--violet); border-radius: 14px;
+  background: linear-gradient(135deg, rgba(37,99,235,.10), rgba(34,211,238,.03));
+}
+.plan-card h3 { font-size: 1.2rem; font-weight: 800; margin-bottom: 4px; }
+.plan-card .price { font-size: 2rem; font-weight: 800; margin: 8px 0; }
+.plan-card .price .u { font-size: .9rem; color: #475569; font-weight: 500; }
+.plan-card ul { list-style: none; padding: 0; margin: 12px 0; }
+.plan-card li { padding: 5px 0; font-size: .86rem; color: var(--text-2); }
+.plan-card li::before { content: '✓ '; color: var(--green); font-weight: 800; }
+
+.step-content { display: none; }
+.step-content.active { display: block; }
+</style>
+</head>
+<body>
+
+<div class="orbs"></div>
+
+<div class="wrap">
+  <div class="brand"><span class="ico">⚡</span> Click&Clase</div>
+
+  <div class="card">
+    <!-- Stepper -->
+    <div class="stepper">
+      <div class="step active" data-step="1"><div class="n">1</div><div class="l">Cuenta</div></div>
+      <div class="step"        data-step="2"><div class="n">2</div><div class="l">Docente</div></div>
+      <div class="step"        data-step="3"><div class="n">3</div><div class="l">Niveles</div></div>
+      <div class="step"        data-step="4"><div class="n">4</div><div class="l">Listo</div></div>
+    </div>
+
+    <div id="errBox" class="err"></div>
+
+    <!-- Paso 1: Datos personales -->
+    <div class="step-content active" id="step-1">
+      <h2>Empezá gratis en 2 minutos</h2>
+      <p class="sub">Sin tarjeta. Sin caducidad. Podés cancelar cuando quieras.</p>
+
+      <div class="fld"><label>Nombre completo *</label>
+        <input type="text" id="fNombre" placeholder="Ej: Alejandra Quintana" autofocus>
+      </div>
+      <div class="row2">
+        <div class="fld"><label>Email *</label>
+          <input type="email" id="fEmail" placeholder="tu@correo.cl">
+        </div>
+        <div class="fld"><label>RUT * <span style="font-weight:400;font-size:.75rem;color:#64748B">(sin puntos, con guión)</span></label>
+          <input type="text" id="fRut" placeholder="12345678-9" autocomplete="off" required>
+          <div style="font-size:.72rem;color:#64748B;margin-top:4px">Usamos tu RUT únicamente para validar identidad y evitar fraudes.</div>
+        </div>
+      </div>
+      <div class="row2">
+        <div class="fld"><label>Contraseña * (mín 8 caracteres)</label>
+          <input type="password" id="fPass" placeholder="Elegí una contraseña">
+        </div>
+        <div class="fld"><label>Repetir contraseña *</label>
+          <input type="password" id="fPass2" placeholder="Repetí la contraseña">
+        </div>
+      </div>
+
+      <div class="nav-btns">
+        <a class="btn" href="index.html">← Volver</a>
+        <button class="btn primary" onclick="siguiente(2)">Continuar →</button>
+      </div>
+    </div>
+
+    <!-- Paso 2: Tipo de docente -->
+    <div class="step-content" id="step-2">
+      <h2>¿Qué enseñás?</h2>
+      <p class="sub">Elegí tu tipo y las asignaturas/módulos que dictás.</p>
+
+      <div class="fld"><label>Tipo de docente *</label>
+        <select id="fTipo" onchange="onCambioTipo()">
+          <option value="">— Elegir —</option>
+          <option value="tecnico">⚙ Técnico-Profesional (EMTP)</option>
+          <option value="media">🎓 Educación Media (Plan Común)</option>
+          <option value="basica">📚 Educación Básica</option>
+        </select>
+      </div>
+
+      <div class="fld" id="fldEsp" style="display:none">
+        <label>Especialidad EMTP *</label>
+        <select id="fEsp"><option value="">— Elegir —</option></select>
+      </div>
+
+      <div class="fld" id="fldAsigs" style="display:none">
+        <label>Asignaturas que dictás * (marca una o varias)</label>
+        <div class="chip-grid" id="asigsGrid"></div>
+      </div>
+
+      <div class="nav-btns">
+        <button class="btn" onclick="siguiente(1)">← Atrás</button>
+        <button class="btn primary" onclick="siguiente(3)">Continuar →</button>
+      </div>
+    </div>
+
+    <!-- Paso 3: Niveles -->
+    <div class="step-content" id="step-3">
+      <h2>¿En qué niveles?</h2>
+      <p class="sub">Marcá los cursos donde hacés clases. Podés cambiarlos después.</p>
+
+      <div class="fld">
+        <label>Niveles que dictás *</label>
+        <div class="chip-grid" id="nivelesGrid"></div>
+      </div>
+
+      <div class="nav-btns">
+        <button class="btn" onclick="siguiente(2)">← Atrás</button>
+        <button class="btn primary" onclick="crearCuenta()" id="btnCrear">🎉 Crear cuenta gratis</button>
+      </div>
+    </div>
+
+    <!-- Paso 4: Éxito -->
+    <div class="step-content" id="step-4">
+      <div style="text-align:center;padding:20px 0 10px">
+        <div style="font-size:4rem;margin-bottom:14px">🎉</div>
+        <h2 style="font-size:1.8rem">¡Cuenta creada!</h2>
+        <p class="sub">Tu cuenta está lista. Estás en el plan <b>Free</b>.</p>
+      </div>
+
+      <div class="plan-card">
+        <h3>🎁 Prueba gratis — activa ahora</h3>
+        <div class="price">$0 <span class="u">para siempre</span></div>
+        <ul>
+          <li><b>2 materiales generados con IA</b> (total, no mensuales)</li>
+          <li>Explorá el resto del panel para conocer todas las funciones</li>
+        </ul>
+        <p style="font-size:.82rem;color:var(--muted);margin-top:10px">¿Querés seguir usando la IA sin límites? Cambiate a <a href="planes.html" style="color:var(--violet)">Pro o Premium</a> cuando quieras.</p>
+      </div>
+
+      <div class="nav-btns">
+        <div></div>
+        <a class="btn primary" href="bienvenida-docente.html">🚀 Comenzar el recorrido →</a>
+      </div>
+    </div>
+  </div>
+
+  <p style="text-align:center;color:var(--muted);font-size:.82rem;margin-top:20px">
+    ¿Ya tienes cuenta? <a href="login.html" style="color:var(--violet)">Iniciar sesión →</a>
+  </p>
+</div>
+
+<script>
+var _paso = 1;
+var _datos = { tipo: '', esp: '', asigs: [], niveles: [] };
+var _uid = null;
+
+var ASIG_PLAN_COMUN = [
+  'Lenguaje y Comunicación','Matemática','Ciencias Naturales','Historia',
+  'Inglés','Ed. Física','Artes Visuales','Música','Tecnología','Orientación','Religión',
+  'Biología','Física','Química','Filosofía'
+];
+var NIV_MEDIA  = ['1M','2M','3M','4M'];
+var NIV_BASICA = ['1B','2B','3B','4B','5B','6B','7B','8B'];
+var NIV_TP     = ['3M','4M'];
+
+function esc(s){return String(s==null?'':s).replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+function err(msg) {
+  var e = document.getElementById('errBox');
+  e.textContent = msg; e.classList.add('show');
+  setTimeout(function(){ e.classList.remove('show'); }, 6000);
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  Validador de RUT chileno (algoritmo módulo 11)
+// ═══════════════════════════════════════════════════════════════
+function limpiarRut(r) {
+  return String(r || '').replace(/[.\-\s]/g, '').toUpperCase();
+}
+function formatearRut(r) {
+  var c = limpiarRut(r);
+  if (c.length < 2) return c;
+  var cuerpo = c.slice(0, -1);
+  var dv = c.slice(-1);
+  // Formato XX.XXX.XXX-X
+  var conPuntos = cuerpo.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  return conPuntos + '-' + dv;
+}
+function validarRut(r) {
+  var c = limpiarRut(r);
+  if (!/^[0-9]+[0-9K]$/.test(c)) return false;
+  if (c.length < 8 || c.length > 9) return false; // 7-8 dígitos + DV
+  var cuerpo = c.slice(0, -1);
+  var dv = c.slice(-1);
+  var suma = 0;
+  var mult = 2;
+  for (var i = cuerpo.length - 1; i >= 0; i--) {
+    suma += parseInt(cuerpo[i], 10) * mult;
+    mult = (mult === 7) ? 2 : mult + 1;
+  }
+  var resto = 11 - (suma % 11);
+  var esperado = resto === 11 ? '0' : (resto === 10 ? 'K' : String(resto));
+  return esperado === dv;
+}
+
+// Formato automático del RUT mientras el usuario escribe
+document.addEventListener('DOMContentLoaded', function () {
+  var f = document.getElementById('fRut');
+  if (!f) return;
+  f.addEventListener('blur', function () {
+    if (f.value && validarRut(f.value)) f.value = formatearRut(f.value);
+  });
+});
+
+function siguiente(p) {
+  if (p > _paso) {  // hacia adelante → validar
+    if (_paso === 1 && !validarPaso1()) return;
+    if (_paso === 2 && !validarPaso2()) return;
+  }
+  document.querySelectorAll('.step-content').forEach(function (el) { el.classList.remove('active'); });
+  document.getElementById('step-' + p).classList.add('active');
+  document.querySelectorAll('.stepper .step').forEach(function (s) {
+    s.classList.remove('active');
+    var n = parseInt(s.getAttribute('data-step'));
+    if (n < p) s.classList.add('done');
+    else if (n === p) { s.classList.remove('done'); s.classList.add('active'); }
+    else s.classList.remove('done');
+  });
+  _paso = p;
+  if (p === 3) renderNiveles();
+}
+
+function validarPaso1() {
+  var nom = document.getElementById('fNombre').value.trim();
+  var email = document.getElementById('fEmail').value.trim();
+  var pass = document.getElementById('fPass').value;
+  var pass2 = document.getElementById('fPass2').value;
+  var rut = document.getElementById('fRut').value.trim();
+  if (!nom) { err('Nombre requerido'); return false; }
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { err('Email inválido'); return false; }
+  if (!rut) { err('RUT requerido para validar tu identidad'); return false; }
+  if (!validarRut(rut)) { err('RUT inválido. Revisá el dígito verificador (ej: 12345678-9)'); return false; }
+  if (pass.length < 8) { err('La contraseña debe tener al menos 8 caracteres'); return false; }
+  if (pass !== pass2) { err('Las contraseñas no coinciden'); return false; }
+  return true;
+}
+
+function validarPaso2() {
+  var tipo = document.getElementById('fTipo').value;
+  if (!tipo) { err('Elegí tu tipo de docente'); return false; }
+  _datos.tipo = tipo;
+  if (tipo === 'tecnico') {
+    var esp = document.getElementById('fEsp').value;
+    if (!esp) { err('Elegí tu especialidad EMTP'); return false; }
+    _datos.esp = esp;
+  } else {
+    _datos.asigs = Array.from(document.querySelectorAll('input[name="asigChk"]:checked')).map(function(i){ return i.value; });
+    if (!_datos.asigs.length) { err('Marcá al menos una asignatura'); return false; }
+  }
+  return true;
+}
+
+function onCambioTipo() {
+  var tipo = document.getElementById('fTipo').value;
+  var fldEsp = document.getElementById('fldEsp');
+  var fldAsigs = document.getElementById('fldAsigs');
+  fldEsp.style.display = tipo === 'tecnico' ? 'block' : 'none';
+  fldAsigs.style.display = (tipo === 'media' || tipo === 'basica') ? 'block' : 'none';
+  if (tipo === 'tecnico') poblarEspecialidades();
+  if (tipo === 'media' || tipo === 'basica') poblarAsignaturas();
+}
+
+function poblarEspecialidades() {
+  var sel = document.getElementById('fEsp');
+  if (sel.options.length > 1) return;
+  if (typeof CCTPCatalogo === 'undefined') { sel.innerHTML = '<option>Catálogo no cargado</option>'; return; }
+  CCTPCatalogo.cargarCatalogo().then(function () {
+    var ids = CCTPCatalogo.todasLasEspecialidades();
+    sel.innerHTML = '<option value="">— Elegir —</option>' +
+      ids.map(function (id) { return '<option value="' + id + '">' + esc(CCTPCatalogo.labelEspecialidad(id)) + '</option>'; }).join('');
+  });
+}
+
+function poblarAsignaturas() {
+  var g = document.getElementById('asigsGrid');
+  if (g.innerHTML) return;
+  g.innerHTML = ASIG_PLAN_COMUN.map(function (a) {
+    return '<label class="chip-option"><input type="checkbox" name="asigChk" value="' + esc(a) + '" onchange="this.parentElement.classList.toggle(\'selected\', this.checked)">' + esc(a) + '</label>';
+  }).join('');
+}
+
+function renderNiveles() {
+  var set = _datos.tipo === 'basica' ? NIV_BASICA : (_datos.tipo === 'tecnico' ? NIV_TP : NIV_MEDIA);
+  var g = document.getElementById('nivelesGrid');
+  g.innerHTML = set.map(function (n) {
+    return '<label class="chip-option"><input type="checkbox" name="nivChk" value="' + esc(n) + '" onchange="this.parentElement.classList.toggle(\'selected\', this.checked)">' + esc(n) + '</label>';
+  }).join('');
+}
+
+async function crearCuenta() {
+  _datos.niveles = Array.from(document.querySelectorAll('input[name="nivChk"]:checked')).map(function(i){ return i.value; });
+  if (!_datos.niveles.length) { err('Marcá al menos un nivel'); return; }
+
+  var btn = document.getElementById('btnCrear');
+  btn.disabled = true; btn.textContent = 'Creando…';
+
+  try {
+    // 1) Preparar datos
+    var email = document.getElementById('fEmail').value.trim();
+    var pass = document.getElementById('fPass').value;
+    var nom = document.getElementById('fNombre').value.trim();
+    var rutRaw = document.getElementById('fRut').value.trim();
+    var rutLimpio = limpiarRut(rutRaw);        // '12345678K' (para búsqueda)
+    var rutFormato = formatearRut(rutRaw);      // '12.345.678-K' (para display)
+
+    // 2) Chequear que este RUT no haya usado su prueba gratis antes
+    btn.textContent = 'Validando RUT…';
+    try {
+      var q = await EL_DB.collection('usuarios')
+        .where('rutLimpio', '==', rutLimpio)
+        .limit(1)
+        .get();
+      if (!q.empty) {
+        var existente = q.docs[0].data();
+        // Si el existente ya agotó su cuota → mensaje anti-fraude
+        var yaAgotado = (existente.materialesGeneradosIA || 0) >= 2;
+        var msg = yaAgotado
+          ? 'Este RUT ya utilizó su prueba gratuita de Click&Clase. Contactanos por WhatsApp para acceder a un plan sin límites.'
+          : 'Ya existe una cuenta con este RUT (' + rutFormato + '). Si es tuya, iniciá sesión. Si creés que hay un error, contactanos.';
+        btn.disabled = false;
+        btn.textContent = '🎉 Crear cuenta gratis';
+        err(msg);
+        return;
+      }
+    } catch (eq) {
+      console.warn('[signup] chequeo RUT:', eq);
+      // Si falla la query no bloqueamos, el backend igual valida
+    }
+
+    // 3) Crear en Firebase Auth
+    btn.textContent = 'Creando cuenta…';
+    var cred = await firebase.auth().createUserWithEmailAndPassword(email, pass);
+    _uid = cred.user.uid;
+    await cred.user.updateProfile({ displayName: nom });
+
+    // 4) Crear doc en Firestore
+    var userDoc = {
+      uid:            _uid,
+      email:          email,
+      nombre:         nom,
+      rut:            rutFormato,          // '12.345.678-K' bonito
+      rutLimpio:      rutLimpio,           // '12345678K' para búsquedas anti-fraude
+      role:           'profesor',
+      roles:          { profesor: {} },
+      liceoSlug:      '',        // Profesor particular
+      tipoProfesor:   _datos.tipo,
+      asignaturas:    _datos.asigs,
+      especialidades: _datos.esp ? [_datos.esp] : [],
+      especialidad:   _datos.esp || '',
+      niveles:        _datos.niveles,
+      modulosTP:      {},
+      cursosAsignados:[],
+      permisos:       { planificar: true, crearMaterial: true },
+      plan:           'free',
+      esParticular:   true,
+      // Cuota anti-fraude — solo el backend puede incrementar
+      materialesGeneradosIA: 0,
+      cuotaMateriales: 2,
+      activo:         true,
+      primerIngreso:  true,
+      creadoEn:       new Date().toISOString(),
+      creadoPor:      'signup-publico',
+      xp: 0, nivel: 1, badges: [], evaluaciones: []
+    };
+    await EL_DB.collection('usuarios').doc(_uid).set(userDoc);
+
+    // 3) Éxito → paso 4
+    siguiente(4);
+  } catch (e) {
+    btn.disabled = false; btn.textContent = '🎉 Crear cuenta gratis';
+    var msg = e.message || String(e);
+    if (e.code === 'auth/email-already-in-use') msg = '⚠ Ya existe una cuenta con ese email. ¿Querés iniciar sesión?';
+    else if (e.code === 'auth/weak-password')   msg = '⚠ Contraseña muy débil (mín 6 caracteres para Firebase).';
+    else if (e.code === 'auth/invalid-email')   msg = '⚠ Email inválido.';
+    err(msg);
+  }
+}
+</script>
+
+</body>
+</html>

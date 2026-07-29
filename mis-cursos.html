@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mis Cursos — Click&Clase</title>
+<link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg">
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="js/firebase-rest.js"></script>
+<script src="js/firebase-config.js"></script>
+<script src="js/firebase-auth.js"></script>
+<script src="js/firebase-db.js"></script>
+<script src="js/roles-permissions.js"></script>
+<script src="js/roles-router.js"></script>
+<script src="js/cursos.js"></script>
+<script src="js/cc-uikit.js"></script>
+<style>
+* { box-sizing: border-box; }
+body { margin: 0; font-family: 'Segoe UI', Roboto, Arial, sans-serif; background: #F0F7FF; color: #0C1E3B; }
+.container { max-width: 1500px; margin: 20px auto; padding: 0 24px; }
+
+.curso-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; }
+.curso-c { background:#fff; border:1px solid rgba(37,99,235,.14); border-radius:14px; padding:18px 20px;
+  transition:.2s; display:flex; flex-direction:column; gap:10px }
+.curso-c:hover { border-color:#2563EB; box-shadow:0 10px 24px rgba(37,99,235,.08); transform:translateY(-2px) }
+.curso-h { display:flex; justify-content:space-between; align-items:flex-start }
+.curso-tit { font-size:1.15rem; font-weight:800; color:#0C1E3B; margin:0 }
+.curso-sub { color:#64748B; font-size:.82rem; margin:2px 0 0 }
+.curso-badges { display:flex; flex-wrap:wrap; gap:6px; margin-top:6px }
+.curso-asigs { color:#2563EB; font-size:.82rem; margin:6px 0; padding:8px 10px;
+  background:rgba(37,99,235,.05); border-radius:8px; border-left:3px solid #2563EB }
+.curso-acc { display:grid; grid-template-columns:repeat(2,1fr); gap:6px; margin-top:auto }
+.curso-acc a { background:rgba(37,99,235,.05); color:#0C1E3B; border-radius:8px; padding:8px 10px;
+  text-decoration:none; font-size:.78rem; font-weight:600; text-align:center; transition:.15s;
+  display:flex; align-items:center; justify-content:center; gap:4px }
+.curso-acc a:hover { background:rgba(37,99,235,.14); color:#2563EB }
+.jefe-badge { padding:2px 10px; background:linear-gradient(135deg,#2563EB,#38BDF8); color:#fff;
+  border-radius:99px; font-size:.7rem; font-weight:700; text-transform:uppercase }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div id="ccHero"></div>
+  <div id="ccKpis"></div>
+  <div id="body">
+    <div class="cck-sk-row"><div class="cck-sk"></div><div class="cck-sk"></div><div class="cck-sk"></div></div>
+    <div class="cck-sk-row"><div class="cck-sk"></div><div class="cck-sk"></div><div class="cck-sk"></div></div>
+  </div>
+</div>
+
+<script>
+if (window.CCRouter && window.CCRouter.guardPanel) {
+  CCRouter.guardPanel(['profesor','jefe_curso','utp','encargado_area','admin_colegio','director','rector']);
+}
+
+function esc(s){ return String(s == null ? '' : s).replace(/[<>&"]/g,function(c){return {'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c];}); }
+
+function _renderHero() {
+  document.getElementById('ccHero').innerHTML = CCKit.hero({
+    emoji: '📚',
+    title: 'Mis Cursos',
+    sub: 'Todos los cursos y módulos donde dictás clases',
+    actions: [
+      { label: 'Panel', emoji: '←', href: 'dashboard-profesor.html' },
+      { label: 'Libro de clases', emoji: '📖', href: 'libro-clases.html' }
+    ]
+  });
+}
+
+function iniciar() {
+  _renderHero();
+  var u = (window.ELAuth && ELAuth.user) || {};
+  var uid = u.uid;
+  var espsProfe = Array.isArray(u.especialidades) ? u.especialidades
+                  : (u.especialidad ? [u.especialidad] : []);
+  var nivsProfe = Array.isArray(u.niveles) ? u.niveles : [];
+  var cursosAsig = Array.isArray(u.cursosAsignados) ? u.cursosAsignados : [];
+
+  EL_DB.collection('cursos').get().then(function (snap) {
+    var mios = [];
+    snap.forEach(function (d) {
+      var c = d.data(); if (!c || c.liceoSlug !== u.liceoSlug) return;
+      c.cursoId = c.cursoId || c.id || d.id;
+      if (c.activo === false) return;
+      var esJefe = c.jefeUid === uid;
+      var asigsDelProfe = (c.asignaturasAsignadas || [])
+        .filter(function (a) { return a.docenteUid === uid; })
+        .map(function (a) { return a.asignatura; });
+      var esCursoAsignado = cursosAsig.indexOf(c.cursoId) !== -1;
+      var esTPMio = c.esp && espsProfe.indexOf(c.esp) !== -1 &&
+                    (!nivsProfe.length || nivsProfe.indexOf(c.nivel) !== -1);
+      if (esJefe || asigsDelProfe.length || esCursoAsignado || esTPMio) {
+        c._misAsigs = asigsDelProfe;
+        c._esJefe = esJefe;
+        mios.push(c);
+      }
+    });
+    // Ordenar por nivel/letra
+    mios.sort(function (a, b) {
+      return String(a.nombreCompleto||a.nombre||'').localeCompare(String(b.nombreCompleto||b.nombre||''), 'es');
+    });
+    _renderKpis(mios);
+    _renderCursos(mios);
+  }).catch(function (err) {
+    document.getElementById('body').innerHTML = CCKit.emptyState({
+      emoji: '⚠', title: 'Error al cargar', body: err.message
+    });
+  });
+}
+
+function _renderKpis(cursos) {
+  var totalEst = cursos.reduce(function(s,c){ return s + ((c.estudiantes||[]).length); }, 0);
+  var jefes = cursos.filter(function(c){ return c._esJefe; }).length;
+  var asigs = {};
+  cursos.forEach(function(c){ (c._misAsigs||[]).forEach(function(a){ asigs[a]=1; }); });
+  var totAsigs = Object.keys(asigs).length;
+
+  document.getElementById('ccKpis').innerHTML = CCKit.kpiRow([
+    { emoji:'📚', label:'Cursos totales', value: cursos.length, tone:'info' },
+    { emoji:'🎓', label:'Jefaturas', value: jefes, tone:'ok',
+      hint: jefes ? 'Ver Mi Jefatura →' : 'No eres jefe' },
+    { emoji:'📖', label:'Asignaturas/Módulos', value: totAsigs, tone:'info' },
+    { emoji:'👥', label:'Estudiantes totales', value: totalEst, tone:'info' }
+  ]);
+}
+
+function _renderCursos(cursos) {
+  var body = document.getElementById('body');
+  if (!cursos.length) {
+    body.innerHTML = CCKit.emptyState({
+      emoji: '📚',
+      title: 'Aún no tienes cursos asignados',
+      body: 'Pedile al UTP o al director que te asigne cursos y asignaturas desde el Panel de Administración → Cursos.'
+    });
+    return;
+  }
+  body.innerHTML = '<div class="curso-grid">' + cursos.map(function (c) {
+    var asigs = (c._misAsigs || []).length
+      ? '<div class="curso-asigs">📖 ' + esc((c._misAsigs).join(' · ')) + '</div>'
+      : (c._esJefe ? '<div class="curso-asigs">🎓 Jefatura general (Consejo · Orientación)</div>' : '');
+    var jefeBadge = c._esJefe ? '<span class="jefe-badge">🎓 Jefe</span>' : '';
+    return '<div class="curso-c">' +
+      '<div class="curso-h">' +
+        '<div>' +
+          '<h3 class="curso-tit">' + esc(c.nombreCompleto || c.nombre || '—') + '</h3>' +
+          '<div class="curso-sub">' + esc(c.nivel || '') + (c.especialidadNombre?' · '+esc(c.especialidadNombre):'') + '</div>' +
+        '</div>' +
+        jefeBadge +
+      '</div>' +
+      '<div class="curso-badges">' +
+        CCKit.badge({ text: (c.estudiantes||[]).length + ' estudiantes', tone:'gray' }) +
+        (c.esp ? CCKit.badge({ text:'TP', tone:'info' }) : CCKit.badge({ text:'Plan común', tone:'info' })) +
+      '</div>' +
+      asigs +
+      '<div class="curso-acc">' +
+        '<a href="libro-clases.html">📖 Libro de clases</a>' +
+        '<a href="planificacion.html?cursoId=' + esc(c.cursoId) + '">📋 Planificar</a>' +
+        '<a href="notas.html">📊 Cargar notas</a>' +
+        '<a href="listas-curso.html">👥 Nómina</a>' +
+        '<a href="alumnos.html">👤 Estudiantes</a>' +
+        '<a href="reportes-utp.html">📤 Enviar reporte UTP</a>' +
+      '</div>' +
+    '</div>';
+  }).join('') + '</div>';
+}
+
+if (window.ELAuth && ELAuth.onUserReady) {
+  ELAuth.onUserReady(function(u){ if(u) iniciar(); });
+}
+</script>
+<script src="js/ia-widget.js" defer></script>
+<script src="js/session-guard.js" defer></script>
+<script src="js/search-global.js" defer></script>
+</body>
+</html>

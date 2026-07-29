@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Derivaciones · Click&Clase</title>
+<link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg">
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="js/firebase-rest.js"></script>
+<script src="js/firebase-config.js"></script>
+<script src="js/firebase-auth.js"></script>
+<script src="js/firebase-db.js"></script>
+<script src="js/roles-permissions.js"></script>
+<script src="js/roles-router.js"></script>
+<script src="js/derivaciones.js"></script>
+<style>
+:root {
+  --bg: #F0F7FF; --bg-2: #E0EDFF; --panel: #FFFFFF; --panel-2: #FAFCFF;
+  --border: rgba(148,163,184,.14); --border-strong: rgba(37,99,235,.22);
+  --text: #0C1E3B; --text-2: #334155; --muted: #475569;
+  --violet: #2563EB; --gold: #F59E0B; --green: #34d399;
+  --danger: #DC2626; --cyan: #38BDF8; --pink: #DC2626;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Inter','Segoe UI',Roboto,Arial,sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; font-size: 15px; line-height: 1.55; }
+.wrap { max-width: 1300px; margin: 0 auto; padding: 24px; }
+.back-link { color: var(--violet); text-decoration: none; font-size: .88rem; }
+
+.header {
+  background: linear-gradient(135deg, var(--panel), var(--panel-2));
+  border: 1px solid var(--border-strong); border-radius: 20px;
+  padding: 32px 36px; margin: 16px 0 24px;
+}
+.header h1 { font-size: 1.9rem; font-weight: 800; margin-bottom: 6px; }
+.header p { color: var(--text-2); font-size: .92rem; max-width: 700px; }
+
+.tabs { display: flex; gap: 4px; border-bottom: 2px solid var(--border); margin-bottom: 22px; overflow-x: auto; }
+.tab { padding: 12px 20px; background: none; border: none; color: #475569; cursor: pointer; font-family: inherit; font-size: .92rem; font-weight: 600; border-bottom: 3px solid transparent; margin-bottom: -2px; white-space: nowrap; }
+.tab:hover { color: var(--text-2); }
+.tab.active { color: var(--violet); border-bottom-color: var(--violet); }
+.tab .badge { background: var(--danger); color: #fff; font-size: .68rem; padding: 1px 7px; border-radius: 8px; margin-left: 6px; font-weight: 700; }
+
+.sec { display: none; }
+.sec.active { display: block; }
+
+.card { background: var(--panel); border: 1px solid var(--border); border-radius: 14px; padding: 22px 26px; margin-bottom: 16px; }
+
+table { width: 100%; border-collapse: collapse; font-size: .88rem; }
+th, td { padding: 12px 14px; text-align: left; border-bottom: 1px solid var(--border); vertical-align: top; }
+th { font-size: .72rem; text-transform: uppercase; letter-spacing: 1px; color: #475569; font-weight: 700; background: rgba(37,99,235,.08); }
+tr:hover td { background: rgba(37,99,235,.04); }
+
+.chip { display: inline-block; padding: 3px 10px; border-radius: 8px; font-size: .72rem; font-weight: 700; }
+.urg-alta   { background: rgba(220,38,38,.15); color: #DC2626; }
+.urg-media  { background: rgba(251,191,36,.15); color: #B45309; }
+.urg-baja   { background: rgba(37,99,235,.15); color: #475569; }
+.est-pendiente   { background: rgba(220,38,38,.12); color: var(--danger); }
+.est-en_atencion { background: rgba(251,191,36,.12); color: var(--gold); }
+.est-atendida    { background: rgba(52,211,153,.12); color: var(--green); }
+
+.dest-apoyo       { background: rgba(34,211,238,.15); color: #0369A1; }
+.dest-convivencia { background: rgba(249,115,22,.15); color: #fdba74; }
+.dest-pie         { background: rgba(37,99,235,.15); color: #1D4ED8; }
+
+.mini-btn {
+  padding: 5px 10px; background: rgba(37,99,235,.15); border: 1px solid rgba(37,99,235,.3);
+  color: #1D4ED8; border-radius: 6px; font-size: .74rem; font-weight: 600; text-decoration: none;
+  display: inline-block; cursor: pointer; margin-right: 3px;
+}
+.mini-btn:hover { background: rgba(37,99,235,.3); }
+.mini-btn.warning { background: rgba(251,191,36,.15); border-color: rgba(251,191,36,.3); color: var(--gold); }
+.mini-btn.warning:hover { background: rgba(251,191,36,.3); }
+.mini-btn.success { background: rgba(52,211,153,.15); border-color: rgba(52,211,153,.3); color: var(--green); }
+.mini-btn.success:hover { background: rgba(52,211,153,.3); }
+
+.empty { padding: 60px 20px; text-align: center; color: #475569; }
+.empty .icon { font-size: 4rem; margin-bottom: 12px; }
+.loader { padding: 40px; text-align: center; color: #475569; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <a class="back-link" href="dashboard-profesor.html">← Volver al panel</a>
+
+  <div class="header">
+    <h1>🔀 Derivaciones</h1>
+    <p>Como profesor jefe puedes derivar alumnos a Apoyo, Convivencia o PIE desde su ficha. Como coordinador de un equipo, acá recibís los casos.</p>
+  </div>
+
+  <div class="tabs" id="tabsBar"></div>
+
+  <div class="sec active" id="sec-enviadas">
+    <div class="card">
+      <div id="listaEnviadas"><div class="loader">⏳ Cargando…</div></div>
+    </div>
+  </div>
+
+  <div class="sec" id="sec-recibidas">
+    <div class="card">
+      <div id="listaRecibidas"><div class="loader">⏳ Cargando…</div></div>
+    </div>
+  </div>
+</div>
+
+<script>
+if (window.CCRouter && CCRouter.guardPanel) {
+  CCRouter.guardPanel(['admin','director','rector','admin_colegio','utp','encargado_area','profesor','jefe_curso','pie_enc','pie_edu','aps_enc','aps_prof','amb_enc','amb_prof']);
+}
+
+var _user = null;
+var _enviadas  = [];
+var _recibidas = [];
+var _destinoDelUsuario = null;   // 'apoyo' | 'convivencia' | 'pie' | null
+
+function esc(s) { return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function inicio() {
+  _user = ELAuth.user || {};
+  var roles = _user.roles || {};
+  var role = _user.role || '';
+
+  // Detectar destino según rol
+  if (role.indexOf('aps') === 0 || roles.aps_enc || roles.aps_prof) _destinoDelUsuario = 'apoyo';
+  else if (role.indexOf('amb') === 0 || roles.amb_enc || roles.amb_prof) _destinoDelUsuario = 'convivencia';
+  else if (role.indexOf('pie') === 0 || roles.pie_enc || roles.pie_edu) _destinoDelUsuario = 'pie';
+  else if (role === 'admin' || roles.admin || role === 'director' || role === 'rector' || roles.director || roles.rector) {
+    _destinoDelUsuario = 'todos';   // ver todo
+  }
+
+  renderTabs();
+  cargarEnviadas();
+  if (_destinoDelUsuario) cargarRecibidas();
+}
+
+function renderTabs() {
+  var tabs = [{ id: 'enviadas', label: '📤 Mis derivaciones enviadas' }];
+  if (_destinoDelUsuario) {
+    var lbl = _destinoDelUsuario === 'todos' ? '📥 Todas las derivaciones' :
+              '📥 Casos recibidos (' + (CCDerivaciones.destinoInfo(_destinoDelUsuario) || {}).label + ')';
+    tabs.push({ id: 'recibidas', label: lbl });
+  }
+  document.getElementById('tabsBar').innerHTML = tabs.map(function (t, i) {
+    return '<button class="tab' + (i === 0 ? ' active' : '') + '" onclick="verSec(\'' + t.id + '\', this)">' + t.label + '</button>';
+  }).join('');
+}
+
+function verSec(id, btn) {
+  document.querySelectorAll('.tab').forEach(function (t) { t.classList.remove('active'); });
+  document.querySelectorAll('.sec').forEach(function (s) { s.classList.remove('active'); });
+  btn.classList.add('active');
+  document.getElementById('sec-' + id).classList.add('active');
+}
+
+function cargarEnviadas() {
+  CCDerivaciones.listarPorProfesor().then(function (arr) {
+    _enviadas = arr;
+    renderLista('listaEnviadas', arr, false);
+  }).catch(function (err) {
+    document.getElementById('listaEnviadas').innerHTML = '<div class="empty">Error: ' + esc(err.message) + '</div>';
+  });
+}
+
+function cargarRecibidas() {
+  var promise = _destinoDelUsuario === 'todos'
+    ? EL_DB.collection('derivaciones_alumno').get().then(function (snap) {
+        var arr = [];
+        snap.forEach(function (d) {
+          var data = d.data();
+          if (data.liceoSlug === (_user.liceoSlug || '')) arr.push(Object.assign({ id: d.id }, data));
+        });
+        var prio = { alta: 0, media: 1, baja: 2 };
+        arr.sort(function (a, b) { return (prio[a.urgencia]||3) - (prio[b.urgencia]||3); });
+        return arr;
+      })
+    : CCDerivaciones.listarPorDestino(_destinoDelUsuario);
+
+  promise.then(function (arr) {
+    _recibidas = arr;
+    renderLista('listaRecibidas', arr, true);
+  }).catch(function (err) {
+    document.getElementById('listaRecibidas').innerHTML = '<div class="empty">Error: ' + esc(err.message) + '</div>';
+  });
+}
+
+function renderLista(wrapId, arr, mostrarAcciones) {
+  if (!arr.length) {
+    document.getElementById(wrapId).innerHTML = '<div class="empty"><div class="icon">🔀</div>Sin derivaciones.</div>';
+    return;
+  }
+  var filas = arr.map(function (d) {
+    var dest = CCDerivaciones.destinoInfo(d.destino) || { label: d.destino, ico: '📌' };
+    var fecha = new Date(d.fecha).toLocaleString('es-CL', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+    var motivos = (CCDerivaciones.motivosPara(d.destino) || []).find(function (m) { return m.id === d.motivo; });
+    var motivoLbl = motivos ? motivos.label : d.motivo;
+
+    var acciones = '<a class="mini-btn" href="ficha-alumno.html?rut=' + encodeURIComponent(d.alumnoRut) + '&curso=' + encodeURIComponent(d.cursoId) + '" target="_blank">👤 Ficha</a>';
+    if (mostrarAcciones) {
+      if (d.estado === 'pendiente') {
+        acciones += '<button class="mini-btn warning" onclick="tomarCaso(\'' + d.id + '\')">▶ Tomar caso</button>';
+      }
+      if (d.estado === 'en_atencion') {
+        acciones += '<button class="mini-btn success" onclick="marcarAtendida(\'' + d.id + '\')">✓ Marcar atendida</button>';
+      }
+    }
+
+    return '<tr>' +
+      '<td style="white-space:nowrap;color:var(--muted);font-size:.8rem">' + fecha + '</td>' +
+      '<td><b>' + esc(d.alumnoNombre) + '</b><div style="color:var(--muted);font-size:.75rem">Por: ' + esc(d.profesorNombre) + '</div></td>' +
+      '<td><span class="chip dest-' + d.destino + '">' + dest.ico + ' ' + dest.label + '</span></td>' +
+      '<td>' + esc(motivoLbl) + '</td>' +
+      '<td><span class="chip urg-' + d.urgencia + '">' + esc(d.urgencia) + '</span></td>' +
+      '<td><span class="chip est-' + d.estado + '">' + esc(d.estado.replace('_', ' ')) + '</span></td>' +
+      '<td style="max-width:280px;font-size:.82rem">' + esc(d.descripcion) + '</td>' +
+      '<td style="white-space:nowrap">' + acciones + '</td>' +
+    '</tr>';
+  }).join('');
+
+  document.getElementById(wrapId).innerHTML =
+    '<div style="overflow-x:auto"><table>' +
+    '<thead><tr><th>Fecha</th><th>Alumno</th><th>Destino</th><th>Motivo</th><th>Urgencia</th><th>Estado</th><th>Descripción</th><th>Acciones</th></tr></thead>' +
+    '<tbody>' + filas + '</tbody></table></div>';
+}
+
+function tomarCaso(derId) {
+  if (!confirm('¿Tomar este caso? El estado pasará a "en atención".')) return;
+  CCDerivaciones.actualizarEstado(derId, 'en_atencion').then(function () {
+    cargarRecibidas();
+  }).catch(function (err) { alert('Error: ' + err.message); });
+}
+
+function marcarAtendida(derId) {
+  if (!confirm('¿Marcar como atendida? Registrá primero la atención en el panel del equipo.')) return;
+  CCDerivaciones.actualizarEstado(derId, 'atendida').then(function () {
+    cargarRecibidas();
+  }).catch(function (err) { alert('Error: ' + err.message); });
+}
+
+if (typeof ELAuth !== 'undefined' && ELAuth.onUserReady) {
+  ELAuth.onUserReady(inicio);
+} else {
+  window.addEventListener('load', inicio);
+}
+</script>
+
+<script src="js/ia-widget.js" defer></script>
+<script src="js/search-global.js" defer></script>
+</body>
+</html>

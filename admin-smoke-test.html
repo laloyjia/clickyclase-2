@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🔬 Smoke Test · Click&Clase</title>
+<link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg">
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="js/firebase-rest.js"></script>
+<script src="js/firebase-config.js"></script>
+<script src="js/firebase-auth.js"></script>
+<script src="js/firebase-db.js"></script>
+<script src="js/tp-catalogo.js"></script>
+<script src="js/curricula/tp/datos-atencion-enfermeria.js"></script>
+<script src="js/curricula-chile.js"></script>
+<style>
+:root {
+  --bg: #F0F7FF; --panel: #FFFFFF; --panel-2: #FAFCFF;
+  --border: rgba(37,99,235,.20); --text: #0C1E3B; --muted: #475569;
+  --violet: #2563EB; --green: #34d399; --danger: #DC2626; --gold: #F59E0B;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding: 24px; }
+.wrap { max-width: 1000px; margin: 0 auto; }
+.header {
+  background: linear-gradient(135deg, var(--panel), var(--panel-2));
+  border: 1px solid var(--border); border-radius: 20px;
+  padding: 32px 36px; margin-bottom: 24px;
+}
+h1 { font-size: 1.8rem; font-weight: 800; margin-bottom: 6px; }
+.sub { color: #475569; font-size: .95rem; }
+.back-link { color: var(--violet); text-decoration: none; font-size: .88rem; }
+
+.controls { display: flex; gap: 10px; margin-bottom: 20px; align-items: center; flex-wrap: wrap; }
+.btn { padding: 12px 22px; border-radius: 10px; border: 1px solid var(--border); background: rgba(37,99,235,.04); color: var(--text); font-family: inherit; font-weight: 700; cursor: pointer; }
+.btn.primary { background: linear-gradient(135deg, var(--violet), #1E40AF); border-color: transparent; color: white; font-size: 1rem; padding: 14px 28px; }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+
+.stats { display: flex; gap: 12px; flex-wrap: wrap; margin-left: auto; }
+.stat { padding: 8px 16px; background: rgba(37,99,235,.04); border: 1px solid var(--border); border-radius: 10px; font-size: .82rem; font-weight: 700; }
+.stat.ok { background: rgba(52,211,153,.15); border-color: rgba(52,211,153,.4); color: var(--green); }
+.stat.fail { background: rgba(220,38,38,.15); border-color: rgba(220,38,38,.4); color: var(--danger); }
+.stat.pend { background: rgba(148,163,184,.1); color: #475569; }
+
+.test {
+  background: var(--panel); border: 1px solid var(--border); border-radius: 12px;
+  padding: 18px 22px; margin-bottom: 10px;
+  display: grid; grid-template-columns: auto 1fr auto; gap: 18px; align-items: center;
+}
+.test.running { border-color: rgba(37,99,235,.5); background: linear-gradient(135deg, rgba(37,99,235,.05), transparent); }
+.test.ok { border-color: rgba(52,211,153,.3); background: linear-gradient(135deg, rgba(52,211,153,.04), transparent); }
+.test.fail { border-color: rgba(220,38,38,.4); background: linear-gradient(135deg, rgba(220,38,38,.08), transparent); }
+.test .ico { font-size: 1.8rem; }
+.test .info h3 { font-size: 1rem; font-weight: 700; margin-bottom: 4px; }
+.test .info .desc { font-size: .82rem; color: #475569; }
+.test .info .err { font-size: .78rem; color: var(--danger); margin-top: 6px; padding: 6px 10px; background: rgba(220,38,38,.08); border-radius: 6px; word-break: break-all; }
+.test .status { font-size: .8rem; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; }
+.test.ok .status { color: var(--green); }
+.test.fail .status { color: var(--danger); }
+.test.running .status { color: var(--violet); }
+.test.pend .status { color: #475569; }
+
+.spin {
+  display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(37,99,235,.3);
+  border-top-color: var(--violet); border-radius: 50%; animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <a class="back-link" href="admin.html">← Volver al Panel Admin</a>
+
+  <div class="header">
+    <h1>🔬 Smoke Test automático</h1>
+    <p class="sub">Verifica en 30 segundos que las funciones críticas del sistema estén operativas. <b>Correr antes de cada deploy y después de cada release.</b> Si algún check falla, no promover a producción.</p>
+  </div>
+
+  <div class="controls">
+    <button class="btn primary" onclick="correrTodos()" id="btnRun">▶ Correr todos los tests</button>
+    <div class="stats">
+      <div class="stat pend"><span id="statPend">0</span> pendientes</div>
+      <div class="stat ok"><span id="statOk">0</span> ok</div>
+      <div class="stat fail"><span id="statFail">0</span> fallidos</div>
+    </div>
+  </div>
+
+  <div id="testsWrap"></div>
+</div>
+
+<script>
+var TESTS = [
+  {
+    id: 'auth',
+    icon: '🔐',
+    nombre: 'Autenticación',
+    desc: 'El SDK de Firebase Auth está cargado y responde',
+    fn: async function () {
+      if (typeof firebase === 'undefined') throw new Error('Firebase SDK no cargado');
+      if (!firebase.auth) throw new Error('firebase.auth no disponible');
+      var user = firebase.auth().currentUser;
+      if (!user) throw new Error('No hay usuario logueado. Iniciá sesión primero.');
+      return 'Logueado como ' + (user.email || user.uid);
+    }
+  },
+  {
+    id: 'firestore-read',
+    icon: '📦',
+    nombre: 'Firestore lectura',
+    desc: 'Puede leer la colección liceos',
+    fn: async function () {
+      var snap = await EL_DB.collection('liceos').get();
+      return snap.size + ' liceos leídos';
+    }
+  },
+  {
+    id: 'rules-usuarios',
+    icon: '👥',
+    nombre: 'Rules — list usuarios',
+    desc: 'Rule /usuarios permite list para admin (no 403)',
+    fn: async function () {
+      var snap = await EL_DB.collection('usuarios').get();
+      return snap.size + ' usuarios accesibles';
+    }
+  },
+  {
+    id: 'rules-derivaciones',
+    icon: '🔀',
+    nombre: 'Rules — list derivaciones',
+    desc: 'Rule /derivaciones_alumno permite list sin 403',
+    fn: async function () {
+      var snap = await EL_DB.collection('derivaciones_alumno').get();
+      return snap.size + ' derivaciones accesibles';
+    }
+  },
+  {
+    id: 'rules-alertas',
+    icon: '🚨',
+    nombre: 'Rules — list alertas',
+    desc: 'Rule /alertas_alumno permite list sin 403',
+    fn: async function () {
+      var snap = await EL_DB.collection('alertas_alumno').get();
+      return snap.size + ' alertas accesibles';
+    }
+  },
+  {
+    id: 'rules-libro',
+    icon: '📖',
+    nombre: 'Rules — list libro_clases',
+    desc: 'Rule /libro_clases permite list sin 403',
+    fn: async function () {
+      var snap = await EL_DB.collection('libro_clases').get();
+      return snap.size + ' registros accesibles';
+    }
+  },
+  {
+    id: 'catalogo-tp',
+    icon: '🔧',
+    nombre: 'Catálogo TP dual',
+    desc: 'CCTPCatalogo acepta id interno y slug',
+    fn: async function () {
+      if (typeof CCTPCatalogo === 'undefined') throw new Error('CCTPCatalogo no cargado');
+      await CCTPCatalogo.cargarCatalogo();
+      var mods1 = CCTPCatalogo.modulos('tp_enfermeria');
+      var mods2 = CCTPCatalogo.modulos('atencion-enfermeria');
+      if (!mods1.length) throw new Error('modulos(tp_enfermeria) vacío');
+      if (!mods2.length) throw new Error('modulos(atencion-enfermeria) vacío');
+      if (mods1.length !== mods2.length) throw new Error('Los dos formatos devuelven distinta cantidad de módulos');
+      return mods1.length + ' módulos con ambos formatos';
+    }
+  },
+  {
+    id: 'curricula-oas',
+    icon: '🎯',
+    nombre: 'Currícula carga OAs',
+    desc: 'CURRICULA_CHILE.getModuloCompat retorna OAs para tp_enfermeria/AE3',
+    fn: async function () {
+      if (typeof CURRICULA_CHILE === 'undefined') throw new Error('CURRICULA_CHILE no cargado');
+      var m = CURRICULA_CHILE.getModuloCompat('tp_enfermeria', 'AE3');
+      if (!m) throw new Error('getModuloCompat(tp_enfermeria, AE3) retornó null (planificador NO carga OAs)');
+      if (!m.oas || Object.keys(m.oas).length === 0) throw new Error('El módulo no tiene OAs');
+      return Object.keys(m.oas).length + ' OAs disponibles';
+    }
+  },
+  {
+    id: 'paginas-clave',
+    icon: '📄',
+    nombre: 'Páginas clave existen',
+    desc: 'HEAD a las 6 páginas principales del sistema',
+    fn: async function () {
+      var paginas = [
+        'dashboard-profesor.html', 'planificacion.html', 'material.html',
+        'ficha-alumno.html', 'alumnos.html', 'alertas.html', 'derivaciones.html',
+        'panel-admin-colegio.html', 'panel-apoyo.html', 'panel-ambiente.html', 'panel-pie.html'
+      ];
+      var faltantes = [];
+      for (var i = 0; i < paginas.length; i++) {
+        var r = await fetch(paginas[i], { method: 'HEAD' });
+        if (!r.ok) faltantes.push(paginas[i] + ' (' + r.status + ')');
+      }
+      if (faltantes.length) throw new Error('Faltan: ' + faltantes.join(', '));
+      return paginas.length + ' páginas OK';
+    }
+  }
+];
+
+function esc(s) { return String(s == null ? '' : s).replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function renderTests() {
+  document.getElementById('testsWrap').innerHTML = TESTS.map(function (t) {
+    return '<div class="test pend" id="test-' + t.id + '">' +
+      '<div class="ico">' + t.icon + '</div>' +
+      '<div class="info"><h3>' + t.nombre + '</h3><div class="desc">' + t.desc + '</div><div class="detail"></div></div>' +
+      '<div class="status">Pendiente</div>' +
+    '</div>';
+  }).join('');
+  actualizarStats();
+}
+
+function actualizarStats() {
+  var pend = document.querySelectorAll('.test.pend').length;
+  var ok = document.querySelectorAll('.test.ok').length;
+  var fail = document.querySelectorAll('.test.fail').length;
+  document.getElementById('statPend').textContent = pend;
+  document.getElementById('statOk').textContent = ok;
+  document.getElementById('statFail').textContent = fail;
+}
+
+async function correrTest(t) {
+  var el = document.getElementById('test-' + t.id);
+  el.classList.remove('pend', 'ok', 'fail');
+  el.classList.add('running');
+  el.querySelector('.status').innerHTML = '<span class="spin"></span> Corriendo…';
+  el.querySelector('.detail').innerHTML = '';
+  try {
+    var resultado = await Promise.race([
+      t.fn(),
+      new Promise(function (_, rej) { setTimeout(function () { rej(new Error('Timeout 10s')); }, 10000); })
+    ]);
+    el.classList.remove('running');
+    el.classList.add('ok');
+    el.querySelector('.status').textContent = '✓ OK';
+    el.querySelector('.detail').innerHTML = '<div style="font-size:.78rem;color:var(--green);margin-top:4px">' + esc(resultado || '') + '</div>';
+  } catch (e) {
+    el.classList.remove('running');
+    el.classList.add('fail');
+    el.querySelector('.status').textContent = '✗ FALLÓ';
+    el.querySelector('.detail').innerHTML = '<div class="err">' + esc(e.message || String(e)) + '</div>';
+  }
+  actualizarStats();
+}
+
+async function correrTodos() {
+  document.getElementById('btnRun').disabled = true;
+  renderTests();
+  // Ejecutar en serie para no saturar
+  for (var i = 0; i < TESTS.length; i++) {
+    await correrTest(TESTS[i]);
+    await new Promise(function (r) { setTimeout(r, 100); });
+  }
+  document.getElementById('btnRun').disabled = false;
+}
+
+if (typeof ELAuth !== 'undefined' && ELAuth.onUserReady) {
+  ELAuth.onUserReady(function () { renderTests(); });
+} else {
+  window.addEventListener('load', renderTests);
+}
+</script>
+
+</body>
+</html>

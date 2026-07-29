@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Certificados — Click&Clase</title>
+<link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg">
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="js/firebase-rest.js"></script>
+<script src="js/firebase-config.js"></script>
+<script src="js/firebase-auth.js"></script>
+<script src="js/firebase-db.js"></script>
+<script src="js/roles-permissions.js"></script>
+<script src="js/roles-router.js"></script>
+<script src="js/cursos.js"></script>
+<script src="js/cc-uikit.js"></script>
+<style>
+* { box-sizing: border-box; }
+body { margin: 0; font-family: 'Segoe UI', Roboto, Arial, sans-serif; background: #F0F7FF; color: #0C1E3B; }
+.container { max-width: 1300px; margin: 20px auto; padding: 0 24px; }
+.filtros { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px }
+.fld label { display: block; font-size: .72rem; color: #64748B; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 4px }
+select, input { width: 100%; padding: 9px 12px; border-radius: 8px; background: #fff; border: 1px solid rgba(37,99,235,.2); font-size: .88rem }
+.cert-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; margin-top: 14px }
+.cert-card { background: #fff; border: 1px solid rgba(37,99,235,.14); border-radius: 14px; padding: 20px; cursor: pointer; transition: .2s; text-align: center }
+.cert-card:hover { border-color: #4F46E5; transform: translateY(-3px); box-shadow: 0 12px 28px rgba(79,70,229,.15) }
+.cert-emoji { font-size: 2.4rem; margin-bottom: 8px }
+.cert-title { font-weight: 800; color: #0C1E3B; margin-bottom: 4px; font-size: 1rem }
+.cert-sub { color: #64748B; font-size: .82rem; line-height: 1.4 }
+.btn { padding: 10px 22px; border-radius: 8px; border: none; background: linear-gradient(135deg,#4F46E5,#6366F1); color: #fff; cursor: pointer; font-weight: 700; margin-top: 12px }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div id="ccHero"></div>
+
+  <div class="cck-card">
+    <h2>👤 Datos del estudiante</h2>
+    <div class="filtros">
+      <div class="fld"><label>Curso</label><select id="fCurso" onchange="onCurso()"><option value="">— Elegir —</option></select></div>
+      <div class="fld"><label>Estudiante</label><select id="fAlumno"><option value="">— Elegir —</option></select></div>
+    </div>
+  </div>
+
+  <div class="cck-card">
+    <h2>📜 Elegí el certificado a generar</h2>
+    <div class="cert-grid">
+      <div class="cert-card" onclick="generar('alumnoRegular')">
+        <div class="cert-emoji">🎓</div>
+        <div class="cert-title">Alumno Regular</div>
+        <div class="cert-sub">Certifica matrícula vigente para trámites externos</div>
+      </div>
+      <div class="cert-card" onclick="generar('notas')">
+        <div class="cert-emoji">📊</div>
+        <div class="cert-title">Concentración de Notas</div>
+        <div class="cert-sub">Detalle de calificaciones por asignatura y semestre</div>
+      </div>
+      <div class="cert-card" onclick="generar('personalidad')">
+        <div class="cert-emoji">📄</div>
+        <div class="cert-title">Informe de Personalidad</div>
+        <div class="cert-sub">Evaluación cualitativa formato MINEDUC</div>
+      </div>
+      <div class="cert-card" onclick="generar('conducta')">
+        <div class="cert-emoji">🤝</div>
+        <div class="cert-title">Certificado de Conducta</div>
+        <div class="cert-sub">Comportamiento y participación institucional</div>
+      </div>
+      <div class="cert-card" onclick="generar('matricula')">
+        <div class="cert-emoji">📝</div>
+        <div class="cert-title">Certificado de Matrícula</div>
+        <div class="cert-sub">Confirmación de matrícula del año lectivo</div>
+      </div>
+      <div class="cert-card" onclick="generar('asistencia')">
+        <div class="cert-emoji">✅</div>
+        <div class="cert-title">Certificado de Asistencia</div>
+        <div class="cert-sub">Porcentaje de asistencia del período</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+if (window.CCRouter && window.CCRouter.guardPanel) {
+  CCRouter.guardPanel(['profesor','jefe_curso','utp','encargado_area','admin_colegio','director','rector']);
+}
+
+var _cursos=[], _cursoSel=null;
+function esc(s){return String(s==null?'':s).replace(/[<>&"]/g,function(c){return {'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c];});}
+
+function _hero(qVolver){
+  var actions = qVolver
+    ? [{label:'Mi Jefatura',emoji:'←',href:qVolver}]
+    : [{label:'Panel',emoji:'←',href:'dashboard-profesor.html'},
+       {label:'Mi Jefatura',emoji:'🎓',href:'mi-jefatura.html'}];
+  document.getElementById('ccHero').innerHTML = CCKit.hero({
+    emoji:'📜', title:'Certificados oficiales',
+    sub:'Generá y descarga certificados listos para firmar', actions:actions
+  });
+}
+
+function iniciar(){
+  var qp = new URLSearchParams(window.location.search);
+  _hero(qp.get('volverA'));
+  var qCursoId = qp.get('cursoId');
+  CCCursos.misCursos().then(function(cs){
+    _cursos = cs || [];
+    var sel = document.getElementById('fCurso');
+    sel.innerHTML = '<option value="">— Elegir —</option>' +
+      _cursos.map(function(c){ return '<option value="'+esc(c.cursoId)+'">'+esc(c.nombreCompleto)+'</option>'; }).join('');
+    if (qCursoId) { sel.value = qCursoId; onCurso(); }
+  });
+}
+
+function onCurso(){
+  var cid = document.getElementById('fCurso').value;
+  _cursoSel = _cursos.find(function(c){ return c.cursoId === cid; });
+  var selA = document.getElementById('fAlumno');
+  var ests = (_cursoSel && _cursoSel.estudiantes) || [];
+  selA.innerHTML = '<option value="">— Elegir —</option>' +
+    ests.map(function(e){ return '<option value="'+esc(e.rut)+'">'+esc(e.nombre)+'</option>'; }).join('');
+}
+
+function _alumnoActual(){
+  var rut = document.getElementById('fAlumno').value;
+  if (!rut || !_cursoSel) return null;
+  return (_cursoSel.estudiantes||[]).find(function(e){ return e.rut === rut; });
+}
+
+function _abrirPDF(html, titulo){
+  var w = window.open('','print','width=900,height=1000');
+  w.document.write('<html><head><title>'+esc(titulo)+'</title>' +
+    '<style>' +
+      '@page{margin:2cm}body{font-family:Georgia,serif;padding:40px;color:#000;line-height:1.7;max-width:700px;margin:0 auto}' +
+      '.logo{text-align:center;margin-bottom:20px;font-size:.85rem;color:#555}' +
+      'h1{text-align:center;font-size:1.6rem;margin:20px 0 6px;letter-spacing:2px;text-transform:uppercase}' +
+      'h2{text-align:center;font-size:1.05rem;margin:0 0 30px;color:#555;font-weight:normal;letter-spacing:1px}' +
+      '.contenido{text-align:justify;font-size:1.05rem;margin:30px 0;text-indent:2rem}' +
+      '.firmas{display:flex;justify-content:space-around;margin-top:80px}' +
+      '.firma{text-align:center;width:250px}' +
+      '.firma .linea{border-top:1px solid #000;padding-top:6px;font-size:.85rem}' +
+      '.pie{text-align:center;margin-top:60px;color:#666;font-size:.78rem}' +
+      'table.notas{width:100%;border-collapse:collapse;margin:20px 0;font-size:.9rem}' +
+      'table.notas th,table.notas td{border:1px solid #333;padding:6px 10px}' +
+      'table.notas th{background:#eee;text-align:center}' +
+    '</style></head><body>' + html +
+    '<sc' + 'ript>window.onload=function(){window.print()}</sc' + 'ript></body></html>');
+  w.document.close();
+}
+
+function _headerHtml(){
+  var u = (window.ELAuth && ELAuth.user) || {};
+  return '<div class="logo"><b>Click&amp;Clase</b> — ' + esc((u.liceoNombre||u.liceoSlug||'Colegio').toUpperCase()) + '</div>';
+}
+function _firmasHtml(){
+  var u = (window.ELAuth && ELAuth.user) || {};
+  return '<div class="firmas">' +
+    '<div class="firma"><div class="linea">' + esc(u.nombre || u.email || 'Profesor Jefe') + '<br><b>Profesor(a) Jefe</b></div></div>' +
+    '<div class="firma"><div class="linea">Dirección<br><b>Director(a) del establecimiento</b></div></div>' +
+    '</div>';
+}
+function _pieHtml(){
+  return '<div class="pie">Documento emitido el ' + new Date().toLocaleDateString('es-CL',{day:'numeric',month:'long',year:'numeric'}) +
+    '.<br>Este certificado tiene validez ante organismos que así lo requieran.</div>';
+}
+
+function generar(tipo){
+  var alu = _alumnoActual();
+  if (!alu) { alert('Elegí curso y estudiante primero'); return; }
+  var curso = _cursoSel.nombreCompleto || _cursoSel.nombre || '';
+  var u = (window.ELAuth && ELAuth.user) || {};
+  var liceo = u.liceoNombre || u.liceoSlug || 'este establecimiento';
+  var fecha = new Date().toLocaleDateString('es-CL',{day:'numeric',month:'long',year:'numeric'});
+  var html, titulo;
+
+  if (tipo === 'alumnoRegular') {
+    titulo = 'Certificado de Alumno Regular';
+    html = _headerHtml() +
+      '<h1>Certificado de Alumno Regular</h1>' +
+      '<h2>Año Lectivo ' + new Date().getFullYear() + '</h2>' +
+      '<div class="contenido">El(la) suscrito(a) certifica que <b>' + esc(alu.nombre) + '</b>' +
+      (alu.rut?', cédula de identidad Nº <b>' + esc(alu.rut) + '</b>':'') +
+      ', se encuentra matriculado(a) como <b>alumno(a) regular</b> del curso <b>' + esc(curso) +
+      '</b> del establecimiento <b>' + esc(liceo) + '</b> durante el año escolar en curso.</div>' +
+      '<div class="contenido">Se extiende el presente certificado a solicitud del interesado para los fines que estime pertinentes.</div>' +
+      _firmasHtml() + _pieHtml();
+
+  } else if (tipo === 'notas') {
+    titulo = 'Concentración de Notas';
+    // Traer las notas del alumno
+    _traerNotasAlumno(alu).then(function(res){
+      var tabla = '<table class="notas"><thead><tr><th>Asignatura</th><th>Sem 1</th><th>Sem 2</th><th>Promedio</th></tr></thead><tbody>';
+      Object.keys(res).forEach(function(asig){
+        var s1 = res[asig].s1.length ? (res[asig].s1.reduce(function(s,n){return s+n;},0)/res[asig].s1.length) : null;
+        var s2 = res[asig].s2.length ? (res[asig].s2.reduce(function(s,n){return s+n;},0)/res[asig].s2.length) : null;
+        var pm = (s1!=null && s2!=null) ? (s1+s2)/2 : (s1||s2);
+        tabla += '<tr><td>'+esc(asig)+'</td>' +
+          '<td style="text-align:center">'+(s1!=null?s1.toFixed(1):'—')+'</td>' +
+          '<td style="text-align:center">'+(s2!=null?s2.toFixed(1):'—')+'</td>' +
+          '<td style="text-align:center"><b>'+(pm!=null?pm.toFixed(1):'—')+'</b></td></tr>';
+      });
+      tabla += '</tbody></table>';
+      if (!Object.keys(res).length) tabla = '<p style="text-align:center;color:#999">Sin notas registradas para este estudiante.</p>';
+      var html2 = _headerHtml() +
+        '<h1>Concentración de Notas</h1>' +
+        '<h2>' + esc(curso) + ' — ' + new Date().getFullYear() + '</h2>' +
+        '<div style="margin-bottom:20px"><b>Estudiante:</b> ' + esc(alu.nombre) + '<br><b>RUT:</b> ' + esc(alu.rut||'—') + '</div>' +
+        tabla + _firmasHtml() + _pieHtml();
+      _abrirPDF(html2, titulo);
+    });
+    return;
+
+  } else if (tipo === 'personalidad') {
+    titulo = 'Informe de Personalidad';
+    // Traer informe guardado y generar PDF completo con las 4 dimensiones
+    _traerInformePersonalidad(alu).then(function(data){
+      var vals = (data && data.valores) || {};
+      var CRITERIOS = {
+        etica: {t:'1. Formación Ética', items:[
+          {k:'e1', txt:'Reconoce, respeta y defiende la igualdad de derechos entre las personas'},
+          {k:'e2', txt:'Demuestra honestidad en su actuar cotidiano'},
+          {k:'e3', txt:'Respeta y valora las ideas y creencias distintas a las propias'},
+          {k:'e4', txt:'Manifiesta actitudes de solidaridad y respeto por los demás'}
+        ]},
+        creci: {t:'2. Crecimiento y Autoafirmación Personal', items:[
+          {k:'c1', txt:'Demuestra iniciativa personal y creatividad'},
+          {k:'c2', txt:'Manifiesta interés por conocer y aprender cosas nuevas'},
+          {k:'c3', txt:'Reconoce y valora sus capacidades y limitaciones'},
+          {k:'c4', txt:'Demuestra perseverancia frente a las dificultades'}
+        ]},
+        entorno: {t:'3. La Persona y su Entorno', items:[
+          {k:'p1', txt:'Se integra al trabajo grupal aportando ideas'},
+          {k:'p2', txt:'Manifiesta respeto por el medio ambiente'},
+          {k:'p3', txt:'Cumple con las normas de convivencia del establecimiento'},
+          {k:'p4', txt:'Se relaciona adecuadamente con sus pares y adultos'}
+        ]},
+        proact: {t:'4. Proactividad y Trabajo', items:[
+          {k:'w1', txt:'Cumple con sus tareas y trabajos oportunamente'},
+          {k:'w2', txt:'Demuestra responsabilidad en el cuidado de sus materiales'},
+          {k:'w3', txt:'Asiste puntualmente a clases'},
+          {k:'w4', txt:'Trabaja con orden y limpieza'}
+        ]}
+      };
+      var w = window.open('','print','width=900,height=1100');
+      var css = '<style>@page{margin:2cm}body{font-family:Georgia,serif;max-width:720px;margin:0 auto;padding:24px;color:#000;line-height:1.5}' +
+        '.header{text-align:center;border-bottom:2px solid #000;padding-bottom:14px;margin-bottom:18px}' +
+        '.header h1{margin:0;font-size:1.35rem;letter-spacing:1.5px;text-transform:uppercase}' +
+        '.header p{margin:4px 0 0;color:#555;font-size:.85rem}' +
+        '.datos{width:100%;border-collapse:collapse;font-size:.88rem;margin-bottom:14px}' +
+        '.datos td{padding:6px 10px;border:1px solid #999}' +
+        '.datos td.k{background:#f5f5f5;font-weight:700;width:30%}' +
+        'h2{font-size:.92rem;background:#4F46E5;color:#fff;padding:6px 10px;margin:14px 0 8px;letter-spacing:.3px}' +
+        'table.crit{width:100%;border-collapse:collapse;font-size:.82rem;margin-bottom:8px}' +
+        'table.crit th,table.crit td{border:1px solid #666;padding:5px 8px}' +
+        'table.crit th{background:#e0e0e0;font-size:.7rem}' +
+        'table.crit td.sel{background:#000;color:#fff;font-weight:700}' +
+        'table.crit td.crit-txt{text-align:left;font-size:.82rem}' +
+        '.firmas{display:flex;justify-content:space-around;margin-top:40px}' +
+        '.firma{text-align:center;width:240px}' +
+        '.firma .linea{border-top:1px solid #000;padding-top:6px;font-size:.82rem}' +
+        '.pie{text-align:center;margin-top:20px;color:#666;font-size:.75rem;border-top:1px dashed #999;padding-top:8px}' +
+        '</style>';
+      w.document.write('<html><head><title>Informe de Personalidad — '+esc(alu.nombre)+'</title>'+css+'</head><body>');
+      w.document.write('<div class="header"><h1>Informe de Personalidad</h1><p>'+esc(liceo)+'</p></div>');
+      w.document.write('<table class="datos">' +
+        '<tr><td class="k">Estudiante</td><td>'+esc(alu.nombre)+'</td></tr>' +
+        '<tr><td class="k">RUT</td><td>'+esc(alu.rut||'—')+'</td></tr>' +
+        '<tr><td class="k">Curso</td><td>'+esc(curso)+'</td></tr>' +
+        '<tr><td class="k">Período</td><td>'+(data.periodo||'2° Semestre '+new Date().getFullYear())+'</td></tr>' +
+        '<tr><td class="k">Profesor(a) Jefe</td><td>'+esc(u.nombre||u.email||'')+'</td></tr>' +
+      '</table>');
+      w.document.write('<p style="font-size:.78rem;background:#f0f0f0;padding:8px 12px;border-left:3px solid #4F46E5">' +
+        '<b>Escala:</b> L = Logrado &nbsp; ML = Medianamente Logrado &nbsp; PL = Por Lograr &nbsp; NO = No Observado</p>');
+      Object.keys(CRITERIOS).forEach(function(sec){
+        var s = CRITERIOS[sec];
+        w.document.write('<h2>'+s.t+'</h2><table class="crit"><thead><tr><th style="text-align:left">Criterio</th><th style="width:36px">L</th><th style="width:36px">ML</th><th style="width:36px">PL</th><th style="width:36px">NO</th></tr></thead><tbody>');
+        s.items.forEach(function(c){
+          var v = vals[c.k] || '';
+          w.document.write('<tr><td class="crit-txt">'+esc(c.txt)+'</td>' +
+            ['L','ML','PL','NO'].map(function(lvl){
+              return '<td style="text-align:center" class="'+(v===lvl?'sel':'')+'">'+lvl+'</td>';
+            }).join('') + '</tr>');
+        });
+        w.document.write('</tbody></table>');
+      });
+      if (data.observaciones) {
+        w.document.write('<h2>Observaciones del(a) profesor(a) jefe</h2>' +
+          '<div style="border:1px solid #666;padding:10px 14px;min-height:60px;background:#fafafa;font-size:.88rem">'+
+          esc(data.observaciones).replace(/\n/g,'<br>')+'</div>');
+      }
+      w.document.write('<div class="firmas">' +
+        '<div class="firma"><div class="linea">'+esc(u.nombre||u.email||'')+'<br><b>Profesor(a) Jefe</b></div></div>' +
+        '<div class="firma"><div class="linea">Dirección<br><b>Director(a) del establecimiento</b></div></div>' +
+      '</div>');
+      w.document.write('<div class="pie">Documento emitido el '+new Date().toLocaleDateString('es-CL',{day:'numeric',month:'long',year:'numeric'})+'</div>');
+      w.document.write('<sc'+'ript>window.onload=function(){window.print()}</sc'+'ript></body></html>');
+      w.document.close();
+    });
+    return;
+
+  } else if (tipo === 'conducta') {
+    titulo = 'Certificado de Conducta';
+    html = _headerHtml() +
+      '<h1>Certificado de Conducta</h1>' +
+      '<h2>Año Lectivo ' + new Date().getFullYear() + '</h2>' +
+      '<div class="contenido">El(la) suscrito(a), en su calidad de Profesor(a) Jefe del curso <b>' + esc(curso) +
+      '</b>, certifica que el(la) estudiante <b>' + esc(alu.nombre) + '</b>' +
+      (alu.rut?' (RUT ' + esc(alu.rut) + ')':'') +
+      ' ha mantenido durante el período en curso una <b>conducta acorde con el Reglamento Interno</b> del establecimiento ' +
+      esc(liceo) + ', destacándose por su respeto, responsabilidad y participación en las actividades escolares.</div>' +
+      '<div class="contenido">Se extiende el presente certificado a solicitud del(la) apoderado(a) para los fines que estime convenientes.</div>' +
+      _firmasHtml() + _pieHtml();
+
+  } else if (tipo === 'matricula') {
+    titulo = 'Certificado de Matrícula';
+    html = _headerHtml() +
+      '<h1>Certificado de Matrícula</h1>' +
+      '<h2>Año Lectivo ' + new Date().getFullYear() + '</h2>' +
+      '<div class="contenido">Se certifica por el presente documento que <b>' + esc(alu.nombre) + '</b>' +
+      (alu.rut?', RUT <b>' + esc(alu.rut) + '</b>':'') +
+      ', ha formalizado su matrícula en el establecimiento <b>' + esc(liceo) +
+      '</b> para cursar el nivel <b>' + esc(curso) + '</b> durante el año lectivo ' + new Date().getFullYear() + '.</div>' +
+      '<div class="contenido">Se extiende el presente para los fines que el(la) apoderado(a) estime pertinentes.</div>' +
+      _firmasHtml() + _pieHtml();
+
+  } else if (tipo === 'asistencia') {
+    titulo = 'Certificado de Asistencia';
+    _traerAsistencia(alu).then(function(pct){
+      var html2 = _headerHtml() +
+        '<h1>Certificado de Asistencia</h1>' +
+        '<h2>Año Lectivo ' + new Date().getFullYear() + '</h2>' +
+        '<div class="contenido">Se certifica que el(la) estudiante <b>' + esc(alu.nombre) + '</b>' +
+        (alu.rut?', RUT <b>' + esc(alu.rut) + '</b>':'') +
+        ', matriculado(a) en el curso <b>' + esc(curso) + '</b> del establecimiento <b>' + esc(liceo) +
+        '</b>, registra al día ' + esc(fecha) + ' un porcentaje de asistencia acumulada de ' +
+        '<b>' + pct + '%</b>.</div>' +
+        '<div class="contenido">Se extiende el presente para los fines que estime pertinentes.</div>' +
+        _firmasHtml() + _pieHtml();
+      _abrirPDF(html2, titulo);
+    });
+    return;
+  }
+
+  _abrirPDF(html, titulo);
+}
+
+function _traerNotasAlumno(alu){
+  return EL_DB.collection('notas').get().then(function(sn){
+    var out = {};
+    sn.forEach(function(d){
+      var n = d.data(); if (!n) return;
+      if (n.cursoId !== _cursoSel.cursoId) return;
+      var key = n.estudianteRut || n.estudianteUid || n.estudianteNombre;
+      if (key !== alu.rut && n.estudianteNombre !== alu.nombre) return;
+      var asig = n.asignatura || '—';
+      if (!out[asig]) out[asig] = { s1:[], s2:[] };
+      var sem = n.semestre === 2 ? 's2' : 's1';
+      if (typeof n.nota === 'number') out[asig][sem].push(n.nota);
+    });
+    return out;
+  }).catch(function(){ return {}; });
+}
+
+function _traerInformePersonalidad(alu){
+  var periodo = '2° Semestre';
+  var id = _cursoSel.cursoId + '__' + alu.rut + '__' + periodo;
+  return EL_DB.collection('informes_personalidad').doc(id).get().then(function(sn){
+    if (sn.exists) return sn.data();
+    // Intento con 1° Semestre
+    var id2 = _cursoSel.cursoId + '__' + alu.rut + '__1° Semestre';
+    return EL_DB.collection('informes_personalidad').doc(id2).get().then(function(sn2){
+      return sn2.exists ? sn2.data() : { valores: {}, periodo: periodo };
+    });
+  }).catch(function(){ return { valores: {}, periodo: periodo }; });
+}
+
+function _traerAsistencia(alu){
+  return EL_DB.collection('libro_clases').get().then(function(sn){
+    var P=0, tot=0;
+    sn.forEach(function(d){
+      var r = d.data(); if (!r || r.cursoId !== _cursoSel.cursoId) return;
+      (r.asistencia||[]).forEach(function(a){
+        if (a.rut === alu.rut || a.nombreCompleto === alu.nombre) {
+          if (['P','T','J'].indexOf(a.estado) !== -1) P++;
+          tot++;
+        }
+      });
+    });
+    return tot ? Math.round(P/tot*100) : 0;
+  }).catch(function(){ return 0; });
+}
+
+if (window.ELAuth && ELAuth.onUserReady) ELAuth.onUserReady(function(u){ if(u) iniciar(); });
+</script>
+</body>
+</html>

@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex,nofollow">
+<title>Checklist QA · Click&Clase</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:       #F0F7FF;
+  --panel:    #FFFFFF;
+  --panel-2:  #F8FAFF;
+  --border:   rgba(37,99,235,.14);
+  --text:     #0C1E3B;
+  --text-2:   #334155;
+  --muted:    #475569;
+  --primary:  #2563EB;
+  --primary-2:#1D4ED8;
+  --success:  #059669;
+  --success-bg:rgba(5,150,105,.10);
+  --danger:   #DC2626;
+  --danger-bg:rgba(220,38,38,.10);
+  --warn:     #B45309;
+  --warn-bg:  rgba(245,158,11,.14);
+  --pending:  #94A3B8;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  padding: 24px 20px 60px;
+  font-feature-settings: "cv02","cv03","cv04","cv11";
+  -webkit-font-smoothing: antialiased;
+}
+.container { max-width: 1180px; margin: 0 auto; }
+
+/* ── Header ── */
+.head {
+  background: #FFFFFF;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 26px 28px;
+  margin-bottom: 22px;
+  box-shadow: 0 6px 20px rgba(37,99,235,.06);
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 22px;
+  align-items: center;
+}
+.head-l h1 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1.6rem; font-weight: 800; letter-spacing: -.02em;
+  background: linear-gradient(135deg, #0C1E3B 20%, #2563EB 80%);
+  -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+  margin-bottom: 6px;
+}
+.head-l p { color: var(--muted); font-size: .93rem; }
+
+.progress-ring {
+  width: 90px; height: 90px; flex-shrink: 0;
+  position: relative;
+  display: grid; place-items: center;
+}
+.progress-ring svg { transform: rotate(-90deg); }
+.progress-ring .track { fill: none; stroke: rgba(37,99,235,.10); stroke-width: 8; }
+.progress-ring .fill  { fill: none; stroke: var(--primary); stroke-width: 8; stroke-linecap: round; transition: stroke-dashoffset .5s cubic-bezier(.4,0,.2,1); }
+.progress-ring .lbl {
+  position: absolute; font-weight: 800; font-size: 1.1rem;
+  color: var(--primary);
+  font-family: 'Space Grotesk', sans-serif;
+}
+.progress-ring .sub {
+  position: absolute; margin-top: 46px; font-size: .64rem;
+  color: var(--muted); text-transform: uppercase; letter-spacing: .1em;
+}
+
+/* ── Barra estadísticas ── */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 22px;
+}
+.stat {
+  background: #FFFFFF;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 14px 16px;
+  transition: transform .2s, box-shadow .2s;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(37,99,235,.04);
+}
+.stat:hover { transform: translateY(-2px); box-shadow: 0 10px 22px rgba(37,99,235,.10); }
+.stat.is-active {
+  background: linear-gradient(135deg, rgba(37,99,235,.08), rgba(56,189,248,.04));
+  border-color: var(--primary);
+}
+.stat .l { font-size: .68rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); font-weight: 700; }
+.stat .v { font-size: 1.75rem; font-weight: 800; margin-top: 4px; font-family: 'Space Grotesk', sans-serif; }
+.stat.pending  .v { color: var(--pending); }
+.stat.ok       .v { color: var(--success); }
+.stat.fail     .v { color: var(--danger); }
+.stat.warn     .v { color: var(--warn); }
+
+/* ── Toolbar ── */
+.toolbar {
+  display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
+  background: #FFFFFF;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 10px 14px;
+  margin-bottom: 22px;
+  box-shadow: 0 4px 14px rgba(37,99,235,.04);
+}
+.tbtn {
+  background: #FFFFFF;
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 8px 14px;
+  border-radius: 10px;
+  font-size: .84rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all .18s;
+}
+.tbtn:hover { background: rgba(37,99,235,.06); border-color: rgba(37,99,235,.35); color: var(--primary); }
+.tbtn.primary { background: linear-gradient(135deg, var(--primary), var(--primary-2)); color: #fff; border-color: transparent; }
+.tbtn.primary:hover { box-shadow: 0 6px 14px rgba(37,99,235,.35); transform: translateY(-1px); }
+.tbtn.danger { color: var(--danger); border-color: rgba(220,38,38,.24); }
+.tbtn.danger:hover { background: rgba(220,38,38,.06); border-color: var(--danger); }
+
+/* ── Categorías ── */
+.cat {
+  background: #FFFFFF;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  margin-bottom: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 14px rgba(37,99,235,.04);
+}
+.cat-head {
+  padding: 16px 22px;
+  background: linear-gradient(135deg, rgba(37,99,235,.05), rgba(56,189,248,.02));
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 14px;
+  cursor: pointer;
+  user-select: none;
+  transition: background .15s;
+}
+.cat-head:hover { background: linear-gradient(135deg, rgba(37,99,235,.08), rgba(56,189,248,.04)); }
+.cat-head .cat-emoji { font-size: 1.3rem; }
+.cat-head .cat-tit {
+  flex: 1;
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 800;
+  font-size: 1.02rem;
+  color: var(--text);
+  letter-spacing: -.01em;
+}
+.cat-head .cat-prog {
+  font-size: .74rem;
+  color: var(--muted);
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: rgba(37,99,235,.08);
+}
+.cat-head .cat-tog {
+  color: var(--muted); font-size: .9rem; transition: transform .2s;
+}
+.cat.collapsed .cat-tog { transform: rotate(-90deg); }
+.cat.collapsed .cat-body { display: none; }
+.cat-body { padding: 6px 4px 12px; }
+
+/* ── Item ── */
+.it {
+  display: grid;
+  grid-template-columns: auto 1fr auto auto;
+  gap: 12px;
+  padding: 10px 18px;
+  border-bottom: 1px solid rgba(37,99,235,.06);
+  align-items: center;
+  transition: background .12s;
+}
+.it:last-child { border-bottom: none; }
+.it:hover { background: rgba(37,99,235,.03); }
+
+/* estados */
+.it.ok   { background: rgba(5,150,105,.05); }
+.it.ok:hover { background: rgba(5,150,105,.10); }
+.it.fail { background: rgba(220,38,38,.04); }
+.it.fail:hover { background: rgba(220,38,38,.09); }
+.it.warn { background: rgba(245,158,11,.05); }
+.it.warn:hover { background: rgba(245,158,11,.10); }
+
+.it-states {
+  display: flex; gap: 4px; flex-shrink: 0;
+}
+.it-state-btn {
+  width: 30px; height: 30px;
+  border-radius: 9px;
+  border: 1.5px solid var(--border);
+  background: #FFFFFF;
+  cursor: pointer;
+  display: grid; place-items: center;
+  font-size: .95rem;
+  transition: all .15s;
+  padding: 0;
+}
+.it-state-btn:hover { transform: scale(1.10); }
+.it-state-btn.active[data-st="ok"]   { background: var(--success); border-color: var(--success); color: #fff; }
+.it-state-btn.active[data-st="fail"] { background: var(--danger);  border-color: var(--danger);  color: #fff; }
+.it-state-btn.active[data-st="warn"] { background: var(--warn);    border-color: var(--warn);    color: #fff; }
+
+.it-nom {
+  font-weight: 600;
+  font-size: .92rem;
+  color: var(--text);
+  line-height: 1.35;
+}
+.it-nom small {
+  display: block; color: var(--muted); font-weight: 500;
+  font-size: .78rem; margin-top: 2px;
+}
+
+.it-actions {
+  display: flex; gap: 6px; align-items: center;
+}
+.mini-btn {
+  background: rgba(37,99,235,.08);
+  border: 1px solid rgba(37,99,235,.14);
+  color: var(--primary);
+  padding: 5px 11px;
+  border-radius: 7px;
+  font-size: .76rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all .15s;
+  font-family: inherit;
+  display: inline-flex; align-items: center; gap: 4px;
+  white-space: nowrap;
+}
+.mini-btn:hover { background: rgba(37,99,235,.16); border-color: var(--primary); }
+.mini-btn.note {
+  background: rgba(245,158,11,.10);
+  border-color: rgba(245,158,11,.30);
+  color: var(--warn);
+}
+.mini-btn.note:hover { background: rgba(245,158,11,.20); }
+.mini-btn.note.has { background: var(--warn); color: #fff; border-color: var(--warn); }
+
+/* ── Observaciones inline ── */
+.it-obs {
+  grid-column: 1 / -1;
+  margin-top: 8px;
+  display: none;
+}
+.it.show-obs .it-obs { display: block; }
+.it-obs textarea {
+  width: 100%;
+  min-height: 68px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1.5px solid rgba(37,99,235,.16);
+  background: var(--panel-2);
+  font-family: inherit;
+  font-size: .85rem;
+  color: var(--text);
+  resize: vertical;
+  outline: none;
+  transition: border-color .18s, box-shadow .18s;
+}
+.it-obs textarea:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(37,99,235,.14);
+  background: #FFFFFF;
+}
+
+/* ── Modal export ── */
+.modal-back {
+  position: fixed; inset: 0;
+  background: rgba(12,30,59,.45); backdrop-filter: blur(8px);
+  z-index: 100;
+  display: none; align-items: center; justify-content: center;
+  padding: 20px;
+  animation: fadeIn .2s;
+}
+.modal-back.show { display: flex; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.modal {
+  background: #FFFFFF; border-radius: 20px;
+  width: 100%; max-width: 700px; max-height: 90vh;
+  overflow: hidden;
+  box-shadow: 0 32px 60px rgba(37,99,235,.24);
+  display: flex; flex-direction: column;
+  animation: slideUp .28s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+.modal-h {
+  padding: 18px 22px;
+  background: linear-gradient(135deg, var(--primary), var(--primary-2));
+  color: #fff;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.modal-h h3 { font-family: 'Space Grotesk', sans-serif; font-weight: 800; font-size: 1.1rem; }
+.modal-h button {
+  background: rgba(255,255,255,.2); border: 0; color: #fff;
+  width: 32px; height: 32px; border-radius: 8px; cursor: pointer;
+  font-size: 1rem;
+}
+.modal-b {
+  padding: 20px 22px;
+  overflow-y: auto;
+  flex: 1;
+}
+.modal-b textarea {
+  width: 100%;
+  min-height: 320px;
+  padding: 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--panel-2);
+  font-family: 'SF Mono', Menlo, monospace;
+  font-size: .82rem;
+  color: var(--text);
+  outline: none;
+  resize: vertical;
+  line-height: 1.55;
+}
+.modal-f {
+  padding: 14px 22px;
+  border-top: 1px solid var(--border);
+  display: flex; gap: 10px; justify-content: flex-end;
+  background: var(--panel-2);
+}
+
+/* ── Toast ── */
+.toast {
+  position: fixed;
+  bottom: 24px; right: 24px;
+  background: linear-gradient(135deg, var(--success), #10b981);
+  color: #fff;
+  padding: 12px 20px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: .88rem;
+  box-shadow: 0 12px 30px rgba(5,150,105,.35);
+  z-index: 200;
+  animation: toastIn .3s ease;
+}
+@keyframes toastIn { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+@media (max-width: 720px) {
+  .head { grid-template-columns: 1fr; text-align: center; }
+  .stats { grid-template-columns: 1fr 1fr; }
+  .it { grid-template-columns: auto 1fr; }
+  .it-states, .it-actions { grid-column: 1 / -1; margin-top: 8px; justify-content: flex-end; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- HEADER -->
+  <div class="head">
+    <div class="head-l">
+      <h1>🧪 Checklist QA — Click&Clase</h1>
+      <p>Marcá cada funcionalidad como <b>✓ OK</b>, <b>✕ Falla</b> o <b>⚠ Con observación</b>. Los datos se guardan automáticamente. Al terminar exportá el reporte y me lo enviás.</p>
+    </div>
+    <div class="progress-ring">
+      <svg width="90" height="90"><circle class="track" cx="45" cy="45" r="38"></circle><circle class="fill" cx="45" cy="45" r="38" stroke-dasharray="238.76" stroke-dashoffset="238.76" id="progFill"></circle></svg>
+      <span class="lbl" id="progLbl">0%</span>
+      <span class="sub">Progreso</span>
+    </div>
+  </div>
+
+  <!-- STATS (funcionan como filtros) -->
+  <div class="stats">
+    <div class="stat pending is-active" data-filter="all">
+      <div class="l">Total items</div>
+      <div class="v" id="statTotal">0</div>
+    </div>
+    <div class="stat ok" data-filter="ok">
+      <div class="l">✓ Funciona</div>
+      <div class="v" id="statOk">0</div>
+    </div>
+    <div class="stat warn" data-filter="warn">
+      <div class="l">⚠ Con observación</div>
+      <div class="v" id="statWarn">0</div>
+    </div>
+    <div class="stat fail" data-filter="fail">
+      <div class="l">✕ Falla</div>
+      <div class="v" id="statFail">0</div>
+    </div>
+  </div>
+
+  <!-- TOOLBAR -->
+  <div class="toolbar">
+    <button class="tbtn primary" onclick="exportar()">📄 Exportar informe</button>
+    <button class="tbtn" onclick="colapsarTodo()">▶ Colapsar todo</button>
+    <button class="tbtn" onclick="expandirTodo()">▼ Expandir todo</button>
+    <button class="tbtn danger" onclick="resetear()">🗑 Reiniciar todo</button>
+    <div style="margin-left:auto;color:var(--muted);font-size:.78rem">
+      💾 Guardado en tu navegador · <span id="ultAct">—</span>
+    </div>
+  </div>
+
+  <!-- CATEGORÍAS -->
+  <div id="cats"></div>
+</div>
+
+<!-- MODAL EXPORT -->
+<div class="modal-back" id="modalExp">
+  <div class="modal">
+    <div class="modal-h">
+      <h3>📄 Informe QA — Click&Clase</h3>
+      <button onclick="cerrarModal()">×</button>
+    </div>
+    <div class="modal-b">
+      <textarea id="reporteTxt" readonly></textarea>
+    </div>
+    <div class="modal-f">
+      <button class="tbtn" onclick="copiar()">📋 Copiar al portapapeles</button>
+      <button class="tbtn" onclick="descargar()">💾 Descargar .md</button>
+      <button class="tbtn primary" onclick="cerrarModal()">Listo</button>
+    </div>
+  </div>
+</div>
+
+<div id="toastHost"></div>
+
+<script>
+'use strict';
+
+// ═══════════════════════════════════════════════════════════════
+// DEFINICIÓN DE CATEGORÍAS E ITEMS
+// ═══════════════════════════════════════════════════════════════
+const CATEGORIAS = [
+  {
+    id: 'auth', emoji: '🔐', tit: 'Autenticación y accesos',
+    items: [
+      { id: 'auth-01', nom: 'Login con email y contraseña', sub: 'Ingresar como profesor y llegar al dashboard-profesor', href: 'login.html' },
+      { id: 'auth-02', nom: 'Recuperar contraseña', sub: 'Enlace "¿Olvidaste tu contraseña?" envía email', href: 'login.html' },
+      { id: 'auth-03', nom: 'Signup docente particular', sub: 'Wizard multi-paso crea cuenta nueva', href: 'signup.html' },
+      { id: 'auth-04', nom: 'Redirección por rol al login', sub: 'Admin → panel-admin-colegio · Director → panel-director, etc.', href: 'login.html' },
+      { id: 'auth-05', nom: 'Cerrar sesión desde cualquier panel', sub: 'Botón "Cerrar sesión" limpia estado y vuelve al login', href: 'dashboard-profesor.html' },
+      { id: 'auth-06', nom: 'Guard de panel: usuario sin rol es redirigido', sub: 'Ej: alumno intentando entrar a panel-utp lo devuelve a dashboard', href: 'panel-utp.html' }
+    ]
+  },
+  {
+    id: 'widget-ia', emoji: '🤖', tit: 'Widget IA "Preguntá a Click&Clase"',
+    items: [
+      { id: 'ia-01', nom: 'Botón flotante ⚡ aparece abajo derecha', sub: 'Debe estar en todos los paneles internos, no en login/index/planes', href: 'dashboard-profesor.html' },
+      { id: 'ia-02', nom: 'Al abrir muestra 4 sugerencias iniciales', sub: 'Rúbrica, actividades, motivación, comprensión', href: 'dashboard-profesor.html' },
+      { id: 'ia-03', nom: 'Click en sugerencia envía la pregunta automáticamente', sub: '', href: 'dashboard-profesor.html' },
+      { id: 'ia-04', nom: 'Envío de mensaje libre y recibe respuesta', sub: 'Texto pedagógico con formato (negrita, código, listas)', href: 'dashboard-profesor.html' },
+      { id: 'ia-05', nom: 'Historial persiste en la misma sesión', sub: 'Cerrar y abrir mantiene los mensajes', href: 'dashboard-profesor.html' },
+      { id: 'ia-06', nom: 'Botón 🗑 limpia conversación', sub: 'Vuelve a mostrar las sugerencias iniciales', href: 'dashboard-profesor.html' },
+      { id: 'ia-07', nom: 'Cierra con Esc, botón ×, o click en fondo', sub: '', href: 'dashboard-profesor.html' },
+      { id: 'ia-08', nom: 'Widget se ve bien en mobile (responsive)', sub: 'Full-width abajo con 8px de padding', href: 'dashboard-profesor.html' }
+    ]
+  },
+  {
+    id: 'search', emoji: '🔎', tit: 'Búsqueda global (Ctrl+K / ⌘+K)',
+    items: [
+      { id: 'sg-01', nom: 'Se abre con atajo de teclado', sub: 'Ctrl+K en Windows/Linux · ⌘+K en Mac', href: 'dashboard-profesor.html' },
+      { id: 'sg-02', nom: 'Busca alumnos por nombre', sub: 'Ej: "camila" muestra todas las Camilas', href: 'dashboard-profesor.html' },
+      { id: 'sg-03', nom: 'Busca materiales por título', sub: 'Ej: "análisis" muestra las guías con esa palabra', href: 'dashboard-profesor.html' },
+      { id: 'sg-04', nom: 'Busca planificaciones', sub: 'Aparecen agrupadas en su categoría', href: 'dashboard-profesor.html' },
+      { id: 'sg-05', nom: 'Busca cursos', sub: 'Ej: "3M-A" muestra el curso', href: 'dashboard-profesor.html' },
+      { id: 'sg-06', nom: 'Busca módulos/asignaturas del profesor', sub: '', href: 'dashboard-profesor.html' },
+      { id: 'sg-07', nom: 'Navegación con teclado ↑ ↓ y Enter abre', sub: '', href: 'dashboard-profesor.html' },
+      { id: 'sg-08', nom: 'Highlight amarillo del match en resultados', sub: '', href: 'dashboard-profesor.html' },
+      { id: 'sg-09', nom: 'Sin resultados muestra mensaje amigable', sub: 'Ej: buscar "xyz123" da "sin resultados"', href: 'dashboard-profesor.html' }
+    ]
+  },
+  {
+    id: 'dashboard-prof', emoji: '👨‍🏫', tit: 'Dashboard Profesor',
+    items: [
+      { id: 'dp-01', nom: 'Nombre y avatar cargan del perfil', sub: 'Ej: "¡Bienvenido, Camila!" con inicial "C"', href: 'dashboard-profesor.html' },
+      { id: 'dp-02', nom: 'Nombre del colegio en subtítulo', sub: 'Ej: "Docente · Salesianos Talca"', href: 'dashboard-profesor.html' },
+      { id: 'dp-03', nom: 'KPIs muestran datos reales', sub: 'Materiales · Planificaciones · Módulos · Niveles con conteos', href: 'dashboard-profesor.html' },
+      { id: 'dp-04', nom: 'Tu resumen — Sábado X de julio', sub: 'Fecha correcta y agenda del día/semana', href: 'dashboard-profesor.html' },
+      { id: 'dp-05', nom: 'Mi asignación curricular con OAs por asignatura', sub: 'Muestra los datos del profesor', href: 'dashboard-profesor.html' },
+      { id: 'dp-06', nom: 'Últimos materiales creados aparecen', sub: '', href: 'dashboard-profesor.html' },
+      { id: 'dp-07', nom: 'Sidebar clicks cambian de sección (Mis módulos, Mis materiales, etc)', sub: 'No redirige a Inicio', href: 'dashboard-profesor.html' },
+      { id: 'dp-08', nom: 'Botón "Crear material" lleva a material.html', sub: '', href: 'dashboard-profesor.html' },
+      { id: 'dp-09', nom: 'Botón "Planificar" lleva a planificacion.html', sub: '', href: 'dashboard-profesor.html' },
+      { id: 'dp-10', nom: 'Botón "Volver al Panel Admin" (solo admins)', sub: 'Aparece con href correcto', href: 'dashboard-profesor.html' }
+    ]
+  },
+  {
+    id: 'material', emoji: '🪄', tit: 'Crear material con IA (material.html)',
+    items: [
+      { id: 'mat-01', nom: 'Wizard de 5 pasos completos', sub: 'Tipo → OAs → Valores → Contenido → Configuración', href: 'material.html' },
+      { id: 'mat-02', nom: 'Elegir tipo de documento (guía, apunte, prueba, etc)', sub: '', href: 'material.html' },
+      { id: 'mat-03', nom: 'OAs cargan según asignatura y nivel', sub: 'Aparecen los OAs Mineduc reales', href: 'material.html' },
+      { id: 'mat-04', nom: 'Valores MBE seleccionables', sub: '', href: 'material.html' },
+      { id: 'mat-05', nom: 'Botón "Generar con IA" produce documento', sub: 'Contenido pedagógico coherente', href: 'material.html' },
+      { id: 'mat-06', nom: 'Botón "Refinar con IA" mejora el documento', sub: 'Modal de refinamiento', href: 'material.html' },
+      { id: 'mat-07', nom: 'Descargar Word (.doc)', sub: 'Archivo descargable con formato correcto', href: 'material.html' },
+      { id: 'mat-08', nom: 'Publicar en Biblioteca', sub: 'Aparece luego en biblioteca.html', href: 'material.html' },
+      { id: 'mat-09', nom: 'Versión NEE/PIE (si aplica)', sub: 'Tab adicional con adecuaciones', href: 'material.html' },
+      { id: 'mat-10', nom: 'Auto-guarda borrador cada X segundos', sub: 'Timestamp de "Borrador guardado 06:44 pm"', href: 'material.html' }
+    ]
+  },
+  {
+    id: 'planificacion', emoji: '📅', tit: 'Planificar clase (planificacion.html)',
+    items: [
+      { id: 'plan-01', nom: 'Toggle Plan Común / TP funcional', sub: 'Cambia lista de asignaturas/módulos', href: 'planificacion.html' },
+      { id: 'plan-02', nom: 'Elegir asignatura/módulo del dropdown', sub: '', href: 'planificacion.html' },
+      { id: 'plan-03', nom: 'OAs cargan según selección', sub: '', href: 'planificacion.html' },
+      { id: 'plan-04', nom: 'Botón "Generar plan con IA"', sub: 'Genera planificación estructurada', href: 'planificacion.html' },
+      { id: 'plan-05', nom: 'Botón "Generar plan MBE/DUA"', sub: 'Versión con Marco Buena Enseñanza y DUA', href: 'planificacion.html' },
+      { id: 'plan-06', nom: 'Descargar planificación', sub: '', href: 'planificacion.html' }
+    ]
+  },
+  {
+    id: 'libro-clases', emoji: '📖', tit: 'Libro de clases',
+    items: [
+      { id: 'lc-01', nom: 'Selector de curso funciona', sub: 'Muestra cursos del profesor', href: 'libro-clases.html' },
+      { id: 'lc-02', nom: 'Selector de asignatura', sub: '', href: 'libro-clases.html' },
+      { id: 'lc-03', nom: 'Selector de fecha', sub: '', href: 'libro-clases.html' },
+      { id: 'lc-04', nom: 'Registrar asistencia con checkboxes P/A/J', sub: '', href: 'libro-clases.html' },
+      { id: 'lc-05', nom: 'Agregar anotaciones al estudiante', sub: 'Positiva / negativa / neutra', href: 'libro-clases.html' },
+      { id: 'lc-06', nom: 'Historial asistencia por curso', sub: '', href: 'libro-clases-historial.html' },
+      { id: 'lc-07', nom: 'Registrar notas semestre', sub: '', href: 'notas.html' },
+      { id: 'lc-08', nom: 'Promedio automático por asignatura', sub: '', href: 'notas.html' }
+    ]
+  },
+  {
+    id: 'alumnos', emoji: '👥', tit: 'Alumnos y fichas',
+    items: [
+      { id: 'al-01', nom: 'Ver todos los cursos del profesor', sub: '', href: 'listas-curso.html' },
+      { id: 'al-02', nom: 'Ver alumnos de cada curso', sub: '', href: 'listas-curso.html' },
+      { id: 'al-03', nom: 'Buscar alumno por nombre', sub: 'Búsqueda con filtros', href: 'alumnos.html' },
+      { id: 'al-04', nom: 'Abrir ficha del alumno', sub: 'Con datos completos', href: 'alumnos.html' },
+      { id: 'al-05', nom: 'Ficha muestra info general (RUT, curso, apoderado)', sub: '', href: 'ficha-alumno.html' },
+      { id: 'al-06', nom: 'Ficha muestra anotaciones históricas', sub: '', href: 'ficha-alumno.html' },
+      { id: 'al-07', nom: 'Ficha muestra alertas enviadas al apoderado', sub: '', href: 'ficha-alumno.html' },
+      { id: 'al-08', nom: 'Ficha muestra derivaciones activas', sub: '', href: 'ficha-alumno.html' },
+      { id: 'al-09', nom: 'Ficha muestra notas por asignatura', sub: '', href: 'ficha-alumno.html' },
+      { id: 'al-10', nom: 'Ficha muestra % asistencia', sub: '', href: 'ficha-alumno.html' }
+    ]
+  },
+  {
+    id: 'alertas-deriv', emoji: '🚨', tit: 'Alertas apoderado y derivaciones',
+    items: [
+      { id: 'alr-01', nom: 'Crear alerta a apoderado', sub: 'Con motivo, descripción y canal', href: 'alertas.html' },
+      { id: 'alr-02', nom: 'Preview WhatsApp con enlace wa.me', sub: '', href: 'alertas.html' },
+      { id: 'alr-03', nom: 'Preview Email con mailto:', sub: '', href: 'alertas.html' },
+      { id: 'alr-04', nom: 'Ver historial de alertas con estados', sub: 'Enviada / leída / respondida', href: 'alertas.html' },
+      { id: 'alr-05', nom: 'Badge rojo en sidebar cuenta alertas', sub: 'Últimos 7 días', href: 'dashboard-profesor.html' },
+      { id: 'der-01', nom: 'Crear derivación a apoyo/convivencia/PIE', sub: '', href: 'derivaciones.html' },
+      { id: 'der-02', nom: 'Estado de la derivación cambia', sub: 'Pendiente → En atención → Atendida', href: 'derivaciones.html' },
+      { id: 'der-03', nom: 'La derivación aparece en el panel destino', sub: 'Ej: si derivo a apoyo aparece en panel-apoyo', href: 'panel-apoyo.html' }
+    ]
+  },
+  {
+    id: 'biblioteca', emoji: '📚', tit: 'Biblioteca',
+    items: [
+      { id: 'bib-01', nom: 'Ver materiales del colegio', sub: 'Visibilidad "liceo"', href: 'biblioteca.html' },
+      { id: 'bib-02', nom: 'Ver materiales del departamento', sub: 'Visibilidad "departamento"', href: 'biblioteca.html' },
+      { id: 'bib-03', nom: 'Ver materiales propios (privados)', sub: '', href: 'biblioteca.html' },
+      { id: 'bib-04', nom: 'Filtros por tipo, asignatura, autor', sub: '', href: 'biblioteca.html' },
+      { id: 'bib-05', nom: 'Vista previa del material', sub: '', href: 'biblioteca.html' },
+      { id: 'bib-06', nom: 'Descargar material', sub: '', href: 'biblioteca.html' }
+    ]
+  },
+  {
+    id: 'director', emoji: '📊', tit: 'Panel Director',
+    items: [
+      { id: 'dir-01', nom: 'Login como director muestra su panel', sub: 'director@salesianos-talca.cl / Demo1234!', href: 'panel-director.html' },
+      { id: 'dir-02', nom: 'KPIs institucionales cargan', sub: '', href: 'panel-director.html' },
+      { id: 'dir-03', nom: 'Asistencia por curso (últimos 30 días)', sub: '', href: 'panel-director.html' },
+      { id: 'dir-04', nom: 'Cobertura curricular por curso', sub: '', href: 'panel-director.html' },
+      { id: 'dir-05', nom: 'Producción docente (últimos 7 días)', sub: '', href: 'panel-director.html' },
+      { id: 'dir-06', nom: 'Alertas del colegio con conteo', sub: '', href: 'panel-director.html' },
+      { id: 'dir-07', nom: 'Accesos rápidos a Cursos, UTP, PIE, Apoyo, Convivencia', sub: '', href: 'panel-director.html' },
+      { id: 'dir-08', nom: 'Click en Panel UTP entra sin redirigir', sub: 'Sin ciclo de vuelta', href: 'panel-director.html' }
+    ]
+  },
+  {
+    id: 'rector', emoji: '👑', tit: 'Panel Rector',
+    items: [
+      { id: 'rec-01', nom: 'Login como rector muestra su panel', sub: 'rector@salesianos-talca.cl', href: 'panel-rector.html' },
+      { id: 'rec-02', nom: 'KPIs ejecutivos completos', sub: '', href: 'panel-rector.html' },
+      { id: 'rec-03', nom: 'Accesos a todos los subpaneles', sub: '', href: 'panel-rector.html' }
+    ]
+  },
+  {
+    id: 'utp', emoji: '📋', tit: 'Panel UTP',
+    items: [
+      { id: 'utp-01', nom: 'Login como UTP muestra su panel', sub: 'utp1@salesianos-talca.cl', href: 'panel-utp.html' },
+      { id: 'utp-02', nom: 'Card Cursos y Estudiantes', sub: '', href: 'panel-utp.html' },
+      { id: 'utp-03', nom: 'Bandeja de revisión (pendientes)', sub: '', href: 'revisor-bandeja.html' },
+      { id: 'utp-04', nom: 'Aprobar/rechazar planificación', sub: '', href: 'revisor-bandeja.html' },
+      { id: 'utp-05', nom: 'Reportes mensuales', sub: '', href: 'reportes-utp.html' }
+    ]
+  },
+  {
+    id: 'apoyo', emoji: '💙', tit: 'Panel Apoyo Psicosocial',
+    items: [
+      { id: 'aps-01', nom: 'Login como encargado apoyo', sub: 'apoyo.enc@salesianos-talca.cl', href: 'panel-apoyo.html' },
+      { id: 'aps-02', nom: 'KPIs por motivo de intervención', sub: '', href: 'panel-apoyo.html' },
+      { id: 'aps-03', nom: 'Casos por profesional', sub: '', href: 'panel-apoyo.html' },
+      { id: 'aps-04', nom: 'Registrar intervención (profesional)', sub: '', href: 'panel-apoyo-prof.html' },
+      { id: 'aps-05', nom: 'Estados de casos (abierto/seguimiento/cerrado/derivado)', sub: '', href: 'panel-apoyo.html' }
+    ]
+  },
+  {
+    id: 'convivencia', emoji: '🤝', tit: 'Panel Convivencia',
+    items: [
+      { id: 'amb-01', nom: 'Login como encargado convivencia', sub: 'conviv.enc@salesianos-talca.cl', href: 'panel-ambiente.html' },
+      { id: 'amb-02', nom: 'KPIs por gravedad', sub: '', href: 'panel-ambiente.html' },
+      { id: 'amb-03', nom: 'Registrar entrevista', sub: '', href: 'panel-ambiente-prof.html' }
+    ]
+  },
+  {
+    id: 'pie', emoji: '♿', tit: 'Panel PIE',
+    items: [
+      { id: 'pie-01', nom: 'Login como coordinador PIE', sub: 'pie.coord@salesianos-talca.cl', href: 'panel-pie.html' },
+      { id: 'pie-02', nom: 'Distribución por diagnóstico (gráfico)', sub: '', href: 'panel-pie.html' },
+      { id: 'pie-03', nom: 'Lista de educadoras diferenciales', sub: '', href: 'panel-pie.html' },
+      { id: 'pie-04', nom: 'Ver ficha PIE con adecuaciones', sub: '', href: 'pie-ficha.html' },
+      { id: 'pie-05', nom: 'Generar adecuaciones con IA', sub: '', href: 'pie-ficha.html' },
+      { id: 'pie-06', nom: 'Vista educadora (panel-pie-edu)', sub: '', href: 'panel-pie-edu.html' }
+    ]
+  },
+  {
+    id: 'admin-col', emoji: '🏫', tit: 'Panel Admin del Colegio',
+    items: [
+      { id: 'ac-01', nom: 'Login como admin colegio', sub: 'admin@salesianos-talca.cl', href: 'panel-admin-colegio.html' },
+      { id: 'ac-02', nom: 'Ver lista completa de personal', sub: '', href: 'panel-admin-colegio.html' },
+      { id: 'ac-03', nom: 'Filtros por rol funcionan', sub: '', href: 'panel-admin-colegio.html' },
+      { id: 'ac-04', nom: 'Agregar nuevo miembro', sub: 'Con checkbox de roles agrupados', href: 'panel-admin-colegio.html' },
+      { id: 'ac-05', nom: 'Editar miembro existente', sub: '', href: 'panel-admin-colegio.html' },
+      { id: 'ac-06', nom: 'Desactivar/reactivar miembro', sub: '', href: 'panel-admin-colegio.html' },
+      { id: 'ac-07', nom: 'Carga masiva Excel de personal', sub: '', href: 'panel-admin-colegio.html' },
+      { id: 'ac-08', nom: 'Accesos rápidos a otros paneles', sub: 'Cursos, Director, UTP, PIE, Apoyo, Convivencia', href: 'panel-admin-colegio.html' }
+    ]
+  },
+  {
+    id: 'admin-plat', emoji: '⚙', tit: 'Panel Admin de Plataforma',
+    items: [
+      { id: 'ap-01', nom: 'Login como admin plataforma', sub: 'eduyanezjara@gmail.com', href: 'admin.html' },
+      { id: 'ap-02', nom: 'Ver todos los usuarios', sub: 'Con conteos globales', href: 'admin.html' },
+      { id: 'ap-03', nom: 'Ver profesores', sub: '', href: 'admin.html' },
+      { id: 'ap-04', nom: 'Ver liceos/colegios', sub: '', href: 'admin.html' },
+      { id: 'ap-05', nom: 'SaaS · Colegios (Wizard nuevo colegio)', sub: '', href: 'admin.html' },
+      { id: 'ap-06', nom: 'Códigos de acceso', sub: '', href: 'admin.html' },
+      { id: 'ap-07', nom: 'Publicar comunicados', sub: '', href: 'admin.html' },
+      { id: 'ap-08', nom: 'Configuración IA — agregar/quitar keys', sub: '', href: 'admin.html' },
+      { id: 'ap-09', nom: 'Configuración IA — cambiar modelo Gemini', sub: '', href: 'admin.html' },
+      { id: 'ap-10', nom: 'Recursos curriculares', sub: '', href: 'admin.html' },
+      { id: 'ap-11', nom: 'Monitoreo en vivo', sub: '', href: 'admin.html' },
+      { id: 'ap-12', nom: 'Registro de actividad (log de eventos)', sub: '', href: 'admin.html' },
+      { id: 'ap-13', nom: 'Restaurar contraseña de un usuario', sub: 'Botón en edición de miembro', href: 'admin.html' },
+      { id: 'ap-14', nom: 'Diagnóstico de usuarios', sub: 'Reparar campos faltantes', href: 'admin-diagnostico-usuarios.html' }
+    ]
+  },
+  {
+    id: 'landing', emoji: '🌐', tit: 'Páginas públicas (marketing)',
+    items: [
+      { id: 'lp-01', nom: 'Landing principal carga (index.html)', sub: 'Nav sticky + hero + secciones', href: 'index.html' },
+      { id: 'lp-02', nom: 'Página de planes (planes.html)', sub: 'Toggle Docente/Colegio', href: 'planes.html' },
+      { id: 'lp-03', nom: 'Pricing detallado (pricing.html)', sub: '', href: 'pricing.html' },
+      { id: 'lp-04', nom: 'Botones "Empezar" van a signup', sub: '', href: 'index.html' },
+      { id: 'lp-05', nom: 'Botón WhatsApp con mensaje pre-cargado', sub: '', href: 'index.html' },
+      { id: 'lp-06', nom: 'Calculadora costos IA', sub: '', href: 'calculadora-costos-ia.html' }
+    ]
+  },
+  {
+    id: 'visual', emoji: '🎨', tit: 'Visual global (Cielo Chile)',
+    items: [
+      { id: 'v-01', nom: 'Todos los paneles con fondo azul cielo (#F0F7FF)', sub: 'Ni un panel dark residual', href: 'dashboard-profesor.html' },
+      { id: 'v-02', nom: 'Botones primarios con gradient azul consistente', sub: '', href: 'material.html' },
+      { id: 'v-03', nom: 'KPIs con números legibles (color oscuro sobre blanco)', sub: '', href: 'panel-director.html' },
+      { id: 'v-04', nom: 'Sidebars blancas con item activo en azul', sub: '', href: 'dashboard-profesor.html' },
+      { id: 'v-05', nom: 'Contraste de textos WCAG AA+', sub: 'Nada gris pálido invisible', href: 'dashboard-profesor.html' },
+      { id: 'v-06', nom: 'Botón "Cerrar Sesión" en navbar visible', sub: 'Azul sólido, no gris', href: 'material.html' },
+      { id: 'v-07', nom: 'Cards con sombra suave azulada', sub: '', href: 'dashboard-profesor.html' },
+      { id: 'v-08', nom: 'Focus rings azules en inputs', sub: 'Al hacer click en un input', href: 'login.html' },
+      { id: 'v-09', nom: 'Scrollbar azul fino personalizado', sub: '', href: 'admin.html' },
+      { id: 'v-10', nom: 'Loading skeletons con shimmer azul', sub: 'Mientras cargan datos', href: 'dashboard-profesor.html' }
+    ]
+  }
+];
+
+// ═══════════════════════════════════════════════════════════════
+// PERSISTENCIA
+// ═══════════════════════════════════════════════════════════════
+const STORE_KEY = 'cc_qa_checklist_v1';
+let state = {}; // { itemId: { estado: 'ok'|'fail'|'warn'|null, obs: '' } }
+
+function load() {
+  try {
+    const raw = localStorage.getItem(STORE_KEY);
+    if (raw) state = JSON.parse(raw);
+  } catch(e) { state = {}; }
+}
+function save() {
+  try {
+    localStorage.setItem(STORE_KEY, JSON.stringify(state));
+    const el = document.getElementById('ultAct');
+    if (el) el.textContent = 'guardado ' + new Date().toLocaleTimeString('es-CL');
+  } catch(e) {}
+}
+
+// ═══════════════════════════════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════════════════════════════
+let filtro = 'all';
+
+function render() {
+  const cont = document.getElementById('cats');
+  cont.innerHTML = '';
+
+  CATEGORIAS.forEach(cat => {
+    const okC   = cat.items.filter(i => (state[i.id]||{}).estado === 'ok').length;
+    const failC = cat.items.filter(i => (state[i.id]||{}).estado === 'fail').length;
+    const warnC = cat.items.filter(i => (state[i.id]||{}).estado === 'warn').length;
+    const tot   = cat.items.length;
+    const done  = okC + failC + warnC;
+
+    // Filtrar items segun estado
+    const visibles = cat.items.filter(i => {
+      if (filtro === 'all')  return true;
+      const st = (state[i.id]||{}).estado;
+      if (filtro === 'ok')   return st === 'ok';
+      if (filtro === 'fail') return st === 'fail';
+      if (filtro === 'warn') return st === 'warn';
+      return true;
+    });
+    if (visibles.length === 0) return;
+
+    const catEl = document.createElement('div');
+    catEl.className = 'cat';
+    catEl.dataset.cat = cat.id;
+    catEl.innerHTML =
+      '<div class="cat-head" onclick="toggleCat(\'' + cat.id + '\')">' +
+        '<span class="cat-emoji">' + cat.emoji + '</span>' +
+        '<span class="cat-tit">' + cat.tit + '</span>' +
+        '<span class="cat-prog">' + done + ' / ' + tot + '</span>' +
+        '<span class="cat-tog">▼</span>' +
+      '</div>' +
+      '<div class="cat-body">' +
+      visibles.map(it => renderItem(it)).join('') +
+      '</div>';
+    cont.appendChild(catEl);
+  });
+
+  actualizarStats();
+}
+
+function renderItem(it) {
+  const s = state[it.id] || {};
+  const estado = s.estado || '';
+  const obs = s.obs || '';
+  const showObs = !!obs;
+  const clase = estado ? 'it ' + estado + (showObs ? ' show-obs' : '') : 'it' + (showObs ? ' show-obs' : '');
+
+  return '<div class="' + clase + '" data-id="' + it.id + '">' +
+    '<div class="it-states">' +
+      '<button class="it-state-btn ' + (estado === 'ok'   ? 'active' : '') + '" data-st="ok"   onclick="setEstado(\'' + it.id + '\',\'ok\')"   title="Funciona">✓</button>' +
+      '<button class="it-state-btn ' + (estado === 'warn' ? 'active' : '') + '" data-st="warn" onclick="setEstado(\'' + it.id + '\',\'warn\')" title="Con observación">⚠</button>' +
+      '<button class="it-state-btn ' + (estado === 'fail' ? 'active' : '') + '" data-st="fail" onclick="setEstado(\'' + it.id + '\',\'fail\')" title="No funciona">✕</button>' +
+    '</div>' +
+    '<div class="it-nom">' + esc(it.nom) + (it.sub ? '<small>' + esc(it.sub) + '</small>' : '') + '</div>' +
+    '<div class="it-actions">' +
+      (it.href ? '<a class="mini-btn" href="' + esc(it.href) + '" target="_blank" rel="noopener">🔗 Probar</a>' : '') +
+      '<button class="mini-btn note ' + (obs ? 'has' : '') + '" onclick="toggleObs(\'' + it.id + '\')">📝 Nota</button>' +
+    '</div>' +
+    '<div class="it-obs">' +
+      '<textarea placeholder="Escribí acá tu observación, bug encontrado, mejora sugerida…" onblur="setObs(\'' + it.id + '\',this.value)" oninput="setObs(\'' + it.id + '\',this.value)">' + esc(obs) + '</textarea>' +
+    '</div>' +
+  '</div>';
+}
+
+function esc(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// INTERACCIÓN
+// ═══════════════════════════════════════════════════════════════
+function setEstado(id, st) {
+  if (!state[id]) state[id] = {};
+  // Click 2 veces en el mismo estado lo apaga
+  if (state[id].estado === st) state[id].estado = null;
+  else state[id].estado = st;
+  save();
+  render();
+}
+
+function setObs(id, val) {
+  if (!state[id]) state[id] = {};
+  state[id].obs = val;
+  save();
+}
+
+function toggleObs(id) {
+  const el = document.querySelector('.it[data-id="' + id + '"]');
+  if (el) el.classList.toggle('show-obs');
+}
+
+function toggleCat(cid) {
+  const el = document.querySelector('.cat[data-cat="' + cid + '"]');
+  if (el) el.classList.toggle('collapsed');
+}
+
+function actualizarStats() {
+  let total = 0, ok = 0, warn = 0, fail = 0;
+  CATEGORIAS.forEach(c => {
+    c.items.forEach(i => {
+      total++;
+      const st = (state[i.id]||{}).estado;
+      if (st === 'ok')   ok++;
+      if (st === 'warn') warn++;
+      if (st === 'fail') fail++;
+    });
+  });
+  document.getElementById('statTotal').textContent = total;
+  document.getElementById('statOk').textContent    = ok;
+  document.getElementById('statWarn').textContent  = warn;
+  document.getElementById('statFail').textContent  = fail;
+
+  const done = ok + warn + fail;
+  const pct = total ? Math.round(done / total * 100) : 0;
+  const circ = 2 * Math.PI * 38;
+  document.getElementById('progFill').setAttribute('stroke-dashoffset', circ - (circ * pct / 100));
+  document.getElementById('progLbl').textContent = pct + '%';
+}
+
+document.querySelectorAll('.stat').forEach(el => {
+  el.addEventListener('click', () => {
+    filtro = el.dataset.filter;
+    document.querySelectorAll('.stat').forEach(x => x.classList.remove('is-active'));
+    el.classList.add('is-active');
+    render();
+  });
+});
+
+function colapsarTodo() {
+  document.querySelectorAll('.cat').forEach(c => c.classList.add('collapsed'));
+}
+function expandirTodo() {
+  document.querySelectorAll('.cat').forEach(c => c.classList.remove('collapsed'));
+}
+
+function resetear() {
+  if (!confirm('¿Reiniciar TODO el progreso? Esta acción no se puede deshacer.')) return;
+  state = {};
+  save();
+  render();
+  toast('✓ Checklist reiniciado');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// EXPORT
+// ═══════════════════════════════════════════════════════════════
+function exportar() {
+  const fecha = new Date().toLocaleString('es-CL', { dateStyle: 'long', timeStyle: 'short' });
+  let total = 0, ok = 0, warn = 0, fail = 0;
+  CATEGORIAS.forEach(c => c.items.forEach(i => {
+    total++;
+    const st = (state[i.id]||{}).estado;
+    if (st === 'ok') ok++;
+    if (st === 'warn') warn++;
+    if (st === 'fail') fail++;
+  }));
+  const done = ok + warn + fail;
+  const pct = total ? Math.round(done / total * 100) : 0;
+
+  let md = '# 🧪 Informe QA — Click&Clase\n\n';
+  md += '**Fecha:** ' + fecha + '\n\n';
+  md += '## 📊 Resumen general\n\n';
+  md += '- **Total de items:** ' + total + '\n';
+  md += '- **✓ Funcionan:** ' + ok + ' (' + Math.round(ok/total*100) + '%)\n';
+  md += '- **⚠ Con observación:** ' + warn + ' (' + Math.round(warn/total*100) + '%)\n';
+  md += '- **✕ Fallan:** ' + fail + ' (' + Math.round(fail/total*100) + '%)\n';
+  md += '- **Pendientes de revisar:** ' + (total - done) + '\n';
+  md += '- **Avance:** ' + pct + '%\n\n';
+  md += '---\n\n';
+
+  CATEGORIAS.forEach(c => {
+    const items = c.items.filter(i => state[i.id] && state[i.id].estado);
+    if (items.length === 0) return;
+    md += '## ' + c.emoji + ' ' + c.tit + '\n\n';
+    items.forEach(it => {
+      const s = state[it.id];
+      const icon = s.estado === 'ok' ? '✅' : s.estado === 'warn' ? '⚠️' : '❌';
+      md += '- ' + icon + ' **' + it.nom + '**\n';
+      if (it.sub) md += '  - ' + it.sub + '\n';
+      if (s.obs) {
+        md += '  - **Observación:** ' + s.obs.replace(/\n/g, ' ') + '\n';
+      }
+    });
+    md += '\n';
+  });
+
+  // Pendientes
+  const pendientes = [];
+  CATEGORIAS.forEach(c => c.items.forEach(i => {
+    if (!state[i.id] || !state[i.id].estado) pendientes.push({ cat: c.tit, nom: i.nom });
+  }));
+  if (pendientes.length) {
+    md += '---\n\n## ⏳ Pendientes de revisar (' + pendientes.length + ')\n\n';
+    pendientes.forEach(p => {
+      md += '- ' + p.cat + ' — ' + p.nom + '\n';
+    });
+    md += '\n';
+  }
+
+  md += '\n---\n\n*Generado por checklist-qa.html · Click&Clase*\n';
+
+  document.getElementById('reporteTxt').value = md;
+  document.getElementById('modalExp').classList.add('show');
+}
+
+function cerrarModal() {
+  document.getElementById('modalExp').classList.remove('show');
+}
+
+function copiar() {
+  const t = document.getElementById('reporteTxt');
+  t.select();
+  navigator.clipboard.writeText(t.value).then(() => toast('✓ Copiado al portapapeles'))
+    .catch(() => { document.execCommand('copy'); toast('✓ Copiado'); });
+}
+
+function descargar() {
+  const t = document.getElementById('reporteTxt').value;
+  const fecha = new Date().toISOString().slice(0, 16).replace(/[T:]/g, '-');
+  const blob = new Blob([t], { type: 'text/markdown;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'informe-qa-clickyclase-' + fecha + '.md';
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('✓ Descargado');
+}
+
+function toast(msg) {
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.textContent = msg;
+  document.getElementById('toastHost').appendChild(t);
+  setTimeout(() => t.remove(), 2400);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════
+load();
+render();
+save();
+</script>
+</body>
+</html>

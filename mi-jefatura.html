@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mi Jefatura — Click&Clase</title>
+<link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg">
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="js/firebase-rest.js"></script>
+<script src="js/firebase-config.js"></script>
+<script src="js/firebase-auth.js"></script>
+<script src="js/firebase-db.js"></script>
+<script src="js/roles-permissions.js"></script>
+<script src="js/roles-router.js"></script>
+<script src="js/cursos.js"></script>
+<script src="js/anotaciones.js"></script>
+<script src="js/libro-clases.js"></script>
+<script src="js/cc-uikit.js"></script>
+<style>
+* { box-sizing: border-box; }
+body { margin: 0; font-family: 'Segoe UI', Roboto, Arial, sans-serif; background: #F0F7FF; color: #0C1E3B; }
+.container { max-width: 1400px; margin: 20px auto; padding: 0 24px; }
+.acc-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-bottom: 22px }
+.acc-card { background:#fff; border:1px solid rgba(37,99,235,.14); border-radius:12px; padding:16px;
+  text-decoration:none; color:#0C1E3B; display:flex; flex-direction:column; gap:6px;
+  transition:.2s; cursor:pointer }
+.acc-card:hover { border-color:#2563EB; transform:translateY(-2px); box-shadow:0 10px 24px rgba(37,99,235,.1) }
+.acc-emoji { font-size:1.6rem }
+.acc-title { font-weight:700; font-size:.95rem }
+.acc-sub { color:#64748B; font-size:.78rem }
+.est-lista { display:grid; grid-template-columns:1fr; gap:6px; margin-top:8px }
+.est-item { display:flex; justify-content:space-between; align-items:center; padding:8px 12px;
+  background:#F8FAFF; border-radius:8px; font-size:.86rem }
+.est-item .est-nom { font-weight:600 }
+.est-item .est-meta { color:#64748B; font-size:.78rem }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div id="ccHero"></div>
+  <div id="body"></div>
+</div>
+
+<script>
+if (window.CCRouter && window.CCRouter.guardPanel) {
+  CCRouter.guardPanel(['profesor','jefe_curso','utp','encargado_area','admin_colegio','director','rector']);
+}
+
+var _cursoJefe = null;
+
+function esc(s){ return String(s == null ? '' : s).replace(/[<>&"]/g,function(c){return {'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c];}); }
+
+function _renderHero(nombreCurso) {
+  document.getElementById('ccHero').innerHTML = CCKit.hero({
+    emoji: '🎓',
+    title: 'Mi Jefatura' + (nombreCurso ? ' · ' + nombreCurso : ''),
+    sub: 'Gestión completa de tu curso jefe',
+    actions: [
+      { label: 'Panel', emoji: '←', href: 'dashboard-profesor.html' }
+    ]
+  });
+}
+
+function iniciar() {
+  _renderHero();
+  var u = (window.ELAuth && ELAuth.user) || {};
+  var uid = u.uid;
+  if (!uid) return;
+  // Buscar el curso donde el profe es jefe
+  EL_DB.collection('cursos').get().then(function (snap) {
+    var mio = null;
+    snap.forEach(function (d) {
+      var c = d.data();
+      if (!c || c.liceoSlug !== u.liceoSlug) return;
+      if (c.jefeUid === uid) { c.cursoId = c.cursoId || c.id || d.id; mio = c; }
+    });
+    if (!mio) {
+      document.getElementById('body').innerHTML = CCKit.emptyState({
+        emoji: '🎓',
+        title: 'No eres jefe de curso',
+        body: 'Este panel es exclusivo para profesores jefes. Si crees que deberías serlo, pedile al director o UTP que te asigne un curso.',
+        cta: { label: 'Volver al panel', emoji: '←', href: 'dashboard-profesor.html' }
+      });
+      return;
+    }
+    _cursoJefe = mio;
+    _renderHero(mio.nombreCompleto || mio.nombre);
+    _renderJefatura(mio);
+  });
+}
+
+function _renderJefatura(curso) {
+  var estudiantes = curso.estudiantes || [];
+  var totalEst = estudiantes.length;
+  var conPie = estudiantes.filter(function (e) { return e.pie === true || e.esPie === true; }).length;
+
+  // Cargar en paralelo: anotaciones recientes, libro de clases del curso, notas
+  Promise.all([
+    window.CCAnotaciones && CCAnotaciones.listarPorCurso ? CCAnotaciones.listarPorCurso(curso.cursoId).catch(function(){return[];}) : Promise.resolve([]),
+    EL_DB.collection('libro_clases').get().then(function(sn){
+      var arr = [];
+      sn.forEach(function(d){
+        var r = d.data(); if(r && r.cursoId === curso.cursoId) arr.push(r);
+      });
+      return arr;
+    }).catch(function(){return[];}),
+    EL_DB.collection('notas').get().then(function(sn){
+      var arr = [];
+      sn.forEach(function(d){
+        var n = d.data(); if(n && n.cursoId === curso.cursoId) arr.push(n);
+      });
+      return arr;
+    }).catch(function(){return[];})
+  ]).then(function (arr) {
+    var anotaciones = arr[0];
+    var registros   = arr[1];
+    var notas       = arr[2];
+
+    // KPIs
+    var totAsist=0, totPres=0;
+    registros.forEach(function(r){
+      totPres += (r.totalPresentes||0);
+      totAsist += (r.totalPresentes||0)+(r.totalAusentes||0)+(r.totalAtrasados||0)+(r.totalJustificados||0);
+    });
+    var pctAsist = totAsist ? Math.round(totPres/totAsist*100) : 0;
+
+    // Promedio general del curso
+    var notasPorAlumno = {};
+    notas.forEach(function(n){
+      var k = n.estudianteRut || n.estudianteUid || n.estudianteNombre;
+      if(!k) return;
+      if(!notasPorAlumno[k]) notasPorAlumno[k] = [];
+      notasPorAlumno[k].push({ nota: n.nota, ponderacion: n.ponderacion || 100 });
+    });
+    var promedios = Object.keys(notasPorAlumno).map(function(k){
+      var arr = notasPorAlumno[k];
+      var sum = arr.reduce(function(s,n){ return s + n.nota; }, 0);
+      return sum / arr.length;
+    });
+    var promGeneral = promedios.length ? (promedios.reduce(function(s,p){return s+p;},0) / promedios.length) : 0;
+    var enRiesgo = promedios.filter(function(p){ return p > 0 && p < 4.0; }).length;
+
+    var kpis = CCKit.kpiRow([
+      { emoji:'👥', label:'Estudiantes', value: totalEst, tone:'info',
+        hint: conPie + ' en PIE' },
+      { emoji:'✅', label:'Asistencia general', value: pctAsist + '%',
+        tone: pctAsist>=85?'ok':pctAsist>=70?'warn':'err',
+        hint: totAsist + ' registros' },
+      { emoji:'📈', label:'Promedio del curso',
+        value: promGeneral>0 ? promGeneral.toFixed(1) : '—',
+        tone: promGeneral>=5.5?'ok':promGeneral>=4.0?'warn':'err' },
+      { emoji:'⚠', label:'En riesgo académico', value: enRiesgo,
+        tone: enRiesgo>0?'err':'ok',
+        hint: enRiesgo>0 ? 'Promedio < 4.0' : 'Todo bien' }
+    ]);
+
+    // Accesos rápidos — TODOS pasan cursoId + soloCurso=1 + volverA
+    var q = '?cursoId=' + encodeURIComponent(curso.cursoId) +
+            '&soloCurso=1&volverA=mi-jefatura.html';
+    var accesos = '<div class="acc-grid">' +
+      _accCard('📋', 'Nómina del curso', 'Ver y editar los datos de tus estudiantes', 'listas-curso.html' + q) +
+      _accCard('📝', 'Anotaciones', 'Registrar observaciones de conducta y desempeño', 'anotaciones.html' + q) +
+      _accCard('📞', 'Entrevistas con apoderados', 'Historial y agendamiento', 'entrevistas.html' + q) +
+      _accCard('👤', 'Fichas individuales', 'Datos completos por estudiante', 'alumnos.html' + q) +
+      _accCard('📊', 'Notas del curso', 'Todas las asignaturas de tu jefatura', 'notas.html' + q) +
+      _accCard('✅', 'Asistencia', 'Ver estadísticas de asistencia', 'asistencia.html' + q) +
+      _accCard('📨', 'Comunicados a apoderados', 'Enviar información y avisos', 'comunicados.html' + q) +
+      _accCard('📄', 'Informe de personalidad', 'Redactar y firmar informes', 'informe-personalidad.html' + q) +
+      _accCard('📜', 'Certificados', 'Descargar certificados oficiales', 'certificados.html' + q) +
+    '</div>';
+
+    // Estudiantes en riesgo (últimos 5)
+    var riesgoLista = promedios.map(function(p,i){
+      return { promedio: p, rut: Object.keys(notasPorAlumno)[i] };
+    }).filter(function(x){ return x.promedio > 0 && x.promedio < 4.0; })
+      .sort(function(a,b){ return a.promedio - b.promedio; })
+      .slice(0,5);
+    var riesgoBox = '';
+    if (riesgoLista.length) {
+      riesgoBox = '<div class="cck-card">' +
+        '<h2>⚠ Estudiantes en riesgo académico</h2>' +
+        '<div class="est-lista">' +
+          riesgoLista.map(function(x){
+            var e = (curso.estudiantes||[]).find(function(y){ return y.rut === x.rut; }) || {};
+            return '<div class="est-item">' +
+              '<span class="est-nom">' + esc(e.nombre || x.rut || '—') + '</span>' +
+              '<span>' + CCKit.badge({ text: x.promedio.toFixed(1), tone: x.promedio<3.5?'err':'warn' }) + '</span>' +
+              '</div>';
+          }).join('') +
+        '</div></div>';
+    }
+
+    // Últimas anotaciones
+    var ultAnos = '';
+    if (anotaciones.length) {
+      ultAnos = '<div class="cck-card">' +
+        '<h2>📝 Últimas anotaciones del curso</h2>' +
+        '<div class="est-lista">' +
+          anotaciones.slice(0,5).map(function(a){
+            var t = a.tipo === 'positiva' ? 'ok' : a.tipo === 'negativa' ? 'err' : 'gray';
+            return '<div class="est-item">' +
+              '<span><b>' + esc(a.alumnoNombre) + '</b>: ' + esc((a.descripcion||'').slice(0,80)) + '</span>' +
+              CCKit.badge({ text: a.tipo || 'neutra', tone: t }) +
+              '</div>';
+          }).join('') +
+        '</div></div>';
+    }
+
+    document.getElementById('body').innerHTML = kpis + accesos + riesgoBox + ultAnos;
+  });
+}
+
+function _accCard(emoji, title, sub, href) {
+  return '<a class="acc-card" href="' + esc(href) + '">' +
+    '<div class="acc-emoji">' + emoji + '</div>' +
+    '<div class="acc-title">' + esc(title) + '</div>' +
+    '<div class="acc-sub">' + esc(sub) + '</div>' +
+    '</a>';
+}
+
+if (window.ELAuth && ELAuth.onUserReady) {
+  ELAuth.onUserReady(function(u){ if(u) iniciar(); });
+}
+</script>
+<script src="js/ia-widget.js" defer></script>
+<script src="js/session-guard.js" defer></script>
+<script src="js/search-global.js" defer></script>
+</body>
+</html>

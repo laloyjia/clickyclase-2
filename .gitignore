@@ -32,3 +32,9 @@ ui-debug.log
 # ─── Sistema operativo ───
 .DS_Store
 Thumbs.db
+
+nul
+setup-usuarios/output/
+
+nul
+setup-usuarios/output/

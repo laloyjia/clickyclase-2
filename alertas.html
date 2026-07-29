@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Alertas apoderado · Click&Clase</title>
+<link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg">
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="js/firebase-rest.js"></script>
+<script src="js/firebase-config.js"></script>
+<script src="js/firebase-auth.js"></script>
+<script src="js/firebase-db.js"></script>
+<script src="js/roles-permissions.js"></script>
+<script src="js/roles-router.js"></script>
+<script src="js/alertas-alumno.js"></script>
+<style>
+:root {
+  --bg: #F0F7FF; --bg-2: #E0EDFF; --panel: #FFFFFF; --panel-2: #FAFCFF;
+  --border: rgba(148,163,184,.14); --border-strong: rgba(37,99,235,.22);
+  --text: #0C1E3B; --text-2: #334155; --muted: #475569;
+  --violet: #2563EB; --gold: #F59E0B; --green: #34d399;
+  --danger: #DC2626; --cyan: #38BDF8;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Inter','Segoe UI',Roboto,Arial,sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; font-size: 15px; line-height: 1.55; }
+.wrap { max-width: 1300px; margin: 0 auto; padding: 24px; }
+.back-link { color: var(--violet); text-decoration: none; font-size: .88rem; }
+.back-link:hover { text-decoration: underline; }
+
+.header {
+  background: linear-gradient(135deg, var(--panel), var(--panel-2));
+  border: 1px solid var(--border-strong);
+  border-radius: 20px;
+  padding: 32px 36px;
+  margin: 16px 0 24px;
+  display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap;
+}
+.header h1 { font-size: 1.9rem; font-weight: 800; letter-spacing: -.5px; margin-bottom: 4px; }
+.header p { color: var(--text-2); font-size: .92rem; max-width: 600px; }
+
+.btn { padding: 11px 18px; border-radius: 10px; border: 1px solid var(--border-strong); background: var(--bg-2); color: var(--text); cursor: pointer; font-family: inherit; font-size: .9rem; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
+.btn.primary { background: linear-gradient(135deg, var(--violet), #1E40AF); border-color: transparent; color: white; }
+.btn.warning { background: linear-gradient(135deg, var(--gold), #d97706); color: #F0F7FF; border-color: transparent; }
+
+.card { background: var(--panel); border: 1px solid var(--border); border-radius: 16px; padding: 22px 26px; margin-bottom: 16px; }
+
+.stat-row { display: grid; grid-template-columns: repeat(auto-fit,minmax(160px,1fr)); gap: 12px; margin-bottom: 20px; }
+.stat-card {
+  background: var(--bg-2); border: 1px solid var(--border); border-radius: 12px;
+  padding: 16px 18px;
+}
+.stat-card .l { font-size: .72rem; color: #475569; text-transform: uppercase; letter-spacing: .8px; font-weight: 700; margin-bottom: 6px; }
+.stat-card .v { font-size: 1.9rem; font-weight: 800; color: var(--violet); }
+
+.filtros { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+.chip-filtro {
+  padding: 7px 14px; background: var(--bg-2); border: 1px solid var(--border-strong);
+  border-radius: 20px; cursor: pointer; font-size: .82rem; font-weight: 600;
+  transition: all .15s; color: var(--text-2);
+}
+.chip-filtro:hover { color: var(--text); }
+.chip-filtro.active { background: rgba(37,99,235,.15); border-color: var(--violet); color: var(--violet); }
+
+table { width: 100%; border-collapse: collapse; font-size: .88rem; }
+th, td { padding: 12px 14px; text-align: left; border-bottom: 1px solid var(--border); vertical-align: top; }
+th { font-size: .72rem; text-transform: uppercase; letter-spacing: 1px; color: #475569; font-weight: 700; background: rgba(37,99,235,.08); }
+tr:hover td { background: rgba(37,99,235,.04); }
+
+.chip {
+  display: inline-block; padding: 3px 10px; border-radius: 8px;
+  font-size: .74rem; font-weight: 700;
+}
+.chip-motivo {
+  background: rgba(148,163,184,.12); color: var(--text-2);
+}
+.chip-dest {
+  background: rgba(34,211,238,.12); color: var(--cyan); margin-right: 3px;
+}
+
+.empty { padding: 60px 20px; text-align: center; color: #475569; }
+.empty .icon { font-size: 4rem; margin-bottom: 12px; }
+.loader { padding: 40px; text-align: center; color: #475569; }
+
+.mini-btn {
+  padding: 5px 10px; background: rgba(37,99,235,.15); border: 1px solid rgba(37,99,235,.3);
+  color: #1D4ED8; border-radius: 6px; font-size: .74rem; font-weight: 600; text-decoration: none;
+  display: inline-block; cursor: pointer;
+}
+.mini-btn:hover { background: rgba(37,99,235,.3); }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <a class="back-link" href="dashboard-profesor.html">← Volver al panel</a>
+
+  <div class="header">
+    <div>
+      <h1>🚨 Alertas al apoderado</h1>
+      <p>Registro de todas las alertas enviadas a los apoderados. Para crear una nueva, abre la ficha del alumno.</p>
+    </div>
+    <a class="btn primary" href="alumnos.html">🔍 Buscar alumno para alertar</a>
+  </div>
+
+  <div class="stat-row" id="stats"></div>
+
+  <div class="card">
+    <div class="filtros" id="filtros"></div>
+    <div id="tablaWrap"><div class="loader">⏳ Cargando alertas…</div></div>
+  </div>
+</div>
+
+<script>
+if (window.CCRouter && CCRouter.guardPanel) {
+  CCRouter.guardPanel(['admin','director','rector','admin_colegio','utp','encargado_area','profesor','jefe_curso']);
+}
+
+var _todas   = [];
+var _filtro  = 'todas';
+function esc(s) { return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function inicio() {
+  cargar();
+}
+
+function cargar() {
+  CCAlertasAlumno.listarPorProfesor().then(function (arr) {
+    _todas = arr;
+    renderStats();
+    renderFiltros();
+    renderTabla();
+  }).catch(function (err) {
+    document.getElementById('tablaWrap').innerHTML = '<div class="empty"><div class="icon">⚠</div>Error: ' + esc(err.message) + '</div>';
+  });
+}
+
+function renderStats() {
+  var porMotivo = {};
+  var ultimos7 = 0;
+  var hace7 = new Date(); hace7.setDate(hace7.getDate() - 7);
+  _todas.forEach(function (a) {
+    porMotivo[a.motivo] = (porMotivo[a.motivo] || 0) + 1;
+    if (new Date(a.fecha) >= hace7) ultimos7++;
+  });
+  document.getElementById('stats').innerHTML =
+    '<div class="stat-card"><div class="l">Total enviadas</div><div class="v">' + _todas.length + '</div></div>' +
+    '<div class="stat-card"><div class="l">Últimos 7 días</div><div class="v">' + ultimos7 + '</div></div>' +
+    '<div class="stat-card"><div class="l">Motivos únicos</div><div class="v">' + Object.keys(porMotivo).length + '</div></div>';
+}
+
+function renderFiltros() {
+  var chips = [{ id: 'todas', label: 'Todas (' + _todas.length + ')' }];
+  CCAlertasAlumno.MOTIVOS.forEach(function (m) {
+    var count = _todas.filter(function (a) { return a.motivo === m.id; }).length;
+    if (count > 0) chips.push({ id: m.id, label: m.ico + ' ' + m.label + ' (' + count + ')' });
+  });
+  document.getElementById('filtros').innerHTML = chips.map(function (c) {
+    return '<div class="chip-filtro' + (c.id === _filtro ? ' active' : '') + '" onclick="setFiltro(\'' + c.id + '\')">' + c.label + '</div>';
+  }).join('');
+}
+
+function setFiltro(f) { _filtro = f; renderFiltros(); renderTabla(); }
+
+function renderTabla() {
+  var lista = _filtro === 'todas' ? _todas : _todas.filter(function (a) { return a.motivo === _filtro; });
+  if (!lista.length) {
+    document.getElementById('tablaWrap').innerHTML =
+      '<div class="empty"><div class="icon">🚨</div>Sin alertas registradas. Andá a un alumno y crea la primera.</div>';
+    return;
+  }
+  var filas = lista.map(function (a) {
+    var mi = CCAlertasAlumno.motivoInfo(a.motivo) || { label: a.motivo, ico: '📌' };
+    var fecha = new Date(a.fecha).toLocaleString('es-CL', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+    var dests = (a.destinatarios || []).map(function (d) { return '<span class="chip chip-dest">' + esc(d) + '</span>'; }).join(' ');
+    return '<tr>' +
+      '<td style="white-space:nowrap;color:var(--muted);font-size:.82rem">' + fecha + '</td>' +
+      '<td><b>' + esc(a.alumnoNombre) + '</b><div style="color:var(--muted);font-size:.78rem">' + esc(a.cursoNombre || '') + '</div></td>' +
+      '<td><span class="chip chip-motivo">' + mi.ico + ' ' + esc(mi.label) + '</span></td>' +
+      '<td style="max-width:340px">' + esc(a.descripcion) + '</td>' +
+      '<td>' + dests + '</td>' +
+      '<td><a class="mini-btn" href="ficha-alumno.html?rut=' + encodeURIComponent(a.alumnoRut) + '&curso=' + encodeURIComponent(a.cursoId) + '" target="_blank">👤 Ficha</a></td>' +
+    '</tr>';
+  }).join('');
+  document.getElementById('tablaWrap').innerHTML =
+    '<div style="overflow-x:auto"><table>' +
+    '<thead><tr><th>Fecha</th><th>Alumno</th><th>Motivo</th><th>Descripción</th><th>Enviada a</th><th></th></tr></thead>' +
+    '<tbody>' + filas + '</tbody></table></div>';
+}
+
+if (typeof ELAuth !== 'undefined' && ELAuth.onUserReady) {
+  ELAuth.onUserReady(inicio);
+} else {
+  window.addEventListener('load', inicio);
+}
+</script>
+
+<script src="js/ia-widget.js" defer></script>
+<script src="js/search-global.js" defer></script>
+</body>
+</html>

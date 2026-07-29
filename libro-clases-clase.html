@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Clase — Libro de Clases</title>
+<link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg">
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="js/firebase-rest.js"></script>
+<script src="js/firebase-config.js"></script>
+<script src="js/firebase-auth.js"></script>
+<script src="js/firebase-db.js"></script>
+<script src="js/roles-permissions.js"></script>
+<script src="js/roles-router.js"></script>
+<script src="js/cursos.js"></script>
+<script src="js/libro-clases.js"></script>
+<script src="js/pin-firma.js"></script>
+<script src="js/cc-uikit.js"></script>
+<style>
+* { box-sizing: border-box; }
+body { margin: 0; font-family: 'Segoe UI', Roboto, Arial, sans-serif; background: #F0F7FF; color: #0C1E3B; padding: 16px 20px 40px; }
+.head-clase { background: linear-gradient(135deg, #4F46E5, #6366F1); color: #fff; padding: 16px 22px; border-radius: 14px; margin-bottom: 16px;
+  display: flex; justify-content: space-between; align-items: center; gap: 14px; box-shadow: 0 10px 30px rgba(79,70,229,.25) }
+.head-clase h1 { margin: 0; font-size: 1.35rem; font-weight: 800 }
+.head-clase .h-meta { font-size: .85rem; opacity: .92; margin-top: 4px }
+.head-clase button { background: rgba(255,255,255,.2); border: 1px solid rgba(255,255,255,.3); color: #fff;
+  padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: .85rem }
+.card { background: #fff; border: 1px solid rgba(37,99,235,.14); border-radius: 12px; padding: 16px 20px; margin-bottom: 14px }
+.card h3 { margin: 0 0 12px; font-size: .82rem; text-transform: uppercase; letter-spacing: .6px; color: #64748B; font-weight: 700 }
+textarea, select, input { width: 100%; padding: 9px 12px; border-radius: 8px; background: rgba(37,99,235,.05); border: 1px solid rgba(37,99,235,.15); font-size: .9rem; font-family: inherit; color: #0C1E3B }
+.acciones-fila { display: flex; gap: 10px; justify-content: flex-end; margin-top: 14px }
+.btn { padding: 10px 20px; border-radius: 9px; border: 1px solid rgba(37,99,235,.15); background: #fff; color: #0C1E3B; cursor: pointer; font-weight: 700; font-size: .88rem }
+.btn.primary { background: linear-gradient(135deg,#4F46E5,#6366F1); color: #fff; border-color: transparent }
+.btn.success { background: linear-gradient(135deg,#059669,#10B981); color: #fff; border-color: transparent }
+.asist-tabla { width: 100%; border-collapse: collapse; font-size: .88rem }
+.asist-tabla th { background: #F1F5F9; padding: 8px 10px; text-align: left; font-size: .72rem; text-transform: uppercase; color: #475569; letter-spacing: .5px }
+.asist-tabla td { padding: 6px 10px; border-bottom: 1px solid rgba(37,99,235,.06) }
+.est-btns { display: flex; gap: 4px }
+.est-btn { padding: 5px 10px; border: 1px solid rgba(37,99,235,.15); background: #fff; border-radius: 6px; cursor: pointer; font-weight: 700; font-size: .85rem; min-width: 34px }
+.est-btn.act.P { background: #059669; color: #fff; border-color: transparent }
+.est-btn.act.A { background: #DC2626; color: #fff; border-color: transparent }
+.est-btn.act.T { background: #F59E0B; color: #fff; border-color: transparent }
+.est-btn.act.J { background: #2563EB; color: #fff; border-color: transparent }
+.est-btn:disabled { opacity: .5; cursor: not-allowed }
+.stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 14px }
+.stat { background: #fff; padding: 12px; border-radius: 10px; text-align: center; border: 1px solid rgba(37,99,235,.14) }
+.stat .v { font-size: 1.6rem; font-weight: 800 }
+.stat .l { font-size: .72rem; color: #64748B; text-transform: uppercase; letter-spacing: .5px }
+.stat.P .v { color: #059669 } .stat.A .v { color: #DC2626 }
+.stat.T .v { color: #F59E0B } .stat.J .v { color: #2563EB }
+.firmado-banner { background: linear-gradient(135deg,#D1FAE5,#A7F3D0); border: 1px solid #10B981;
+  border-radius: 10px; padding: 12px 16px; margin-bottom: 14px; color: #047857; font-size: .9rem; font-weight: 600 }
+</style>
+</head>
+<body>
+
+<div class="head-clase">
+  <div>
+    <h1 id="hClase">Cargando...</h1>
+    <div class="h-meta" id="hMeta"></div>
+  </div>
+  <button onclick="window.close()">✕ Cerrar</button>
+</div>
+
+<div id="body">
+  <div class="cck-sk-row"><div class="cck-sk"></div><div class="cck-sk"></div><div class="cck-sk"></div></div>
+</div>
+
+<script>
+if (window.CCRouter && window.CCRouter.guardPanel) {
+  CCRouter.guardPanel(['profesor','jefe_curso','utp','encargado_area']);
+}
+
+var _cursoId = null, _asig = null, _fecha = null, _cursoNombre = '', _reg = null;
+
+function esc(s){return String(s==null?'':s).replace(/[<>&"]/g,function(c){return {'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c];});}
+
+function iniciar(){
+  var qp = new URLSearchParams(window.location.search);
+  _cursoId = qp.get('cursoId') || '';
+  _asig    = qp.get('asig') || '';
+  _fecha   = qp.get('fecha') || new Date().toISOString().slice(0,10);
+  if (!_cursoId || !_asig) {
+    document.getElementById('body').innerHTML = CCKit.emptyState({
+      emoji:'⚠', title:'Parámetros faltantes',
+      body:'Volvé al libro de clases y haz click en una clase.',
+      cta:{label:'Cerrar', onclick:'window.close()'}
+    });
+    return;
+  }
+  // Traer nombre del curso
+  EL_DB.collection('cursos').doc(_cursoId).get().then(function(sn){
+    _cursoNombre = sn.exists ? (sn.data().nombreCompleto || sn.data().nombre || _cursoId) : _cursoId;
+    document.getElementById('hClase').textContent = '📖 ' + _cursoNombre + ' · ' + _asig;
+    var f = new Date(_fecha + 'T00:00:00');
+    document.getElementById('hMeta').textContent =
+      f.toLocaleDateString('es-CL',{weekday:'long', day:'numeric', month:'long', year:'numeric'});
+    abrirRegistro();
+  });
+}
+
+function abrirRegistro(){
+  CCLibroClases.abrirOCrearRegistro({ cursoId:_cursoId, asignatura:_asig, fecha:_fecha })
+    .then(function(reg){ _reg = reg; render(); })
+    .catch(function(err){
+      document.getElementById('body').innerHTML = CCKit.emptyState({
+        emoji:'⚠', title:'Error al abrir clase', body:err.message
+      });
+    });
+}
+
+function render(){
+  if (!_reg) return;
+  var editable = !_reg.firmado;
+
+  // Ordenar por apellidos (chile)
+  if (Array.isArray(_reg.asistencia) && window.CCNombre && CCNombre.comparar) {
+    _reg.asistencia.sort(function(a,b){
+      return CCNombre.comparar(a.nombreCompleto||'', b.nombreCompleto||'');
+    });
+    _reg.asistencia.forEach(function(a,i){ a.ordinal = i+1; });
+  }
+
+  var banner = _reg.firmado
+    ? '<div class="firmado-banner">✍ <b>Clase firmada</b> por ' + esc(_reg.firmadoPor||'—') +
+      ' el ' + new Date(_reg.firmadoEn).toLocaleString('es-CL') +
+      (_reg.firmaConPin?' 🔐 (con PIN)':'') + '</div>'
+    : '';
+
+  var stats = '<div class="stats-row">' +
+    '<div class="stat P"><div class="v" id="tP">0</div><div class="l">Presentes</div></div>' +
+    '<div class="stat A"><div class="v" id="tA">0</div><div class="l">Ausentes</div></div>' +
+    '<div class="stat T"><div class="v" id="tT">0</div><div class="l">Atrasados</div></div>' +
+    '<div class="stat J"><div class="v" id="tJ">0</div><div class="l">Justificados</div></div>' +
+    '</div>';
+
+  var content =
+    '<div class="card">' +
+      '<h3>📝 Contenido de la clase</h3>' +
+      (editable ? '<div style="display:flex;gap:10px;align-items:center;margin-bottom:10px;flex-wrap:wrap">' +
+        '<label style="font-size:.78rem;color:#64748B;font-weight:600;margin:0;white-space:nowrap">📋 Planificación asociada:</label>' +
+        '<select id="selPlan" style="flex:1;min-width:220px" onchange="usarPlan(this.value)">' +
+          '<option value="">— Cargando... —</option>' +
+        '</select>' +
+        '<a id="lnkPlan" href="#" target="_blank" style="display:none;font-size:.78rem;color:#4F46E5;font-weight:600;text-decoration:none">👁 Ver planificación →</a>' +
+      '</div>' : '') +
+      '<textarea id="txtContenido" rows="3" placeholder="¿Qué se trabajó hoy? (o elige una planificación arriba para autocompletar)" ' +
+        (editable?'':'disabled') + '>' + esc(_reg.contenidoDelDia||'') + '</textarea>' +
+      '<h3 style="margin-top:14px">🔎 Observaciones generales</h3>' +
+      '<textarea id="txtObs" rows="2" ' + (editable?'':'disabled') + '>' + esc(_reg.observacionesGenerales||'') + '</textarea>' +
+    '</div>' +
+    '<div class="card">' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">' +
+        '<h3 style="margin:0">👥 Asistencia</h3>' +
+        (editable?'<div style="display:flex;gap:6px"><button class="btn" onclick="marcarTodos(\'P\')">Todos P</button><button class="btn" onclick="marcarTodos(\'A\')">Todos A</button></div>':'') +
+      '</div>' +
+      '<table class="asist-tabla">' +
+        '<thead><tr><th style="width:40px">N°</th><th>Apellidos</th><th>Nombres</th><th style="width:200px">Estado</th><th>Motivo</th></tr></thead>' +
+        '<tbody id="tbAsist"></tbody>' +
+      '</table>' +
+      (editable?
+        '<div class="acciones-fila">' +
+          '<button class="btn" onclick="guardarBorrador()">💾 Guardar borrador</button>' +
+          '<button class="btn success" onclick="firmarClase()">✍ Firmar con PIN</button>' +
+        '</div>' : '') +
+    '</div>';
+
+  document.getElementById('body').innerHTML = banner + stats + content;
+  renderAsistencia();
+  actualizarStats();
+  if (editable) cargarPlanificaciones();
+}
+
+var _planCache = [];
+
+function cargarPlanificaciones(){
+  var sel = document.getElementById('selPlan');
+  if (!sel) return;
+  var u = (window.ELAuth && ELAuth.user) || {};
+  var email = u.email || '', uid = u.uid || '';
+  function _norm(s){ return String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,' ').trim(); }
+  var asigKey = _norm(_asig);
+  EL_DB.collection('planificaciones').get().then(function(sn){
+    var arr = [];
+    sn.forEach(function(d){
+      var p = d.data(); if (!p) return;
+      var esDelProfe = (email && p.profesor === email) ||
+                       (uid && (p.profesorUid === uid || p.autorUid === uid || p.docenteUid === uid));
+      if (!esDelProfe) return;
+      var pAsig = _norm(p.asignatura || p.modulo || p.materia || '');
+      if (!pAsig) return;
+      if (pAsig !== asigKey && pAsig.indexOf(asigKey) === -1 && asigKey.indexOf(pAsig) === -1) return;
+      if (p.cursoId && _cursoId && p.cursoId !== _cursoId) return;
+      arr.push(Object.assign({id:d.id}, p));
+    });
+    arr.sort(function(a,b){
+      var da = String(a.fecha||a.creadaEn||''); var db = String(b.fecha||b.creadaEn||'');
+      return db.localeCompare(da);
+    });
+    _planCache = arr;
+    if (!arr.length) {
+      sel.innerHTML = '<option value="">— No hay planificaciones para esta clase —</option>';
+      return;
+    }
+    sel.innerHTML = '<option value="">— Sin enlazar (contenido libre) —</option>' +
+      arr.map(function(p){
+        var titulo = p.titulo || p.tema || p.nombre || p.oa || 'Planificación';
+        var fecha = String(p.fecha||p.creadaEn||'').slice(0,10);
+        var label = titulo + (fecha?' · '+fecha:'');
+        if (label.length > 80) label = label.slice(0,77) + '…';
+        return '<option value="'+p.id+'">'+esc(label)+'</option>';
+      }).join('');
+    if (_reg && _reg.planificacionId) {
+      sel.value = _reg.planificacionId;
+      _actLinkPlan(_reg.planificacionId);
+    }
+  }).catch(function(){});
+}
+
+function usarPlan(planId){
+  var link = document.getElementById('lnkPlan');
+  if (!planId) { link.style.display = 'none'; return; }
+  _actLinkPlan(planId);
+  var p = _planCache.find(function(x){ return x.id === planId; });
+  if (!p) return;
+  var txt = document.getElementById('txtContenido');
+  if (!txt.value.trim() || confirm('¿Reemplazar el contenido actual con el de la planificación?')) {
+    var partes = [];
+    if (p.titulo)      partes.push('📌 ' + p.titulo);
+    if (p.oa)          partes.push('OA: ' + p.oa);
+    if (p.tema)        partes.push('Tema: ' + p.tema);
+    if (p.objetivo)    partes.push('Objetivo: ' + p.objetivo);
+    if (p.contenido)   partes.push('\n' + String(p.contenido).slice(0,800));
+    if (p.actividades) partes.push('\nActividades: ' + String(p.actividades).slice(0,400));
+    txt.value = partes.join('\n');
+  }
+  // Guardar planificacionId en _reg para persistir al guardar
+  if (_reg) {
+    _reg.planificacionId = planId;
+    var opt = document.getElementById('selPlan').options[document.getElementById('selPlan').selectedIndex];
+    _reg.planificacionTitulo = opt ? opt.textContent : '';
+  }
+}
+
+function _actLinkPlan(planId){
+  var link = document.getElementById('lnkPlan');
+  if (!link) return;
+  link.href = 'planificacion.html?id=' + encodeURIComponent(planId);
+  link.style.display = 'inline-block';
+}
+
+function renderAsistencia(){
+  var editable = !_reg.firmado;
+  var tb = document.getElementById('tbAsist');
+  tb.innerHTML = (_reg.asistencia||[]).map(function(a, i){
+    var btns = ['P','A','T','J'].map(function(e){
+      var act = a.estado === e ? ' act ' + e : '';
+      return '<button class="est-btn' + act + '" onclick="marcarUno(' + i + ',\'' + e + '\')" ' +
+        (editable?'':'disabled') + '>' + e + '</button>';
+    }).join('');
+    var p = window.CCNombre ? CCNombre.parse(a.nombreCompleto||'') : {apellidos:'',nombres:a.nombreCompleto};
+    return '<tr>' +
+      '<td>' + a.ordinal + '</td>' +
+      '<td><b>' + esc(p.apellidos) + '</b></td>' +
+      '<td>' + esc(p.nombres) + '</td>' +
+      '<td><div class="est-btns">' + btns + '</div></td>' +
+      '<td><input type="text" value="' + esc(a.motivo||'') + '" ' +
+        (editable?'':'disabled') + ' placeholder="—" onchange="editarMotivo(' + i + ',this.value)"></td>' +
+    '</tr>';
+  }).join('');
+}
+
+function marcarUno(idx, estado){
+  if (!_reg || _reg.firmado) return;
+  _reg.asistencia[idx].estado = estado;
+  renderAsistencia(); actualizarStats();
+}
+
+function marcarTodos(estado){
+  if (!_reg || _reg.firmado) return;
+  _reg.asistencia.forEach(function(a){ a.estado = estado; });
+  renderAsistencia(); actualizarStats();
+}
+
+function editarMotivo(idx, val){
+  if (_reg && _reg.asistencia[idx]) _reg.asistencia[idx].motivo = val;
+}
+
+function actualizarStats(){
+  var c = { P:0, A:0, T:0, J:0 };
+  (_reg.asistencia||[]).forEach(function(a){ if (c[a.estado] !== undefined) c[a.estado]++; });
+  ['P','A','T','J'].forEach(function(k){ var el = document.getElementById('t'+k); if (el) el.textContent = c[k]; });
+}
+
+function guardarBorrador(){
+  if (!_reg) return;
+  _reg.contenidoDelDia = document.getElementById('txtContenido').value;
+  _reg.observacionesGenerales = document.getElementById('txtObs').value;
+  CCLibroClases.guardar(_reg.regId, {
+    contenidoDelDia: _reg.contenidoDelDia,
+    observacionesGenerales: _reg.observacionesGenerales,
+    asistencia: _reg.asistencia,
+    planificacionId: _reg.planificacionId || '',
+    planificacionTitulo: _reg.planificacionTitulo || ''
+  }).then(function(){ alert('💾 Guardado como borrador. Podés cerrar la ventana.'); })
+    .catch(function(err){ alert('Error: '+err.message); });
+}
+
+function firmarClase(){
+  if (!_reg) return;
+  _reg.contenidoDelDia = document.getElementById('txtContenido').value;
+  _reg.observacionesGenerales = document.getElementById('txtObs').value;
+  var pinP = (window.CCPinFirma && CCPinFirma.pedirYValidar)
+    ? CCPinFirma.pedirYValidar({
+        titulo:'🔐 Firmar libro de clases',
+        mensaje:'Ingresá tu PIN de 6 dígitos para firmar. Después NO se podrá editar.'
+      })
+    : Promise.resolve(true);
+  pinP.then(function(){
+    return CCLibroClases.guardar(_reg.regId, {
+      contenidoDelDia:_reg.contenidoDelDia,
+      observacionesGenerales:_reg.observacionesGenerales,
+      asistencia:_reg.asistencia,
+      planificacionId: _reg.planificacionId || '',
+      planificacionTitulo: _reg.planificacionTitulo || ''
+    });
+  }).then(function(){
+    return CCLibroClases.firmar(_reg.regId, { conPin:true });
+  }).then(function(){
+    return EL_DB.collection('libro_clases').doc(_reg.regId).get();
+  }).then(function(sn){
+    _reg = sn.data();
+    render();
+    alert('✍ Clase firmada. Podés cerrar la ventana.');
+  }).catch(function(err){
+    if (err && (err.message==='cancelado'||err.message==='pin_incorrecto'||err.message==='sin_pin')) return;
+    alert('Error al firmar: '+err.message);
+  });
+}
+
+if (window.ELAuth && ELAuth.onUserReady) ELAuth.onUserReady(function(u){ if(u) iniciar(); });
+</script>
+</body>
+</html>

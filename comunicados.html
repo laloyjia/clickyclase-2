@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Comunicados a Apoderados — Click&Clase</title>
+<link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg">
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="js/firebase-rest.js"></script>
+<script src="js/firebase-config.js"></script>
+<script src="js/firebase-auth.js"></script>
+<script src="js/firebase-db.js"></script>
+<script src="js/roles-permissions.js"></script>
+<script src="js/roles-router.js"></script>
+<script src="js/cursos.js"></script>
+<script src="js/cc-uikit.js"></script>
+<style>
+* { box-sizing: border-box; }
+body { margin: 0; font-family: 'Segoe UI', Roboto, Arial, sans-serif; background: #F0F7FF; color: #0C1E3B; }
+.container { max-width: 1300px; margin: 20px auto; padding: 0 24px; }
+.filtros { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 14px }
+.fld label { display: block; font-size: .72rem; color: #64748B; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 4px; }
+input, select, textarea { width: 100%; padding: 9px 12px; border-radius: 8px; background: #fff; border: 1px solid rgba(37,99,235,.2); font-size: .88rem; font-family: inherit }
+.btn { padding: 9px 18px; border-radius: 8px; border: 1px solid rgba(37,99,235,.15); background: #fff; color: #0C1E3B; cursor: pointer; font-weight: 600; font-size: .85rem; text-decoration: none; display: inline-block; text-align: center }
+.btn.primary { background: linear-gradient(135deg,#2563EB,#38BDF8); color: #fff; border-color: transparent }
+.apo-item { padding: 10px 14px; border: 1px solid rgba(37,99,235,.1); border-radius: 8px; margin-bottom: 6px;
+  background: #fff; display: grid; grid-template-columns: 30px 1fr 200px auto; gap: 10px; align-items: center; font-size: .88rem }
+.apo-check { justify-self: center }
+.plantillas { display: grid; grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); gap: 10px; margin-bottom: 14px }
+.plantilla { background: linear-gradient(135deg,rgba(37,99,235,.06),rgba(56,189,248,.04)); border: 1px solid rgba(37,99,235,.14);
+  border-radius: 10px; padding: 12px; cursor: pointer; transition: .2s }
+.plantilla:hover { border-color: #2563EB; transform: translateY(-2px) }
+.plantilla b { display: block; margin-bottom: 4px }
+.plantilla small { color: #64748B; font-size: .78rem }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div id="ccHero"></div>
+  <div id="ccKpis"></div>
+
+  <div class="cck-card">
+    <h2>📨 Plantillas rápidas</h2>
+    <div class="plantillas">
+      <div class="plantilla" onclick="usarPlantilla('reunion')">
+        <b>📅 Convocatoria a reunión</b>
+        <small>Cita general de apoderados del curso</small>
+      </div>
+      <div class="plantilla" onclick="usarPlantilla('entrevista')">
+        <b>📞 Citación a entrevista</b>
+        <small>Reunión individual con el apoderado</small>
+      </div>
+      <div class="plantilla" onclick="usarPlantilla('academico')">
+        <b>📊 Informe académico</b>
+        <small>Estado actual del rendimiento</small>
+      </div>
+      <div class="plantilla" onclick="usarPlantilla('aviso')">
+        <b>📣 Aviso general</b>
+        <small>Suspensión de clases, salidas, actividades</small>
+      </div>
+    </div>
+  </div>
+
+  <div class="cck-card">
+    <h2>✍ Redactar comunicado</h2>
+    <div class="filtros">
+      <div class="fld"><label>Curso</label><select id="fCurso" onchange="cargarApoderados()"><option value="">— Elegir —</option></select></div>
+      <div class="fld"><label>Enviar a</label>
+        <select id="fDest" onchange="cargarApoderados()">
+          <option value="todos">Todos los apoderados del curso</option>
+          <option value="uno">Solo un apoderado</option>
+        </select>
+      </div>
+    </div>
+    <div class="fld">
+      <label>Asunto</label>
+      <input id="asunto" placeholder="Ej: Reunión de apoderados — 30/07">
+    </div>
+    <div class="fld">
+      <label>Mensaje</label>
+      <textarea id="mensaje" rows="8" placeholder="Estimado apoderado:..."></textarea>
+    </div>
+    <div id="apodBox" style="margin:14px 0"></div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap">
+      <button class="btn" onclick="copiar()">📋 Copiar cuerpo</button>
+      <button class="btn" onclick="enviarMailto()">📧 Abrir cliente de correo</button>
+      <button class="btn primary" onclick="enviarGmail()">✉ Abrir en Gmail</button>
+    </div>
+  </div>
+</div>
+
+<script>
+if (window.CCRouter && window.CCRouter.guardPanel) {
+  CCRouter.guardPanel(['profesor','jefe_curso','utp','encargado_area','admin_colegio','director','rector']);
+}
+var _cursos=[], _cursoSel=null, _apoderados=[];
+function esc(s){return String(s==null?'':s).replace(/[<>&"]/g,function(c){return {'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c];});}
+
+function _hero(){
+  document.getElementById('ccHero').innerHTML = CCKit.hero({
+    emoji:'📨', title:'Comunicados a Apoderados',
+    sub:'Enviá información, avisos y citaciones por correo',
+    actions:[{label:'Panel',emoji:'←',href:'dashboard-profesor.html'},
+             {label:'Mi Jefatura',emoji:'🎓',href:'mi-jefatura.html'}]
+  });
+}
+
+function iniciar(){
+  _hero();
+  CCCursos.misCursos().then(function(cs){
+    _cursos = cs || [];
+    var sel = document.getElementById('fCurso');
+    sel.innerHTML = '<option value="">— Elegir —</option>' +
+      _cursos.map(function(c){ return '<option value="'+esc(c.cursoId)+'">'+esc(c.nombreCompleto)+'</option>'; }).join('');
+    var qp = new URLSearchParams(window.location.search);
+    var qc = qp.get('cursoId');
+    if (qc) { sel.value = qc; cargarApoderados(); }
+  });
+}
+
+function cargarApoderados(){
+  var cid = document.getElementById('fCurso').value;
+  if (!cid) {
+    document.getElementById('apodBox').innerHTML = '';
+    document.getElementById('ccKpis').innerHTML = '';
+    return;
+  }
+  _cursoSel = _cursos.find(function(c){ return c.cursoId === cid; });
+  var ests = (_cursoSel && _cursoSel.estudiantes) || [];
+  _apoderados = ests.map(function(e){
+    var apo = e.apoderado || {};
+    return {
+      alumno: e.nombre,
+      nombre: apo.nombre || e.apoderadoNombre || '',
+      email: apo.email || e.apoderadoEmail || '',
+      telefono: apo.telefono || e.apoderadoTelefono || e.telefono || ''
+    };
+  }).filter(function(a){ return a.email || a.telefono; });
+
+  _renderKpis(ests.length);
+  var destino = document.getElementById('fDest').value;
+  if (destino === 'uno') {
+    document.getElementById('apodBox').innerHTML =
+      '<label style="display:block;font-size:.75rem;color:#475569;font-weight:600;text-transform:uppercase;margin-bottom:4px">Elegí apoderado</label>' +
+      '<select id="apoUnico" style="width:100%;padding:9px 12px;border:1px solid rgba(37,99,235,.2);border-radius:8px">' +
+        _apoderados.map(function(a){
+          return '<option value="'+esc(a.email)+'">'+esc(a.nombre||'—')+' — Apoderado de '+esc(a.alumno)+' ('+esc(a.email||'sin email')+')</option>';
+        }).join('') +
+      '</select>';
+  } else {
+    document.getElementById('apodBox').innerHTML =
+      '<div style="background:#F0F7FF;border:1px solid rgba(37,99,235,.15);border-radius:10px;padding:12px 14px;color:#334155;font-size:.85rem">' +
+        '✉ Se enviará a <b>' + _apoderados.filter(function(a){return a.email;}).length + ' apoderados</b> con email registrado' +
+        ' (de un total de ' + ests.length + ' estudiantes en el curso).' +
+      '</div>';
+  }
+}
+
+function _renderKpis(totalEst){
+  var conMail = _apoderados.filter(function(a){return a.email;}).length;
+  var conTel = _apoderados.filter(function(a){return a.telefono;}).length;
+  document.getElementById('ccKpis').innerHTML = CCKit.kpiRow([
+    {emoji:'👥',label:'Apoderados en el curso',value:totalEst,tone:'info'},
+    {emoji:'📧',label:'Con email',value:conMail,tone:conMail===totalEst?'ok':'warn',
+      hint: totalEst?Math.round(conMail/totalEst*100)+'% del curso':''},
+    {emoji:'📱',label:'Con teléfono',value:conTel,tone:conTel===totalEst?'ok':'warn'}
+  ]);
+}
+
+function usarPlantilla(tipo){
+  var u = (window.ELAuth && ELAuth.user) || {};
+  var profe = u.nombre || u.email || '';
+  var curso = _cursoSel ? (_cursoSel.nombreCompleto || _cursoSel.nombre) : '[nombre del curso]';
+  var plantillas = {
+    reunion: {
+      asunto: 'Convocatoria a reunión de apoderados — Curso ' + curso,
+      mensaje: 'Estimados apoderados:\n\nJunto con saludarlos, los invitamos a la reunión de apoderados del curso ' + curso + ' que se realizará el día [FECHA] a las [HORA] en la sala del curso.\n\nTemas a tratar:\n1. Informe académico del período\n2. Actividades próximas\n3. Otros\n\nEsperamos contar con vuestra presencia.\n\nSaludos cordiales,\n' + profe + '\nProfesor(a) jefe'
+    },
+    entrevista: {
+      asunto: 'Citación a entrevista — ' + curso,
+      mensaje: 'Estimado(a) apoderado(a):\n\nJunto con saludarlo, le solicito coordinar una entrevista para conversar sobre el proceso de su pupilo(a).\n\nMis horarios disponibles son:\n- [DÍA 1] entre [HORA] y [HORA]\n- [DÍA 2] entre [HORA] y [HORA]\n\nPuede responder este correo indicando el horario de su preferencia.\n\nAtentamente,\n' + profe + '\nProfesor(a) jefe · ' + curso
+    },
+    academico: {
+      asunto: 'Informe académico — ' + curso,
+      mensaje: 'Estimado(a) apoderado(a):\n\nLe comparto un resumen del rendimiento académico de su pupilo(a) al día de hoy:\n\n[COMPLETAR]\n\nEn caso de tener consultas, quedo a su disposición.\n\nSaludos,\n' + profe
+    },
+    aviso: {
+      asunto: 'Aviso importante — ' + curso,
+      mensaje: 'Estimados apoderados:\n\nInformamos que [DETALLE DEL AVISO].\n\nLes agradecemos tomar nota.\n\nSaludos cordiales,\n' + profe + '\nProfesor(a) jefe'
+    }
+  };
+  var p = plantillas[tipo]; if (!p) return;
+  document.getElementById('asunto').value = p.asunto;
+  document.getElementById('mensaje').value = p.mensaje;
+}
+
+function enviarMailto(){
+  var destino = document.getElementById('fDest').value;
+  var emails = [];
+  if (destino === 'uno') {
+    var uno = document.getElementById('apoUnico');
+    if (uno && uno.value) emails = [uno.value];
+  } else {
+    emails = _apoderados.filter(function(a){return a.email;}).map(function(a){return a.email;});
+  }
+  if (!emails.length) { alert('No hay apoderados con email para este curso.'); return; }
+  var asunto = document.getElementById('asunto').value.trim();
+  var msg = document.getElementById('mensaje').value.trim();
+  if (!asunto || !msg) { alert('Completá asunto y mensaje'); return; }
+  var url = 'mailto:?bcc=' + encodeURIComponent(emails.join(','))
+          + '&subject=' + encodeURIComponent(asunto)
+          + '&body=' + encodeURIComponent(msg);
+  window.location.href = url;
+  // Registrar el envío
+  var u = (window.ELAuth && ELAuth.user) || {};
+  EL_DB.collection('comunicados').add({
+    liceoSlug: u.liceoSlug || '', cursoId: _cursoSel.cursoId,
+    cursoNombre: _cursoSel.nombreCompleto || '',
+    profesorUid: u.uid || '', profesorNombre: u.nombre || u.email || '',
+    destinatarios: emails, asunto: asunto, mensaje: msg,
+    enviadoEn: new Date().toISOString()
+  }).catch(function(){});
+}
+
+function copiar(){
+  var t = document.getElementById('asunto').value + '\n\n' + document.getElementById('mensaje').value;
+  navigator.clipboard.writeText(t).then(function(){ alert('✓ Copiado al portapapeles'); });
+}
+
+function enviarGmail(){
+  var destino = document.getElementById('fDest').value;
+  var emails = [];
+  if (destino === 'uno') {
+    var uno = document.getElementById('apoUnico');
+    if (uno && uno.value) emails = [uno.value];
+  } else {
+    emails = _apoderados.filter(function(a){return a.email;}).map(function(a){return a.email;});
+  }
+  if (!emails.length) { alert('No hay apoderados con email para este curso.'); return; }
+  var asunto = document.getElementById('asunto').value.trim();
+  var msg = document.getElementById('mensaje').value.trim();
+  if (!asunto || !msg) { alert('Completá asunto y mensaje'); return; }
+  // Gmail compose URL — para envíos masivos, se usa 'bcc' (evita revelar la lista)
+  var url = 'https://mail.google.com/mail/?view=cm&fs=1' +
+    '&bcc=' + encodeURIComponent(emails.join(',')) +
+    '&su='  + encodeURIComponent(asunto) +
+    '&body=' + encodeURIComponent(msg);
+  window.open(url, '_blank');
+  // Registrar
+  var u = (window.ELAuth && ELAuth.user) || {};
+  EL_DB.collection('comunicados').add({
+    liceoSlug: u.liceoSlug || '', cursoId: _cursoSel.cursoId,
+    cursoNombre: _cursoSel.nombreCompleto || '',
+    profesorUid: u.uid || '', profesorNombre: u.nombre || u.email || '',
+    destinatarios: emails, asunto: asunto, mensaje: msg,
+    via: 'gmail', enviadoEn: new Date().toISOString()
+  }).catch(function(){});
+}
+
+if (window.ELAuth && ELAuth.onUserReady) ELAuth.onUserReady(function(u){ if(u) iniciar(); });
+</script>
+</body>
+</html>

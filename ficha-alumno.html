@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ficha del Alumno · Click&Clase</title>
+<link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg">
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="js/firebase-rest.js"></script>
+<script src="js/firebase-config.js"></script>
+<script src="js/firebase-auth.js"></script>
+<script src="js/firebase-db.js"></script>
+<script src="js/roles-permissions.js"></script>
+<script src="js/roles-router.js"></script>
+<script src="js/cursos.js"></script>
+<script src="js/anotaciones.js"></script>
+<script src="js/alertas-alumno.js"></script>
+<script src="js/derivaciones.js"></script>
+<style>
+:root {
+  --bg: #F0F7FF; --bg-2: #E0EDFF; --panel: #FFFFFF; --panel-2: #FAFCFF;
+  --border: rgba(148,163,184,.14); --border-strong: rgba(37,99,235,.22);
+  --text: #0C1E3B; --text-2: #334155; --muted: #475569;
+  --violet: #2563EB; --gold: #F59E0B; --green: #34d399;
+  --danger: #DC2626; --cyan: #38BDF8; --pink: #DC2626;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Inter','Segoe UI',Roboto,Arial,sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; font-size: 15px; line-height: 1.55; }
+.wrap { max-width: 1400px; margin: 0 auto; padding: 24px; }
+
+.back-link { color: var(--violet); text-decoration: none; font-size: .88rem; }
+.back-link:hover { text-decoration: underline; }
+
+/* Header alumno */
+.header-alumno {
+  background: linear-gradient(135deg, var(--panel), var(--panel-2));
+  border: 1px solid var(--border-strong);
+  border-radius: 20px;
+  padding: 28px 32px;
+  margin: 16px 0 24px;
+  display: flex; align-items: center; gap: 22px; flex-wrap: wrap;
+}
+.header-alumno .avatar {
+  width: 76px; height: 76px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--violet), var(--gold));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 2rem; font-weight: 800; color: #fff;
+  flex-shrink: 0;
+}
+.header-alumno .info { flex: 1; min-width: 240px; }
+.header-alumno .sub {
+  font-size: .72rem; color: #475569; letter-spacing: 1.2px;
+  text-transform: uppercase; font-weight: 600; margin-bottom: 3px;
+}
+.header-alumno h1 { font-size: 1.75rem; font-weight: 800; letter-spacing: -.4px; margin-bottom: 6px; }
+.header-alumno .meta { color: var(--text-2); font-size: .9rem; display: flex; gap: 16px; flex-wrap: wrap; }
+.header-alumno .meta span { display: inline-flex; align-items: center; gap: 4px; }
+.header-alumno .acciones { display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* Botones */
+.btn { padding: 10px 16px; border-radius: 10px; border: 1px solid var(--border-strong); background: var(--bg-2); color: var(--text); cursor: pointer; font-family: inherit; font-size: .88rem; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; text-decoration: none; }
+.btn:hover { background: var(--panel-2); }
+.btn.primary { background: linear-gradient(135deg, var(--violet), #1E40AF); border-color: transparent; color: white; }
+.btn.primary:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(37,99,235,.35); }
+.btn.warning { background: linear-gradient(135deg, var(--gold), #d97706); color: #F0F7FF; border-color: transparent; font-weight: 700; }
+.btn.warning:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(251,191,36,.35); }
+.btn.info { background: linear-gradient(135deg, var(--cyan), #0891b2); color: #F0F7FF; border-color: transparent; font-weight: 700; }
+.btn.info:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(34,211,238,.35); }
+.btn.danger { color: #DC2626; border-color: rgba(220,38,38,.3); }
+.btn.small { padding: 6px 12px; font-size: .78rem; }
+
+/* Tabs */
+.tabs { display: flex; gap: 4px; border-bottom: 2px solid var(--border); margin-bottom: 22px; overflow-x: auto; }
+.tab { padding: 12px 20px; background: none; border: none; color: #475569; cursor: pointer; font-family: inherit; font-size: .92rem; font-weight: 600; border-bottom: 3px solid transparent; margin-bottom: -2px; white-space: nowrap; }
+.tab:hover { color: var(--text-2); }
+.tab.active { color: var(--violet); border-bottom-color: var(--violet); }
+.tab .badge { background: var(--violet); color: #fff; font-size: .68rem; padding: 1px 7px; border-radius: 8px; margin-left: 6px; font-weight: 700; }
+
+.sec { display: none; }
+.sec.active { display: block; }
+
+.card { background: var(--panel); border: 1px solid var(--border); border-radius: 14px; padding: 22px 26px; margin-bottom: 16px; }
+.card h3 { font-size: .82rem; color: #475569; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 14px; }
+
+table { width: 100%; border-collapse: collapse; font-size: .88rem; }
+th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border); }
+th { font-size: .68rem; text-transform: uppercase; letter-spacing: 1px; color: #475569; font-weight: 700; }
+
+.empty { padding: 40px 20px; text-align: center; color: #475569; }
+.empty .icon { font-size: 3rem; margin-bottom: 10px; }
+
+/* Datos personales grid */
+.datos-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); gap: 16px; }
+.dato-item { background: var(--bg-2); padding: 12px 16px; border-radius: 10px; }
+.dato-item .l { font-size: .68rem; color: #475569; text-transform: uppercase; letter-spacing: .8px; font-weight: 700; }
+.dato-item .v { font-size: 1rem; font-weight: 600; margin-top: 4px; }
+
+/* Notas */
+.notas-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(280px,1fr)); gap: 12px; }
+.nota-asig { background: var(--panel-2); padding: 14px 18px; border-radius: 12px; border: 1px solid var(--border); }
+.nota-asig .titulo { font-weight: 700; margin-bottom: 8px; }
+.nota-asig .promedio { font-size: 1.8rem; font-weight: 800; }
+.nota-asig .promedio.rojo { color: var(--danger); }
+.nota-asig .promedio.ok { color: var(--green); }
+.nota-asig .promedio.warn { color: var(--gold); }
+
+/* Anotaciones timeline */
+.timeline-item {
+  border-left: 3px solid var(--border);
+  padding: 10px 16px 14px 16px;
+  margin-left: 10px;
+  position: relative;
+}
+.timeline-item::before {
+  content: '';
+  position: absolute;
+  left: -8px; top: 14px;
+  width: 13px; height: 13px;
+  background: var(--muted);
+  border-radius: 50%;
+  border: 3px solid var(--panel);
+}
+.timeline-item.positiva { border-left-color: var(--green); }
+.timeline-item.positiva::before { background: var(--green); }
+.timeline-item.negativa { border-left-color: var(--danger); }
+.timeline-item.negativa::before { background: var(--danger); }
+.timeline-item .fecha { font-size: .74rem; color: #475569; margin-bottom: 4px; }
+.timeline-item .titulo { font-weight: 700; margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
+.timeline-item .desc { color: var(--text-2); font-size: .88rem; }
+.timeline-item .meta { font-size: .74rem; color: #475569; margin-top: 6px; display: flex; gap: 10px; flex-wrap: wrap; }
+.chip-visible { background: rgba(34,211,238,.12); color: var(--cyan); padding: 1px 8px; border-radius: 6px; font-size: .68rem; font-weight: 700; }
+
+/* Modal */
+.modal-bg { position: fixed; inset: 0; background: rgba(12,30,59,.35); z-index: 100; display: none; align-items: flex-start; justify-content: center; padding: 40px 20px; overflow-y: auto; }
+.modal-bg.show { display: flex; }
+.modal { background: var(--panel); border: 1px solid var(--border-strong); border-radius: 18px; max-width: 640px; width: 100%; padding: 30px; box-shadow: 0 20px 60px rgba(37,99,235,.12); }
+.modal-title { font-size: 1.3rem; font-weight: 800; margin-bottom: 4px; }
+.modal-sub { color: #475569; font-size: .88rem; margin-bottom: 24px; }
+
+.fld { margin-bottom: 14px; }
+.fld label { display: block; font-size: .74rem; color: #475569; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 6px; }
+.fld input, .fld select, .fld textarea { width: 100%; padding: 10px 13px; border-radius: 9px; background: var(--bg-2); border: 1px solid var(--border-strong); color: var(--text); font-family: inherit; font-size: .92rem; }
+.fld textarea { resize: vertical; min-height: 80px; }
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+.chip-select { display: grid; grid-template-columns: repeat(auto-fit,minmax(120px,1fr)); gap: 6px; }
+.chip-option { padding: 10px 12px; background: var(--bg-2); border: 1px solid var(--border-strong); border-radius: 8px; cursor: pointer; text-align: center; font-size: .84rem; transition: all .15s; }
+.chip-option:hover { border-color: #475569; }
+.chip-option.selected { background: rgba(37,99,235,.15); border-color: var(--violet); color: var(--violet); font-weight: 600; }
+.chip-option.pos.selected { background: rgba(52,211,153,.15); border-color: var(--green); color: var(--green); }
+.chip-option.neg.selected { background: rgba(220,38,38,.15); border-color: var(--danger); color: var(--danger); }
+
+.modal-nav { display: flex; justify-content: flex-end; gap: 10px; margin-top: 22px; }
+.check-line { display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: var(--bg-2); border: 1px solid var(--border); border-radius: 8px; cursor: pointer; }
+.check-line input { width: auto; margin: 0; accent-color: var(--violet); }
+.err-box { background: rgba(220,38,38,.08); border: 1px solid rgba(220,38,38,.25); border-radius: 8px; padding: 10px 14px; color: var(--danger); font-size: .84rem; margin-bottom: 14px; display: none; }
+.err-box.show { display: block; }
+.exito-box { background: rgba(52,211,153,.08); border: 1px solid rgba(52,211,153,.3); border-radius: 10px; padding: 14px 16px; color: var(--green); font-size: .88rem; margin: 12px 0; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <a class="back-link" href="javascript:history.back()">← Volver</a>
+
+  <div class="header-alumno" id="headerAlumno">
+    <div class="avatar" id="avatarAlumno">?</div>
+    <div class="info">
+      <div class="sub">Ficha del alumno</div>
+      <h1 id="nombreAlumno">Cargando…</h1>
+      <div class="meta">
+        <span>🎓 <span id="cursoAlumno">—</span></span>
+        <span>🪪 <span id="rutAlumno">—</span></span>
+        <span>👤 <span id="sexoAlumno">—</span></span>
+      </div>
+    </div>
+    <div class="acciones" id="accionesAlumno"></div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="verSec('datos', this)">📋 Datos</button>
+    <button class="tab" onclick="verSec('academico', this)">🎯 Académico</button>
+    <button class="tab" onclick="verSec('asistencia', this)">📅 Asistencia</button>
+    <button class="tab" onclick="verSec('anotaciones', this)">📝 Anotaciones <span class="badge" id="badgeAnot">0</span></button>
+    <button class="tab" onclick="verSec('intervenciones', this)">💙 Intervenciones</button>
+    <button class="tab" onclick="verSec('alertas', this)">🚨 Alertas <span class="badge" id="badgeAle">0</span></button>
+  </div>
+
+  <!-- DATOS -->
+  <div class="sec active" id="sec-datos">
+    <div class="card">
+      <h3>Datos personales</h3>
+      <div class="datos-grid" id="datosGrid"></div>
+    </div>
+    <div class="card">
+      <h3>Apoderado</h3>
+      <div class="datos-grid" id="apoderadoGrid"></div>
+    </div>
+  </div>
+
+  <!-- ACADÉMICO -->
+  <div class="sec" id="sec-academico">
+    <div class="card">
+      <h3>Notas por asignatura</h3>
+      <div id="notasWrap"><div class="empty"><div class="icon">📊</div>Cargando notas…</div></div>
+    </div>
+  </div>
+
+  <!-- ASISTENCIA -->
+  <div class="sec" id="sec-asistencia">
+    <div class="card">
+      <h3>Asistencia general</h3>
+      <div id="asistenciaWrap"><div class="empty"><div class="icon">📅</div>Cargando asistencia…</div></div>
+    </div>
+  </div>
+
+  <!-- ANOTACIONES -->
+  <div class="sec" id="sec-anotaciones">
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:10px;flex-wrap:wrap">
+        <h3 style="margin:0">Anotaciones</h3>
+        <button class="btn primary small" onclick="abrirModalAnotacion()">➕ Nueva anotación</button>
+      </div>
+      <div id="anotacionesWrap"><div class="empty"><div class="icon">📝</div>Cargando…</div></div>
+    </div>
+  </div>
+
+  <!-- INTERVENCIONES -->
+  <div class="sec" id="sec-intervenciones">
+    <div class="card">
+      <h3>💙 Apoyo psicosocial</h3>
+      <div id="apoyoWrap"><div class="empty">Cargando…</div></div>
+    </div>
+    <div class="card">
+      <h3>🤝 Convivencia</h3>
+      <div id="convivWrap"><div class="empty">Cargando…</div></div>
+    </div>
+    <div class="card">
+      <h3>♿ PIE</h3>
+      <div id="pieWrap"><div class="empty">Cargando…</div></div>
+    </div>
+  </div>
+
+  <!-- ALERTAS -->
+  <div class="sec" id="sec-alertas">
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <h3 style="margin:0">Alertas enviadas</h3>
+        <button class="btn warning small" onclick="abrirModalAlerta()">🚨 Nueva alerta</button>
+      </div>
+      <div id="alertasWrap"><div class="empty"><div class="icon">🚨</div>Sin alertas registradas</div></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═════════════════ MODAL: NUEVA ANOTACIÓN ═════════════════ -->
+<div class="modal-bg" id="modalAnotacion">
+  <div class="modal">
+    <div class="modal-title">📝 Nueva anotación</div>
+    <div class="modal-sub">Registrá una observación sobre <b id="mAnoAlumno">—</b>.</div>
+    <div class="err-box" id="mAnoErr"></div>
+
+    <div class="fld">
+      <label>Tipo *</label>
+      <div class="chip-select" id="mAnoTipos"></div>
+    </div>
+    <div class="fld">
+      <label>Categoría *</label>
+      <div class="chip-select" id="mAnoCats"></div>
+    </div>
+    <div class="fld">
+      <label>Descripción *</label>
+      <textarea id="mAnoDesc" placeholder="Ej: Participó activamente en la clase de fotosíntesis y ayudó a compañeros"></textarea>
+    </div>
+    <div class="fld">
+      <label class="check-line">
+        <input type="checkbox" id="mAnoVisible">
+        <span>👀 Visible para el apoderado</span>
+      </label>
+    </div>
+
+    <div class="modal-nav">
+      <button class="btn" onclick="cerrarModal('modalAnotacion')">Cancelar</button>
+      <button class="btn primary" onclick="guardarAnotacion()">💾 Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═════════════════ MODAL: NUEVA ALERTA ═════════════════ -->
+<div class="modal-bg" id="modalAlerta">
+  <div class="modal">
+    <div class="modal-title">🚨 Enviar alerta</div>
+    <div class="modal-sub">Sobre <b id="mAleAlumno">—</b>. Se genera el mensaje y puedes enviarlo por WhatsApp o Mail.</div>
+    <div class="err-box" id="mAleErr"></div>
+
+    <div class="fld">
+      <label>Motivo *</label>
+      <div class="chip-select" id="mAleMotivos"></div>
+    </div>
+    <div class="fld">
+      <label>Descripción *</label>
+      <textarea id="mAleDesc" placeholder="Ej: Ha faltado a las últimas 3 clases sin justificar. Revisar situación."></textarea>
+    </div>
+    <div class="fld">
+      <label>Destinatarios *</label>
+      <div id="mAleDest" style="display:flex;flex-direction:column;gap:8px"></div>
+    </div>
+    <div class="fld" id="mAleTelWrap" style="display:none">
+      <label>Teléfono del apoderado (WhatsApp)</label>
+      <input type="text" id="mAleTel" placeholder="+56 9 1234 5678">
+    </div>
+
+    <div id="mAleResult" style="display:none">
+      <div class="exito-box">✅ Alerta registrada. Elegí cómo enviarla:</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
+        <a class="btn info" id="mAleWA" target="_blank">📱 WhatsApp</a>
+        <a class="btn" id="mAleMail" target="_blank">✉ Gmail / Mail</a>
+        <button class="btn" onclick="copiarMensajeAlerta()">📋 Copiar texto</button>
+      </div>
+    </div>
+
+    <div class="modal-nav">
+      <button class="btn" onclick="cerrarModal('modalAlerta')">Cerrar</button>
+      <button class="btn warning" id="mAleBtnGen" onclick="generarAlerta()">🚨 Generar alerta</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═════════════════ MODAL: DERIVAR (solo jefes) ═════════════════ -->
+<div class="modal-bg" id="modalDerivar">
+  <div class="modal">
+    <div class="modal-title">🔀 Derivar alumno a equipo especializado</div>
+    <div class="modal-sub">Sobre <b id="mDerAlumno">—</b>. Solo profesores jefes.</div>
+    <div class="err-box" id="mDerErr"></div>
+
+    <div class="fld">
+      <label>Derivar a *</label>
+      <div class="chip-select" id="mDerDestinos"></div>
+    </div>
+    <div class="fld">
+      <label>Motivo *</label>
+      <select id="mDerMotivo" disabled>
+        <option value="">— Primero elige destino —</option>
+      </select>
+    </div>
+    <div class="fld">
+      <label>Urgencia *</label>
+      <div class="chip-select" id="mDerUrgencia"></div>
+    </div>
+    <div class="fld">
+      <label>Descripción *</label>
+      <textarea id="mDerDesc" placeholder="Situación observada, evidencia, contexto…"></textarea>
+    </div>
+
+    <div class="modal-nav">
+      <button class="btn" onclick="cerrarModal('modalDerivar')">Cancelar</button>
+      <button class="btn warning" onclick="guardarDerivacion()">🔀 Derivar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+if (window.CCRouter && CCRouter.guardPanel) {
+  CCRouter.guardPanel(['admin','director','rector','admin_colegio','utp','encargado_area','profesor','jefe_curso','pie_enc','pie_edu','aps_enc','aps_prof','amb_enc','amb_prof']);
+}
+
+// ── Parámetros ──
+var params = new URLSearchParams(window.location.search);
+var _alumnoRut  = params.get('rut') || '';
+var _cursoId    = params.get('curso') || '';
+var _alumno     = null;
+var _curso      = null;
+var _mensajeAlerta = '';
+
+function esc(s) { return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function verSec(id, btn) {
+  document.querySelectorAll('.tab').forEach(function (t) { t.classList.remove('active'); });
+  document.querySelectorAll('.sec').forEach(function (s) { s.classList.remove('active'); });
+  btn.classList.add('active');
+  document.getElementById('sec-' + id).classList.add('active');
+
+  if (id === 'anotaciones') cargarAnotaciones();
+  if (id === 'alertas') cargarAlertas();
+  if (id === 'academico') cargarNotas();
+  if (id === 'asistencia') cargarAsistencia();
+  if (id === 'intervenciones') cargarIntervenciones();
+}
+
+function iniciar() {
+  if (!_alumnoRut || !_cursoId) {
+    document.getElementById('nombreAlumno').textContent = 'Faltan parámetros ?rut= y ?curso=';
+    return;
+  }
+  cargarCurso();
+}
+
+function cargarCurso() {
+  EL_DB.collection('cursos').doc(_cursoId).get().then(function (doc) {
+    if (!doc.exists) { document.getElementById('nombreAlumno').textContent = 'Curso no encontrado'; return; }
+    _curso = doc.data();
+    _alumno = (_curso.estudiantes || []).find(function (e) { return e.rut === _alumnoRut; });
+    if (!_alumno) { document.getElementById('nombreAlumno').textContent = 'Alumno no está en este curso'; return; }
+    _normalizarAlumno(); // Parseo del shape del seed → shape esperado por la UI
+    renderHeader();
+    renderDatos();
+    renderAcciones();
+    cargarAnotaciones();  // por defecto activo
+  });
+}
+
+// Normaliza el alumno para que tanto shape legacy (nombres/apellidos separados)
+// como shape nuevo del seed (nombre completo en un solo campo) rendericen bien.
+function _normalizarAlumno() {
+  if (!_alumno) return;
+  // Si el alumno viene del seed con "nombre" completo tipo "Camila Reyes González"
+  // → parsear en primer nombre + apellidos
+  if (_alumno.nombre && !_alumno.nombres) {
+    var partes = String(_alumno.nombre).trim().split(/\s+/);
+    if (partes.length >= 3) {
+      // "Camila Reyes González" → nombres="Camila", apellidos="Reyes González"
+      _alumno.nombres = partes[0];
+      _alumno.apellidos = partes.slice(1).join(' ');
+      _alumno.apellidoP = partes[1] || '';
+      _alumno.apellidoM = partes[2] || '';
+    } else if (partes.length === 2) {
+      _alumno.nombres = partes[0];
+      _alumno.apellidos = partes[1];
+      _alumno.apellidoP = partes[1];
+    } else {
+      _alumno.nombres = _alumno.nombre;
+      _alumno.apellidos = '';
+    }
+  }
+  // fechaNac (seed) vs fechaNacimiento (legacy)
+  if (_alumno.fechaNac && !_alumno.fechaNacimiento) {
+    _alumno.fechaNacimiento = _alumno.fechaNac;
+  }
+  // Email del apoderado en el shape del seed viene bajo apoderado.email
+  if (_alumno.apoderado && !_alumno.apoderadoNombre) {
+    _alumno.apoderadoNombre    = _alumno.apoderado.nombre;
+    _alumno.apoderadoTelefono  = _alumno.apoderado.telefono;
+    _alumno.apoderadoEmail     = _alumno.apoderado.email;
+  }
+}
+
+function renderHeader() {
+  var nom = ((_alumno.nombres || '') + ' ' + (_alumno.apellidos || '')).trim() || _alumno.nombre || 'Alumno';
+  var inicial = nom.charAt(0).toUpperCase();
+  document.getElementById('avatarAlumno').textContent = inicial;
+  document.getElementById('nombreAlumno').textContent = nom;
+  document.getElementById('cursoAlumno').textContent = _curso.nombreCompleto || (_curso.nivel + ' ' + _curso.letra);
+  document.getElementById('rutAlumno').textContent = _alumno.rut || '—';
+  document.getElementById('sexoAlumno').textContent = _alumno.sexo || '—';
+  document.title = nom + ' · Ficha · Click&Clase';
+}
+
+function renderDatos() {
+  var d = document.getElementById('datosGrid');
+  var fields = [
+    ['RUT',            _alumno.rut || '—'],
+    ['Nombres',        _alumno.nombres || '—'],
+    ['Apellidos',      _alumno.apellidos || '—'],
+    ['Sexo',           _alumno.sexo || '—'],
+    ['Email',          _alumno.email || '—'],
+    ['Fecha nac.',     _alumno.fechaNacimiento || '—']
+  ];
+  d.innerHTML = fields.map(function (f) {
+    return '<div class="dato-item"><div class="l">' + esc(f[0]) + '</div><div class="v">' + esc(f[1]) + '</div></div>';
+  }).join('');
+
+  var a = document.getElementById('apoderadoGrid');
+  var apo = _alumno.apoderado || {};
+  var apoFields = [
+    ['Nombre',   apo.nombre   || _alumno.apoderadoNombre   || '—'],
+    ['RUT',      apo.rut      || _alumno.apoderadoRut      || '—'],
+    ['Teléfono', apo.telefono || _alumno.apoderadoTelefono || '—'],
+    ['Email',    apo.email    || _alumno.apoderadoEmail    || '—'],
+    ['Parentesco', apo.parentesco || '—']
+  ];
+  a.innerHTML = apoFields.map(function (f) {
+    return '<div class="dato-item"><div class="l">' + esc(f[0]) + '</div><div class="v">' + esc(f[1]) + '</div></div>';
+  }).join('');
+}
+
+function renderAcciones() {
+  var u = ELAuth.user || {};
+  var roles = u.roles || {};
+  // Cualquier docente/directivo/equipo puede derivar. Solo estudiantes/apoderados no.
+  var puedeDerivar = u.role !== 'estudiante' && u.role !== 'apoderado' &&
+                     !roles.estudiante && !roles.apoderado;
+  var html = '<button class="btn primary" onclick="abrirModalAnotacion()">📝 Nueva anotación</button>'
+           + '<button class="btn warning" onclick="abrirModalAlerta()">🚨 Alertar</button>';
+  if (puedeDerivar) {
+    html += '<button class="btn info" onclick="abrirModalDerivar()">🔀 Derivar</button>';
+  }
+  document.getElementById('accionesAlumno').innerHTML = html;
+}
+
+// ── Cargar notas ──
+// Tolera 2 shapes:
+//   Legacy: doc por (alumno × evaluación) con {alumnoRut, asignatura, nota, ponderacion}
+//   Nuevo:  doc por evaluación con {cursoId, asignatura, ponderacion, notas: [{uid, ordinal, nombre, nota}]}
+function cargarNotas() {
+  if (typeof EL_DB === 'undefined') return;
+  var alumnoUid = _alumno && _alumno.uid;
+  var alumnoOrd = _alumno && _alumno.ordinal;
+  var alumnoNom = _alumno && _alumno.nombre;
+
+  EL_DB.collection('notas').get().then(function (snap) {
+    var byAsig = {};
+    snap.forEach(function (d) {
+      var n = d.data();
+      if (_curso.liceoSlug && n.liceoSlug && n.liceoSlug !== _curso.liceoSlug) return;
+
+      // Shape LEGACY: nota directa con alumnoRut
+      if (n.alumnoRut === _alumnoRut && typeof n.nota === 'number') {
+        if (!byAsig[n.asignatura]) byAsig[n.asignatura] = [];
+        byAsig[n.asignatura].push({ nota: n.nota, ponderacion: n.ponderacion || 1, nombre: n.nombre || n.concepto });
+        return;
+      }
+      // Shape NUEVO: doc por evaluación con notas: []
+      if (n.cursoId === _cursoId && Array.isArray(n.notas)) {
+        n.notas.forEach(function(nn) {
+          if (typeof nn.nota !== 'number') return;
+          // Match por uid, ordinal o nombre (fallback)
+          var match = (alumnoUid && nn.uid === alumnoUid) ||
+                      (alumnoOrd && nn.ordinal === alumnoOrd) ||
+                      (alumnoNom && nn.nombre === alumnoNom);
+          if (!match) return;
+          if (!byAsig[n.asignatura]) byAsig[n.asignatura] = [];
+          byAsig[n.asignatura].push({
+            nota: nn.nota,
+            ponderacion: n.ponderacion || 1,
+            nombre: n.nombre || 'Evaluación',
+            fecha: n.fecha
+          });
+        });
+      }
+    });
+
+    var asigs = Object.keys(byAsig).sort();
+    if (!asigs.length) {
+      document.getElementById('notasWrap').innerHTML = '<div class="empty"><div class="icon">📊</div>Sin notas cargadas todavía.</div>';
+      return;
+    }
+    var html = '<div class="notas-grid">';
+    asigs.forEach(function (a) {
+      var notas = byAsig[a];
+      var suma = 0, count = 0;
+      notas.forEach(function (n) {
+        var v = parseFloat(n.nota); var p = parseFloat(n.ponderacion) || 1;
+        if (!isNaN(v)) { suma += v * p; count += p; }
+      });
+      var prom = count > 0 ? (suma / count) : null;
+      var claseClr = 'ok';
+      if (prom === null) claseClr = '';
+      else if (prom < 4.0) claseClr = 'rojo';
+      else if (prom < 5.0) claseClr = 'warn';
+      // Mini lista de las últimas 5 notas
+      var ultimas = notas.slice(-5).map(function(n){
+        var v = n.nota.toFixed(1);
+        var col = n.nota < 4.0 ? '#DC2626' : n.nota < 5.0 ? '#F59E0B' : '#059669';
+        return '<span style="display:inline-block;padding:2px 6px;background:' + col + '20;color:' + col + ';border-radius:4px;font-size:.7rem;font-weight:700;margin:1px" title="' + esc(n.nombre || '') + '">' + v + '</span>';
+      }).join('');
+      html += '<div class="nota-asig"><div class="titulo">' + esc(_asigLabel(a)) + '</div>'
+        + '<div class="promedio ' + claseClr + '">' + (prom !== null ? prom.toFixed(1) : '—') + '</div>'
+        + '<div style="font-size:.72rem;color:var(--muted);margin-top:4px">' + notas.length + ' evaluación' + (notas.length !== 1 ? 'es' : '') + '</div>'
+        + '<div style="margin-top:6px">' + ultimas + '</div></div>';
+    });
+    html += '</div>';
+    document.getElementById('notasWrap').innerHTML = html;
+  }).catch(function (err) {
+    console.error('[ficha] notas', err);
+    document.getElementById('notasWrap').innerHTML = '<div class="empty">Sin notas disponibles.</div>';
+  });
+}
+
+// Labels amigables de asignaturas
+var _ASIG_MAP = {
+  'lenguaje':'Lenguaje','ling_liter':'Lengua y Literatura','matematica':'Matemática',
+  'historia':'Historia','ingles':'Inglés','biologia':'Biología','fisica':'Física',
+  'quimica':'Química','ciencias_nat':'Ciencias Naturales','ed_fisica':'Ed. Física',
+  'artes_vis':'Artes Visuales','musica':'Música','tecnologia':'Tecnología',
+  'religion':'Religión','orientacion':'Orientación','filosofia':'Filosofía'
+};
+function _asigLabel(k) { return _ASIG_MAP[k] || k; }
+
+// ── Cargar asistencia ──
+// Tolera 2 shapes:
+//   Legacy: libro_clases con asistencia:[{rut, estado:'P/A/T'}]
+//   Nuevo:  asistencia (raíz) con registros:[{uid, ordinal, nombre, estado:'presente/ausente/atrasado/justificado'}]
+function cargarAsistencia() {
+  var alumnoUid = _alumno && _alumno.uid;
+  var alumnoOrd = _alumno && _alumno.ordinal;
+  var alumnoNom = _alumno && _alumno.nombre;
+
+  var total = 0, presentes = 0, atrasos = 0, ausentes = 0, justificados = 0;
+  var porMes = {};
+
+  function _matchAlumno(reg) {
+    if (reg.rut && reg.rut === _alumnoRut) return true;
+    if (alumnoUid && reg.uid === alumnoUid) return true;
+    if (alumnoOrd && reg.ordinal === alumnoOrd) return true;
+    if (alumnoNom && reg.nombre === alumnoNom) return true;
+    return false;
+  }
+  function _addEstado(estado, mes) {
+    if (!porMes[mes]) porMes[mes] = { p: 0, a: 0, at: 0, j: 0 };
+    total++;
+    var e = String(estado || '').toLowerCase();
+    if (e === 'p' || e === 'presente') { presentes++; porMes[mes].p++; }
+    else if (e === 'a' || e === 'ausente') { ausentes++; porMes[mes].a++; }
+    else if (e === 't' || e === 'atraso' || e === 'atrasado') { atrasos++; porMes[mes].at++; }
+    else if (e === 'j' || e === 'justificado') { justificados++; porMes[mes].j++; total--; ausentes--; /* no cuenta */ presentes++; porMes[mes].p++; } // justificado se cuenta como presente en el %
+  }
+
+  // Fuente 1: libro_clases legacy
+  var p1 = EL_DB.collection('libro_clases').get().then(function(snap){
+    snap.forEach(function(d){
+      var r = d.data();
+      if (_curso.liceoSlug && r.liceoSlug && r.liceoSlug !== _curso.liceoSlug) return;
+      if (r.cursoId !== _cursoId) return;
+      var reg = (r.asistencia || []).find(_matchAlumno);
+      if (!reg) return;
+      var mes = (r.fecha || '').substring(0, 7);
+      _addEstado(reg.estado, mes);
+    });
+  }).catch(function(){});
+
+  // Fuente 2: asistencia (raíz, shape del seed)
+  var p2 = EL_DB.collection('asistencia').where('cursoId', '==', _cursoId).get().then(function(snap){
+    snap.forEach(function(d){
+      var r = d.data();
+      if (_curso.liceoSlug && r.liceoSlug && r.liceoSlug !== _curso.liceoSlug) return;
+      var reg = (r.registros || []).find(_matchAlumno);
+      if (!reg) return;
+      var mes = (r.fecha || '').substring(0, 7);
+      _addEstado(reg.estado, mes);
+    });
+  }).catch(function(){});
+
+  Promise.all([p1, p2]).then(function(){
+    var pct = total > 0 ? Math.round(presentes / total * 100) : 0;
+    var colorPct = pct >= 85 ? 'var(--green, #059669)' : pct >= 70 ? 'var(--gold, #F59E0B)' : 'var(--danger, #DC2626)';
+    if (total === 0) {
+      document.getElementById('asistenciaWrap').innerHTML = '<div class="empty"><div class="icon">📅</div>Sin registros de asistencia todavía.</div>';
+      return;
+    }
+    var html = '<div class="datos-grid">'
+      + '<div class="dato-item"><div class="l">% Asistencia</div><div class="v" style="color:' + colorPct + '">' + pct + '%</div></div>'
+      + '<div class="dato-item"><div class="l">Presentes</div><div class="v">' + presentes + '</div></div>'
+      + '<div class="dato-item"><div class="l">Atrasos</div><div class="v">' + atrasos + '</div></div>'
+      + '<div class="dato-item"><div class="l">Ausentes</div><div class="v">' + ausentes + '</div></div>'
+      + '<div class="dato-item"><div class="l">Justificados</div><div class="v">' + justificados + '</div></div>'
+      + '<div class="dato-item"><div class="l">Total clases</div><div class="v">' + total + '</div></div>'
+      + '</div>';
+    // Mini tabla por mes
+    var meses = Object.keys(porMes).sort();
+    if (meses.length > 1) {
+      html += '<div style="margin-top:16px;font-size:.85rem"><b>Detalle por mes:</b><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;margin-top:8px">';
+      meses.forEach(function(m){
+        var pm = porMes[m];
+        var tot = pm.p + pm.a + pm.at;
+        var pctM = tot > 0 ? Math.round(pm.p / tot * 100) : 0;
+        html += '<div style="padding:8px 10px;background:rgba(37,99,235,.05);border:1px solid rgba(37,99,235,.14);border-radius:8px"><div style="font-weight:700;font-size:.85rem">' + m + '</div><div style="font-size:.75rem;color:#64748B">' + pctM + '% · P:' + pm.p + ' A:' + pm.a + ' T:' + pm.at + '</div></div>';
+      });
+      html += '</div></div>';
+    }
+    document.getElementById('asistenciaWrap').innerHTML = html;
+  });
+}
+
+// ── Anotaciones ──
+function cargarAnotaciones() {
+  var alumnoUid = _alumno && _alumno.uid;
+  // Mapeo de tipos del seed (categorías pedagógicas) a tipo emocional (positiva/neutra/negativa)
+  var TIPO_MAP_EMOC = {
+    'positiva':      'positiva',
+    'academica':     'neutra',
+    'comportamiento':'negativa',
+    'apoyo':         'neutra',
+    'neutra':        'neutra',
+    'negativa':      'negativa'
+  };
+  var TIPO_MAP_ICO = {
+    'positiva':      { ico:'👍', color:'#22c55e', lbl:'Positiva' },
+    'neutra':        { ico:'📝', color:'#94a3b8', lbl:'Neutra' },
+    'negativa':      { ico:'⚠', color:'#ef4444', lbl:'Atención' },
+    'academica':     { ico:'📚', color:'#3B82F6', lbl:'Académica' },
+    'comportamiento':{ ico:'🎭', color:'#F59E0B', lbl:'Comportamiento' },
+    'apoyo':         { ico:'💙', color:'#7C3AED', lbl:'Apoyo' }
+  };
+
+  CCAnotaciones.listarPorAlumno(_alumnoRut, { alumnoUid: alumnoUid }).then(function (arr) {
+    document.getElementById('badgeAnot').textContent = arr.length;
+    if (!arr.length) {
+      document.getElementById('anotacionesWrap').innerHTML = '<div class="empty"><div class="icon">📝</div>Sin anotaciones. Agregá la primera con el botón "+ Nueva anotación".</div>';
+      return;
+    }
+    var html = '<div>';
+    arr.forEach(function (a) {
+      var tipoRaw = String(a.tipo || '').toLowerCase();
+      var tipoEmoc = TIPO_MAP_EMOC[tipoRaw] || 'neutra';
+      var tipoInfo = TIPO_MAP_ICO[tipoRaw] || TIPO_MAP_ICO[tipoEmoc];
+      var desc = a.descripcion || a.texto || '(sin descripción)';
+      var fecha = new Date(a.fecha || a.creadoEn || Date.now()).toLocaleDateString('es-CL', { day: '2-digit', month: 'short', year: 'numeric' });
+      var lblCat = a.categoria
+        ? (CCAnotaciones.categoriaInfo && CCAnotaciones.categoriaInfo(a.categoria) || {}).label || a.categoria
+        : tipoInfo.lbl;
+      html += '<div class="timeline-item ' + esc(tipoEmoc) + '" style="border-left:3px solid ' + tipoInfo.color + '">'
+        + '<div class="fecha">' + fecha + '</div>'
+        + '<div class="titulo">' + tipoInfo.ico + ' ' + esc(lblCat) + '</div>'
+        + '<div class="desc">' + esc(desc) + '</div>'
+        + '<div class="meta"><span>por ' + esc(a.profesorNombre || '—') + '</span>'
+        + (a.visibleApoderado ? '<span class="chip-visible">👀 Visible apoderado</span>' : '')
+        + '</div></div>';
+    });
+    html += '</div>';
+    document.getElementById('anotacionesWrap').innerHTML = html;
+  }).catch(function (err) {
+    console.error('[ficha] anotaciones', err);
+    document.getElementById('anotacionesWrap').innerHTML = '<div class="empty">Error: ' + esc(err.message) + '</div>';
+  });
+}
+
+// ── Alertas ──
+function cargarAlertas() {
+  CCAlertasAlumno.listarPorAlumno(_alumnoRut).then(function (arr) {
+    document.getElementById('badgeAle').textContent = arr.length;
+    if (!arr.length) {
+      document.getElementById('alertasWrap').innerHTML = '<div class="empty"><div class="icon">🚨</div>Sin alertas registradas.</div>';
+      return;
+    }
+    var html = '<table><thead><tr><th>Fecha</th><th>Motivo</th><th>Descripción</th><th>Enviada por</th><th>Destinatarios</th></tr></thead><tbody>';
+    arr.forEach(function (a) {
+      var mi = CCAlertasAlumno.motivoInfo(a.motivo) || {};
+      html += '<tr><td>' + new Date(a.fecha).toLocaleDateString('es-CL') + '</td>'
+        + '<td>' + (mi.ico || '') + ' ' + esc(mi.label || a.motivo) + '</td>'
+        + '<td style="max-width:280px">' + esc(a.descripcion) + '</td>'
+        + '<td>' + esc(a.profesorNombre) + '</td>'
+        + '<td>' + (a.destinatarios || []).join(', ') + '</td></tr>';
+    });
+    html += '</tbody></table>';
+    document.getElementById('alertasWrap').innerHTML = html;
+  }).catch(function (err) {
+    document.getElementById('alertasWrap').innerHTML = '<div class="empty">Error: ' + esc(err.message) + '</div>';
+  });
+}
+
+// ── Intervenciones ──
+function cargarIntervenciones() {
+  ['intervenciones_apoyo','entrevistas_convivencia'].forEach(function (col) {
+    var wrapId = col === 'intervenciones_apoyo' ? 'apoyoWrap' : 'convivWrap';
+    EL_DB.collection(col).where('alumnoRut', '==', _alumnoRut).get().then(function (snap) {
+      var arr = [];
+      snap.forEach(function (d) { arr.push(d.data()); });
+      if (!arr.length) {
+        document.getElementById(wrapId).innerHTML = '<div class="empty">Sin registros.</div>';
+        return;
+      }
+      var html = '<table><thead><tr><th>Fecha</th><th>Motivo</th><th>Resumen</th><th>Estado</th></tr></thead><tbody>';
+      arr.forEach(function (x) {
+        html += '<tr><td>' + esc((x.fecha || '').substring(0, 10)) + '</td>'
+          + '<td>' + esc(x.motivo || '—') + '</td>'
+          + '<td style="max-width:280px">' + esc(x.resumen || '—') + '</td>'
+          + '<td>' + esc(x.estado || '—') + '</td></tr>';
+      });
+      document.getElementById(wrapId).innerHTML = html + '</tbody></table>';
+    }).catch(function () {
+      document.getElementById(wrapId).innerHTML = '<div class="empty">Sin datos.</div>';
+    });
+  });
+  EL_DB.collection('pie_estudiantes').doc(_alumnoRut).get().then(function (doc) {
+    if (!doc.exists) { document.getElementById('pieWrap').innerHTML = '<div class="empty">Sin ficha PIE.</div>'; return; }
+    var p = doc.data();
+    document.getElementById('pieWrap').innerHTML = '<div class="datos-grid">'
+      + '<div class="dato-item"><div class="l">Diagnóstico</div><div class="v">' + esc(p.diagnostico || '—') + '</div></div>'
+      + '<div class="dato-item"><div class="l">Decreto</div><div class="v">' + esc(p.decreto || '—') + '</div></div>'
+      + '<div class="dato-item"><div class="l">Estado</div><div class="v">' + esc(p.estadoDerivacion || p.estado || '—') + '</div></div>'
+      + '</div>';
+  }).catch(function () {
+    document.getElementById('pieWrap').innerHTML = '<div class="empty">Sin ficha PIE.</div>';
+  });
+}
+
+// ═══════════════════ MODAL: ANOTACIÓN ═══════════════════
+var _anoTipo = 'neutra';
+var _anoCat  = 'academica';
+
+function abrirModalAnotacion() {
+  document.getElementById('mAnoAlumno').textContent = _alumno.nombres + ' ' + _alumno.apellidos;
+  document.getElementById('mAnoDesc').value = '';
+  document.getElementById('mAnoVisible').checked = false;
+  document.getElementById('mAnoErr').classList.remove('show');
+  // Render tipos
+  document.getElementById('mAnoTipos').innerHTML = CCAnotaciones.TIPOS.map(function (t) {
+    return '<div class="chip-option ' + (t.id === 'positiva' ? 'pos' : t.id === 'negativa' ? 'neg' : '') + '" data-tipo="' + t.id + '" onclick="setAnoTipo(\'' + t.id + '\')">' + t.ico + ' ' + t.label + '</div>';
+  }).join('');
+  document.getElementById('mAnoCats').innerHTML = CCAnotaciones.CATEGORIAS.map(function (c) {
+    return '<div class="chip-option" data-cat="' + c.id + '" onclick="setAnoCat(\'' + c.id + '\')">' + c.ico + ' ' + c.label + '</div>';
+  }).join('');
+  setAnoTipo('neutra'); setAnoCat('academica');
+  document.getElementById('modalAnotacion').classList.add('show');
+}
+
+function setAnoTipo(t) {
+  _anoTipo = t;
+  document.querySelectorAll('#mAnoTipos .chip-option').forEach(function (el) {
+    el.classList.toggle('selected', el.getAttribute('data-tipo') === t);
+  });
+}
+function setAnoCat(c) {
+  _anoCat = c;
+  document.querySelectorAll('#mAnoCats .chip-option').forEach(function (el) {
+    el.classList.toggle('selected', el.getAttribute('data-cat') === c);
+  });
+}
+
+function guardarAnotacion() {
+  var desc = document.getElementById('mAnoDesc').value.trim();
+  if (!desc) { mostrarErr('mAnoErr', 'Descripción requerida'); return; }
+  CCAnotaciones.crear({
+    alumnoRut:        _alumnoRut,
+    alumnoNombre:     _alumno.nombres + ' ' + _alumno.apellidos,
+    cursoId:          _cursoId,
+    tipo:             _anoTipo,
+    categoria:        _anoCat,
+    descripcion:      desc,
+    visibleApoderado: document.getElementById('mAnoVisible').checked
+  }).then(function () {
+    cerrarModal('modalAnotacion');
+    cargarAnotaciones();
+  }).catch(function (err) { mostrarErr('mAnoErr', err.message); });
+}
+
+// ═══════════════════ MODAL: ALERTA ═══════════════════
+var _aleMotivo = '';
+var _aleDest = [];
+
+function abrirModalAlerta() {
+  document.getElementById('mAleAlumno').textContent = _alumno.nombres + ' ' + _alumno.apellidos;
+  document.getElementById('mAleDesc').value = '';
+  document.getElementById('mAleErr').classList.remove('show');
+  document.getElementById('mAleResult').style.display = 'none';
+  document.getElementById('mAleBtnGen').style.display = '';
+  // Motivos
+  document.getElementById('mAleMotivos').innerHTML = CCAlertasAlumno.MOTIVOS.map(function (m) {
+    return '<div class="chip-option" data-motivo="' + m.id + '" onclick="setAleMotivo(\'' + m.id + '\')">' + m.ico + ' ' + m.label + '</div>';
+  }).join('');
+  // Destinatarios
+  document.getElementById('mAleDest').innerHTML = CCAlertasAlumno.DESTINATARIOS.map(function (d) {
+    return '<label class="check-line"><input type="checkbox" value="' + d.id + '" onchange="toggleAleDest(\'' + d.id + '\',this.checked)"><span>' + d.label + '</span></label>';
+  }).join('');
+  _aleMotivo = ''; _aleDest = [];
+  // Tel apoderado precargado si existe
+  var tel = (_alumno.apoderado && _alumno.apoderado.telefono) || _alumno.apoderadoTelefono || '';
+  document.getElementById('mAleTel').value = tel;
+  document.getElementById('mAleTelWrap').style.display = 'none';
+  document.getElementById('modalAlerta').classList.add('show');
+}
+
+function setAleMotivo(m) {
+  _aleMotivo = m;
+  document.querySelectorAll('#mAleMotivos .chip-option').forEach(function (el) {
+    el.classList.toggle('selected', el.getAttribute('data-motivo') === m);
+  });
+}
+function toggleAleDest(id, checked) {
+  if (checked) _aleDest.push(id);
+  else _aleDest = _aleDest.filter(function (x) { return x !== id; });
+  document.getElementById('mAleTelWrap').style.display = _aleDest.indexOf('apoderado') !== -1 ? '' : 'none';
+}
+
+function generarAlerta() {
+  var desc = document.getElementById('mAleDesc').value.trim();
+  if (!_aleMotivo) { mostrarErr('mAleErr', 'Elegí un motivo'); return; }
+  if (!desc) { mostrarErr('mAleErr', 'Descripción requerida'); return; }
+  if (!_aleDest.length) { mostrarErr('mAleErr', 'Elegí al menos un destinatario'); return; }
+
+  var tel = document.getElementById('mAleTel').value.trim();
+  var datos = {
+    alumnoRut:         _alumnoRut,
+    alumnoNombre:      _alumno.nombres + ' ' + _alumno.apellidos,
+    cursoId:           _cursoId,
+    cursoNombre:       _curso.nombreCompleto || (_curso.nivel + ' ' + _curso.letra),
+    liceoNombre:       '',   // TODO: cargar del liceo
+    motivo:            _aleMotivo,
+    descripcion:       desc,
+    destinatarios:     _aleDest,
+    telefonoApoderado: tel,
+    metodo:            'whatsapp'
+  };
+  _mensajeAlerta = CCAlertasAlumno.generarMensaje(datos);
+
+  CCAlertasAlumno.registrar(datos).then(function () {
+    // Links generados
+    var asunto = 'Alerta escolar — ' + datos.alumnoNombre;
+    if (tel) document.getElementById('mAleWA').href = CCAlertasAlumno.linkWhatsApp(tel, _mensajeAlerta);
+    else document.getElementById('mAleWA').style.display = 'none';
+    var emailApo = (_alumno.apoderado && _alumno.apoderado.email) || _alumno.apoderadoEmail || '';
+    document.getElementById('mAleMail').href = CCAlertasAlumno.linkGmail(emailApo, asunto, _mensajeAlerta);
+    document.getElementById('mAleResult').style.display = 'block';
+    document.getElementById('mAleBtnGen').style.display = 'none';
+    cargarAlertas();
+  }).catch(function (err) { mostrarErr('mAleErr', err.message); });
+}
+
+function copiarMensajeAlerta() {
+  CCAlertasAlumno.copiarAlPortapapeles(_mensajeAlerta).then(function () {
+    alert('✓ Mensaje copiado al portapapeles');
+  });
+}
+
+// ═══════════════════ MODAL: DERIVACIÓN ═══════════════════
+var _derDestino = '';
+var _derUrgencia = 'media';
+
+function abrirModalDerivar() {
+  document.getElementById('mDerAlumno').textContent = _alumno.nombres + ' ' + _alumno.apellidos;
+  document.getElementById('mDerDesc').value = '';
+  document.getElementById('mDerErr').classList.remove('show');
+  document.getElementById('mDerDestinos').innerHTML = CCDerivaciones.DESTINOS.map(function (d) {
+    return '<div class="chip-option" data-destino="' + d.id + '" onclick="setDerDestino(\'' + d.id + '\')">' + d.ico + ' ' + d.label + '</div>';
+  }).join('');
+  document.getElementById('mDerUrgencia').innerHTML = CCDerivaciones.URGENCIAS.map(function (u) {
+    return '<div class="chip-option" data-urg="' + u.id + '" onclick="setDerUrgencia(\'' + u.id + '\')">' + u.label + '</div>';
+  }).join('');
+  _derDestino = ''; _derUrgencia = 'media';
+  setDerUrgencia('media');
+  document.getElementById('modalDerivar').classList.add('show');
+}
+
+function setDerDestino(d) {
+  _derDestino = d;
+  document.querySelectorAll('#mDerDestinos .chip-option').forEach(function (el) {
+    el.classList.toggle('selected', el.getAttribute('data-destino') === d);
+  });
+  // Cargar motivos del destino
+  var sel = document.getElementById('mDerMotivo');
+  sel.disabled = false;
+  sel.innerHTML = '<option value="">— Seleccionar motivo —</option>'
+    + CCDerivaciones.motivosPara(d).map(function (m) {
+      return '<option value="' + m.id + '">' + m.label + '</option>';
+    }).join('');
+}
+function setDerUrgencia(u) {
+  _derUrgencia = u;
+  document.querySelectorAll('#mDerUrgencia .chip-option').forEach(function (el) {
+    el.classList.toggle('selected', el.getAttribute('data-urg') === u);
+  });
+}
+
+function guardarDerivacion() {
+  var motivo = document.getElementById('mDerMotivo').value;
+  var desc = document.getElementById('mDerDesc').value.trim();
+  if (!_derDestino) { mostrarErr('mDerErr', 'Elegí destino'); return; }
+  if (!motivo) { mostrarErr('mDerErr', 'Elegí motivo'); return; }
+  if (!desc) { mostrarErr('mDerErr', 'Descripción requerida'); return; }
+  CCDerivaciones.crear({
+    alumnoRut:    _alumnoRut,
+    alumnoNombre: _alumno.nombres + ' ' + _alumno.apellidos,
+    cursoId:      _cursoId,
+    destino:      _derDestino,
+    motivo:       motivo,
+    descripcion:  desc,
+    urgencia:     _derUrgencia
+  }).then(function () {
+    cerrarModal('modalDerivar');
+    alert('✓ Derivación creada. El equipo destino la verá en su panel.');
+    cargarIntervenciones();
+  }).catch(function (err) { mostrarErr('mDerErr', err.message); });
+}
+
+// ── Helpers ──
+function mostrarErr(id, msg) {
+  var el = document.getElementById(id);
+  el.textContent = '⚠ ' + msg;
+  el.classList.add('show');
+}
+function cerrarModal(id) { document.getElementById(id).classList.remove('show'); }
+
+if (typeof ELAuth !== 'undefined' && ELAuth.onUserReady) {
+  ELAuth.onUserReady(iniciar);
+} else {
+  window.addEventListener('load', iniciar);
+}
+</script>
+
+<script src="js/ia-widget.js" defer></script>
+<script src="js/search-global.js" defer></script>
+</body>
+</html>

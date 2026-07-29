@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Informe de Personalidad — Click&Clase</title>
+<link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg">
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="js/firebase-rest.js"></script>
+<script src="js/firebase-config.js"></script>
+<script src="js/firebase-auth.js"></script>
+<script src="js/firebase-db.js"></script>
+<script src="js/roles-permissions.js"></script>
+<script src="js/roles-router.js"></script>
+<script src="js/cursos.js"></script>
+<script src="js/cc-uikit.js"></script>
+<style>
+* { box-sizing: border-box; }
+body { margin: 0; font-family: 'Segoe UI', Roboto, Arial, sans-serif; background: #F0F7FF; color: #0C1E3B; }
+.container { max-width: 1200px; margin: 20px auto; padding: 0 24px; }
+.filtros { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 14px }
+.fld label { display: block; font-size: .72rem; color: #64748B; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 4px; }
+select, input, textarea { width: 100%; padding: 9px 12px; border-radius: 8px; background: #fff; border: 1px solid rgba(37,99,235,.2); font-size: .88rem; font-family: inherit }
+.btn { padding: 9px 18px; border-radius: 8px; border: 1px solid rgba(37,99,235,.15); background: #fff; color: #0C1E3B; cursor: pointer; font-weight: 600; font-size: .85rem }
+.btn.primary { background: linear-gradient(135deg,#2563EB,#38BDF8); color: #fff; border-color: transparent }
+.dim-table { width: 100%; border-collapse: collapse; margin-bottom: 12px }
+.dim-table th { background: #2563EB; color: #fff; padding: 8px 10px; font-size: .75rem; text-transform: uppercase; letter-spacing: .5px }
+.dim-table td { padding: 6px 10px; border: 1px solid rgba(37,99,235,.15); font-size: .85rem }
+.dim-table td.criterio { background: #F8FAFF; font-weight: 600; width: 60% }
+.dim-cell { text-align: center; cursor: pointer; padding: 8px !important; font-weight: 700; font-size: 1rem;
+  min-width: 40px; transition: .15s }
+.dim-cell:hover { background: rgba(37,99,235,.1) }
+.dim-cell.sel { background: linear-gradient(135deg,#2563EB,#38BDF8); color: #fff }
+.dim-section { background: #fff; border: 1px solid rgba(37,99,235,.14); border-radius: 10px; padding: 14px 18px; margin-bottom: 12px }
+.dim-section h3 { margin: 0 0 10px; color: #0C1E3B; font-size: 1rem; padding-bottom: 6px; border-bottom: 2px solid #2563EB }
+.leyenda { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; font-size: .82rem }
+.leyenda span { padding: 4px 10px; border-radius: 6px; font-weight: 700 }
+.tab-btn { padding: 10px 18px; border: none; background: transparent; color: #64748B; cursor: pointer; font-weight: 700; border-radius: 8px; font-size: .88rem }
+.tab-btn.active { background: linear-gradient(135deg,#4F46E5,#6366F1); color: #fff }
+.planilla-tbl { width: 100%; border-collapse: collapse; font-size: .8rem }
+.planilla-tbl th { background: #4F46E5; color: #fff; padding: 8px 6px; font-size: .68rem; text-transform: uppercase; letter-spacing: .3px; position: sticky; top: 0 }
+.planilla-tbl td { padding: 6px; border: 1px solid rgba(37,99,235,.08); text-align: center }
+.planilla-tbl td.alu { text-align: left; font-weight: 600; background: #F8FAFF; min-width: 200px; position: sticky; left: 0; z-index: 1 }
+.plan-cell { padding: 4px 6px !important; cursor: pointer; font-weight: 700; min-width: 34px }
+.plan-cell.L { background: #D1FAE5; color: #047857 }
+.plan-cell.ML { background: #DBEAFE; color: #1D4ED8 }
+.plan-cell.PL { background: #FEF3C7; color: #B45309 }
+.plan-cell.NO { background: #F1F5F9; color: #475569 }
+.plan-cell:hover { transform: scale(1.15); box-shadow: 0 0 0 2px #4F46E5 }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div id="ccHero"></div>
+
+  <!-- Tabs -->
+  <div class="cck-card" style="padding:8px">
+    <div style="display:flex;gap:6px">
+      <button class="tab-btn active" data-tab="individual" onclick="cambiarModo('individual')">👤 Individual</button>
+      <button class="tab-btn" data-tab="planilla" onclick="cambiarModo('planilla')">📋 Vista curso completo</button>
+    </div>
+  </div>
+
+  <div class="cck-card">
+    <h2>👤 Estudiante</h2>
+    <div class="filtros">
+      <div class="fld"><label>Curso</label><select id="fCurso" onchange="onCurso()"><option value="">— Elegir —</option></select></div>
+      <div class="fld" id="fldAlumno"><label>Estudiante</label><select id="fAlumno" onchange="cargar()"><option value="">— Elegir —</option></select></div>
+      <div class="fld"><label>Período</label>
+        <select id="fPeriodo" onchange="cargar()">
+          <option value="1° Semestre">1° Semestre</option>
+          <option value="2° Semestre" selected>2° Semestre</option>
+          <option value="Anual">Anual</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div id="planillaBox" style="display:none">
+    <div class="cck-card">
+      <h2 style="display:flex;justify-content:space-between;align-items:center">
+        <span>📋 Planilla del curso</span>
+        <button class="btn primary" onclick="descargarTodos()">📥 Descargar todos (PDF)</button>
+      </h2>
+      <div id="planillaBody"></div>
+    </div>
+  </div>
+
+  <div id="formulario" style="display:none">
+
+    <div class="leyenda">
+      <span style="background:rgba(5,150,105,.15);color:#047857">L = Logrado</span>
+      <span style="background:rgba(37,99,235,.15);color:#1D4ED8">ML = Medianamente Logrado</span>
+      <span style="background:rgba(245,158,11,.15);color:#B45309">PL = Por Lograr</span>
+      <span style="background:rgba(100,116,139,.12);color:#475569">NO = No Observado</span>
+    </div>
+
+    <!-- Dimensiones según MINEDUC -->
+    <div class="dim-section">
+      <h3>1. Formación Ética</h3>
+      <table class="dim-table"><thead><tr><th>Criterio</th><th>L</th><th>ML</th><th>PL</th><th>NO</th></tr></thead>
+        <tbody id="tblEtica"></tbody>
+      </table>
+    </div>
+
+    <div class="dim-section">
+      <h3>2. Crecimiento y Autoafirmación Personal</h3>
+      <table class="dim-table"><thead><tr><th>Criterio</th><th>L</th><th>ML</th><th>PL</th><th>NO</th></tr></thead>
+        <tbody id="tblCreci"></tbody>
+      </table>
+    </div>
+
+    <div class="dim-section">
+      <h3>3. La Persona y su Entorno</h3>
+      <table class="dim-table"><thead><tr><th>Criterio</th><th>L</th><th>ML</th><th>PL</th><th>NO</th></tr></thead>
+        <tbody id="tblEntorno"></tbody>
+      </table>
+    </div>
+
+    <div class="dim-section">
+      <h3>4. Proactividad y Trabajo</h3>
+      <table class="dim-table"><thead><tr><th>Criterio</th><th>L</th><th>ML</th><th>PL</th><th>NO</th></tr></thead>
+        <tbody id="tblProactividad"></tbody>
+      </table>
+    </div>
+
+    <div class="dim-section">
+      <h3>📝 Observaciones del profesor jefe</h3>
+      <textarea id="observaciones" rows="4" placeholder="Comentarios adicionales sobre el estudiante..."></textarea>
+    </div>
+
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:14px">
+      <button class="btn" onclick="imprimir()">🖨 Imprimir / PDF</button>
+      <button class="btn primary" onclick="guardar()">💾 Guardar informe</button>
+    </div>
+  </div>
+</div>
+
+<script>
+if (window.CCRouter && window.CCRouter.guardPanel) {
+  CCRouter.guardPanel(['profesor','jefe_curso','utp','encargado_area','admin_colegio','director','rector']);
+}
+
+var _cursos=[], _cursoSel=null, _alumnoSel=null, _valores={}, _modo='individual', _informesCurso={};
+function esc(s){return String(s==null?'':s).replace(/[<>&"]/g,function(c){return {'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c];});}
+
+// Criterios MINEDUC estándar
+// CRITERIOS + escala se cargan desde Firestore (indicadores_informe/{liceoSlug}).
+// Si el colegio no configuró nada, se usa el preset MINEDUC estándar.
+var CRITERIOS = {};        // { seccionId: [{k,corto,txt}] }
+var COLOR_DIM = {};        // { seccionId: '#DC2626' }
+var LABEL_DIM = {};        // { seccionId: '🤝 Formación Ética' }
+var ESCALA = ['L','ML','PL','NO']; // los valores válidos (se actualizan de config)
+
+var PRESET_MINEDUC_DIMS = [
+  { id:'etica', nombre:'Formación Ética', color:'#DC2626', emoji:'🤝', indicadores:[
+    { id:'e1', corto:'Igualdad', txt:'Reconoce, respeta y defiende la igualdad de derechos entre las personas' },
+    { id:'e2', corto:'Honestidad', txt:'Demuestra honestidad en su actuar cotidiano' },
+    { id:'e3', corto:'Respeto ideas', txt:'Respeta y valora las ideas y creencias distintas a las propias' },
+    { id:'e4', corto:'Solidaridad', txt:'Manifiesta actitudes de solidaridad y respeto por los demás' }
+  ]},
+  { id:'creci', nombre:'Crecimiento Personal', color:'#059669', emoji:'🌱', indicadores:[
+    { id:'c1', corto:'Iniciativa', txt:'Demuestra iniciativa personal y creatividad' },
+    { id:'c2', corto:'Interés',  txt:'Manifiesta interés por conocer y aprender cosas nuevas' },
+    { id:'c3', corto:'Autoconoc.', txt:'Reconoce y valora sus capacidades y limitaciones' },
+    { id:'c4', corto:'Persevera', txt:'Demuestra perseverancia frente a las dificultades' }
+  ]},
+  { id:'entorno', nombre:'Persona y Entorno', color:'#F59E0B', emoji:'🌎', indicadores:[
+    { id:'p1', corto:'Trab. grupal', txt:'Se integra al trabajo grupal aportando ideas' },
+    { id:'p2', corto:'M. ambiente', txt:'Manifiesta respeto por el medio ambiente' },
+    { id:'p3', corto:'Norm. conviv.', txt:'Cumple con las normas de convivencia del establecimiento' },
+    { id:'p4', corto:'Relaciones', txt:'Se relaciona adecuadamente con sus pares y adultos' }
+  ]},
+  { id:'proact', nombre:'Proactividad y Trabajo', color:'#4F46E5', emoji:'⚡', indicadores:[
+    { id:'w1', corto:'Tareas', txt:'Cumple con sus tareas y trabajos oportunamente' },
+    { id:'w2', corto:'Materiales', txt:'Demuestra responsabilidad en el cuidado de sus materiales' },
+    { id:'w3', corto:'Puntualidad', txt:'Asiste puntualmente a clases' },
+    { id:'w4', corto:'Orden', txt:'Trabaja con orden y limpieza' }
+  ]}
+];
+
+function _aplicarConfigDims(dims){
+  CRITERIOS = {}; COLOR_DIM = {}; LABEL_DIM = {};
+  dims.forEach(function(d){
+    var secId = d.id || ('sec_' + (d.nombre||'').replace(/\W/g,''));
+    CRITERIOS[secId] = (d.indicadores||[]).map(function(ind){
+      return { k: ind.id || ind.k, corto: ind.corto || (ind.id||ind.k), txt: ind.txt || '' };
+    });
+    COLOR_DIM[secId] = d.color || '#4F46E5';
+    LABEL_DIM[secId] = (d.emoji ? d.emoji + ' ' : '') + (d.nombre || 'Dimensión');
+  });
+}
+
+function cargarConfigIndicadores(){
+  var u = (window.ELAuth && ELAuth.user) || {};
+  if (!u.liceoSlug) {
+    _aplicarConfigDims(PRESET_MINEDUC_DIMS);
+    return Promise.resolve();
+  }
+  return EL_DB.collection('indicadores_informe').doc(u.liceoSlug).get().then(function(sn){
+    if (sn.exists && sn.data() && sn.data().dimensiones && sn.data().dimensiones.length) {
+      _aplicarConfigDims(sn.data().dimensiones);
+      if (sn.data().escala && sn.data().escala.length) {
+        ESCALA = sn.data().escala.map(function(e){ return e.valor; }).filter(Boolean);
+      }
+    } else {
+      _aplicarConfigDims(PRESET_MINEDUC_DIMS);
+    }
+  }).catch(function(){ _aplicarConfigDims(PRESET_MINEDUC_DIMS); });
+}
+
+function _hero(){
+  document.getElementById('ccHero').innerHTML = CCKit.hero({
+    emoji:'📄', title:'Informe de Personalidad',
+    sub:'Formato MINEDUC · Registro personal del estudiante',
+    actions:[{label:'Panel',emoji:'←',href:'dashboard-profesor.html'},
+             {label:'Mi Jefatura',emoji:'🎓',href:'mi-jefatura.html'}]
+  });
+}
+
+function iniciar(){
+  _hero();
+  // Cargar la configuración de indicadores del colegio ANTES de renderizar
+  cargarConfigIndicadores().then(function(){
+    // Sincronizar rotación con la escala configurada
+    _rotacion = [''].concat(ESCALA);
+    return CCCursos.misCursos();
+  }).then(function(cs){
+    _cursos = cs || [];
+    var sel = document.getElementById('fCurso');
+    sel.innerHTML = '<option value="">— Elegir —</option>' +
+      _cursos.map(function(c){ return '<option value="'+esc(c.cursoId)+'">'+esc(c.nombreCompleto)+'</option>'; }).join('');
+    var qp = new URLSearchParams(window.location.search);
+    var qc = qp.get('cursoId');
+    if (qc) { sel.value = qc; onCurso(); }
+  });
+}
+
+function onCurso(){
+  var cid = document.getElementById('fCurso').value;
+  _cursoSel = _cursos.find(function(c){ return c.cursoId === cid; });
+  var selA = document.getElementById('fAlumno');
+  var ests = (_cursoSel && _cursoSel.estudiantes) || [];
+  selA.innerHTML = '<option value="">— Elegir estudiante —</option>' +
+    ests.map(function(e){ return '<option value="'+esc(e.rut)+'">'+esc(e.nombre)+'</option>'; }).join('');
+  if (_modo === 'planilla') renderPlanilla();
+}
+
+function cambiarModo(m){
+  _modo = m;
+  document.querySelectorAll('.tab-btn').forEach(function(b){
+    b.classList.toggle('active', b.getAttribute('data-tab') === m);
+  });
+  document.getElementById('fldAlumno').style.display = m === 'individual' ? '' : 'none';
+  document.getElementById('formulario').style.display = 'none';
+  document.getElementById('planillaBox').style.display = m === 'planilla' ? '' : 'none';
+  if (m === 'planilla') renderPlanilla();
+}
+
+function renderPlanilla(){
+  if (!_cursoSel) {
+    document.getElementById('planillaBody').innerHTML =
+      '<div style="padding:20px;text-align:center;color:#64748B">Elegí un curso arriba.</div>';
+    return;
+  }
+  var ests = _cursoSel.estudiantes || [];
+  var periodo = document.getElementById('fPeriodo').value;
+  // Todos los criterios en orden
+  var todosCriterios = [];
+  Object.keys(CRITERIOS).forEach(function(sec){ todosCriterios = todosCriterios.concat(CRITERIOS[sec]); });
+
+  // Cargar todos los informes en UNA sola query (evita 404 por doc inexistente)
+  document.getElementById('planillaBody').innerHTML =
+    '<div style="text-align:center;padding:20px;color:#64748B">⏳ Cargando informes...</div>';
+
+  EL_DB.collection('informes_personalidad').get().then(function(sn){
+    _informesCurso = {};
+    // Indexar por rut (normalizado) los informes de este curso+periodo
+    var porRut = {};
+    sn.forEach(function(d){
+      var inf = d.data();
+      if (!inf) return;
+      if (inf.cursoId !== _cursoSel.cursoId) return;
+      if (inf.periodo !== periodo) return;
+      var rutN = String(inf.alumnoRut||'').replace(/[^\dkK]/g,'').toLowerCase();
+      if (rutN) porRut[rutN] = inf.valores || {};
+    });
+    // Mapear a la nómina del curso
+    var rs = ests.map(function(e){
+      var rutN = String(e.rut||'').replace(/[^\dkK]/g,'').toLowerCase();
+      return { rut: e.rut, data: { valores: porRut[rutN] || {} } };
+    });
+    rs.forEach(function(r){ _informesCurso[r.rut] = r.data.valores || {}; });
+
+    // Banner con leyenda de dimensiones + link a config
+    var u = (window.ELAuth && ELAuth.user) || {};
+    var puedeConfig = u.role === 'admin' || u.role === 'admin_colegio' ||
+      (u.roles && (u.roles.admin || u.roles.director || u.roles.utp || u.roles.aps_enc || u.roles.encargado_area));
+    var banner = '<div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:12px;align-items:center">';
+    Object.keys(CRITERIOS).forEach(function(sec){
+      banner += '<div style="display:flex;align-items:center;gap:6px;font-size:.8rem;color:#334155">' +
+        '<span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:'+COLOR_DIM[sec]+'"></span>' +
+        '<b>'+LABEL_DIM[sec]+'</b>' +
+      '</div>';
+    });
+    if (puedeConfig) {
+      banner += '<a href="admin-informe-personalidad.html" style="margin-left:auto;padding:4px 10px;background:#EEF2FF;color:#4F46E5;border-radius:6px;text-decoration:none;font-size:.78rem;font-weight:600">⚙ Configurar indicadores</a>';
+    }
+    banner += '</div>';
+
+    // Header con 2 filas: dimensiones (agrupadas) + criterios cortos
+    var thDim = '<tr><th class="alu" rowspan="2" style="text-align:left;background:#4F46E5;color:#fff;vertical-align:middle">Estudiante</th>';
+    Object.keys(CRITERIOS).forEach(function(sec){
+      thDim += '<th colspan="'+CRITERIOS[sec].length+'" style="background:'+COLOR_DIM[sec]+';color:#fff;text-align:center;font-size:.72rem;padding:6px 4px">'+LABEL_DIM[sec]+'</th>';
+    });
+    thDim += '<th rowspan="2" style="background:#4F46E5;color:#fff">💾</th></tr>';
+
+    var thCri = '<tr>';
+    Object.keys(CRITERIOS).forEach(function(sec){
+      CRITERIOS[sec].forEach(function(c){
+        thCri += '<th title="'+esc(c.txt)+'" style="background:'+COLOR_DIM[sec]+'22;color:'+COLOR_DIM[sec]+';padding:6px 3px;font-size:.68rem;letter-spacing:.2px;min-width:70px;cursor:help">'+
+          esc(c.corto || c.k.toUpperCase()) +
+        '</th>';
+      });
+    });
+    thCri += '</tr>';
+
+    var html = banner + '<div style="overflow:auto;max-height:70vh"><table class="planilla-tbl">' +
+      '<thead>' + thDim + thCri + '</thead><tbody>';
+    ests.forEach(function(e){
+      var vals = _informesCurso[e.rut] || {};
+      // Ojo: rut como atributo (no en onclick inline) — evita bugs de escape
+      html += '<tr data-rut="'+esc(e.rut)+'"><td class="alu">'+esc(e.nombre)+'</td>' +
+        todosCriterios.map(function(c){
+          var v = vals[c.k] || '';
+          var cls = v ? 'plan-cell '+v : 'plan-cell';
+          return '<td class="'+cls+'" data-rut="'+esc(e.rut)+'" data-k="'+esc(c.k)+'">'+
+            (v || '·') + '</td>';
+        }).join('') +
+        '<td><button class="btn primary btn-guardar-fila" style="padding:4px 10px;font-size:.75rem" data-rut="'+esc(e.rut)+'" data-nom="'+esc(e.nombre)+'">Guardar</button></td>' +
+      '</tr>';
+    });
+    html += '</tbody></table></div>' +
+      '<div style="margin-top:12px;padding:10px;background:#F0F7FF;border-radius:8px;font-size:.82rem;color:#334155">' +
+      '💡 Hacé click en cada celda para rotar: <b class="plan-cell L" style="padding:2px 6px;border-radius:4px">L</b> → <b class="plan-cell ML" style="padding:2px 6px;border-radius:4px">ML</b> → <b class="plan-cell PL" style="padding:2px 6px;border-radius:4px">PL</b> → <b class="plan-cell NO" style="padding:2px 6px;border-radius:4px">NO</b> → vacío.' +
+      '</div>';
+    document.getElementById('planillaBody').innerHTML = html;
+    _installPlanillaListeners();
+  });
+}
+
+var _rotacion = ['', 'L', 'ML', 'PL', 'NO'];
+
+// Event delegation UNA sola vez — evita re-render que perdería cambios locales.
+var _planillaListenersOK = false;
+function _installPlanillaListeners(){
+  if (_planillaListenersOK) return;
+  _planillaListenersOK = true;
+  document.addEventListener('click', function(ev){
+    var td = ev.target;
+    // Click en celda de indicador (L/ML/PL/NO/·)
+    if (td && td.classList && td.classList.contains('plan-cell')) {
+      var rut = td.getAttribute('data-rut');
+      var k   = td.getAttribute('data-k');
+      if (!rut || !k) return;
+      if (!_informesCurso[rut]) _informesCurso[rut] = {};
+      var actual = _informesCurso[rut][k] || '';
+      var next   = _rotacion[(_rotacion.indexOf(actual) + 1) % _rotacion.length];
+      _informesCurso[rut][k] = next;
+      // Actualizar SOLO esta celda en el DOM (sin re-fetch)
+      td.className = next ? 'plan-cell ' + next : 'plan-cell';
+      td.textContent = next || '·';
+      return;
+    }
+    // Click en botón "Guardar" de una fila
+    var btn = ev.target;
+    if (btn && btn.classList && btn.classList.contains('btn-guardar-fila')) {
+      var r = btn.getAttribute('data-rut');
+      var n = btn.getAttribute('data-nom');
+      if (r) guardarFila(r, n || '');
+    }
+  });
+}
+
+function guardarFila(rut, nombre){
+  var u = (window.ELAuth && ELAuth.user) || {};
+  var periodo = document.getElementById('fPeriodo').value;
+  var id = _cursoSel.cursoId + '__' + rut + '__' + periodo;
+  EL_DB.collection('informes_personalidad').doc(id).set({
+    liceoSlug: u.liceoSlug || '',
+    cursoId: _cursoSel.cursoId, cursoNombre: _cursoSel.nombreCompleto || '',
+    alumnoRut: rut, alumnoNombre: nombre,
+    periodo: periodo,
+    valores: _informesCurso[rut] || {},
+    profesorJefeUid: u.uid || '', profesorJefeNombre: u.nombre || u.email || '',
+    actualizadoEn: new Date().toISOString()
+  }).then(function(){ alert('✓ Guardado para ' + nombre); })
+    .catch(function(err){ alert('Error: '+err.message); });
+}
+
+function descargarTodos(){
+  if (!_cursoSel) { alert('Elegí un curso'); return; }
+  var ests = _cursoSel.estudiantes || [];
+  var periodo = document.getElementById('fPeriodo').value;
+  var u = (window.ELAuth && ELAuth.user) || {};
+  var todosCriterios = [];
+  Object.keys(CRITERIOS).forEach(function(sec){ todosCriterios = todosCriterios.concat(CRITERIOS[sec]); });
+
+  var w = window.open('','print','width=900,height=800');
+  var css = '<style>body{font-family:Arial;padding:20px}h1{border-bottom:2px solid #000;padding-bottom:6px}h2{font-size:1rem;margin-top:14px;color:#4F46E5}.info{margin-bottom:8px;font-size:.85rem}table{width:100%;border-collapse:collapse;font-size:.78rem;margin-bottom:20px}th,td{border:1px solid #666;padding:4px 8px}th{background:#eee}.pagina{page-break-after:always}.sel{background:#000;color:#fff;font-weight:700}</style>';
+  w.document.write('<html><head><title>Informes de Personalidad — '+esc(_cursoSel.nombreCompleto||'')+'</title>'+css+'</head><body>');
+  w.document.write('<h1>INFORMES DE PERSONALIDAD — ' + esc(_cursoSel.nombreCompleto||'') + '</h1>');
+  w.document.write('<p><b>Período:</b> ' + esc(periodo) + ' &nbsp; <b>Profesor jefe:</b> ' + esc(u.nombre||u.email||'') + ' &nbsp; <b>Fecha:</b> ' + new Date().toLocaleDateString('es-CL') + '</p>');
+  ests.forEach(function(e, idx){
+    var vals = _informesCurso[e.rut] || {};
+    w.document.write('<div class="pagina">');
+    w.document.write('<h2>👤 ' + esc(e.nombre) + '</h2>');
+    w.document.write('<p class="info">RUT: ' + esc(e.rut||'—') + '</p>');
+    Object.keys(CRITERIOS).forEach(function(sec, i){
+      var titSec = ['1. Formación Ética','2. Crecimiento y Autoafirmación Personal','3. La Persona y su Entorno','4. Proactividad y Trabajo'][i];
+      w.document.write('<h3 style="background:#4F46E5;color:#fff;padding:6px 10px;font-size:.85rem">'+titSec+'</h3>');
+      w.document.write('<table><thead><tr><th style="text-align:left">Criterio</th><th>L</th><th>ML</th><th>PL</th><th>NO</th></tr></thead><tbody>');
+      CRITERIOS[sec].forEach(function(c){
+        var v = vals[c.k]||'';
+        w.document.write('<tr><td style="text-align:left">'+esc(c.txt)+'</td>' +
+          ['L','ML','PL','NO'].map(function(lvl){
+            return '<td class="'+(v===lvl?'sel':'')+'">'+lvl+'</td>';
+          }).join('') + '</tr>');
+      });
+      w.document.write('</tbody></table>');
+    });
+    w.document.write('<div style="margin-top:30px;display:flex;gap:40px;justify-content:space-around">' +
+      '<div style="text-align:center"><div style="border-top:1px solid #000;padding-top:6px;width:220px">Firma Profesor Jefe</div></div>' +
+      '<div style="text-align:center"><div style="border-top:1px solid #000;padding-top:6px;width:220px">Firma Director</div></div>' +
+      '</div>');
+    w.document.write('</div>');
+  });
+  w.document.write('<sc' + 'ript>window.onload=function(){window.print()}</sc' + 'ript></body></html>');
+  w.document.close();
+}
+
+function cargar(){
+  var rut = document.getElementById('fAlumno').value;
+  if (!rut || !_cursoSel) { document.getElementById('formulario').style.display = 'none'; return; }
+  var _nrut = function(r){ return String(r||'').replace(/[^\dkK]/g,'').toLowerCase(); };
+  _alumnoSel = (_cursoSel.estudiantes || []).find(function(e){ return _nrut(e.rut) === _nrut(rut); });
+  _valores = {};
+  Object.keys(CRITERIOS).forEach(function(k){ _renderTabla(k); });
+  document.getElementById('observaciones').value = '';
+  document.getElementById('formulario').style.display = 'block';
+  // Intentar cargar informe existente
+  var id = _cursoSel.cursoId + '__' + rut + '__' + document.getElementById('fPeriodo').value;
+  EL_DB.collection('informes_personalidad').doc(id).get().then(function(sn){
+    if (sn.exists && sn.data()) {
+      var d = sn.data();
+      _valores = d.valores || {};
+      Object.keys(CRITERIOS).forEach(function(k){ _renderTabla(k); });
+      document.getElementById('observaciones').value = d.observaciones || '';
+    }
+  }).catch(function(){});
+}
+
+function _renderTabla(tblId){
+  var tbody = document.getElementById(tblId);
+  if (!tbody) return;
+  tbody.innerHTML = CRITERIOS[tblId].map(function(c){
+    var v = _valores[c.k] || '';
+    return '<tr>' +
+      '<td class="criterio">'+esc(c.txt)+'</td>' +
+      ['L','ML','PL','NO'].map(function(lvl){
+        var cls = v === lvl ? 'dim-cell sel' : 'dim-cell';
+        return '<td class="'+cls+'" data-k="'+c.k+'" data-lvl="'+lvl+'">'+lvl+'</td>';
+      }).join('') +
+    '</tr>';
+  }).join('');
+}
+
+function marcar(k, lvl){
+  if (!k || !lvl) return;
+  _valores[k] = _valores[k] === lvl ? '' : lvl;
+  Object.keys(CRITERIOS).forEach(function(t){ _renderTabla(t); });
+}
+
+// Event delegation — un solo listener global captura todos los clicks en dim-cell.
+// Más robusto que onclick inline (funciona siempre, aunque re-renderice).
+document.addEventListener('click', function(ev){
+  var td = ev.target;
+  if (td && td.classList && td.classList.contains('dim-cell')) {
+    var k = td.getAttribute('data-k');
+    var lvl = td.getAttribute('data-lvl');
+    if (k && lvl) marcar(k, lvl);
+  }
+});
+
+function guardar(){
+  if (!_alumnoSel || !_cursoSel) return;
+  var u = (window.ELAuth && ELAuth.user) || {};
+  var periodo = document.getElementById('fPeriodo').value;
+  var id = _cursoSel.cursoId + '__' + _alumnoSel.rut + '__' + periodo;
+  EL_DB.collection('informes_personalidad').doc(id).set({
+    liceoSlug: u.liceoSlug || '',
+    cursoId: _cursoSel.cursoId, cursoNombre: _cursoSel.nombreCompleto || '',
+    alumnoRut: _alumnoSel.rut, alumnoNombre: _alumnoSel.nombre,
+    periodo: periodo,
+    valores: _valores,
+    observaciones: document.getElementById('observaciones').value,
+    profesorJefeUid: u.uid || '', profesorJefeNombre: u.nombre || u.email || '',
+    actualizadoEn: new Date().toISOString()
+  }).then(function(){
+    alert('✓ Informe guardado. Podés imprimirlo o volver más tarde para actualizarlo.');
+  }).catch(function(err){ alert('Error: '+err.message); });
+}
+
+function imprimir(){
+  var w = window.open('','print','width=900,height=800');
+  var css = '<style>body{font-family:Arial,sans-serif;padding:24px;color:#000}h1{border-bottom:2px solid #000;padding-bottom:6px}h3{background:#2563EB;color:#fff;padding:8px 10px;font-size:.9rem;margin:12px 0 8px}table{width:100%;border-collapse:collapse;margin-bottom:10px;font-size:.8rem}th,td{border:1px solid #666;padding:4px 8px}th{background:#eee}.sel{background:#000;color:#fff;font-weight:700}.header-info{margin-bottom:14px;font-size:.9rem}.header-info td{padding:2px 8px;border:none}</style>';
+  var contenido = document.getElementById('formulario').innerHTML;
+  var titulo = 'INFORME DE PERSONALIDAD';
+  var alu = _alumnoSel ? _alumnoSel.nombre : '';
+  var curso = _cursoSel ? _cursoSel.nombreCompleto : '';
+  var periodo = document.getElementById('fPeriodo').value;
+  var u = (window.ELAuth && ELAuth.user) || {};
+  w.document.write('<html><head><title>'+titulo+' — '+alu+'</title>'+css+'</head><body>' +
+    '<h1>'+titulo+'</h1>' +
+    '<table class="header-info"><tr>' +
+      '<td><b>Estudiante:</b> '+esc(alu)+'</td>' +
+      '<td><b>Curso:</b> '+esc(curso)+'</td>' +
+      '<td><b>Período:</b> '+esc(periodo)+'</td>' +
+    '</tr><tr>' +
+      '<td><b>Profesor jefe:</b> '+esc(u.nombre||u.email||'')+'</td>' +
+      '<td><b>Fecha:</b> '+new Date().toLocaleDateString('es-CL')+'</td>' +
+      '<td><b>Establecimiento:</b> '+esc(u.liceoSlug||'')+'</td>' +
+    '</tr></table>' +
+    contenido +
+    '<div style="margin-top:40px;display:flex;gap:40px;justify-content:space-around">' +
+      '<div style="text-align:center"><div style="border-top:1px solid #000;padding-top:6px;width:250px">Firma Profesor Jefe</div></div>' +
+      '<div style="text-align:center"><div style="border-top:1px solid #000;padding-top:6px;width:250px">Firma Director</div></div>' +
+    '</div>' +
+    '<script>window.onload=function(){window.print()}<' + '/script>' +
+    '</body></html>');
+  w.document.close();
+}
+
+if (window.ELAuth && ELAuth.onUserReady) ELAuth.onUserReady(function(u){ if(u) iniciar(); });
+</script>
+</body>
+</html>

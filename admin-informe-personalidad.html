@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Config. Informe Personalidad — Click&Clase</title>
+<link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg">
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="js/firebase-rest.js"></script>
+<script src="js/firebase-config.js"></script>
+<script src="js/firebase-auth.js"></script>
+<script src="js/firebase-db.js"></script>
+<script src="js/roles-permissions.js"></script>
+<script src="js/roles-router.js"></script>
+<script src="js/cc-uikit.js"></script>
+<style>
+* { box-sizing: border-box; }
+body { margin: 0; font-family: 'Segoe UI', Roboto, Arial, sans-serif; background: #F0F7FF; color: #0C1E3B; }
+.container { max-width: 1300px; margin: 20px auto; padding: 0 24px; }
+.dim-card { background:#fff; border-radius:12px; padding:16px 20px; margin-bottom:14px;
+  border-left:5px solid #4F46E5; box-shadow:0 1px 4px rgba(15,23,42,.05); }
+.dim-head { display:flex; gap:10px; align-items:center; margin-bottom:12px; flex-wrap:wrap }
+.dim-head input.dim-nombre { flex:1; min-width:200px; padding:8px 12px; border:1px solid rgba(37,99,235,.2); border-radius:8px; font-weight:700; font-size:.95rem }
+.dim-head input.dim-emoji { width:60px; padding:8px; border:1px solid rgba(37,99,235,.2); border-radius:8px; text-align:center; font-size:1.1rem }
+.dim-head input.dim-color { width:50px; height:38px; padding:2px; border:1px solid rgba(37,99,235,.2); border-radius:8px; cursor:pointer }
+.crit-row { display:grid; grid-template-columns:120px 1fr 32px; gap:8px; margin-bottom:6px; align-items:center }
+.crit-row input { padding:7px 10px; border:1px solid rgba(37,99,235,.15); border-radius:6px; font-size:.85rem }
+.btn { padding:9px 18px; border-radius:8px; border:1px solid rgba(37,99,235,.15); background:#fff; color:#0C1E3B; cursor:pointer; font-weight:600; font-size:.85rem }
+.btn.primary { background:linear-gradient(135deg,#4F46E5,#6366F1); color:#fff; border-color:transparent }
+.btn.danger { background:#DC2626; color:#fff; border-color:transparent }
+.btn.small { padding:5px 10px; font-size:.75rem }
+.escala-row { display:flex; gap:8px; align-items:center; flex-wrap:wrap }
+.escala-chip { display:flex; gap:4px; align-items:center; background:#F8FAFF; padding:6px 10px; border-radius:8px; border:1px solid rgba(37,99,235,.15) }
+.escala-chip input { width:60px; padding:4px 8px; border:1px solid rgba(37,99,235,.15); border-radius:6px; font-weight:700; text-align:center; text-transform:uppercase }
+.escala-chip input.desc { width:180px; text-align:left; font-weight:normal; text-transform:none }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div id="ccHero"></div>
+
+  <div class="cck-card">
+    <h2>📐 Escala de calificación</h2>
+    <p style="color:#64748B;font-size:.85rem;margin:0 0 10px">
+      Definí cómo se van a calificar los indicadores en tu colegio. Ej: L / ML / PL / NO o S / G / O / N.
+    </p>
+    <div class="escala-row" id="escalaRow"></div>
+    <button class="btn small" onclick="agregarEscala()" style="margin-top:10px">+ Agregar valor</button>
+    <div style="margin-top:12px;display:flex;gap:8px">
+      <button class="btn small" onclick="presetLMLPLNO()">📋 Preset L / ML / PL / NO</button>
+      <button class="btn small" onclick="presetSGON()">📋 Preset S / G / O / N</button>
+    </div>
+  </div>
+
+  <div class="cck-card">
+    <h2 style="display:flex;justify-content:space-between;align-items:center">
+      <span>📋 Dimensiones e indicadores</span>
+      <button class="btn primary" onclick="agregarDimension()">+ Nueva dimensión</button>
+    </h2>
+    <p style="color:#64748B;font-size:.85rem;margin:0 0 14px">
+      Cada dimensión agrupa varios criterios que se van a evaluar. Podés reutilizar el formato MINEDUC estándar o crear los propios.
+    </p>
+    <div id="dimensionesBox"></div>
+    <div style="margin-top:14px">
+      <button class="btn small" onclick="cargarPresetMineduc()">📥 Cargar preset MINEDUC estándar</button>
+    </div>
+  </div>
+
+  <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:16px">
+    <button class="btn" onclick="window.location.href='panel-admin-colegio.html'">Cancelar</button>
+    <button class="btn primary" onclick="guardar()">💾 Guardar configuración</button>
+  </div>
+</div>
+
+<script>
+if (window.CCRouter && window.CCRouter.guardPanel) {
+  CCRouter.guardPanel(['admin','admin_colegio','director','rector','utp','encargado_area','aps_enc']);
+}
+
+var _config = {
+  escala: [
+    { valor:'L',  descripcion:'Logrado' },
+    { valor:'ML', descripcion:'Medianamente Logrado' },
+    { valor:'PL', descripcion:'Por Lograr' },
+    { valor:'NO', descripcion:'No Observado' }
+  ],
+  dimensiones: []
+};
+
+var PRESET_MINEDUC = [
+  { id:'etica', nombre:'Formación Ética', color:'#DC2626', emoji:'🤝', indicadores:[
+    { id:'e1', corto:'Igualdad',    txt:'Reconoce, respeta y defiende la igualdad de derechos entre las personas' },
+    { id:'e2', corto:'Honestidad',  txt:'Demuestra honestidad en su actuar cotidiano' },
+    { id:'e3', corto:'Respeto ideas', txt:'Respeta y valora las ideas y creencias distintas a las propias' },
+    { id:'e4', corto:'Solidaridad', txt:'Manifiesta actitudes de solidaridad y respeto por los demás' }
+  ]},
+  { id:'creci', nombre:'Crecimiento Personal', color:'#059669', emoji:'🌱', indicadores:[
+    { id:'c1', corto:'Iniciativa', txt:'Demuestra iniciativa personal y creatividad' },
+    { id:'c2', corto:'Interés',    txt:'Manifiesta interés por conocer y aprender cosas nuevas' },
+    { id:'c3', corto:'Autoconoc.', txt:'Reconoce y valora sus capacidades y limitaciones' },
+    { id:'c4', corto:'Persevera',  txt:'Demuestra perseverancia frente a las dificultades' }
+  ]},
+  { id:'entorno', nombre:'Persona y Entorno', color:'#F59E0B', emoji:'🌎', indicadores:[
+    { id:'p1', corto:'Trab. grupal', txt:'Se integra al trabajo grupal aportando ideas' },
+    { id:'p2', corto:'M. ambiente',  txt:'Manifiesta respeto por el medio ambiente' },
+    { id:'p3', corto:'Norm. conviv.', txt:'Cumple con las normas de convivencia del establecimiento' },
+    { id:'p4', corto:'Relaciones',   txt:'Se relaciona adecuadamente con sus pares y adultos' }
+  ]},
+  { id:'proact', nombre:'Proactividad y Trabajo', color:'#4F46E5', emoji:'⚡', indicadores:[
+    { id:'w1', corto:'Tareas',      txt:'Cumple con sus tareas y trabajos oportunamente' },
+    { id:'w2', corto:'Materiales',  txt:'Demuestra responsabilidad en el cuidado de sus materiales' },
+    { id:'w3', corto:'Puntualidad', txt:'Asiste puntualmente a clases' },
+    { id:'w4', corto:'Orden',       txt:'Trabaja con orden y limpieza' }
+  ]}
+];
+
+function esc(s){return String(s==null?'':s).replace(/[<>&"]/g,function(c){return {'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c];});}
+
+function _hero(){
+  document.getElementById('ccHero').innerHTML = CCKit.hero({
+    emoji:'📄', title:'Configurar Informe de Personalidad',
+    sub:'Definí las dimensiones, criterios y escala que usa tu colegio',
+    actions:[{label:'Panel Admin',emoji:'←',href:'panel-admin-colegio.html'}]
+  });
+}
+
+function iniciar(){
+  _hero();
+  var u = (window.ELAuth && ELAuth.user) || {};
+  if (!u.liceoSlug) return alert('No hay liceo asociado a tu cuenta');
+  EL_DB.collection('indicadores_informe').doc(u.liceoSlug).get().then(function(sn){
+    if (sn.exists && sn.data()) {
+      var d = sn.data();
+      if (d.escala && d.escala.length) _config.escala = d.escala;
+      if (d.dimensiones && d.dimensiones.length) _config.dimensiones = d.dimensiones;
+    }
+    if (!_config.dimensiones.length) _config.dimensiones = JSON.parse(JSON.stringify(PRESET_MINEDUC));
+    renderTodo();
+  }).catch(function(){
+    _config.dimensiones = JSON.parse(JSON.stringify(PRESET_MINEDUC));
+    renderTodo();
+  });
+}
+
+function renderTodo(){ renderEscala(); renderDimensiones(); }
+
+function renderEscala(){
+  document.getElementById('escalaRow').innerHTML = _config.escala.map(function(e,i){
+    return '<div class="escala-chip">' +
+      '<input value="'+esc(e.valor)+'" onchange="_config.escala['+i+'].valor=this.value.toUpperCase()" maxlength="3">' +
+      '<input class="desc" value="'+esc(e.descripcion)+'" onchange="_config.escala['+i+'].descripcion=this.value" placeholder="Descripción">' +
+      '<button class="btn small danger" onclick="quitarEscala('+i+')" title="Quitar">✕</button>' +
+    '</div>';
+  }).join('');
+}
+
+function agregarEscala(){
+  _config.escala.push({ valor:'', descripcion:'' });
+  renderEscala();
+}
+function quitarEscala(i){
+  _config.escala.splice(i,1);
+  renderEscala();
+}
+function presetLMLPLNO(){
+  _config.escala = [
+    { valor:'L',  descripcion:'Logrado' },
+    { valor:'ML', descripcion:'Medianamente Logrado' },
+    { valor:'PL', descripcion:'Por Lograr' },
+    { valor:'NO', descripcion:'No Observado' }
+  ];
+  renderEscala();
+}
+function presetSGON(){
+  _config.escala = [
+    { valor:'S', descripcion:'Siempre' },
+    { valor:'G', descripcion:'Generalmente' },
+    { valor:'O', descripcion:'Ocasionalmente' },
+    { valor:'N', descripcion:'Nunca' }
+  ];
+  renderEscala();
+}
+
+function renderDimensiones(){
+  document.getElementById('dimensionesBox').innerHTML = _config.dimensiones.map(function(dim,di){
+    var color = dim.color || '#4F46E5';
+    var html = '<div class="dim-card" style="border-left-color:'+color+'">' +
+      '<div class="dim-head">' +
+        '<input class="dim-emoji" value="'+esc(dim.emoji||'')+'" onchange="_config.dimensiones['+di+'].emoji=this.value" placeholder="🎯">' +
+        '<input class="dim-nombre" value="'+esc(dim.nombre||'')+'" onchange="_config.dimensiones['+di+'].nombre=this.value" placeholder="Nombre de la dimensión">' +
+        '<input class="dim-color" type="color" value="'+esc(color)+'" onchange="_actualizarColor('+di+',this.value)">' +
+        '<button class="btn small danger" onclick="quitarDim('+di+')">✕ Quitar</button>' +
+      '</div>' +
+      '<div style="padding-left:12px;border-left:2px dashed #E2E8F0">' +
+        '<div style="font-size:.75rem;color:#64748B;font-weight:600;text-transform:uppercase;margin-bottom:6px">Indicadores</div>' +
+        (dim.indicadores||[]).map(function(ind,ii){
+          return '<div class="crit-row">' +
+            '<input value="'+esc(ind.corto||'')+'" onchange="_config.dimensiones['+di+'].indicadores['+ii+'].corto=this.value" placeholder="Etiqueta corta">' +
+            '<input value="'+esc(ind.txt||'')+'" onchange="_config.dimensiones['+di+'].indicadores['+ii+'].txt=this.value" placeholder="Descripción completa del criterio">' +
+            '<button class="btn small danger" onclick="quitarIndicador('+di+','+ii+')" title="Quitar">✕</button>' +
+          '</div>';
+        }).join('') +
+        '<button class="btn small" onclick="agregarIndicador('+di+')" style="margin-top:8px">+ Agregar indicador</button>' +
+      '</div>' +
+    '</div>';
+    return html;
+  }).join('');
+}
+
+function _actualizarColor(di,color){
+  _config.dimensiones[di].color = color;
+  renderDimensiones();
+}
+
+function agregarDimension(){
+  var id = 'd' + (Date.now()%100000);
+  _config.dimensiones.push({
+    id: id, nombre: 'Nueva dimensión', color: '#4F46E5', emoji: '⭐',
+    indicadores: [{ id:id+'_1', corto:'', txt:'' }]
+  });
+  renderDimensiones();
+}
+function quitarDim(di){
+  if (!confirm('¿Eliminar esta dimensión y todos sus indicadores?')) return;
+  _config.dimensiones.splice(di,1);
+  renderDimensiones();
+}
+function agregarIndicador(di){
+  var idx = (_config.dimensiones[di].indicadores||[]).length + 1;
+  _config.dimensiones[di].indicadores.push({
+    id: _config.dimensiones[di].id + '_' + idx,
+    corto:'', txt:''
+  });
+  renderDimensiones();
+}
+function quitarIndicador(di,ii){
+  _config.dimensiones[di].indicadores.splice(ii,1);
+  renderDimensiones();
+}
+function cargarPresetMineduc(){
+  if (!confirm('¿Reemplazar las dimensiones actuales con el preset MINEDUC estándar?')) return;
+  _config.dimensiones = JSON.parse(JSON.stringify(PRESET_MINEDUC));
+  renderDimensiones();
+}
+
+function guardar(){
+  var u = (window.ELAuth && ELAuth.user) || {};
+  if (!u.liceoSlug) return alert('Sin liceo asociado');
+  // Validaciones mínimas
+  if (!_config.escala.length) return alert('Definí al menos un valor de escala');
+  if (!_config.dimensiones.length) return alert('Definí al menos una dimensión');
+  for (var d of _config.dimensiones) {
+    if (!d.nombre) return alert('Todas las dimensiones deben tener nombre');
+    if (!d.indicadores || !d.indicadores.length) return alert('La dimensión "'+d.nombre+'" no tiene indicadores');
+  }
+  EL_DB.collection('indicadores_informe').doc(u.liceoSlug).set({
+    liceoSlug: u.liceoSlug,
+    escala: _config.escala,
+    dimensiones: _config.dimensiones,
+    actualizadoEn: new Date().toISOString(),
+    actualizadoPor: u.email || u.nombre || ''
+  }).then(function(){
+    alert('✓ Configuración guardada.\n\nAhora los profesores jefes verán estos indicadores en el Informe de Personalidad.');
+  }).catch(function(err){ alert('Error: '+err.message); });
+}
+
+if (window.ELAuth && ELAuth.onUserReady) ELAuth.onUserReady(function(u){ if(u) iniciar(); });
+</script>
+</body>
+</html>

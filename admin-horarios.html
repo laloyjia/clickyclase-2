@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Horarios del Colegio — Click&Clase</title>
+<link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg">
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="js/firebase-rest.js"></script>
+<script src="js/firebase-config.js"></script>
+<script src="js/firebase-auth.js"></script>
+<script src="js/firebase-db.js"></script>
+<script src="js/roles-permissions.js"></script>
+<script src="js/roles-router.js"></script>
+<script src="js/cursos.js"></script>
+<script src="js/personal.js"></script>
+<script src="js/horarios.js"></script>
+<script src="js/cc-uikit.js"></script>
+<style>
+* { box-sizing: border-box; }
+body { margin: 0; font-family: 'Segoe UI', Roboto, Arial, sans-serif; background: #F0F7FF; color: #0C1E3B; }
+.container { max-width: 1500px; margin: 20px auto; padding: 0 24px; }
+.tabs { display: flex; gap: 8px; margin-bottom: 20px; border-bottom: 2px solid rgba(37,99,235,.12); }
+.tab { padding: 12px 20px; border: none; background: transparent; color: #64748B; cursor: pointer;
+  font-weight: 600; font-size: .9rem; border-bottom: 3px solid transparent; margin-bottom: -2px; transition: .2s }
+.tab.active { color: #2563EB; border-bottom-color: #2563EB }
+.tab:hover { color: #2563EB }
+.tab-content { display: none }
+.tab-content.active { display: block }
+
+/* Bloques del liceo */
+.bloques-table { width:100%; border-collapse:collapse; background:#fff; border-radius:10px; overflow:hidden;
+  border:1px solid rgba(37,99,235,.14) }
+.bloques-table th { background:rgba(37,99,235,.06); padding:10px 12px; text-align:left; font-size:.75rem;
+  color:#475569; text-transform:uppercase; letter-spacing:.5px; font-weight:700 }
+.bloques-table td { padding:8px 10px; border-top:1px solid rgba(37,99,235,.08); font-size:.88rem }
+.bloques-table input { width:100%; padding:6px 8px; border:1px solid rgba(37,99,235,.15); border-radius:6px;
+  font-size:.85rem; font-family:inherit }
+.bloques-table select { padding:6px 8px; border:1px solid rgba(37,99,235,.15); border-radius:6px; font-size:.85rem }
+.bloque-clase { background:#fff }
+.bloque-recreo { background:rgba(245,158,11,.05) }
+.bloque-almuerzo { background:rgba(37,99,235,.05) }
+
+/* Horario docente — grilla semanal */
+.hor-picker { display:grid; grid-template-columns:280px 1fr; gap:16px; align-items:start }
+.hor-picker .docente-list { background:#fff; border:1px solid rgba(37,99,235,.14); border-radius:12px;
+  padding:12px; max-height:70vh; overflow:auto }
+.docente-btn { display:block; width:100%; text-align:left; padding:9px 12px; border-radius:8px; border:none;
+  background:transparent; cursor:pointer; font-size:.86rem; color:#0C1E3B; margin-bottom:2px; transition:.15s }
+.docente-btn:hover { background:rgba(37,99,235,.06) }
+.docente-btn.active { background:linear-gradient(135deg,#2563EB,#38BDF8); color:#fff; font-weight:600 }
+.docente-btn small { display:block; opacity:.7; font-size:.72rem; margin-top:2px }
+
+.hor-grid { background:#fff; border:1px solid rgba(37,99,235,.14); border-radius:12px; padding:14px; overflow:auto }
+.hor-tbl { width:100%; border-collapse:collapse; font-size:.82rem; min-width:900px }
+.hor-tbl th { background:rgba(37,99,235,.06); padding:8px 10px; text-align:center; font-size:.72rem;
+  text-transform:uppercase; letter-spacing:.5px; color:#475569; font-weight:700; border:1px solid rgba(37,99,235,.1) }
+.hor-tbl td { padding:6px; border:1px solid rgba(37,99,235,.08); vertical-align:top; min-width:130px }
+.hor-tbl td.bloq-header { background:rgba(37,99,235,.04); text-align:center; font-weight:700; color:#334155; width:110px }
+.hor-tbl td.bloq-header .hora { display:block; font-size:.7rem; color:#64748B; font-weight:normal }
+.hor-tbl td.recreo, .hor-tbl td.almuerzo { background:rgba(245,158,11,.08); text-align:center; color:#B45309;
+  font-style:italic; font-size:.78rem }
+.slot-empty { color:#94a3b8; font-size:.75rem; text-align:center; padding:8px 4px; cursor:pointer;
+  border:1px dashed transparent; border-radius:6px; min-height:52px; display:flex; align-items:center; justify-content:center }
+.slot-empty:hover { border-color:rgba(37,99,235,.3); background:rgba(37,99,235,.03) }
+.slot-full { padding:6px 8px; border-radius:6px; cursor:pointer;
+  background:linear-gradient(135deg,rgba(37,99,235,.08),rgba(56,189,248,.08));
+  border:1px solid rgba(37,99,235,.2); min-height:52px; display:flex; flex-direction:column;
+  justify-content:center; align-items:center; gap:2px; text-align:center }
+.slot-full:hover { border-color:#2563EB }
+.slot-curso { font-weight:700; color:#0C1E3B; font-size:.8rem }
+.slot-asig { color:#2563EB; font-size:.72rem }
+.slot-del { position:absolute; top:2px; right:2px; width:18px; height:18px; border-radius:50%; background:#DC2626;
+  color:#fff; font-size:.7rem; border:none; cursor:pointer; opacity:0; transition:.15s }
+.slot-full:hover .slot-del { opacity:1 }
+
+/* Modal asignar clase */
+.ov { position:fixed; inset:0; background:rgba(15,23,42,.55); z-index:9999; display:none;
+  align-items:center; justify-content:center; padding:20px }
+.ov.open { display:flex }
+.ov-box { background:#fff; border-radius:14px; padding:22px 26px; width:min(460px,94vw); max-height:90vh; overflow:auto }
+.ov-box h3 { margin:0 0 14px; color:#0C1E3B }
+.ov-box label { display:block; font-size:.75rem; color:#475569; font-weight:600; text-transform:uppercase;
+  margin-bottom:4px; margin-top:10px }
+.ov-box select, .ov-box input { width:100%; padding:9px 11px; border:1px solid rgba(37,99,235,.18);
+  border-radius:8px; font-size:.9rem; font-family:inherit; background:#F0F7FF }
+.ov-actions { display:flex; gap:8px; margin-top:16px; justify-content:flex-end }
+.ov-actions button { padding:9px 20px; border-radius:8px; border:1px solid #e2e8f0; background:#fff;
+  color:#334155; cursor:pointer; font-weight:600 }
+.ov-actions button.primary { background:linear-gradient(135deg,#2563EB,#38BDF8); color:#fff; border-color:transparent }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <div id="ccHero"></div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="tab('bloques')">🕐 Bloques del colegio</button>
+    <button class="tab" onclick="tab('horarios')">📅 Horarios docentes</button>
+  </div>
+
+  <!-- TAB BLOQUES -->
+  <div id="tab-bloques" class="tab-content active">
+    <div class="cck-card">
+      <h2 style="display:flex;justify-content:space-between;align-items:center">
+        <span>🕐 Bloques horarios estándar del colegio</span>
+        <span>
+          <button class="cck-hero .btn" onclick="agregarBloque()"
+            style="padding:8px 14px;border-radius:8px;border:none;background:linear-gradient(135deg,#2563EB,#38BDF8);color:#fff;font-weight:700;cursor:pointer">
+            + Agregar bloque
+          </button>
+        </span>
+      </h2>
+      <p style="color:#64748B;font-size:.85rem;margin:0 0 14px">
+        Definí acá los bloques que usa tu colegio. Después los usarás al armar los horarios de cada docente.
+      </p>
+      <table class="bloques-table" id="tblBloques"></table>
+      <div style="display:flex;justify-content:flex-end;margin-top:14px;gap:8px">
+        <button onclick="cargarBloquesDefault()" style="padding:9px 16px;border-radius:8px;border:1px solid rgba(37,99,235,.18);background:#fff;color:#2563EB;font-weight:600;cursor:pointer">
+          📋 Cargar preset chileno estándar
+        </button>
+        <button onclick="guardarBloques()" style="padding:9px 20px;border-radius:8px;border:none;background:linear-gradient(135deg,#2563EB,#38BDF8);color:#fff;font-weight:700;cursor:pointer">
+          💾 Guardar bloques
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB HORARIOS DOCENTES -->
+  <div id="tab-horarios" class="tab-content">
+    <div class="hor-picker">
+      <div class="docente-list">
+        <input id="fBuscar" type="text" placeholder="🔎 Buscar docente..."
+          style="width:100%;padding:9px 12px;margin-bottom:10px;border:1px solid rgba(37,99,235,.18);border-radius:8px;font-size:.86rem"
+          oninput="filtrarDocentes()">
+        <div id="listDocentes"></div>
+      </div>
+
+      <div class="hor-grid">
+        <div id="horHeader" style="margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+          <div style="color:#64748B;font-size:.9rem">👈 Elegí un docente para editar su horario</div>
+        </div>
+        <div id="horBody"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL asignar clase a un slot -->
+<div class="ov" id="ovSlot">
+  <div class="ov-box">
+    <h3 id="ovTitulo">Asignar clase</h3>
+    <label>Curso</label>
+    <select id="ovCurso"></select>
+    <label>Asignatura / Módulo</label>
+    <select id="ovAsig"><option value="">— Elegir primero un curso —</option></select>
+    <label>Sala (opcional)</label>
+    <input id="ovSala" placeholder="Ej: Sala 12, Taller electricidad">
+    <div class="ov-actions">
+      <button onclick="cerrarOv()">Cancelar</button>
+      <button class="primary" onclick="guardarSlot()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+if (window.CCRouter && window.CCRouter.guardPanel) {
+  CCRouter.guardPanel(['admin','admin_colegio','director','rector','utp','encargado_area']);
+}
+
+var _bloques = [];
+var _docentes = [];
+var _docenteSel = null;
+var _horarioSel = null;
+var _cursos = [];
+var _slot = null; // { dia, bloqueId }
+
+function esc(s){ return String(s == null ? '' : s).replace(/[<>&"]/g,function(c){return {'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c];}); }
+
+function _renderHero() {
+  document.getElementById('ccHero').innerHTML = CCKit.hero({
+    emoji: '🕐',
+    title: 'Horarios del Colegio',
+    sub: 'Configurá bloques y asignaciones semanales de cada docente',
+    actions: [
+      { label: 'Panel Admin', emoji: '←', href: 'panel-admin-colegio.html' }
+    ]
+  });
+}
+
+function tab(id) {
+  document.querySelectorAll('.tab').forEach(function(t){ t.classList.remove('active'); });
+  document.querySelectorAll('.tab-content').forEach(function(t){ t.classList.remove('active'); });
+  event.target.classList.add('active');
+  document.getElementById('tab-'+id).classList.add('active');
+  if (id === 'horarios') cargarDocentes();
+}
+
+function iniciar() {
+  _renderHero();
+  cargarBloques();
+}
+
+function cargarBloques() {
+  CCHorarios.getBloques().then(function (blq) {
+    _bloques = blq;
+    renderBloques();
+  });
+}
+
+function renderBloques() {
+  var html = '<thead><tr><th style="width:60px">Orden</th><th>Nombre</th><th style="width:110px">Desde</th><th style="width:110px">Hasta</th><th style="width:130px">Tipo</th><th style="width:70px">Acción</th></tr></thead><tbody>';
+  _bloques.forEach(function (b, i) {
+    var cls = 'bloque-' + (b.tipo || 'clase');
+    html += '<tr class="' + cls + '">' +
+      '<td><input type="number" value="' + (b.orden||i+1) + '" onchange="_bloques['+i+'].orden=parseInt(this.value)||0;renderBloques()"></td>' +
+      '<td><input value="' + esc(b.nombre||'') + '" onchange="_bloques['+i+'].nombre=this.value"></td>' +
+      '<td><input type="time" value="' + esc(b.horaInicio||'') + '" onchange="_bloques['+i+'].horaInicio=this.value"></td>' +
+      '<td><input type="time" value="' + esc(b.horaFin||'') + '" onchange="_bloques['+i+'].horaFin=this.value"></td>' +
+      '<td><select onchange="_bloques['+i+'].tipo=this.value;renderBloques()">' +
+        ['clase','recreo','almuerzo'].map(function(t){
+          return '<option value="'+t+'"' + (b.tipo===t?' selected':'') + '>' + t.charAt(0).toUpperCase()+t.slice(1) + '</option>';
+        }).join('') + '</select></td>' +
+      '<td><button onclick="quitarBloque('+i+')" style="background:transparent;border:none;color:#DC2626;cursor:pointer;font-size:1rem">✕</button></td>' +
+      '</tr>';
+  });
+  html += '</tbody>';
+  document.getElementById('tblBloques').innerHTML = html;
+}
+
+function agregarBloque() {
+  var id = 'b' + (_bloques.length + 1);
+  _bloques.push({ id:id, orden:_bloques.length+1, horaInicio:'', horaFin:'', nombre:'Nuevo bloque', tipo:'clase' });
+  renderBloques();
+}
+
+function quitarBloque(i) {
+  if (!confirm('¿Eliminar este bloque?')) return;
+  _bloques.splice(i, 1);
+  renderBloques();
+}
+
+function cargarBloquesDefault() {
+  if (!confirm('Reemplazar bloques actuales con el preset chileno estándar?')) return;
+  _bloques = JSON.parse(JSON.stringify(CCHorarios.BLOQUES_DEFAULT));
+  renderBloques();
+}
+
+function guardarBloques() {
+  CCHorarios.guardarBloques(null, _bloques).then(function () {
+    alert('✓ Bloques guardados. Ahora puedes armar los horarios de cada docente.');
+  }).catch(function (err) { alert('Error: ' + err.message); });
+}
+
+// ── Horarios docentes ─────────────────────────────────────────
+function cargarDocentes() {
+  if (_docentes.length) { renderDocentes(); return; }
+  CCPersonal.listarMiembros().then(function (miembros) {
+    // Filtrar docentes (profesor, jefe_curso, utp, encargado_area)
+    _docentes = (miembros || []).filter(function (m) {
+      var roles = m.roles || {};
+      return roles.profesor || roles.jefe_curso || roles.utp || roles.encargado_area;
+    }).sort(function (a, b) {
+      return String(a.nombre||a.email||'').localeCompare(String(b.nombre||b.email||''), 'es');
+    });
+    renderDocentes();
+  });
+  // Cargar cursos del liceo
+  EL_DB.collection('cursos').get().then(function (snap) {
+    _cursos = [];
+    snap.forEach(function (d) {
+      var c = d.data();
+      if (!c || c.liceoSlug !== (ELAuth.user && ELAuth.user.liceoSlug)) return;
+      c.cursoId = c.cursoId || c.id || d.id;
+      _cursos.push(c);
+    });
+    _cursos.sort(function(a,b){ return String(a.nombreCompleto||a.nombre||'').localeCompare(String(b.nombreCompleto||b.nombre||''),'es'); });
+  });
+}
+
+function filtrarDocentes() { renderDocentes(); }
+
+function renderDocentes() {
+  var q = (document.getElementById('fBuscar').value || '').toLowerCase();
+  var list = document.getElementById('listDocentes');
+  var filtrados = _docentes.filter(function (d) {
+    if (!q) return true;
+    return String(d.nombre||'').toLowerCase().indexOf(q) !== -1 ||
+           String(d.email||'').toLowerCase().indexOf(q) !== -1;
+  });
+  if (!filtrados.length) {
+    list.innerHTML = '<div style="text-align:center;color:#94a3b8;padding:20px;font-size:.85rem">Sin docentes</div>';
+    return;
+  }
+  list.innerHTML = filtrados.map(function (d) {
+    var uid = d.uid || d.id;
+    var activo = _docenteSel && _docenteSel.uid === uid;
+    return '<button class="docente-btn' + (activo?' active':'') + '" onclick="seleccionarDocente(\'' + esc(uid) + '\')">' +
+      esc(d.nombre || d.email || 'Sin nombre') +
+      '<small>' + esc(d.email||'') + '</small>' +
+      '</button>';
+  }).join('');
+}
+
+function seleccionarDocente(uid) {
+  _docenteSel = _docentes.find(function(d){ return (d.uid||d.id) === uid; });
+  if (!_docenteSel) return;
+  renderDocentes();
+  document.getElementById('horHeader').innerHTML =
+    '<div><b>' + esc(_docenteSel.nombre||_docenteSel.email) + '</b>' +
+    '<div style="color:#64748B;font-size:.8rem">' + esc(_docenteSel.email||'') + '</div></div>' +
+    '<button onclick="guardarHorario()" style="padding:9px 20px;border-radius:8px;border:none;background:linear-gradient(135deg,#2563EB,#38BDF8);color:#fff;font-weight:700;cursor:pointer">💾 Guardar horario</button>';
+
+  CCHorarios.gridSemanaDocente(uid).then(function (grid) {
+    _horarioSel = grid.horario;
+    if (!_horarioSel.semana) _horarioSel.semana = {};
+    CCHorarios.DIAS.forEach(function(d){ if(!_horarioSel.semana[d]) _horarioSel.semana[d] = []; });
+    renderGrid();
+  });
+}
+
+function renderGrid() {
+  if (!_horarioSel || !_bloques.length) return;
+  var html = '<table class="hor-tbl"><thead><tr><th>Bloque</th>';
+  CCHorarios.DIAS.forEach(function(d){ html += '<th>' + CCHorarios.DIAS_LABEL[d] + '</th>'; });
+  html += '</tr></thead><tbody>';
+  _bloques.forEach(function (b) {
+    html += '<tr>';
+    var horas = (b.horaInicio||'') + '–' + (b.horaFin||'');
+    html += '<td class="bloq-header">' + esc(b.nombre) + '<span class="hora">' + horas + '</span></td>';
+    CCHorarios.DIAS.forEach(function (d) {
+      if (b.tipo === 'recreo' || b.tipo === 'almuerzo') {
+        html += '<td class="' + b.tipo + '">' + (b.tipo === 'recreo' ? '🎉 Recreo' : '🍽 Almuerzo') + '</td>';
+        return;
+      }
+      var e = (_horarioSel.semana[d] || []).find(function (x) { return x.bloqueId === b.id; });
+      if (e) {
+        html += '<td><div class="slot-full" style="position:relative" onclick="editarSlot(\'' + d + '\',\'' + b.id + '\')">' +
+          '<button class="slot-del" onclick="event.stopPropagation();borrarSlot(\'' + d + '\',\'' + b.id + '\')">✕</button>' +
+          '<div class="slot-curso">' + esc(e.cursoNombre||e.cursoId) + '</div>' +
+          '<div class="slot-asig">' + esc(e.asignatura) + '</div>' +
+          (e.sala ? '<div style="font-size:.7rem;color:#94a3b8">📍 ' + esc(e.sala) + '</div>' : '') +
+          '</div></td>';
+      } else {
+        html += '<td><div class="slot-empty" onclick="editarSlot(\'' + d + '\',\'' + b.id + '\')">+ vacío</div></td>';
+      }
+    });
+    html += '</tr>';
+  });
+  html += '</tbody></table>';
+  document.getElementById('horBody').innerHTML = html;
+}
+
+function editarSlot(dia, bloqueId) {
+  _slot = { dia: dia, bloqueId: bloqueId };
+  var e = (_horarioSel.semana[dia] || []).find(function(x){ return x.bloqueId === bloqueId; });
+  document.getElementById('ovTitulo').textContent =
+    'Clase — ' + CCHorarios.DIAS_LABEL[dia] + ' · ' + (_bloques.find(function(b){return b.id===bloqueId;}) || {}).nombre;
+  // Poblar select de cursos
+  document.getElementById('ovCurso').innerHTML = '<option value="">— Elegir —</option>' +
+    _cursos.map(function (c) {
+      return '<option value="' + esc(c.cursoId) + '" data-nom="' + esc(c.nombreCompleto||c.nombre||'') + '">' +
+        esc(c.nombreCompleto||c.nombre||c.cursoId) + '</option>';
+    }).join('');
+  document.getElementById('ovCurso').onchange = function () {
+    var opt = this.options[this.selectedIndex];
+    var c = _cursos.find(function(x){ return x.cursoId === this.value; }.bind(this));
+    var asigs = c && c.asignaturasAsignadas ? c.asignaturasAsignadas : [];
+    document.getElementById('ovAsig').innerHTML = '<option value="">— Elegir —</option>' +
+      asigs.map(function (a) { return '<option value="' + esc(a.asignatura) + '">' + esc(a.asignatura) + '</option>'; }).join('');
+  };
+  if (e) {
+    document.getElementById('ovCurso').value = e.cursoId || '';
+    document.getElementById('ovCurso').onchange();
+    document.getElementById('ovAsig').value = e.asignatura || '';
+    document.getElementById('ovSala').value  = e.sala || '';
+  } else {
+    document.getElementById('ovSala').value = '';
+    document.getElementById('ovAsig').innerHTML = '<option value="">— Elegir primero un curso —</option>';
+  }
+  document.getElementById('ovSlot').classList.add('open');
+}
+
+function cerrarOv() { document.getElementById('ovSlot').classList.remove('open'); }
+
+function guardarSlot() {
+  var cursoId = document.getElementById('ovCurso').value;
+  var asig    = document.getElementById('ovAsig').value;
+  var sala    = document.getElementById('ovSala').value.trim();
+  if (!cursoId || !asig) { alert('Elegí curso y asignatura'); return; }
+  var c = _cursos.find(function(x){ return x.cursoId === cursoId; });
+  var nueva = { bloqueId: _slot.bloqueId, cursoId: cursoId,
+                cursoNombre: c ? (c.nombreCompleto||c.nombre||'') : '',
+                asignatura: asig, sala: sala };
+  var arr = _horarioSel.semana[_slot.dia] || [];
+  var idx = arr.findIndex(function(x){ return x.bloqueId === _slot.bloqueId; });
+  if (idx >= 0) arr[idx] = nueva; else arr.push(nueva);
+  _horarioSel.semana[_slot.dia] = arr;
+  cerrarOv();
+  renderGrid();
+}
+
+function borrarSlot(dia, bloqueId) {
+  if (!confirm('¿Quitar esta clase del horario?')) return;
+  _horarioSel.semana[dia] = (_horarioSel.semana[dia] || []).filter(function(x){ return x.bloqueId !== bloqueId; });
+  renderGrid();
+}
+
+function guardarHorario() {
+  if (!_docenteSel || !_horarioSel) return;
+  CCHorarios.guardarHorarioDocente({
+    docenteUid:    _docenteSel.uid || _docenteSel.id,
+    docenteNombre: _docenteSel.nombre || _docenteSel.email,
+    docenteEmail:  _docenteSel.email,
+    semana:        _horarioSel.semana
+  }).then(function () {
+    alert('✓ Horario de ' + (_docenteSel.nombre||_docenteSel.email) + ' guardado.');
+  }).catch(function (err) { alert('Error: ' + err.message); });
+}
+
+if (window.ELAuth && ELAuth.onUserReady) {
+  ELAuth.onUserReady(function(u){ if(u) iniciar(); });
+}
+</script>
+</body>
+</html>

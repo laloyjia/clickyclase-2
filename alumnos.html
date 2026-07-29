@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Buscar alumno · Click&Clase</title>
+<link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg">
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="js/firebase-rest.js"></script>
+<script src="js/firebase-config.js"></script>
+<script src="js/firebase-auth.js"></script>
+<script src="js/firebase-db.js"></script>
+<script src="js/roles-permissions.js"></script>
+<script src="js/roles-router.js"></script>
+<style>
+:root {
+  --bg: #F0F7FF; --bg-2: #E0EDFF; --panel: #FFFFFF; --panel-2: #FAFCFF;
+  --border: rgba(148,163,184,.14); --border-strong: rgba(37,99,235,.22);
+  --text: #0C1E3B; --text-2: #334155; --muted: #475569;
+  --violet: #2563EB; --gold: #F59E0B; --green: #34d399;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Inter','Segoe UI',Roboto,Arial,sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; font-size: 15px; line-height: 1.55; }
+.wrap { max-width: 1200px; margin: 0 auto; padding: 24px; }
+.back-link { color: var(--violet); text-decoration: none; font-size: .88rem; }
+.back-link:hover { text-decoration: underline; }
+
+.header {
+  background: linear-gradient(135deg, var(--panel), var(--panel-2));
+  border: 1px solid var(--border-strong);
+  border-radius: 20px;
+  padding: 32px 36px;
+  margin: 16px 0 24px;
+}
+.header h1 { font-size: 2rem; font-weight: 800; letter-spacing: -.5px; margin-bottom: 6px; }
+.header p { color: var(--text-2); font-size: .95rem; }
+
+.card { background: var(--panel); border: 1px solid var(--border); border-radius: 16px; padding: 22px 26px; margin-bottom: 16px; }
+
+.filtros { display: grid; grid-template-columns: 1fr 240px; gap: 12px; margin-bottom: 20px; }
+@media (max-width: 700px) { .filtros { grid-template-columns: 1fr; } }
+.filtros input, .filtros select {
+  padding: 12px 15px; border-radius: 10px; background: var(--bg-2);
+  border: 1px solid var(--border-strong); color: var(--text);
+  font-family: inherit; font-size: .95rem;
+}
+.filtros input:focus, .filtros select:focus { outline: none; border-color: var(--violet); }
+
+.stat-row { display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+.stat-chip {
+  background: var(--bg-2); border: 1px solid var(--border); border-radius: 10px;
+  padding: 10px 16px; display: flex; align-items: center; gap: 8px; font-size: .88rem;
+}
+.stat-chip b { font-size: 1.1rem; color: var(--violet); font-weight: 800; }
+
+table { width: 100%; border-collapse: collapse; font-size: .9rem; }
+th, td { padding: 12px 14px; text-align: left; border-bottom: 1px solid var(--border); }
+th { font-size: .72rem; text-transform: uppercase; letter-spacing: 1px; color: #475569; font-weight: 700; background: rgba(37,99,235,.08); }
+tr:hover td { background: rgba(37,99,235,.04); }
+
+.avatar-mini {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 32px; height: 32px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--violet), var(--gold));
+  color: white; font-weight: 800; font-size: .85rem; margin-right: 10px;
+}
+.chip-curso {
+  display: inline-block; padding: 3px 10px; background: rgba(37,99,235,.15);
+  color: #1D4ED8; border-radius: 8px; font-size: .78rem; font-weight: 600;
+}
+.chip-sexo-M { background: rgba(34,211,238,.12); color: #0369A1; }
+.chip-sexo-F { background: rgba(244,114,182,.12); color: #DC2626; }
+
+.btn-ficha {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 6px 12px; background: linear-gradient(135deg, var(--violet), #1E40AF);
+  color: white; border: none; border-radius: 8px; text-decoration: none;
+  font-size: .82rem; font-weight: 600; cursor: pointer;
+}
+.btn-ficha:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(37,99,235,.35); }
+
+.empty { padding: 60px 20px; text-align: center; color: #475569; }
+.empty .icon { font-size: 4rem; margin-bottom: 12px; }
+.loader { padding: 40px; text-align: center; color: #475569; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <a class="back-link" id="backLink" href="dashboard-profesor.html">← Volver al panel</a>
+  <script>
+    (function(){
+      var qp = new URLSearchParams(window.location.search);
+      var volverA = qp.get('volverA');
+      if (volverA) {
+        var a = document.getElementById('backLink');
+        a.href = volverA;
+        a.textContent = '← Volver a Mi Jefatura';
+      }
+    })();
+  </script>
+
+  <div class="header">
+    <h1>🔍 Buscar alumno</h1>
+    <p>Encontrá rápidamente a cualquier estudiante de tus cursos y abre su ficha completa.</p>
+  </div>
+
+  <div class="card">
+    <div class="filtros">
+      <input type="text" id="fBusq" placeholder="Buscar por nombre, apellido o RUT…" oninput="renderLista()">
+      <select id="fCurso" onchange="renderLista()">
+        <option value="">Todos los cursos</option>
+      </select>
+    </div>
+
+    <div class="stat-row" id="stats"></div>
+
+    <div id="tablaWrap"><div class="loader">⏳ Cargando alumnos…</div></div>
+  </div>
+</div>
+
+<script>
+if (window.CCRouter && CCRouter.guardPanel) {
+  CCRouter.guardPanel(['admin','director','rector','admin_colegio','utp','encargado_area','profesor','jefe_curso','pie_enc','pie_edu','aps_enc','aps_prof','amb_enc','amb_prof']);
+}
+
+var _cursos    = [];
+var _alumnos   = [];   // flat: {rut, nombres, apellidos, sexo, cursoId, cursoNombre}
+var _user      = null;
+
+function esc(s) { return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function inicio() {
+  _user = ELAuth.user || {};
+  cargarCursos();
+}
+
+function cargarCursos() {
+  var uid       = _user.uid;
+  var liceoSlug = _user.liceoSlug || '';
+  var esAdmin   = _user.role === 'admin' || (_user.roles && _user.roles.admin) ||
+                  _user.role === 'director' || _user.role === 'rector' ||
+                  _user.role === 'utp' || _user.role === 'admin_colegio' ||
+                  (_user.roles && (_user.roles.director || _user.roles.rector || _user.roles.utp || _user.roles.admin_colegio));
+
+  EL_DB.collection('cursos').get().then(function (snap) {
+    _cursos = [];
+    snap.forEach(function (d) {
+      var c = d.data(); c.id = d.id; c.cursoId = d.id;
+      if (c.liceoSlug !== liceoSlug && !esAdmin) return;
+      // Filtro: solo cursos del profesor a menos que sea directivo
+      if (!esAdmin) {
+        var esJefe = c.jefeUid === uid;
+        var enAsig = (c.asignaturasAsignadas || []).some(function (a) { return a.docenteUid === uid; });
+        if (!esJefe && !enAsig) return;
+      }
+      _cursos.push(c);
+    });
+    _cursos.sort(function (a, b) { return (a.nombreCompleto || '').localeCompare(b.nombreCompleto || ''); });
+
+    // Poblar select de cursos
+    var sel = document.getElementById('fCurso');
+    sel.innerHTML = '<option value="">Todos los cursos (' + _cursos.length + ')</option>' +
+      _cursos.map(function (c) {
+        var count = (c.estudiantes || []).length;
+        return '<option value="' + esc(c.cursoId) + '">' + esc(c.nombreCompleto) + ' — ' + count + ' est.</option>';
+      }).join('');
+    // Preseleccionar cursoId de URL (viene de Mi Jefatura)
+    var qp = new URLSearchParams(window.location.search);
+    var qCursoId = qp.get('cursoId');
+    if (qCursoId) sel.value = qCursoId;
+
+    // Flatten alumnos
+    _alumnos = [];
+    _cursos.forEach(function (c) {
+      (c.estudiantes || []).forEach(function (e, idx) {
+        // Tolerar 2 shapes:
+        //   nuevo:  { uid, nombre: "Camila Reyes González", rut }
+        //   legacy: { ordinal, apellidoP, apellidoM, nombre }
+        var nombreCompleto = e.nombre && e.nombre.indexOf(' ') !== -1
+          ? e.nombre
+          : ((e.apellidoP || '') + ' ' + (e.apellidoM || '') + (e.nombre ? ', ' + e.nombre : '')).trim();
+        _alumnos.push({
+          rut:          e.rut || '',
+          uid:          e.uid || '',
+          nombres:      e.nombre || e.nombres || '',
+          apellidoP:    e.apellidoP || '',
+          apellidoM:    e.apellidoM || '',
+          nombreCompleto: nombreCompleto,
+          sexo:         e.sexo || '',
+          ordinal:      e.ordinal || (idx + 1),
+          cursoId:      c.cursoId || c.id,
+          cursoNombre:  c.nombreCompleto || (c.nivel + ' ' + c.letra)
+        });
+      });
+    });
+    renderLista();
+  }).catch(function (err) {
+    document.getElementById('tablaWrap').innerHTML = '<div class="empty"><div class="icon">⚠</div>Error al cargar: ' + esc(err.message) + '</div>';
+  });
+}
+
+function renderLista() {
+  var q = (document.getElementById('fBusq').value || '').toLowerCase().trim();
+  var cursoId = document.getElementById('fCurso').value;
+
+  var lista = _alumnos.filter(function (a) {
+    if (cursoId && a.cursoId !== cursoId) return false;
+    if (!q) return true;
+    var target = (a.nombreCompleto + ' ' + a.rut).toLowerCase();
+    return target.indexOf(q) !== -1;
+  });
+
+  // Stats
+  var htmlStats =
+    '<div class="stat-chip">👥 <b>' + lista.length + '</b> encontrados</div>' +
+    '<div class="stat-chip">🏫 <b>' + _cursos.length + '</b> cursos</div>' +
+    '<div class="stat-chip">📊 <b>' + _alumnos.length + '</b> alumnos totales</div>';
+  document.getElementById('stats').innerHTML = htmlStats;
+
+  if (!lista.length) {
+    document.getElementById('tablaWrap').innerHTML = q
+      ? '<div class="empty"><div class="icon">🔍</div>Sin resultados para "<b>' + esc(q) + '</b>"</div>'
+      : '<div class="empty"><div class="icon">👥</div>Sin alumnos disponibles.</div>';
+    return;
+  }
+
+  lista.sort(function (a, b) { return a.nombreCompleto.localeCompare(b.nombreCompleto); });
+
+  var filas = lista.slice(0, 300).map(function (a) {
+    var inicial = ((a.apellidoP || a.nombres || '?').charAt(0)).toUpperCase();
+    var sexoChip = a.sexo === 'M' ? '<span class="chip-curso chip-sexo-M">M</span>' :
+                   a.sexo === 'F' ? '<span class="chip-curso chip-sexo-F">F</span>' :
+                   '<span class="chip-curso">—</span>';
+    return '<tr>' +
+      '<td><span class="avatar-mini">' + inicial + '</span><b>' + esc(a.nombreCompleto) + '</b></td>' +
+      '<td>' + esc(a.rut || '—') + '</td>' +
+      '<td>' + sexoChip + '</td>' +
+      '<td><span class="chip-curso">' + esc(a.cursoNombre) + '</span></td>' +
+      '<td><a class="btn-ficha" href="ficha-alumno.html?rut=' + encodeURIComponent(a.rut) + '&curso=' + encodeURIComponent(a.cursoId) + '">👤 Ver ficha</a></td>' +
+    '</tr>';
+  }).join('');
+
+  var htmlTail = lista.length > 300 ? '<div style="padding:12px;text-align:center;color:var(--muted);font-size:.85rem">Mostrando primeros 300 · afiná la búsqueda para ver más</div>' : '';
+
+  document.getElementById('tablaWrap').innerHTML =
+    '<table><thead><tr><th>Alumno</th><th>RUT</th><th>Sexo</th><th>Curso</th><th style="width:130px">Acciones</th></tr></thead>' +
+    '<tbody>' + filas + '</tbody></table>' + htmlTail;
+}
+
+if (typeof ELAuth !== 'undefined' && ELAuth.onUserReady) {
+  ELAuth.onUserReady(inicio);
+} else {
+  window.addEventListener('load', inicio);
+}
+</script>
+
+<script src="js/ia-widget.js" defer></script>
+<script src="js/search-global.js" defer></script>
+</body>
+</html>

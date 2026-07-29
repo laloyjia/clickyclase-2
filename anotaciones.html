@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Anotaciones — Click&Clase</title>
+<link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg">
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="js/firebase-rest.js"></script>
+<script src="js/firebase-config.js"></script>
+<script src="js/firebase-auth.js"></script>
+<script src="js/firebase-db.js"></script>
+<script src="js/roles-permissions.js"></script>
+<script src="js/roles-router.js"></script>
+<script src="js/cursos.js"></script>
+<script src="js/anotaciones.js"></script>
+<script src="js/cc-uikit.js"></script>
+<style>
+* { box-sizing: border-box; }
+body { margin: 0; font-family: 'Segoe UI', Roboto, Arial, sans-serif; background: #F0F7FF; color: #0C1E3B; }
+.container { max-width: 1300px; margin: 20px auto; padding: 0 24px; }
+.filtros { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
+.fld label { display: block; font-size: .72rem; color: #64748B; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 4px; }
+input, select, textarea { width: 100%; padding: 9px 12px; border-radius: 8px; background: #fff; border: 1px solid rgba(37,99,235,.2); font-size: .88rem; font-family: inherit; }
+.btn { padding: 9px 18px; border-radius: 8px; border: 1px solid rgba(37,99,235,.15); background: #fff; color: #0C1E3B; cursor: pointer; font-weight: 600; font-size: .85rem }
+.btn.primary { background: linear-gradient(135deg,#2563EB,#38BDF8); color: #fff; border-color: transparent }
+.ano-item { padding: 12px 16px; border: 1px solid rgba(37,99,235,.1); border-radius: 10px; margin-bottom: 8px; background: #fff }
+.ano-h { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px }
+.ano-alu { font-weight: 700 }
+.ano-desc { color: #334155; font-size: .9rem; line-height: 1.5 }
+.ano-meta { color: #94a3b8; font-size: .75rem; margin-top: 4px }
+.ov { position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:9999;display:none;align-items:center;justify-content:center;padding:20px }
+.ov.open { display: flex }
+.ov-box { background:#fff;border-radius:14px;padding:22px 26px;width:min(500px,94vw);max-height:90vh;overflow:auto }
+.ov-box h3 { margin: 0 0 14px }
+.ov-box label { display: block; font-size: .75rem; color: #475569; font-weight: 600; text-transform: uppercase; margin-bottom: 4px; margin-top: 10px }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div id="ccHero"></div>
+  <div id="ccKpis"></div>
+
+  <div class="cck-card">
+    <h2 style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+      <span>📝 Anotaciones del curso</span>
+      <button class="btn primary" onclick="nueva()">➕ Nueva anotación</button>
+    </h2>
+    <div class="filtros" style="margin-bottom:14px">
+      <div class="fld"><label>Curso</label><select id="fCurso" onchange="onCambioCurso()"><option value="">— Elegir curso —</option></select></div>
+      <div class="fld"><label>Alumno</label><select id="fAlumno" onchange="reFiltrar()"><option value="">Todos</option></select></div>
+      <div class="fld"><label>Tipo</label>
+        <select id="fTipo" onchange="reFiltrar()">
+          <option value="">Todas</option><option value="positiva">👍 Positivas</option>
+          <option value="neutra">📝 Neutras</option><option value="negativa">⚠ Negativas</option>
+        </select>
+      </div>
+    </div>
+    <div id="lista">
+      <div class="cck-sk-row"><div class="cck-sk"></div><div class="cck-sk"></div><div class="cck-sk"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="ov" id="ovNueva">
+  <div class="ov-box">
+    <h3>➕ Nueva anotación</h3>
+    <label>Alumno</label>
+    <select id="nAlumno"></select>
+    <label>Tipo</label>
+    <select id="nTipo">
+      <option value="positiva">👍 Positiva</option>
+      <option value="neutra" selected>📝 Neutra</option>
+      <option value="negativa">⚠ Negativa</option>
+    </select>
+    <label>Categoría</label>
+    <select id="nCat">
+      <option value="academica">Académica</option>
+      <option value="conductual">Conductual</option>
+      <option value="actitudinal">Actitudinal</option>
+      <option value="asistencia">Asistencia</option>
+      <option value="colaboracion">Colaboración</option>
+      <option value="otra">Otra</option>
+    </select>
+    <label>Descripción</label>
+    <div style="display:flex;gap:6px;margin-bottom:6px;flex-wrap:wrap" id="sugerencias"></div>
+    <textarea id="nDesc" rows="4" placeholder="Describe el hecho observado..."></textarea>
+    <label style="display:flex;align-items:center;gap:6px;margin-top:12px;text-transform:none">
+      <input type="checkbox" id="nVisible" style="width:auto"> Visible para apoderado
+    </label>
+    <div style="display:flex;gap:8px;margin-top:16px;justify-content:flex-end">
+      <button class="btn" onclick="cerrar()">Cancelar</button>
+      <button class="btn primary" onclick="guardar()">💾 Guardar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+if (window.CCRouter && window.CCRouter.guardPanel) {
+  CCRouter.guardPanel(['profesor','jefe_curso','utp','encargado_area','admin_colegio','director','rector']);
+}
+var _cursos=[], _cursoSel=null, _anotaciones=[];
+
+// Normaliza rut: quita puntos, guiones, espacios y pasa a minúsculas.
+// "12.345.678-9" == "12345678-9" == "123456789"
+function _normRut(r){
+  return String(r||'').replace(/[^\dkK]/g,'').toLowerCase();
+}
+function _nombreDelRut(rut){
+  var e = (_cursoSel && _cursoSel.estudiantes || []).find(function(x){ return _normRut(x.rut) === _normRut(rut); });
+  return e ? e.nombre : '';
+}
+function _mismoAlumno(anot, fAlu){
+  if (!fAlu) return true;
+  var target = _normRut(fAlu);
+  return _normRut(anot.alumnoRut) === target ||
+         _normRut(anot.estudianteRut) === target ||
+         _normRut(anot.rut) === target ||
+         (anot.alumno && _normRut(anot.alumno.rut) === target);
+}
+function esc(s){return String(s==null?'':s).replace(/[<>&"]/g,function(c){return {'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c];});}
+
+function _hero(qVolver){
+  var actions = qVolver
+    ? [{label:'Mi Jefatura',emoji:'←',href:qVolver}]
+    : [{label:'Panel',emoji:'←',href:'dashboard-profesor.html'},
+       {label:'Mi Jefatura',emoji:'🎓',href:'mi-jefatura.html'}];
+  document.getElementById('ccHero').innerHTML = CCKit.hero({
+    emoji:'📝', title:'Anotaciones', sub:'Observaciones de conducta y desempeño académico',
+    actions:actions
+  });
+}
+
+function iniciar(){
+  var qp = new URLSearchParams(window.location.search);
+  var qc = qp.get('cursoId');
+  var qSolo = qp.get('soloCurso') === '1';
+  var qVolver = qp.get('volverA');
+  _hero(qVolver);
+
+  // Redundancia: registrar listeners programáticos por si el onchange inline falla
+  ['fAlumno', 'fTipo'].forEach(function(id){
+    var el = document.getElementById(id);
+    if (el) el.addEventListener('change', reFiltrar);
+  });
+  var elC = document.getElementById('fCurso');
+  if (elC) elC.addEventListener('change', onCambioCurso);
+  CCCursos.misCursos().then(function(cs){
+    _cursos = cs || [];
+    var sel = document.getElementById('fCurso');
+    if (qSolo && qc) {
+      // Solo mostrar ese curso
+      var uno = _cursos.find(function(c){ return c.cursoId === qc; });
+      _cursos = uno ? [uno] : _cursos;
+      sel.innerHTML = _cursos.map(function(c){ return '<option value="'+esc(c.cursoId)+'">'+esc(c.nombreCompleto)+'</option>'; }).join('');
+      sel.disabled = true;
+      sel.style.opacity = '.7';
+    } else {
+      sel.innerHTML = '<option value="">— Elegir curso —</option>' +
+        _cursos.map(function(c){ return '<option value="'+esc(c.cursoId)+'">'+esc(c.nombreCompleto)+'</option>'; }).join('');
+    }
+    if (qc) { sel.value = qc; cargar(); }
+  });
+}
+
+// _anotacionesRaw guarda TODAS las anotaciones del curso (sin filtros)
+// Los filtros se aplican in-memory sin re-fetch, para no repoblar el select.
+var _anotacionesRaw = [];
+
+function onCambioCurso(){
+  var cid = document.getElementById('fCurso').value;
+  if (!cid) {
+    document.getElementById('lista').innerHTML = CCKit.emptyState({
+      emoji:'📝', title:'Elegí un curso', body:'Seleccioná uno de tus cursos arriba para ver sus anotaciones.'
+    });
+    document.getElementById('ccKpis').innerHTML = '';
+    _anotacionesRaw = [];
+    return;
+  }
+  _cursoSel = _cursos.find(function(c){ return c.cursoId === cid; });
+
+  // Poblar alumnos SOLO al cambiar curso
+  var selA = document.getElementById('fAlumno');
+  var ests = (_cursoSel && _cursoSel.estudiantes) || [];
+  selA.innerHTML = '<option value="">Todos ('+ests.length+')</option>' +
+    ests.map(function(e){ return '<option value="'+esc(e.rut)+'">'+esc(e.nombre)+'</option>'; }).join('');
+
+  // Fetch anotaciones del curso (una sola vez)
+  Promise.all([
+    EL_DB.collection('anotaciones_alumno').get().catch(function(){return {forEach:function(){}};}),
+    EL_DB.collection('anotaciones').get().catch(function(){return {forEach:function(){}};})
+  ]).then(function(snaps){
+    var out = [], vistos = {};
+    snaps.forEach(function(sn){
+      sn.forEach(function(d){
+        var a = d.data();
+        if (!a || vistos[d.id]) return;
+        vistos[d.id] = true;
+        if (a.cursoId !== cid) return;
+        out.push(Object.assign({id:d.id}, a));
+      });
+    });
+    out.sort(function(a,b){ return String(b.fecha||b.creadoEn||'').localeCompare(String(a.fecha||a.creadoEn||'')); });
+    _anotacionesRaw = out;
+    reFiltrar();
+  });
+}
+
+// Aplica filtros in-memory sin repoblar el select de alumnos.
+function reFiltrar(){
+  var fAlu  = document.getElementById('fAlumno').value;
+  var fTipo = document.getElementById('fTipo').value;
+  var out = _anotacionesRaw.slice();
+  if (fAlu)  out = out.filter(function(a){ return _mismoAlumno(a, fAlu); });
+  if (fTipo) out = out.filter(function(a){ return a.tipo === fTipo; });
+  _anotaciones = out;
+  _renderKpis(); _renderLista();
+}
+
+// Compat: `cargar()` se llama desde varios sitios (nueva anotación, etc.)
+function cargar(){ onCambioCurso(); }
+
+function _renderKpis(){
+  var pos = _anotaciones.filter(function(a){return a.tipo==='positiva';}).length;
+  var neg = _anotaciones.filter(function(a){return a.tipo==='negativa';}).length;
+  var neu = _anotaciones.filter(function(a){return a.tipo==='neutra';}).length;
+  document.getElementById('ccKpis').innerHTML = CCKit.kpiRow([
+    {emoji:'📝',label:'Total',value:_anotaciones.length,tone:'info'},
+    {emoji:'👍',label:'Positivas',value:pos,tone:'ok'},
+    {emoji:'📄',label:'Neutras',value:neu,tone:'gray'},
+    {emoji:'⚠',label:'Negativas',value:neg,tone:neg>0?'err':'ok'}
+  ]);
+}
+
+function _renderLista(){
+  if (!_anotaciones.length) {
+    document.getElementById('lista').innerHTML = CCKit.emptyState({
+      emoji:'📝', title:'Sin anotaciones aún',
+      body:'Registrá la primera anotación con el botón "➕ Nueva anotación".',
+      cta:{label:'Nueva anotación',emoji:'➕',onclick:'nueva()'}
+    });
+    return;
+  }
+  document.getElementById('lista').innerHTML = _anotaciones.map(function(a){
+    var tone = a.tipo==='positiva'?'ok':a.tipo==='negativa'?'err':'gray';
+    var ico = a.tipo==='positiva'?'👍':a.tipo==='negativa'?'⚠':'📝';
+    var fecha = String(a.fecha||a.creadoEn||'').slice(0,10);
+    return '<div class="ano-item">' +
+      '<div class="ano-h">' +
+        '<span class="ano-alu">'+ico+' '+esc(a.alumnoNombre||'—')+'</span>' +
+        CCKit.badge({text:a.tipo||'neutra',tone:tone}) +
+      '</div>' +
+      '<div class="ano-desc">'+esc(a.descripcion||'')+'</div>' +
+      '<div class="ano-meta">📅 '+fecha+' · '+esc(a.categoria||'')+' · por '+esc(a.profesorNombre||'—')+
+        (a.visibleApoderado?' · 👁 visible apoderado':'') + '</div>' +
+    '</div>';
+  }).join('');
+}
+
+// Plantillas rápidas por categoría — sugerencias tipo LIRMI/Napsis
+var PLANTILLAS = {
+  academica: [
+    { tipo:'positiva', txt:'Demuestra excelente disposición y participa activamente en clases.' },
+    { tipo:'positiva', txt:'Presenta sus trabajos y evaluaciones con dedicación y calidad.' },
+    { tipo:'negativa', txt:'No presenta las tareas asignadas en la fecha establecida.' },
+    { tipo:'negativa', txt:'Se distrae con facilidad y no participa de las actividades de la clase.' },
+    { tipo:'neutra',   txt:'Se ausenta a evaluación programada. Se reagenda para próxima clase.' }
+  ],
+  conductual: [
+    { tipo:'positiva', txt:'Colabora con sus compañeros en actividades grupales, demostrando respeto y empatía.' },
+    { tipo:'negativa', txt:'Interrumpe reiteradamente el desarrollo de la clase con conversaciones ajenas.' },
+    { tipo:'negativa', txt:'Utiliza el celular durante la clase sin autorización, pese a advertencias.' },
+    { tipo:'negativa', txt:'Falta el respeto a compañero(a) con expresiones inadecuadas. Se conversa la situación.' }
+  ],
+  actitudinal: [
+    { tipo:'positiva', txt:'Muestra actitud positiva frente a los desafíos académicos.' },
+    { tipo:'positiva', txt:'Demuestra liderazgo y compromiso con las actividades del curso.' },
+    { tipo:'negativa', txt:'Presenta actitud negativa y de rechazo frente a las indicaciones dadas.' }
+  ],
+  asistencia: [
+    { tipo:'negativa', txt:'Llega atrasado(a) sin justificación al inicio de la jornada.' },
+    { tipo:'negativa', txt:'Se retira de la sala sin autorización durante el desarrollo de la clase.' },
+    { tipo:'neutra',   txt:'Se registra ausencia justificada por el apoderado.' }
+  ],
+  colaboracion: [
+    { tipo:'positiva', txt:'Colabora activamente en la organización de actividades del curso.' },
+    { tipo:'positiva', txt:'Ayuda a compañeros(as) que presentan dificultades en la materia.' }
+  ],
+  otra: [
+    { tipo:'neutra',   txt:'Se cita al apoderado para conversar situación observada.' },
+    { tipo:'neutra',   txt:'Se envía comunicación al apoderado informando la situación.' }
+  ]
+};
+
+function _pintarSugerencias(){
+  var cat = document.getElementById('nCat').value;
+  var box = document.getElementById('sugerencias');
+  var lista = PLANTILLAS[cat] || [];
+  if (!lista.length) { box.innerHTML = ''; return; }
+  box.innerHTML = '<div style="width:100%;font-size:.72rem;color:#64748B;font-weight:600;text-transform:uppercase;margin-bottom:4px">💡 Sugerencias rápidas</div>' +
+    lista.map(function(p, i){
+      var color = p.tipo==='positiva' ? '#059669' : p.tipo==='negativa' ? '#DC2626' : '#64748B';
+      var ico   = p.tipo==='positiva' ? '👍' : p.tipo==='negativa' ? '⚠' : '📝';
+      return '<button type="button" onclick="_usarPlantilla('+i+')" ' +
+        'style="padding:6px 12px;border:1px solid '+color+';background:#fff;color:'+color+';border-radius:99px;font-size:.75rem;cursor:pointer;font-weight:600" ' +
+        'title="'+esc(p.txt)+'">' + ico + ' ' + esc(p.txt.slice(0, 50)) + (p.txt.length>50?'…':'') + '</button>';
+    }).join('');
+}
+
+function _usarPlantilla(idx){
+  var cat = document.getElementById('nCat').value;
+  var p = PLANTILLAS[cat][idx];
+  if (!p) return;
+  document.getElementById('nDesc').value = p.txt;
+  document.getElementById('nTipo').value = p.tipo;
+}
+
+function nueva(){
+  if (!_cursoSel) { alert('Elegí un curso primero'); return; }
+  var ests = _cursoSel.estudiantes || [];
+  document.getElementById('nAlumno').innerHTML = ests.map(function(e){
+    return '<option value="'+esc(e.rut)+'|'+esc(e.nombre)+'">'+esc(e.nombre)+'</option>';
+  }).join('');
+  document.getElementById('nDesc').value = '';
+  document.getElementById('nTipo').value = 'neutra';
+  document.getElementById('nCat').value = 'academica';
+  document.getElementById('nVisible').checked = false;
+  _pintarSugerencias();
+  // Cuando cambia categoría, actualizar sugerencias
+  document.getElementById('nCat').onchange = _pintarSugerencias;
+  document.getElementById('ovNueva').classList.add('open');
+}
+function cerrar(){ document.getElementById('ovNueva').classList.remove('open'); }
+
+function guardar(){
+  if (!_cursoSel) return;
+  var partes = document.getElementById('nAlumno').value.split('|');
+  var rut = partes[0], nom = partes[1] || '';
+  var desc = document.getElementById('nDesc').value.trim();
+  if (!desc) { alert('Escribí una descripción'); return; }
+  CCAnotaciones.crear({
+    alumnoRut: rut, alumnoNombre: nom,
+    cursoId: _cursoSel.cursoId,
+    tipo: document.getElementById('nTipo').value,
+    categoria: document.getElementById('nCat').value,
+    descripcion: desc,
+    visibleApoderado: document.getElementById('nVisible').checked
+  }).then(function(){
+    cerrar(); cargar();
+  }).catch(function(err){ alert('Error: '+err.message); });
+}
+
+if (window.ELAuth && ELAuth.onUserReady) ELAuth.onUserReady(function(u){ if(u) iniciar(); });
+</script>
+</body>
+</html>

@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Planes · Click&Clase — Docente particular o colegio</title>
+<meta name="description" content="Planes de Click&Clase para docentes particulares y colegios. Prueba gratis. Sin tarjeta. Mineduc-alineado.">
+<link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg">
+<meta property="og:title" content="Planes · Click&Clase">
+<meta property="og:description" content="El asistente docente con IA alineado al currículum Mineduc. Planes desde $0 para particulares.">
+<meta property="og:image" content="https://clickyclase.cl/assets/img/og-image.png">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://clickyclase.cl/planes.html">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #F0F7FF; --bg-2: #E0EDFF; --panel: #FFFFFF; --panel-2: #FAFCFF;
+  --border: rgba(37,99,235,.15); --text: #0C1E3B; --text-2: #334155; --muted: #475569;
+  --violet: #2563EB; --violet-2: #1E40AF; --gold: #F59E0B; --green: #34d399; --cyan: #38BDF8; --pink: #DC2626;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; }
+
+/* Orbes de fondo */
+.orbs { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+.orbs::before, .orbs::after { content: ''; position: absolute; border-radius: 50%; filter: blur(120px); opacity: .35; }
+.orbs::before { width: 540px; height: 540px; background: radial-gradient(circle, #1D4ED8, transparent 65%); top: -180px; left: -120px; }
+.orbs::after { width: 460px; height: 460px; background: radial-gradient(circle, #38BDF8, transparent 65%); bottom: -180px; right: -120px; }
+
+/* Header */
+header { position: sticky; top: 0; z-index: 50; background: rgba(255, 255, 255, .90); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); padding: 16px 32px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 14px rgba(37,99,235,.05); }
+header .brand { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 1.05rem; color: #0C1E3B; text-decoration: none; }
+header .brand .ico { width: 32px; height: 32px; border-radius: 8px; background: linear-gradient(135deg, var(--violet), var(--violet-2)); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; color: #fff; }
+header nav { display: flex; gap: 8px; }
+header nav a { color: #334155; text-decoration: none; padding: 8px 14px; border-radius: 8px; font-size: .88rem; font-weight: 500; }
+header nav a:hover { background: rgba(37,99,235,.06); color: #1D4ED8; }
+header .cta-log { padding: 8px 18px; border-radius: 10px; background: linear-gradient(135deg, var(--violet), var(--violet-2)); color: white; font-weight: 700; font-size: .88rem; }
+
+/* Layout */
+.wrap { position: relative; z-index: 1; max-width: none; margin: 0 auto; padding: 60px clamp(24px, 3vw, 60px); }
+
+/* Hero */
+.hero { text-align: center; margin-bottom: 60px; }
+.hero .badge {
+  display: inline-block; padding: 6px 16px; background: rgba(37,99,235,.15); border: 1px solid rgba(37,99,235,.35);
+  color: #1D4ED8; border-radius: 999px; font-size: .78rem; font-weight: 600; margin-bottom: 20px;
+}
+.hero h1 {
+  font-family: 'Space Grotesk', sans-serif; font-size: clamp(2.2rem, 5vw, 3.6rem); font-weight: 800; line-height: 1.1;
+  letter-spacing: -1px; margin-bottom: 18px;
+}
+.hero h1 .hl { background: linear-gradient(135deg, var(--violet), var(--cyan)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+.hero p { font-size: 1.15rem; color: #334155; max-width: 620px; margin: 0 auto; line-height: 1.55; }
+
+/* Toggle Docente/Colegio */
+.toggle-wrap { display: flex; justify-content: center; margin: 40px 0 50px; }
+.toggle {
+  display: inline-flex; background: var(--panel); border: 1px solid var(--border); border-radius: 14px; padding: 5px; gap: 4px;
+}
+.toggle button {
+  padding: 12px 26px; background: transparent; border: none; color: #334155; cursor: pointer; font-family: inherit;
+  font-size: .95rem; font-weight: 600; border-radius: 10px; display: inline-flex; align-items: center; gap: 8px; transition: all .2s;
+}
+.toggle button.active {
+  background: linear-gradient(135deg, var(--violet), var(--violet-2)); color: white; font-weight: 700;
+  box-shadow: 0 8px 24px rgba(37,99,235,.35);
+}
+.toggle button:not(.active):hover { background: rgba(37,99,235,.06); color: #1D4ED8; }
+
+/* Cards de planes */
+.planes-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; margin-bottom: 60px; }
+@media (max-width: 900px) { .planes-grid { grid-template-columns: 1fr; max-width: 480px; margin-left: auto; margin-right: auto; } }
+.plan {
+  background: linear-gradient(180deg, var(--panel), var(--bg-2));
+  border: 1px solid var(--border); border-radius: 22px; padding: 32px 28px;
+  position: relative; display: flex; flex-direction: column;
+}
+.plan.destacado {
+  border: 2px solid rgba(37,99,235,.5);
+  box-shadow: 0 20px 60px rgba(37,99,235,.25);
+  transform: scale(1.03);
+}
+@media (max-width: 900px) { .plan.destacado { transform: none; } }
+.plan .badge-top {
+  position: absolute; top: -14px; left: 50%; transform: translateX(-50%);
+  padding: 5px 16px; background: linear-gradient(135deg, var(--violet), var(--violet-2));
+  color: white; font-size: .74rem; font-weight: 800; letter-spacing: 1px; border-radius: 999px; text-transform: uppercase;
+}
+.plan .p-nombre { font-size: 1.35rem; font-weight: 800; margin-bottom: 4px; }
+.plan .p-desc { color: #475569; font-size: .88rem; margin-bottom: 22px; min-height: 40px; }
+.plan .p-precio { display: flex; align-items: baseline; gap: 6px; margin-bottom: 6px; }
+.plan .p-precio .n { font-size: 2.6rem; font-weight: 800; font-family: 'Space Grotesk', sans-serif; }
+.plan .p-precio .u { color: #475569; font-size: .95rem; font-weight: 500; }
+.plan .p-precio-nota { font-size: .78rem; color: #475569; margin-bottom: 24px; }
+.plan .p-features { list-style: none; padding: 0; margin-bottom: 28px; flex: 1; }
+.plan .p-features li {
+  padding: 9px 0; font-size: .88rem; color: #334155; display: flex; align-items: flex-start; gap: 10px;
+  border-bottom: 1px dashed rgba(148,163,184,.1);
+}
+.plan .p-features li:last-child { border-bottom: none; }
+.plan .p-features li::before { content: '✓'; color: var(--green); font-weight: 800; flex-shrink: 0; }
+.plan .p-features li.off { color: #475569; text-decoration: line-through; opacity: .55; }
+.plan .p-features li.off::before { content: '✕'; color: #475569; }
+.plan .p-cta {
+  padding: 14px 24px; border-radius: 12px; border: 1px solid var(--border); background: transparent;
+  color: var(--text); text-decoration: none; text-align: center; font-weight: 700; font-size: .95rem;
+  cursor: pointer; display: block; transition: all .2s;
+}
+.plan.destacado .p-cta {
+  background: linear-gradient(135deg, var(--violet), var(--violet-2)); border-color: transparent; color: white;
+  box-shadow: 0 8px 20px rgba(37,99,235,.4);
+}
+.plan .p-cta:hover { transform: translateY(-2px); box-shadow: 0 12px 28px rgba(37,99,235,.35); background: rgba(37,99,235,.1); }
+.plan.destacado .p-cta:hover { background: linear-gradient(135deg, #60A5FA, var(--violet)); }
+
+/* Comparación */
+.compara {
+  background: linear-gradient(135deg, rgba(37,99,235,.06), rgba(34,211,238,.03));
+  border: 1px solid var(--border); border-radius: 20px; padding: 40px 32px; margin-bottom: 50px;
+}
+.compara h2 { font-size: 1.6rem; margin-bottom: 8px; font-weight: 800; }
+.compara p { color: #475569; margin-bottom: 20px; }
+.compara table { width: 100%; border-collapse: collapse; font-size: .88rem; }
+.compara th, .compara td { padding: 12px 14px; text-align: left; border-bottom: 1px solid var(--border); }
+.compara th { font-weight: 700; color: var(--text-2); text-transform: uppercase; font-size: .72rem; letter-spacing: .5px; color: #475569; }
+.compara td.check { color: var(--green); font-weight: 700; text-align: center; }
+.compara td.cross { color: #475569; text-align: center; }
+.compara td.info { text-align: center; color: var(--cyan); font-weight: 600; }
+
+/* Contacto */
+.contacto {
+  background: var(--panel); border: 1px solid var(--border); border-radius: 20px; padding: 40px 32px; text-align: center;
+  margin-bottom: 30px;
+}
+.contacto h2 { font-size: 1.6rem; font-weight: 800; margin-bottom: 8px; }
+.contacto p { color: #475569; margin-bottom: 22px; }
+.contacto .btns { display: inline-flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+.contacto .btns a {
+  padding: 12px 22px; border-radius: 12px; text-decoration: none; font-weight: 700; font-size: .92rem;
+  display: inline-flex; align-items: center; gap: 8px;
+}
+.contacto .btns .primary { background: linear-gradient(135deg, var(--violet), var(--violet-2)); color: white; }
+.contacto .btns .wa { background: linear-gradient(135deg, #22c55e, #16a34a); color: white; }
+.contacto .btns .mail { background: rgba(37,99,235,.06); color: var(--text); border: 1px solid var(--border); }
+
+/* FAQ */
+.faq { margin-bottom: 40px; }
+.faq h2 { font-size: 1.6rem; font-weight: 800; margin-bottom: 20px; text-align: center; }
+.faq-item { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 18px 22px; margin-bottom: 10px; }
+.faq-item summary { cursor: pointer; font-weight: 700; font-size: .95rem; list-style: none; display: flex; justify-content: space-between; align-items: center; }
+.faq-item summary::after { content: '+'; font-size: 1.4rem; color: var(--violet); font-weight: 300; }
+.faq-item[open] summary::after { content: '−'; }
+.faq-item p { color: var(--text-2); font-size: .88rem; margin-top: 12px; line-height: 1.6; }
+
+footer { text-align: center; padding: 30px 20px; color: #475569; font-size: .82rem; border-top: 1px solid var(--border); }
+footer a { color: var(--violet); text-decoration: none; margin: 0 8px; }
+</style>
+</head>
+<body>
+
+<div class="orbs"></div>
+
+<header>
+  <a class="brand" href="/"><span class="ico">⚡</span> Click&Clase</a>
+  <nav>
+    <a href="index.html">Inicio</a>
+    <a href="#planes">Planes</a>
+    <a href="#faq">Preguntas</a>
+    <a href="login.html" class="cta-log">Iniciar sesión</a>
+  </nav>
+</header>
+
+<div class="wrap">
+
+  <!-- HERO -->
+  <div class="hero">
+    <span class="badge">🇨🇱 Alineado al currículum Mineduc</span>
+    <h1>Elegí tu plan. <span class="hl">Empezá gratis.</span></h1>
+    <p>Click&Clase es el asistente docente con IA que planifica clases, crea material y hace seguimiento de estudiantes. Sin tarjeta para empezar. Cancelás cuando quieras.</p>
+  </div>
+
+  <!-- TOGGLE Docente/Colegio -->
+  <div class="toggle-wrap">
+    <div class="toggle" id="toggle">
+      <button class="active" data-tipo="docente" onclick="verPlanes('docente', this)">👤 Docente Particular</button>
+      <button data-tipo="colegio" onclick="verPlanes('colegio', this)">🏫 Colegio / Institución</button>
+    </div>
+  </div>
+
+  <!-- PLANES DOCENTE -->
+  <div class="planes-grid" id="planesDocente">
+    <div class="plan">
+      <div class="p-nombre">Free</div>
+      <div class="p-desc">Probalo sin costo con las funciones básicas.</div>
+      <div class="p-precio"><span class="n">$0</span><span class="u">/ mes</span></div>
+      <div class="p-precio-nota">Sin tarjeta · Sin caducidad</div>
+      <ul class="p-features">
+        <li>3 planificaciones de clase al mes</li>
+        <li>2 materiales con IA al mes</li>
+        <li>1 asignatura o módulo TP</li>
+        <li>Biblioteca personal (privada)</li>
+        <li class="off">Compartir con otros docentes</li>
+        <li class="off">Anotaciones de alumnos</li>
+        <li class="off">Alertas al apoderado</li>
+      </ul>
+      <a class="p-cta" href="signup.html">Empezar gratis →</a>
+    </div>
+
+    <div class="plan destacado">
+      <div class="badge-top">Más elegido</div>
+      <div class="p-nombre">Pro</div>
+      <div class="p-desc">Para el docente que necesita todo el poder de la IA.</div>
+      <div class="p-precio"><span class="n">$4.990</span><span class="u">/ mes</span></div>
+      <div class="p-precio-nota">Facturación mensual · Cancelás cuando quieras</div>
+      <ul class="p-features">
+        <li>Planificaciones ilimitadas</li>
+        <li>Materiales ilimitados con IA</li>
+        <li>Todas tus asignaturas/módulos</li>
+        <li>Formatos PAES/SIMCE/DUA</li>
+        <li>Taxonomía Marzano</li>
+        <li>Calendario personal</li>
+        <li>Exportar a Word/PDF</li>
+        <li class="off">Anotaciones y ficha del alumno</li>
+      </ul>
+      <a class="p-cta" href="mailto:soporte.learn0@gmail.com?subject=Quiero%20plan%20Pro%20-%20Click%26Clase">Suscribirme al Pro →</a>
+    </div>
+
+    <div class="plan">
+      <div class="p-nombre">Premium</div>
+      <div class="p-desc">Todo Pro + seguimiento de estudiantes.</div>
+      <div class="p-precio"><span class="n">$9.990</span><span class="u">/ mes</span></div>
+      <div class="p-precio-nota">Facturación mensual</div>
+      <ul class="p-features">
+        <li>Todo lo del plan Pro, más:</li>
+        <li>Ficha de alumnos completa</li>
+        <li>Anotaciones (positiva/negativa)</li>
+        <li>Alertas al apoderado (WhatsApp/Mail)</li>
+        <li>Libro de clases digital</li>
+        <li>Historial académico</li>
+        <li>Reportes de cobertura</li>
+        <li>Soporte prioritario</li>
+      </ul>
+      <a class="p-cta" href="mailto:soporte.learn0@gmail.com?subject=Quiero%20plan%20Premium%20-%20Click%26Clase">Suscribirme al Premium →</a>
+    </div>
+  </div>
+
+  <!-- PLANES COLEGIO (oculto por default) -->
+  <div class="planes-grid" id="planesColegio" style="display:none">
+    <div class="plan">
+      <div class="p-nombre">Básico</div>
+      <div class="p-desc">Ideal para colegios pequeños que empiezan.</div>
+      <div class="p-precio"><span class="n">$99.000</span><span class="u">/ mes</span></div>
+      <div class="p-precio-nota">Hasta 20 docentes · 300 estudiantes</div>
+      <ul class="p-features">
+        <li>Panel Admin del Colegio</li>
+        <li>Todos los docentes acceden</li>
+        <li>Libro de clases digital</li>
+        <li>Notas y asistencia</li>
+        <li>Biblioteca compartida institucional</li>
+        <li>Materiales con IA (5 000/mes)</li>
+        <li class="off">Paneles UTP / PIE / Convivencia</li>
+        <li class="off">Dashboards Director / Rector</li>
+      </ul>
+      <a class="p-cta" href="mailto:soporte.learn0@gmail.com?subject=Info%20plan%20B%C3%A1sico%20Colegio">Pedir demo →</a>
+    </div>
+
+    <div class="plan destacado">
+      <div class="badge-top">Recomendado</div>
+      <div class="p-nombre">Pro</div>
+      <div class="p-desc">Todo lo que un colegio necesita para operar.</div>
+      <div class="p-precio"><span class="n">$249.000</span><span class="u">/ mes</span></div>
+      <div class="p-precio-nota">Hasta 60 docentes · 1 000 estudiantes</div>
+      <ul class="p-features">
+        <li>Todo lo del Básico, más:</li>
+        <li>Panel UTP con revisión de material</li>
+        <li>Panel PIE completo</li>
+        <li>Panel Convivencia Escolar</li>
+        <li>Panel Apoyo Psicosocial</li>
+        <li>Circuito de derivaciones</li>
+        <li>Dashboards Director / Rector</li>
+        <li>Materiales con IA (30 000/mes)</li>
+      </ul>
+      <a class="p-cta" href="mailto:soporte.learn0@gmail.com?subject=Info%20plan%20Pro%20Colegio">Pedir demo →</a>
+    </div>
+
+    <div class="plan">
+      <div class="p-nombre">Enterprise</div>
+      <div class="p-desc">Para redes escolares y colegios grandes.</div>
+      <div class="p-precio"><span class="n">A medida</span></div>
+      <div class="p-precio-nota">Sin límite de docentes ni estudiantes</div>
+      <ul class="p-features">
+        <li>Todo lo del Pro, más:</li>
+        <li>Multi-sede en una sola cuenta</li>
+        <li>Integración con SGE del colegio</li>
+        <li>Firma electrónica del libro</li>
+        <li>SLA 99.9% + soporte 24/7</li>
+        <li>Onboarding + capacitación en sitio</li>
+        <li>Custom branding</li>
+        <li>Uso ilimitado de IA</li>
+      </ul>
+      <a class="p-cta" href="mailto:soporte.learn0@gmail.com?subject=Info%20plan%20Enterprise%20Colegio">Contactar ventas →</a>
+    </div>
+  </div>
+
+  <!-- COMPARACIÓN -->
+  <div class="compara" id="compara">
+    <h2>Comparación rápida</h2>
+    <p>Todo lo que necesitas saber en una sola tabla.</p>
+    <table>
+      <thead id="compHead"></thead>
+      <tbody id="compBody"></tbody>
+    </table>
+  </div>
+
+  <!-- CONTACTO -->
+  <div class="contacto">
+    <h2>¿No sabes cuál elegir?</h2>
+    <p>Hablemos 10 minutos. Te ayudamos a elegir el plan justo o armamos uno a medida.</p>
+    <div class="btns">
+      <a class="primary" href="mailto:soporte.learn0@gmail.com?subject=Consulta%20planes%20Click%26Clase">✉ Escribinos</a>
+      <a class="wa" href="https://wa.me/56942532644?text=Hola%2C%20quiero%20info%20de%20Click%26Clase" target="_blank">💬 WhatsApp</a>
+      <a class="mail" href="signup.html">🚀 Probar gratis</a>
+    </div>
+  </div>
+
+  <!-- FAQ -->
+  <div class="faq" id="faq">
+    <h2>Preguntas frecuentes</h2>
+    <details class="faq-item">
+      <summary>¿Necesito instalar algo?</summary>
+      <p>No. Click&Clase funciona 100% en el navegador. Solo necesitas tu computador o tablet con internet.</p>
+    </details>
+    <details class="faq-item">
+      <summary>¿La IA está incluida en el precio?</summary>
+      <p>Sí. Todos los planes de pago tienen IA incluida con cuota mensual. En Free tienes algunas generaciones para probar.</p>
+    </details>
+    <details class="faq-item">
+      <summary>¿Está alineado al currículum Mineduc?</summary>
+      <p>Sí. Trabajamos con los Objetivos de Aprendizaje (OA), Aprendizajes Esperados (AE) y Criterios de Evaluación (CE) oficiales para Educación Básica, Media y Técnico-Profesional (Decreto 546/2020 y 452/2013).</p>
+    </details>
+    <details class="faq-item">
+      <summary>¿Los datos de mis estudiantes están seguros?</summary>
+      <p>Sí. Cumplimos la Ley 19.628 de protección de datos personales. Cada colegio tiene sus datos aislados. Nunca compartimos ni vendemos información.</p>
+    </details>
+    <details class="faq-item">
+      <summary>¿Puedo cancelar cuando quiera?</summary>
+      <p>Absolutamente. No hay contratos de permanencia. Cancelás desde tu panel o escribiéndonos y no se cobra más al mes siguiente.</p>
+    </details>
+    <details class="faq-item">
+      <summary>Nuestro colegio ya usa otro sistema. ¿Podemos migrar?</summary>
+      <p>Sí. Migramos gratis desde LIRMI, PapiNotas, NAPSIS, PowerSchool y otros. Nuestro equipo hace la carga masiva de cursos y estudiantes desde Excel en menos de 24 hs.</p>
+    </details>
+    <details class="faq-item">
+      <summary>¿Sirve para especialidades técnico-profesionales?</summary>
+      <p>Sí. Tenemos todos los módulos de las 35 especialidades EMTP del Mineduc con sus OA, AE y CE oficiales. Ideal para profesores de Enfermería, Electrónica, Mecánica, Administración, etc.</p>
+    </details>
+  </div>
+
+</div>
+
+<footer>
+  © 2026 Click&Clase · Chile
+  <a href="index.html">Inicio</a>
+  <a href="mailto:soporte.learn0@gmail.com">Soporte</a>
+  <a href="login.html">Ingresar</a>
+</footer>
+
+<script>
+var _tipo = 'docente';
+function verPlanes(tipo, btn) {
+  _tipo = tipo;
+  document.querySelectorAll('.toggle button').forEach(function (b) { b.classList.toggle('active', b === btn); });
+  document.getElementById('planesDocente').style.display = tipo === 'docente' ? 'grid' : 'none';
+  document.getElementById('planesColegio').style.display = tipo === 'colegio' ? 'grid' : 'none';
+  renderComparacion();
+}
+
+var COMP_DOCENTE = [
+  { f: 'Precio mensual',            free: '$0',   pro: '$4.990', prem: '$9.990' },
+  { f: 'Planificaciones/mes',       free: '3',     pro: '∞',      prem: '∞' },
+  { f: 'Materiales IA/mes',         free: '2',     pro: '∞',      prem: '∞' },
+  { f: 'Asignaturas / Módulos',     free: '1',     pro: 'Todas',  prem: 'Todas' },
+  { f: 'Biblioteca personal',       free: '✓',     pro: '✓',      prem: '✓' },
+  { f: 'Formatos PAES/SIMCE/DUA',   free: '—',     pro: '✓',      prem: '✓' },
+  { f: 'Ficha de alumno',           free: '—',     pro: '—',      prem: '✓' },
+  { f: 'Anotaciones + Alertas',     free: '—',     pro: '—',      prem: '✓' },
+  { f: 'Libro de clases digital',   free: '—',     pro: '—',      prem: '✓' },
+  { f: 'Soporte',                   free: 'Email', pro: 'Email',  prem: 'Prioritario' }
+];
+var COMP_COLEGIO = [
+  { f: 'Precio mensual',            basico: '$99.000',  pro: '$249.000', ent: 'A medida' },
+  { f: 'Docentes',                  basico: '20',        pro: '60',       ent: 'Ilimitado' },
+  { f: 'Estudiantes',               basico: '300',       pro: '1 000',    ent: 'Ilimitado' },
+  { f: 'Panel Admin del Colegio',   basico: '✓',        pro: '✓',        ent: '✓' },
+  { f: 'Libro + Notas + Asistencia',basico: '✓',        pro: '✓',        ent: '✓' },
+  { f: 'Biblioteca institucional',  basico: '✓',        pro: '✓',        ent: '✓' },
+  { f: 'Panel UTP',                 basico: '—',        pro: '✓',        ent: '✓' },
+  { f: 'Panel PIE completo',        basico: '—',        pro: '✓',        ent: '✓' },
+  { f: 'Panel Convivencia',         basico: '—',        pro: '✓',        ent: '✓' },
+  { f: 'Panel Apoyo Psicosocial',   basico: '—',        pro: '✓',        ent: '✓' },
+  { f: 'Dashboards Director/Rector',basico: '—',        pro: '✓',        ent: '✓' },
+  { f: 'Multi-sede',                basico: '—',        pro: '—',        ent: '✓' },
+  { f: 'Integración SGE',           basico: '—',        pro: '—',        ent: '✓' },
+  { f: 'Firma electrónica libro',   basico: '—',        pro: '—',        ent: '✓' },
+  { f: 'Soporte',                   basico: 'Email',    pro: 'Prioritario', ent: '24/7 SLA 99.9%' }
+];
+
+function renderComparacion() {
+  var head = document.getElementById('compHead');
+  var body = document.getElementById('compBody');
+  if (_tipo === 'docente') {
+    head.innerHTML = '<tr><th>Función</th><th>Free</th><th>Pro</th><th>Premium</th></tr>';
+    body.innerHTML = COMP_DOCENTE.map(function (r) {
+      return '<tr><td>' + r.f + '</td>' +
+        celda(r.free) + celda(r.pro) + celda(r.prem) + '</tr>';
+    }).join('');
+  } else {
+    head.innerHTML = '<tr><th>Función</th><th>Básico</th><th>Pro</th><th>Enterprise</th></tr>';
+    body.innerHTML = COMP_COLEGIO.map(function (r) {
+      return '<tr><td>' + r.f + '</td>' +
+        celda(r.basico) + celda(r.pro) + celda(r.ent) + '</tr>';
+    }).join('');
+  }
+}
+function celda(v) {
+  if (v === '✓') return '<td class="check">✓</td>';
+  if (v === '—') return '<td class="cross">—</td>';
+  return '<td class="info">' + v + '</td>';
+}
+
+renderComparacion();
+</script>
+
+</body>
+</html>

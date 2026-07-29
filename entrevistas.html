@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Entrevistas con Apoderados — Click&Clase</title>
+<link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg">
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="js/firebase-rest.js"></script>
+<script src="js/firebase-config.js"></script>
+<script src="js/firebase-auth.js"></script>
+<script src="js/firebase-db.js"></script>
+<script src="js/roles-permissions.js"></script>
+<script src="js/roles-router.js"></script>
+<script src="js/cursos.js"></script>
+<script src="js/cc-uikit.js"></script>
+<style>
+* { box-sizing: border-box; }
+body { margin: 0; font-family: 'Segoe UI', Roboto, Arial, sans-serif; background: #F0F7FF; color: #0C1E3B; }
+.container { max-width: 1300px; margin: 20px auto; padding: 0 24px; }
+.filtros { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
+.fld label { display: block; font-size: .72rem; color: #64748B; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 4px; }
+input, select, textarea { width: 100%; padding: 9px 12px; border-radius: 8px; background: #fff; border: 1px solid rgba(37,99,235,.2); font-size: .88rem; font-family: inherit; }
+.btn { padding: 9px 18px; border-radius: 8px; border: 1px solid rgba(37,99,235,.15); background: #fff; color: #0C1E3B; cursor: pointer; font-weight: 600; font-size: .85rem }
+.btn.primary { background: linear-gradient(135deg,#2563EB,#38BDF8); color: #fff; border-color: transparent }
+.ent-item { padding: 14px 18px; border: 1px solid rgba(37,99,235,.1); border-radius: 10px; margin-bottom: 10px; background: #fff }
+.ent-h { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 8px }
+.ent-alu { font-weight: 700; font-size: 1rem }
+.ent-fecha { color: #2563EB; font-weight: 600; font-size: .82rem }
+.ent-motivo { color: #64748B; font-size: .78rem; margin: 4px 0 }
+.ent-body { padding: 8px 12px; background: #F8FAFF; border-radius: 8px; font-size: .85rem; margin-top: 8px; line-height: 1.5 }
+.ov { position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:9999;display:none;align-items:center;justify-content:center;padding:20px }
+.ov.open { display: flex }
+.ov-box { background:#fff;border-radius:14px;padding:22px 26px;width:min(560px,94vw);max-height:90vh;overflow:auto }
+.ov-box h3 { margin: 0 0 14px }
+.ov-box label { display: block; font-size: .75rem; color: #475569; font-weight: 600; text-transform: uppercase; margin-bottom: 4px; margin-top: 10px }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div id="ccHero"></div>
+  <div id="ccKpis"></div>
+
+  <div class="cck-card">
+    <h2 style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+      <span>📞 Entrevistas registradas</span>
+      <button class="btn primary" onclick="nueva()">➕ Nueva entrevista</button>
+    </h2>
+    <div class="filtros" style="margin-bottom:14px">
+      <div class="fld"><label>Curso</label><select id="fCurso" onchange="onCambioCurso()"><option value="">— Elegir —</option></select></div>
+      <div class="fld"><label>Alumno</label><select id="fAlumno" onchange="reFiltrar()"><option value="">Todos</option></select></div>
+      <div class="fld"><label>Estado</label>
+        <select id="fEstado" onchange="reFiltrar()">
+          <option value="">Todas</option><option value="realizada">Realizadas</option>
+          <option value="agendada">Agendadas</option><option value="cancelada">Canceladas</option>
+        </select>
+      </div>
+    </div>
+    <div id="lista">
+      <div class="cck-sk-row"><div class="cck-sk"></div><div class="cck-sk"></div><div class="cck-sk"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="ov" id="ovNueva">
+  <div class="ov-box">
+    <h3>📞 Nueva entrevista</h3>
+    <label>Alumno</label>
+    <label class="switch-buscar" style="text-transform:none;font-weight:normal;color:#334155;margin:0 0 8px;font-size:.82rem;cursor:pointer;display:flex;align-items:center;gap:8px;padding:8px 12px;background:#F8FAFF;border-radius:8px;border:1px solid rgba(37,99,235,.1)">
+      <input type="checkbox" id="nBusquedaGlobal" onchange="_toggleBuscador()" style="width:auto;margin:0;flex-shrink:0">
+      <span style="flex:1">🔎 Buscar alumno de otro curso del colegio</span>
+    </label>
+    <input id="nBuscar" type="text" placeholder="Escribí nombre o RUT para filtrar..." style="display:none;margin-bottom:8px" oninput="_filtrarAlumnos()">
+    <select id="nAlumno" size="1"></select>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div><label>Fecha</label><input type="date" id="nFecha"></div>
+      <div><label>Hora</label><input type="time" id="nHora"></div>
+    </div>
+    <label>Modalidad</label>
+    <select id="nModalidad">
+      <option value="presencial">Presencial</option>
+      <option value="virtual">Videollamada</option>
+      <option value="telefonica">Telefónica</option>
+    </select>
+    <label>Participantes</label>
+    <input id="nParticipantes" placeholder="Apoderado, alumno, orientadora...">
+    <label>Motivo</label>
+    <input id="nMotivo" placeholder="Bajo rendimiento en matemática">
+    <label>Detalle / Acuerdos</label>
+    <textarea id="nDetalle" rows="4" placeholder="Se acuerda apoyo con..."></textarea>
+    <label>Estado</label>
+    <select id="nEstado">
+      <option value="agendada">📅 Agendada</option>
+      <option value="realizada" selected>✅ Realizada</option>
+      <option value="cancelada">❌ Cancelada</option>
+    </select>
+    <label>Próxima cita (opcional)</label>
+    <input type="date" id="nProxima">
+    <div style="display:flex;gap:8px;margin-top:16px;justify-content:flex-end">
+      <button class="btn" onclick="cerrar()">Cancelar</button>
+      <button class="btn primary" onclick="guardar()">💾 Guardar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+if (window.CCRouter && window.CCRouter.guardPanel) {
+  CCRouter.guardPanel(['profesor','jefe_curso','utp','encargado_area','admin_colegio','director','rector']);
+}
+var _cursos=[], _cursoSel=null, _entrevistas=[], _todosAlumnos=[];
+
+// Normaliza rut para comparación robusta (quita puntos/guiones/espacios)
+function _normRut(r){
+  return String(r||'').replace(/[^\dkK]/g,'').toLowerCase();
+}
+function _mismoAlumno(item, fAlu){
+  if (!fAlu) return true;
+  var target = _normRut(fAlu);
+  return _normRut(item.alumnoRut) === target ||
+         _normRut(item.estudianteRut) === target ||
+         _normRut(item.rut) === target;
+}
+function esc(s){return String(s==null?'':s).replace(/[<>&"]/g,function(c){return {'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c];});}
+function hoyISO(){var d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+
+function _hero(){
+  document.getElementById('ccHero').innerHTML = CCKit.hero({
+    emoji:'📞', title:'Entrevistas con Apoderados',
+    sub:'Historial y agendamiento de entrevistas',
+    actions:[{label:'Panel',emoji:'←',href:'dashboard-profesor.html'},
+             {label:'Mi Jefatura',emoji:'🎓',href:'mi-jefatura.html'}]
+  });
+}
+
+function iniciar(){
+  _hero();
+  CCCursos.misCursos().then(function(cs){
+    _cursos = cs || [];
+    var sel = document.getElementById('fCurso');
+    sel.innerHTML = '<option value="">— Elegir —</option>' +
+      _cursos.map(function(c){ return '<option value="'+esc(c.cursoId)+'">'+esc(c.nombreCompleto)+'</option>'; }).join('');
+    var qp = new URLSearchParams(window.location.search);
+    var qc = qp.get('cursoId');
+    if (qc) { sel.value = qc; cargar(); }
+  });
+}
+
+var _entrevistasRaw = [];
+
+function onCambioCurso(){
+  var cid = document.getElementById('fCurso').value;
+  if (!cid) {
+    document.getElementById('lista').innerHTML = CCKit.emptyState({
+      emoji:'📞', title:'Elegí un curso',
+      body:'Seleccioná uno de tus cursos para ver las entrevistas registradas.'
+    });
+    document.getElementById('ccKpis').innerHTML = '';
+    _entrevistasRaw = [];
+    return;
+  }
+  _cursoSel = _cursos.find(function(c){ return c.cursoId === cid; });
+  // Repoblar alumnos SOLO al cambiar curso
+  var selA = document.getElementById('fAlumno');
+  var ests = (_cursoSel && _cursoSel.estudiantes) || [];
+  selA.innerHTML = '<option value="">Todos ('+ests.length+')</option>' +
+    ests.map(function(e){ return '<option value="'+esc(e.rut)+'">'+esc(e.nombre)+'</option>'; }).join('');
+
+  EL_DB.collection('entrevistas_apoderado').get().then(function(sn){
+    var out = [];
+    sn.forEach(function(d){
+      var e = d.data(); if (!e || e.cursoId !== cid) return;
+      out.push(Object.assign({id:d.id}, e));
+    });
+    out.sort(function(a,b){ return String(b.fecha||'').localeCompare(String(a.fecha||'')); });
+    _entrevistasRaw = out;
+    reFiltrar();
+  }).catch(function(err){
+    document.getElementById('lista').innerHTML = CCKit.emptyState({
+      emoji:'⚠', title:'Error al cargar', body:err.message
+    });
+  });
+}
+
+function reFiltrar(){
+  var fAlu = document.getElementById('fAlumno').value;
+  var fEs  = document.getElementById('fEstado').value;
+  var out = _entrevistasRaw.slice();
+  if (fAlu) out = out.filter(function(x){ return _mismoAlumno(x, fAlu); });
+  if (fEs)  out = out.filter(function(x){ return x.estado === fEs; });
+  _entrevistas = out;
+  _renderKpis(); _renderLista();
+}
+
+function cargar(){ onCambioCurso(); }
+
+function _renderKpis(){
+  var real = _entrevistas.filter(function(e){return e.estado==='realizada';}).length;
+  var ag = _entrevistas.filter(function(e){return e.estado==='agendada';}).length;
+  document.getElementById('ccKpis').innerHTML = CCKit.kpiRow([
+    {emoji:'📞',label:'Total',value:_entrevistas.length,tone:'info'},
+    {emoji:'✅',label:'Realizadas',value:real,tone:'ok'},
+    {emoji:'📅',label:'Agendadas',value:ag,tone:ag>0?'warn':'gray',hint:ag>0?'Próximamente':'Sin pendientes'}
+  ]);
+}
+
+function _renderLista(){
+  if (!_entrevistas.length) {
+    document.getElementById('lista').innerHTML = CCKit.emptyState({
+      emoji:'📞', title:'Sin entrevistas registradas',
+      body:'Registrá la primera entrevista con el apoderado usando el botón "➕ Nueva entrevista".',
+      cta:{label:'Nueva entrevista',emoji:'➕',onclick:'nueva()'}
+    });
+    return;
+  }
+  document.getElementById('lista').innerHTML = _entrevistas.map(function(e, i){
+    var tone = e.estado==='realizada'?'ok':e.estado==='agendada'?'warn':'err';
+    var ico = e.estado==='realizada'?'✅':e.estado==='agendada'?'📅':'❌';
+    return '<div class="ent-item">' +
+      '<div class="ent-h">' +
+        '<div><span class="ent-alu">'+ico+' '+esc(e.alumnoNombre||'—')+'</span></div>' +
+        '<div style="display:flex;gap:8px;align-items:center">' +
+          '<span class="ent-fecha">'+esc(String(e.fecha||'').slice(0,10))+(e.hora?' '+esc(e.hora):'')+'</span>' +
+          CCKit.badge({text:e.estado||'',tone:tone}) +
+        '</div>' +
+      '</div>' +
+      '<div class="ent-motivo">📌 <b>Motivo:</b> '+esc(e.motivo||'—')+' · <b>Modalidad:</b> '+esc(e.modalidad||'presencial')+'</div>' +
+      (e.participantes?'<div class="ent-motivo">👥 <b>Participantes:</b> '+esc(e.participantes)+'</div>':'') +
+      (e.detalle?'<div class="ent-body">'+esc(e.detalle)+'</div>':'') +
+      (e.proxima?'<div class="ent-motivo" style="color:#2563EB;margin-top:8px">🔜 <b>Próxima cita:</b> '+esc(e.proxima)+'</div>':'') +
+      '<div style="display:flex;gap:6px;margin-top:10px;justify-content:flex-end;flex-wrap:wrap">' +
+        '<button class="btn" onclick="descargarPDF(' + i + ')">📄 Descargar acta PDF</button>' +
+        (e.apoderadoEmail ? '<button class="btn primary" onclick="enviarApoderado(' + i + ')">✉ Enviar copia al apoderado</button>' : '') +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function descargarPDF(idx){
+  var e = _entrevistas[idx]; if (!e) return;
+  var u = (window.ELAuth && ELAuth.user) || {};
+  var liceo = u.liceoNombre || u.liceoSlug || 'Establecimiento';
+  var w = window.open('','pdf','width=900,height=1100');
+  var css = '<style>' +
+    '@page{margin:2.5cm}body{font-family:Georgia,serif;max-width:700px;margin:0 auto;padding:24px;color:#000;line-height:1.7}' +
+    '.header{text-align:center;border-bottom:2px solid #000;padding-bottom:12px;margin-bottom:20px}' +
+    '.header h1{margin:0;font-size:1.4rem;letter-spacing:1.5px;text-transform:uppercase}' +
+    '.header p{margin:4px 0 0;color:#555;font-size:.85rem}' +
+    'h2{font-size:1rem;background:#f0f0f0;padding:6px 10px;margin:20px 0 10px;border-left:4px solid #333}' +
+    '.datos{width:100%;border-collapse:collapse;font-size:.92rem;margin-bottom:16px}' +
+    '.datos td{padding:6px 10px;border:1px solid #999;vertical-align:top}' +
+    '.datos td.k{background:#f7f7f7;font-weight:700;width:35%}' +
+    '.detalle{border:1px solid #999;padding:12px 14px;background:#fafafa;min-height:100px;text-align:justify}' +
+    '.firmas{display:flex;justify-content:space-around;margin-top:60px}' +
+    '.firma{text-align:center;width:250px}' +
+    '.firma .linea{border-top:1px solid #000;padding-top:6px;font-size:.85rem}' +
+    '.pie{text-align:center;margin-top:40px;color:#666;font-size:.75rem;border-top:1px dashed #999;padding-top:8px}' +
+    '</style>';
+  w.document.write('<html><head><title>Acta de Entrevista — '+esc(e.alumnoNombre)+'</title>'+css+'</head><body>');
+  w.document.write('<div class="header"><h1>Acta de Entrevista con Apoderado</h1>' +
+    '<p>'+esc(liceo)+'</p></div>');
+  w.document.write('<h2>Antecedentes generales</h2>' +
+    '<table class="datos">' +
+      '<tr><td class="k">Estudiante</td><td>'+esc(e.alumnoNombre||'—')+'</td></tr>' +
+      '<tr><td class="k">Curso</td><td>'+esc(e.cursoNombre||'—')+'</td></tr>' +
+      '<tr><td class="k">Apoderado</td><td>'+esc(e.apoderadoNombre||'—')+'</td></tr>' +
+      '<tr><td class="k">Fecha y hora</td><td>'+esc(String(e.fecha||'').slice(0,10))+(e.hora?' — '+esc(e.hora):'')+'</td></tr>' +
+      '<tr><td class="k">Modalidad</td><td>'+esc(e.modalidad||'presencial')+'</td></tr>' +
+      '<tr><td class="k">Participantes</td><td>'+esc(e.participantes||'—')+'</td></tr>' +
+      '<tr><td class="k">Motivo</td><td>'+esc(e.motivo||'—')+'</td></tr>' +
+    '</table>');
+  w.document.write('<h2>Desarrollo y acuerdos</h2>' +
+    '<div class="detalle">'+esc(e.detalle||'—').replace(/\n/g,'<br>')+'</div>');
+  if (e.proxima) {
+    w.document.write('<p style="margin-top:14px"><b>Próxima cita agendada:</b> '+esc(e.proxima)+'</p>');
+  }
+  w.document.write('<div class="firmas">' +
+    '<div class="firma"><div class="linea">Firma del(a) Apoderado(a)</div></div>' +
+    '<div class="firma"><div class="linea">'+esc(e.profesorNombre||'')+'<br><b>Profesor(a) Jefe</b></div></div>' +
+  '</div>');
+  w.document.write('<div class="pie">Acta emitida el '+new Date().toLocaleDateString('es-CL',{day:'numeric',month:'long',year:'numeric'})+' — Sistema Click&amp;Clase</div>');
+  w.document.write('<sc'+'ript>window.onload=function(){window.print()}</sc'+'ript></body></html>');
+  w.document.close();
+}
+
+function enviarApoderado(idx){
+  var e = _entrevistas[idx]; if (!e || !e.apoderadoEmail) return;
+  var u = (window.ELAuth && ELAuth.user) || {};
+  var liceo = u.liceoNombre || u.liceoSlug || '';
+  var asunto = 'Acta de entrevista — ' + e.alumnoNombre;
+  var cuerpo = 'Estimado(a) apoderado(a):\n\n' +
+    'Le compartimos el acta de la entrevista sostenida el ' + String(e.fecha||'').slice(0,10) +
+    (e.hora?' a las '+e.hora:'') + '.\n\n' +
+    '=== ACTA ===\n' +
+    'Estudiante: ' + e.alumnoNombre + '\n' +
+    'Curso: ' + (e.cursoNombre||'') + '\n' +
+    'Modalidad: ' + (e.modalidad||'presencial') + '\n' +
+    'Motivo: ' + e.motivo + '\n\n' +
+    'Desarrollo y acuerdos:\n' + (e.detalle||'') + '\n\n' +
+    (e.proxima ? 'Próxima cita: ' + e.proxima + '\n\n' : '') +
+    'Cordialmente,\n' + (u.nombre || u.email) + '\nProfesor(a) Jefe\n' + liceo;
+  var gmailUrl = 'https://mail.google.com/mail/?view=cm&fs=1' +
+    '&to=' + encodeURIComponent(e.apoderadoEmail) +
+    '&su=' + encodeURIComponent(asunto) +
+    '&body=' + encodeURIComponent(cuerpo);
+  window.open(gmailUrl, '_blank');
+}
+
+function nueva(){
+  if (!_cursoSel) { alert('Elegí un curso primero'); return; }
+  document.getElementById('nBusquedaGlobal').checked = false;
+  document.getElementById('nBuscar').style.display = 'none';
+  document.getElementById('nBuscar').value = '';
+  _pintarAlumnos(_cursoSel.estudiantes || []);
+  document.getElementById('nFecha').value = hoyISO();
+  document.getElementById('nHora').value = '';
+  document.getElementById('nMotivo').value = '';
+  document.getElementById('nDetalle').value = '';
+  document.getElementById('nParticipantes').value = '';
+  document.getElementById('nProxima').value = '';
+  document.getElementById('nEstado').value = 'realizada';
+  document.getElementById('nModalidad').value = 'presencial';
+  document.getElementById('ovNueva').classList.add('open');
+}
+
+function _pintarAlumnos(lista){
+  document.getElementById('nAlumno').innerHTML = lista.map(function(e){
+    var apoNom = (e.apoderado && e.apoderado.nombre) || e.apoderadoNombre || '';
+    var suf = e._cursoNombre ? ' · ' + e._cursoNombre : '';
+    return '<option value="'+esc(e.rut)+'|'+esc(e.nombre)+'|'+esc(apoNom)+'">' +
+           esc(e.nombre) + suf + (apoNom?' — Apo: '+esc(apoNom):'') + '</option>';
+  }).join('');
+}
+
+function _toggleBuscador(){
+  var check = document.getElementById('nBusquedaGlobal').checked;
+  document.getElementById('nBuscar').style.display = check ? 'block' : 'none';
+  if (check) {
+    // Cargar TODOS los alumnos del colegio (una vez)
+    if (_todosAlumnos.length) { _pintarAlumnos(_todosAlumnos); return; }
+    document.getElementById('nAlumno').innerHTML = '<option>⏳ Cargando alumnos...</option>';
+    var u = (window.ELAuth && ELAuth.user) || {};
+    EL_DB.collection('cursos').get().then(function(sn){
+      var todos = [];
+      sn.forEach(function(d){
+        var c = d.data();
+        if (!c || c.liceoSlug !== u.liceoSlug) return;
+        (c.estudiantes||[]).forEach(function(e){
+          todos.push(Object.assign({ _cursoNombre: c.nombreCompleto || c.nombre || '' }, e));
+        });
+      });
+      todos.sort(function(a,b){
+        if (window.CCNombre && CCNombre.comparar) return CCNombre.comparar(a.nombre||'', b.nombre||'');
+        return String(a.nombre||'').localeCompare(String(b.nombre||''),'es');
+      });
+      _todosAlumnos = todos;
+      _pintarAlumnos(todos);
+    });
+  } else {
+    _pintarAlumnos(_cursoSel.estudiantes || []);
+  }
+}
+
+function _filtrarAlumnos(){
+  var q = document.getElementById('nBuscar').value.toLowerCase().trim();
+  if (!q) return _pintarAlumnos(_todosAlumnos);
+  var fil = _todosAlumnos.filter(function(a){
+    return String(a.nombre||'').toLowerCase().indexOf(q) !== -1 ||
+           String(a.rut||'').toLowerCase().indexOf(q) !== -1;
+  });
+  _pintarAlumnos(fil);
+}
+function cerrar(){ document.getElementById('ovNueva').classList.remove('open'); }
+
+function guardar(){
+  if (!_cursoSel) return;
+  var partes = document.getElementById('nAlumno').value.split('|');
+  var motivo = document.getElementById('nMotivo').value.trim();
+  var fecha = document.getElementById('nFecha').value;
+  if (!motivo || !fecha) { alert('Motivo y fecha son obligatorios'); return; }
+  var u = (window.ELAuth && ELAuth.user) || {};
+  var doc = {
+    alumnoRut: partes[0], alumnoNombre: partes[1] || '',
+    apoderadoNombre: partes[2] || '',
+    cursoId: _cursoSel.cursoId, cursoNombre: _cursoSel.nombreCompleto || _cursoSel.nombre || '',
+    liceoSlug: u.liceoSlug || '',
+    fecha: fecha, hora: document.getElementById('nHora').value,
+    modalidad: document.getElementById('nModalidad').value,
+    participantes: document.getElementById('nParticipantes').value.trim(),
+    motivo: motivo,
+    detalle: document.getElementById('nDetalle').value.trim(),
+    estado: document.getElementById('nEstado').value,
+    proxima: document.getElementById('nProxima').value,
+    profesorUid: u.uid || '', profesorNombre: u.nombre || u.email || '',
+    creadoEn: new Date().toISOString()
+  };
+  EL_DB.collection('entrevistas_apoderado').add(doc).then(function(){
+    cerrar(); cargar();
+  }).catch(function(err){ alert('Error: '+err.message); });
+}
+
+if (window.ELAuth && ELAuth.onUserReady) ELAuth.onUserReady(function(u){ if(u) iniciar(); });
+</script>
+</body>
+</html>

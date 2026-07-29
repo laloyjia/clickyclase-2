@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🔧 Diagnóstico Usuarios · Click&Clase</title>
+<link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg">
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="js/firebase-rest.js"></script>
+<script src="js/firebase-config.js"></script>
+<script src="js/firebase-auth.js"></script>
+<script src="js/firebase-db.js"></script>
+<!-- Catálogo TP para normalizar especialidades -->
+<script src="js/curricula/tp/datos-atencion-enfermeria.js"></script>
+<script src="js/curricula/tp/datos-electronica.js"></script>
+<script src="js/curricula/tp/datos-electricidad.js"></script>
+<script src="js/curricula/tp/datos-mecanica-automotriz.js"></script>
+<script src="js/curricula/tp/datos-mecanica-industrial.js"></script>
+<script src="js/curricula/tp/datos-administracion.js"></script>
+<script src="js/curricula/tp/datos-contabilidad.js"></script>
+<script src="js/curricula/tp/datos-atencion-parvulos.js"></script>
+<script src="js/curricula-chile.js"></script>
+<script src="js/tp-catalogo.js"></script>
+<style>
+:root {
+  --bg: #F0F7FF; --panel: #FFFFFF; --panel-2: #FAFCFF;
+  --border: rgba(37,99,235,.20); --text: #0C1E3B; --muted: #475569;
+  --violet: #2563EB; --green: #34d399; --danger: #DC2626; --gold: #F59E0B;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Inter',system-ui,sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding: 24px; }
+.wrap { max-width: 1100px; margin: 0 auto; }
+.header {
+  background: linear-gradient(135deg, var(--panel), var(--panel-2));
+  border: 1px solid var(--border); border-radius: 20px;
+  padding: 28px 32px; margin-bottom: 20px;
+}
+h1 { font-size: 1.7rem; font-weight: 800; margin-bottom: 6px; }
+.sub { color: #475569; }
+.back-link { color: var(--violet); text-decoration: none; font-size: .88rem; }
+.card { background: var(--panel); border: 1px solid var(--border); border-radius: 14px; padding: 22px 26px; margin-bottom: 16px; }
+
+.search-row { display: flex; gap: 10px; margin-bottom: 16px; }
+.search-row input { flex: 1; padding: 12px 15px; border-radius: 10px; background: rgba(37,99,235,.04); border: 1px solid var(--border); color: var(--text); font-size: .95rem; }
+.btn { padding: 12px 18px; border-radius: 10px; border: 1px solid var(--border); background: rgba(37,99,235,.05); color: var(--text); font-family: inherit; font-weight: 600; cursor: pointer; }
+.btn:hover { background: rgba(37,99,235,.08); border-color: rgba(37,99,235,.35); }
+.btn.primary { background: linear-gradient(135deg, var(--violet), #1E40AF); border-color: transparent; color: white; }
+.btn.success { background: linear-gradient(135deg, var(--green), #059669); border-color: transparent; color: #F0F7FF; }
+.btn.warning { background: linear-gradient(135deg, var(--gold), #d97706); border-color: transparent; color: #F0F7FF; }
+.btn.small { padding: 6px 12px; font-size: .78rem; }
+
+.user-list { max-height: 300px; overflow-y: auto; }
+.user-item {
+  padding: 12px 14px; background: rgba(37,99,235,.03); border: 1px solid var(--border);
+  border-radius: 10px; margin-bottom: 6px; cursor: pointer; display: flex; justify-content: space-between; align-items: center;
+}
+.user-item:hover { background: rgba(37,99,235,.08); border-color: var(--violet); }
+.user-item .info { flex: 1; }
+.user-item .name { font-weight: 600; }
+.user-item .email { font-size: .78rem; color: #475569; }
+.user-item .badge { background: rgba(37,99,235,.15); color: #1D4ED8; padding: 3px 10px; border-radius: 8px; font-size: .72rem; font-weight: 700; }
+.user-item .badge.warn { background: rgba(251,191,36,.15); color: var(--gold); }
+
+.diag-list { display: grid; grid-template-columns: repeat(auto-fill,minmax(280px,1fr)); gap: 10px; }
+.diag-item {
+  padding: 12px 14px; background: rgba(37,99,235,.03); border: 1px solid var(--border);
+  border-radius: 10px; display: flex; align-items: flex-start; gap: 10px;
+}
+.diag-item .ico { font-size: 1.1rem; margin-top: 2px; }
+.diag-item .txt { flex: 1; }
+.diag-item .label { font-size: .78rem; color: #475569; }
+.diag-item .val { font-size: .88rem; margin-top: 2px; word-break: break-all; }
+.diag-item.ok    { border-color: rgba(52,211,153,.35); background: rgba(52,211,153,.06); }
+.diag-item.warn  { border-color: rgba(251,191,36,.35); background: rgba(251,191,36,.06); }
+.diag-item.error { border-color: rgba(220,38,38,.35); background: rgba(220,38,38,.06); }
+
+pre.raw {
+  background: rgba(37,99,235,.07); border: 1px solid var(--border); border-radius: 10px;
+  padding: 14px; font-size: .8rem; color: #1D4ED8; overflow-x: auto; max-height: 400px;
+}
+.badge-role { display: inline-block; padding: 2px 8px; background: rgba(37,99,235,.15); color: #1D4ED8; border-radius: 6px; font-size: .72rem; font-weight: 700; margin: 0 4px 4px 0; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <a class="back-link" href="dashboard-profesor.html">← Volver</a>
+
+  <div class="header">
+    <h1>🔧 Diagnóstico y reparación de usuarios</h1>
+    <p class="sub">Solo admin. Buscá un profesor por email/RUT/nombre para revisar cómo está su registro en Firestore, detectar campos faltantes y reparar en 1 click.</p>
+  </div>
+
+  <div class="card">
+    <div class="search-row">
+      <input id="fBusqueda" placeholder="Buscar por email, RUT o nombre (mín 3 letras)…" oninput="buscar()">
+      <button class="btn" onclick="cargarTodos()">📋 Cargar todos los usuarios</button>
+    </div>
+    <div id="listaUsers" class="user-list"></div>
+  </div>
+
+  <div id="detalleUser"></div>
+</div>
+
+<script>
+var _todos = [];
+var _selected = null;
+
+function esc(s) { return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function icoOK(cond)   { return cond ? '✅' : '❌'; }
+function classOK(cond) { return cond ? 'ok' : 'error'; }
+
+async function cargarTodos() {
+  document.getElementById('listaUsers').innerHTML = '<div style="padding:20px;color:var(--muted)">⏳ Cargando…</div>';
+  try {
+    var snap = await EL_DB.collection('usuarios').get();
+    _todos = [];
+    snap.forEach(function (d) { _todos.push(Object.assign({ id: d.id }, d.data())); });
+    _todos.sort(function (a, b) { return (a.email || '').localeCompare(b.email || ''); });
+    renderLista(_todos);
+  } catch (e) {
+    document.getElementById('listaUsers').innerHTML = '<div style="padding:20px;color:var(--danger)">Error: ' + esc(e.message) + '</div>';
+  }
+}
+
+function buscar() {
+  var q = document.getElementById('fBusqueda').value.trim().toLowerCase();
+  if (q.length < 3) { renderLista(_todos); return; }
+  var f = _todos.filter(function (u) {
+    return (u.email || '').toLowerCase().includes(q) ||
+           (u.rut || '').toLowerCase().includes(q) ||
+           (u.nombre || u.displayName || '').toLowerCase().includes(q);
+  });
+  renderLista(f);
+}
+
+function renderLista(users) {
+  var wrap = document.getElementById('listaUsers');
+  if (!users.length) { wrap.innerHTML = '<div style="padding:20px;color:var(--muted)">Sin resultados. Cargá primero con "Cargar todos".</div>'; return; }
+  wrap.innerHTML = users.map(function (u) {
+    var problemas = _diagnosticar(u).filter(function (d) { return d.tipo !== 'ok'; }).length;
+    var badge = problemas
+      ? '<span class="badge warn">' + problemas + ' problemas</span>'
+      : '<span class="badge">✓ OK</span>';
+    return '<div class="user-item" onclick="verUser(\'' + u.id + '\')">' +
+      '<div class="info">' +
+        '<div class="name">' + esc(u.nombre || u.displayName || '(sin nombre)') + '</div>' +
+        '<div class="email">' + esc(u.email || '') + ' · ' + esc(u.role || '?') + '</div>' +
+      '</div>' + badge +
+    '</div>';
+  }).join('');
+}
+
+function _diagnosticar(u) {
+  var d = [];
+  d.push({ campo: 'uid',        val: u.uid,             tipo: u.uid ? 'ok' : 'error' });
+  d.push({ campo: 'email',      val: u.email,           tipo: u.email ? 'ok' : 'error' });
+  d.push({ campo: 'nombre',     val: u.nombre || u.displayName, tipo: (u.nombre || u.displayName) ? 'ok' : 'warn' });
+  d.push({
+    campo: 'liceoSlug',
+    val: u.liceoSlug || 'PROFESOR PARTICULAR',
+    tipo: 'ok',
+    nota: u.liceoSlug ? '' : 'Sin colegio → cuenta particular. Podés asignarle uno más abajo si corresponde.'
+  });
+  d.push({ campo: 'role (legacy)',  val: u.role,       tipo: u.role ? 'ok' : 'warn' });
+  d.push({ campo: 'roles (map)',    val: u.roles ? Object.keys(u.roles).join(', ') : null, tipo: u.roles ? 'ok' : 'warn' });
+  d.push({ campo: 'asignaturas (array)', val: (u.asignaturas || []).join(', '), tipo: Array.isArray(u.asignaturas) ? 'ok' : (u.asignatura ? 'warn' : 'ok') });
+  d.push({ campo: 'especialidades (array)', val: (u.especialidades || []).join(', '), tipo: Array.isArray(u.especialidades) ? 'ok' : (u.especialidad ? 'warn' : 'ok') });
+  d.push({ campo: 'especialidad (singular)', val: u.especialidad,
+           tipo: u.especialidad ? (_esSlug(u.especialidad) ? 'warn' : 'ok') : 'ok',
+           nota: u.especialidad && _esSlug(u.especialidad) ? '⚠ Está como slug ("' + u.especialidad + '") en vez de ID interno ("' + (CCTPCatalogo.normalizarId(u.especialidad) || '?') + '")' : ''
+         });
+  d.push({ campo: 'tipoProfesor', val: u.tipoProfesor, tipo: u.tipoProfesor ? 'ok' : (u.especialidad || u.especialidades ? 'warn' : 'ok') });
+  // modulosTP: chequea si las keys están normalizadas
+  if (u.modulosTP && typeof u.modulosTP === 'object') {
+    var keys = Object.keys(u.modulosTP);
+    var totalMods = 0; keys.forEach(function (k) { totalMods += (u.modulosTP[k] || []).length; });
+    var keysNoNorm = keys.filter(function (k) { return _esSlug(k); });
+    d.push({
+      campo: 'modulosTP (keys / mods)',
+      val: keys.length + ' esp · ' + totalMods + ' mods · [' + keys.join(', ') + ']',
+      tipo: keysNoNorm.length ? 'warn' : 'ok',
+      nota: keysNoNorm.length ? '⚠ Keys sin normalizar: ' + keysNoNorm.join(', ') + ' — el planificador NO encontrará módulos hasta reparar' : ''
+    });
+  } else {
+    d.push({ campo: 'modulosTP', val: null, tipo: u.especialidad ? 'warn' : 'ok', nota: u.especialidad ? 'TP sin módulos asignados' : '' });
+  }
+  d.push({ campo: 'permisos',   val: u.permisos ? JSON.stringify(u.permisos) : null, tipo: u.permisos ? 'ok' : 'warn' });
+  d.push({ campo: 'activo',     val: String(u.activo === false ? false : true), tipo: 'ok' });
+  return d;
+}
+
+function _esSlug(x) {
+  if (!x) return false;
+  // ID interno tiene formato tp_xxx. Si NO empieza con tp_ y CCTPCatalogo lo mapea a un tp_xxx, es slug.
+  if (String(x).indexOf('tp_') === 0) return false;
+  return CCTPCatalogo && CCTPCatalogo.slugToId && CCTPCatalogo.slugToId(x) !== null;
+}
+
+function verUser(uid) {
+  _selected = _todos.find(function (u) { return u.id === uid; });
+  if (!_selected) return;
+  var u = _selected;
+  var diag = _diagnosticar(u);
+  var html = '<div class="card">';
+  html += '<h2 style="font-size:1.2rem;font-weight:800;margin-bottom:4px">' + esc(u.nombre || u.displayName || '(sin nombre)') + '</h2>';
+  html += '<div style="color:var(--muted);font-size:.88rem;margin-bottom:14px">' + esc(u.email || '') + ' · <code style="color:#1D4ED8">' + esc(u.id) + '</code></div>';
+
+  // Rol chips
+  html += '<div style="margin-bottom:14px">';
+  if (u.role) html += '<span class="badge-role">role: ' + esc(u.role) + '</span>';
+  if (u.roles) Object.keys(u.roles).forEach(function (r) { html += '<span class="badge-role">' + esc(r) + '</span>'; });
+  html += '</div>';
+
+  // Diagnóstico
+  html += '<h3 style="font-size:.95rem;font-weight:700;margin:14px 0 8px;color:var(--muted)">🔍 Diagnóstico</h3>';
+  html += '<div class="diag-list">';
+  diag.forEach(function (d) {
+    html += '<div class="diag-item ' + (d.tipo === 'ok' ? 'ok' : d.tipo === 'warn' ? 'warn' : 'error') + '">' +
+      '<div class="ico">' + (d.tipo === 'ok' ? '✅' : d.tipo === 'warn' ? '⚠' : '❌') + '</div>' +
+      '<div class="txt"><div class="label">' + esc(d.campo) + '</div>' +
+      '<div class="val">' + esc(d.val == null ? '(vacío)' : d.val) + '</div>' +
+      (d.nota ? '<div style="font-size:.72rem;color:var(--gold);margin-top:4px">' + esc(d.nota) + '</div>' : '') +
+      '</div></div>';
+  });
+  html += '</div>';
+
+  // Botones de acción
+  html += '<div style="margin-top:20px;display:flex;gap:8px;flex-wrap:wrap;align-items:center">';
+  html += '<button class="btn success" onclick="repararUser()">🔧 Reparar todo automáticamente</button>';
+  if (u.email) {
+    html += '<button class="btn" style="background:linear-gradient(135deg,#f59e0b,#d97706);color:#F0F7FF;border-color:transparent;font-weight:700" onclick="restaurarPassword()">🔑 Enviar reset de contraseña</button>';
+  }
+  if (u.especialidad && _esSlug(u.especialidad)) {
+    html += '<button class="btn warning" onclick="normalizarEspecialidad()">🔄 Normalizar especialidad "' + esc(u.especialidad) + '" → "' + esc(CCTPCatalogo.normalizarId(u.especialidad)) + '"</button>';
+  }
+  html += '<button class="btn" style="background:linear-gradient(135deg,#38BDF8,#0891b2);color:#F0F7FF;border-color:transparent;font-weight:700" onclick="abrirModalAsignarModulos()">⚙ Asignar especialidad + módulos + niveles</button>';
+  if (u.liceoSlug) {
+    html += '<a class="btn" href="panel-admin-colegio.html" style="text-decoration:none">🏫 Ir a Panel del Colegio</a>';
+  }
+  html += '</div>';
+
+  // ── Asignar liceoSlug (opcional — puede quedar como profesor particular) ──
+  if (!u.liceoSlug) {
+    html += '<div style="margin-top:16px;padding:16px 18px;background:rgba(34,211,238,.06);border:1px solid rgba(34,211,238,.28);border-radius:12px">' +
+      '<div style="font-weight:700;color:var(--cyan);margin-bottom:6px">ℹ Profesor particular (sin colegio)</div>' +
+      '<div style="font-size:.85rem;color:var(--muted);margin-bottom:10px">Este usuario NO tiene colegio asignado. Es un caso legítimo: los profesores particulares tienen su propio plan y no dependen de un colegio. Solo si quieres vincularlo a un colegio, elegilo y confirma:</div>' +
+      '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">' +
+        '<select id="selLiceoAsignar" style="padding:10px 14px;border-radius:8px;background:rgba(37,99,235,.06);border:1px solid var(--border);color:var(--text);min-width:280px"><option>⏳ Cargando colegios…</option></select>' +
+        '<button class="btn" onclick="asignarLiceo()">🏫 Vincular a colegio</button>' +
+      '</div></div>';
+    setTimeout(cargarLiceosParaAsignar, 100);
+  }
+
+  // Doc raw
+  html += '<h3 style="font-size:.95rem;font-weight:700;margin:20px 0 8px;color:var(--muted)">📄 Documento Firestore crudo</h3>';
+  html += '<pre class="raw">' + esc(JSON.stringify(u, null, 2)) + '</pre>';
+
+  html += '</div>';
+  document.getElementById('detalleUser').innerHTML = html;
+  window.scrollTo({ top: document.getElementById('detalleUser').offsetTop - 20, behavior: 'smooth' });
+}
+
+async function repararUser() {
+  if (!_selected) return;
+  var u = _selected;
+  var updates = {};
+
+  // 1) Migrar role → roles (si no lo tiene)
+  if (u.role && !u.roles) {
+    updates.roles = {};
+    updates.roles[u.role] = {};
+  }
+  // 2) Migrar asignatura (singular) → asignaturas (array)
+  if (u.asignatura && (!u.asignaturas || !u.asignaturas.length)) {
+    updates.asignaturas = [u.asignatura];
+  }
+  // 3) Migrar especialidad (singular) → especialidades (array) + normalizar
+  if (u.especialidad) {
+    var normalized = CCTPCatalogo.normalizarId(u.especialidad);
+    if (normalized !== u.especialidad) updates.especialidad = normalized;
+    if (!u.especialidades || !u.especialidades.length) {
+      updates.especialidades = [normalized];
+    } else {
+      var espsNorm = u.especialidades.map(function (e) { return CCTPCatalogo.normalizarId(e); });
+      if (JSON.stringify(espsNorm) !== JSON.stringify(u.especialidades)) {
+        updates.especialidades = espsNorm;
+      }
+    }
+  }
+
+  // 3.5) modulosTP: normalizar keys al ID interno (tp_xxx)
+  //      Si estaba como slug ('atencion-enfermeria'), pasar a 'tp_enfermeria'
+  if (u.modulosTP && typeof u.modulosTP === 'object') {
+    var modsNorm = {};
+    var cambio = false;
+    Object.keys(u.modulosTP).forEach(function (k) {
+      var kNorm = CCTPCatalogo.normalizarId(k);
+      if (kNorm !== k) cambio = true;
+      // Fusionar si ya existía (por si tiene ambas keys)
+      if (modsNorm[kNorm]) {
+        var union = modsNorm[kNorm].concat(u.modulosTP[k] || []);
+        modsNorm[kNorm] = union.filter(function (v, i) { return union.indexOf(v) === i; });
+      } else {
+        modsNorm[kNorm] = (u.modulosTP[k] || []).slice();
+      }
+    });
+    if (cambio) updates.modulosTP = modsNorm;
+  }
+  // 4) Si tiene especialidad pero no tipoProfesor
+  if ((u.especialidad || (u.especialidades && u.especialidades.length)) && !u.tipoProfesor) {
+    updates.tipoProfesor = 'tecnico';
+  }
+  // 5) Si tiene asignaturas pero no tipoProfesor
+  else if ((u.asignatura || (u.asignaturas && u.asignaturas.length)) && !u.tipoProfesor) {
+    updates.tipoProfesor = 'media';
+  }
+  // 6) Permisos defaults
+  if (!u.permisos) {
+    updates.permisos = { planificar: true, crearMaterial: true };
+  }
+
+  if (Object.keys(updates).length === 0) {
+    alert('✓ El usuario ya está OK, no hay nada que reparar.');
+    return;
+  }
+
+  var confirmMsg = 'Se van a actualizar los siguientes campos:\n\n' + JSON.stringify(updates, null, 2) + '\n\n¿Confirmás?';
+  if (!confirm(confirmMsg)) return;
+
+  try {
+    await EL_DB.collection('usuarios').doc(u.id).update(updates);
+    alert('✅ Usuario reparado.');
+    // Refrescar
+    var updated = await EL_DB.collection('usuarios').doc(u.id).get();
+    _selected = Object.assign({ id: u.id }, updated.data());
+    // Actualizar en la lista global también
+    var idx = _todos.findIndex(function (x) { return x.id === u.id; });
+    if (idx !== -1) _todos[idx] = _selected;
+    verUser(u.id);
+    renderLista(_todos);
+  } catch (e) {
+    alert('❌ Error: ' + e.message);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  MODAL: Asignar especialidad + módulos + niveles al profesor
+// ═══════════════════════════════════════════════════════════════
+var NIVELES_MEDIA  = ['1M','2M','3M','4M'];
+var NIVELES_BASICA = ['1B','2B','3B','4B','5B','6B','7B','8B'];
+var ASIG_PLAN_COMUN = [
+  'Lenguaje y Comunicación','Matemática','Ciencias Naturales','Historia, Geografía y Cs. Sociales',
+  'Inglés','Educación Física y Salud','Artes Visuales','Música','Tecnología','Orientación','Religión',
+  'Biología','Física','Química','Filosofía','Ciencias para la Ciudadanía','Educación Ciudadana'
+];
+
+function abrirModalAsignarModulos() {
+  if (!_selected) return;
+  var u = _selected;
+
+  // Remover si existe
+  var prev = document.getElementById('modalAsigMods');
+  if (prev) prev.remove();
+
+  var wrap = document.createElement('div');
+  wrap.id = 'modalAsigMods';
+  wrap.style.cssText = 'position:fixed;inset:0;background:rgba(12,30,59,.35);z-index:9999;display:flex;align-items:flex-start;justify-content:center;padding:24px;overflow-y:auto';
+
+  var opciones = CCTPCatalogo.todasLasEspecialidades().map(function (id) {
+    return '<option value="' + id + '"' + (u.especialidad === id ? ' selected' : '') + '>🔧 ' +
+      esc(CCTPCatalogo.labelEspecialidad(id)) + '</option>';
+  }).join('');
+
+  wrap.innerHTML =
+    '<div style="background:#FFFFFF;border:1px solid rgba(37,99,235,.22);border-radius:20px;max-width:720px;width:100%;padding:30px;color:#0C1E3B;font-family:Inter,sans-serif">' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">' +
+        '<div><div style="font-size:1.3rem;font-weight:800">⚙ Asignar configuración docente</div>' +
+        '<div style="color:#64748B;font-size:.88rem;margin-top:2px">' + esc(u.nombre || u.email) + '</div></div>' +
+        '<button onclick="document.getElementById(\'modalAsigMods\').remove()" style="background:transparent;border:1px solid rgba(37,99,235,.20);color:#0C1E3B;width:36px;height:36px;border-radius:8px;cursor:pointer">✕</button>' +
+      '</div>' +
+
+      '<div style="margin-bottom:16px">' +
+        '<label style="display:block;font-size:.78rem;color:#475569;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Tipo de docente</label>' +
+        '<select id="asigTipo" onchange="onCambioTipoAsig()" style="width:100%;padding:11px 14px;border-radius:8px;background:rgba(37,99,235,.06);border:1px solid rgba(37,99,235,.20);color:#0C1E3B;font-family:inherit">' +
+          '<option value="tecnico"' + (u.tipoProfesor === 'tecnico' ? ' selected' : '') + '>⚙ Técnico-Profesional (EMTP)</option>' +
+          '<option value="media"' + (u.tipoProfesor === 'media' ? ' selected' : '') + '>🎓 Educación Media (Plan Común)</option>' +
+          '<option value="basica"' + (u.tipoProfesor === 'basica' ? ' selected' : '') + '>📚 Educación Básica</option>' +
+        '</select>' +
+      '</div>' +
+
+      // Bloque TP
+      '<div id="asigBlockTP">' +
+        '<label style="display:block;font-size:.78rem;color:#475569;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Especialidad EMTP</label>' +
+        '<select id="asigEsp" onchange="renderModulosDelUser()" style="width:100%;padding:11px 14px;border-radius:8px;background:rgba(37,99,235,.06);border:1px solid rgba(37,99,235,.20);color:#0C1E3B;font-family:inherit;margin-bottom:14px">' +
+          '<option value="">— Elegir —</option>' + opciones +
+        '</select>' +
+        '<label style="display:block;font-size:.78rem;color:#475569;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Módulos</label>' +
+        '<div id="asigModulos" style="max-height:280px;overflow-y:auto;padding:10px;background:rgba(37,99,235,.10);border:1px solid rgba(37,99,235,.15);border-radius:8px;margin-bottom:14px"><div style="color:#64748B;padding:12px;text-align:center">Elegí primero una especialidad.</div></div>' +
+      '</div>' +
+
+      // Bloque Plan Común
+      '<div id="asigBlockCC" style="display:none">' +
+        '<label style="display:block;font-size:.78rem;color:#475569;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Asignaturas del Plan Común</label>' +
+        '<div id="asigAsigs" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:6px;max-height:280px;overflow-y:auto;padding:10px;background:rgba(37,99,235,.10);border:1px solid rgba(37,99,235,.15);border-radius:8px;margin-bottom:14px"></div>' +
+      '</div>' +
+
+      // Niveles
+      '<label style="display:block;font-size:.78rem;color:#475569;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Niveles</label>' +
+      '<div id="asigNiveles" style="display:flex;gap:6px;flex-wrap:wrap;padding:10px;background:rgba(37,99,235,.10);border:1px solid rgba(37,99,235,.15);border-radius:8px;margin-bottom:18px"></div>' +
+
+      '<div style="display:flex;justify-content:flex-end;gap:10px">' +
+        '<button class="btn" onclick="document.getElementById(\'modalAsigMods\').remove()">Cancelar</button>' +
+        '<button class="btn success" onclick="guardarAsignacionMods()">💾 Guardar</button>' +
+      '</div>' +
+    '</div>';
+
+  document.body.appendChild(wrap);
+  onCambioTipoAsig();
+  if (u.especialidad) renderModulosDelUser();
+  renderAsigsDelUser();
+  renderNivelesDelUser();
+}
+
+function onCambioTipoAsig() {
+  var tipo = document.getElementById('asigTipo').value;
+  document.getElementById('asigBlockTP').style.display = (tipo === 'tecnico') ? 'block' : 'none';
+  document.getElementById('asigBlockCC').style.display = (tipo === 'tecnico') ? 'none'  : 'block';
+  renderNivelesDelUser();  // cambia el set de niveles según tipo
+}
+
+function renderModulosDelUser() {
+  var espId = document.getElementById('asigEsp').value;
+  var wrap = document.getElementById('asigModulos');
+  if (!espId) { wrap.innerHTML = '<div style="color:#64748B;padding:12px;text-align:center">Elegí primero una especialidad.</div>'; return; }
+  CCTPCatalogo.cargarCatalogo().then(function () {
+    var mods = CCTPCatalogo.modulos(espId);
+    var yaMarcados = (_selected.modulosTP && _selected.modulosTP[espId]) || [];
+    // Compat: si guardado con key slug distinta, buscar también
+    if (!yaMarcados.length && _selected.modulosTP) {
+      Object.keys(_selected.modulosTP).forEach(function (k) {
+        if (CCTPCatalogo.normalizarId(k) === espId) yaMarcados = _selected.modulosTP[k];
+      });
+    }
+    wrap.innerHTML = mods.map(function (m) {
+      var marcado = yaMarcados.indexOf(m.id) !== -1;
+      return '<label style="display:flex;gap:8px;padding:8px 10px;margin-bottom:4px;background:' + (marcado ? 'rgba(37,99,235,.10)' : 'rgba(37,99,235,.03)') + ';border:1px solid ' + (marcado ? 'rgba(37,99,235,.4)' : 'rgba(37,99,235,.14)') + ';border-radius:6px;cursor:pointer;align-items:center">' +
+        '<input type="checkbox" name="asigMod" value="' + esc(m.id) + '"' + (marcado ? ' checked' : '') + '>' +
+        '<span style="font-weight:600;font-size:.85rem">' + esc(m.num || m.id) + '</span>' +
+        '<span style="color:#0C1E3B;font-size:.85rem;flex:1">' + esc(m.nombre) + '</span>' +
+        (m.nivel ? '<span style="font-size:.68rem;padding:1px 6px;border-radius:4px;background:rgba(37,99,235,.15);color:#1D4ED8">' + esc(m.nivel) + '</span>' : '') +
+      '</label>';
+    }).join('');
+  });
+}
+
+function renderAsigsDelUser() {
+  var wrap = document.getElementById('asigAsigs');
+  if (!wrap) return;
+  var yaMarcadas = _selected.asignaturas || [];
+  wrap.innerHTML = ASIG_PLAN_COMUN.map(function (a) {
+    var m = yaMarcadas.indexOf(a) !== -1;
+    return '<label style="display:flex;gap:6px;align-items:center;padding:8px 10px;background:' + (m ? 'rgba(37,99,235,.10)' : 'rgba(37,99,235,.03)') + ';border:1px solid ' + (m ? 'rgba(37,99,235,.4)' : 'rgba(37,99,235,.14)') + ';border-radius:6px;cursor:pointer;font-size:.85rem">' +
+      '<input type="checkbox" name="asigAsig" value="' + esc(a) + '"' + (m ? ' checked' : '') + '>' + esc(a) +
+    '</label>';
+  }).join('');
+}
+
+function renderNivelesDelUser() {
+  var wrap = document.getElementById('asigNiveles');
+  if (!wrap) return;
+  var tipo = document.getElementById('asigTipo').value;
+  var set = tipo === 'basica' ? NIVELES_BASICA : (tipo === 'tecnico' ? ['3M','4M'] : NIVELES_MEDIA);
+  var yaMarcados = _selected.niveles || [];
+  wrap.innerHTML = set.map(function (n) {
+    var m = yaMarcados.indexOf(n) !== -1;
+    return '<label style="display:inline-flex;gap:6px;align-items:center;padding:7px 14px;background:' + (m ? 'rgba(37,99,235,.15)' : 'rgba(37,99,235,.03)') + ';border:1px solid ' + (m ? '#2563EB' : 'rgba(37,99,235,.20)') + ';border-radius:20px;cursor:pointer;font-size:.85rem;font-weight:600">' +
+      '<input type="checkbox" name="asigNivel" value="' + esc(n) + '"' + (m ? ' checked' : '') + '>' + esc(n) +
+    '</label>';
+  }).join('');
+}
+
+async function guardarAsignacionMods() {
+  var tipo = document.getElementById('asigTipo').value;
+  var updates = { tipoProfesor: tipo };
+
+  if (tipo === 'tecnico') {
+    var espId = document.getElementById('asigEsp').value;
+    if (!espId) { alert('Elegí una especialidad.'); return; }
+    var modsMarcados = Array.from(document.querySelectorAll('input[name="asigMod"]:checked')).map(function (i) { return i.value; });
+    updates.especialidad     = espId;
+    updates.especialidades   = [espId];
+    updates.modulosTP        = {};
+    updates.modulosTP[espId] = modsMarcados;
+    updates.asignaturas      = [];   // clear plan común si estaba
+  } else {
+    var asigsMarcadas = Array.from(document.querySelectorAll('input[name="asigAsig"]:checked')).map(function (i) { return i.value; });
+    if (!asigsMarcadas.length) { alert('Elegí al menos una asignatura.'); return; }
+    updates.asignaturas    = asigsMarcadas;
+    updates.especialidad   = '';
+    updates.especialidades = [];
+    updates.modulosTP      = {};
+  }
+
+  var niveles = Array.from(document.querySelectorAll('input[name="asigNivel"]:checked')).map(function (i) { return i.value; });
+  updates.niveles = niveles;
+
+  try {
+    await EL_DB.collection('usuarios').doc(_selected.id).update(updates);
+    document.getElementById('modalAsigMods').remove();
+    alert('✅ Configuración guardada.');
+    var updated = await EL_DB.collection('usuarios').doc(_selected.id).get();
+    _selected = Object.assign({ id: _selected.id }, updated.data());
+    var idx = _todos.findIndex(function (x) { return x.id === _selected.id; });
+    if (idx !== -1) _todos[idx] = _selected;
+    verUser(_selected.id);
+  } catch (e) { alert('❌ Error: ' + e.message); }
+}
+
+async function cargarLiceosParaAsignar() {
+  var sel = document.getElementById('selLiceoAsignar');
+  if (!sel) return;
+  try {
+    var snap = await EL_DB.collection('liceos').get();
+    var liceos = [];
+    snap.forEach(function (d) { liceos.push(Object.assign({ id: d.id }, d.data())); });
+    liceos.sort(function (a, b) { return (a.nombre || a.slug || '').localeCompare(b.nombre || b.slug || ''); });
+    if (!liceos.length) {
+      sel.innerHTML = '<option value="">(No hay colegios en la base)</option>';
+      return;
+    }
+    sel.innerHTML = '<option value="">— Elegir colegio —</option>' +
+      liceos.map(function (l) {
+        return '<option value="' + esc(l.slug || l.id) + '">' + esc(l.nombre || l.slug || l.id) + ' (' + esc(l.slug || l.id) + ')</option>';
+      }).join('');
+  } catch (e) {
+    sel.innerHTML = '<option value="">Error: ' + esc(e.message) + '</option>';
+  }
+}
+
+async function asignarLiceo() {
+  if (!_selected) return;
+  var slug = document.getElementById('selLiceoAsignar').value;
+  if (!slug) { alert('Elegí un colegio primero.'); return; }
+  if (!confirm('¿Asignar "' + slug + '" como liceoSlug de ' + (_selected.nombre || _selected.email) + '?')) return;
+  try {
+    await EL_DB.collection('usuarios').doc(_selected.id).update({ liceoSlug: slug });
+    alert('✅ Liceo asignado.');
+    var updated = await EL_DB.collection('usuarios').doc(_selected.id).get();
+    _selected = Object.assign({ id: _selected.id }, updated.data());
+    var idx = _todos.findIndex(function (x) { return x.id === _selected.id; });
+    if (idx !== -1) _todos[idx] = _selected;
+    verUser(_selected.id);
+  } catch (e) {
+    alert('❌ Error: ' + e.message);
+  }
+}
+
+async function restaurarPassword() {
+  if (!_selected || !_selected.email) return;
+  var email = _selected.email;
+  var nombre = _selected.nombre || _selected.displayName || email;
+
+  var confirmMsg = '¿Enviar link de restauración de contraseña a "' + nombre + '"?\n\n' +
+    '📧 El email se enviará a: ' + email + '\n\n' +
+    'El usuario recibirá un correo con un link. Al hacer click, podrá elegir una nueva contraseña.\n\n' +
+    '⚠ Si el email va a Spam, avísale que lo busque ahí.';
+  if (!confirm(confirmMsg)) return;
+
+  try {
+    // firebase.auth() está disponible desde el SDK compat
+    var auth = firebase.auth();
+    // Enviamos con URL de continuación al login del sitio
+    var actionCodeSettings = {
+      url: window.location.origin + '/login.html',
+      handleCodeInApp: false
+    };
+    await auth.sendPasswordResetEmail(email, actionCodeSettings);
+    alert('✅ Email enviado a ' + email + '\n\nEl usuario debería recibirlo en 1-2 min. Pedile que revise Spam si no llega.');
+  } catch (e) {
+    var msg = e.message || String(e);
+    if (e.code === 'auth/user-not-found') {
+      msg = '❌ Este email NO existe en Firebase Auth.\n\nEl usuario está en Firestore pero no en Authentication. Probablemente el registro fue incompleto. Reparalo desde el modal "Agregar personal" del panel del colegio.';
+    } else if (e.code === 'auth/invalid-email') {
+      msg = '❌ Email inválido: ' + email;
+    } else if (e.code === 'auth/too-many-requests') {
+      msg = '⚠ Demasiadas solicitudes desde esta IP. Esperá unos minutos.';
+    }
+    alert(msg);
+  }
+}
+
+async function normalizarEspecialidad() {
+  if (!_selected || !_selected.especialidad) return;
+  var normalized = CCTPCatalogo.normalizarId(_selected.especialidad);
+  var espsNorm = (_selected.especialidades || [_selected.especialidad]).map(function (e) { return CCTPCatalogo.normalizarId(e); });
+  var updates = { especialidad: normalized, especialidades: espsNorm };
+  if (!_selected.tipoProfesor) updates.tipoProfesor = 'tecnico';
+
+  if (!confirm('Cambiar "' + _selected.especialidad + '" → "' + normalized + '"?')) return;
+
+  try {
+    await EL_DB.collection('usuarios').doc(_selected.id).update(updates);
+    alert('✓ Normalizado.');
+    var updated = await EL_DB.collection('usuarios').doc(_selected.id).get();
+    _selected = Object.assign({ id: _selected.id }, updated.data());
+    verUser(_selected.id);
+  } catch (e) { alert('❌ Error: ' + e.message); }
+}
+
+// Autoload
+window.addEventListener('load', function () {
+  if (typeof ELAuth !== 'undefined' && ELAuth.onUserReady) {
+    ELAuth.onUserReady(function () { cargarTodos(); });
+  } else {
+    cargarTodos();
+  }
+});
+</script>
+
+</body>
+</html>

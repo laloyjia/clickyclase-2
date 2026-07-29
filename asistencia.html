@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Asistencia — Click&Clase</title>
+<link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg">
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="js/firebase-rest.js"></script>
+<script src="js/firebase-config.js"></script>
+<script src="js/firebase-auth.js"></script>
+<script src="js/firebase-db.js"></script>
+<script src="js/roles-permissions.js"></script>
+<script src="js/roles-router.js"></script>
+<script src="js/cursos.js"></script>
+<script src="js/cc-uikit.js"></script>
+<style>
+* { box-sizing: border-box; }
+body { margin: 0; font-family: 'Segoe UI', Roboto, Arial, sans-serif; background: #F0F7FF; color: #0C1E3B; }
+.container { max-width: 1400px; margin: 20px auto; padding: 0 24px; }
+.filtros { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 14px }
+.fld label { display: block; font-size: .72rem; color: #64748B; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 4px; }
+select { width: 100%; padding: 9px 12px; border-radius: 8px; background: #fff; border: 1px solid rgba(37,99,235,.2); font-size: .88rem }
+table.asist { width: 100%; border-collapse: collapse; font-size: .85rem }
+table.asist th, table.asist td { padding: 8px 10px; border-bottom: 1px solid rgba(37,99,235,.08); text-align: left }
+table.asist th { background: rgba(37,99,235,.05); font-size: .72rem; text-transform: uppercase; color: #475569; font-weight: 700 }
+table.asist td.num { font-weight: 700; color: #64748B; width: 40px; text-align: center }
+table.asist td.p, table.asist td.a, table.asist td.t, table.asist td.j { text-align: center; font-weight: 700 }
+.pct-good { color: #059669 } .pct-warn { color: #F59E0B } .pct-bad { color: #DC2626 }
+.bar { width: 100%; height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden; margin-top: 3px }
+.bar-fill { height: 100%; transition: width .3s }
+.tab-btn { padding: 10px 18px; border: none; background: transparent; color: #64748B; cursor: pointer; font-weight: 700; border-radius: 8px; font-size: .88rem }
+.tab-btn.active { background: linear-gradient(135deg,#4F46E5,#6366F1); color: #fff; box-shadow: 0 4px 12px rgba(79,70,229,.25) }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div id="ccHero"></div>
+  <div id="ccKpis"></div>
+
+  <!-- Tabs -->
+  <div class="cck-card" style="padding:8px">
+    <div style="display:flex;gap:6px">
+      <button class="tab-btn active" data-tab="jefatura" onclick="cambiarTab('jefatura')" id="tabJef" style="display:none">🎓 Mi curso jefe</button>
+      <button class="tab-btn active" data-tab="asignaturas" onclick="cambiarTab('asignaturas')">📚 Mis asignaturas</button>
+    </div>
+  </div>
+
+  <div class="cck-card">
+    <h2>🔎 Filtros</h2>
+    <div class="filtros">
+      <div class="fld"><label>Curso</label><select id="fCurso" onchange="cargar()"><option value="">— Elegir —</option></select></div>
+      <div class="fld"><label>Asignatura</label><select id="fAsig" onchange="cargar()"><option value="">Todas</option></select></div>
+      <div class="fld"><label>Período</label>
+        <select id="fPeriodo" onchange="cargar()">
+          <option value="mes">Este mes</option>
+          <option value="semana">Última semana</option>
+          <option value="todos" selected>Todo el año</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="cck-card">
+    <h2 style="display:flex;justify-content:space-between;align-items:center">
+      <span>📊 Detalle por estudiante</span>
+      <span id="asistCount" style="font-size:.78rem;color:#64748B;font-weight:600;text-transform:none"></span>
+    </h2>
+    <div id="tblWrap">
+      <div class="cck-sk-row"><div class="cck-sk"></div><div class="cck-sk"></div><div class="cck-sk"></div></div>
+    </div>
+  </div>
+</div>
+
+<script>
+if (window.CCRouter && window.CCRouter.guardPanel) {
+  CCRouter.guardPanel(['profesor','jefe_curso','utp','encargado_area','admin_colegio','director','rector']);
+}
+var _cursos=[], _cursoSel=null, _rows=[], _tab='asignaturas', _cursoJefe=null;
+function esc(s){return String(s==null?'':s).replace(/[<>&"]/g,function(c){return {'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c];});}
+
+function _hero(){
+  document.getElementById('ccHero').innerHTML = CCKit.hero({
+    emoji:'✅', title:'Asistencia',
+    sub:'Estadísticas de asistencia consolidada por estudiante',
+    actions:[{label:'Panel',emoji:'←',href:'dashboard-profesor.html'},
+             {label:'Mi Jefatura',emoji:'🎓',href:'mi-jefatura.html'}]
+  });
+}
+
+function iniciar(){
+  _hero();
+  CCCursos.misCursos().then(function(cs){
+    _cursos = cs || [];
+    var u = (window.ELAuth && ELAuth.user) || {};
+    // Detectar si es jefe de curso
+    _cursoJefe = _cursos.find(function(c){ return c.jefeUid === u.uid; });
+    if (_cursoJefe) {
+      document.getElementById('tabJef').style.display = '';
+    }
+    var qp = new URLSearchParams(window.location.search);
+    var qc = qp.get('cursoId');
+    var qSolo = qp.get('soloCurso') === '1';
+    // Si viene desde Mi Jefatura → tab jefatura
+    if (qSolo && qc && _cursoJefe) { _tab = 'jefatura'; }
+    _pintarSelector(qc);
+    if (qc) cargar();
+  });
+}
+
+function _pintarSelector(preseleccionar){
+  var sel = document.getElementById('fCurso');
+  var lista = _tab === 'jefatura' && _cursoJefe ? [_cursoJefe] : _cursos;
+  sel.innerHTML = (_tab==='jefatura'
+    ? lista.map(function(c){ return '<option value="'+esc(c.cursoId)+'">'+esc(c.nombreCompleto)+'</option>'; }).join('')
+    : '<option value="">— Elegir —</option>' + lista.map(function(c){
+        return '<option value="'+esc(c.cursoId)+'">'+esc(c.nombreCompleto)+'</option>';
+      }).join(''));
+  sel.disabled = _tab === 'jefatura';
+  sel.style.opacity = _tab === 'jefatura' ? '.7' : '1';
+  if (preseleccionar) sel.value = preseleccionar;
+  else if (_tab === 'jefatura' && _cursoJefe) sel.value = _cursoJefe.cursoId;
+
+  // Poblar asignaturas del profe en ese curso
+  _pintarAsignaturas();
+}
+
+function _pintarAsignaturas(){
+  var cid = document.getElementById('fCurso').value;
+  var selA = document.getElementById('fAsig');
+  if (!selA) return;
+  var u = (window.ELAuth && ELAuth.user) || {};
+  var c = _cursos.find(function(x){ return x.cursoId === cid; });
+  var asigs = c ? (c.asignaturasAsignadas||[]).filter(function(a){ return a.docenteUid === u.uid; }).map(function(a){ return a.asignatura; }) : [];
+  if (_tab === 'jefatura') {
+    // Todas las asignaturas del curso jefe
+    asigs = c ? (c.asignaturasAsignadas||[]).map(function(a){ return a.asignatura; }) : [];
+  }
+  selA.innerHTML = '<option value="">Todas</option>' +
+    asigs.map(function(a){ return '<option value="'+esc(a)+'">'+esc(a)+'</option>'; }).join('');
+}
+
+function cambiarTab(t){
+  _tab = t;
+  document.querySelectorAll('.tab-btn').forEach(function(b){
+    b.classList.toggle('active', b.getAttribute('data-tab') === t);
+  });
+  _pintarSelector();
+  cargar();
+}
+
+function _enPeriodo(fecha, periodo){
+  if (periodo === 'todos') return true;
+  var f = new Date(fecha); if (isNaN(f)) return false;
+  var hoy = new Date();
+  if (periodo === 'mes') {
+    return f.getFullYear() === hoy.getFullYear() && f.getMonth() === hoy.getMonth();
+  }
+  if (periodo === 'semana') {
+    var lun = new Date(hoy); lun.setDate(hoy.getDate() - ((hoy.getDay()+6)%7));
+    return f >= lun;
+  }
+  return true;
+}
+
+function cargar(){
+  var cid = document.getElementById('fCurso').value;
+  var periodo = document.getElementById('fPeriodo').value;
+  if (!cid) {
+    document.getElementById('tblWrap').innerHTML = CCKit.emptyState({
+      emoji:'✅', title:'Elegí un curso',
+      body:'Seleccioná uno de tus cursos para ver la asistencia consolidada.'
+    });
+    document.getElementById('ccKpis').innerHTML = '';
+    return;
+  }
+  _cursoSel = _cursos.find(function(c){ return c.cursoId === cid; });
+  var ests = (_cursoSel && _cursoSel.estudiantes) || [];
+
+  // Cargar registros de libro_clases + asistencia_curso
+  Promise.all([
+    EL_DB.collection('libro_clases').get().catch(function(){return {forEach:function(){}};}),
+    EL_DB.collection('asistencia_curso').get().catch(function(){return {forEach:function(){}};})
+  ]).then(function(snaps){
+    // Init contador por alumno
+    var stats = {};
+    ests.forEach(function(e){
+      var key = e.rut || e.nombre;
+      stats[key] = { alumno: e.nombre || e.rut || '—', rut: e.rut, P:0, A:0, T:0, J:0, dias:0 };
+    });
+
+    var fAsig = document.getElementById('fAsig') ? document.getElementById('fAsig').value : '';
+    var u = (window.ELAuth && ELAuth.user) || {};
+    // De libro_clases: iterar asistencia por reg
+    snaps[0].forEach(function(d){
+      var r = d.data(); if (!r || r.cursoId !== cid) return;
+      if (!_enPeriodo(r.fecha, periodo)) return;
+      // Filtro por asignatura (si se eligió)
+      if (fAsig && r.asignatura !== fAsig) return;
+      // Tab "Mis asignaturas": solo mis clases (por docenteUid)
+      if (_tab === 'asignaturas' && r.docenteUid && r.docenteUid !== u.uid) return;
+      (r.asistencia || []).forEach(function(a){
+        var key = a.rut || a.nombreCompleto;
+        if (!stats[key]) stats[key] = { alumno: a.nombreCompleto||a.rut, rut:a.rut, P:0, A:0, T:0, J:0, dias:0 };
+        var e = a.estado || 'A';
+        if (stats[key][e] !== undefined) stats[key][e]++;
+        stats[key].dias++;
+      });
+    });
+
+    // De asistencia_curso: doc con "registros: { fecha: { estKey: 'P|A|T|J' } }"
+    snaps[1].forEach(function(d){
+      var r = d.data(); if (!r || !r.registros) return;
+      // Heurística: matchear por profesorUid o cursoId embebido en el docId
+      Object.keys(r.registros || {}).forEach(function(fecha){
+        if (!_enPeriodo(fecha, periodo)) return;
+        Object.keys(r.registros[fecha] || {}).forEach(function(k){
+          var estado = r.registros[fecha][k];
+          // k tipo "r:12345678-9" o "n:nombre"
+          var rut = k.startsWith('r:') ? k.slice(2) : null;
+          var st = stats[rut] || stats[k.slice(2)];
+          if (!st) return;
+          if (st[estado] !== undefined) st[estado]++;
+          st.dias++;
+        });
+      });
+    });
+
+    _rows = Object.values(stats).map(function(s){
+      var total = s.dias || (s.P+s.A+s.T+s.J);
+      s.total = total;
+      s.pct = total ? Math.round((s.P + s.T + s.J) / total * 100) : 0;
+      return s;
+    }).sort(function(a,b){ return a.pct - b.pct; });
+
+    _renderKpis(); _renderTabla();
+  });
+}
+
+function _renderKpis(){
+  var totP = _rows.reduce(function(s,r){return s+r.P;}, 0);
+  var totA = _rows.reduce(function(s,r){return s+r.A;}, 0);
+  var totT = _rows.reduce(function(s,r){return s+r.T;}, 0);
+  var totJ = _rows.reduce(function(s,r){return s+r.J;}, 0);
+  var tot = totP+totA+totT+totJ;
+  var pctGen = tot ? Math.round((totP+totT+totJ)/tot*100) : 0;
+  var enRiesgo = _rows.filter(function(r){ return r.total>0 && r.pct < 85; }).length;
+  document.getElementById('ccKpis').innerHTML = CCKit.kpiRow([
+    {emoji:'👥',label:'Estudiantes',value:_rows.length,tone:'info'},
+    {emoji:'📊',label:'Asistencia general',value:pctGen+'%',
+      tone:pctGen>=90?'ok':pctGen>=85?'warn':'err',
+      hint:totP+'P · '+totA+'A · '+totT+'T · '+totJ+'J'},
+    {emoji:'⚠',label:'Bajo el 85%',value:enRiesgo,
+      tone:enRiesgo>0?'err':'ok',
+      hint:enRiesgo>0?'Requieren seguimiento':'Todo al día'},
+    {emoji:'📅',label:'Días registrados',value:_rows.length?Math.max.apply(null,_rows.map(function(r){return r.total;})):0,tone:'gray'}
+  ]);
+}
+
+function _renderTabla(){
+  var count = document.getElementById('asistCount');
+  count.textContent = _rows.length ? _rows.length+' estudiantes' : '';
+  if (!_rows.length) {
+    document.getElementById('tblWrap').innerHTML = CCKit.emptyState({
+      emoji:'✅', title:'Sin registros de asistencia',
+      body:'Cuando cargues asistencia desde el libro de clases, acá verás las estadísticas por estudiante.'
+    });
+    return;
+  }
+  document.getElementById('tblWrap').innerHTML =
+    '<div style="overflow-x:auto"><table class="asist"><thead><tr>' +
+      '<th class="num">N°</th><th>Estudiante</th>' +
+      '<th class="p">P</th><th class="a">A</th><th class="t">T</th><th class="j">J</th>' +
+      '<th>Días</th><th style="min-width:180px">% Asistencia</th>' +
+    '</tr></thead><tbody>' +
+    _rows.map(function(r,i){
+      var pctCls = r.pct>=90?'pct-good':r.pct>=85?'pct-warn':'pct-bad';
+      var barCol = r.pct>=90?'#059669':r.pct>=85?'#F59E0B':'#DC2626';
+      return '<tr>' +
+        '<td class="num">'+(i+1)+'</td>' +
+        '<td><b>'+esc(r.alumno)+'</b>'+(r.rut?'<div style="color:#94a3b8;font-size:.72rem">'+esc(r.rut)+'</div>':'')+'</td>' +
+        '<td class="p" style="color:#059669">'+r.P+'</td>' +
+        '<td class="a" style="color:#DC2626">'+r.A+'</td>' +
+        '<td class="t" style="color:#F59E0B">'+r.T+'</td>' +
+        '<td class="j" style="color:#2563EB">'+r.J+'</td>' +
+        '<td style="text-align:center">'+r.total+'</td>' +
+        '<td><b class="'+pctCls+'">'+r.pct+'%</b>' +
+          '<div class="bar"><div class="bar-fill" style="width:'+r.pct+'%;background:'+barCol+'"></div></div>' +
+        '</td>' +
+      '</tr>';
+    }).join('') +
+    '</tbody></table></div>';
+}
+
+if (window.ELAuth && ELAuth.onUserReady) ELAuth.onUserReady(function(u){ if(u) iniciar(); });
+</script>
+</body>
+</html>
