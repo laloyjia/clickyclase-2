@@ -1808,6 +1808,11 @@
 
     function _resolveAsigSiglaLocal(nombre) {
         if (!nombre) return null;
+        // FIX: si viene con nivel pegado (superadmin: "lenguaje__2b"), quitarlo y normalizar.
+        if (String(nombre).indexOf('__') !== -1) nombre = String(nombre).split('__')[0];
+        if (typeof CURRICULA_CHILE !== 'undefined' && CURRICULA_CHILE.nombreAsignaturaCanonico) {
+            nombre = CURRICULA_CHILE.nombreAsignaturaCanonico(nombre);
+        }
         var k = nombre.trim().toLowerCase()
             .replace(/[áéíóúñ]/g, function(c){return {á:'a',é:'e',í:'i',ó:'o',ú:'u',ñ:'n'}[c]||c;});
         if (_SIGLA_MAP_PLAN[k]) return _SIGLA_MAP_PLAN[k];

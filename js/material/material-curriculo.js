@@ -42,6 +42,12 @@
 
   function _resolveAsigSiglaMat(nombre) {
       if (!nombre) return null;
+      // FIX: si viene con nivel pegado (superadmin: "lenguaje__2b"), quitarlo.
+      if (String(nombre).indexOf('__') !== -1) nombre = String(nombre).split('__')[0];
+      // Normalizar via el canónico del currículo (traduce slugs como "ciencias_nat").
+      if (typeof CURRICULA_CHILE !== 'undefined' && CURRICULA_CHILE.nombreAsignaturaCanonico) {
+          nombre = CURRICULA_CHILE.nombreAsignaturaCanonico(nombre);
+      }
       var k = nombre.trim().toLowerCase()
           .replace(/[áéíóúñ]/g, function(c){return {á:'a',é:'e',í:'i',ó:'o',ú:'u',ñ:'n'}[c]||c;});
       if (_SIGLA_MAP_MAT[k]) return _SIGLA_MAP_MAT[k];

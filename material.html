@@ -1265,38 +1265,17 @@
 
         /* Chips de diagnóstico NEE — mismo lenguaje visual que planificación */
         .pie-diag-chk {
-            display: flex;
-            align-items: center;
-            gap: 9px;
+            display: flex; align-items: center; gap: 9px;
             padding: 10px 13px;
             background: rgba(100,116,139,.06);
             border: 1px solid rgba(100,116,139,.18);
-            border-radius: 10px;
-            cursor: pointer;
-            font-size: .82rem;
-            font-weight: 600;
-            color: #334155;
-            transition: all .16s ease;
-            user-select: none;
+            border-radius: 10px; cursor: pointer;
+            font-size: .82rem; font-weight: 600; color: #334155;
+            transition: all .16s ease; user-select: none;
         }
-        .pie-diag-chk:hover {
-            background: rgba(100,116,139,.1);
-            border-color: rgba(100,116,139,.3);
-        }
-        .pie-diag-chk input[type=checkbox] {
-            accent-color: #d6499a;
-            width: 15px;
-            height: 15px;
-            margin: 0;
-            flex-shrink: 0;
-        }
-        /* Estado seleccionado: tarjeta rosa suave como las NEE de planificación */
-        .pie-diag-chk:has(input:checked) {
-            background: rgba(236,72,153,.08);
-            color: #9d174d;
-            border: 1px solid rgba(236,72,153,.25);
-            font-weight: 700;
-        }
+        .pie-diag-chk:hover { background: rgba(100,116,139,.1); border-color: rgba(100,116,139,.3); }
+        .pie-diag-chk input[type=checkbox] { accent-color: #d6499a; width: 15px; height: 15px; margin: 0; flex-shrink: 0; }
+        .pie-diag-chk:has(input:checked) { background: rgba(236,72,153,.08); color: #9d174d; border: 1px solid rgba(236,72,153,.25); font-weight: 700; }
 
         /* Paneles de configuración por NEE (uno por diagnóstico marcado) */
         .pie-panel {
@@ -1777,20 +1756,20 @@
                         <div class="campo">
                             <label>Diagnósticos NEE a generar <small style="color:#334155;font-weight:400;">(marca uno o varios — se generará una versión adaptada por cada uno)</small></label>
                             <div id="pieDiagGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:6px;margin-top:6px;">
-                                <label class="pie-diag-chk"><input type="checkbox" name="pruebaPieDiag" value="TDAH"> <span>⚡ TDAH</span></label>
-                                <label class="pie-diag-chk"><input type="checkbox" name="pruebaPieDiag" value="TEA"> <span>🧩 TEA</span></label>
-                                <label class="pie-diag-chk"><input type="checkbox" name="pruebaPieDiag" value="Dislexia"> <span>📖 Dislexia</span></label>
-                                <label class="pie-diag-chk"><input type="checkbox" name="pruebaPieDiag" value="Discalculia"> <span>🔢 Discalculia</span></label>
-                                <label class="pie-diag-chk"><input type="checkbox" name="pruebaPieDiag" value="Disgrafía"> <span>✍️ Disgrafía</span></label>
-                                <label class="pie-diag-chk"><input type="checkbox" name="pruebaPieDiag" value="Discapacidad Intelectual Leve"> <span>🧠 D. Intelectual Leve</span></label>
-                                <label class="pie-diag-chk"><input type="checkbox" name="pruebaPieDiag" value="Discapacidad Intelectual Moderada"> <span>🧠 D. Intelectual Moderada</span></label>
-                                <label class="pie-diag-chk"><input type="checkbox" name="pruebaPieDiag" value="TEL"> <span>💬 TEL</span></label>
-                                <label class="pie-diag-chk"><input type="checkbox" name="pruebaPieDiag" value="Funcionamiento Intelectual Limítrofe"> <span>🔵 F. I. Limítrofe</span></label>
-                                <label class="pie-diag-chk"><input type="checkbox" name="pruebaPieDiag" value="Trastorno Emocional / Ansiedad"> <span>💗 T. Emocional / Ansiedad</span></label>
-                                <label class="pie-diag-chk"><input type="checkbox" name="pruebaPieDiag" value="Discapacidad Auditiva"> <span>👂 D. Auditiva</span></label>
-                                <label class="pie-diag-chk"><input type="checkbox" name="pruebaPieDiag" value="Discapacidad Visual"> <span>👁️ D. Visual</span></label>
-                                <label class="pie-diag-chk"><input type="checkbox" name="pruebaPieDiag" value="Discapacidad Motora"> <span>♿ D. Motora</span></label>
-                                <label class="pie-diag-chk"><input type="checkbox" name="pruebaPieDiag" value="Otro"> <span>➕ Otro</span></label>
+                                <label class="pie-diag-chk"><input type="checkbox" name="pruebaPieDiag" value="TDAH"> <span>TDAH</span></label>
+                                <label class="pie-diag-chk"><input type="checkbox" name="pruebaPieDiag" value="TEA"> <span>TEA</span></label>
+                                <label class="pie-diag-chk"><input type="checkbox" name="pruebaPieDiag" value="Dislexia"> <span>Dislexia</span></label>
+                                <label class="pie-diag-chk"><input type="checkbox" name="pruebaPieDiag" value="Discalculia"> <span>Discalculia</span></label>
+                                <label class="pie-diag-chk"><input type="checkbox" name="pruebaPieDiag" value="Disgrafía"> <span>Disgrafía</span></label>
+                                <label class="pie-diag-chk"><input type="checkbox" name="pruebaPieDiag" value="Discapacidad Intelectual Leve"> <span>D. Intelectual Leve</span></label>
+                                <label class="pie-diag-chk"><input type="checkbox" name="pruebaPieDiag" value="Discapacidad Intelectual Moderada"> <span>D. Intelectual Moderada</span></label>
+                                <label class="pie-diag-chk"><input type="checkbox" name="pruebaPieDiag" value="TEL"> <span>TEL</span></label>
+                                <label class="pie-diag-chk"><input type="checkbox" name="pruebaPieDiag" value="Funcionamiento Intelectual Limítrofe"> <span>F. I. Limítrofe</span></label>
+                                <label class="pie-diag-chk"><input type="checkbox" name="pruebaPieDiag" value="Trastorno Emocional / Ansiedad"> <span>T. Emocional / Ansiedad</span></label>
+                                <label class="pie-diag-chk"><input type="checkbox" name="pruebaPieDiag" value="Discapacidad Auditiva"> <span>D. Auditiva</span></label>
+                                <label class="pie-diag-chk"><input type="checkbox" name="pruebaPieDiag" value="Discapacidad Visual"> <span>D. Visual</span></label>
+                                <label class="pie-diag-chk"><input type="checkbox" name="pruebaPieDiag" value="Discapacidad Motora"> <span>D. Motora</span></label>
+                                <label class="pie-diag-chk"><input type="checkbox" name="pruebaPieDiag" value="Otro"> <span>Otro</span></label>
                             </div>
                             <small class="cfg-help" id="pieDiagCount" style="margin-top:8px;display:block;color:#334155;">0 diagnósticos seleccionados.</small>
                         </div>
@@ -2190,26 +2169,6 @@
                 return;
             }
             _matUser = user;
-
-            // Quitar NT1/NT2 si el profesor tiene asignaturas de plan común (no
-            // existen en Educación Parvularia). Evita combos como "Ciencias Naturales · NT1".
-            if (user.tipoProfesor !== 'parvularia' && Array.isArray(user.niveles)
-                && Array.isArray(user.asignaturas) && user.asignaturas.length) {
-                user.niveles = user.niveles.filter(function (n) { return n !== 'NT1' && n !== 'NT2'; });
-            }
-            // Limpiar combos "asignatura__nt1/nt2" dentro de asignaturas.
-            if (Array.isArray(user.asignaturas)) {
-                user.asignaturas = (function(asigs){
-                    var NUCLEOS = ['parvularia','nucleo','exploracion','lenguaje_verbal','convivencia',
-                                   'corporalidad','pensamiento','artistico','entorno','identidad','comunicacion'];
-                    return asigs.filter(function(slug){
-                        var s = String(slug||'').toLowerCase();
-                        if (s.indexOf('nt1') === -1 && s.indexOf('nt2') === -1) return true;
-                        return NUCLEOS.some(function(n){ return s.indexOf(n) !== -1; });
-                    });
-                })(user.asignaturas);
-            }
-
 
             var inProf = document.getElementById('inputProfesor');
             if (inProf) inProf.value = user.nombre || user.name || '';

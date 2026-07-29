@@ -1515,6 +1515,24 @@ var CURRICULA_CHILE = (function() {
     nombreAsignaturaCanonico: function(nombre) {
       if (!nombre) return nombre;
       var k = String(nombre).trim().toLowerCase();
+      // FIX: el panel de superadmin guarda las asignaturas con el nivel pegado
+      // (ej. "lenguaje__2b", "ciencias_nat__1m"). Quitamos el sufijo "__nivel"
+      // para quedarnos solo con la asignatura. Sin esto, los OA y las unidades
+      // no cargan para profesores creados por superadmin.
+      if (k.indexOf('__') !== -1) k = k.split('__')[0];
+      // Mapa de slugs internos del superadmin → nombre que el currículo conoce.
+      var _SLUG = {
+        'lenguaje':'lenguaje y comunicación', 'ling_liter':'lengua y literatura',
+        'lengua_literatura':'lengua y literatura', 'matematica':'matemática',
+        'ciencias_nat':'ciencias naturales', 'ciencias':'ciencias naturales',
+        'biologia':'biología', 'fisica':'física', 'quimica':'química',
+        'historia':'historia, geografía y ciencias sociales', 'ingles':'inglés',
+        'artes_vis':'artes visuales', 'artes':'artes visuales', 'musica':'música',
+        'tecnologia':'tecnología', 'ed_fisica':'educación física y salud',
+        'religion':'religión', 'orientacion':'orientación', 'filosofia':'filosofía',
+        'cs_ciudadania':'ciencias para la ciudadanía', 'ed_ciudadana':'educación ciudadana'
+      };
+      if (_SLUG[k]) k = _SLUG[k];
       return this._NOMBRE_CANONICO[k] || nombre;
     },
 
