@@ -1712,6 +1712,28 @@
 
         ELAuth.onUserReady(function(user) {
             if (!user) return;
+
+            // ── FIX combos inválidos ──────────────────────────────────────
+            // Limpiar de una vez, apenas entra el usuario, las combinaciones
+            // asignatura·nivel imposibles (ej. "ciencias_nat__nt1"): las
+            // asignaturas de plan común no existen en NT1/NT2 (Parvularia usa
+            // Núcleos). Así TODA la página (barra de contexto incluida) recibe
+            // datos limpios.
+            if (Array.isArray(user.asignaturas)) {
+                var _NUCLEOS = ['parvularia','nucleo','exploracion','lenguaje_verbal','convivencia',
+                                'corporalidad','pensamiento','artistico','entorno','identidad','comunicacion'];
+                user.asignaturas = user.asignaturas.filter(function(slug){
+                    var s = String(slug||'').toLowerCase();
+                    if (s.indexOf('nt1') === -1 && s.indexOf('nt2') === -1) return true;
+                    return _NUCLEOS.some(function(n){ return s.indexOf(n) !== -1; });
+                });
+            }
+            if (user.tipoProfesor !== 'parvularia' && Array.isArray(user.niveles)
+                && Array.isArray(user.asignaturas) && user.asignaturas.length) {
+                user.niveles = user.niveles.filter(function(n){ return n !== 'NT1' && n !== 'NT2'; });
+            }
+            // ──────────────────────────────────────────────────────────────
+
             _planifUser = user;
 
             // Llenar nombre del profesor
