@@ -1387,8 +1387,27 @@ function _marcarNiveles(val){
   document.querySelectorAll('.pf-niv').forEach(function(c){ c.checked = val; });
 }
 function _leerAsigsChecks(){
-  return Array.prototype.slice.call(document.querySelectorAll('.pf-asig:checked'))
-    .map(function(c){ return c.value; });
+  // Los checkboxes tienen value "slug__nivel" (ej. "fisica__3b"). El sistema de
+  // carga de OA (y el panel de admin) espera NOMBRES limpios ("Física"), sin
+  // nivel y deduplicados. Convertimos aquí para guardar en el mismo formato que
+  // admin, que es el único que el motor de OA entiende.
+  var SLUG_A_NOMBRE = {
+    'lenguaje':'Lenguaje y Comunicación','ling_liter':'Lengua y Literatura',
+    'lengua_literatura':'Lengua y Literatura','matematica':'Matemática',
+    'ciencias_nat':'Ciencias Naturales','ciencias':'Ciencias Naturales',
+    'biologia':'Biología','fisica':'Física','quimica':'Química',
+    'historia':'Historia, Geografía y Ciencias Sociales','ingles':'Inglés',
+    'artes_vis':'Artes Visuales','artes':'Artes Visuales','musica':'Música',
+    'tecnologia':'Tecnología','ed_fisica':'Educación Física y Salud',
+    'religion':'Religión','orientacion':'Orientación','filosofia':'Filosofía',
+    'cs_ciudadania':'Ciencias para la Ciudadanía','ed_ciudadana':'Educación Ciudadana'
+  };
+  var set = new Set();
+  Array.prototype.slice.call(document.querySelectorAll('.pf-asig:checked')).forEach(function(c){
+    var slug = String(c.value).split('__')[0].toLowerCase().trim();
+    set.add(SLUG_A_NOMBRE[slug] || slug);
+  });
+  return Array.from(set);
 }
 function _leerNivelesChecks(){
   return Array.prototype.slice.call(document.querySelectorAll('.pf-niv:checked'))
@@ -1492,18 +1511,6 @@ function _renderPersonal(){
 function _thPer(txt){
   return '<th style="text-align:left;padding:8px 10px;font-size:.7rem;color:#475569;text-transform:uppercase;letter-spacing:.4px;border-bottom:2px solid #E2E8F0;font-weight:700">'+txt+'</th>';
 }
-// Oculta combinaciones asignatura·nivel imposibles (ej. "ciencias__nt1").
-// Las asignaturas de plan común no existen en NT1/NT2 (Parvularia usa Núcleos).
-function _sinCombosParvularia(asigs){
-  if (!Array.isArray(asigs)) return asigs || [];
-  var NUCLEOS = ['parvularia','nucleo','exploracion','lenguaje_verbal','convivencia',
-                 'corporalidad','pensamiento','artistico','entorno','identidad','comunicacion'];
-  return asigs.filter(function(slug){
-    var s = String(slug||'').toLowerCase();
-    if (s.indexOf('nt1') === -1 && s.indexOf('nt2') === -1) return true;
-    return NUCLEOS.some(function(n){ return s.indexOf(n) !== -1; });
-  });
-}
 // Formatea slugs feos → nombres legibles: "biologia_nt1" → "Biología NT1"
 function _formatearAsig(slug){
   var s = String(slug||'').trim();
@@ -1570,7 +1577,7 @@ function _filaPersonal(u){
   var rolPrincipal = rolesArrRow.length
     ? _chipsLista(rolesArrRow, '#4F46E5', _rolLabel)
     : '<span style="color:#94a3b8">—</span>';
-  var asigsHtml = _chipsLista(_sinCombosParvularia(u.asignaturas), '#4F46E5', _formatearAsig);
+  var asigsHtml = _chipsLista(u.asignaturas, '#4F46E5', _formatearAsig);
   var nivsHtml  = _chipsLista(u.niveles, '#059669', function(x){ return String(x).toUpperCase(); });
   var estado = u.activo === false
     ? '<span style="display:inline-block;padding:3px 10px;background:#FEE2E2;color:#B91C1C;border-radius:99px;font-size:.7rem;font-weight:700">✗ Pausado</span>'
