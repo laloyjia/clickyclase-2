@@ -96,9 +96,9 @@
    */
   function panelDefault(user) {
     var rol = rolPrincipal(user);
-    if (!rol) return 'panel-profesor.html';
+    if (!rol) return 'dashboard-profesor.html';
     var mapa = (typeof EL_ROLES_PANEL !== 'undefined') ? EL_ROLES_PANEL : {};
-    return mapa[rol] || 'panel-profesor.html';
+    return mapa[rol] || 'dashboard-profesor.html';
   }
 
   /**

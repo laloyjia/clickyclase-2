@@ -445,12 +445,22 @@ CURRICULA_PLAN_COMUN['lenguaje'] = {
       nombre:  'Taller de Literatura',
       sigla:   'TLIT',
       tramo:   'media',
-      niveles: ['3M'],
+      niveles: ['3M', '4M'],
       unidades: {
-        '3M': ['Trayectorias de lectura', 'Producción literaria y creativa', 'Comunidad lectora']
+        '3M': ['Trayectorias de lectura', 'Producción literaria y creativa', 'Comunidad lectora'],
+        '4M': ['Trayectorias de lectura', 'Producción literaria y creativa', 'Comunidad lectora']
       },
+      // Bases MINEDUC prescriben los mismos OAs para 3°M y 4°M (electivo anual repetible)
       oas: {
         '3M': [
+          { codigo: 'OA1', eje: 'Producción',        descripcion: 'Producir diversos géneros escritos y audiovisuales para desarrollar y comunicar sus interpretaciones de las obras leídas.' },
+          { codigo: 'OA2', eje: 'Producción',        descripcion: 'Producir textos pertenecientes a diversos géneros discursivos de la literatura que den cuenta de sus proyectos personales y creativos.' },
+          { codigo: 'OA3', eje: 'Comunidad lectora', descripcion: 'Contribuir con sus comentarios, sugerencias, interpretaciones y críticas a los procesos de lectura colectiva y de escritura creativa de sus pares.' },
+          { codigo: 'OA4', eje: 'Producción',        descripcion: 'Revisar y reescribir sus propias producciones (escritas, orales o audiovisuales) a la luz de los comentarios, críticas y sugerencias de sus pares, para enriquecer su producción creativa.' },
+          { codigo: 'OA5', eje: 'Lectura',           descripcion: 'Construir trayectorias de lectura que surjan de sus propios intereses, gustos literarios e inquietudes, explicitando criterios de selección de obras y compartiéndolas con sus pares.' },
+          { codigo: 'OA6', eje: 'Producción',        descripcion: 'Producir textos y otras producciones que den cuenta de sus reflexiones sobre sí mismos y sobre diversas temáticas del mundo, surgidas de las interpretaciones de las obras leídas y de sus trayectorias de lectura.' }
+        ],
+        '4M': [
           { codigo: 'OA1', eje: 'Producción',        descripcion: 'Producir diversos géneros escritos y audiovisuales para desarrollar y comunicar sus interpretaciones de las obras leídas.' },
           { codigo: 'OA2', eje: 'Producción',        descripcion: 'Producir textos pertenecientes a diversos géneros discursivos de la literatura que den cuenta de sus proyectos personales y creativos.' },
           { codigo: 'OA3', eje: 'Comunidad lectora', descripcion: 'Contribuir con sus comentarios, sugerencias, interpretaciones y críticas a los procesos de lectura colectiva y de escritura creativa de sus pares.' },

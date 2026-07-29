@@ -32,7 +32,7 @@
 <div class="topbar">
   <div style="display:flex;align-items:center;gap:14px">
     <span class="brand">Click&Clase</span>
-    <span id="topLiceoNombre" style="color:var(--muted);font-size:13px;padding-left:14px;border-left:1px solid rgba(148,163,184,.2)">Cargando…</span>
+    <span id="topLiceoNombre" style="color:var(--muted);font-size:13px;padding-left:14px;border-left:1px solid rgba(37,99,235,.18)">Cargando…</span>
   </div>
   <div class="switcher">
     <label for="segSel">Encargado de:</label>
@@ -55,29 +55,29 @@
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:16px 0">
 
         <a href="admin-cursos.html" style="display:block;text-decoration:none;padding:20px 24px;background:linear-gradient(135deg,rgba(16,185,129,.10),rgba(34,197,94,.06));border:1px solid rgba(34,197,94,.3);border-radius:14px;color:inherit">
-          <div style="font-size:.8rem;color:#86efac;font-weight:600;letter-spacing:.6px;text-transform:uppercase">Cursos y roster</div>
+          <div style="font-size:.8rem;color:#059669;font-weight:600;letter-spacing:.6px;text-transform:uppercase">Cursos y roster</div>
           <div style="font-size:1.35rem;font-weight:700;margin-top:4px">🎓 Gestionar Cursos</div>
-          <div style="font-size:.88rem;color:#94a3b8;margin-top:6px" id="cursosResumen">Crear cursos, cargar estudiantes, asignar docentes por asignatura…</div>
+          <div style="font-size:.88rem;color:#64748B;margin-top:6px" id="cursosResumen">Crear cursos, cargar estudiantes, asignar docentes por asignatura…</div>
         </a>
 
-        <a href="revisor-bandeja.html" style="display:block;text-decoration:none;padding:20px 24px;background:linear-gradient(135deg,rgba(124,58,237,.12),rgba(34,211,238,.08));border:1px solid rgba(124,58,237,.3);border-radius:14px;color:inherit;transition:transform .15s ease;">
+        <a href="revisor-bandeja.html" style="display:block;text-decoration:none;padding:20px 24px;background:linear-gradient(135deg,rgba(37,99,235,.12),rgba(34,211,238,.08));border:1px solid rgba(37,99,235,.3);border-radius:14px;color:inherit;transition:transform .15s ease;">
         <div style="display:flex;align-items:center;justify-content:space-between;gap:16px">
           <div>
-            <div style="font-size:.8rem;color:#c4b5fd;font-weight:600;letter-spacing:.6px;text-transform:uppercase">Aprobaciones</div>
+            <div style="font-size:.8rem;color:#2563EB;font-weight:600;letter-spacing:.6px;text-transform:uppercase">Aprobaciones</div>
             <div style="font-size:1.35rem;font-weight:700;margin-top:4px">📋 Bandeja de Revisión</div>
-            <div style="font-size:.88rem;color:#94a3b8;margin-top:6px" id="bandejaResumen">Revisar y aprobar planificaciones, materiales y evaluaciones enviadas por docentes…</div>
+            <div style="font-size:.88rem;color:#64748B;margin-top:6px" id="bandejaResumen">Revisar y aprobar planificaciones, materiales y evaluaciones enviadas por docentes…</div>
           </div>
           <div style="text-align:right">
-            <div style="font-size:2.4rem;font-weight:800;color:#67e8f9" id="bandejaCount">—</div>
-            <div style="font-size:.72rem;color:#94a3b8;text-transform:uppercase;letter-spacing:.6px">Pendientes</div>
+            <div style="font-size:2.4rem;font-weight:800;color:#0369A1" id="bandejaCount">—</div>
+            <div style="font-size:.72rem;color:#64748B;text-transform:uppercase;letter-spacing:.6px">Pendientes</div>
           </div>
         </div>
       </a>
 
         <a href="reportes-utp.html" style="display:block;text-decoration:none;padding:20px 24px;background:linear-gradient(135deg,rgba(251,191,36,.10),rgba(245,158,11,.06));border:1px solid rgba(251,191,36,.3);border-radius:14px;color:inherit">
-          <div style="font-size:.8rem;color:#fbbf24;font-weight:600;letter-spacing:.6px;text-transform:uppercase">Estadísticas</div>
+          <div style="font-size:.8rem;color:#F59E0B;font-weight:600;letter-spacing:.6px;text-transform:uppercase">Estadísticas</div>
           <div style="font-size:1.35rem;font-weight:700;margin-top:4px">📊 Reportes Mensuales</div>
-          <div style="font-size:.88rem;color:#94a3b8;margin-top:6px">Asistencia, promedios, alertas de riesgo académico · exporta a PDF</div>
+          <div style="font-size:.88rem;color:#64748B;margin-top:6px">Asistencia, promedios, alertas de riesgo académico · exporta a PDF</div>
         </a>
 
       </div> <!-- fin accesos rápidos Fase 1/2.1/2.4 -->
@@ -137,7 +137,93 @@
         <table><thead><tr><th>Profesor</th><th>Curso</th><th>Última observación</th><th>Estado</th></tr></thead><tbody id="tb-acomp"></tbody></table>
       </div>
     </section>
+
+    <!-- ═══════════ SECCIÓN: DOCUMENTOS COMPARTIDOS ═══════════ -->
+    <section class="sec" id="sec-docs">
+      <div class="h1">Documentos de mis profesores</div>
+      <div class="sub">Materiales y planificaciones creados por los profesores del ciclo</div>
+
+      <!-- Tabs Materiales | Planificaciones -->
+      <div class="card" style="padding:8px;margin-bottom:14px">
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <button type="button" class="btn ghost sm" id="docsTabMat"
+              onclick="_utpDocsTab('mat')"
+              style="border-color:var(--primary);background:rgba(37,99,235,.12);color:var(--primary);font-weight:700">
+              <span class="material-symbols-outlined" style="font-size:16px">menu_book</span> Materiales <span id="docsCntMat" style="margin-left:4px;background:rgba(37,99,235,.2);padding:1px 8px;border-radius:99px;font-size:.75rem">0</span>
+          </button>
+          <button type="button" class="btn ghost sm" id="docsTabPlan"
+              onclick="_utpDocsTab('plan')">
+              <span class="material-symbols-outlined" style="font-size:16px">description</span> Planificaciones <span id="docsCntPlan" style="margin-left:4px;background:rgba(100,116,139,.2);padding:1px 8px;border-radius:99px;font-size:.75rem">0</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Filtros -->
+      <div class="card" style="padding:12px 14px;margin-bottom:12px">
+        <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:10px;align-items:end">
+          <div>
+            <label style="font-size:.72rem;color:var(--muted);text-transform:uppercase;font-weight:600;display:block;margin-bottom:3px">Buscar</label>
+            <input type="text" id="utpDocsBuscar" oninput="_utpDocsRender()" placeholder="Título, profesor, asignatura…" style="width:100%;padding:7px 10px;border:1px solid var(--border);border-radius:6px;font-size:.85rem">
+          </div>
+          <div>
+            <label style="font-size:.72rem;color:var(--muted);text-transform:uppercase;font-weight:600;display:block;margin-bottom:3px">Profesor</label>
+            <select id="utpDocsProfesor" onchange="_utpDocsRender()" style="width:100%;padding:7px 10px;border:1px solid var(--border);border-radius:6px;font-size:.85rem">
+              <option value="">Todos</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size:.72rem;color:var(--muted);text-transform:uppercase;font-weight:600;display:block;margin-bottom:3px">Asignatura</label>
+            <select id="utpDocsAsig" onchange="_utpDocsRender()" style="width:100%;padding:7px 10px;border:1px solid var(--border);border-radius:6px;font-size:.85rem">
+              <option value="">Todas</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size:.72rem;color:var(--muted);text-transform:uppercase;font-weight:600;display:block;margin-bottom:3px">Curso</label>
+            <select id="utpDocsCurso" onchange="_utpDocsRender()" style="width:100%;padding:7px 10px;border:1px solid var(--border);border-radius:6px;font-size:.85rem">
+              <option value="">Todos</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabla de documentos -->
+      <div class="card">
+        <div class="cardhead">
+          <h3><span class="material-symbols-outlined">folder_open</span> Listado <span class="count" id="cnt-docs">0</span></h3>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Título</th>
+              <th>Tipo</th>
+              <th>Profesor</th>
+              <th>Curso / Asignatura</th>
+              <th>Fecha</th>
+              <th>Acción</th>
+            </tr>
+          </thead>
+          <tbody id="tb-docs"></tbody>
+        </table>
+      </div>
+      <div class="legal">📚 Vista de solo lectura. Los materiales y planificaciones fueron creados por los profesores del ciclo.</div>
+    </section>
   </main>
+</div>
+
+<!-- Modal preview del documento (materiales/planificaciones) -->
+<div class="overlay" id="docPreviewOv">
+  <div class="modal" style="max-width:900px;max-height:85vh;overflow:auto">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;position:sticky;top:0;background:var(--surface);padding-bottom:10px;border-bottom:1px solid var(--border)">
+      <h3 style="font-size:16px;font-weight:600;display:flex;align-items:center;gap:8px"><span class="material-symbols-outlined" style="color:var(--primary)" id="docPreviewIcon">description</span> <span id="docPreviewTitulo">Documento</span></h3>
+      <span class="material-symbols-outlined" style="cursor:pointer;color:var(--muted)" onclick="_utpCerrarPreview()">close</span>
+    </div>
+    <div id="docPreviewMeta" style="font-size:.82rem;color:var(--muted);margin-bottom:12px;padding:10px;background:rgba(37,99,235,.06);border-radius:8px"></div>
+    <div id="docPreviewBody" style="font-size:.88rem;line-height:1.6;white-space:pre-wrap;padding:14px;background:#fff;border:1px solid var(--border);border-radius:8px;max-height:60vh;overflow:auto"></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:14px">
+      <button class="btn ghost sm" onclick="_utpCopiarDoc()"><span class="material-symbols-outlined" style="font-size:16px">content_copy</span> Copiar</button>
+      <button class="btn sm" onclick="_utpCerrarPreview()">Cerrar</button>
+    </div>
+  </div>
 </div>
 <input type="file" id="fileImp" accept=".xlsx,.xls,.csv,.docx" style="display:none">
 <div id="toast"><span class="material-symbols-outlined" style="color:var(--success)">check_circle</span><span id="toastMsg"></span></div>
@@ -248,9 +334,9 @@ function renderCalColegio(){
  render(local);
  if(window.ccStore){ccStore.getCalendario().then(render).catch(function(){});}
 }
-var NAV=[['dashboard','Resumen','resumen'],['groups','Mis profesores','profes'],['assignment_ind','Asignar profesores','asignar'],['description','Planificaciones','plan'],['checklist','Cobertura','cobertura'],['event_note','Evaluaciones','eval'],['visibility','Acompañamiento','acomp']];
+var NAV=[['dashboard','Resumen','resumen'],['groups','Mis profesores','profes'],['assignment_ind','Asignar profesores','asignar'],['description','Planificaciones','plan'],['folder_shared','Documentos','docs'],['checklist','Cobertura','cobertura'],['event_note','Evaluaciones','eval'],['visibility','Acompañamiento','acomp']];
 document.getElementById('nav').innerHTML=NAV.map(function(n,i){return '<div class="nav-item'+(i===0?' active':'')+'" data-s="'+n[2]+'">'+ic(n[0])+'<span>'+n[1]+'</span></div>'}).join('');
-function show(s){document.querySelectorAll('.nav-item').forEach(function(x){x.classList.toggle('active',x.dataset.s===s)});document.querySelectorAll('.sec').forEach(function(x){x.classList.toggle('active',x.id==='sec-'+s)});if(s==='cobertura')mkCob('chCob2');}
+function show(s){document.querySelectorAll('.nav-item').forEach(function(x){x.classList.toggle('active',x.dataset.s===s)});document.querySelectorAll('.sec').forEach(function(x){x.classList.toggle('active',x.id==='sec-'+s)});if(s==='cobertura')mkCob('chCob2');if(s==='docs')_utpDocsCargar();}
 document.querySelectorAll('.nav-item').forEach(function(x){x.addEventListener('click',function(){show(x.dataset.s)})});
 document.addEventListener('input',function(e){var inp=e.target;if(!inp.dataset||!inp.dataset.f)return;var q=inp.value.toLowerCase(),cont=document.getElementById('tb-'+inp.dataset.f);cont.querySelectorAll('[data-txt]').forEach(function(row){row.style.display=row.dataset.txt.indexOf(q)!==-1?'':'none'});});
 var _impKey=null;
@@ -294,7 +380,7 @@ renderAll();
 <script>
 // Fase 0: proteger la página según rol del usuario.
 if (window.CCRouter && window.CCRouter.guardPanel) {
-  CCRouter.guardPanel(['utp','encargado_area']);
+  CCRouter.guardPanel(['utp','encargado_area','director','rector','admin_colegio','admin']);
 }
 
 // Fase 1: contar pendientes de revisión para la card del resumen.
@@ -389,6 +475,199 @@ if (window.CCRouter && window.CCRouter.guardPanel) {
       }).catch(function (err) { console.warn('KPIs UTP:', err); });
     }, 800);
   });
+})();
+</script>
+<script src="js/ia-widget.js" defer></script>
+<script src="js/session-guard.js" defer></script>
+<script src="js/search-global.js" defer></script>
+
+<!-- ═══════════════════════════════════════════════════
+     UTP · Documentos compartidos de los profesores del ciclo
+     Lee materiales y planificaciones de Firestore filtrado por liceoSlug
+     ═══════════════════════════════════════════════════ -->
+<script>
+(function(){
+    var _utpDocsData = { mat: [], plan: [] };
+    var _utpDocsCache = { profesores: [], asignaturas: [], cursos: [] };
+    var _utpDocsActiveTab = 'mat';
+    var _utpDocsCargado = false;
+
+    window._utpDocsTab = function(t){
+        _utpDocsActiveTab = t;
+        var m = document.getElementById('docsTabMat');
+        var p = document.getElementById('docsTabPlan');
+        [m, p].forEach(function(b){ if(!b) return; b.style.borderColor=''; b.style.background=''; b.style.color=''; b.style.fontWeight='500'; });
+        var act = t === 'mat' ? m : p;
+        if (act) { act.style.borderColor='var(--primary)'; act.style.background='rgba(37,99,235,.12)'; act.style.color='var(--primary)'; act.style.fontWeight='700'; }
+        _utpDocsRender();
+    };
+
+    window._utpDocsCargar = function(){
+        if (_utpDocsCargado) { _utpDocsRender(); return; }
+        if (typeof EL_DB === 'undefined' || !EL_DB) { console.warn('UTP docs: EL_DB no disponible'); return; }
+        var slug = (window.EL_USER && window.EL_USER.liceoSlug) || null;
+        if (!slug) { console.warn('UTP docs: sin liceoSlug'); return; }
+        var tb = document.getElementById('tb-docs');
+        if (tb) tb.innerHTML = '<tr><td colspan="6" style="padding:20px;text-align:center;color:var(--muted)"><span class="material-symbols-outlined" style="animation:spin 1s linear infinite">progress_activity</span> Cargando documentos…</td></tr>';
+
+        Promise.all([
+            EL_DB.collection('materiales').where('liceoSlug','==', slug).get().catch(function(){ return {forEach:function(){}, docs:[]}; }),
+            EL_DB.collection('planificaciones').where('liceoSlug','==', slug).get().catch(function(){ return {forEach:function(){}, docs:[]}; })
+        ]).then(function(res){
+            _utpDocsData.mat = [];
+            _utpDocsData.plan = [];
+            res[0].forEach(function(d){
+                var x = d.data(); x.id = d.id; x._tipo = 'mat';
+                _utpDocsData.mat.push(x);
+            });
+            res[1].forEach(function(d){
+                var x = d.data(); x.id = d.id; x._tipo = 'plan';
+                _utpDocsData.plan.push(x);
+            });
+            // Extraer catálogos de filtro
+            var todos = _utpDocsData.mat.concat(_utpDocsData.plan);
+            var setProf = {}, setAsig = {}, setCurso = {};
+            todos.forEach(function(d){
+                var p = d.profesorNombre || d.profesor || d.docenteNombre || d.creadoPor || '';
+                var a = d.asignatura || d.asignaturaNombre || d.materia || '';
+                var c = d.cursoNombre || d.curso || d.cursoId || '';
+                if (p) setProf[p] = true;
+                if (a) setAsig[a] = true;
+                if (c) setCurso[c] = true;
+            });
+            _utpDocsCache.profesores = Object.keys(setProf).sort();
+            _utpDocsCache.asignaturas = Object.keys(setAsig).sort();
+            _utpDocsCache.cursos = Object.keys(setCurso).sort();
+
+            function _fillSel(id, opts){
+                var s = document.getElementById(id); if (!s) return;
+                var cur = s.value;
+                s.innerHTML = '<option value="">Todos</option>' + opts.map(function(o){ return '<option value="'+o.replace(/"/g,'&quot;')+'">'+o+'</option>'; }).join('');
+                s.value = cur;
+            }
+            _fillSel('utpDocsProfesor', _utpDocsCache.profesores);
+            _fillSel('utpDocsAsig',      _utpDocsCache.asignaturas);
+            _fillSel('utpDocsCurso',     _utpDocsCache.cursos);
+
+            var m = document.getElementById('docsCntMat');   if (m) m.textContent = _utpDocsData.mat.length;
+            var p = document.getElementById('docsCntPlan');  if (p) p.textContent = _utpDocsData.plan.length;
+
+            _utpDocsCargado = true;
+            _utpDocsRender();
+        }).catch(function(err){
+            console.error('UTP docs error:', err);
+            if (tb) tb.innerHTML = '<tr><td colspan="6" style="padding:20px;text-align:center;color:var(--danger)">Error al cargar: ' + (err.message || err) + '</td></tr>';
+        });
+    };
+
+    window._utpDocsRender = function(){
+        var tb = document.getElementById('tb-docs');
+        var cnt = document.getElementById('cnt-docs');
+        if (!tb) return;
+        var arr = _utpDocsData[_utpDocsActiveTab] || [];
+        var q     = ((document.getElementById('utpDocsBuscar')||{}).value || '').toLowerCase();
+        var fProf = ((document.getElementById('utpDocsProfesor')||{}).value || '');
+        var fAsig = ((document.getElementById('utpDocsAsig')||{}).value || '');
+        var fCurso= ((document.getElementById('utpDocsCurso')||{}).value || '');
+        var filtrado = arr.filter(function(d){
+            var titulo = (d.titulo || d.tituloDoc || d.tipoDocumento || d.nombre || '').toString();
+            var prof = (d.profesorNombre || d.profesor || d.docenteNombre || d.creadoPor || '');
+            var asig = (d.asignatura || d.asignaturaNombre || d.materia || '');
+            var curso= (d.cursoNombre || d.curso || d.cursoId || '');
+            if (fProf && prof !== fProf) return false;
+            if (fAsig && asig !== fAsig) return false;
+            if (fCurso && curso !== fCurso) return false;
+            if (q) {
+                var hay = (titulo + ' ' + prof + ' ' + asig + ' ' + curso).toLowerCase();
+                if (hay.indexOf(q) === -1) return false;
+            }
+            return true;
+        });
+        // Ordenar por fecha (más nuevo primero)
+        filtrado.sort(function(a,b){
+            var fa = new Date(a.creadoEn || a.fechaCreacion || a.fecha || 0).getTime();
+            var fb = new Date(b.creadoEn || b.fechaCreacion || b.fecha || 0).getTime();
+            return fb - fa;
+        });
+        if (cnt) cnt.textContent = filtrado.length;
+        if (!filtrado.length) {
+            tb.innerHTML = '<tr><td colspan="6" style="padding:24px;text-align:center;color:var(--muted)">Sin documentos que coincidan con los filtros.</td></tr>';
+            return;
+        }
+        tb.innerHTML = filtrado.map(function(d, i){
+            var titulo = (d.titulo || d.tituloDoc || d.tipoDocumento || d.nombre || '(sin título)').toString();
+            var tipo = _utpDocsActiveTab === 'mat' ? _tipoMat(d) : '📅 Planificación';
+            var prof = (d.profesorNombre || d.profesor || d.docenteNombre || d.creadoPor || '—');
+            var asig = (d.asignatura || d.asignaturaNombre || d.materia || '');
+            var curso= (d.cursoNombre || d.curso || d.cursoId || '');
+            var cursoAsig = [curso, asig].filter(Boolean).join(' · ') || '—';
+            var fechaRaw = d.creadoEn || d.fechaCreacion || d.fecha || null;
+            var fecha = fechaRaw ? new Date(fechaRaw).toLocaleDateString('es-CL',{day:'2-digit',month:'short',year:'numeric'}) : '—';
+            return '<tr>' +
+                '<td><b>' + _esc(titulo) + '</b></td>' +
+                '<td><span style="display:inline-block;padding:2px 8px;background:rgba(37,99,235,.1);color:var(--primary);border-radius:99px;font-size:.72rem;font-weight:600">' + _esc(tipo) + '</span></td>' +
+                '<td>' + _esc(prof) + '</td>' +
+                '<td style="font-size:.85rem">' + _esc(cursoAsig) + '</td>' +
+                '<td style="color:var(--muted);font-size:.82rem">' + _esc(fecha) + '</td>' +
+                '<td><button class="btn ghost sm" onclick="_utpVerDoc(\'' + _utpDocsActiveTab + '\',' + i + ')"><span class="material-symbols-outlined" style="font-size:14px">visibility</span> Ver</button></td>' +
+                '</tr>';
+        }).join('');
+        // Guardar el array filtrado en window para que _utpVerDoc lo referencie por índice
+        window._utpDocsFiltrado = filtrado;
+    };
+
+    function _tipoMat(d){
+        var t = (d.tipoDocumento || d.tipo || '').toString().toLowerCase();
+        var MAP = { guia:'📘 Guía', apunte:'📝 Apunte', evaluacion:'✍ Ejercicios', prueba:'📄 Prueba', control:'⏱ Control' };
+        return MAP[t] || '📚 Material';
+    }
+    function _esc(s){ return String(s||'').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+    window._utpVerDoc = function(tab, idx){
+        var d = window._utpDocsFiltrado && window._utpDocsFiltrado[idx];
+        if (!d) return;
+        var ov = document.getElementById('docPreviewOv');
+        var titulo = (d.titulo || d.tituloDoc || d.tipoDocumento || d.nombre || 'Documento');
+        var prof = (d.profesorNombre || d.profesor || d.docenteNombre || d.creadoPor || '—');
+        var asig = (d.asignatura || d.asignaturaNombre || d.materia || '');
+        var curso= (d.cursoNombre || d.curso || d.cursoId || '');
+        var fecha = d.creadoEn || d.fechaCreacion || d.fecha || null;
+        var fechaTxt = fecha ? new Date(fecha).toLocaleString('es-CL') : '—';
+        document.getElementById('docPreviewTitulo').textContent = titulo;
+        document.getElementById('docPreviewIcon').textContent = tab === 'mat' ? 'menu_book' : 'description';
+        document.getElementById('docPreviewMeta').innerHTML =
+            '<b>Profesor:</b> ' + _esc(prof) + ' · <b>Curso:</b> ' + _esc(curso || '—') + ' · <b>Asignatura:</b> ' + _esc(asig || '—') + ' · <b>Creado:</b> ' + _esc(fechaTxt);
+        // El body puede venir en varios campos según cómo lo haya guardado el generador
+        var body = d.contenido || d.contenidoTexto || d.texto || d.output || d.textoIA || d.planificacion || '';
+        if (!body && d.camposLIRMI) {
+            body = (d.camposLIRMI||[]).map(function(c){ return (c.titulo?c.titulo+':\n':'') + (c.texto||''); }).join('\n\n');
+        }
+        if (!body && d.htmlContent) body = d.htmlContent.replace(/<[^>]+>/g,'');
+        if (!body) body = '(Sin contenido de texto guardado — el documento existe pero no tiene body legible.)';
+        document.getElementById('docPreviewBody').textContent = body;
+        window._utpCopiarDocTexto = body;
+        ov.classList.add('show');
+    };
+    window._utpCerrarPreview = function(){ document.getElementById('docPreviewOv').classList.remove('show'); };
+    window._utpCopiarDoc = function(){
+        var t = window._utpCopiarDocTexto || '';
+        if (!t) return;
+        if (navigator.clipboard) navigator.clipboard.writeText(t).then(function(){
+            if (typeof toast === 'function') toast('Documento copiado al portapapeles.','success');
+        });
+    };
+
+    // Auto-cargar cuando se entra a la sección docs (por si abren con hash)
+    setTimeout(function(){
+        var hash = (location.hash || '').replace('#','');
+        if (hash === 'docs') _utpDocsCargar();
+    }, 800);
+
+    // Cerrar modal al click fuera
+    document.addEventListener('click', function(ev){
+        var ov = document.getElementById('docPreviewOv');
+        if (ov && ev.target === ov) _utpCerrarPreview();
+    });
 })();
 </script>
 </body>

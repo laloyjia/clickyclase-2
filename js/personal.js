@@ -266,11 +266,35 @@
   }
 
   // ── Desactivar / reactivar ──
+  // Usamos update directo con SOLO los 2 campos necesarios.
+  // Evita conflictos con validación de rules cuando actualizarMiembro
+  // envía más campos derivados.
   function desactivar(uid) {
-    return actualizarMiembro(uid, { activo: false });
+    if (!uid) return Promise.reject(new Error('uid requerido'));
+    return EL_DB.collection(COL_USERS).doc(uid).update({
+      activo: false,
+      desactivadoEn: new Date().toISOString()
+    }).catch(function(err){
+      // Fallback: si update rechaza, intentar con set merge
+      console.warn('[personal] update falló, intentando set merge:', err.message);
+      return EL_DB.collection(COL_USERS).doc(uid).set({
+        activo: false,
+        desactivadoEn: new Date().toISOString()
+      }, { merge: true });
+    });
   }
   function reactivar(uid) {
-    return actualizarMiembro(uid, { activo: true });
+    if (!uid) return Promise.reject(new Error('uid requerido'));
+    return EL_DB.collection(COL_USERS).doc(uid).update({
+      activo: true,
+      reactivadoEn: new Date().toISOString()
+    }).catch(function(err){
+      console.warn('[personal] update falló, intentando set merge:', err.message);
+      return EL_DB.collection(COL_USERS).doc(uid).set({
+        activo: true,
+        reactivadoEn: new Date().toISOString()
+      }, { merge: true });
+    });
   }
 
   // ── Resetear password (requiere admin SDK server-side normalmente).

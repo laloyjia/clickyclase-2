@@ -133,12 +133,30 @@
     btn.innerHTML = '<span class="ia-spin"></span> Aplicando…';
     _refinarSetStatus('⏳ La IA está modificando el documento…', '#a5b4fc');
 
+    var _uid = '';
+    try {
+      if (window.firebase && firebase.auth && firebase.auth().currentUser)
+        _uid = firebase.auth().currentUser.uid;
+      else if (window.EL_USER && window.EL_USER.uid)
+        _uid = window.EL_USER.uid;
+    } catch(_){}
     fetch(window.IA_ENDPOINT || '/api/ia-asistente', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ tipo: 'refinar', datos: { contenidoActual: contenidoActual, instruccion: instruccion } })
+      body: JSON.stringify({ tipo: 'refinar', datos: { contenidoActual: contenidoActual, instruccion: instruccion, uid: _uid, consumeQuota: false } })
     })
-      .then(function (r) { return r.json(); })
+      .then(function (r) {
+        return r.text().then(function(txt){
+          var d; try { d = JSON.parse(txt); } catch(_) { d = null; }
+          // 402 = cuota agotada
+          if (r.status === 402 && d && d.errorCode === 'CUOTA_AGOTADA') {
+            if (window._mostrarModalCuotaAgotada) window._mostrarModalCuotaAgotada(d);
+            else alert('🎁 Prueba gratis agotada. Contactanos por WhatsApp: +56 9 4253 2644');
+            throw new Error('CUOTA_AGOTADA');
+          }
+          return d || {};
+        });
+      })
       .then(function (data) {
         if (data.error) throw new Error(data.error);
         var nuevo = String(data.resultado || '').trim();

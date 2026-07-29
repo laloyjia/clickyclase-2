@@ -16,39 +16,39 @@
 <script src="js/cursos.js"></script>
 <script src="js/pie.js"></script>
 <style>
-:root { --bg: #0b0d1e; --panel: #12162f; --border: rgba(148,163,184,.15); --text: #e5e7eb; --muted: #94a3b8; --violet: #7c3aed; --pink: #f472b6; --cyan: #22d3ee; }
+:root { --bg: #F0F7FF; --panel: #FFFFFF; --border: rgba(37,99,235,.14); --text: #0C1E3B; --muted: #475569; --violet: #2563EB; --pink: #DC2626; --cyan: #38BDF8; }
 * { box-sizing: border-box; }
 body { margin: 0; font-family: 'Segoe UI', Roboto, Arial, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
-.topbar { padding: 16px 28px; border-bottom: 1px solid var(--border); background: linear-gradient(135deg, rgba(244,114,182,.10), rgba(124,58,237,.05)); display: flex; align-items: center; justify-content: space-between; }
+.topbar { padding: 16px 28px; border-bottom: 1px solid var(--border); background: linear-gradient(135deg, rgba(244,114,182,.10), rgba(37,99,235,.05)); display: flex; align-items: center; justify-content: space-between; }
 .topbar h1 { margin: 0; font-size: 1.3rem; font-weight: 700; }
-.breadcrumb { color: var(--muted); font-size: .78rem; }
+.breadcrumb { color: #475569; font-size: .78rem; }
 .container { max-width: 1400px; margin: 22px auto; padding: 0 22px 40px; }
 .card { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 18px 22px; margin-bottom: 18px; }
-.card h3 { margin: 0 0 14px; font-size: .8rem; text-transform: uppercase; letter-spacing: .8px; color: var(--muted); font-weight: 700; display: flex; align-items: center; gap: 8px; }
+.card h3 { margin: 0 0 14px; font-size: .8rem; text-transform: uppercase; letter-spacing: .8px; color: #475569; font-weight: 700; display: flex; align-items: center; gap: 8px; }
 .fld { margin-bottom: 12px; }
-.fld label { display: block; font-size: .72rem; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 4px; }
-input, select, textarea { width: 100%; padding: 8px 10px; border-radius: 7px; background: rgba(255,255,255,.04); border: 1px solid rgba(148,163,184,.2); color: var(--text); font-size: .85rem; font-family: inherit; }
+.fld label { display: block; font-size: .72rem; color: #475569; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 4px; }
+input, select, textarea { width: 100%; padding: 8px 10px; border-radius: 7px; background: rgba(37,99,235,.05); border: 1px solid rgba(37,99,235,.18); color: var(--text); font-size: .85rem; font-family: inherit; }
 textarea { resize: vertical; min-height: 60px; }
 .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
-.btn { padding: 9px 15px; border-radius: 8px; border: 1px solid var(--border); background: rgba(255,255,255,.04); color: var(--text); cursor: pointer; font-size: .85rem; font-weight: 600; text-decoration: none; display: inline-block; }
-.btn.primary { background: linear-gradient(135deg, #f472b6, #7c3aed); color: white; border-color: transparent; }
-.btn.ia { background: linear-gradient(135deg, #7c3aed, #22d3ee); color: white; border-color: transparent; }
+.btn { padding: 9px 15px; border-radius: 8px; border: 1px solid var(--border); background: rgba(37,99,235,.05); color: var(--text); cursor: pointer; font-size: .85rem; font-weight: 600; text-decoration: none; display: inline-block; }
+.btn.primary { background: linear-gradient(135deg, #DC2626, #2563EB); color: white; border-color: transparent; }
+.btn.ia { background: linear-gradient(135deg, #2563EB, #38BDF8); color: white; border-color: transparent; }
 .btn:disabled { opacity: .5; cursor: not-allowed; }
-.btn:hover:not(:disabled) { background: rgba(255,255,255,.08); }
-.chk { display: flex; align-items: center; gap: 8px; font-size: .84rem; padding: 8px 10px; border-radius: 6px; background: rgba(255,255,255,.02); border: 1px solid var(--border); cursor: pointer; }
+.btn:hover:not(:disabled) { background: rgba(37,99,235,.08); }
+.chk { display: flex; align-items: center; gap: 8px; font-size: .84rem; padding: 8px 10px; border-radius: 6px; background: rgba(37,99,235,.03); border: 1px solid var(--border); cursor: pointer; }
 .chk input { width: auto; margin: 0; }
 
-.ia-out { background: rgba(255,255,255,.02); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; margin-top: 10px; }
-.ia-out h3 { color: #c4b5fd; font-size: .9rem; letter-spacing: 0; text-transform: none; margin: 14px 0 6px; }
+.ia-out { background: rgba(37,99,235,.03); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; margin-top: 10px; }
+.ia-out h3 { color: #2563EB; font-size: .9rem; letter-spacing: 0; text-transform: none; margin: 14px 0 6px; }
 .ia-out ul { padding-left: 20px; }
 .ia-out li { margin-bottom: 4px; font-size: .88rem; }
 
-.adec-item { padding: 12px 14px; border-radius: 8px; background: rgba(124,58,237,.06); border-left: 3px solid #7c3aed; margin-bottom: 8px; }
-.adec-item .h { font-weight: 700; color: #c4b5fd; font-size: .78rem; text-transform: uppercase; letter-spacing: .5px; }
+.adec-item { padding: 12px 14px; border-radius: 8px; background: rgba(37,99,235,.06); border-left: 3px solid #2563EB; margin-bottom: 8px; }
+.adec-item .h { font-weight: 700; color: #2563EB; font-size: .78rem; text-transform: uppercase; letter-spacing: .5px; }
 .adec-item .d { margin-top: 4px; font-size: .87rem; }
 
-.spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(124,58,237,.3); border-top-color: #7c3aed; border-radius: 50%; animation: sp 1s linear infinite; vertical-align: middle; margin-right: 6px; }
+.spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(37,99,235,.3); border-top-color: #2563EB; border-radius: 50%; animation: sp 1s linear infinite; vertical-align: middle; margin-right: 6px; }
 @keyframes sp { to { transform: rotate(360deg); } }
 </style>
 </head>
@@ -111,7 +111,7 @@ textarea { resize: vertical; min-height: 60px; }
     <div id="adecList"><div style="color:var(--muted);text-align:center;padding:16px">Sin adecuaciones cargadas todavía. Podés generarlas con IA arriba o agregar manualmente.</div></div>
     <details style="margin-top:14px">
       <summary style="cursor:pointer;color:var(--muted);font-size:.85rem">+ Agregar adecuación manualmente</summary>
-      <div style="padding:12px;background:rgba(255,255,255,.02);border-radius:8px;margin-top:8px">
+      <div style="padding:12px;background:rgba(37,99,235,.03);border-radius:8px;margin-top:8px">
         <div class="row2">
           <div class="fld"><label>Tipo</label><select id="mAdecTipo"></select></div>
           <div class="fld"><label>Aplica a asignatura</label><input id="mAdecAsig" placeholder="Ej: Todas / Matemática"></div>
@@ -195,13 +195,18 @@ function cargarFichaExistente(estUid) {
 
 function onCambioCurso() {
   var cursoId = document.getElementById('fCurso').value;
-  _cursoActivo = _cursos.find(function(c){ return c.cursoId === cursoId; });
+  _cursoActivo = _cursos.find(function(c){ return (c.cursoId || c.id) === cursoId; });
   var selE = document.getElementById('fEst');
   if (!_cursoActivo) { selE.innerHTML = '<option value="">— Elegir curso primero —</option>'; return; }
+  var estudiantes = _cursoActivo.estudiantes || [];
+  if (!estudiantes.length) { selE.innerHTML = '<option value="">Este curso no tiene estudiantes cargados</option>'; return; }
   selE.innerHTML = '<option value="">— Elegir —</option>' +
-    (_cursoActivo.estudiantes || []).map(function(e){
-      var nom = ((e.apellidoP||'') + ' ' + (e.apellidoM||'') + ', ' + (e.nombre||'')).trim();
-      return '<option value="' + e.ordinal + '" data-nom="' + esc(nom) + '">' + esc(nom) + '</option>';
+    estudiantes.map(function(e, idx){
+      var nom = e.nombre && e.nombre.indexOf(' ') !== -1
+        ? e.nombre
+        : ((e.apellidoP||'') + ' ' + (e.apellidoM||'') + (e.nombre ? ', ' + e.nombre : '')).trim();
+      var val = e.ordinal || e.uid || (idx + 1);
+      return '<option value="' + esc(String(val)) + '" data-nom="' + esc(nom) + '">' + esc(nom) + '</option>';
     }).join('');
 }
 
@@ -232,7 +237,7 @@ function onGenerarIA() {
     document.getElementById('iaEstado').textContent = '';
     btn.disabled = false;
   }).catch(function(err) {
-    document.getElementById('iaEstado').innerHTML = '<span style="color:#fca5a5">Error: ' + esc(err.message) + '</span>';
+    document.getElementById('iaEstado').innerHTML = '<span style="color:#DC2626">Error: ' + esc(err.message) + '</span>';
     btn.disabled = false;
   });
 }
@@ -270,7 +275,7 @@ function onExtraerAdec() {
     }
   });
   renderAdecuaciones();
-  alert('✓ ' + nuevos + ' adecuaciones agregadas al listado. Revisá y guardá la ficha.');
+  alert('✓ ' + nuevos + ' adecuaciones agregadas al listado. Revisá y guarda la ficha.');
 }
 
 function onAgregarAdec() {
@@ -299,11 +304,11 @@ function renderAdecuaciones() {
   }
   wrap.innerHTML = _adecuaciones.map(function(a, i) {
     var lbl = CCPie.TIPO_ADEC_LABEL[a.tipo] || a.tipo;
-    var origen = a.origenIA ? ' <span style="font-size:.68rem;color:#c4b5fd;background:rgba(124,58,237,.15);padding:1px 6px;border-radius:4px">IA</span>' : '';
+    var origen = a.origenIA ? ' <span style="font-size:.68rem;color:#2563EB;background:rgba(37,99,235,.15);padding:1px 6px;border-radius:4px">IA</span>' : '';
     var asig = a.aplicaAsignaturas ? ' · ' + esc(a.aplicaAsignaturas) : '';
     return '<div class="adec-item">' +
       '<div class="h">' + esc(lbl) + origen + asig +
-      ' <button onclick="quitarAdec(' + i + ')" style="float:right;background:none;border:none;color:#fca5a5;cursor:pointer;font-size:.9rem">✕</button></div>' +
+      ' <button onclick="quitarAdec(' + i + ')" style="float:right;background:none;border:none;color:#DC2626;cursor:pointer;font-size:.9rem">✕</button></div>' +
       '<div class="d">' + esc(a.descripcion) + '</div>' +
       '</div>';
   }).join('');

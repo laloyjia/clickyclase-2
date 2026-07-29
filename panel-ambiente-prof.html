@@ -3,10 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Convivencia — Mis Casos — Click&Clase</title>
+<meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
+<title>Convivencia — Mi Panel — Click&Clase</title>
 <link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-storage-compat.js"></script>
 <script src="js/firebase-rest.js"></script>
 <script src="js/firebase-config.js"></script>
 <script src="js/firebase-auth.js"></script>
@@ -15,140 +19,264 @@
 <script src="js/roles-router.js"></script>
 <script src="js/cursos.js"></script>
 <script src="js/convivencia.js"></script>
+<script src="js/convivencia-perfiles.js"></script>
 <style>
-:root { --bg: #0b0d1e; --panel: #12162f; --border: rgba(148,163,184,.15); --text: #e5e7eb; --muted: #94a3b8; --violet: #7c3aed; --orange: #f97316; }
+:root { --bg:#F0F7FF; --panel:#FFFFFF; --border:rgba(37,99,235,.14); --text:#0C1E3B; --muted:#475569; --orange:#f97316; --amber:#f59e0b; --danger:#DC2626; --ok:#10B981; --info:#2563EB; --perfil-primary:#f97316; --perfil-accent:#DC2626; }
 * { box-sizing: border-box; }
 body { margin: 0; font-family: 'Segoe UI', Roboto, Arial, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
-.topbar { padding: 16px 28px; border-bottom: 1px solid var(--border); background: linear-gradient(135deg, rgba(249,115,22,.09), rgba(124,58,237,.05)); display: flex; align-items: center; justify-content: space-between; }
-.topbar h1 { margin: 0; font-size: 1.3rem; font-weight: 700; }
-.breadcrumb { color: var(--muted); font-size: .78rem; }
-.usr { font-size: .82rem; color: var(--muted); }
-.usr .salir { color: #fca5a5; text-decoration: none; margin-left: 10px; }
-.container { max-width: 1400px; margin: 22px auto; padding: 0 22px 40px; }
-.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 22px; }
+a { color: inherit; text-decoration: none; }
+
+.topbar { padding: 12px 24px; border-bottom: 1px solid var(--border); background: linear-gradient(135deg, color-mix(in srgb, var(--perfil-primary) 12%, transparent), color-mix(in srgb, var(--perfil-accent) 6%, transparent)); display: flex; align-items: center; gap: 16px; position: sticky; top: 0; z-index: 40; backdrop-filter: blur(10px); }
+.topbar .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 1.1rem; }
+.topbar .brand .ico { font-size: 1.5rem; }
+.topbar .search-wrap { flex: 1; max-width: 520px; position: relative; }
+.topbar .search-wrap input { width: 100%; padding: 9px 14px 9px 38px; border-radius: 8px; border: 1px solid rgba(249,115,22,.25); background: #fff; font-size: .88rem; outline: none; }
+.topbar .search-wrap input:focus { border-color: var(--perfil-primary); box-shadow: 0 0 0 3px rgba(249,115,22,.12); }
+.topbar .search-wrap::before { content: "🔎"; position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: .95rem; opacity: .6; }
+.topbar .usr { font-size: .82rem; color: var(--muted); display: flex; align-items: center; gap: 12px; }
+.topbar .usr .role-badge { padding: 2px 10px; background: color-mix(in srgb, var(--perfil-primary) 15%, white); color: var(--perfil-primary); border-radius: 99px; font-size: .72rem; font-weight: 700; }
+.topbar .usr .salir { color: var(--danger); font-weight: 600; cursor: pointer; }
+
+.wrap { display: grid; grid-template-columns: 240px minmax(0,1fr); gap: 20px; padding: 18px 22px; }
+@media (max-width: 900px) { .wrap { grid-template-columns: 1fr; padding: 12px; } }
+.sidebar { position: sticky; top: 76px; align-self: start; }
+.sidebar .grp { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 10px 8px; margin-bottom: 10px; box-shadow: 0 4px 12px rgba(37,99,235,.04); }
+.sidebar .grp .grp-title { font-size: .68rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 700; padding: 4px 10px 8px; }
+.sidebar .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 8px; cursor: pointer; font-size: .88rem; font-weight: 500; color: var(--text); transition: all .15s; }
+.sidebar .nav-item:hover { background: rgba(249,115,22,.06); }
+.sidebar .nav-item.active { background: linear-gradient(90deg, color-mix(in srgb, var(--perfil-primary) 14%, transparent), color-mix(in srgb, var(--perfil-accent) 6%, transparent)); color: var(--perfil-primary); font-weight: 700; }
+.sidebar .nav-item .ico { font-size: 1.1rem; width: 22px; text-align: center; }
+.sidebar .nav-item .badge { margin-left: auto; background: var(--danger); color: white; font-size: .68rem; font-weight: 700; padding: 1px 8px; border-radius: 99px; }
+
+.section { display: none; }
+.section.active { display: block; animation: fadeIn .25s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+.section-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; flex-wrap: wrap; gap: 10px; }
+.section-head h2 { margin: 0; font-size: 1.35rem; font-weight: 700; }
+.section-head .sub { color: var(--muted); font-size: .84rem; margin-top: 2px; }
+.section-head .actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.btn { padding: 8px 14px; border-radius: 8px; border: 1px solid var(--border); background: #fff; color: var(--text); cursor: pointer; font-size: .84rem; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; }
+.btn:hover:not(:disabled) { background: rgba(249,115,22,.05); }
+.btn.primary { background: linear-gradient(135deg, var(--perfil-primary), var(--perfil-accent)); color: white; border-color: transparent; }
+.btn.danger { background: linear-gradient(135deg, var(--danger), #B91C1C); color: white; border-color: transparent; }
+.card { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 16px 20px; box-shadow: 0 4px 14px rgba(37,99,235,.05); margin-bottom: 16px; }
+.card h3 { margin: 0 0 12px; font-size: .78rem; text-transform: uppercase; letter-spacing: .8px; color: var(--muted); font-weight: 700; display: flex; align-items: center; gap: 8px; }
+
+.kpis { display: grid; grid-template-columns: repeat(auto-fit,minmax(160px,1fr)); gap: 12px; margin-bottom: 20px; }
 .kpi { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; }
-.kpi .l { font-size: .68rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
-.kpi .v { font-size: 1.8rem; font-weight: 800; margin-top: 4px; }
-.kpi.abr .v { color: #c4b5fd; } .kpi.seg .v { color: #fbbf24; }
-.kpi.grave .v { color: #fca5a5; } .kpi.mes .v { color: #f97316; }
-.grid-main { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-@media (max-width: 900px) { .grid-main { grid-template-columns: 1fr; } }
-.card { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 18px 22px; }
-.card h3 { margin: 0 0 12px; font-size: .8rem; text-transform: uppercase; letter-spacing: .8px; color: var(--muted); font-weight: 700; display: flex; align-items: center; gap: 8px; }
-.fld { margin-bottom: 12px; }
-.fld label { display: block; font-size: .72rem; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 4px; }
-input, select, textarea { width: 100%; padding: 8px 10px; border-radius: 7px; background: rgba(255,255,255,.04); border: 1px solid rgba(148,163,184,.2); color: var(--text); font-size: .85rem; font-family: inherit; }
-textarea { resize: vertical; min-height: 60px; }
-.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
-.btn { padding: 9px 15px; border-radius: 8px; border: 1px solid var(--border); background: rgba(255,255,255,.04); color: var(--text); cursor: pointer; font-size: .85rem; font-weight: 600; }
-.btn.primary { background: linear-gradient(135deg, #f97316, #ef4444); color: white; border-color: transparent; }
-.btn:hover { background: rgba(255,255,255,.08); }
-.btn:disabled { opacity: .5; cursor: not-allowed; }
-.chk { display: flex; align-items: center; gap: 8px; font-size: .84rem; padding: 8px 10px; border-radius: 6px; background: rgba(255,255,255,.02); border: 1px solid var(--border); cursor: pointer; }
+.kpi .l { font-size: .68rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 700; }
+.kpi .v { font-size: 1.9rem; font-weight: 800; margin-top: 4px; line-height: 1.1; }
+.kpi .d { font-size: .7rem; margin-top: 4px; color: var(--muted); }
+.kpi.abr .v { color: var(--info); } .kpi.seg .v { color: #B45309; } .kpi.cer .v { color: #059669; }
+.kpi.mes .v { color: #C2410C; } .kpi.tasa .v { color: #7C3AED; } .kpi.hoy .v { color: var(--danger); }
+
+.form-section { padding: 12px 16px; background: color-mix(in srgb, var(--perfil-primary) 4%, transparent); border-left: 3px solid var(--perfil-primary); border-radius: 8px; margin-bottom: 12px; }
+.form-section-title { font-size: .72rem; text-transform: uppercase; letter-spacing: 1px; color: var(--perfil-primary); font-weight: 700; margin: 0 0 10px; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.form-row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+@media (max-width: 700px) { .form-row, .form-row3 { grid-template-columns: 1fr; } }
+.fld { margin-bottom: 10px; }
+.fld label { display: block; font-size: .76rem; color: #334155; font-weight: 600; margin-bottom: 4px; }
+input, select, textarea { width: 100%; padding: 8px 10px; border-radius: 7px; background: #fff; border: 1px solid rgba(37,99,235,.18); color: var(--text); font-size: .88rem; font-family: inherit; outline: none; }
+input:focus, select:focus, textarea:focus { border-color: var(--perfil-primary); box-shadow: 0 0 0 3px rgba(249,115,22,.12); }
+textarea { resize: vertical; min-height: 70px; }
+.chk { display: flex; align-items: center; gap: 8px; font-size: .84rem; padding: 8px 10px; border-radius: 6px; background: #fff; border: 1px solid var(--border); cursor: pointer; }
 .chk input { width: auto; margin: 0; }
+
 table { width: 100%; border-collapse: collapse; }
 th, td { padding: 9px 11px; border-bottom: 1px solid var(--border); font-size: .84rem; text-align: left; vertical-align: top; }
-th { background: rgba(255,255,255,.03); font-size: .68rem; text-transform: uppercase; letter-spacing: .8px; color: var(--muted); font-weight: 700; }
-tr:hover td { background: rgba(255,255,255,.02); }
-.empty { padding: 40px; text-align: center; color: var(--muted); }
-.filtros { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 14px; }
+th { background: rgba(37,99,235,.05); font-size: .68rem; text-transform: uppercase; letter-spacing: .8px; color: var(--muted); font-weight: 700; }
+tr:hover td { background: rgba(37,99,235,.03); }
+.empty { padding: 30px; text-align: center; color: var(--muted); }
+.filtros { display: grid; grid-template-columns: repeat(auto-fit,minmax(140px,1fr)); gap: 10px; margin-bottom: 14px; }
+
+.agenda { display: grid; grid-template-columns: 90px repeat(5,1fr); gap: 4px; }
+.agenda .th { font-size: .72rem; text-transform: uppercase; letter-spacing: .8px; color: var(--muted); font-weight: 700; padding: 8px; text-align: center; background: rgba(37,99,235,.05); border-radius: 6px; }
+.agenda .cell { min-height: 66px; padding: 6px 8px; background: #fff; border: 1px dashed var(--border); border-radius: 6px; cursor: pointer; transition: all .15s; font-size: .78rem; position: relative; }
+.agenda .cell:hover { border-color: var(--perfil-primary); background: rgba(249,115,22,.03); }
+.agenda .cell.busy { background: color-mix(in srgb, var(--perfil-primary) 10%, white); border-color: var(--perfil-primary); border-style: solid; }
+.agenda .hora { display: flex; align-items: center; justify-content: center; font-weight: 700; color: var(--muted); font-size: .8rem; background: rgba(37,99,235,.03); border-radius: 6px; padding: 8px 4px; }
+.spin { display: inline-block; animation: spinning 1.1s linear infinite; }
+@keyframes spinning { to { transform: rotate(360deg); } }
 </style>
 </head>
 <body>
 
-<div class="topbar">
-  <div><div class="breadcrumb">Equipo Convivencia Escolar</div><h1>🤝 Mis Entrevistas e Intervenciones</h1></div>
-  <div class="usr"><span id="userName">—</span><a href="login.html" class="salir">Salir</a></div>
-</div>
-
-<div class="container">
-
-  <div class="kpis" id="kpisWrap"><div style="grid-column:1/-1;padding:20px;text-align:center;color:var(--muted)">⏳ Cargando…</div></div>
-
-  <div class="grid-main">
-
-    <div class="card">
-      <h3><span>➕</span> Nueva entrevista / intervención</h3>
-      <div class="row2">
-        <div class="fld"><label>Tipo</label><select id="fTipo" onchange="onCambioTipo()">
-          <option value="apoderado">Con apoderado</option>
-          <option value="estudiante">Con estudiante</option>
-          <option value="grupo">Grupal</option>
-          <option value="reunion_equipo">Reunión de equipo</option>
-        </select></div>
-        <div class="fld"><label>Fecha</label><input type="date" id="fFecha"></div>
-      </div>
-      <div class="row2">
-        <div class="fld"><label>Curso</label><select id="fCurso" onchange="onCambioCurso()"><option value="">— Elegir —</option></select></div>
-        <div class="fld"><label>Estudiante</label><select id="fEst"><option value="">— Elegir curso primero —</option></select></div>
-      </div>
-      <div class="fld"><label>Otros participantes (opcional)</label><input id="fParticipantes" placeholder="Ej: madre, hermano, apoderado suplente"></div>
-
-      <div class="row3">
-        <div class="fld"><label>Motivo</label><select id="fMotivo"></select></div>
-        <div class="fld"><label>Gravedad</label><select id="fGravedad">
-          <option value="">— Sin clasificar —</option>
-          <option value="leve">Leve</option>
-          <option value="grave">Grave</option>
-          <option value="gravisima">Gravísima</option>
-        </select></div>
-        <div class="fld"><label>Estado</label><select id="fEstado">
-          <option value="abierto">Abierto</option>
-          <option value="seguimiento">En seguimiento</option>
-          <option value="cerrado">Cerrado</option>
-          <option value="derivado">Derivado</option>
-        </select></div>
-      </div>
-
-      <div class="fld"><label>Detalle del motivo</label><input id="fMotivoDetalle" placeholder="Descripción breve"></div>
-      <div class="fld"><label>Resumen de la entrevista (obligatorio)</label><textarea id="fResumen" rows="4" placeholder="Relato de la conversación, hechos, observaciones…"></textarea></div>
-      <div class="fld"><label>Acuerdos y compromisos</label><textarea id="fAcuerdos" rows="2" placeholder="Qué se acordó, quién hará qué, plazos"></textarea></div>
-
-      <div class="fld"><label>Medida aplicada (Reglamento Interno)</label><select id="fMedida"></select></div>
-
-      <div class="row2">
-        <label class="chk"><input type="checkbox" id="fSeguimiento"> Requiere seguimiento</label>
-        <div class="fld" style="margin:0"><label>Próxima reunión</label><input type="date" id="fProxima"></div>
-      </div>
-      <label class="chk" style="margin-top:6px"><input type="checkbox" id="fConf"> Confidencial (solo yo)</label>
-
-      <button class="btn primary" onclick="onGuardar()" id="btnGuardar" style="margin-top:12px">💾 Registrar entrevista</button>
-    </div>
-
-    <div class="card">
-      <h3><span>📋</span> Mis casos recientes</h3>
-      <div class="filtros">
-        <select id="fltEstado" onchange="cargarMisCasos()">
-          <option value="">Todos los estados</option>
-          <option value="abierto">Abiertos</option>
-          <option value="seguimiento">En seguimiento</option>
-          <option value="cerrado">Cerrados</option>
-          <option value="derivado">Derivados</option>
-        </select>
-        <select id="fltGravedad" onchange="cargarMisCasos()">
-          <option value="">Toda gravedad</option>
-          <option value="leve">Leve</option>
-          <option value="grave">Grave</option>
-          <option value="gravisima">Gravísima</option>
-        </select>
-      </div>
-      <table>
-        <thead><tr><th>Fecha</th><th>Estudiante</th><th>Motivo</th><th>Estado</th></tr></thead>
-        <tbody id="tbCasos"><tr><td colspan="4" class="empty">⏳ Cargando…</td></tr></tbody>
-      </table>
-    </div>
-
+<div class="topbar" id="topbarWrap">
+  <div class="brand"><span class="ico" id="brandIco">🤝</span><span id="brandTxt">Mi Panel Convivencia</span></div>
+  <div class="search-wrap"><input type="search" placeholder="Buscar estudiante…" id="topSearch"></div>
+  <div class="usr">
+    <span class="role-badge" id="roleBadge">CV</span>
+    <span id="userName">—</span>
+    <a href="login.html" class="salir">Salir</a>
   </div>
 </div>
 
-<div id="mBg" style="position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;padding:30px;z-index:1000;backdrop-filter:blur(4px)">
-  <div style="background:var(--panel);border:1px solid var(--border);border-radius:14px;width:100%;max-width:700px;max-height:90vh;overflow:hidden;display:flex;flex-direction:column">
-    <div style="padding:16px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
-      <h2 id="mTit" style="margin:0;font-size:1.1rem">Entrevista</h2>
-      <button onclick="cerrarModal()" style="background:none;border:none;color:var(--muted);font-size:1.5rem;cursor:pointer">×</button>
+<div class="wrap">
+  <aside class="sidebar">
+    <div class="grp">
+      <div class="grp-title">Mi trabajo</div>
+      <div class="nav-item active" data-sec="resumen"><span class="ico">📊</span><span>Resumen</span></div>
+      <div class="nav-item" data-sec="nueva"><span class="ico">➕</span><span>Nueva entrevista</span></div>
+      <div class="nav-item" data-sec="casos"><span class="ico">📋</span><span>Mis casos</span> <span class="badge" id="badgeCasos" style="display:none">0</span></div>
+      <div class="nav-item" data-sec="agenda"><span class="ico">📅</span><span>Mi agenda</span></div>
+      <div class="nav-item" data-sec="familia"><span class="ico">👨‍👩‍👧</span><span>Familia</span></div>
+      <div class="nav-item" data-sec="perfil" id="navPerfil" style="display:none"><span class="ico" id="navPerfilIco">🔧</span><span id="navPerfilTxt">Mi especialidad</span></div>
+      <div class="nav-item" data-sec="reportes"><span class="ico">📄</span><span>Reportes</span></div>
     </div>
-    <div id="mBody" style="padding:18px 22px;overflow-y:auto;flex:1"></div>
+  </aside>
+
+  <main>
+    <!-- RESUMEN -->
+    <section class="section active" id="sec-resumen">
+      <div class="section-head">
+        <div>
+          <h2>Mi trabajo en Convivencia</h2>
+          <div class="sub">Hola <span id="salu">—</span> · <span id="prof">—</span> · <span id="hoyISO">—</span></div>
+        </div>
+        <div class="actions"><button class="btn primary" onclick="mostrar('nueva')">➕ Nueva entrevista</button></div>
+      </div>
+      <div class="kpis" id="kpisWrap"><div style="grid-column:1/-1;padding:20px;text-align:center;color:var(--muted)"><span class="spin">⏳</span> Cargando…</div></div>
+      <div class="card">
+        <h3><span>⚡</span> Herramientas rápidas</h3>
+        <div id="perfilHerramientas" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px"></div>
+      </div>
+      <div class="card">
+        <h3><span>📅</span> Mis próximas 5 sesiones</h3>
+        <div id="proxSesiones"><div class="empty">⏳ Cargando…</div></div>
+      </div>
+    </section>
+
+    <!-- NUEVA -->
+    <section class="section" id="sec-nueva">
+      <div class="section-head">
+        <div>
+          <h2>➕ Nueva entrevista / intervención</h2>
+          <div class="sub">Los campos con * son obligatorios. Se registra con hash de firma.</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="form-section">
+          <div class="form-section-title">1. Datos</div>
+          <div class="form-row3">
+            <div class="fld"><label>Tipo *</label><select id="fTipo" onchange="onCambioTipo()">
+              <option value="apoderado">Con apoderado</option>
+              <option value="estudiante">Con estudiante</option>
+              <option value="grupo">Grupal</option>
+              <option value="reunion_equipo">Reunión de equipo</option>
+            </select></div>
+            <div class="fld"><label>Fecha *</label><input type="date" id="fFecha"></div>
+            <div class="fld"><label>Gravedad</label><select id="fGravedad"><option value="">—</option><option value="leve">🟢 Leve</option><option value="grave">🟠 Grave</option><option value="gravisima">🔴 Gravísima</option></select></div>
+          </div>
+          <div class="form-row">
+            <div class="fld"><label>Curso</label><select id="fCurso" onchange="onCambioCurso()"><option value="">— Elegir —</option></select></div>
+            <div class="fld"><label>Estudiante</label><select id="fEst"><option value="">— Elegir curso primero —</option></select></div>
+          </div>
+          <div class="fld"><label>Motivo *</label><select id="fMotivo"></select></div>
+        </div>
+        <div class="form-section">
+          <div class="form-section-title">2. Registro</div>
+          <div class="fld"><label>Resumen de la intervención *</label><textarea id="fResumen" rows="4"></textarea></div>
+          <div class="fld"><label>Medida / acuerdo</label><textarea id="fMedida" rows="2"></textarea></div>
+          <div class="form-row">
+            <label class="chk"><input type="checkbox" id="fSeg"> Requiere seguimiento</label>
+            <div class="fld" style="margin:0"><label>Próxima sesión</label><input type="date" id="fProx"></div>
+          </div>
+        </div>
+        <div class="form-section">
+          <div class="form-section-title">3. Derivación</div>
+          <div class="fld"><label>Derivar a</label><select id="fDerivar">
+            <option value="">— Ninguno —</option>
+            <option value="amb_enc">🔺 Encargado Convivencia</option>
+            <option value="aps">💙 Apoyo Psicosocial</option>
+            <option value="pie">🧩 PIE</option>
+            <option value="externo">↗ Red externa (OPD/Fiscalía)</option>
+          </select></div>
+        </div>
+        <div class="form-section" style="background:rgba(220,38,38,.04);border-left-color:var(--danger)">
+          <div class="form-section-title" style="color:#B91C1C">4. Firma PIN</div>
+          <div class="fld"><label>PIN (4-6 dígitos)</label><input type="password" id="fPin" maxlength="6" pattern="\d*" inputmode="numeric" placeholder="••••"></div>
+        </div>
+        <div style="display:flex;gap:8px;justify-content:flex-end;padding-top:10px;border-top:1px solid var(--border)">
+          <button class="btn" onclick="limpiarForm()">🗑 Limpiar</button>
+          <button class="btn primary" id="btnGuardar" onclick="onGuardar()">💾 Registrar</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- MIS CASOS -->
+    <section class="section" id="sec-casos">
+      <div class="section-head">
+        <div><h2>📋 Mis casos</h2><div class="sub"><span id="totalCasosMuestra">0</span> registros</div></div>
+        <div class="actions"><button class="btn" onclick="exportarMisCasosCSV()">📥 CSV</button><button class="btn primary" onclick="mostrar('nueva')">➕ Nueva</button></div>
+      </div>
+      <div class="card">
+        <div class="filtros">
+          <select id="fltEstado" onchange="cargarMisCasos()"><option value="">Todos los estados</option><option value="abierto">Abierto</option><option value="seguimiento">Seguimiento</option><option value="cerrado">Cerrado</option><option value="derivado">Derivado</option></select>
+          <select id="fltGravedad" onchange="cargarMisCasos()"><option value="">Toda gravedad</option><option value="leve">🟢 Leve</option><option value="grave">🟠 Grave</option><option value="gravisima">🔴 Gravísima</option></select>
+          <input type="date" id="fltDesde" onchange="cargarMisCasos()">
+          <input type="date" id="fltHasta" onchange="cargarMisCasos()">
+          <input type="text" id="fltBuscar" placeholder="Buscar estudiante…" oninput="cargarMisCasos()">
+        </div>
+        <table><thead><tr><th>Fecha</th><th>Estudiante</th><th>Motivo</th><th>Gravedad</th><th>Estado</th></tr></thead>
+        <tbody id="tbCasos"><tr><td colspan="5" class="empty"><span class="spin">⏳</span> Cargando…</td></tr></tbody></table>
+      </div>
+    </section>
+
+    <!-- AGENDA -->
+    <section class="section" id="sec-agenda">
+      <div class="section-head">
+        <div><h2>📅 Mi agenda semanal</h2><div class="sub">Horas de atención · sesiones de mediación · citaciones</div></div>
+        <div class="actions"><button class="btn" onclick="agSemana(-1)">← Anterior</button><button class="btn" onclick="agSemana(0)">Hoy</button><button class="btn" onclick="agSemana(1)">Siguiente →</button></div>
+      </div>
+      <div class="card">
+        <div style="margin-bottom:12px;font-weight:700;color:var(--perfil-primary)" id="agRangoTxt">—</div>
+        <div class="agenda" id="agGrid"></div>
+        <div style="margin-top:12px;font-size:.78rem;color:var(--muted)">💡 Clic en una celda para agendar. Se guarda bajo tu UID en <code>convivencia_agenda</code>.</div>
+      </div>
+    </section>
+
+    <!-- FAMILIA -->
+    <section class="section" id="sec-familia">
+      <div class="section-head">
+        <div><h2>👨‍👩‍👧 Registros con familia</h2><div class="sub">Notificaciones, citaciones y acuerdos con apoderados</div></div>
+        <div class="actions"><button class="btn primary" onclick="famAbrir()">➕ Nuevo</button></div>
+      </div>
+      <div class="card"><div id="famLista"><div class="empty"><span class="spin">⏳</span> Cargando…</div></div></div>
+    </section>
+
+    <!-- PERFIL ESPECÍFICO -->
+    <section class="section" id="sec-perfil">
+      <div class="section-head">
+        <div><h2 id="perfilTitulo">Mi especialidad</h2><div class="sub" id="perfilSub">—</div></div>
+        <div class="actions"><button class="btn primary" onclick="perfilAbrir()">➕ Nuevo registro</button></div>
+      </div>
+      <div class="card"><div id="perfilLista"><div class="empty">⏳ Cargando…</div></div></div>
+    </section>
+
+    <!-- REPORTES -->
+    <section class="section" id="sec-reportes">
+      <div class="section-head"><div><h2>📄 Mis reportes</h2><div class="sub">Descargá para supervisión o equipo</div></div></div>
+      <div class="card">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px">
+          <button class="btn" onclick="reporteGenerar('mensual')">📊 Mi resumen mensual</button>
+          <button class="btn" onclick="reporteGenerar('motivos')">🎯 Casos por motivo</button>
+          <button class="btn primary" onclick="reporteGenerar('supervision')">🤝 Reporte para supervisión</button>
+          <button class="btn" onclick="exportarMisCasosCSV()">📥 CSV · Casos</button>
+        </div>
+        <div id="reporteOut" style="margin-top:20px"></div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div id="cvModalOv" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:1000;align-items:center;justify-content:center;padding:20px">
+  <div id="cvModalBox" style="background:#fff;border-radius:14px;padding:24px 28px;width:min(560px,94vw);max-height:92vh;overflow:auto;box-shadow:0 20px 60px rgba(0,0,0,.35)">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <h3 id="cvModalTit" style="margin:0;font-size:1.05rem">—</h3>
+      <button style="background:transparent;border:0;font-size:1.5rem;cursor:pointer;color:var(--muted)" onclick="cvCerrarModal()">×</button>
+    </div>
+    <div id="cvModalBody"></div>
   </div>
 </div>
 
@@ -156,169 +284,506 @@ tr:hover td { background: rgba(255,255,255,.02); }
 if (window.CCRouter && window.CCRouter.guardPanel) {
   CCRouter.guardPanel(['amb_prof','amb_enc','director','rector','admin_colegio','admin']);
 }
+
+var _cursos = [], _cursoActivo = null;
+var PERFIL = null;
+var _misCasos = [], _famRegistros = [], _perfilRegistros = [];
+var _todasInterv = [];
+var _semanaLunes = _lunesDe(new Date());
+var HORAS = ['08:00','08:45','09:30','10:15','11:00','11:45','12:30','13:15','14:00','14:45','15:30','16:15'];
+var DIAS = ['Lunes','Martes','Miércoles','Jueves','Viernes'];
+
 function esc(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function _hoyISO(){ return new Date().toISOString().slice(0,10); }
+function _diasDesde(f){ if(!f) return null; return Math.round((new Date() - new Date(f))/86400000); }
+function _lunesDe(d){ var x = new Date(d); var day = x.getDay(); var diff = day === 0 ? -6 : 1 - day; x.setDate(x.getDate() + diff); x.setHours(0,0,0,0); return x; }
+function _fmtFecha(d){ return d.toLocaleDateString('es-CL', { day:'2-digit', month:'short' }); }
+function _hash(str){ if (!window.crypto || !window.crypto.subtle) return Promise.resolve(null); var buf = new TextEncoder().encode(str||''); return crypto.subtle.digest('SHA-256', buf).then(function(h){ return Array.from(new Uint8Array(h)).map(function(b){return b.toString(16).padStart(2,'0');}).join('').slice(0,16); }); }
 
-var _cursos = [];
-var _cursoActivo = null;
+function cvAbrirModal(titulo, body, ancho){
+  document.getElementById('cvModalTit').textContent = titulo;
+  document.getElementById('cvModalBody').innerHTML = body;
+  var box = document.getElementById('cvModalBox');
+  if (box) box.style.width = 'min(' + (ancho || 620) + 'px, 94vw)';
+  document.getElementById('cvModalOv').style.display = 'flex';
+}
+function cvCerrarModal(){ document.getElementById('cvModalOv').style.display = 'none'; }
+document.getElementById('cvModalOv').addEventListener('click', function(ev){ if (ev.target === this) cvCerrarModal(); });
+document.addEventListener('keydown', function(e){ if (e.key === 'Escape') cvCerrarModal(); });
 
+document.querySelectorAll('.sidebar .nav-item[data-sec]').forEach(function(el){
+  el.addEventListener('click', function(){ mostrar(el.dataset.sec); });
+});
+function mostrar(id){
+  document.querySelectorAll('.sidebar .nav-item[data-sec]').forEach(function(x){ x.classList.toggle('active', x.dataset.sec === id); });
+  document.querySelectorAll('.section').forEach(function(x){ x.classList.toggle('active', x.id === 'sec-' + id); });
+  if (id === 'agenda')  agRender();
+  if (id === 'familia') famCargar();
+  if (id === 'perfil')  perfilCargar();
+  try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch(e){}
+}
+
+/* INIT */
 function iniciar() {
   var u = ELAuth.user || {};
+  PERFIL = window.CCAmbPerfil ? CCAmbPerfil.detectar(u) : null;
+  if (PERFIL) {
+    CCAmbPerfil.aplicarTema(PERFIL);
+    document.getElementById('brandIco').textContent = PERFIL.icono;
+    document.getElementById('brandTxt').textContent = 'Mi Panel · ' + PERFIL.nombreCorto;
+    document.getElementById('roleBadge').textContent = PERFIL.id.toUpperCase().slice(0,3);
+    document.title = PERFIL.etiqueta + ' — Click&Clase';
+    if (PERFIL.seccionExtra) {
+      document.getElementById('navPerfil').style.display = 'flex';
+      document.getElementById('navPerfilIco').textContent = PERFIL.seccionExtra.icono;
+      document.getElementById('navPerfilTxt').textContent = PERFIL.seccionExtra.titulo;
+      document.getElementById('perfilTitulo').innerHTML = PERFIL.seccionExtra.icono + ' ' + PERFIL.seccionExtra.titulo;
+      document.getElementById('perfilSub').textContent = PERFIL.seccionExtra.subtitulo || '';
+    }
+    // Herramientas rápidas
+    var ht = (PERFIL.herramientasRapidas || []).map(function(h){
+      return '<div onclick="ejecutarHerramienta(\'' + esc(h.accion||'nueva') + '\')" style="cursor:pointer;padding:12px 14px;background:linear-gradient(135deg,color-mix(in srgb,var(--perfil-primary) 8%,transparent),color-mix(in srgb,var(--perfil-accent) 4%,transparent));border-left:3px solid var(--perfil-primary);border-radius:8px;display:flex;align-items:center;gap:10px;font-size:.88rem;font-weight:600;transition:all .15s" onmouseover="this.style.transform=\'translateY(-2px)\';this.style.boxShadow=\'0 6px 14px rgba(0,0,0,.08)\'" onmouseout="this.style.transform=\'\';this.style.boxShadow=\'\'"><span style="font-size:1.4rem">' + h.icono + '</span><span>' + h.txt + '</span><span style="margin-left:auto;opacity:.5">→</span></div>';
+    }).join('');
+    var hEl = document.getElementById('perfilHerramientas');
+    if (hEl) hEl.innerHTML = ht || '<div class="empty">Sin herramientas configuradas</div>';
+    // Motivos del perfil
+    if (PERFIL.motivos) {
+      var motSel = document.getElementById('fMotivo');
+      if (motSel) motSel.innerHTML = PERFIL.motivos.map(function(m){ return '<option value="' + m.v + '">' + m.t + '</option>'; }).join('');
+    }
+  }
   document.getElementById('userName').textContent = u.nombre || u.email || 'Profesional';
-  document.getElementById('fFecha').value = new Date().toISOString().slice(0,10);
-  // Motivos
-  var opts = Object.keys(CCConvivencia.MOTIVO_LABEL).map(function(k) {
-    return '<option value="' + k + '">' + CCConvivencia.MOTIVO_LABEL[k] + '</option>';
-  });
-  document.getElementById('fMotivo').innerHTML = opts.join('');
-  // Medidas
-  var meds = Object.keys(CCConvivencia.MEDIDA_LABEL).map(function(k) {
-    return '<option value="' + k + '">' + CCConvivencia.MEDIDA_LABEL[k] + '</option>';
-  });
-  document.getElementById('fMedida').innerHTML = meds.join('');
-  document.getElementById('fMedida').value = 'ninguna';
-
-  cargarKPIs(); cargarCursos(); cargarMisCasos();
+  document.getElementById('salu').textContent = (u.nombre||'').split(' ')[0] || 'colega';
+  document.getElementById('prof').textContent = (PERFIL && PERFIL.etiqueta) || u.profesion || u.cargo || 'Equipo Convivencia';
+  document.getElementById('hoyISO').textContent = new Date().toLocaleDateString('es-CL', { weekday:'long', day:'2-digit', month:'long' });
+  document.getElementById('fFecha').value = _hoyISO();
+  cargarCursos(); cargarTodo();
 }
-
-function cargarKPIs() {
-  CCConvivencia.kpisConvivencia().then(function(k){
-    var uid = ELAuth.user.uid;
-    var mias = k.porProfesional[uid] ? k.porProfesional[uid].cantidad : 0;
-    document.getElementById('kpisWrap').innerHTML =
-      '<div class="kpi abr"><div class="l">Casos abiertos</div><div class="v">' + k.totalAbiertos + '</div></div>' +
-      '<div class="kpi seg"><div class="l">En seguimiento</div><div class="v">' + k.totalSeguimiento + '</div></div>' +
-      '<div class="kpi grave"><div class="l">Casos graves activos</div><div class="v">' + k.casosGravesActivos + '</div></div>' +
-      '<div class="kpi mes"><div class="l">Entrevistas este mes</div><div class="v">' + k.entrevistasMes + '</div></div>' +
-      '<div class="kpi mes"><div class="l">Mis entrevistas</div><div class="v">' + mias + '</div></div>';
+function cargarTodo(){
+  CCConvivencia.listarEntrevistas({}).then(function(items){
+    _todasInterv = items || [];
+    _renderResumen();
+    cargarMisCasos();
+    renderProxSesiones();
   });
 }
+function _misIntervenciones(){
+  var uid = ELAuth.user.uid;
+  return _todasInterv.filter(function(i){ return i.profesionalUid === uid; });
+}
+function _renderResumen(){
+  var mios = _misIntervenciones();
+  var abr = mios.filter(function(i){return i.estado==='abierto';}).length;
+  var seg = mios.filter(function(i){return i.estado==='seguimiento';}).length;
+  var cer = mios.filter(function(i){return i.estado==='cerrado';}).length;
+  var der = mios.filter(function(i){return i.estado==='derivado';}).length;
+  var mes = mios.filter(function(i){ var d=new Date(i.fecha); var h=new Date(); return d.getMonth()===h.getMonth() && d.getFullYear()===h.getFullYear(); }).length;
+  var hoy = mios.filter(function(i){ return i.proximaSesion === _hoyISO(); }).length;
+  var tasa = mios.length ? Math.round((cer+der)/mios.length*100) : 0;
+  document.getElementById('kpisWrap').innerHTML =
+    '<div class="kpi abr"><div class="l">📋 Abiertos</div><div class="v">' + abr + '</div></div>' +
+    '<div class="kpi seg"><div class="l">🔁 Seguimiento</div><div class="v">' + seg + '</div></div>' +
+    '<div class="kpi cer"><div class="l">✓ Cerrados</div><div class="v">' + cer + '</div></div>' +
+    '<div class="kpi mes"><div class="l">📅 Este mes</div><div class="v">' + mes + '</div></div>' +
+    '<div class="kpi tasa"><div class="l">🎯 Resolución</div><div class="v">' + tasa + '%</div></div>' +
+    '<div class="kpi hoy"><div class="l">🔔 Sesiones hoy</div><div class="v">' + hoy + '</div></div>';
+  var badge = document.getElementById('badgeCasos');
+  if (abr + seg > 0) { badge.textContent = abr + seg; badge.style.display = 'inline-block'; } else badge.style.display = 'none';
+}
+function renderProxSesiones(){
+  var mios = _misIntervenciones();
+  var futuros = mios.filter(function(i){ return i.proximaSesion && i.proximaSesion >= _hoyISO(); })
+    .sort(function(a,b){ return a.proximaSesion.localeCompare(b.proximaSesion); }).slice(0, 5);
+  var host = document.getElementById('proxSesiones');
+  if (!futuros.length) { host.innerHTML = '<div class="empty">Sin sesiones agendadas.</div>'; return; }
+  host.innerHTML = '<div style="display:grid;gap:6px">' + futuros.map(function(i){
+    var d = _diasDesde(i.proximaSesion) * -1;
+    var chip = d === 0 ? '<span style="background:var(--danger);color:#fff;padding:2px 10px;border-radius:99px;font-size:.7rem;font-weight:700">HOY</span>' :
+               d === 1 ? '<span style="background:var(--amber);color:#fff;padding:2px 10px;border-radius:99px;font-size:.7rem;font-weight:700">Mañana</span>' :
+               '<span style="background:rgba(37,99,235,.15);color:#1D4ED8;padding:2px 10px;border-radius:99px;font-size:.7rem;font-weight:700">En ' + d + 'd</span>';
+    var estClick = i.estudianteNombre ? ' onclick="timelineEstudiante(\'' + esc(i.estudianteNombre).replace(/\'/g,'\\\'') + '\')" style="cursor:pointer;color:#2563EB;text-decoration:underline"' : '';
+    return '<div style="padding:9px 12px;background:#fff;border:1px solid var(--border);border-left:3px solid var(--perfil-primary);border-radius:6px;display:flex;justify-content:space-between;align-items:center;font-size:.85rem">' +
+      '<span><b' + estClick + '>' + esc(i.estudianteNombre||'—') + '</b> · <span style="color:var(--muted)">' + esc(i.cursoNombre||'') + '</span></span>' +
+      '<span>' + i.proximaSesion + ' ' + chip + '</span></div>';
+  }).join('') + '</div>';
+}
 
+/* NUEVA */
 function cargarCursos() {
   var u = ELAuth.user;
   CCCursos.listarCursos({ liceoSlug: u.liceoSlug || u.liceoPrincipal }).then(function(cs){
     _cursos = cs || [];
     var sel = document.getElementById('fCurso');
-    sel.innerHTML = '<option value="">— Elegir —</option>' +
-      _cursos.map(function(c){ return '<option value="' + esc(c.cursoId) + '">' + esc(c.nombreCompleto) + '</option>'; }).join('');
+    sel.innerHTML = '<option value="">— Elegir —</option>' + _cursos.map(function(c){ return '<option value="' + esc(c.cursoId) + '">' + esc(c.nombreCompleto) + '</option>'; }).join('');
   });
 }
-
 function onCambioCurso() {
   var cursoId = document.getElementById('fCurso').value;
-  _cursoActivo = _cursos.find(function(c){ return c.cursoId === cursoId; });
+  _cursoActivo = _cursos.find(function(c){ return (c.cursoId || c.id) === cursoId; });
   var selE = document.getElementById('fEst');
-  if (!_cursoActivo) { selE.innerHTML = '<option value="">— Elegir curso primero —</option>'; return; }
-  selE.innerHTML = '<option value="">— Elegir —</option>' +
-    (_cursoActivo.estudiantes || []).map(function(e){
-      var nom = ((e.apellidoP||'') + ' ' + (e.apellidoM||'') + ', ' + (e.nombre||'')).trim();
-      return '<option value="' + e.ordinal + '" data-nom="' + esc(nom) + '">' + esc(nom) + '</option>';
-    }).join('');
+  if (!_cursoActivo) { selE.innerHTML = '<option value="">— Elegir curso —</option>'; return; }
+  var ests = _cursoActivo.estudiantes || [];
+  if (!ests.length) { selE.innerHTML = '<option value="">Sin estudiantes</option>'; return; }
+  selE.innerHTML = '<option value="">— Elegir —</option>' + ests.map(function(e, i){
+    var nom = e.nombre && e.nombre.indexOf(' ') !== -1 ? e.nombre : ((e.apellidoP||'') + ' ' + (e.apellidoM||'') + ', ' + (e.nombre||'')).trim();
+    return '<option value="' + (e.ordinal||e.uid||i+1) + '" data-nom="' + esc(nom) + '">' + esc(nom) + '</option>';
+  }).join('');
 }
-
-function onCambioTipo() {
-  var t = document.getElementById('fTipo').value;
-  var estWrap = document.getElementById('fEst').parentElement;
-  var curWrap = document.getElementById('fCurso').parentElement;
-  if (t === 'reunion_equipo') {
-    estWrap.style.opacity = '.4'; curWrap.style.opacity = '.4';
-  } else {
-    estWrap.style.opacity = '1'; curWrap.style.opacity = '1';
-  }
-}
-
+function onCambioTipo(){ /* placeholder */ }
 function onGuardar() {
   var resumen = document.getElementById('fResumen').value.trim();
   var motivo = document.getElementById('fMotivo').value;
+  var pin = document.getElementById('fPin').value;
   if (!resumen) { alert('El resumen es obligatorio'); return; }
-  var ordSt = document.getElementById('fEst').value;
+  if (!motivo) { alert('Elegí un motivo'); return; }
+  if (!pin || pin.length < 4) { alert('Ingresá tu PIN'); return; }
   var estEl = document.getElementById('fEst');
   var estOpt = estEl.options[estEl.selectedIndex];
   var estNom = estOpt ? (estOpt.dataset.nom || estOpt.text) : '';
-  var participantesRaw = document.getElementById('fParticipantes').value.trim();
-  var participantes = participantesRaw ? participantesRaw.split(',').map(function(x){ return { nombre: x.trim(), rol: '' }; }) : [];
-
-  var datos = {
-    liceoSlug: ELAuth.user.liceoSlug || ELAuth.user.liceoPrincipal || '',
-    tipo: document.getElementById('fTipo').value,
-    cursoId: document.getElementById('fCurso').value,
-    cursoNombre: _cursoActivo ? _cursoActivo.nombreCompleto : '',
-    estudianteOrdinal: ordSt ? parseInt(ordSt, 10) : null,
-    estudianteNombre: estNom,
-    participantes: participantes,
-    motivo: motivo,
-    motivoDetalle: document.getElementById('fMotivoDetalle').value.trim(),
-    resumen: resumen,
-    acuerdos: document.getElementById('fAcuerdos').value.trim(),
-    fecha: document.getElementById('fFecha').value,
-    gravedad: document.getElementById('fGravedad').value,
-    medida: document.getElementById('fMedida').value,
-    estado: document.getElementById('fEstado').value,
-    seguimientoRequerido: document.getElementById('fSeguimiento').checked,
-    proximaReunion: document.getElementById('fProxima').value,
-    confidencial: document.getElementById('fConf').checked
-  };
   var btn = document.getElementById('btnGuardar');
-  btn.disabled = true;
-  CCConvivencia.registrarEntrevista(datos).then(function() {
-    alert('✓ Entrevista registrada');
-    limpiar(); cargarKPIs(); cargarMisCasos();
-    btn.disabled = false;
-  }).catch(function(err) { alert('Error: ' + err.message); btn.disabled = false; });
+  btn.disabled = true; btn.innerHTML = '<span class="spin">⏳</span> Guardando…';
+  _hash(pin + '|' + resumen + '|' + ELAuth.user.uid).then(function(h){
+    var datos = {
+      liceoSlug: ELAuth.user.liceoSlug || '',
+      cursoId: document.getElementById('fCurso').value,
+      cursoNombre: _cursoActivo ? _cursoActivo.nombreCompleto : '',
+      estudianteOrdinal: document.getElementById('fEst').value ? parseInt(document.getElementById('fEst').value, 10) : null,
+      estudianteNombre: estNom,
+      tipo: document.getElementById('fTipo').value,
+      motivo: motivo,
+      resumen: resumen,
+      medida: document.getElementById('fMedida').value.trim(),
+      fecha: document.getElementById('fFecha').value,
+      gravedad: document.getElementById('fGravedad').value,
+      estado: 'abierto',
+      seguimientoRequerido: document.getElementById('fSeg').checked,
+      proximaSesion: document.getElementById('fProx').value,
+      derivadoA: document.getElementById('fDerivar').value,
+      firmaHash: h,
+      firmadoEn: new Date().toISOString()
+    };
+    return CCConvivencia.registrarEntrevista(datos);
+  }).then(function(){
+    alert('✓ Entrevista registrada y firmada');
+    limpiarForm(); cargarTodo();
+    btn.disabled = false; btn.innerHTML = '💾 Registrar';
+    mostrar('casos');
+  }).catch(function(err){ alert('Error: ' + err.message); btn.disabled=false; btn.innerHTML='💾 Registrar'; });
+}
+function limpiarForm() {
+  ['fResumen','fMedida','fProx','fPin'].forEach(function(id){ document.getElementById(id).value = ''; });
+  document.getElementById('fSeg').checked = false;
+  document.getElementById('fDerivar').value = '';
 }
 
-function limpiar() {
-  ['fResumen','fAcuerdos','fMotivoDetalle','fProxima','fParticipantes'].forEach(function(id){ document.getElementById(id).value = ''; });
-  document.getElementById('fSeguimiento').checked = false;
-  document.getElementById('fConf').checked = false;
-  document.getElementById('fEstado').value = 'abierto';
-  document.getElementById('fMedida').value = 'ninguna';
-  document.getElementById('fGravedad').value = '';
-}
-
+/* MIS CASOS */
 function cargarMisCasos() {
-  var opts = { profesionalUid: ELAuth.user.uid };
+  var uid = ELAuth.user.uid;
+  var opts = { profesionalUid: uid };
   var e = document.getElementById('fltEstado').value; if (e) opts.estado = e;
   var g = document.getElementById('fltGravedad').value; if (g) opts.gravedad = g;
+  var d = document.getElementById('fltDesde').value; if (d) opts.desde = d;
+  var h = document.getElementById('fltHasta').value; if (h) opts.hasta = h;
+  var q = (document.getElementById('fltBuscar').value || '').toLowerCase().trim();
   CCConvivencia.listarEntrevistas(opts).then(function(items) {
+    if (q) items = items.filter(function(i){ return (i.estudianteNombre||'').toLowerCase().indexOf(q) !== -1; });
+    _misCasos = items;
+    document.getElementById('totalCasosMuestra').textContent = items.length;
     var tb = document.getElementById('tbCasos');
-    if (!items.length) { tb.innerHTML = '<tr><td colspan="4" class="empty">Sin casos que coincidan</td></tr>'; return; }
-    tb.innerHTML = items.slice(0, 50).map(function(i) {
-      return '<tr onclick="verDetalle(\'' + esc(i.entId) + '\')" style="cursor:pointer">' +
+    if (!items.length) { tb.innerHTML = '<tr><td colspan="5" class="empty">Sin casos</td></tr>'; return; }
+    tb.innerHTML = items.slice(0, 100).map(function(i) {
+      var estClick = i.estudianteNombre ? ' onclick="timelineEstudiante(\'' + esc(i.estudianteNombre).replace(/\'/g,'\\\'') + '\')" style="cursor:pointer;color:#2563EB;text-decoration:underline"' : '';
+      return '<tr>' +
         '<td>' + esc(i.fecha) + '</td>' +
-        '<td>' + esc(i.estudianteNombre || CCConvivencia.TIPO_LABEL[i.tipo]) + '<br><span style="font-size:.72rem;color:var(--muted)">' + esc(i.cursoNombre || '') + '</span></td>' +
-        '<td>' + CCConvivencia.badgeMotivoHTML(i.motivo) + (i.gravedad ? ' ' + CCConvivencia.badgeGravedadHTML(i.gravedad) : '') + '</td>' +
-        '<td>' + CCConvivencia.badgeEstadoHTML(i.estado) + '</td>' +
-        '</tr>';
+        '<td><b' + estClick + '>' + esc(i.estudianteNombre||'—') + '</b><br><span style="font-size:.72rem;color:var(--muted)">' + esc(i.cursoNombre||'') + '</span></td>' +
+        '<td>' + CCConvivencia.badgeMotivoHTML(i.motivo) + '</td>' +
+        '<td>' + CCConvivencia.badgeGravedadHTML(i.gravedad) + '</td>' +
+        '<td>' + CCConvivencia.badgeEstadoHTML(i.estado) + '</td></tr>';
     }).join('');
   });
 }
 
-function verDetalle(entId) {
-  CCConvivencia.obtenerEntrevista(entId).then(function(d) {
-    if (!d) return;
-    document.getElementById('mTit').textContent = 'Entrevista — ' + esc(d.fecha);
-    document.getElementById('mBody').innerHTML =
-      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px 20px;margin-bottom:16px">' +
-        '<div><strong style="font-size:.72rem;color:var(--muted);text-transform:uppercase">Tipo</strong><div>' + esc(CCConvivencia.TIPO_LABEL[d.tipo] || d.tipo) + '</div></div>' +
-        '<div><strong style="font-size:.72rem;color:var(--muted);text-transform:uppercase">Estudiante</strong><div>' + esc(d.estudianteNombre || '—') + '</div></div>' +
-        '<div><strong style="font-size:.72rem;color:var(--muted);text-transform:uppercase">Curso</strong><div>' + esc(d.cursoNombre || '—') + '</div></div>' +
-        '<div><strong style="font-size:.72rem;color:var(--muted);text-transform:uppercase">Motivo</strong><div>' + CCConvivencia.badgeMotivoHTML(d.motivo) + '</div></div>' +
-        (d.gravedad ? '<div><strong style="font-size:.72rem;color:var(--muted);text-transform:uppercase">Gravedad</strong><div>' + CCConvivencia.badgeGravedadHTML(d.gravedad) + '</div></div>' : '') +
-        '<div><strong style="font-size:.72rem;color:var(--muted);text-transform:uppercase">Medida</strong><div>' + esc(CCConvivencia.MEDIDA_LABEL[d.medida] || d.medida) + '</div></div>' +
-        '<div><strong style="font-size:.72rem;color:var(--muted);text-transform:uppercase">Estado</strong><div>' + CCConvivencia.badgeEstadoHTML(d.estado) + '</div></div>' +
-        '<div><strong style="font-size:.72rem;color:var(--muted);text-transform:uppercase">Profesional</strong><div>' + esc(d.profesionalNombre) + '</div></div>' +
-      '</div>' +
-      (d.motivoDetalle ? '<h3 style="font-size:.75rem;color:var(--muted);text-transform:uppercase;margin:14px 0 6px">Motivo — detalle</h3><p style="margin:0">' + esc(d.motivoDetalle) + '</p>' : '') +
-      '<h3 style="font-size:.75rem;color:var(--muted);text-transform:uppercase;margin:14px 0 6px">Resumen</h3><p style="margin:0;white-space:pre-wrap">' + esc(d.resumen) + '</p>' +
-      (d.acuerdos ? '<h3 style="font-size:.75rem;color:var(--muted);text-transform:uppercase;margin:14px 0 6px">Acuerdos y compromisos</h3><p style="margin:0;white-space:pre-wrap">' + esc(d.acuerdos) + '</p>' : '') +
-      (d.seguimientoRequerido ? '<p style="margin-top:14px;font-size:.85rem;color:#fbbf24">⚠ Requiere seguimiento' + (d.proximaReunion ? ' — próxima: ' + esc(d.proximaReunion) : '') + '</p>' : '');
-    document.getElementById('mBg').style.display = 'flex';
+/* TIMELINE */
+function timelineEstudiante(nombre){
+  var casos = _todasInterv.filter(function(i){ return (i.estudianteNombre||'').toLowerCase() === nombre.toLowerCase(); })
+    .sort(function(a,b){ return new Date(b.fecha||0) - new Date(a.fecha||0); });
+  var body = '<div style="max-height:70vh;overflow:auto">' +
+    '<div style="padding:12px 16px;background:color-mix(in srgb, var(--perfil-primary) 8%, transparent);border-radius:10px;margin-bottom:14px">' +
+    '<div style="font-weight:700;font-size:1.1rem">👤 ' + esc(nombre) + '</div>' +
+    '<div style="color:var(--muted);font-size:.82rem;margin-top:4px">' + casos.length + ' entrevista(s)</div></div>';
+  if (!casos.length) body += '<div class="empty">Sin registros.</div>';
+  else {
+    body += '<div style="position:relative;padding-left:34px"><div style="position:absolute;left:14px;top:6px;bottom:6px;width:2px;background:var(--perfil-primary)"></div>';
+    casos.forEach(function(c){
+      body += '<div style="position:relative;margin-bottom:14px">' +
+        '<div style="position:absolute;left:-27px;top:0;width:26px;height:26px;border-radius:99px;background:var(--perfil-primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.85rem;border:2px solid #fff">📋</div>' +
+        '<div style="background:#fff;border:1px solid var(--border);border-left:3px solid var(--perfil-primary);border-radius:8px;padding:10px 14px">' +
+        '<div style="display:flex;justify-content:space-between;gap:10px;align-items:baseline"><b>' + esc(CCConvivencia.MOTIVO_LABEL[c.motivo]||c.motivo) + '</b><span style="color:var(--muted);font-size:.75rem">' + esc(c.fecha||'') + '</span></div>' +
+        '<div style="color:var(--muted);font-size:.78rem;margin-top:2px">' + esc(c.gravedad||'') + ' · ' + esc(c.estado||'') + '</div>' +
+        (c.resumen ? '<div style="margin-top:6px;font-size:.85rem;line-height:1.45">' + esc(c.resumen) + '</div>' : '') +
+        '</div></div>';
+    });
+    body += '</div>';
+  }
+  body += '<div style="display:flex;gap:8px;justify-content:flex-end;margin-top:14px;padding-top:12px;border-top:1px solid var(--border)"><button class="btn" onclick="cvCerrarModal()">Cerrar</button></div></div>';
+  cvAbrirModal('📖 Timeline · ' + nombre, body, 720);
+}
+
+/* AGENDA */
+function agSemana(delta){
+  if (delta === 0) _semanaLunes = _lunesDe(new Date());
+  else { var d = new Date(_semanaLunes); d.setDate(d.getDate() + (delta*7)); _semanaLunes = _lunesDe(d); }
+  agRender();
+}
+function _fISO(idx){ var d = new Date(_semanaLunes); d.setDate(d.getDate()+idx); return d.toISOString().slice(0,10); }
+function agRender(){
+  var fin = new Date(_semanaLunes); fin.setDate(fin.getDate()+4);
+  document.getElementById('agRangoTxt').textContent = 'Semana del ' + _fmtFecha(_semanaLunes) + ' al ' + _fmtFecha(fin);
+  var grid = document.getElementById('agGrid');
+  var html = '<div class="th">Hora</div>';
+  for (var d=0; d<5; d++) { var f = new Date(_semanaLunes); f.setDate(f.getDate()+d); html += '<div class="th">' + DIAS[d] + '<br><span style="font-weight:400;font-size:.66rem">' + _fmtFecha(f) + '</span></div>'; }
+  HORAS.forEach(function(h){
+    html += '<div class="hora">' + h + '</div>';
+    for (var di=0; di<5; di++) { var fISO = _fISO(di); html += '<div class="cell" data-f="' + fISO + '" data-h="' + h + '" onclick="agAbrir(\'' + fISO + '\',\'' + h + '\')"></div>'; }
+  });
+  grid.innerHTML = html;
+  agCargar();
+}
+function agCargar(){
+  if (typeof EL_DB === 'undefined') return;
+  var uid = ELAuth.user.uid; var slug = ELAuth.user.liceoSlug || 'demo';
+  EL_DB.collection('convivencia_agenda').where('profesionalUid','==',uid).where('liceoSlug','==',slug).get().then(function(sn){
+    sn.forEach(function(doc){
+      var s = doc.data();
+      if (s.fecha < _fISO(0) || s.fecha > _fISO(4)) return;
+      var cell = document.querySelector('.agenda .cell[data-f="' + s.fecha + '"][data-h="' + s.hora + '"]');
+      if (cell) {
+        cell.classList.add('busy');
+        cell.innerHTML = '<b style="color:var(--perfil-primary)">' + esc(s.estudianteNombre||s.titulo||'Atención') + '</b>' + (s.motivo ? '<br><span style="color:var(--muted);font-size:.7rem">' + esc(s.motivo) + '</span>' : '');
+        cell.setAttribute('data-id', doc.id);
+        cell.onclick = function(){ agAbrir(s.fecha, s.hora, doc.id); };
+      }
+    });
+  }).catch(function(){});
+}
+function agAbrir(f, h, id){
+  var slug = ELAuth.user.liceoSlug || 'demo';
+  var docP = id ? EL_DB.collection('convivencia_agenda').doc(id).get().then(function(d){ return d.data(); }) : Promise.resolve({});
+  docP.then(function(s){
+    s = s || {};
+    cvAbrirModal((id?'✏ Editar':'➕ Agendar') + ' · ' + f + ' ' + h,
+      '<div style="display:grid;gap:10px">' +
+      '<div class="fld"><label>Estudiante / apoderado</label><input type="text" id="asEst" value="' + esc(s.estudianteNombre||'') + '"></div>' +
+      '<div class="form-row"><div class="fld"><label>Motivo</label><input type="text" id="asMot" value="' + esc(s.motivo||'') + '"></div><div class="fld"><label>Curso</label><input type="text" id="asCurso" value="' + esc(s.cursoNombre||'') + '"></div></div>' +
+      '<div class="fld"><label>Notas</label><textarea id="asNotas" rows="2">' + esc(s.notas||'') + '</textarea></div>' +
+      '<div style="display:flex;gap:8px;justify-content:space-between;padding-top:10px;border-top:1px solid var(--border)">' +
+      (id ? '<button class="btn danger" onclick="agBorrar(\'' + id + '\')">🗑 Eliminar</button>' : '<div></div>') +
+      '<div style="display:flex;gap:8px"><button class="btn" onclick="cvCerrarModal()">Cancelar</button><button class="btn primary" onclick="agGuardar(\'' + f + '\',\'' + h + '\',' + (id?'\''+id+'\'':'null') + ')">💾 Guardar</button></div></div></div>');
   });
 }
-function cerrarModal() { document.getElementById('mBg').style.display = 'none'; }
-document.addEventListener('keydown', function(e){ if (e.key === 'Escape') cerrarModal(); });
+function agGuardar(f, h, id){
+  var slug = ELAuth.user.liceoSlug || 'demo'; var uid = ELAuth.user.uid;
+  var docId = id || 'ag_' + uid + '_' + f + '_' + h.replace(':','');
+  var est = document.getElementById('asEst').value.trim();
+  if (!est) { alert('Ingresá estudiante o apoderado'); return; }
+  var data = {
+    id:docId, liceoSlug:slug, profesionalUid:uid, profesionalNombre:ELAuth.user.nombre||ELAuth.user.email,
+    fecha:f, hora:h,
+    estudianteNombre:est,
+    motivo: document.getElementById('asMot').value.trim(),
+    cursoNombre: document.getElementById('asCurso').value.trim(),
+    notas: document.getElementById('asNotas').value.trim(),
+    actualizadoEn: new Date().toISOString()
+  };
+  EL_DB.collection('convivencia_agenda').doc(docId).set(data, {merge:true}).then(function(){ cvCerrarModal(); agRender(); }).catch(function(e){alert('Error: '+e.message);});
+}
+function agBorrar(id){
+  if (!confirm('¿Eliminar esta atención?')) return;
+  EL_DB.collection('convivencia_agenda').doc(id).delete().then(function(){ cvCerrarModal(); agRender(); });
+}
+
+/* FAMILIA */
+function famCargar(){
+  if (typeof EL_DB === 'undefined') return;
+  var slug = ELAuth.user.liceoSlug || 'demo';
+  EL_DB.collection('convivencia_familia').where('liceoSlug','==',slug).get().then(function(sn){
+    _famRegistros = []; sn.forEach(function(d){ var x=d.data(); x.id=d.id; _famRegistros.push(x); });
+    _famRegistros.sort(function(a,b){ return new Date(b.fecha||0) - new Date(a.fecha||0); });
+    famRender();
+  }).catch(function(){ document.getElementById('famLista').innerHTML='<div class="empty" style="color:var(--danger)">Error</div>'; });
+}
+function famRender(){
+  var host = document.getElementById('famLista');
+  if (!_famRegistros.length) { host.innerHTML = '<div class="empty">Sin registros aún.</div>'; return; }
+  var TIPO_ICON = { entrevista:'🤝', notificacion:'📢', acuerdo:'✅', citacion:'📆' };
+  host.innerHTML = '<table><thead><tr><th>Fecha</th><th>Estudiante</th><th>Apoderado</th><th>Tipo</th><th>Contacto</th><th></th></tr></thead><tbody>' +
+    _famRegistros.map(function(r, i){
+      var estClick = r.estudianteNombre ? ' onclick="timelineEstudiante(\'' + esc(r.estudianteNombre).replace(/\'/g,'\\\'') + '\')" style="cursor:pointer;color:#2563EB;text-decoration:underline"' : '';
+      return '<tr><td>' + esc(r.fecha||'—') + '</td><td><b' + estClick + '>' + esc(r.estudianteNombre||'—') + '</b><br><span style="font-size:.72rem;color:var(--muted)">' + esc(r.cursoNombre||'') + '</span></td><td>' + esc(r.apoderadoNombre||'—') + '</td><td>' + (TIPO_ICON[r.tipo]||'') + ' ' + esc(r.tipo||'—') + '</td><td style="font-size:.78rem">' + (r.apoderadoTel?'<a href="tel:'+esc(r.apoderadoTel)+'" style="color:#059669">📞 '+esc(r.apoderadoTel)+'</a>':'') + (r.apoderadoEmail?'<br><a href="mailto:'+esc(r.apoderadoEmail)+'" style="color:#2563EB">✉ '+esc(r.apoderadoEmail)+'</a>':'') + '</td><td><button class="btn" style="padding:3px 8px;font-size:.7rem" onclick="famAbrir(' + i + ')">✏</button></td></tr>';
+    }).join('') + '</tbody></table>';
+}
+function famAbrir(idx){
+  var r = (idx != null && idx >= 0) ? _famRegistros[idx] : {};
+  var esNuevo = idx == null || idx < 0;
+  cvAbrirModal((esNuevo?'➕':'✏') + ' Registro con familia',
+    '<div style="display:grid;gap:10px">' +
+    '<div class="form-row"><div class="fld"><label>Estudiante *</label><input type="text" id="fEstF" value="' + esc(r.estudianteNombre||'') + '"></div><div class="fld"><label>Curso</label><input type="text" id="fCursoF" value="' + esc(r.cursoNombre||'') + '"></div></div>' +
+    '<div class="form-row"><div class="fld"><label>Apoderado *</label><input type="text" id="fApo" value="' + esc(r.apoderadoNombre||'') + '"></div><div class="fld"><label>Parentesco</label><select id="fPar"><option>Madre</option><option>Padre</option><option>Tutor/a</option><option>Otro</option></select></div></div>' +
+    '<div class="form-row"><div class="fld"><label>Teléfono</label><input type="tel" id="fTel" value="' + esc(r.apoderadoTel||'') + '"></div><div class="fld"><label>Email</label><input type="email" id="fEmail" value="' + esc(r.apoderadoEmail||'') + '"></div></div>' +
+    '<div class="form-row3"><div class="fld"><label>Tipo *</label><select id="fTipoF"><option value="entrevista">🤝 Entrevista</option><option value="notificacion">📢 Notificación</option><option value="acuerdo">✅ Acuerdo</option><option value="citacion">📆 Citación</option></select></div><div class="fld"><label>Fecha *</label><input type="date" id="fFechaF" value="' + esc(r.fecha||_hoyISO()) + '"></div><div class="fld"><label>Motivo</label><input type="text" id="fMot" value="' + esc(r.motivo||'') + '"></div></div>' +
+    '<div class="fld"><label>Detalle</label><textarea id="fDetalle" rows="3">' + esc(r.detalle||'') + '</textarea></div>' +
+    '<div style="display:flex;gap:8px;justify-content:flex-end;padding-top:10px;border-top:1px solid var(--border)"><button class="btn" onclick="cvCerrarModal()">Cancelar</button><button class="btn primary" onclick="famGuardar(' + (esNuevo?-1:idx) + ')">💾 Guardar</button></div></div>', 640);
+}
+function famGuardar(idx){
+  var slug = ELAuth.user.liceoSlug || 'demo';
+  var existing = idx >= 0 ? _famRegistros[idx] : null;
+  var id = existing ? existing.id : ('cvfam_' + Date.now());
+  var data = {
+    id:id, liceoSlug:slug,
+    estudianteNombre: document.getElementById('fEstF').value.trim(),
+    cursoNombre: document.getElementById('fCursoF').value.trim(),
+    apoderadoNombre: document.getElementById('fApo').value.trim(),
+    parentesco: document.getElementById('fPar').value,
+    apoderadoTel: document.getElementById('fTel').value.trim(),
+    apoderadoEmail: document.getElementById('fEmail').value.trim(),
+    tipo: document.getElementById('fTipoF').value,
+    fecha: document.getElementById('fFechaF').value,
+    motivo: document.getElementById('fMot').value.trim(),
+    detalle: document.getElementById('fDetalle').value.trim(),
+    actualizadoEn: new Date().toISOString(),
+    actualizadoPor: ELAuth.user.nombre||ELAuth.user.email
+  };
+  if (!data.estudianteNombre || !data.apoderadoNombre) { alert('Estudiante y apoderado son obligatorios'); return; }
+  if (!existing) data.creadoEn = new Date().toISOString();
+  EL_DB.collection('convivencia_familia').doc(id).set(data,{merge:true}).then(function(){ cvCerrarModal(); famCargar(); });
+}
+
+/* PERFIL específico */
+function _perfilCol(){ if (!PERFIL || !PERFIL.seccionExtra) return null; return 'convivencia_perfil_' + PERFIL.seccionExtra.id; }
+function ejecutarHerramienta(accion){
+  if (!accion) return;
+  if (accion === 'nueva' || accion === 'nueva_intervencion') { mostrar('nueva'); return; }
+  if (accion === 'perfil_nuevo') { perfilAbrir(); return; }
+  if (accion === 'aplicar_protocolo') { alert('Acción: aplicá el protocolo desde el panel del Encargado de Convivencia.'); return; }
+  if (accion === 'mediacion_circulo') { perfilAbrir(); return; }
+  if (accion.indexOf('perfil_pre:') === 0) {
+    perfilAbrir();
+    setTimeout(function(){
+      var params = {}; accion.substring(11).split('&').forEach(function(kv){ var p=kv.split('='); if(p[0]) params[p[0]] = p[1]||''; });
+      Object.keys(params).forEach(function(k){ var el = document.getElementById('pf_'+k); if (el) el.value = params[k]; });
+    }, 200);
+    return;
+  }
+  alert('Herramienta no implementada: ' + accion);
+}
+function perfilCargar(){
+  var col = _perfilCol();
+  if (!col) { document.getElementById('perfilLista').innerHTML = '<div class="empty">Esta profesión no tiene sección específica.</div>'; return; }
+  var slug = ELAuth.user.liceoSlug || 'demo'; var uid = ELAuth.user.uid;
+  EL_DB.collection(col).where('liceoSlug','==',slug).where('profesionalUid','==',uid).get().then(function(sn){
+    _perfilRegistros = []; sn.forEach(function(d){ var x=d.data(); x.id=d.id; _perfilRegistros.push(x); });
+    _perfilRegistros.sort(function(a,b){ return new Date(b.fecha||0) - new Date(a.fecha||0); });
+    perfilRender();
+  }).catch(function(err){ document.getElementById('perfilLista').innerHTML='<div class="empty" style="color:var(--danger)">Error</div>'; });
+}
+function perfilRender(){
+  if (!PERFIL || !PERFIL.seccionExtra) return;
+  var host = document.getElementById('perfilLista');
+  if (!_perfilRegistros.length) { host.innerHTML='<div class="empty">Aún no hay registros. Clic en "Nuevo registro" arriba.</div>'; return; }
+  var campoResumen = PERFIL.seccionExtra.campos[0].key;
+  host.innerHTML = '<table><thead><tr><th>Fecha</th><th>Estudiante</th><th>' + esc(PERFIL.seccionExtra.campos[0].label) + '</th><th>Acciones</th></tr></thead><tbody>' +
+    _perfilRegistros.map(function(r, i){
+      var estClick = r.estudianteNombre ? ' onclick="timelineEstudiante(\'' + esc(r.estudianteNombre).replace(/\'/g,'\\\'') + '\')" style="cursor:pointer;color:#2563EB;text-decoration:underline"' : '';
+      return '<tr><td>' + esc(r.fecha||'—') + '</td><td><b' + estClick + '>' + esc(r.estudianteNombre||'—') + '</b><br><span style="font-size:.72rem;color:var(--muted)">' + esc(r.cursoNombre||'') + '</span></td><td style="font-size:.85rem">' + esc(r[campoResumen]||'—') + '</td><td><button class="btn" style="padding:3px 8px;font-size:.7rem" onclick="perfilAbrir(' + i + ')">✏</button> <button class="btn" style="padding:3px 8px;font-size:.7rem;color:#DC2626" onclick="perfilBorrar(' + i + ')">🗑</button></td></tr>';
+    }).join('') + '</tbody></table>';
+}
+function perfilAbrir(idx){
+  if (!PERFIL || !PERFIL.seccionExtra) { alert('Esta profesión no tiene sección específica.'); return; }
+  var r = (idx != null && idx >= 0) ? _perfilRegistros[idx] : {};
+  var esNuevo = idx == null || idx < 0;
+  var camposHtml = PERFIL.seccionExtra.campos.map(function(c){
+    var val = r[c.key] || '';
+    if (c.tipo === 'textarea') return '<div class="fld"><label>' + esc(c.label) + '</label><textarea id="pf_' + c.key + '" rows="3" placeholder="' + esc(c.placeholder||'') + '">' + esc(val) + '</textarea></div>';
+    if (c.tipo === 'select') { var opts = c.opciones.map(function(o){ return '<option value="' + o.v + '"' + (val === o.v ? ' selected' : '') + '>' + o.t + '</option>'; }).join(''); return '<div class="fld"><label>' + esc(c.label) + '</label><select id="pf_' + c.key + '"><option value="">— Elegir —</option>' + opts + '</select></div>'; }
+    return '<div class="fld"><label>' + esc(c.label) + '</label><input type="' + c.tipo + '" id="pf_' + c.key + '" value="' + esc(val) + '" placeholder="' + esc(c.placeholder||'') + '"></div>';
+  }).join('');
+  cvAbrirModal((esNuevo?'➕':'✏') + ' · ' + PERFIL.seccionExtra.titulo,
+    '<div style="display:grid;gap:10px">' +
+    '<div style="padding:8px 12px;background:color-mix(in srgb, var(--perfil-primary) 6%, transparent);border-left:3px solid var(--perfil-primary);border-radius:6px;font-size:.78rem;color:var(--perfil-primary);font-weight:600">' + PERFIL.seccionExtra.icono + ' Registro de ' + esc(PERFIL.nombreCorto) + '</div>' +
+    '<div class="form-row"><div class="fld"><label>Estudiante *</label><input type="text" id="pf_estudianteNombre" value="' + esc(r.estudianteNombre||'') + '"></div><div class="fld"><label>Curso</label><input type="text" id="pf_cursoNombre" value="' + esc(r.cursoNombre||'') + '"></div></div>' +
+    '<div class="fld"><label>Fecha *</label><input type="date" id="pf_fecha" value="' + esc(r.fecha||_hoyISO()) + '"></div>' +
+    camposHtml +
+    '<div style="display:flex;gap:8px;justify-content:space-between;padding-top:10px;border-top:1px solid var(--border)">' +
+    (esNuevo ? '<div></div>' : '<button class="btn danger" onclick="perfilBorrar(' + idx + ')">🗑 Eliminar</button>') +
+    '<div style="display:flex;gap:8px"><button class="btn" onclick="cvCerrarModal()">Cancelar</button><button class="btn primary" onclick="perfilGuardar(' + (esNuevo?-1:idx) + ')">💾 Guardar</button></div></div></div>', 640);
+}
+function perfilGuardar(idx){
+  var col = _perfilCol(); if (!col) return;
+  var slug = ELAuth.user.liceoSlug || 'demo'; var uid = ELAuth.user.uid;
+  var existing = idx >= 0 ? _perfilRegistros[idx] : null;
+  var id = existing ? existing.id : (PERFIL.seccionExtra.id.slice(0,4) + '_' + Date.now());
+  var data = { id:id, liceoSlug:slug, profesionalUid:uid, profesionalNombre: ELAuth.user.nombre||ELAuth.user.email, perfilId: PERFIL.id, estudianteNombre: document.getElementById('pf_estudianteNombre').value.trim(), cursoNombre: document.getElementById('pf_cursoNombre').value.trim(), fecha: document.getElementById('pf_fecha').value, actualizadoEn: new Date().toISOString() };
+  PERFIL.seccionExtra.campos.forEach(function(c){ var el = document.getElementById('pf_' + c.key); if (el) data[c.key] = el.value.trim(); });
+  if (!data.estudianteNombre) { alert('Estudiante obligatorio'); return; }
+  if (!existing) data.creadoEn = new Date().toISOString();
+  _hash(data.estudianteNombre + '|' + data.fecha + '|' + JSON.stringify(data)).then(function(h){
+    data.bitacoraHash = h;
+    EL_DB.collection(col).doc(id).set(data,{merge:true}).then(function(){ cvCerrarModal(); perfilCargar(); }).catch(function(e){alert('Error: '+e.message);});
+  });
+}
+function perfilBorrar(idx){
+  var r = _perfilRegistros[idx]; if (!r) return;
+  if (!confirm('¿Eliminar este registro?')) return;
+  EL_DB.collection(_perfilCol()).doc(r.id).delete().then(function(){ cvCerrarModal(); perfilCargar(); });
+}
+
+/* EXPORT CSV */
+function _csvDownload(name, rows){
+  var csv = rows.map(function(r){ return r.map(function(c){ return '"' + String(c==null?'':c).replace(/"/g,'""') + '"'; }).join(','); }).join('\n');
+  var blob = new Blob(['﻿'+csv], { type:'text/csv;charset=utf-8' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a'); a.href=url; a.download=name; document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+}
+function exportarMisCasosCSV(){
+  var mios = _misIntervenciones();
+  var rows = [['Fecha','Estudiante','Curso','Motivo','Gravedad','Tipo','Estado','Resumen','Medida']];
+  mios.forEach(function(i){ rows.push([i.fecha||'',i.estudianteNombre||'',i.cursoNombre||'',CCConvivencia.MOTIVO_LABEL[i.motivo]||i.motivo||'',i.gravedad||'',i.tipo||'',i.estado||'',(i.resumen||'').replace(/[\r\n]+/g,' '),(i.medida||'').replace(/[\r\n]+/g,' ')]); });
+  _csvDownload('convivencia_miscasos_' + _hoyISO() + '.csv', rows);
+}
+
+/* REPORTES */
+function reporteGenerar(tipo){
+  var u = ELAuth.user||{}; var fecha = new Date().toLocaleDateString('es-CL');
+  var mios = _misIntervenciones();
+  var totales = { abierto:0, seguimiento:0, cerrado:0, derivado:0 };
+  mios.forEach(function(i){ totales[i.estado]=(totales[i.estado]||0)+1; });
+  var html = '<div style="background:#fff;padding:24px;border:1px solid var(--border);border-radius:10px">';
+  html += '<div style="text-align:center;margin-bottom:20px"><h2 style="margin:0">📄 Reporte Convivencia · ' + esc(tipo) + '</h2><div style="color:var(--muted);font-size:.85rem;margin-top:4px">' + esc(u.nombre||u.email||'') + ' · ' + fecha + '</div></div>';
+  if (tipo === 'mensual') {
+    var mes = mios.filter(function(i){ var d=new Date(i.fecha); var h=new Date(); return d.getMonth()===h.getMonth() && d.getFullYear()===h.getFullYear(); });
+    html += '<h3>Estado del mes</h3><ul><li>Del mes: <b>' + mes.length + '</b></li><li>Histórico: <b>' + mios.length + '</b></li><li>Abiertos: <b>' + totales.abierto + '</b></li><li>Cerrados: <b>' + totales.cerrado + '</b></li><li>Derivados: <b>' + totales.derivado + '</b></li></ul>';
+  } else if (tipo === 'motivos') {
+    var byM = {}; mios.forEach(function(i){ var k=CCConvivencia.MOTIVO_LABEL[i.motivo]||i.motivo||'Otro'; byM[k]=(byM[k]||0)+1; });
+    html += '<h3>Por motivo</h3><table style="width:100%"><thead><tr><th>Motivo</th><th>Casos</th></tr></thead><tbody>' + Object.keys(byM).sort(function(a,b){return byM[b]-byM[a];}).map(function(k){return '<tr><td>' + esc(k) + '</td><td>' + byM[k] + '</td></tr>';}).join('') + '</tbody></table>';
+  } else if (tipo === 'supervision') {
+    html += '<div style="padding:14px;background:linear-gradient(135deg,rgba(124,58,237,.06),rgba(37,99,235,.03));border-left:4px solid #7C3AED;border-radius:8px;margin-bottom:16px"><b>🤝 REPORTE PARA SUPERVISIÓN</b></div>';
+    html += '<h3>1. Datos del profesional</h3><ul><li><b>Nombre:</b> ' + esc(u.nombre||'—') + '</li><li><b>Perfil:</b> ' + esc((PERFIL&&PERFIL.etiqueta)||u.cargo||'—') + '</li><li><b>Período:</b> ' + fecha + '</li></ul>';
+    html += '<h3>2. Volumen de trabajo</h3><ul><li>Total intervenciones: <b>' + mios.length + '</b></li><li>Activos: <b>' + (totales.abierto+totales.seguimiento) + '</b></li><li>Resueltos: <b>' + (totales.cerrado+totales.derivado) + '</b></li></ul>';
+    html += '<h3>3. Firma</h3><p style="margin-top:40px">___________________________________<br><b>' + esc(u.nombre||'—') + '</b><br>' + esc((PERFIL&&PERFIL.etiqueta)||u.cargo||'') + '</p>';
+  }
+  html += '<div style="margin-top:20px;text-align:right"><button class="btn" onclick="window.print()">🖨 Imprimir / PDF</button></div></div>';
+  document.getElementById('reporteOut').innerHTML = html;
+}
+
+document.getElementById('topSearch').addEventListener('keydown', function(e){
+  if (e.key === 'Enter') { var q=this.value.trim(); if(!q) return; mostrar('casos'); document.getElementById('fltBuscar').value = q; cargarMisCasos(); }
+});
 
 if (window.ELAuth && ELAuth.onUserReady) ELAuth.onUserReady(function(u){ if(u) iniciar(); });
 </script>
+<script src="js/ia-widget.js" defer></script>
+<script src="js/session-guard.js" defer></script>
+<script src="js/search-global.js" defer></script>
 </body>
 </html>

@@ -30,17 +30,32 @@ var ELAuth = (function() {
     }
 
   // Reintentar fetch de Firestore cuando el cliente está offline (timing issue)
+  // Con timeout de seguridad para no colgar la app cuando Firestore es bloqueado
+  // por ad-blocker/firewall (ERR_CONNECTION_CLOSED, ERR_BLOCKED_BY_CLIENT, etc.)
   function _fetchUserDocConReintentos(uid, intentos) {
     intentos = intentos || 0;
-    return EL_DB.collection(EL_COLLECTIONS.USERS).doc(uid).get()
+    // Timeout de 5s por intento — si Firestore está bloqueado por extensión,
+    // esta llamada nunca resuelve; el timeout hace que reintentemos o fallemos.
+    var fetchPromise = EL_DB.collection(EL_COLLECTIONS.USERS).doc(uid).get();
+    var timeoutPromise = new Promise(function(_, reject) {
+      setTimeout(function() { reject(new Error('firestore-timeout: bloqueado o sin red')); }, 5000);
+    });
+    return Promise.race([fetchPromise, timeoutPromise])
       .catch(function(err) {
-        var esOffline = err.message && (err.message.indexOf('offline') !== -1 || err.code === 'unavailable');
-        if (esOffline && intentos < 6) {
-          console.log('[ELAuth] Firestore offline, reintentando en 2s... (' + (intentos+1) + '/6)');
+        var msg = (err && err.message) || '';
+        var esOffline = msg.indexOf('offline') !== -1
+                      || msg.indexOf('timeout') !== -1
+                      || msg.indexOf('CONNECTION_CLOSED') !== -1
+                      || msg.indexOf('BLOCKED_BY_CLIENT') !== -1
+                      || msg.indexOf('Failed to fetch') !== -1
+                      || (err && err.code === 'unavailable');
+        // Solo 2 reintentos rápidos (antes eran 6 con 2s = 12s de espera)
+        if (esOffline && intentos < 2) {
+          console.log('[ELAuth] Firestore no responde, reintentando en 1s... (' + (intentos+1) + '/2)');
           return new Promise(function(resolve, reject) {
             setTimeout(function() {
               _fetchUserDocConReintentos(uid, intentos + 1).then(resolve).catch(reject);
-            }, 2000);
+            }, 1000);
           });
         }
         throw err;

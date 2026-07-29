@@ -8,78 +8,78 @@
 <style>
   *,*::before,*::after{box-sizing:border-box}
   html,body{margin:0;padding:0}
-  body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#080b14;color:#e5e7eb;line-height:1.5;min-height:100vh}
+  body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#F0F7FF;color:#0C1E3B;line-height:1.5;min-height:100vh}
   a{color:inherit;text-decoration:none}
-  .topbar{display:flex;align-items:center;gap:14px;padding:14px 22px;background:rgba(15,23,42,.9);border-bottom:1px solid rgba(148,163,184,.12);position:sticky;top:0;z-index:10}
+  .topbar{display:flex;align-items:center;gap:14px;padding:14px 22px;background:rgba(255,255,255,.9);border-bottom:1px solid rgba(148,163,184,.12);position:sticky;top:0;z-index:10}
   .brand{display:flex;align-items:center;gap:9px;font-weight:800;font-size:1.05rem}
-  .brand .ico{width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,#7c3aed,#22d3ee);display:grid;place-items:center;font-size:.85rem}
+  .brand .ico{width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,#2563EB,#38BDF8);display:grid;place-items:center;font-size:.85rem}
   .topbar .sp{flex:1}
-  .tb-link{font-size:.85rem;color:#cbd5e1;padding:7px 13px;border-radius:9px;border:1px solid rgba(148,163,184,.2);transition:.15s;cursor:pointer;background:transparent}
-  .tb-link:hover{border-color:rgba(124,58,237,.5);color:#fff}
+  .tb-link{font-size:.85rem;color:#334155;padding:7px 13px;border-radius:9px;border:1px solid rgba(37,99,235,.18);transition:.15s;cursor:pointer;background:transparent}
+  .tb-link:hover{border-color:rgba(37,99,235,.5);color:#fff}
   .wrap{max-width:1100px;margin:0 auto;padding:26px 20px 60px}
   h1{font-family:'Space Grotesk',sans-serif;font-size:1.6rem;margin:0 0 4px}
-  .lead{color:#94a3b8;font-size:.9rem;margin:0 0 22px}
+  .lead{color:#64748B;font-size:.9rem;margin:0 0 22px}
   .cursos-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
-  .curso-tab{padding:9px 16px;border-radius:10px;border:1px solid rgba(148,163,184,.2);background:rgba(255,255,255,.03);color:#cbd5e1;font-weight:700;font-size:.86rem;cursor:pointer;transition:.15s}
-  .curso-tab:hover{border-color:rgba(124,58,237,.45);color:#fff}
-  .curso-tab.active{background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;border-color:transparent}
+  .curso-tab{padding:9px 16px;border-radius:10px;border:1px solid rgba(37,99,235,.18);background:rgba(37,99,235,.05);color:#334155;font-weight:700;font-size:.86rem;cursor:pointer;transition:.15s}
+  .curso-tab:hover{border-color:#2563EB;color:#2563EB;background:rgba(37,99,235,.1)}
+  .curso-tab.active{background:linear-gradient(135deg,#4F46E5,#6366F1);color:#fff;border-color:transparent;box-shadow:0 4px 12px rgba(79,70,229,.3)}
   .subtabs{display:flex;gap:6px;margin-bottom:14px;border-bottom:1px solid rgba(148,163,184,.14)}
-  .subtab{padding:9px 18px;border:0;background:transparent;color:#94a3b8;font-weight:700;font-size:.88rem;cursor:pointer;border-bottom:2px solid transparent;transition:.15s}
-  .subtab:hover{color:#e5e7eb}
-  .subtab.active{color:#fff;border-bottom-color:#a78bfa}
+  .subtab{padding:10px 20px;border:0;background:transparent;color:#64748B;font-weight:700;font-size:.88rem;cursor:pointer;border-bottom:3px solid transparent;transition:.15s;margin-bottom:-1px}
+  .subtab:hover{color:#4F46E5;background:rgba(79,70,229,.05)}
+  .subtab.active{color:#4F46E5;border-bottom-color:#4F46E5;background:rgba(79,70,229,.06)}
   .sem-toggle{display:flex;gap:6px;margin-bottom:16px}
-  .sem-btn{padding:7px 14px;border-radius:8px;border:1px solid rgba(148,163,184,.2);background:rgba(255,255,255,.03);color:#cbd5e1;font-weight:700;font-size:.8rem;cursor:pointer;transition:.15s}
-  .sem-btn.active{background:rgba(124,58,237,.25);border-color:rgba(124,58,237,.6);color:#fff}
-  .panel{background:rgba(15,23,42,.7);border:1px solid rgba(148,163,184,.14);border-radius:16px;padding:20px}
+  .sem-btn{padding:7px 14px;border-radius:8px;border:1px solid rgba(37,99,235,.18);background:rgba(37,99,235,.05);color:#334155;font-weight:700;font-size:.8rem;cursor:pointer;transition:.15s}
+  .sem-btn.active{background:linear-gradient(135deg,#4F46E5,#6366F1);border-color:transparent;color:#fff;box-shadow:0 2px 8px rgba(79,70,229,.25)}
+  .panel{background:rgba(255,255,255,.7);border:1px solid rgba(148,163,184,.14);border-radius:16px;padding:20px}
   .toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:16px}
-  .toolbar .cuenta{font-size:.85rem;color:#94a3b8;margin-right:auto}
-  .toolbar .cuenta b{color:#a78bfa;font-size:1.05rem}
+  .toolbar .cuenta{font-size:.85rem;color:#64748B;margin-right:auto}
+  .toolbar .cuenta b{color:#2563EB;font-size:1.05rem}
   .btn{padding:8px 14px;border-radius:9px;font-weight:700;font-size:.83rem;border:0;cursor:pointer;transition:transform .12s,box-shadow .2s;display:inline-flex;align-items:center;gap:6px}
   .btn-gold{background:linear-gradient(135deg,#fcd34d,#f59e0b);color:#1c1206}
   .btn-gold:hover{transform:translateY(-1px)}
-  .btn-ghost{background:rgba(255,255,255,.05);color:#e5e7eb;border:1px solid rgba(148,163,184,.22)}
-  .btn-ghost:hover{border-color:rgba(124,58,237,.45)}
+  .btn-ghost{background:rgba(37,99,235,.05);color:#0C1E3B;border:1px solid rgba(148,163,184,.22)}
+  .btn-ghost:hover{border-color:rgba(37,99,235,.45)}
   .btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
   table{width:100%;border-collapse:collapse;font-size:.88rem}
-  th{text-align:left;padding:8px 10px;color:#94a3b8;font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid rgba(148,163,184,.18)}
+  th{text-align:left;padding:8px 10px;color:#64748B;font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid rgba(148,163,184,.18)}
   td{padding:7px 10px;border-bottom:1px solid rgba(148,163,184,.08)}
   td[contenteditable]{outline:none;border-radius:5px}
-  td[contenteditable]:focus{background:rgba(124,58,237,.12);box-shadow:0 0 0 1px rgba(124,58,237,.5)}
-  tr:hover td{background:rgba(255,255,255,.02)}
+  td[contenteditable]:focus{background:rgba(37,99,235,.12);box-shadow:0 0 0 1px rgba(37,99,235,.5)}
+  tr:hover td{background:rgba(37,99,235,.03)}
   .num{color:#64748b;width:42px;text-align:center}
-  .del{background:rgba(239,68,68,.12);color:#f87171;border:1px solid rgba(239,68,68,.28);border-radius:6px;width:26px;height:26px;cursor:pointer;font-size:.8rem;line-height:1}
+  .del{background:rgba(239,68,68,.12);color:#DC2626;border:1px solid rgba(239,68,68,.28);border-radius:6px;width:26px;height:26px;cursor:pointer;font-size:.8rem;line-height:1}
   .del:hover{background:rgba(239,68,68,.25)}
   .empty{text-align:center;padding:46px 20px;color:#64748b}
   .empty .em{font-size:2.4rem;margin-bottom:10px}
   .status{font-size:.83rem;margin-left:4px}
   .hint{font-size:.76rem;color:#64748b;margin-top:14px;line-height:1.6}
-  .hint code{background:rgba(124,58,237,.15);padding:1px 6px;border-radius:4px;font-size:.72rem}
-  .dirty-dot{display:none;width:8px;height:8px;border-radius:50%;background:#fbbf24;box-shadow:0 0 0 3px rgba(251,191,36,.2)}
+  .hint code{background:rgba(37,99,235,.15);padding:1px 6px;border-radius:4px;font-size:.72rem}
+  .dirty-dot{display:none;width:8px;height:8px;border-radius:50%;background:#F59E0B;box-shadow:0 0 0 3px rgba(251,191,36,.2)}
   .notas-scroll{overflow-x:auto}
   table.notas-table th,table.notas-table td{white-space:nowrap}
   table.notas-table .col-est{min-width:200px;white-space:normal}
-  .eval-head .eval-del{margin-left:6px;background:transparent;border:0;color:#f87171;cursor:pointer;font-size:.72rem}
-  .nota-input{width:56px;padding:4px 6px;border-radius:6px;border:1px solid rgba(148,163,184,.25);background:rgba(255,255,255,.04);color:#e5e7eb;font-size:.85rem;text-align:center}
-  .nota-input:focus{outline:none;border-color:#7c3aed;background:rgba(124,58,237,.12)}
+  .eval-head .eval-del{margin-left:6px;background:transparent;border:0;color:#DC2626;cursor:pointer;font-size:.72rem}
+  .nota-input{width:56px;padding:4px 6px;border-radius:6px;border:1px solid rgba(37,99,235,.22);background:rgba(37,99,235,.05);color:#0C1E3B;font-size:.85rem;text-align:center}
+  .nota-input:focus{outline:none;border-color:#2563EB;background:rgba(37,99,235,.12)}
   .prom{font-weight:800;text-align:center}
-  .prom-ex{font-weight:600;text-align:center;color:#94a3b8}
-  tfoot td{border-top:2px solid rgba(148,163,184,.25);border-bottom:0;padding-top:9px}
+  .prom-ex{font-weight:600;text-align:center;color:#64748B}
+  tfoot td{border-top:2px solid rgba(37,99,235,.22);border-bottom:0;padding-top:9px}
   .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:20px}
-  .kpi{background:rgba(255,255,255,.03);border:1px solid rgba(148,163,184,.14);border-radius:12px;padding:14px}
+  .kpi{background:rgba(37,99,235,.05);border:1px solid rgba(148,163,184,.14);border-radius:12px;padding:14px}
   .kpi .v{font-family:'Space Grotesk',sans-serif;font-size:1.7rem;font-weight:800}
-  .kpi .l{font-size:.74rem;color:#94a3b8;margin-top:3px}
-  .chart-box{background:rgba(255,255,255,.03);border:1px solid rgba(148,163,184,.14);border-radius:12px;padding:16px;margin-bottom:16px}
+  .kpi .l{font-size:.74rem;color:#64748B;margin-top:3px}
+  .chart-box{background:rgba(37,99,235,.05);border:1px solid rgba(148,163,184,.14);border-radius:12px;padding:16px;margin-bottom:16px}
   .chart-box h3{margin:0 0 12px;font-size:.95rem}
   .chart-box canvas{max-height:300px}
   .asis-fecha{display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap}
-  .asis-fecha input[type=date]{padding:7px 10px;border-radius:8px;border:1px solid rgba(148,163,184,.25);background:rgba(255,255,255,.04);color:#e5e7eb;font-size:.85rem}
-  .asis-legend{font-size:.74rem;color:#94a3b8;display:flex;gap:14px;flex-wrap:wrap;margin-bottom:12px}
+  .asis-fecha input[type=date]{padding:7px 10px;border-radius:8px;border:1px solid rgba(37,99,235,.22);background:rgba(37,99,235,.05);color:#0C1E3B;font-size:.85rem}
+  .asis-legend{font-size:.74rem;color:#64748B;display:flex;gap:14px;flex-wrap:wrap;margin-bottom:12px}
   .est-btns{display:inline-flex;gap:4px}
-  .est-btn{width:30px;height:28px;border-radius:6px;border:1px solid rgba(148,163,184,.22);background:rgba(255,255,255,.03);color:#94a3b8;font-weight:800;font-size:.78rem;cursor:pointer}
+  .est-btn{width:30px;height:28px;border-radius:6px;border:1px solid rgba(148,163,184,.22);background:rgba(37,99,235,.05);color:#64748B;font-weight:800;font-size:.78rem;cursor:pointer}
   .est-btn.on-P{background:#34d399;color:#06281b;border-color:transparent}
-  .est-btn.on-A{background:#f87171;color:#3b0a0a;border-color:transparent}
-  .est-btn.on-T{background:#fbbf24;color:#3a2a06;border-color:transparent}
-  .est-btn.on-J{background:#60a5fa;color:#0a1f3b;border-color:transparent}
+  .est-btn.on-A{background:#DC2626;color:#3b0a0a;border-color:transparent}
+  .est-btn.on-T{background:#F59E0B;color:#3a2a06;border-color:transparent}
+  .est-btn.on-J{background:#60A5FA;color:#0a1f3b;border-color:transparent}
 </style>
 </head>
 <body>
@@ -100,7 +100,7 @@
   <div id="sinCursos" class="panel" style="display:none">
     <div class="empty">
       <div class="em">🏫</div>
-      <div style="font-weight:700;color:#cbd5e1;margin-bottom:6px">No tienes cursos asignados</div>
+      <div style="font-weight:700;color:#334155;margin-bottom:6px">No tienes cursos asignados</div>
       <div style="font-size:.85rem">Pídele al administrador que te asigne tus cursos para poder usar el libro de clases.</div>
     </div>
   </div>
@@ -111,6 +111,12 @@
       <button class="subtab" id="stNotas" onclick="cambiarVista('notas')">📊 Notas</button>
       <button class="subtab" id="stEstad" onclick="cambiarVista('estadisticas')">📈 Estadísticas</button>
       <button class="subtab" id="stAsis" onclick="cambiarVista('asistencia')">✅ Asistencia</button>
+    </div>
+    <div id="tabsHint" style="display:none;padding:10px 14px;background:#EEF2FF;border:1px solid rgba(79,70,229,.2);border-radius:8px;margin-bottom:12px;font-size:.82rem;color:#4338CA">
+      ℹ Estás viendo la nómina de tu curso jefe. Para <b>notas consolidadas</b> del curso completo (todas las asignaturas), usá el acceso
+      <a href="#" id="linkNotasFull" style="color:#4F46E5;font-weight:700">📊 Notas del curso</a>
+      en tu panel de Mi Jefatura. Para <b>asistencia</b>, usá
+      <a href="#" id="linkAsisFull" style="color:#4F46E5;font-weight:700">✅ Asistencia</a>.
     </div>
 
     <div id="semToggle" class="sem-toggle" style="display:none">
@@ -130,12 +136,22 @@
       <input type="file" id="fileInput" accept=".csv,.xlsx,.xls" style="display:none" onchange="onArchivo(this)">
       <div id="tablaWrap">
         <table>
-          <thead><tr><th class="num">N°</th><th>Nombre del estudiante</th><th>RUT</th><th style="width:44px"></th></tr></thead>
+          <thead><tr>
+            <th class="num">N°</th>
+            <th>Apellidos</th>
+            <th>Nombres</th>
+            <th>RUT</th>
+            <th style="width:80px;text-align:center">Sexo</th>
+            <th style="width:160px">Apoderado</th>
+            <th style="width:130px">Contacto</th>
+            <th style="width:70px;text-align:center">PIE</th>
+            <th style="width:80px;text-align:center">Acciones</th>
+          </tr></thead>
           <tbody id="tbody"></tbody>
         </table>
         <div id="emptyLista" class="empty" style="display:none">
           <div class="em">📭</div>
-          <div style="font-weight:700;color:#cbd5e1;margin-bottom:6px">Este curso aún no tiene nómina</div>
+          <div style="font-weight:700;color:#334155;margin-bottom:6px">Este curso aún no tiene nómina</div>
           <div style="font-size:.85rem">Importa un archivo Excel/CSV o agrega los estudiantes manualmente.</div>
         </div>
       </div>
@@ -162,7 +178,7 @@
     <!-- ASISTENCIA -->
     <div id="vistaAsis" class="panel" style="display:none">
       <div class="asis-fecha">
-        <label style="font-size:.85rem;color:#94a3b8;font-weight:700">📅 Fecha:</label>
+        <label style="font-size:.85rem;color:#64748B;font-weight:700">📅 Fecha:</label>
         <input type="date" id="asisFecha" onchange="cargarFechaAsis()">
         <button class="btn btn-ghost" onclick="marcarTodosPresentes()">✅ Todos presentes</button>
         <button class="btn btn-gold" id="btnGuardarA" onclick="guardarAsistencia()">💾 Guardar asistencia</button>
@@ -208,7 +224,7 @@
   }
   function setStatus(id,msg,color){
     var el=document.getElementById(id); if(!el) return;
-    el.textContent=msg||''; el.style.color=color||'#94a3b8';
+    el.textContent=msg||''; el.style.color=color||'#64748B';
     if(msg) setTimeout(function(){ if(el.textContent===msg) el.textContent=''; },4000);
   }
   function setDirtyN(v){ _dirtyN=v; document.getElementById('dirtyDotN').style.display=v?'inline-block':'none'; }
@@ -219,17 +235,127 @@
   ELAuth.onUserReady(function(user){
     if(!user) return;
     _user=user;
-    var cursos=(user.cursos||[]).filter(function(c){return c&&String(c).trim();});
-    if(!cursos.length){ document.getElementById('sinCursos').style.display=''; return; }
-    var tabs=document.getElementById('cursosTabs'); tabs.innerHTML='';
-    cursos.forEach(function(c){
-      var b=document.createElement('button');
-      b.className='curso-tab'; b.textContent=c;
-      b.onclick=function(){ seleccionarCurso(c,b); };
-      tabs.appendChild(b);
+    // 1) Cursos declarados en el perfil (legacy) - por nombre "3° Medio A"
+    var cursosLegacy = (user.cursos||[])
+      .filter(function(c){return c&&String(c).trim();})
+      .map(function(c){ return { curso: String(c).trim() }; });
+
+    // 2) Cursos reales de Firestore (Fase 8+) - por 4 criterios de matching
+    _cursosDelDocente(user).then(function(cursosReales){
+      var vistos={};
+      var cursos=[];
+      // Prioridad al match real (tiene cursoId + jefeUid/asignaturasAsignadas útiles)
+      cursosReales.forEach(function(c){
+        var nom = c.nombre || ((c.nivel||'') + (c.letra?' '+c.letra:'')).trim() || c.cursoId;
+        if(!nom || vistos[nom]) return;
+        vistos[nom]=true;
+        cursos.push({ curso: nom, cursoId: c.cursoId || c.id, meta: c });
+      });
+      cursosLegacy.forEach(function(c){
+        if(vistos[c.curso]) return;
+        vistos[c.curso]=true;
+        cursos.push(c);
+      });
+
+      if(!cursos.length){ document.getElementById('sinCursos').style.display=''; return; }
+      var tabs=document.getElementById('cursosTabs'); tabs.innerHTML='';
+      cursos.forEach(function(c){
+        var b=document.createElement('button');
+        b.className='curso-tab'; b.textContent=c.curso;
+        b.setAttribute('data-cursoid', c.cursoId || '');
+        b.onclick=function(){ seleccionarCurso(c.curso,b); };
+        tabs.appendChild(b);
+      });
+      // Preseleccionar por ?cursoId= de la URL (viene de Mi Jefatura, etc.)
+      var qp = new URLSearchParams(window.location.search);
+      var qCursoId = qp.get('cursoId');
+      var qSolo    = qp.get('soloCurso') === '1';
+      var qVolver  = qp.get('volverA');
+      var initialBtn = tabs.firstChild;
+      var initialCurso = cursos[0].curso;
+      if (qCursoId) {
+        var m = cursos.find(function(c){ return c.cursoId === qCursoId; });
+        if (m) {
+          initialCurso = m.curso;
+          initialBtn = tabs.querySelector('[data-cursoid="' + qCursoId + '"]') || tabs.firstChild;
+        }
+      }
+      // Si viene con soloCurso=1 → ocultar tabs de otros cursos y bloquear
+      if (qSolo && qCursoId) {
+        Array.prototype.forEach.call(tabs.children, function(btn){
+          if (btn.getAttribute('data-cursoid') !== qCursoId) btn.style.display = 'none';
+        });
+        // Además: ocultar pestañas Notas/Estadísticas/Asistencia — el jefe usa
+        // los accesos dedicados de Mi Jefatura que muestran TODAS las asignaturas.
+        // Las pestañas de listas-curso son personales del profe y confunden.
+        setTimeout(function(){
+          ['stNotas','stEstad','stAsis'].forEach(function(id){
+            var el = document.getElementById(id);
+            if (el) el.style.display = 'none';
+          });
+          var hint = document.getElementById('tabsHint');
+          if (hint) {
+            hint.style.display = 'block';
+            var linkN = document.getElementById('linkNotasFull');
+            var linkA = document.getElementById('linkAsisFull');
+            if (linkN) linkN.href = 'notas.html?cursoId=' + encodeURIComponent(qCursoId) + '&soloCurso=1&volverA=mi-jefatura.html';
+            if (linkA) linkA.href = 'asistencia.html?cursoId=' + encodeURIComponent(qCursoId) + '&soloCurso=1&volverA=mi-jefatura.html';
+          }
+        }, 100);
+      }
+      // Botón "volver" custom si viene de otro panel
+      if (qVolver) {
+        var backBtns = document.querySelectorAll('a[href="dashboard-profesor.html"]');
+        backBtns.forEach(function(a){
+          a.href = qVolver;
+          if (a.textContent.indexOf('Panel') !== -1) a.textContent = a.textContent.replace('Panel','Mi Jefatura');
+        });
+      }
+      seleccionarCurso(initialCurso, initialBtn);
     });
-    seleccionarCurso(cursos[0], tabs.firstChild);
   });
+
+  // Devuelve los cursos que le corresponden al docente por los 4 criterios
+  // (jefe, asignaturasAsignadas.docenteUid, cursosAsignados[], TP-especialidad+nivel)
+  function _cursosDelDocente(user){
+    if(!user || !user.liceoSlug || typeof EL_DB==='undefined'){
+      return Promise.resolve([]);
+    }
+    var espsProfe = Array.isArray(user.especialidades) && user.especialidades.length
+      ? user.especialidades
+      : (user.especialidad ? [user.especialidad] : []);
+    var nivsProfe = Array.isArray(user.niveles) ? user.niveles : [];
+    var cursosAsig = Array.isArray(user.cursosAsignados) ? user.cursosAsignados : [];
+
+    return EL_DB.collection('cursos').get().then(function(snap){
+      var out=[];
+      snap.forEach(function(doc){
+        var c=doc.data(); if(!c) return;
+        if(c.liceoSlug !== user.liceoSlug) return;
+        if(c.activo === false) return;
+        var cursoId = c.cursoId || c.id || doc.id;
+        var esJefe = c.jefeUid === user.uid;
+        var esDocente = (c.asignaturasAsignadas||[]).some(function(a){
+          return a.docenteUid === user.uid;
+        });
+        var esCursoAsignado = cursosAsig.indexOf(cursoId) !== -1;
+        var esTPDeMiEsp = c.esp && espsProfe.indexOf(c.esp) !== -1 &&
+                          (!nivsProfe.length || nivsProfe.indexOf(c.nivel) !== -1);
+        if(esJefe || esDocente || esCursoAsignado || esTPDeMiEsp){
+          c.cursoId = cursoId;
+          out.push(c);
+        }
+      });
+      // Ordenar por nivel/letra
+      out.sort(function(a,b){
+        return String(a.nombre||'').localeCompare(String(b.nombre||''),'es');
+      });
+      return out;
+    }).catch(function(err){
+      console.warn('[listas-curso] _cursosDelDocente:', err);
+      return [];
+    });
+  }
 
   function seleccionarCurso(curso, btn){
     if((_dirtyN||_dirtyG||_dirtyA) && !confirm('Hay cambios sin guardar. ¿Cambiar de curso de todos modos?')) return;
@@ -240,12 +366,58 @@
     document.getElementById('cursoNombre').textContent=curso;
     setDirtyN(false); setDirtyG(false); setDirtyA(false);
     document.getElementById('tbody').innerHTML='<tr><td colspan="4" style="text-align:center;color:#64748b;padding:24px">Cargando…</td></tr>';
-    var pL=EL_DB.collection('listas_curso').doc(docId(curso)).get();
-    var pN=EL_DB.collection('notas_curso').doc(docId(curso)).get();
-    var pA=EL_DB.collection('asistencia_curso').doc(docId(curso)).get();
+    // Cada get() puede fallar por 403 (doc no existe + regla estricta).
+    // Usamos allSettled para que un fallo aislado no rompa la carga completa.
+    function _safeGet(col, id){
+      return EL_DB.collection(col).doc(id).get()
+        .then(function(d){ return d; })
+        .catch(function(){ return { exists:false, data:function(){return null;} }; });
+    }
+    var pL=_safeGet('listas_curso',    docId(curso));
+    var pN=_safeGet('notas_curso',     docId(curso));
+    var pA=_safeGet('asistencia_curso',docId(curso));
     Promise.all([pL,pN,pA]).then(function(res){
       var dL=res[0], dN=res[1], dA=res[2];
       _lista=(dL&&dL.exists&&dL.data()&&dL.data().estudiantes)?dL.data().estudiantes.slice():[];
+
+      // Fallback: si listas_curso está vacío, cargar de cursos.estudiantes (shape del seed)
+      var pFallback = Promise.resolve();
+      if(!_lista.length){
+        pFallback = EL_DB.collection('cursos').get().then(function(sn){
+          sn.forEach(function(doc){
+            var c=doc.data();
+            if(!c || c.liceoSlug !== _user.liceoSlug) return;
+            var nom = c.nombre || ((c.nivel||'') + (c.letra?' '+c.letra:'')).trim();
+            if(nom !== curso) return;
+            (c.estudiantes||[]).forEach(function(e){
+              _lista.push({ rut: e.rut||'', nombre: e.nombre||'', uid: e.uid||'' });
+            });
+          });
+        }).catch(function(){});
+      }
+
+      // Ordenar por apellido paterno (estándar libro de clases chileno)
+      pFallback.then(function(){
+        if(window.CCNombre && CCNombre.comparar){
+          _lista.sort(function(a,b){
+            return CCNombre.comparar(a.nombre||'', b.nombre||'');
+          });
+        } else {
+          _lista.sort(function(a,b){
+            return String(a.nombre||'').localeCompare(String(b.nombre||''),'es',{sensitivity:'base'});
+          });
+        }
+        continuarCarga(dN, dA);
+      });
+      return;
+    }).catch(function(){
+      _lista=[]; _evals=[]; _notas={}; _asis={}; renderTodo();
+      setStatus('statusN','No se pudieron cargar los datos guardados.','#DC2626');
+    });
+  }
+
+  function continuarCarga(dN, dA){
+    try {
       var nd=(dN&&dN.exists&&dN.data())?dN.data():{};
       _evals=Array.isArray(nd.evaluaciones)?nd.evaluaciones.slice():[];
       _evals.forEach(function(e){ if(e.semestre!==1&&e.semestre!==2) e.semestre=1; });
@@ -253,10 +425,10 @@
       var ad=(dA&&dA.exists&&dA.data())?dA.data():{};
       _asis=(ad.registros&&typeof ad.registros==='object')?JSON.parse(JSON.stringify(ad.registros)):{};
       renderTodo();
-    }).catch(function(){
-      _lista=[]; _evals=[]; _notas={}; _asis={}; renderTodo();
-      setStatus('statusN','No se pudieron cargar los datos guardados.','#f87171');
-    });
+    } catch(e) {
+      _lista=_lista||[]; _evals=[]; _notas={}; _asis={}; renderTodo();
+      setStatus('statusN','No se pudieron cargar los datos guardados.','#DC2626');
+    }
   }
   function renderTodo(){ renderNomina(); renderNotas(); if(_view==='estadisticas') renderEstadisticas(); if(_view==='asistencia') renderAsistencia(); }
 
@@ -292,21 +464,147 @@
     var tabla=document.querySelector('#tablaWrap table');
     if(!_lista.length){ tb.innerHTML=''; empty.style.display=''; tabla.style.display='none'; return; }
     empty.style.display='none'; tabla.style.display='';
+    var puedeEliminar = _puedeEliminarEstudiantes();
     tb.innerHTML=_lista.map(function(e,i){
+      var p = (window.CCNombre && CCNombre.parse) ? CCNombre.parse(e.nombre||'') : { apellidos:'', nombres:e.nombre||'' };
+      var sexo = (e.sexo||'').toUpperCase().charAt(0);
+      var sexoBadge = sexo==='F' ? '<span title="Femenino" style="color:#DB2777">♀</span>'
+                     : sexo==='M' ? '<span title="Masculino" style="color:#2563EB">♂</span>'
+                     : '<span style="color:#94a3b8">—</span>';
+      var apoNom = (e.apoderado && e.apoderado.nombre) || e.apoderadoNombre || '';
+      var apoTel = (e.apoderado && e.apoderado.telefono) || e.apoderadoTelefono || e.telefono || '';
+      var apoMail= (e.apoderado && e.apoderado.email) || e.apoderadoEmail || '';
+      var contacto = apoTel || apoMail || '—';
+      var esPie = e.pie === true || e.esPie === true || (e.necesidades && e.necesidades.pie);
+      var pieBadge = esPie
+        ? '<span style="background:#F59E0B;color:#3a2a06;padding:2px 8px;border-radius:999px;font-size:.7rem;font-weight:700">PIE</span>'
+        : '<span style="color:#94a3b8">—</span>';
+
+      // Botón acciones: siempre ✏ (editar detalles), y X SOLO si tiene permiso.
+      var btnEdit = '<button class="btn-ico" title="Editar datos del estudiante" ' +
+                    'onclick="window._editarEst('+i+')" ' +
+                    'style="background:transparent;border:1px solid #e2e8f0;color:#2563EB;' +
+                    'width:30px;height:30px;border-radius:6px;cursor:pointer;font-size:.9rem">✏</button>';
+      var btnDel = puedeEliminar
+        ? '<button class="del" title="Eliminar del curso" onclick="window._elimEst('+i+')">✕</button>'
+        : '<button class="del" disabled title="Solo el director puede eliminar estudiantes" ' +
+          'style="opacity:.35;cursor:not-allowed">✕</button>';
+
       return '<tr>'+
         '<td class="num">'+(i+1)+'</td>'+
-        '<td contenteditable data-i="'+i+'" data-f="nombre">'+esc(e.nombre||'')+'</td>'+
+        '<td contenteditable data-i="'+i+'" data-f="apellidos" data-sync="1"><b>'+esc(p.apellidos||'')+'</b></td>'+
+        '<td contenteditable data-i="'+i+'" data-f="nombres" data-sync="1">'+esc(p.nombres||'')+'</td>'+
         '<td contenteditable data-i="'+i+'" data-f="rut">'+esc(e.rut||'')+'</td>'+
-        '<td><button class="del" title="Quitar" onclick="window._elimEst('+i+')">✕</button></td>'+
+        '<td style="text-align:center;font-size:1.1rem">'+sexoBadge+'</td>'+
+        '<td style="font-size:.82rem;color:#334155">'+esc(apoNom||'—')+'</td>'+
+        '<td style="font-size:.78rem;color:#475569">'+esc(contacto)+'</td>'+
+        '<td style="text-align:center">'+pieBadge+'</td>'+
+        '<td style="text-align:center;white-space:nowrap">'+btnEdit+' '+btnDel+'</td>'+
       '</tr>';
     }).join('');
   }
+
+  // ¿El usuario tiene permiso para eliminar estudiantes del curso?
+  //   Solo admin plataforma, admin_colegio, director, rector, UTP.
+  //   Los profesores (incluso jefes de curso) NO pueden eliminar por error.
+  function _puedeEliminarEstudiantes(){
+    if(!_user) return false;
+    var r = _user.role || '';
+    var roles = _user.roles || {};
+    if (r === 'admin' || r === 'director' || r === 'rector' || r === 'utp' || r === 'admin_colegio') return true;
+    if (roles.admin || roles.director || roles.rector || roles.utp || roles.admin_colegio) return true;
+    return false;
+  }
+
+  // Modal de edición ampliada por estudiante (email/teléfono/apoderado/PIE/etc.)
+  window._editarEst = function(idx){
+    var e = _lista[idx]; if(!e) return;
+    var apo = e.apoderado || {};
+    var html =
+      '<div id="ovEditEst" style="position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:99999;'+
+      'display:flex;align-items:center;justify-content:center;font-family:inherit">'+
+        '<div style="background:#fff;border-radius:14px;padding:22px 26px;width:min(560px,94vw);'+
+        'max-height:90vh;overflow:auto;box-shadow:0 20px 60px rgba(0,0,0,.35)">'+
+          '<h3 style="margin:0 0 12px;font-size:1.05rem;color:#0C1E3B">✏ Editar estudiante</h3>'+
+          '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;font-size:.85rem">'+
+            _campo('_efNombre','Nombre completo',e.nombre||'','col2') +
+            _campo('_efRut','RUT',e.rut||'') +
+            _campo('_efSexo','Sexo (F/M/X)',e.sexo||'') +
+            _campo('_efFn','Fecha de nacimiento (YYYY-MM-DD)',e.fechaNac||e.fechaNacimiento||'','col2') +
+            _campo('_efEmail','Email del estudiante',e.email||'','col2') +
+            '<div class="col2" style="margin-top:6px;padding-top:10px;border-top:1px solid #e2e8f0"><b style="color:#475569;font-size:.78rem;text-transform:uppercase">Apoderado</b></div>'+
+            _campo('_efApoN','Nombre del apoderado', apo.nombre||e.apoderadoNombre||'','col2') +
+            _campo('_efApoT','Teléfono', apo.telefono||e.apoderadoTelefono||e.telefono||'') +
+            _campo('_efApoE','Email', apo.email||e.apoderadoEmail||'') +
+            '<div class="col2" style="margin-top:6px;padding-top:10px;border-top:1px solid #e2e8f0"><b style="color:#475569;font-size:.78rem;text-transform:uppercase">Programa PIE</b></div>'+
+            '<label class="col2" style="display:flex;gap:8px;align-items:center;cursor:pointer">'+
+              '<input type="checkbox" id="_efPie" '+((e.pie===true||e.esPie===true)?'checked':'')+'> '+
+              'Estudiante en Programa de Integración Escolar (PIE)</label>'+
+            _campo('_efObs','Observaciones internas',e.observaciones||'','col2','textarea') +
+          '</div>'+
+          '<div style="display:flex;gap:8px;margin-top:16px;justify-content:flex-end">'+
+            '<button onclick="document.getElementById(\'ovEditEst\').remove()" '+
+              'style="padding:9px 18px;border-radius:8px;border:1px solid #e2e8f0;background:#fff;color:#334155;cursor:pointer;font-weight:600">Cancelar</button>'+
+            '<button onclick="window._guardarEditEst('+idx+')" '+
+              'style="padding:9px 22px;border-radius:8px;border:none;background:linear-gradient(135deg,#2563EB,#38BDF8);color:#fff;cursor:pointer;font-weight:700">💾 Guardar</button>'+
+          '</div>'+
+        '</div>'+
+      '</div>';
+    document.body.insertAdjacentHTML('beforeend', html);
+    // Layout responsive
+    var s = document.createElement('style');
+    s.textContent = '#ovEditEst .col2{grid-column:span 2}#ovEditEst input,#ovEditEst textarea{width:100%;padding:8px 10px;border:1px solid #e2e8f0;border-radius:6px;font-size:.9rem;font-family:inherit}#ovEditEst label{display:block;color:#475569;font-size:.75rem;font-weight:600;margin-bottom:3px}';
+    document.getElementById('ovEditEst').appendChild(s);
+  };
+
+  function _campo(id, label, valor, cls, tag){
+    tag = tag || 'input';
+    var col = cls || '';
+    if (tag === 'textarea') {
+      return '<div class="'+col+'"><label>'+label+'</label><textarea id="'+id+'" rows="2">'+esc(valor||'')+'</textarea></div>';
+    }
+    return '<div class="'+col+'"><label>'+label+'</label><input id="'+id+'" type="text" value="'+esc(valor||'').replace(/"/g,'&quot;')+'"></div>';
+  }
+
+  window._guardarEditEst = function(idx){
+    var e = _lista[idx]; if(!e) return;
+    function v(id){ var el=document.getElementById(id); return el?el.value.trim():''; }
+    e.nombre = v('_efNombre');
+    e.rut    = v('_efRut');
+    e.sexo   = v('_efSexo').toUpperCase().charAt(0);
+    e.fechaNac = v('_efFn');
+    e.email  = v('_efEmail');
+    e.apoderado = e.apoderado || {};
+    e.apoderado.nombre    = v('_efApoN');
+    e.apoderado.telefono  = v('_efApoT');
+    e.apoderado.email     = v('_efApoE');
+    // Mantener también aliases legacy
+    e.apoderadoNombre    = e.apoderado.nombre;
+    e.apoderadoTelefono  = e.apoderado.telefono;
+    e.apoderadoEmail     = e.apoderado.email;
+    var pieChk = document.getElementById('_efPie');
+    e.pie = pieChk && pieChk.checked;
+    e.observaciones = v('_efObs');
+    document.getElementById('ovEditEst').remove();
+    renderNomina();
+    setDirtyN(true);
+    setStatus('statusN','Datos actualizados. Recordá guardar la nómina.','#059669');
+  };
   document.getElementById('tbody').addEventListener('input',function(ev){
     var td=ev.target;
     if(td&&td.hasAttribute&&td.hasAttribute('contenteditable')){
       var i=parseInt(td.getAttribute('data-i'),10);
       var f=td.getAttribute('data-f');
-      if(!isNaN(i)&&_lista[i]){ _lista[i][f]=td.textContent.trim(); setDirtyN(true); }
+      if(!isNaN(i)&&_lista[i]){
+        _lista[i][f]=td.textContent.trim();
+        // Sincronizar apellidos+nombres → nombre completo para persistencia
+        if(f==='apellidos' || f==='nombres'){
+          var ap = (_lista[i].apellidos||'').trim();
+          var no = (_lista[i].nombres||'').trim();
+          _lista[i].nombre = (no + (ap?' '+ap:'')).trim();
+        }
+        setDirtyN(true);
+      }
     }
   });
   window._elimEst=function(i){ _lista.splice(i,1); renderNomina(); setDirtyN(true); };
@@ -321,18 +619,18 @@
     var file=input.files&&input.files[0]; if(!file) return;
     var ext=(file.name.split('.').pop()||'').toLowerCase();
     var reader=new FileReader();
-    reader.onerror=function(){ setStatus('statusN','No se pudo leer el archivo.','#f87171'); };
+    reader.onerror=function(){ setStatus('statusN','No se pudo leer el archivo.','#DC2626'); };
     if(ext==='csv'){
-      reader.onload=function(e){ try{ parseCSV(e.target.result); }catch(err){ setStatus('statusN','Error al leer el CSV.','#f87171'); } };
+      reader.onload=function(e){ try{ parseCSV(e.target.result); }catch(err){ setStatus('statusN','Error al leer el CSV.','#DC2626'); } };
       reader.readAsText(file,'utf-8');
     } else {
       reader.onload=function(e){
         try{
-          if(typeof XLSX==='undefined'){ setStatus('statusN','Lector de Excel no disponible. Usa un archivo CSV.','#f87171'); return; }
+          if(typeof XLSX==='undefined'){ setStatus('statusN','Lector de Excel no disponible. Usa un archivo CSV.','#DC2626'); return; }
           var wb=XLSX.read(new Uint8Array(e.target.result),{type:'array'});
           var ws=wb.Sheets[wb.SheetNames[0]];
           procesarFilas(XLSX.utils.sheet_to_json(ws,{header:1,defval:''}));
-        }catch(err){ setStatus('statusN','Error al leer el archivo Excel.','#f87171'); }
+        }catch(err){ setStatus('statusN','Error al leer el archivo Excel.','#DC2626'); }
       };
       reader.readAsArrayBuffer(file);
     }
@@ -347,7 +645,7 @@
   }
   function procesarFilas(rows){
     rows=(rows||[]).filter(function(r){ return r&&r.join('').trim()!==''; });
-    if(!rows.length){ setStatus('statusN','El archivo está vacío.','#f87171'); return; }
+    if(!rows.length){ setStatus('statusN','El archivo está vacío.','#DC2626'); return; }
     var first=rows[0].map(function(c){ return String(c||'').toLowerCase().trim(); });
     var idxNom=-1, idxRut=-1;
     for(var k=0;k<first.length;k++){
@@ -362,7 +660,7 @@
       var rut=(idxRut!==-1&&rows[i][idxRut]!=null)?String(rows[i][idxRut]).trim():'';
       if(nombre) ests.push({nombre:nombre,rut:rut});
     }
-    if(!ests.length){ setStatus('statusN','No se encontraron estudiantes en el archivo.','#f87171'); return; }
+    if(!ests.length){ setStatus('statusN','No se encontraron estudiantes en el archivo.','#DC2626'); return; }
     if(!confirm('Se importarán '+ests.length+' estudiantes. Esto reemplaza la nómina actual del curso "'+_curso+'". ¿Continuar?')) return;
     _lista=ests; renderNomina(); renderNotas(); setDirtyN(true);
     setStatus('statusN','✓ '+ests.length+' estudiantes importados. Pulsa Guardar nómina.','#34d399');
@@ -377,7 +675,7 @@
       setDirtyN(false); setStatus('statusN','✓ Nómina guardada.','#34d399'); btn.disabled=false;
       try { if (typeof ELDB!=='undefined' && ELDB.actividad) ELDB.actividad.log('guardar_nomina',{curso:_curso, estudiantes:_lista.length}); } catch (e) {}
       renderNotas();
-    }).catch(function(e){ setStatus('statusN','Error al guardar: '+((e&&e.message)||e),'#f87171'); btn.disabled=false; });
+    }).catch(function(e){ setStatus('statusN','Error al guardar: '+((e&&e.message)||e),'#DC2626'); btn.disabled=false; });
   };
 
   // ════════════════ NOTAS ════════════════
@@ -398,7 +696,7 @@
     _lista.forEach(function(e){ var p=promedio(estKey(e)); if(p!=null){ suma+=p; cant++; } });
     return cant?(suma/cant):null;
   }
-  function colorProm(v){ return (v==null)?'#64748b':(v<4?'#f87171':'#34d399'); }
+  function colorProm(v){ return (v==null)?'#64748b':(v<4?'#DC2626':'#34d399'); }
   function promCell(val,dec,cls,attr){
     var txt=(val==null)?'—':val.toFixed(dec);
     return '<td class="'+(cls||'prom')+'" '+(attr||'')+' style="color:'+colorProm(val)+'">'+txt+'</td>';
@@ -408,11 +706,11 @@
     var evals=evalsSem();
     document.getElementById('cuentaEval').textContent=evals.length;
     if(!_lista.length){
-      wrap.innerHTML='<div class="empty"><div class="em">📋</div><div style="font-weight:700;color:#cbd5e1;margin-bottom:6px">Primero carga la nómina</div><div style="font-size:.85rem">Ve a la pestaña <strong>Nómina</strong> e importa o agrega los estudiantes.</div></div>';
+      wrap.innerHTML='<div class="empty"><div class="em">📋</div><div style="font-weight:700;color:#334155;margin-bottom:6px">Primero carga la nómina</div><div style="font-size:.85rem">Ve a la pestaña <strong>Nómina</strong> e importa o agrega los estudiantes.</div></div>';
       return;
     }
     if(!evals.length){
-      wrap.innerHTML='<div class="empty"><div class="em">📊</div><div style="font-weight:700;color:#cbd5e1;margin-bottom:6px">Sin evaluaciones en el '+_sem+'° semestre</div><div style="font-size:.85rem">Pulsa <strong>Agregar evaluación</strong> para crear la primera columna.</div></div>';
+      wrap.innerHTML='<div class="empty"><div class="em">📊</div><div style="font-weight:700;color:#334155;margin-bottom:6px">Sin evaluaciones en el '+_sem+'° semestre</div><div style="font-size:.85rem">Pulsa <strong>Agregar evaluación</strong> para crear la primera columna.</div></div>';
       return;
     }
     var h='<div class="notas-scroll"><table class="notas-table"><thead><tr>';
@@ -423,7 +721,8 @@
     h+='<th>Prom. aprox.</th><th>Prom. exacto</th></tr></thead><tbody>';
     _lista.forEach(function(e,i){
       var k=estKey(e), p=promedio(k);
-      h+='<tr><td class="num">'+(i+1)+'</td><td class="col-est">'+esc(e.nombre||'')+'</td>';
+      var nomNat = (window.CCNombre && CCNombre.natural) ? CCNombre.natural(e.nombre||'') : (e.nombre||'');
+      h+='<tr><td class="num">'+(i+1)+'</td><td class="col-est">'+esc(nomNat)+'</td>';
       evals.forEach(function(ev){
         var v=(_notas[k]&&_notas[k][ev.id]!=null)?_notas[k][ev.id]:'';
         h+='<td><input class="nota-input" type="number" min="1" max="7" step="0.1" value="'+esc(v)+'" data-k="'+esc(k)+'" data-e="'+esc(ev.id)+'"></td>';
@@ -497,22 +796,22 @@
     }).then(function(){
       setDirtyG(false); setStatus('statusG','✓ Notas guardadas.','#34d399'); btn.disabled=false;
       try { if (typeof ELDB!=='undefined' && ELDB.actividad) ELDB.actividad.log('guardar_notas',{curso:_curso, evaluaciones:_evals.length, semestre:_sem}); } catch (e) {}
-    }).catch(function(e){ setStatus('statusG','Error al guardar: '+((e&&e.message)||e),'#f87171'); btn.disabled=false; });
+    }).catch(function(e){ setStatus('statusG','Error al guardar: '+((e&&e.message)||e),'#DC2626'); btn.disabled=false; });
   };
 
   // ════════════════ ESTADÍSTICAS ════════════════
-  function kpi(v,l,color){ return '<div class="kpi"><div class="v" style="color:'+(color||'#e5e7eb')+'">'+v+'</div><div class="l">'+l+'</div></div>'; }
+  function kpi(v,l,color){ return '<div class="kpi"><div class="v" style="color:'+(color||'#0C1E3B')+'">'+v+'</div><div class="l">'+l+'</div></div>'; }
   function renderEstadisticas(){
     var wrap=document.getElementById('estadWrap');
     var evals=evalsSem();
     if(_chartEval){ _chartEval.destroy(); _chartEval=null; }
     if(_chartDist){ _chartDist.destroy(); _chartDist=null; }
     if(!_lista.length){
-      wrap.innerHTML='<div class="empty"><div class="em">📋</div><div style="font-weight:700;color:#cbd5e1;margin-bottom:6px">Sin nómina</div><div style="font-size:.85rem">Carga la nómina del curso para ver estadísticas.</div></div>';
+      wrap.innerHTML='<div class="empty"><div class="em">📋</div><div style="font-weight:700;color:#334155;margin-bottom:6px">Sin nómina</div><div style="font-size:.85rem">Carga la nómina del curso para ver estadísticas.</div></div>';
       return;
     }
     if(!evals.length){
-      wrap.innerHTML='<div class="empty"><div class="em">📈</div><div style="font-weight:700;color:#cbd5e1;margin-bottom:6px">Sin evaluaciones en el '+_sem+'° semestre</div><div style="font-size:.85rem">Agrega evaluaciones en la pestaña Notas para ver estadísticas.</div></div>';
+      wrap.innerHTML='<div class="empty"><div class="em">📈</div><div style="font-weight:700;color:#334155;margin-bottom:6px">Sin evaluaciones en el '+_sem+'° semestre</div><div style="font-size:.85rem">Agrega evaluaciones en la pestaña Notas para ver estadísticas.</div></div>';
       return;
     }
     var proms=[];
@@ -524,29 +823,29 @@
     var pctAprob=proms.length?Math.round(aprob/proms.length*100):0;
     wrap.innerHTML=
       '<div class="kpis">'+
-        kpi(_lista.length,'Estudiantes','#a78bfa')+
-        kpi(evals.length,'Evaluaciones · '+_sem+'° sem.','#22d3ee')+
+        kpi(_lista.length,'Estudiantes','#60A5FA')+
+        kpi(evals.length,'Evaluaciones · '+_sem+'° sem.','#38BDF8')+
         kpi(promCurso==null?'—':promCurso.toFixed(2),'Promedio del curso',colorProm(promCurso))+
-        kpi(pctAprob+'%','Aprobación (≥ 4,0)',pctAprob<50?'#f87171':'#34d399')+
+        kpi(pctAprob+'%','Aprobación (≥ 4,0)',pctAprob<50?'#DC2626':'#34d399')+
       '</div>'+
       '<div class="chart-box"><h3>📊 Promedio del curso por evaluación</h3><canvas id="chartEval"></canvas></div>'+
       '<div class="chart-box"><h3>🎯 Distribución de rendimiento del curso</h3><canvas id="chartDist"></canvas></div>';
     if(typeof Chart==='undefined') return;
     var lbls=evals.map(function(e){return e.nombre;});
     var dats=evals.map(function(e){ var v=promColumna(e.id); return v==null?0:Number(v.toFixed(2)); });
-    var cols=dats.map(function(d){ return d<4?'#f87171':'#7c3aed'; });
+    var cols=dats.map(function(d){ return d<4?'#DC2626':'#2563EB'; });
     _chartEval=new Chart(document.getElementById('chartEval'),{
       type:'bar',
       data:{labels:lbls,datasets:[{label:'Promedio',data:dats,backgroundColor:cols,borderRadius:5}]},
       options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
-        scales:{y:{min:1,max:7,ticks:{color:'#94a3b8'},grid:{color:'rgba(148,163,184,.12)'}},
-                x:{ticks:{color:'#94a3b8'},grid:{display:false}}}}
+        scales:{y:{min:1,max:7,ticks:{color:'#64748B'},grid:{color:'rgba(148,163,184,.12)'}},
+                x:{ticks:{color:'#64748B'},grid:{display:false}}}}
     });
     _chartDist=new Chart(document.getElementById('chartDist'),{
       type:'doughnut',
       data:{labels:['Aprobados (≥ 4,0)','Reprobados (< 4,0)','Sin notas'],
-            datasets:[{data:[aprob,rep,sinN],backgroundColor:['#34d399','#f87171','#64748b']}]},
-      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{color:'#cbd5e1'}}}}
+            datasets:[{data:[aprob,rep,sinN],backgroundColor:['#34d399','#DC2626','#64748b']}]},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{color:'#334155'}}}}
     });
   }
 
@@ -568,20 +867,21 @@
     if(!fIn.value) fIn.value=hoyISO();
     var fecha=fIn.value;
     if(!_lista.length){
-      wrap.innerHTML='<div class="empty"><div class="em">📋</div><div style="font-weight:700;color:#cbd5e1;margin-bottom:6px">Primero carga la nómina</div><div style="font-size:.85rem">Ve a la pestaña Nómina e importa o agrega los estudiantes.</div></div>';
+      wrap.innerHTML='<div class="empty"><div class="em">📋</div><div style="font-weight:700;color:#334155;margin-bottom:6px">Primero carga la nómina</div><div style="font-size:.85rem">Ve a la pestaña Nómina e importa o agrega los estudiantes.</div></div>';
       return;
     }
     var reg=_asis[fecha]||{};
     var h='<div class="notas-scroll"><table><thead><tr><th class="num">N°</th><th>Estudiante</th><th>Estado</th><th style="text-align:center">% Asistencia</th></tr></thead><tbody>';
     _lista.forEach(function(e,i){
       var k=estKey(e), st=reg[k]||'';
-      h+='<tr><td class="num">'+(i+1)+'</td><td>'+esc(e.nombre||'')+'</td><td><span class="est-btns">';
+      var nomNat = (window.CCNombre && CCNombre.natural) ? CCNombre.natural(e.nombre||'') : (e.nombre||'');
+      h+='<tr><td class="num">'+(i+1)+'</td><td>'+esc(nomNat)+'</td><td><span class="est-btns">';
       ESTADOS.forEach(function(sv){
         h+='<button class="est-btn'+(st===sv?' on-'+sv:'')+'" data-k="'+esc(k)+'" data-s="'+sv+'">'+sv+'</button>';
       });
       h+='</span></td>';
       var p=pctAsistencia(k);
-      h+='<td style="text-align:center;font-weight:700;color:'+(p==null?'#64748b':(p<85?'#fbbf24':'#34d399'))+'">'+(p==null?'—':p+'%')+'</td></tr>';
+      h+='<td style="text-align:center;font-weight:700;color:'+(p==null?'#64748b':(p<85?'#F59E0B':'#34d399'))+'">'+(p==null?'—':p+'%')+'</td></tr>';
     });
     h+='</tbody></table></div>';
     wrap.innerHTML=h;
@@ -614,7 +914,7 @@
     }).then(function(){
       setDirtyA(false); setStatus('statusA','✓ Asistencia guardada.','#34d399'); btn.disabled=false;
       try { if (typeof ELDB!=='undefined' && ELDB.actividad) ELDB.actividad.log('guardar_asistencia',{curso:_curso, dias:Object.keys(_asis||{}).length}); } catch (e) {}
-    }).catch(function(e){ setStatus('statusA','Error al guardar: '+((e&&e.message)||e),'#f87171'); btn.disabled=false; });
+    }).catch(function(e){ setStatus('statusA','Error al guardar: '+((e&&e.message)||e),'#DC2626'); btn.disabled=false; });
   };
 
   window.addEventListener('beforeunload',function(ev){
@@ -622,5 +922,7 @@
   });
 })();
 </script>
+<script src="js/ia-widget.js" defer></script>
+<script src="js/search-global.js" defer></script>
 </body>
 </html>

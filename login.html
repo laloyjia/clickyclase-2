@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 
   <!-- Favicon Click&Clase -->
   <link rel="icon" type="image/svg+xml" href="/assets/img/favicon.svg">
@@ -43,19 +46,19 @@
 
 /* ── Variables ── */
 :root {
-  --purple: #7c3aed;
-  --purple-light: #a78bfa;
-  --purple-glow: rgba(124,58,237,.35);
+  --purple: #2563EB;
+  --purple-light: #60A5FA;
+  --purple-glow: rgba(37,99,235,.35);
   --teal: #0d9488;
   --pink: #ec4899;
-  --bg: #080b14;
-  --surface: #0f1623;
-  --surface2: #151e2d;
-  --border: rgba(255,255,255,.07);
-  --border-focus: rgba(139,92,246,.6);
-  --text: #f1f5f9;
-  --muted: #64748b;
-  --subtle: #1e293b;
+  --bg: #F0F7FF;
+  --surface: #FFFFFF;
+  --surface2: #F8FAFF;
+  --border: rgba(37,99,235,.06);
+  --border-focus: rgba(37,99,235,.6);
+  --text: #0C1E3B;
+  --muted: #475569;
+  --subtle: #475569;
 }
 
 /* ══════════════════════════════════
@@ -81,7 +84,7 @@ html, body {
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(ellipse 80% 50% at 20% -10%, rgba(124,58,237,.18) 0%, transparent 60%),
+    radial-gradient(ellipse 80% 50% at 20% -10%, rgba(37,99,235,.18) 0%, transparent 60%),
     radial-gradient(ellipse 60% 40% at 80% 110%, rgba(13,148,136,.14) 0%, transparent 55%),
     radial-gradient(ellipse 50% 60% at 50% 50%, rgba(236,72,153,.06) 0%, transparent 70%);
 }
@@ -91,8 +94,8 @@ html, body {
   position: absolute;
   inset: 0;
   background-image:
-    linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);
+    linear-gradient(rgba(37,99,235,.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(37,99,235,.03) 1px, transparent 1px);
   background-size: 48px 48px;
   mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 40%, transparent 100%);
 }
@@ -104,7 +107,7 @@ html, body {
   filter: blur(100px);
   animation: drift 18s infinite ease-in-out alternate;
 }
-.orb-1 { width: 500px; height: 500px; background: radial-gradient(circle, rgba(124,58,237,.25), transparent 70%); top: -150px; left: -150px; animation-duration: 20s; }
+.orb-1 { width: 500px; height: 500px; background: radial-gradient(circle, rgba(37,99,235,.25), transparent 70%); top: -150px; left: -150px; animation-duration: 20s; }
 .orb-2 { width: 400px; height: 400px; background: radial-gradient(circle, rgba(13,148,136,.2), transparent 70%); bottom: -100px; right: -100px; animation-duration: 25s; animation-delay: -8s; }
 .orb-3 { width: 300px; height: 300px; background: radial-gradient(circle, rgba(236,72,153,.15), transparent 70%); top: 50%; left: 60%; animation-duration: 15s; animation-delay: -4s; }
 @keyframes drift {
@@ -131,25 +134,26 @@ html, body {
 .card {
   width: 100%;
   max-width: 400px;
-  background: linear-gradient(160deg, rgba(21,30,45,.95) 0%, rgba(15,22,35,.98) 100%);
-  border: 1px solid rgba(139,92,246,.15);
+  background: #FFFFFF;
+  border: 1px solid rgba(37,99,235,.15);
   border-radius: 24px;
   padding: 40px 36px 36px;
   box-shadow:
-    0 0 0 1px rgba(255,255,255,.04),
-    0 24px 48px rgba(0,0,0,.6),
-    0 0 120px rgba(124,58,237,.08);
+    0 0 0 1px rgba(37,99,235,.05),
+    0 24px 48px rgba(37,99,235,.14),
+    0 0 120px rgba(56,189,248,.10);
   animation: rise .5s cubic-bezier(.22,1,.36,1) both;
   /* Línea superior decorativa */
   position: relative;
   overflow: hidden;
+  color: #0C1E3B;
 }
 .card::before {
   content: '';
   position: absolute;
   top: 0; left: 10%; right: 10%;
   height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(139,92,246,.6), rgba(13,148,136,.4), transparent);
+  background: linear-gradient(90deg, transparent, rgba(37,99,235,.6), rgba(13,148,136,.4), transparent);
 }
 @keyframes rise {
   from { opacity: 0; transform: translateY(28px) scale(.98); }
@@ -169,9 +173,9 @@ html, body {
   justify-content: center;
   width: 72px; height: 72px;
   border-radius: 22px;
-  background: linear-gradient(145deg, #7c3aed, #5b21b6);
+  background: linear-gradient(145deg, #2563EB, #5b21b6);
   box-shadow:
-    0 8px 32px rgba(124,58,237,.45),
+    0 8px 32px rgba(37,99,235,.45),
     inset 0 1px 0 rgba(255,255,255,.15);
   margin-bottom: 20px;
   position: relative;
@@ -181,7 +185,7 @@ html, body {
   position: absolute;
   inset: -1px;
   border-radius: 23px;
-  background: linear-gradient(145deg, rgba(167,139,250,.4), transparent 60%);
+  background: linear-gradient(145deg, rgba(37,99,235,.4), transparent 60%);
   pointer-events: none;
 }
 .logo-icon svg {
@@ -194,7 +198,7 @@ html, body {
   font-size: 2rem;
   font-weight: 800;
   letter-spacing: -.02em;
-  background: linear-gradient(135deg, #f1f5f9 30%, #c4b5fd 100%);
+  background: linear-gradient(135deg, #0C1E3B 30%, #60A5FA 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -203,7 +207,7 @@ html, body {
 }
 .logo-sub {
   font-size: .82rem;
-  color: var(--muted);
+  color: #475569;
   letter-spacing: .04em;
 }
 
@@ -218,29 +222,29 @@ html, body {
   font-weight: 700;
   letter-spacing: .08em;
   text-transform: uppercase;
-  color: #94a3b8;
+  color: #64748B;
   margin-bottom: 8px;
 }
 
 .input-box {
   display: flex;
   align-items: center;
-  background: rgba(255,255,255,.04);
-  border: 1.5px solid rgba(255,255,255,.08);
+  background: rgba(37,99,235,.05);
+  border: 1.5px solid rgba(37,99,235,.08);
   border-radius: 13px;
   transition: border-color .2s, box-shadow .2s, background .2s;
   position: relative;
 }
 .input-box:focus-within {
-  border-color: rgba(139,92,246,.7);
-  background: rgba(124,58,237,.06);
-  box-shadow: 0 0 0 3px rgba(124,58,237,.12), 0 1px 3px rgba(0,0,0,.3);
+  border-color: rgba(37,99,235,.7);
+  background: rgba(37,99,235,.06);
+  box-shadow: 0 0 0 3px rgba(37,99,235,.12), 0 1px 3px rgba(0,0,0,.3);
 }
 .input-box .ico {
   display: flex;
   align-items: center;
   padding: 0 0 0 14px;
-  color: var(--muted);
+  color: #475569;
   flex-shrink: 0;
 }
 .input-box .ico svg {
@@ -264,7 +268,7 @@ html, body {
 }
 .input-box input::placeholder { color: #334155; }
 .input-box input:-webkit-autofill {
-  -webkit-box-shadow: 0 0 0 100px rgba(15,22,35,.95) inset !important;
+  -webkit-box-shadow: 0 0 0 100px rgba(255,255,255,.95) inset !important;
   -webkit-text-fill-color: var(--text) !important;
 }
 .btn-eye {
@@ -278,7 +282,7 @@ html, body {
 
 /* ── Fuerza contraseña ── */
 .strength-bar { display: flex; gap: 3px; margin-top: 6px; height: 2px; }
-.strength-bar span { flex: 1; border-radius: 99px; background: rgba(255,255,255,.06); transition: background .3s; }
+.strength-bar span { flex: 1; border-radius: 99px; background: rgba(37,99,235,.06); transition: background .3s; }
 .s1 span:nth-child(1) { background: #ef4444; }
 .s2 span:nth-child(-n+2) { background: #f97316; }
 .s3 span:nth-child(-n+3) { background: #eab308; }
@@ -310,7 +314,7 @@ html, body {
   margin: -6px 0 18px;
   transition: color .2s;
 }
-.link-forgot:hover { color: #a78bfa; }
+.link-forgot:hover { color: #2563EB; }
 
 /* ══════════════════════════════════
    BOTÓN PRINCIPAL
@@ -320,7 +324,7 @@ html, body {
   padding: 14px;
   border: none;
   border-radius: 13px;
-  background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 50%, #5b21b6 100%);
+  background: linear-gradient(135deg, #2563EB 0%, #6d28d9 50%, #5b21b6 100%);
   color: #fff;
   font-size: .95rem;
   font-weight: 700;
@@ -332,7 +336,7 @@ html, body {
   justify-content: center;
   gap: 8px;
   transition: all .2s;
-  box-shadow: 0 4px 20px rgba(124,58,237,.4), inset 0 1px 0 rgba(255,255,255,.12);
+  box-shadow: 0 4px 20px rgba(37,99,235,.4), inset 0 1px 0 rgba(255,255,255,.12);
   position: relative;
   overflow: hidden;
   margin-top: 4px;
@@ -346,7 +350,7 @@ html, body {
   transition: opacity .2s;
 }
 .btn-main:hover:not(:disabled)::before { opacity: 1; }
-.btn-main:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 8px 28px rgba(124,58,237,.5), inset 0 1px 0 rgba(255,255,255,.12); }
+.btn-main:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 8px 28px rgba(37,99,235,.5), inset 0 1px 0 rgba(255,255,255,.12); }
 .btn-main:active:not(:disabled) { transform: translateY(0); }
 .btn-main:disabled { opacity: .5; cursor: not-allowed; }
 
@@ -358,20 +362,20 @@ html, body {
   align-items: center;
   gap: 10px;
   margin: 22px 0;
-  color: #1e293b;
+  color: #FFFFFF;
   font-size: .8rem;
 }
 .divider::before, .divider::after {
   content: '';
   flex: 1;
   height: 1px;
-  background: rgba(255,255,255,.06);
+  background: rgba(37,99,235,.06);
 }
 .divider span { color: #334155; }
 
-.footer-text { text-align: center; font-size: .84rem; color: var(--muted); }
-.footer-text a { color: #a78bfa; font-weight: 600; text-decoration: none; transition: color .2s; }
-.footer-text a:hover { color: #c4b5fd; }
+.footer-text { text-align: center; font-size: .84rem; color: #475569; }
+.footer-text a { color: #2563EB; font-weight: 600; text-decoration: none; transition: color .2s; }
+.footer-text a:hover { color: #2563EB; }
 
 /* ── Badges ── */
 .badges {
@@ -381,7 +385,7 @@ html, body {
   flex-wrap: wrap;
   margin-top: 24px;
   padding-top: 20px;
-  border-top: 1px solid rgba(255,255,255,.05);
+  border-top: 1px solid rgba(37,99,235,.05);
 }
 .badge {
   font-size: .71rem;
@@ -392,14 +396,14 @@ html, body {
   border: 1px solid;
 }
 .b-green  { color: #34d399; border-color: rgba(52,211,153,.2); background: rgba(52,211,153,.06); }
-.b-blue   { color: #60a5fa; border-color: rgba(96,165,250,.2); background: rgba(96,165,250,.06); }
-.b-purple { color: #c4b5fd; border-color: rgba(196,181,253,.2); background: rgba(196,181,253,.06); }
+.b-blue   { color: #2563EB; border-color: rgba(96,165,250,.2); background: rgba(96,165,250,.06); }
+.b-purple { color: #2563EB; border-color: rgba(196,181,253,.2); background: rgba(196,181,253,.06); }
 
 /* ══════════════════════════════════
    MENSAJES
 ══════════════════════════════════ */
 .msg { font-size: .82rem; min-height: 18px; margin-bottom: 10px; text-align: center; padding: 0 2px; }
-.msg-err { color: #f87171; }
+.msg-err { color: #DC2626; }
 .msg-ok  { color: #4ade80; }
 
 /* ── Spinner ── */
@@ -425,8 +429,8 @@ html, body {
   margin-bottom: 24px;
 }
 .alert-warn svg { width: 18px; height: 18px; flex-shrink: 0; margin-top: 1px; fill: none; stroke: #f59e0b; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-.alert-warn p { font-size: .82rem; color: #fcd34d; line-height: 1.6; margin: 0; }
-.alert-warn strong { color: #fbbf24; }
+.alert-warn p { font-size: .82rem; color: #B45309; line-height: 1.6; margin: 0; }
+.alert-warn strong { color: #F59E0B; }
 
 /* ══════════════════════════════════
    RESPONSIVE
@@ -485,7 +489,8 @@ html, body {
     </form>
 
     <div class="divider"><span>o</span></div>
-    <p class="footer-text">¿No tienes cuenta? <a href="#" onclick="showCard('register');return false">Regístrate aquí</a></p>
+    <p class="footer-text">¿Sos docente y no tienes cuenta? <a href="signup.html" style="font-weight:700">Registrate acá →</a></p>
+    <p class="footer-text" style="margin-top:6px;font-size:.82rem">¿Estudiante con código? <a href="#" onclick="showCard('register');return false">Ingresá acá</a></p>
 
     <div class="badges">
       <span class="badge b-green">📚 Básica</span>
@@ -502,8 +507,15 @@ html, body {
       <div class="logo-icon" style="background:linear-gradient(145deg,#0d9488,#0f766e)">
         <svg viewBox="0 0 24 24" style="fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6m3-3h-6"/></svg>
       </div>
-      <h1 class="logo-title" style="background:linear-gradient(135deg,#f1f5f9 30%,#6ee7b7 100%);-webkit-background-clip:text;background-clip:text">Crear Cuenta</h1>
-      <p class="logo-sub">Ingresa tus datos para registrarte</p>
+      <h1 class="logo-title" style="background:linear-gradient(135deg,#0C1E3B 30%,#6ee7b7 100%);-webkit-background-clip:text;background-clip:text">Cuenta de estudiante</h1>
+      <p class="logo-sub">Necesitás el código que te dio tu profesor o colegio</p>
+    </div>
+
+    <!-- CTA para docentes que llegaron acá por error -->
+    <div style="background:linear-gradient(135deg,#DBEAFE,#BFDBFE);border:1px solid #2563EB;border-radius:12px;padding:14px 16px;margin-bottom:18px;text-align:center">
+      <div style="font-weight:700;color:#1E3A8A;font-size:.92rem;margin-bottom:4px">🎓 ¿Sos docente?</div>
+      <div style="color:#1E40AF;font-size:.85rem;margin-bottom:10px">Este formulario es solo para estudiantes con código. Los docentes deben registrarse acá:</div>
+      <a href="signup.html" style="display:inline-block;padding:9px 18px;background:linear-gradient(135deg,#2563EB,#1D4ED8);color:#fff;text-decoration:none;border-radius:8px;font-weight:700;font-size:.9rem">Registro de docente →</a>
     </div>
 
     <form id="formRegister" onsubmit="doRegister(event)" novalidate>
@@ -533,11 +545,12 @@ html, body {
         <div class="strength-bar" id="strReg"><span></span><span></span><span></span><span></span></div>
       </div>
       <div class="field">
-        <label class="field-label">Código de acceso <span style="color:#334155;font-weight:400;text-transform:none;font-size:.78rem">(opcional)</span></label>
+        <label class="field-label">Código de acceso *</label>
         <div class="input-box">
           <span class="ico"><svg viewBox="0 0 24 24"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg></span>
-          <input type="text" id="regCode" placeholder="Código entregado por tu profesor">
+          <input type="text" id="regCode" placeholder="Código entregado por tu profesor" required>
         </div>
+        <div style="font-size:.75rem;color:#64748B;margin-top:4px">Sin código válido no puedes crear cuenta acá.</div>
       </div>
       <p class="msg msg-err" id="errRegister"></p>
       <button type="submit" class="btn-main" id="btnRegister">Crear Cuenta</button>
@@ -555,7 +568,7 @@ html, body {
       <div class="logo-icon" style="background:linear-gradient(145deg,#d97706,#b45309)">
         <svg viewBox="0 0 24 24" style="fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4m0 4h.01"/></svg>
       </div>
-      <h1 class="logo-title" style="background:linear-gradient(135deg,#f1f5f9 30%,#fcd34d 100%);-webkit-background-clip:text;background-clip:text">Recuperar Acceso</h1>
+      <h1 class="logo-title" style="background:linear-gradient(135deg,#0C1E3B 30%,#fcd34d 100%);-webkit-background-clip:text;background-clip:text">Recuperar Acceso</h1>
       <p class="logo-sub">Te enviamos un enlace a tu correo</p>
     </div>
 
@@ -584,7 +597,7 @@ html, body {
       <div class="logo-icon" style="background:linear-gradient(145deg,#dc2626,#b91c1c)">
         <svg viewBox="0 0 24 24" style="fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
       </div>
-      <h1 class="logo-title" style="background:linear-gradient(135deg,#f1f5f9 30%,#fca5a5 100%);-webkit-background-clip:text;background-clip:text">Nueva Contraseña</h1>
+      <h1 class="logo-title" style="background:linear-gradient(135deg,#0C1E3B 30%,#DC2626 100%);-webkit-background-clip:text;background-clip:text">Nueva Contraseña</h1>
       <p class="logo-sub">Requerido en el primer ingreso</p>
     </div>
 
@@ -717,7 +730,7 @@ function redirectByRole(user) {
     if (rol) {
       var mapa = window.EL_ROLES_PANEL || {};
       var destino = mapa[rol];
-      if (destino) { window.location.href = destino; return; }
+      if (destino) { window.location.replace(destino); return; }
     }
   }
   // ── Fallback legacy: mapa directo por user.role ──
@@ -736,10 +749,10 @@ function redirectByRole(user) {
     pie_enc:  'panel-pie.html',
     pie_edu:  'panel-pie-edu.html'
   };
-  if (user && DEST[user.role]) { window.location.href = DEST[user.role]; return; }
+  if (user && DEST[user.role]) { window.location.replace(DEST[user.role]); return; }
   var PANEL_ROLES = ['admin'];
   if (user && PANEL_ROLES.indexOf(user.role) !== -1) {
-    window.location.href = 'panel.html?rol=' + user.role;
+    window.location.replace('panel.html?rol=' + user.role);
     return;
   }
 
@@ -747,11 +760,11 @@ function redirectByRole(user) {
   // SEGURIDAD: acceso a admin.html SOLO si el email está en la lista explícita.
   var admins = window.EL_ADMIN_EMAILS || (window.EL_ADMIN_EMAIL ? [window.EL_ADMIN_EMAIL] : []);
   if (admins.indexOf(user.email) !== -1) {
-    window.location.href = 'admin.html';
+    window.location.replace('admin.html');
   } else if (user.role === 'profesor') {
-    window.location.href = 'dashboard-profesor.html';
+    window.location.replace('dashboard-profesor.html');
   } else {
-    window.location.href = 'dashboard.html';
+    window.location.replace('dashboard.html');
   }
 }
 
@@ -824,7 +837,7 @@ function doChangePass(e) {
     .then(function() {
       // Releer desde Firestore para garantizar rol correcto (no confiar en _pendingUser)
       var cu = EL_AUTH.currentUser;
-      if (!cu) { window.location.href = 'index.html'; return Promise.resolve(null); }
+      if (!cu) { window.location.replace('index.html'); return Promise.resolve(null); }
       return EL_DB.collection(EL_COLLECTIONS.USERS).doc(cu.uid).get()
         .then(function(doc) {
           // SEGURIDAD: el email de Firebase Auth (cu.email) siempre tiene precedencia
@@ -861,13 +874,17 @@ function doRegister(e) {
   var codigo = document.getElementById('regCode').value.trim();
   var err    = document.getElementById('errRegister');
 
-  if (!nombre || !email || !pass) { err.textContent = '⚠ Completa los campos obligatorios.'; return; }
+  if (!nombre || !email || !pass) { err.textContent = '⚠ Completá los campos obligatorios.'; return; }
   if (pass.length < 6)            { err.textContent = '⚠ Contraseña mínimo 6 caracteres.'; return; }
+  if (!codigo) {
+    err.textContent = '⚠ Necesitás un código válido. Si eres docente registrate acá: signup.html';
+    return;
+  }
 
   err.textContent = '';
   setBtn('btnRegister', '<span class="spin"></span> Creando cuenta…', true);
 
-  var validar = codigo ? ELDB.codigos.validar(codigo) : Promise.resolve(null);
+  var validar = ELDB.codigos.validar(codigo);
   validar
     .then(function(cod) {
       return EL_AUTH.createUserWithEmailAndPassword(email, pass)

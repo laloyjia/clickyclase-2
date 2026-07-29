@@ -156,7 +156,7 @@ var ccStore = (function () {
   //   lo redirige a su propio panel. Sin sesión: deja pasar (vista demo).
   function guard(roles) {
     if (typeof ELAuth === 'undefined' || !ELAuth.onUserReady) return;
-    var DEST = { admin: 'panel-admin.html', director: 'panel-director.html', utp: 'panel-utp.html', profesor: 'panel-profesor.html', amb_enc: 'panel-ambiente.html', amb_prof: 'panel-ambiente-prof.html', aps_enc: 'panel-apoyo.html', aps_prof: 'panel-apoyo-prof.html', pie_enc: 'panel-pie.html', pie_edu: 'panel-pie-edu.html' };
+    var DEST = { admin: 'panel-admin.html', director: 'panel-director.html', utp: 'panel-utp.html', profesor: 'dashboard-profesor.html', amb_enc: 'panel-ambiente.html', amb_prof: 'panel-ambiente-prof.html', aps_enc: 'panel-apoyo.html', aps_prof: 'panel-apoyo-prof.html', pie_enc: 'panel-pie.html', pie_edu: 'panel-pie-edu.html' };
     var allow = (roles || []).concat(['admin', 'director']); // admin y dirección supervisan todo
     ELAuth.onUserReady(function (u) {
       if (!u || !u.role) return; // sin sesión: permitir vista de demostración

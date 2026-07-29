@@ -17,35 +17,35 @@
 <script src="js/libro-clases.js"></script>
 <script src="js/notas.js"></script>
 <style>
-:root { --bg: #0b0d1e; --panel: #12162f; --border: rgba(148,163,184,.15); --text: #e5e7eb; --muted: #94a3b8; --cyan: #22d3ee; --violet: #7c3aed; }
+:root { --bg: #F0F7FF; --panel: #FFFFFF; --border: rgba(37,99,235,.14); --text: #0C1E3B; --muted: #475569; --cyan: #38BDF8; --violet: #2563EB; }
 * { box-sizing: border-box; }
 body { margin: 0; font-family: 'Segoe UI', Roboto, Arial, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
-.header { padding: 18px 28px; border-bottom: 1px solid var(--border); background: linear-gradient(135deg, rgba(124,58,237,.08), rgba(34,211,238,.06)); display: flex; justify-content: space-between; align-items: center; }
+.header { padding: 18px 28px; border-bottom: 1px solid var(--border); background: linear-gradient(135deg, rgba(37,99,235,.08), rgba(34,211,238,.06)); display: flex; justify-content: space-between; align-items: center; }
 .header h1 { margin: 0; font-size: 1.35rem; font-weight: 700; }
-.breadcrumb { color: var(--muted); font-size: .82rem; }
+.breadcrumb { color: #475569; font-size: .82rem; }
 .container { max-width: 1300px; margin: 24px auto; padding: 0 24px; }
 .card { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 18px 22px; margin-bottom: 16px; }
 .filtros { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
-.fld label { display: block; font-size: .72rem; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 4px; }
-input, select { width: 100%; padding: 8px 10px; border-radius: 7px; background: rgba(255,255,255,.04); border: 1px solid rgba(148,163,184,.2); color: var(--text); font-size: .85rem; }
-.btn { padding: 8px 14px; border-radius: 7px; border: 1px solid var(--border); background: rgba(255,255,255,.04); color: var(--text); cursor: pointer; font-size: .82rem; font-weight: 600; text-decoration: none; display: inline-block; }
-.btn.primary { background: linear-gradient(135deg, #7c3aed, #22d3ee); color: #fff; border-color: transparent; }
-.btn:hover { background: rgba(255,255,255,.08); }
+.fld label { display: block; font-size: .72rem; color: #475569; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 4px; }
+input, select { width: 100%; padding: 8px 10px; border-radius: 7px; background: rgba(37,99,235,.05); border: 1px solid rgba(37,99,235,.18); color: var(--text); font-size: .85rem; }
+.btn { padding: 8px 14px; border-radius: 7px; border: 1px solid var(--border); background: rgba(37,99,235,.05); color: var(--text); cursor: pointer; font-size: .82rem; font-weight: 600; text-decoration: none; display: inline-block; }
+.btn.primary { background: linear-gradient(135deg, #2563EB, #38BDF8); color: #fff; border-color: transparent; }
+.btn:hover { background: rgba(37,99,235,.08); }
 
 .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 16px 0; }
-.stat { padding: 12px 14px; border-radius: 10px; background: rgba(255,255,255,.02); border: 1px solid var(--border); }
+.stat { padding: 12px 14px; border-radius: 10px; background: rgba(37,99,235,.03); border: 1px solid var(--border); }
 .stat .v { font-size: 1.7rem; font-weight: 800; }
-.stat .l { font-size: .68rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
+.stat .l { font-size: .68rem; color: #475569; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
 
 table { width: 100%; border-collapse: collapse; font-size: .84rem; }
 th, td { padding: 8px 10px; border-bottom: 1px solid var(--border); text-align: left; }
-th { font-size: .7rem; text-transform: uppercase; letter-spacing: .8px; color: var(--muted); font-weight: 700; background: rgba(255,255,255,.03); }
-.badge-warn { color: #fbbf24; font-weight: 700; }
-.badge-crit { color: #fca5a5; font-weight: 700; }
-.badge-ok   { color: #86efac; font-weight: 700; }
+th { font-size: .7rem; text-transform: uppercase; letter-spacing: .8px; color: #475569; font-weight: 700; background: rgba(37,99,235,.05); }
+.badge-warn { color: #F59E0B; font-weight: 700; }
+.badge-crit { color: #DC2626; font-weight: 700; }
+.badge-ok   { color: #059669; font-weight: 700; }
 
-.empty { padding: 40px; text-align: center; color: var(--muted); }
-h2.sec-title { font-size: 1rem; margin: 20px 0 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+.empty { padding: 40px; text-align: center; color: #475569; }
+h2.sec-title { font-size: 1rem; margin: 20px 0 10px; color: #475569; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
 
 @media print {
   body { background: white; color: black; }
@@ -90,6 +90,8 @@ var _cursos = [];
 
 function esc(s) { return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
+function _cid(c) { return c && (c.cursoId || c.id) || ''; }
+
 function iniciar() {
   var hoy = new Date();
   document.getElementById('fMes').value = hoy.toISOString().slice(0,7);
@@ -97,10 +99,14 @@ function iniciar() {
   var u = ELAuth.user;
   var liceo = u.liceoSlug || u.liceoPrincipal || '';
   CCCursos.listarCursos({ liceoSlug: liceo }).then(function(cs) {
-    _cursos = cs || [];
+    _cursos = (cs || []).map(function(c){
+      // Normalizar: garantizar que cursoId siempre exista
+      if (!c.cursoId) c.cursoId = c.id || '';
+      return c;
+    });
     var sel = document.getElementById('fCurso');
     sel.innerHTML = '<option value="">Todos</option>' +
-      _cursos.map(function(c){ return '<option value="' + esc(c.cursoId) + '">' + esc(c.nombreCompleto) + '</option>'; }).join('');
+      _cursos.map(function(c){ return '<option value="' + esc(_cid(c)) + '">' + esc(c.nombreCompleto || (c.nivel+c.letra)) + '</option>'; }).join('');
   });
 }
 
@@ -109,7 +115,7 @@ function generar() {
   var mes = document.getElementById('fMes').value;
   var sem = parseInt(document.getElementById('fSem').value, 10);
   if (!mes) { alert('Elegí un mes'); return; }
-  var cursos = cursoIdSel ? _cursos.filter(function(c){ return c.cursoId === cursoIdSel; }) : _cursos;
+  var cursos = cursoIdSel ? _cursos.filter(function(c){ return _cid(c) === cursoIdSel; }) : _cursos;
   if (cursos.length === 0) {
     document.getElementById('reporte').innerHTML = '<div class="card empty">Sin cursos que reportar</div>';
     return;
@@ -119,9 +125,14 @@ function generar() {
   var hasta = d.toISOString().slice(0,10);
 
   var promesas = cursos.map(function(c) {
+    var cid = _cid(c);
+    if (!cid) {
+      return Promise.resolve({ curso: c, asistencia: { totalDias:0, totales:{P:0,A:0,T:0,J:0}, porEstudiante:[] }, riesgo: [] });
+    }
     return Promise.all([
-      CCLibroClases.estadisticasCurso({ cursoId: c.cursoId, desde: desde, hasta: hasta }),
-      CCNotas.reporteRiesgo(c.cursoId, sem)
+      CCLibroClases.estadisticasCurso({ cursoId: cid, desde: desde, hasta: hasta })
+        .catch(function(){ return { totalDias:0, totales:{P:0,A:0,T:0,J:0}, porEstudiante:[] }; }),
+      CCNotas.reporteRiesgo(cid, sem).catch(function(){ return []; })
     ]).then(function(arr) {
       return { curso: c, asistencia: arr[0], riesgo: arr[1] };
     });
@@ -134,84 +145,186 @@ function generar() {
 
 function renderReporte(datos, mes, sem, desde, hasta) {
   var user = ELAuth.user;
-  var liceo = user.liceoSlug || user.liceoPrincipal || '';
+  var liceoSlug = user.liceoSlug || user.liceoPrincipal || '';
+  var liceoNombre = user.liceoNombre || _liceoNombreCache || liceoSlug;
   var fecha = new Date().toLocaleDateString('es-CL', { day:'2-digit', month:'long', year:'numeric' });
   var mesNombre = new Date(mes + '-01').toLocaleDateString('es-CL', { month: 'long', year: 'numeric' });
+  var utpNombre = user.nombre || user.displayName || user.email || 'Unidad Técnico Pedagógica';
 
-  var totClases = 0, totPres = 0, totAus = 0, totRiesgo = 0;
+  var totClases = 0, totPres = 0, totAus = 0, totRiesgo = 0, totAlumnos = 0, totBajaAsist = 0;
   datos.forEach(function(d) {
     totClases += d.asistencia.totalDias || 0;
     totPres   += d.asistencia.totales.P || 0;
     totAus    += d.asistencia.totales.A || 0;
     totRiesgo += d.riesgo.length || 0;
+    totAlumnos += (d.curso.estudiantes || []).length;
+    totBajaAsist += (d.asistencia.porEstudiante || []).filter(function(e){ return e.porcentajeAsistencia < 85 && e.totalDias > 0; }).length;
   });
   var pctAsist = (totPres + totAus) > 0 ? Math.round((totPres / (totPres + totAus)) * 100) : 0;
+  var colorAsist = pctAsist >= 90 ? '#059669' : pctAsist >= 80 ? '#F59E0B' : '#DC2626';
 
-  var html = '<div class="card">' +
-    '<div style="text-align:center;margin-bottom:20px">' +
-      '<div style="font-size:1.5rem;font-weight:800">Reporte Mensual UTP</div>' +
-      '<div style="color:var(--muted);font-size:.9rem;margin-top:4px">' + esc(liceo) + ' · ' + esc(mesNombre) + ' · ' + sem + '° semestre</div>' +
-      '<div style="color:var(--muted);font-size:.75rem;margin-top:2px">Generado el ' + esc(fecha) + '</div>' +
-    '</div>' +
-    '<div class="stats-row">' +
-      '<div class="stat"><div class="v">' + datos.length + '</div><div class="l">Cursos</div></div>' +
-      '<div class="stat"><div class="v">' + totClases + '</div><div class="l">Clases del mes</div></div>' +
-      '<div class="stat"><div class="v" style="color:#86efac">' + pctAsist + '%</div><div class="l">Asistencia global</div></div>' +
-      '<div class="stat"><div class="v" style="color:#fca5a5">' + totRiesgo + '</div><div class="l">Alertas de riesgo</div></div>' +
-    '</div>' +
-  '</div>';
-
-  // Detalle por curso
-  datos.forEach(function(d) {
-    var totalRegClase = d.asistencia.totalDias;
-    var pctAsistCurso = (d.asistencia.totales.P + d.asistencia.totales.A) > 0
-      ? Math.round((d.asistencia.totales.P / (d.asistencia.totales.P + d.asistencia.totales.A)) * 100)
-      : 0;
-    html += '<div class="card" style="page-break-inside:avoid">';
-    html += '<h2 class="sec-title">' + esc(d.curso.nombreCompleto) + '</h2>';
-    html += '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px">' +
-      '<div><strong>Clases:</strong> ' + totalRegClase + '</div>' +
-      '<div><strong>Presentes:</strong> ' + d.asistencia.totales.P + '</div>' +
-      '<div><strong>Ausentes:</strong> ' + d.asistencia.totales.A + '</div>' +
-      '<div><strong>% Asistencia:</strong> ' + pctAsistCurso + '%</div>' +
+  // ─── PORTADA DEL REPORTE ─────────────────────────────────────
+  var html =
+    '<div class="rep-portada" style="background:linear-gradient(135deg,#2563EB,#1D4ED8);color:#fff;padding:44px 40px;border-radius:16px;margin-bottom:20px;position:relative;overflow:hidden;box-shadow:0 12px 32px rgba(37,99,235,.18)">' +
+      '<div style="position:absolute;top:-50px;right:-50px;width:200px;height:200px;background:rgba(255,255,255,.08);border-radius:50%"></div>' +
+      '<div style="position:absolute;bottom:-80px;left:-40px;width:240px;height:240px;background:rgba(255,255,255,.05);border-radius:50%"></div>' +
+      '<div style="position:relative;z-index:1">' +
+        '<div style="font-size:.85rem;letter-spacing:.24em;text-transform:uppercase;opacity:.85;margin-bottom:8px">📊 Reporte Mensual · Unidad Técnico Pedagógica</div>' +
+        '<div style="font-size:2.2rem;font-weight:900;line-height:1.1;margin-bottom:6px">' + esc(liceoNombre) + '</div>' +
+        '<div style="font-size:1.1rem;opacity:.9;text-transform:capitalize">' + esc(mesNombre) + ' · ' + sem + '° semestre</div>' +
+        '<div style="margin-top:22px;padding-top:16px;border-top:1px solid rgba(255,255,255,.24);display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;font-size:.85rem;opacity:.92">' +
+          '<div>Preparado por: <b>' + esc(utpNombre) + '</b></div>' +
+          '<div>Fecha del informe: <b>' + esc(fecha) + '</b></div>' +
+        '</div>' +
+      '</div>' +
     '</div>';
+
+  // ─── RESUMEN EJECUTIVO ───────────────────────────────────────
+  html +=
+    '<div class="card" style="background:#fff;padding:24px 28px;border-radius:14px;border:1px solid rgba(37,99,235,.14);box-shadow:0 4px 14px rgba(37,99,235,.06);margin-bottom:16px">' +
+      '<div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">' +
+        '<div style="width:6px;height:28px;background:linear-gradient(135deg,#2563EB,#38BDF8);border-radius:3px"></div>' +
+        '<h2 style="margin:0;font-size:1.15rem;font-weight:800;color:#0C1E3B">Resumen ejecutivo del período</h2>' +
+      '</div>' +
+      '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px">' +
+        _repKPI('🎓', datos.length, 'Cursos analizados', '#3B82F6') +
+        _repKPI('👥', totAlumnos, 'Estudiantes totales', '#8B5CF6') +
+        _repKPI('📅', totClases, 'Clases dictadas', '#06B6D4') +
+        _repKPI('✅', pctAsist + '%', '% Asistencia global', colorAsist) +
+        _repKPI('⚠️', totBajaAsist, 'Con baja asistencia', totBajaAsist > 0 ? '#F59E0B' : '#94A3B8') +
+        _repKPI('🚨', totRiesgo, 'Riesgo académico', totRiesgo > 0 ? '#DC2626' : '#94A3B8') +
+      '</div>' +
+      // Semáforo visual
+      '<div style="margin-top:20px;padding:14px 18px;background:' + (pctAsist >= 90 ? '#DCFCE7' : pctAsist >= 80 ? '#FEF3C7' : '#FEE2E2') + ';border-radius:10px;border-left:4px solid ' + colorAsist + '">' +
+        '<div style="font-weight:700;color:' + colorAsist + ';font-size:.95rem;margin-bottom:2px">' +
+          (pctAsist >= 90 ? '✅ Asistencia dentro de rangos esperados' :
+           pctAsist >= 80 ? '⚠️ Asistencia levemente bajo lo esperado — requiere seguimiento' :
+                            '🚨 Asistencia crítica — se requieren acciones inmediatas') +
+        '</div>' +
+        '<div style="font-size:.82rem;color:#334155">' +
+          (totRiesgo > 0
+            ? 'Se identificaron <b>' + totRiesgo + '</b> alertas de riesgo académico distribuidas en ' + datos.length + ' cursos. Revisar detalle a continuación.'
+            : 'Sin alertas académicas relevantes en el período. Continuar seguimiento habitual.') +
+        '</div>' +
+      '</div>' +
+    '</div>';
+
+  // ─── DETALLE POR CURSO ───────────────────────────────────────
+  datos.forEach(function(d, idx) {
+    var totalRegClase = d.asistencia.totalDias;
+    var pP = d.asistencia.totales.P || 0;
+    var pA = d.asistencia.totales.A || 0;
+    var pT = d.asistencia.totales.T || 0;
+    var pJ = d.asistencia.totales.J || 0;
+    var pctAsistCurso = (pP + pA) > 0 ? Math.round((pP / (pP + pA)) * 100) : 0;
+    var colorC = pctAsistCurso >= 90 ? '#059669' : pctAsistCurso >= 80 ? '#F59E0B' : '#DC2626';
+    var totalEst = (d.curso.estudiantes || []).length;
+
+    html +=
+      '<div class="card" style="page-break-inside:avoid;background:#fff;padding:24px 28px;border-radius:14px;border:1px solid rgba(37,99,235,.14);margin-bottom:16px;box-shadow:0 3px 12px rgba(37,99,235,.05)">' +
+        '<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px;flex-wrap:wrap">' +
+          '<div style="display:flex;align-items:center;gap:12px">' +
+            '<div style="width:48px;height:48px;background:linear-gradient(135deg,#2563EB,#1D4ED8);color:#fff;border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:1.15rem">' + esc((d.curso.nivel||'') + (d.curso.letra||'')) + '</div>' +
+            '<div>' +
+              '<div style="font-weight:800;font-size:1.1rem;color:#0C1E3B">' + esc(d.curso.nombreCompleto) + '</div>' +
+              '<div style="font-size:.8rem;color:#64748B">Jefe/a: <b>' + esc(d.curso.jefeNombre || '—') + '</b> · ' + totalEst + ' estudiantes</div>' +
+            '</div>' +
+          '</div>' +
+          '<div style="text-align:right">' +
+            '<div style="font-size:2rem;font-weight:900;color:' + colorC + ';line-height:1">' + pctAsistCurso + '%</div>' +
+            '<div style="font-size:.72rem;color:#64748B;text-transform:uppercase;letter-spacing:1px">Asistencia</div>' +
+          '</div>' +
+        '</div>' +
+        '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px;margin-bottom:14px">' +
+          '<div style="padding:10px 12px;background:#F0F7FF;border-radius:8px;text-align:center"><div style="font-weight:800;color:#1D4ED8;font-size:1.2rem">' + totalRegClase + '</div><div style="font-size:.7rem;color:#64748B;text-transform:uppercase">Clases</div></div>' +
+          '<div style="padding:10px 12px;background:#DCFCE7;border-radius:8px;text-align:center"><div style="font-weight:800;color:#166534;font-size:1.2rem">' + pP + '</div><div style="font-size:.7rem;color:#166534;text-transform:uppercase">Presentes</div></div>' +
+          '<div style="padding:10px 12px;background:#FEE2E2;border-radius:8px;text-align:center"><div style="font-weight:800;color:#991B1B;font-size:1.2rem">' + pA + '</div><div style="font-size:.7rem;color:#991B1B;text-transform:uppercase">Ausentes</div></div>' +
+          '<div style="padding:10px 12px;background:#FEF3C7;border-radius:8px;text-align:center"><div style="font-weight:800;color:#92400E;font-size:1.2rem">' + pT + '</div><div style="font-size:.7rem;color:#92400E;text-transform:uppercase">Atrasos</div></div>' +
+          '<div style="padding:10px 12px;background:#EEF2FF;border-radius:8px;text-align:center"><div style="font-weight:800;color:#4338CA;font-size:1.2rem">' + pJ + '</div><div style="font-size:.7rem;color:#4338CA;text-transform:uppercase">Justif.</div></div>' +
+        '</div>';
 
     // Alertas de asistencia
     var bajaAsist = (d.asistencia.porEstudiante || []).filter(function(e){ return e.porcentajeAsistencia < 85 && e.totalDias > 0; });
     if (bajaAsist.length > 0) {
-      html += '<h3 style="font-size:.85rem;color:#fbbf24;margin:14px 0 6px">⚠ Baja asistencia (<85%)</h3>';
-      html += '<table><thead><tr><th>N°</th><th>Estudiante</th><th>Presentes</th><th>Ausentes</th><th>% Asistencia</th></tr></thead><tbody>';
+      html += '<h3 style="font-size:.9rem;color:#F59E0B;margin:18px 0 8px;font-weight:700">⚠️ Estudiantes con baja asistencia <span style="color:#94A3B8;font-weight:500;font-size:.8rem">(' + bajaAsist.length + ' casos)</span></h3>';
+      html += '<div style="overflow-x:auto"><table style="width:100%;font-size:.85rem;border-collapse:separate;border-spacing:0"><thead><tr><th style="padding:8px 10px;background:#F1F5F9;color:#475569;text-align:left;font-size:.7rem;text-transform:uppercase;font-weight:700">N°</th><th style="padding:8px 10px;background:#F1F5F9;color:#475569;text-align:left;font-size:.7rem;text-transform:uppercase;font-weight:700">Estudiante</th><th style="padding:8px 10px;background:#F1F5F9;color:#475569;font-size:.7rem;text-transform:uppercase;font-weight:700">Pres.</th><th style="padding:8px 10px;background:#F1F5F9;color:#475569;font-size:.7rem;text-transform:uppercase;font-weight:700">Aus.</th><th style="padding:8px 10px;background:#F1F5F9;color:#475569;font-size:.7rem;text-transform:uppercase;font-weight:700">%</th></tr></thead><tbody>';
       bajaAsist.forEach(function(e) {
-        var cls = e.porcentajeAsistencia < 70 ? 'badge-crit' : 'badge-warn';
-        html += '<tr><td>' + e.ordinal + '</td><td>' + esc(e.nombreCompleto) + '</td>' +
-                '<td>' + e.P + '</td><td>' + e.A + '</td>' +
-                '<td class="' + cls + '">' + e.porcentajeAsistencia + '%</td></tr>';
+        var clr = e.porcentajeAsistencia < 70 ? '#DC2626' : '#F59E0B';
+        html += '<tr><td style="padding:8px 10px;border-bottom:1px solid #E2E8F0;color:#64748B">' + (e.ordinal || '—') + '</td>' +
+                '<td style="padding:8px 10px;border-bottom:1px solid #E2E8F0;font-weight:600">' + esc(e.nombreCompleto) + '</td>' +
+                '<td style="padding:8px 10px;border-bottom:1px solid #E2E8F0;text-align:center">' + e.P + '</td>' +
+                '<td style="padding:8px 10px;border-bottom:1px solid #E2E8F0;text-align:center">' + e.A + '</td>' +
+                '<td style="padding:8px 10px;border-bottom:1px solid #E2E8F0;text-align:center"><span style="display:inline-block;padding:3px 10px;background:' + clr + '20;color:' + clr + ';border-radius:12px;font-weight:700">' + e.porcentajeAsistencia + '%</span></td></tr>';
       });
-      html += '</tbody></table>';
+      html += '</tbody></table></div>';
     }
 
     // Riesgo académico
     if (d.riesgo.length > 0) {
-      html += '<h3 style="font-size:.85rem;color:#fca5a5;margin:14px 0 6px">🚨 Riesgo académico</h3>';
-      html += '<table><thead><tr><th>N°</th><th>Estudiante</th><th>Asignatura</th><th>Promedio</th><th>Estado</th></tr></thead><tbody>';
+      html += '<h3 style="font-size:.9rem;color:#DC2626;margin:18px 0 8px;font-weight:700">🚨 Estudiantes en riesgo académico <span style="color:#94A3B8;font-weight:500;font-size:.8rem">(' + d.riesgo.length + ' casos)</span></h3>';
+      html += '<div style="overflow-x:auto"><table style="width:100%;font-size:.85rem;border-collapse:separate;border-spacing:0"><thead><tr><th style="padding:8px 10px;background:#F1F5F9;color:#475569;text-align:left;font-size:.7rem;text-transform:uppercase;font-weight:700">Estudiante</th><th style="padding:8px 10px;background:#F1F5F9;color:#475569;text-align:left;font-size:.7rem;text-transform:uppercase;font-weight:700">Asignatura</th><th style="padding:8px 10px;background:#F1F5F9;color:#475569;text-align:center;font-size:.7rem;text-transform:uppercase;font-weight:700">Promedio</th><th style="padding:8px 10px;background:#F1F5F9;color:#475569;text-align:center;font-size:.7rem;text-transform:uppercase;font-weight:700">Estado</th></tr></thead><tbody>';
       d.riesgo.forEach(function(r) {
-        var cls = r.aprobado ? 'badge-warn' : 'badge-crit';
-        var lbl = r.aprobado ? 'Al límite' : 'REPROBADO';
-        html += '<tr><td>' + r.ordinal + '</td><td>' + esc(r.nombre) + '</td>' +
-                '<td>' + esc(r.asignatura) + '</td>' +
-                '<td>' + r.promedio.toFixed(1) + '</td>' +
-                '<td class="' + cls + '">' + lbl + '</td></tr>';
+        var clr = r.aprobado ? '#F59E0B' : '#DC2626';
+        var lbl = r.aprobado ? 'Al límite' : 'Reprobando';
+        html += '<tr><td style="padding:8px 10px;border-bottom:1px solid #E2E8F0;font-weight:600">' + esc(r.nombre) + '</td>' +
+                '<td style="padding:8px 10px;border-bottom:1px solid #E2E8F0">' + esc(r.asignatura) + '</td>' +
+                '<td style="padding:8px 10px;border-bottom:1px solid #E2E8F0;text-align:center;font-weight:800;color:' + clr + '">' + r.promedio.toFixed(1) + '</td>' +
+                '<td style="padding:8px 10px;border-bottom:1px solid #E2E8F0;text-align:center"><span style="display:inline-block;padding:3px 10px;background:' + clr + '20;color:' + clr + ';border-radius:12px;font-weight:700;font-size:.75rem;text-transform:uppercase">' + lbl + '</span></td></tr>';
       });
       html += '</tbody></table>';
     }
 
     if (bajaAsist.length === 0 && d.riesgo.length === 0) {
-      html += '<p style="color:var(--muted);font-style:italic;font-size:.85rem">✓ Sin alertas en este período</p>';
+      html += '<div style="margin-top:12px;padding:12px 16px;background:#DCFCE7;border-radius:8px;border-left:4px solid #059669;color:#166534;font-weight:600;font-size:.9rem">✓ Sin alertas en este período — el curso muestra buen desempeño.</div>';
     }
     html += '</div>';
   });
 
+  // ─── FIRMA / FOOTER DEL REPORTE ─────────────────────────────
+  html +=
+    '<div class="card" style="background:linear-gradient(135deg,#F8FAFC,#F0F7FF);padding:28px 32px;border-radius:14px;border:1px solid rgba(37,99,235,.10);margin-top:24px;page-break-inside:avoid">' +
+      '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:32px;align-items:end">' +
+        '<div>' +
+          '<div style="border-bottom:1px solid #94A3B8;padding-bottom:6px;margin-bottom:8px;min-height:40px"></div>' +
+          '<div style="font-weight:700;color:#0C1E3B;font-size:.9rem">' + esc(utpNombre) + '</div>' +
+          '<div style="font-size:.78rem;color:#64748B">Unidad Técnico Pedagógica</div>' +
+          '<div style="font-size:.72rem;color:#64748B;margin-top:2px">' + esc(liceoNombre) + '</div>' +
+        '</div>' +
+        '<div>' +
+          '<div style="border-bottom:1px solid #94A3B8;padding-bottom:6px;margin-bottom:8px;min-height:40px"></div>' +
+          '<div style="font-weight:700;color:#0C1E3B;font-size:.9rem">Dirección del Establecimiento</div>' +
+          '<div style="font-size:.78rem;color:#64748B">Visto bueno</div>' +
+          '<div style="font-size:.72rem;color:#64748B;margin-top:2px">Fecha: _________________</div>' +
+        '</div>' +
+      '</div>' +
+      '<div style="margin-top:24px;padding-top:16px;border-top:1px solid rgba(37,99,235,.10);text-align:center;color:#94A3B8;font-size:.72rem">' +
+        '📊 Reporte generado con <b>Click&Clase</b> · clickyclase.cl · ' + esc(fecha) +
+      '</div>' +
+    '</div>';
+
   document.getElementById('reporte').innerHTML = html;
+}
+
+// Helper KPI card para el resumen ejecutivo
+function _repKPI(icono, valor, label, color) {
+  return '<div style="padding:14px 16px;background:linear-gradient(135deg,' + color + '10,' + color + '05);border:1px solid ' + color + '30;border-radius:12px;text-align:center">' +
+    '<div style="font-size:1.5rem;line-height:1;margin-bottom:4px">' + icono + '</div>' +
+    '<div style="font-weight:900;font-size:1.6rem;color:' + color + ';line-height:1">' + valor + '</div>' +
+    '<div style="font-size:.7rem;color:#64748B;text-transform:uppercase;letter-spacing:.8px;font-weight:700;margin-top:4px">' + label + '</div>' +
+  '</div>';
+}
+
+// Cache del nombre del liceo (se carga al iniciar la página)
+var _liceoNombreCache = '';
+if (window.ELAuth && ELAuth.onUserReady) {
+  ELAuth.onUserReady(function(u){
+    if (!u || !u.liceoSlug) return;
+    try {
+      EL_DB.collection('liceos').doc(u.liceoSlug).get().then(function(snap){
+        if (snap && snap.exists) _liceoNombreCache = (snap.data() || {}).nombre || u.liceoSlug;
+      }).catch(function(){});
+    } catch(_) {}
+  });
 }
 
 if (window.ELAuth && ELAuth.onUserReady) {

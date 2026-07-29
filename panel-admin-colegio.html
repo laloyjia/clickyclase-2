@@ -15,16 +15,17 @@
 <script src="js/roles-router.js"></script>
 <script src="js/liceos.js"></script>
 <script src="js/personal.js"></script>
+<script src="js/pin-firma.js"></script>
 <script src="js/curricula-loader.js"></script>
 <script src="js/tp-catalogo.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 :root {
-  --bg: #0a0d1c; --bg-2: #0e1226; --panel: #151b35; --panel-2: #1b2242;
-  --border: rgba(148,163,184,.14); --border-strong: rgba(148,163,184,.22);
-  --text: #f1f5f9; --text-2: #cbd5e1; --muted: #7b8aa5;
-  --violet: #8b5cf6; --gold: #fbbf24; --green: #34d399;
-  --danger: #f87171; --cyan: #22d3ee;
+  --bg: #F0F7FF; --bg-2: #FFFFFF; --panel: #FFFFFF; --panel-2: #F8FAFF;
+  --border: rgba(37,99,235,.14); --border-strong: rgba(37,99,235,.22);
+  --text: #0C1E3B; --text-2: #334155; --muted: #475569;
+  --violet: #1D4ED8; --gold: #F59E0B; --green: #34d399;
+  --danger: #DC2626; --cyan: #38BDF8;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body {
@@ -54,7 +55,7 @@ body {
 .header-liceo .logo-wrap img { width: 100%; height: 100%; border-radius: 16px; object-fit: cover; }
 .header-liceo .info { flex: 1; min-width: 240px; }
 .header-liceo .sub {
-  font-size: .72rem; color: var(--muted); letter-spacing: 1.2px;
+  font-size: .72rem; color: #475569; letter-spacing: 1.2px;
   text-transform: uppercase; font-weight: 600; margin-bottom: 3px;
 }
 .header-liceo h1 {
@@ -63,14 +64,14 @@ body {
 .header-liceo .plan-badge {
   display: inline-block; padding: 4px 12px; border-radius: 999px;
   font-size: .74rem; font-weight: 700; letter-spacing: .5px;
-  background: rgba(139,92,246,.15); color: #c4b5fd;
-  border: 1px solid rgba(139,92,246,.3);
+  background: rgba(37,99,235,.15); color: #2563EB;
+  border: 1px solid rgba(37,99,235,.3);
 }
 .header-liceo .plan-badge.basic { background: rgba(52,211,153,.15); color: var(--green); border-color: rgba(52,211,153,.3); }
 .header-liceo .plan-badge.enterprise { background: rgba(251,191,36,.15); color: var(--gold); border-color: rgba(251,191,36,.3); }
 .header-liceo .user-info { text-align: right; font-size: .85rem; color: var(--text-2); }
 .header-liceo .user-info .name { font-weight: 700; color: var(--text); }
-.header-liceo .user-info .salir { color: #fca5a5; text-decoration: none; margin-left: 12px; font-size: .8rem; }
+.header-liceo .user-info .salir { color: #DC2626; text-decoration: none; margin-left: 12px; font-size: .8rem; }
 
 /* ─── KPIs ─── */
 .kpis {
@@ -78,29 +79,30 @@ body {
   margin-bottom: 24px;
 }
 .kpi { background: var(--panel); border: 1px solid var(--border); border-radius: 14px; padding: 18px 22px; }
-.kpi .l { font-size: .7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
+.kpi .l { font-size: .7rem; color: #475569; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
 .kpi .v { font-size: 1.9rem; font-weight: 800; margin-top: 6px; letter-spacing: -.5px; font-variant-numeric: tabular-nums; }
 .kpi.usu .v { color: var(--violet); }
 .kpi.cur .v { color: var(--cyan); }
 .kpi.act .v { color: var(--green); }
 .kpi.ven .v { color: var(--gold); }
-.kpi .s { font-size: .74rem; color: var(--muted); margin-top: 4px; }
+.kpi .s { font-size: .74rem; color: #475569; margin-top: 4px; }
 
 /* ─── Cards y tabla ─── */
-.card { background: var(--panel); border: 1px solid var(--border); border-radius: 16px; padding: 24px 28px; margin-bottom: 20px; }
-.card h2 { font-size: .82rem; color: var(--muted); font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
-.card .sub { color: var(--muted); font-size: .85rem; margin-bottom: 18px; }
+.card { background: var(--panel); border: 1px solid var(--border); border-radius: 16px; padding: 24px 28px; margin-bottom: 20px; box-shadow: 0 4px 14px rgba(37,99,235,.05); transition: box-shadow .2s, transform .2s; }
+.card:hover { box-shadow: 0 10px 26px rgba(37,99,235,.10); }
+.card h2 { font-size: .82rem; color: #475569; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
+.card .sub { color: #475569; font-size: .85rem; margin-bottom: 18px; }
 
 .filtros-row { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; flex-wrap: wrap; }
 .filtros-row input, .filtros-row select { padding: 9px 13px; border-radius: 9px; background: var(--bg-2); border: 1px solid var(--border-strong); color: var(--text); font-size: .88rem; font-family: inherit; }
 .filtros-row input { min-width: 240px; }
 .btn { padding: 10px 18px; border-radius: 9px; border: 1px solid var(--border-strong); background: var(--bg-2); color: var(--text); cursor: pointer; font-family: inherit; font-size: .88rem; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; text-decoration: none; }
 .btn:hover { background: var(--panel-2); }
-.btn.primary { background: linear-gradient(135deg, var(--violet), #6d28d9); border-color: transparent; color: white; box-shadow: 0 4px 20px rgba(139,92,246,.3); }
-.btn.primary:hover { transform: translateY(-1px); box-shadow: 0 8px 28px rgba(139,92,246,.45); }
+.btn.primary { background: linear-gradient(135deg, var(--violet), #6d28d9); border-color: transparent; color: white; box-shadow: 0 4px 20px rgba(37,99,235,.3); }
+.btn.primary:hover { transform: translateY(-1px); box-shadow: 0 8px 28px rgba(37,99,235,.45); }
 .btn.small { padding: 5px 10px; font-size: .78rem; }
-.btn.danger { color: #fca5a5; border-color: rgba(248,113,113,.3); }
-.btn.danger:hover { background: rgba(248,113,113,.1); }
+.btn.danger { color: #DC2626; border-color: rgba(220,38,38,.3); }
+.btn.danger:hover { background: rgba(220,38,38,.1); }
 .btn:disabled { opacity: .5; cursor: not-allowed; }
 
 .asientos {
@@ -109,36 +111,36 @@ body {
   margin-left: auto;
 }
 .asientos.warn { background: rgba(251,191,36,.06); border-color: rgba(251,191,36,.25); color: var(--gold); }
-.asientos.full { background: rgba(248,113,113,.06); border-color: rgba(248,113,113,.25); color: var(--danger); }
+.asientos.full { background: rgba(220,38,38,.06); border-color: rgba(220,38,38,.25); color: var(--danger); }
 
 table { width: 100%; border-collapse: collapse; font-size: .9rem; }
 th, td { padding: 12px 14px; text-align: left; border-bottom: 1px solid var(--border); vertical-align: middle; }
-th { font-size: .7rem; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); font-weight: 700; background: rgba(255,255,255,.02); }
-tr:hover td { background: rgba(255,255,255,.02); }
+th { font-size: .7rem; text-transform: uppercase; letter-spacing: 1px; color: #475569; font-weight: 700; background: rgba(37,99,235,.03); }
+tr:hover td { background: rgba(37,99,235,.03); }
 .tag {
   display: inline-block; padding: 2px 8px; border-radius: 999px;
   font-size: .7rem; font-weight: 600; margin: 2px 3px 2px 0;
-  background: rgba(139,92,246,.1); color: #c4b5fd; border: 1px solid rgba(139,92,246,.2);
+  background: rgba(37,99,235,.1); color: #2563EB; border: 1px solid rgba(37,99,235,.2);
 }
-.tag.inactivo { background: rgba(248,113,113,.1); color: var(--danger); border-color: rgba(248,113,113,.2); }
+.tag.inactivo { background: rgba(220,38,38,.1); color: var(--danger); border-color: rgba(220,38,38,.2); }
 .miembro-cell { display: flex; align-items: center; gap: 10px; }
 .miembro-cell .avatar { width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg, var(--violet), #6d28d9); display: flex; align-items: center; justify-content: center; font-size: .85rem; font-weight: 700; color: #fff; flex-shrink: 0; }
 .miembro-cell .info b { display: block; font-size: .92rem; }
-.miembro-cell .info .em { font-size: .76rem; color: var(--muted); }
+.miembro-cell .info .em { font-size: .76rem; color: #475569; }
 .acciones-cell { display: flex; gap: 4px; }
 
-.empty { padding: 60px 30px; text-align: center; color: var(--muted); }
+.empty { padding: 60px 30px; text-align: center; color: #475569; }
 .empty .icon { font-size: 3rem; margin-bottom: 12px; }
 
 /* ─── Modal ─── */
-.modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,.75); z-index: 100; display: none; align-items: flex-start; justify-content: center; padding: 30px 20px; overflow-y: auto; }
+.modal-bg { position: fixed; inset: 0; background: rgba(12,30,59,.35); z-index: 100; display: none; align-items: flex-start; justify-content: center; padding: 30px 20px; overflow-y: auto; }
 .modal-bg.show { display: flex; }
-.modal { background: var(--panel); border: 1px solid var(--border-strong); border-radius: 18px; max-width: 640px; width: 100%; padding: 32px; box-shadow: 0 20px 60px rgba(0,0,0,.6); }
+.modal { background: var(--panel); border: 1px solid var(--border-strong); border-radius: 18px; max-width: 640px; width: 100%; padding: 32px; box-shadow: 0 20px 60px rgba(12,30,59,.28); }
 .modal .modal-title { font-size: 1.3rem; font-weight: 800; margin-bottom: 4px; }
-.modal .modal-sub { color: var(--muted); font-size: .88rem; margin-bottom: 24px; }
+.modal .modal-sub { color: #475569; font-size: .88rem; margin-bottom: 24px; }
 
 .fld { margin-bottom: 14px; }
-.fld label { display: block; font-size: .74rem; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 6px; }
+.fld label { display: block; font-size: .74rem; color: #475569; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 6px; }
 .fld input, .fld select, .fld textarea { width: 100%; padding: 10px 13px; border-radius: 9px; background: var(--bg-2); border: 1px solid var(--border-strong); color: var(--text); font-family: inherit; font-size: .92rem; }
 .fld input:focus, .fld select:focus { outline: none; border-color: var(--violet); }
 .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
@@ -158,8 +160,8 @@ tr:hover td { background: rgba(255,255,255,.02); }
   font-size: .85rem;
   transition: all .15s;
 }
-.role-item:hover { border-color: var(--muted); }
-.role-item.selected { background: rgba(139,92,246,.12); border-color: var(--violet); }
+.role-item:hover { border-color: #475569; }
+.role-item.selected { background: rgba(37,99,235,.12); border-color: var(--violet); }
 .role-item input { width: auto; margin: 0; accent-color: var(--violet); }
 .role-item .ico { font-size: 1rem; }
 
@@ -186,7 +188,7 @@ tr:hover td { background: rgba(255,255,255,.02); }
   transition: all .15s;
   min-height: 44px;
 }
-.tp-mod-item:hover { border-color: var(--muted) !important; }
+.tp-mod-item:hover { border-color: #475569 !important; }
 .tp-mod-item .mod-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
 .tp-mod-item .mod-nombre {
   font-weight: 600; font-size: .84rem;
@@ -194,7 +196,7 @@ tr:hover td { background: rgba(255,255,255,.02); }
   white-space: normal; word-break: normal;
 }
 .tp-mod-item .mod-meta {
-  font-size: .68rem; color: var(--muted); font-weight: 500;
+  font-size: .68rem; color: #475569; font-weight: 500;
   letter-spacing: .3px; text-transform: uppercase;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
@@ -202,14 +204,14 @@ tr:hover td { background: rgba(255,255,255,.02); }
 .tp-mod-item .mod-badge {
   display: inline-block; padding: 1px 7px; border-radius: 4px;
   font-size: .65rem; font-weight: 700; letter-spacing: .3px;
-  background: rgba(148,163,184,.12); color: var(--muted);
+  background: rgba(148,163,184,.12); color: #475569;
 }
-.tp-mod-item .mod-badge.nivel { background: rgba(139,92,246,.15); color: #c4b5fd; }
+.tp-mod-item .mod-badge.nivel { background: rgba(37,99,235,.15); color: #2563EB; }
 .tp-mod-item .mod-badge.horas { background: rgba(52,211,153,.12); color: var(--green); }
-.role-grupo { font-size: .68rem; color: var(--muted); text-transform: uppercase; letter-spacing: .8px; margin: 12px 0 6px; font-weight: 700; }
+.role-grupo { font-size: .68rem; color: #475569; text-transform: uppercase; letter-spacing: .8px; margin: 12px 0 6px; font-weight: 700; }
 .role-grupo:first-child { margin-top: 0; }
 
-.err-box { background: rgba(248,113,113,.08); border: 1px solid rgba(248,113,113,.25); border-radius: 8px; padding: 10px 14px; color: var(--danger); font-size: .84rem; margin-bottom: 14px; display: none; }
+.err-box { background: rgba(220,38,38,.08); border: 1px solid rgba(220,38,38,.25); border-radius: 8px; padding: 10px 14px; color: var(--danger); font-size: .84rem; margin-bottom: 14px; display: none; }
 .err-box.show { display: block; }
 
 .modal-nav { display: flex; justify-content: flex-end; gap: 10px; margin-top: 22px; }
@@ -218,11 +220,11 @@ tr:hover td { background: rgba(255,255,255,.02); }
 .exito { text-align: center; padding: 12px 4px; }
 .exito .ico { font-size: 3rem; margin-bottom: 10px; }
 .exito h3 { color: var(--green); margin-bottom: 6px; }
-.exito p { color: var(--muted); font-size: .88rem; margin-bottom: 20px; }
+.exito p { color: #475569; font-size: .88rem; margin-bottom: 20px; }
 .credenciales-box { background: rgba(52,211,153,.05); border: 1px solid rgba(52,211,153,.25); border-radius: 12px; padding: 18px 20px; text-align: left; margin-bottom: 16px; }
-.credenciales-box .row { display: flex; align-items: center; gap: 12px; padding: 8px 0; border-bottom: 1px dashed rgba(148,163,184,.15); }
+.credenciales-box .row { display: flex; align-items: center; gap: 12px; padding: 8px 0; border-bottom: 1px dashed rgba(37,99,235,.14); }
 .credenciales-box .row:last-child { border-bottom: none; }
-.credenciales-box .k { color: var(--muted); font-size: .76rem; text-transform: uppercase; letter-spacing: .5px; min-width: 90px; }
+.credenciales-box .k { color: #475569; font-size: .76rem; text-transform: uppercase; letter-spacing: .5px; min-width: 90px; }
 .credenciales-box .v { flex: 1; font-family: 'Courier New', monospace; font-size: .92rem; word-break: break-all; }
 .aviso { background: rgba(251,191,36,.06); border: 1px solid rgba(251,191,36,.25); border-radius: 8px; padding: 10px 14px; font-size: .82rem; color: var(--gold); }
 
@@ -260,8 +262,13 @@ tr:hover td { background: rgba(255,255,255,.02); }
   <!-- ═══ Accesos rápidos ═══ -->
   <div style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap">
     <a href="admin-cursos.html" class="btn">🎓 Cursos y estudiantes</a>
+    <a href="admin-horarios.html" class="btn">🕐 Horarios docentes</a>
+    <a href="admin-informe-personalidad.html" class="btn">📄 Config. Informe Personalidad</a>
     <a href="panel-director.html" class="btn">📊 Dashboard Director</a>
     <a href="panel-utp.html" class="btn">📋 Panel UTP</a>
+    <a href="panel-pie.html" class="btn">♿ Panel PIE</a>
+    <a href="panel-apoyo.html" class="btn">💙 Apoyo Psicosocial</a>
+    <a href="panel-ambiente.html" class="btn">🤝 Convivencia</a>
     <button class="btn" onclick="editarLiceo()">⚙ Configuración del colegio</button>
   </div>
 
@@ -340,7 +347,7 @@ tr:hover td { background: rgba(255,255,255,.02); }
 <div class="modal-bg" id="modalMiembro">
   <div class="modal">
     <div class="modal-title" id="modalTitulo">Agregar miembro</div>
-    <div class="modal-sub" id="modalSub">Completá los datos y elegí uno o más roles.</div>
+    <div class="modal-sub" id="modalSub">Completá los datos y elige uno o más roles.</div>
 
     <div class="err-box" id="errBox"></div>
 
@@ -355,9 +362,25 @@ tr:hover td { background: rgba(255,255,255,.02); }
       </div>
 
       <div class="fld">
-        <label>Roles (podés marcar más de uno) *</label>
+        <label>Roles (puedes marcar más de uno) *</label>
         <div id="rolesGridWrap"></div>
         <div class="h">Podés combinar: por ejemplo un profesor puede ser también jefe de curso, o un director puede dar clases.</div>
+      </div>
+
+      <!-- Profesión APS/PIE — visible sólo si roles incluye aps_prof, aps_enc, pie_edu, pie_enc, amb_prof -->
+      <div class="fld" id="fldProfesionWrap" style="display:none">
+        <label>Profesión específica *</label>
+        <input type="text" id="fProfesion" list="profesionesAPS" placeholder="Elegí o escribí (ej: Psicóloga, Trabajadora Social, Psicopedagoga)">
+        <datalist id="profesionesAPS">
+          <option value="Psicólogo/a">
+          <option value="Trabajador/a Social">
+          <option value="Psicopedagogo/a">
+          <option value="Terapeuta Ocupacional">
+          <option value="Fonoaudiólogo/a">
+          <option value="Educador/a Diferencial">
+          <option value="Mediador/a Escolar">
+        </datalist>
+        <div class="h">🎯 En APS, la profesión define qué panel específico ve el profesional (Psi/TS/Psp cambian motivos, herramientas y secciones).</div>
       </div>
 
       <div class="fld" id="fldAsignaturasWrap">
@@ -384,8 +407,8 @@ tr:hover td { background: rgba(255,255,255,.02); }
         <div class="h">Marcá los cursos donde este docente da clases. Después vas a poder asignar cada asignatura a un curso específico.</div>
       </div>
 
-      <div class="fld" style="padding:14px 16px;background:rgba(139,92,246,.04);border:1px solid rgba(139,92,246,.2);border-radius:10px;margin-top:8px">
-        <label style="color:#c4b5fd">🔐 Permisos del docente</label>
+      <div class="fld" style="padding:14px 16px;background:rgba(37,99,235,.04);border:1px solid rgba(37,99,235,.2);border-radius:10px;margin-top:8px">
+        <label style="color:#2563EB">🔐 Permisos del docente</label>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
           <label class="role-item" data-perm="planificar">
             <input type="checkbox" id="permPlanificar" checked onchange="onPermCheck(this)">
@@ -402,7 +425,7 @@ tr:hover td { background: rgba(255,255,255,.02); }
       </div>
 
       <div class="fld" style="padding:14px 16px;background:rgba(34,211,238,.04);border:1px solid rgba(34,211,238,.2);border-radius:10px;margin-top:8px">
-        <label style="color:#67e8f9">🧠 Capacidades pedagógicas avanzadas</label>
+        <label style="color:#0369A1">🧠 Capacidades pedagógicas avanzadas</label>
         <div class="h" style="margin-bottom:8px">Habilitá formatos y taxonomías especiales para este docente al crear material o evaluaciones con IA.</div>
         <div style="display:grid;grid-template-columns:1fr;gap:8px">
           <label class="role-item" data-cap="paes">
@@ -435,7 +458,7 @@ tr:hover td { background: rgba(255,255,255,.02); }
           <button type="button" class="btn small" onclick="usarRutPass()">🪪 Usar RUT</button>
           <button type="button" class="btn small" onclick="generarPass()">🎲 Generar</button>
         </div>
-        <div class="h">Por defecto podés usar el RUT sin puntos ni guiones. El usuario podrá cambiarla en su primer ingreso.</div>
+        <div class="h">Por defecto puedes usar el RUT sin puntos ni guiones. El usuario podrá cambiarla en su primer ingreso.</div>
       </div>
 
       <div class="fld" id="fldResetPass" style="display:none;padding:14px;background:rgba(251,191,36,.05);border:1px solid rgba(251,191,36,.2);border-radius:10px">
@@ -444,6 +467,17 @@ tr:hover td { background: rgba(255,255,255,.02); }
         <div style="display:flex;gap:8px">
           <input type="text" id="fNewPass" placeholder="Nueva contraseña temporal" style="flex:1">
           <button type="button" class="btn" onclick="resetearPasswordUsuario()">🔑 Marcar reset</button>
+        </div>
+      </div>
+
+      <div class="fld" id="fldPinFirma" style="display:none;padding:14px;background:rgba(37,99,235,.05);border:1px solid rgba(37,99,235,.2);border-radius:10px">
+        <label style="color:#2563EB">🔐 PIN de firma del libro de clases</label>
+        <div class="h" style="margin-bottom:8px">
+          Cada docente necesita un PIN de 6 dígitos para firmar sus clases. Al generarlo se muestra <b>una sola vez</b>: entregalo en mano o por email al profesor. Si lo pierde, generá uno nuevo.
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <button type="button" class="btn primary" onclick="generarPinFirma()">🎲 Generar PIN nuevo</button>
+          <span id="pinFirmaEstado" style="font-size:.82rem;color:#475569"></span>
         </div>
       </div>
     </div>
@@ -646,10 +680,10 @@ function renderPersonal() {
     var asigsArr = Array.isArray(m.asignaturas) ? m.asignaturas : (m.asignatura ? [m.asignatura] : []);
     var espsArr  = Array.isArray(m.especialidades) ? m.especialidades : (m.especialidad ? [m.especialidad] : []);
     var asigTags = asigsArr.map(function (a) {
-      return '<span class="tag" style="background:rgba(34,211,238,.1);color:#67e8f9;border-color:rgba(34,211,238,.2)">📚 ' + esc(ASIGNATURAS_LABELS[a] || a) + '</span>';
+      return '<span class="tag" style="background:rgba(34,211,238,.1);color:#0369A1;border-color:rgba(34,211,238,.2)">📚 ' + esc(ASIGNATURAS_LABELS[a] || a) + '</span>';
     }).join('');
     var espTags = espsArr.map(function (e) {
-      return '<span class="tag" style="background:rgba(251,191,36,.1);color:#fcd34d;border-color:rgba(251,191,36,.2)">🔧 ' + esc(TP_LABELS[e] || e) + '</span>';
+      return '<span class="tag" style="background:rgba(251,191,36,.1);color: #B45309;border-color:rgba(251,191,36,.2)">🔧 ' + esc(TP_LABELS[e] || e) + '</span>';
     }).join('');
     // Módulos TP por especialidad — como tags más chicos debajo
     var modulosTagsHtml = '';
@@ -660,7 +694,7 @@ function renderPersonal() {
         var label = (typeof CCTPCatalogo !== 'undefined')
           ? CCTPCatalogo.labelModulo(espId, modId)
           : modId;
-        modulosTagsHtml += '<span class="tag" style="background:rgba(139,92,246,.08);color:#c4b5fd;border-color:rgba(139,92,246,.2);font-size:.65rem">📖 ' + esc(label) + '</span>';
+        modulosTagsHtml += '<span class="tag" style="background:rgba(37,99,235,.08);color:#2563EB;border-color:rgba(37,99,235,.2);font-size:.65rem">📖 ' + esc(label) + '</span>';
       });
     });
     var asigEsp = (asigTags + espTags + (modulosTagsHtml ? '<div style="margin-top:4px">' + modulosTagsHtml + '</div>' : '')) || '<span style="color:var(--muted)">—</span>';
@@ -702,10 +736,12 @@ function renderRolesForm() {
 
 function onRolCheck(cb) {
   cb.closest('.role-item').classList.toggle('selected', cb.checked);
+  try { onRolesChange(); } catch(e){}
 }
 
 // Nombres de asignaturas Mineduc (para dropdown)
 var ASIGNATURAS_LABELS = {
+  parvularia: 'Educación Parvularia',
   lenguaje: 'Lenguaje y Comunicación',
   matematica: 'Matemática',
   ciencias_nat: 'Ciencias Naturales',
@@ -724,7 +760,33 @@ var ASIGNATURAS_LABELS = {
   filosofia: 'Filosofía',
   ed_ciudadana: 'Educación Ciudadana',
   ling_liter: 'Lengua y Literatura',
-  artes_esc: 'Artes Escénicas'
+  artes_esc: 'Artes Escénicas (Teatro y Danza)',
+  // Electivos HC 3°-4° Medio
+  el_lee: 'Lectura y Escritura Especializadas',
+  el_tlit: 'Taller de Literatura',
+  el_pad: 'Participación y Argumentación en Democracia',
+  el_geo3d: 'Geometría 3D',
+  el_limi: 'Límites, Derivadas e Integrales',
+  el_prob: 'Probabilidades y Estadística',
+  el_pcp: 'Pensamiento Computacional y Programación',
+  el_cla: 'Chile y la Región Latinoamericana',
+  el_mug: 'Comprensión Histórica del Mundo Global',
+  el_gts: 'Geografía, Territorio y Desafíos Socioambientales',
+  el_ecs: 'Economía y Sociedad',
+  el_bec: 'Biología de los Ecosistemas',
+  el_bcm: 'Biología Celular y Molecular',
+  el_csa: 'Ciencias de la Salud',
+  el_fis_hc: 'Física (Plan Diferenciado HC)',
+  el_qui_hc: 'Química (Plan Diferenciado HC)',
+  el_avm: 'Artes Visuales, Audiovisuales y Multimediales',
+  el_dar: 'Diseño y Arquitectura',
+  el_ccm: 'Creación y Composición Musical',
+  el_imu: 'Interpretación Musical',
+  el_fpo: 'Filosofía Política',
+  el_sfi: 'Seminario de Filosofía',
+  el_est: 'Estética',
+  el_efs1: 'Ed. Física y Salud — Programa 1',
+  el_efs2: 'Ed. Física y Salud — Programa 2'
 };
 
 // Etiquetas de especialidades TP (compartido)
@@ -856,7 +918,7 @@ function renderModulosTP(preservarSeleccion) {
       html += '<div style="margin-bottom:14px;padding:16px 18px;background:rgba(251,191,36,.04);border:1px solid rgba(251,191,36,.22);border-radius:12px">'
         + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:10px;flex-wrap:wrap">'
         +   '<div style="font-weight:700;font-size:.92rem;color:var(--gold)">🔧 ' + esc(espLabel) + '</div>'
-        +   '<span style="font-size:.7rem;color:var(--muted);padding:4px 12px;background:rgba(255,255,255,.04);border-radius:999px;font-weight:600">' + mods.length + ' módulos · ' + totalHoras + 'h totales</span>'
+        +   '<span style="font-size:.7rem;color:var(--muted);padding:4px 12px;background:rgba(37,99,235,.05);border-radius:999px;font-weight:600">' + mods.length + ' módulos · ' + totalHoras + 'h totales</span>'
         + '</div>'
         + '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:8px">';
       mods.forEach(function (m) {
@@ -969,11 +1031,18 @@ function onRutChange() {
   }
 }
 function onRolesChange() {
+  // Mostrar/ocultar campo "Profesión específica" según roles marcados
+  var rolesMarcados = Array.from(document.querySelectorAll('#rolesGridWrap input:checked')).map(function(c){ return c.value; });
+  var ROLES_CON_PROFESION = ['aps_prof','aps_enc','pie_edu','pie_enc','amb_prof','amb_enc'];
+  var muestra = rolesMarcados.some(function(r){ return ROLES_CON_PROFESION.indexOf(r) !== -1; });
+  var fld = document.getElementById('fldProfesionWrap');
+  if (fld) fld.style.display = muestra ? 'block' : 'none';
+
   // Ajustar cargo sugerido según el primer rol
   var sel = document.getElementById('fRolesSelect');
   var rolesSel = Array.from(sel.selectedOptions).map(function (o) { return o.value; });
   var cargoSel = document.getElementById('fCargo');
-  if (!cargoSel.value && rolesSel.length) {
+  if (cargoSel && !cargoSel.value && rolesSel.length) {
     var mapa = {
       profesor: 'Profesor/a de asignatura',
       jefe_curso: 'Profesor/a jefe',
@@ -1016,14 +1085,68 @@ function resetearPasswordUsuario() {
   // No podemos cambiar la password de Auth desde el cliente (requiere admin SDK).
   // Marcamos primerIngreso: true y avisamos al usuario para acción manual en Firebase Console.
   CCPersonal.actualizarMiembro(_editandoUid, { primerIngreso: true }).then(function () {
-    alert('✓ Usuario marcado como primer-ingreso.\n\nPara asignar la contraseña "' + nuevaPass + '" hacé lo siguiente:\n\n1. Andá a https://console.firebase.google.com/project/electrolearn-prod/authentication/users\n2. Buscá el email del usuario\n3. En los ⋮ elegí "Restablecer contraseña"\n\n(En una próxima versión, esto lo haremos automático desde una Cloud Function.)');
+    alert('✓ Usuario marcado como primer-ingreso.\n\nPara asignar la contraseña "' + nuevaPass + '" haz lo siguiente:\n\n1. Andá a https://console.firebase.google.com/project/electrolearn-prod/authentication/users\n2. Buscá el email del usuario\n3. En los ⋮ elige "Restablecer contraseña"\n\n(En una próxima versión, esto lo haremos automático desde una Cloud Function.)');
   }).catch(function (err) { alert('Error: ' + err.message); });
 }
 
+// ── PIN de firma del libro de clases ─────────────────────────
+function generarPinFirma() {
+  if (!_editandoUid) return alert('No hay usuario seleccionado.');
+  if (!window.CCPinFirma) return alert('Módulo PIN no cargado. Refrescá la página.');
+  if (!confirm('¿Generar un PIN nuevo para este docente?\n\n' +
+               'El PIN se mostrará UNA SOLA VEZ — anotalo y entregalo en mano.\n' +
+               'Si ya tenía uno, quedará anulado.')) return;
+
+  var estado = document.getElementById('pinFirmaEstado');
+  if (estado) { estado.textContent = 'Generando…'; estado.style.color = '#475569'; }
+
+  CCPinFirma.generarYGuardarParaUsuario(_editandoUid).then(function (r) {
+    // Modal con el PIN plaintext
+    var ov = document.createElement('div');
+    ov.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,.6);z-index:99999;' +
+      'display:flex;align-items:center;justify-content:center;font-family:inherit';
+    ov.innerHTML =
+      '<div style="background:#fff;border-radius:14px;padding:26px 30px;width:min(440px,94vw);' +
+      'box-shadow:0 20px 60px rgba(0,0,0,.35);text-align:center">' +
+        '<div style="font-size:2.4rem">🔐</div>' +
+        '<h3 style="margin:8px 0 6px;color:#0C1E3B">PIN de firma generado</h3>' +
+        '<p style="margin:0 0 16px;color:#475569;font-size:.88rem">' +
+          'Este PIN se muestra UNA SOLA VEZ. Anotalo o entregalo al docente ahora — ' +
+          'después no podrás verlo de nuevo. Si se pierde, generá uno nuevo.' +
+        '</p>' +
+        '<div style="font-family:monospace;font-size:2.4rem;letter-spacing:.4em;' +
+          'padding:16px;background:#F0F7FF;border:2px solid #2563EB;border-radius:12px;' +
+          'color:#0C1E3B;font-weight:700;margin:12px 0">' + r.pin + '</div>' +
+        '<div style="display:flex;gap:8px;margin-top:14px;justify-content:center">' +
+          '<button id="_pfCopy" style="padding:10px 18px;border-radius:8px;border:1px solid #e2e8f0;' +
+            'background:#fff;color:#334155;cursor:pointer;font-weight:600">📋 Copiar PIN</button>' +
+          '<button id="_pfClose" style="padding:10px 22px;border-radius:8px;border:none;' +
+            'background:linear-gradient(135deg,#2563EB,#38BDF8);color:#fff;cursor:pointer;font-weight:700">Ya lo entregué</button>' +
+        '</div>' +
+      '</div>';
+    document.body.appendChild(ov);
+    ov.querySelector('#_pfCopy').onclick = function () {
+      navigator.clipboard.writeText(r.pin).then(function(){
+        this.textContent = '✓ Copiado';
+      }.bind(ov.querySelector('#_pfCopy')));
+    };
+    ov.querySelector('#_pfClose').onclick = function () { document.body.removeChild(ov); };
+
+    if (estado) {
+      estado.textContent = '✓ PIN generado (' + new Date().toISOString().slice(0,10) + ')';
+      estado.style.color = '#059669';
+    }
+  }).catch(function (err) {
+    if (estado) { estado.textContent = ''; }
+    alert('Error al generar PIN: ' + err.message);
+  });
+}
+
 function _limpiarModal() {
-  ['fNombre','fEmail','fTelefono','fRut','fPassword','fNewPass'].forEach(function (id) {
+  ['fNombre','fEmail','fTelefono','fRut','fPassword','fNewPass','fProfesion'].forEach(function (id) {
     var el = document.getElementById(id); if (el) el.value = '';
   });
+  var fpw = document.getElementById('fldProfesionWrap'); if (fpw) fpw.style.display = 'none';
   document.querySelectorAll('#rolesGridWrap input, #asigGridWrap input, #espGridWrap input, #cursosGridWrap input').forEach(function (cb) {
     cb.checked = false;
     var lbl = cb.closest('.role-item'); if (lbl) lbl.classList.remove('selected');
@@ -1051,6 +1174,10 @@ function _limpiarModal() {
   document.getElementById('btnCerrarExito').style.display = 'none';
   document.getElementById('errBox').classList.remove('show');
   document.getElementById('fldResetPass').style.display = 'none';
+  var fpf = document.getElementById('fldPinFirma');
+  if (fpf) fpf.style.display = 'none';
+  var pfe = document.getElementById('pinFirmaEstado');
+  if (pfe) pfe.textContent = '';
 }
 
 function abrirModalCrear() {
@@ -1080,6 +1207,8 @@ function editar(uid) {
   document.getElementById('fEmail').disabled = true;
   document.getElementById('fTelefono').value = m.telefono || '';
   document.getElementById('fRut').value = m.rut || '';
+  var pfEl = document.getElementById('fProfesion');
+  if (pfEl) pfEl.value = m.profesion || m.cargo || '';
 
   // Marcar roles
   var roles = m.roles ? Object.keys(m.roles) : (m.role ? [m.role] : []);
@@ -1140,6 +1269,25 @@ function editar(uid) {
   });
 
   document.getElementById('fldResetPass').style.display = 'block';
+  // Bloque PIN de firma — solo para docentes/roles que firman clases
+  var rolesQueFirman = ['profesor','jefe_curso','utp','encargado_area'];
+  var puedeFirmar = false;
+  Object.keys(m.roles || {}).forEach(function (r) {
+    if (rolesQueFirman.indexOf(r) !== -1) puedeFirmar = true;
+  });
+  var fpf = document.getElementById('fldPinFirma');
+  if (fpf) {
+    fpf.style.display = puedeFirmar ? 'block' : 'none';
+    var pfe = document.getElementById('pinFirmaEstado');
+    if (pfe) {
+      pfe.textContent = m.pinFirmaHash
+        ? '✓ PIN asignado (' + (m.pinFirmaSetAt ? String(m.pinFirmaSetAt).slice(0,10) : 'sin fecha') + ')'
+        : '⚠ Sin PIN asignado — no puede firmar clases todavía.';
+      pfe.style.color = m.pinFirmaHash ? '#059669' : '#DC2626';
+    }
+  }
+  // Disparar visibilidad del bloque profesión según roles cargados
+  try { onRolesChange(); } catch(e){}
   document.getElementById('modalMiembro').classList.add('show');
 }
 
@@ -1179,11 +1327,13 @@ function guardarMiembro() {
     taxonomiaMarzano: document.getElementById('capMarzano').checked,
     dua:              document.getElementById('capDUA').checked
   };
+  var profesionEl = document.getElementById('fProfesion');
   var datos = {
     nombre:          document.getElementById('fNombre').value.trim(),
     email:           document.getElementById('fEmail').value.trim(),
     telefono:        document.getElementById('fTelefono').value.trim(),
     rut:             document.getElementById('fRut').value.trim(),
+    profesion:       profesionEl ? profesionEl.value.trim() : '',
     asignaturas:     asigs,
     especialidades:  esps,
     modulosTP:       modulosTP,
@@ -1194,6 +1344,10 @@ function guardarMiembro() {
     usarRutComoPass: true,
     roles:           roles
   };
+  // Validar profesión obligatoria si tiene rol APS/PIE/Convivencia
+  var ROLES_CON_PROFESION = ['aps_prof','aps_enc','pie_edu','pie_enc','amb_prof','amb_enc'];
+  var necesitaProf = roles.some(function(r){ return ROLES_CON_PROFESION.indexOf(r) !== -1; });
+  if (necesitaProf && !datos.profesion) { mostrarError('La profesión específica es obligatoria para roles APS/PIE/Convivencia.'); btn.disabled=false; btn.innerHTML='💾 Guardar'; return; }
 
   if (!datos.nombre) { mostrarError('El nombre es obligatorio.'); return; }
   if (!datos.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(datos.email)) { mostrarError('Email inválido.'); return; }
@@ -1247,13 +1401,27 @@ function guardarMiembro() {
 function desactivar(uid) {
   if (!confirm('¿Desactivar a este miembro? No podrá ingresar hasta ser reactivado.')) return;
   CCPersonal.desactivar(uid).then(function () {
-    cargarPersonal(); cargarKpis();
-  }).catch(function (err) { alert('Error: ' + err.message); });
+    // Actualización optimista en memoria (feedback visual inmediato)
+    var m = _miembros.find(function(x){ return x.uid === uid; });
+    if (m) m.activo = false;
+    renderPersonal();
+    // Refrescar contra Firestore (por si otro admin también toca)
+    setTimeout(function(){ cargarPersonal(); cargarKpis(); }, 500);
+  }).catch(function (err) {
+    console.error('[desactivar]', err);
+    alert('Error al desactivar: ' + (err.message || err) + '\n\nSi persiste, contactá al admin.');
+  });
 }
 function reactivar(uid) {
   CCPersonal.reactivar(uid).then(function () {
-    cargarPersonal(); cargarKpis();
-  }).catch(function (err) { alert('Error: ' + err.message); });
+    var m = _miembros.find(function(x){ return x.uid === uid; });
+    if (m) m.activo = true;
+    renderPersonal();
+    setTimeout(function(){ cargarPersonal(); cargarKpis(); }, 500);
+  }).catch(function (err) {
+    console.error('[reactivar]', err);
+    alert('Error al reactivar: ' + (err.message || err));
+  });
 }
 
 function editarLiceo() {
@@ -1361,8 +1529,8 @@ function renderPreviewCarga() {
 
   var resumen = '<div style="display:flex;gap:10px;flex-wrap:wrap;font-size:.86rem">'
     + '<div style="padding:8px 14px;background:rgba(52,211,153,.08);border:1px solid rgba(52,211,153,.25);color:var(--green);border-radius:8px"><b>' + validas + '</b> filas válidas</div>';
-  if (invalidas > 0) resumen += '<div style="padding:8px 14px;background:rgba(248,113,113,.08);border:1px solid rgba(248,113,113,.25);color:var(--danger);border-radius:8px"><b>' + invalidas + '</b> con errores (no se cargarán)</div>';
-  resumen += '<div style="padding:8px 14px;background:rgba(139,92,246,.08);border:1px solid rgba(139,92,246,.25);color:#c4b5fd;border-radius:8px"><b>' + disponibles + '</b> asientos disponibles</div>';
+  if (invalidas > 0) resumen += '<div style="padding:8px 14px;background:rgba(220,38,38,.08);border:1px solid rgba(220,38,38,.25);color:var(--danger);border-radius:8px"><b>' + invalidas + '</b> con errores (no se cargarán)</div>';
+  resumen += '<div style="padding:8px 14px;background:rgba(37,99,235,.08);border:1px solid rgba(37,99,235,.25);color:#2563EB;border-radius:8px"><b>' + disponibles + '</b> asientos disponibles</div>';
   if (validas > disponibles) resumen += '<div style="padding:8px 14px;background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.25);color:var(--gold);border-radius:8px">⚠ Excedés el límite en <b>' + (validas - disponibles) + '</b>. Solo se cargarán las primeras ' + disponibles + '.</div>';
   resumen += '</div>';
   document.getElementById('cargaResumen').innerHTML = resumen;
@@ -1462,5 +1630,8 @@ if (typeof ELAuth !== 'undefined' && ELAuth.onUserReady) {
 }
 </script>
 
+<script src="js/ia-widget.js" defer></script>
+<script src="js/session-guard.js" defer></script>
+<script src="js/search-global.js" defer></script>
 </body>
 </html>

@@ -55,7 +55,7 @@
   function redirigirAPanelDefault(user) {
     var rol = getRolActivo(user);
     var mapa = (typeof EL_ROLES_PANEL !== 'undefined') ? EL_ROLES_PANEL : {};
-    var destino = mapa[rol] || 'panel-profesor.html';
+    var destino = mapa[rol] || 'dashboard-profesor.html';
     // Evitar loops si ya estamos en el panel
     var actual = (window.location.pathname || '').split('/').pop();
     if (actual !== destino) window.location.href = destino;
@@ -67,7 +67,7 @@
    * los alternativos válidos), lo redirige a su panel principal.
    *
    * @param {string|string[]} rolesRequeridos  Rol o roles que dan acceso.
-   * @param {object} opts  { fallback: 'panel-profesor.html' }
+   * @param {object} opts  { fallback: 'dashboard-profesor.html' }
    */
   function guardPanel(rolesRequeridos, opts) {
     opts = opts || {};
@@ -87,7 +87,7 @@
       if (CCRoles.tieneAlgunRol(user, roles)) return;
       // Sin permiso → mandarlo a su panel principal
       console.warn('[CCRouter] usuario sin rol', roles, '→ redirigiendo a su panel');
-      var destino = CCRoles.panelDefault(user) || opts.fallback || 'panel-profesor.html';
+      var destino = CCRoles.panelDefault(user) || opts.fallback || 'dashboard-profesor.html';
       window.location.href = destino;
     });
   }

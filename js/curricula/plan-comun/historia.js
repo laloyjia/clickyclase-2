@@ -221,6 +221,12 @@ CURRICULA_PLAN_COMUN['historia'] = {
       { codigo: 'OA15', eje: 'Formación Ciudadana',  descripcion: 'Analizar el concepto de ciudadanía global en un contexto de interdependencia mundial, considerando los desafíos comunes a la humanidad (paz, derechos humanos, medio ambiente, desarrollo sostenible, cooperación internacional) y el rol de Chile en organismos internacionales.' }
     ]
   }
+
+  // NOTA: Los electivos HC de Historia (chile-latam, mundo-global,
+  // geografia-territorio, economia-sociedad) están registrados como
+  // top-level en CURRICULA_PLAN_COMUN más abajo en este mismo archivo,
+  // y CURRICULA_CHILE.getElectivosHC('HIS') los expone vía el mapa
+  // _ELECTIVOS_TOP_PARENT. No duplicar acá.
 };
 
 // =============================================================================

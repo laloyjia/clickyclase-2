@@ -69,7 +69,7 @@
         .rank-tab.active {
             background: var(--primary);
             color: white;
-            box-shadow: 0 2px 8px rgba(99,102,241,0.4);
+            box-shadow: 0 2px 8px rgba(37,99,235,0.4);
         }
         .rank-tab:hover:not(.active) { color: var(--text); }
 
@@ -110,10 +110,10 @@
             color: white;
         }
 
-        .lugar-1 .podio-avatar { border-color: #fbbf24; background: rgba(251,191,36,0.15); }
-        .lugar-1 .podio-base { height: 90px; background: linear-gradient(180deg, #fbbf24, #f59e0b); }
-        .lugar-2 .podio-avatar { border-color: #94a3b8; background: rgba(148,163,184,0.15); }
-        .lugar-2 .podio-base { height: 65px; background: linear-gradient(180deg, #94a3b8, #64748b); }
+        .lugar-1 .podio-avatar { border-color: #F59E0B; background: rgba(251,191,36,0.15); }
+        .lugar-1 .podio-base { height: 90px; background: linear-gradient(180deg, #F59E0B, #f59e0b); }
+        .lugar-2 .podio-avatar { border-color: #64748B; background: rgba(148,163,184,0.15); }
+        .lugar-2 .podio-base { height: 65px; background: linear-gradient(180deg, #64748B, #64748b); }
         .lugar-3 .podio-avatar { border-color: #f97316; background: rgba(249,115,22,0.15); }
         .lugar-3 .podio-base { height: 50px; background: linear-gradient(180deg, #f97316, #ea580c); }
 
@@ -147,7 +147,7 @@
             .rank-col-eval { display: none; }
         }
         .rank-row:hover { background: rgba(255,255,255,0.04); }
-        .rank-row.yo { background: rgba(99,102,241,0.1); border-left: 3px solid var(--primary); }
+        .rank-row.yo { background: rgba(37,99,235,0.1); border-left: 3px solid var(--primary); }
         .rank-row.top1 { background: rgba(251,191,36,0.07); }
         .rank-row.top2 { background: rgba(148,163,184,0.05); }
         .rank-row.top3 { background: rgba(249,115,22,0.06); }
@@ -260,7 +260,7 @@
         .insignia-desc { font-size: 0.72rem; color: var(--text-muted); margin-top: 2px; }
         .insignia-desbloqueada-label {
             font-size: 0.68rem;
-            color: #fbbf24;
+            color: #F59E0B;
             font-weight: 700;
             margin-top: 4px;
         }
@@ -286,7 +286,7 @@
         .mod-prog-num {
             font-size: 0.72rem; font-weight: 700;
             padding: 0.1rem 0.5rem; border-radius: 20px;
-            background: rgba(99,102,241,0.15); color: var(--primary-light);
+            background: rgba(37,99,235,0.15); color: var(--primary-light);
         }
         .mod-prog-barra-wrap {
             background: rgba(255,255,255,0.08);
@@ -426,7 +426,7 @@
                     <div class="lbl">Promedio nota</div>
                 </div>
                 <div class="mi-stat">
-                    <div class="val" id="miInsignias" style="color:#fbbf24">0</div>
+                    <div class="val" id="miInsignias" style="color:#F59E0B">0</div>
                     <div class="lbl">Insignias</div>
                 </div>
             </div>
@@ -725,7 +725,7 @@
         // Sugerencias
         var sugHtml = '';
         if (modsSinEval.length > 0) {
-            sugHtml += '<div style="background:rgba(99,102,241,0.08);border:1px solid rgba(99,102,241,0.2);border-radius:var(--radius-sm);padding:1rem;margin-bottom:0.8rem;">' +
+            sugHtml += '<div style="background:rgba(37,99,235,0.08);border:1px solid rgba(37,99,235,0.2);border-radius:var(--radius-sm);padding:1rem;margin-bottom:0.8rem;">' +
                 '<strong style="font-size:0.88rem;">📚 Modulos sin evaluar:</strong>' +
                 '<p style="font-size:0.82rem;color:var(--text-muted);margin-top:0.4rem;">' + modsSinEval.slice(0, 4).join(', ') + (modsSinEval.length > 4 ? ' y ' + (modsSinEval.length - 4) + ' mas' : '') + '</p>' +
                 '<a href="evaluaciones.html" style="font-size:0.82rem;color:var(--primary-light);">➡️ Ir a evaluaciones</a>' +
@@ -746,7 +746,7 @@
 
         var xpFalta = xpParaSiguienteNivel(u.xp || 0);
         if (xpFalta.siguiente) {
-            sugHtml += '<div style="background:rgba(0,206,201,0.07);border:1px solid rgba(0,206,201,0.2);border-radius:var(--radius-sm);padding:1rem;">' +
+            sugHtml += '<div style="background:rgba(56, 189, 248, 0.07);border:1px solid rgba(56, 189, 248, 0.2);border-radius:var(--radius-sm);padding:1rem;">' +
                 '<strong style="font-size:0.88rem;">⚡ Proximo nivel: ' + xpFalta.siguiente.icon + ' ' + xpFalta.siguiente.nombre + '</strong>' +
                 '<p style="font-size:0.82rem;color:var(--text-muted);margin-top:0.4rem;">Te faltan <strong>' + xpFalta.xpFalta + ' XP</strong>. Completa ' + Math.ceil(xpFalta.xpFalta / 50) + ' evaluacion' + (Math.ceil(xpFalta.xpFalta / 50) !== 1 ? 'es' : '') + ' con buena nota para alcanzarlo.</p>' +
             '</div>';

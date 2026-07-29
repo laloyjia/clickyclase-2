@@ -17,10 +17,12 @@
 window.CURRICULA_PLAN_COMUN = window.CURRICULA_PLAN_COMUN || {};
 
 // Niveles que corresponden a cada tramo
+var NIVELES_PARVULARIA = ['NT1','NT2'];
 var NIVELES_BASICA = ['1B','2B','3B','4B','5B','6B'];
 var NIVELES_MEDIA  = ['7B','8B','1M','2M','3M','4M']; // 7°B y 8°B en Chile son 2° ciclo básico pero el currículo es por asignatura media 7B-2M
 
 function _tramoDeNivel(nivel) {
+  if (NIVELES_PARVULARIA.indexOf(nivel) !== -1) return 'parvularia';
   if (NIVELES_BASICA.indexOf(nivel) !== -1) return 'basica';
   if (NIVELES_MEDIA.indexOf(nivel)  !== -1) return 'media';
   return 'basica';

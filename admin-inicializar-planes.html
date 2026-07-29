@@ -15,9 +15,9 @@
 <script src="js/roles-router.js"></script>
 <style>
 :root {
-  --bg: #0a0d1c; --panel: #151b35; --border: rgba(148,163,184,.15);
-  --text: #f1f5f9; --muted: #7b8aa5; --violet: #8b5cf6;
-  --green: #34d399; --gold: #fbbf24; --danger: #f87171;
+  --bg: #F0F7FF; --panel: #FFFFFF; --border: rgba(37,99,235,.14);
+  --text: #0C1E3B; --muted: #475569; --violet: #1D4ED8;
+  --green: #34d399; --gold: #F59E0B; --danger: #DC2626;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body {
@@ -29,30 +29,30 @@ body {
 .back { color: var(--violet); text-decoration: none; font-size: .88rem; }
 .back:hover { text-decoration: underline; }
 h1 { font-size: 1.9rem; font-weight: 800; margin: 12px 0 8px; letter-spacing: -.5px; }
-.sub { color: var(--muted); margin-bottom: 32px; }
+.sub { color: #475569; margin-bottom: 32px; }
 .card { background: var(--panel); border: 1px solid var(--border); border-radius: 16px; padding: 32px; margin-bottom: 20px; }
 .card h2 { font-size: 1.1rem; font-weight: 700; margin-bottom: 8px; }
-.card p { color: var(--muted); margin-bottom: 20px; font-size: .92rem; }
+.card p { color: #475569; margin-bottom: 20px; font-size: .92rem; }
 .plan {
-  background: rgba(255,255,255,.03); border: 1px solid var(--border);
+  background: rgba(37,99,235,.05); border: 1px solid var(--border);
   border-radius: 10px; padding: 16px 20px; margin-bottom: 10px;
   display: flex; justify-content: space-between; align-items: center;
 }
 .plan .info b { display: block; font-size: 1rem; }
-.plan .info .desc { color: var(--muted); font-size: .82rem; margin-top: 2px; }
+.plan .info .desc { color: #475569; font-size: .82rem; margin-top: 2px; }
 .plan .precio { font-family: 'Courier New', monospace; color: var(--gold); font-weight: 700; }
 .btn {
   background: linear-gradient(135deg, var(--violet), #6d28d9);
   color: white; border: none; padding: 14px 28px;
   font-size: 1rem; font-weight: 700; border-radius: 12px;
   cursor: pointer; font-family: inherit;
-  box-shadow: 0 4px 20px rgba(139,92,246,.35);
+  box-shadow: 0 4px 20px rgba(37,99,235,.35);
   transition: transform .15s;
 }
 .btn:hover:not(:disabled) { transform: translateY(-1px); }
 .btn:disabled { opacity: .5; cursor: not-allowed; }
 .log {
-  background: #05070f; border: 1px solid var(--border);
+  background: #F0F7FF; border: 1px solid var(--border);
   border-radius: 10px; padding: 20px;
   font-family: 'Courier New', monospace; font-size: .85rem;
   line-height: 1.7; min-height: 100px;
@@ -62,10 +62,10 @@ h1 { font-size: 1.9rem; font-weight: 800; margin: 12px 0 8px; letter-spacing: -.
 .log .ok { color: var(--green); }
 .log .err { color: var(--danger); }
 .log .info { color: var(--gold); }
-.log .dim { color: var(--muted); }
+.log .dim { color: #475569; }
 .auth-check { padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; font-size: .88rem; }
 .auth-check.ok { background: rgba(52,211,153,.08); border: 1px solid rgba(52,211,153,.25); color: var(--green); }
-.auth-check.no { background: rgba(248,113,113,.08); border: 1px solid rgba(248,113,113,.25); color: var(--danger); }
+.auth-check.no { background: rgba(220,38,38,.08); border: 1px solid rgba(220,38,38,.25); color: var(--danger); }
 </style>
 </head>
 <body>
@@ -146,7 +146,7 @@ var PLANES = [
     features: ['planificaciones','libro_clases','notas','asistencia','materiales','reportes_utp','panel_director_basico','ia_asistente','dashboards_avanzados','aprobaciones','panel_rector'],
     modulosIncluidos: ['Todo lo del plan Basic','Asistente IA (planifica, corrige, sugiere)','Dashboards Director & Rector','Flujo aprobación de material'],
     modulosNoIncluidos: ['PIE / Apoyo Psicosocial','Panel Convivencia'],
-    color: '#7c3aed', destacado: true, orden: 2
+    color: '#2563EB', destacado: true, orden: 2
   },
   {
     id: 'enterprise',
@@ -216,7 +216,7 @@ function cargarPlanes() {
     log('');
     if (errores === 0) {
       log('✅ LISTO. ' + completados + '/' + PLANES.length + ' planes cargados exitosamente.', 'ok');
-      log('   Ya podés crear colegios desde el wizard del SuperAdmin.', 'dim');
+      log('   Ya puedes crear colegios desde el wizard del SuperAdmin.', 'dim');
       btn.textContent = '✓ Completado';
     } else {
       log('⚠ Terminado con ' + errores + ' errores. Ver detalle arriba.', 'err');

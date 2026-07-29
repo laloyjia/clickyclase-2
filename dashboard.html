@@ -81,7 +81,7 @@
             content: '';
             position: absolute; inset: -8px;
             border-radius: 32px;
-            background: linear-gradient(135deg, rgba(124,58,237,.45), rgba(0,206,201,.4));
+            background: linear-gradient(135deg, rgba(37,99,235,.45), rgba(56, 189, 248, .4));
             filter: blur(16px); z-index: -1; opacity: .6;
             animation: avatarPulse 4s ease-in-out infinite;
         }
@@ -104,10 +104,10 @@
         .xp-card-pro {
             position: relative;
             background:
-                linear-gradient(135deg, rgba(124,58,237,.18), rgba(0,206,201,.08)),
-                rgba(15,22,35,.55);
+                linear-gradient(135deg, rgba(37,99,235,.18), rgba(56, 189, 248, .08)),
+                #FFFFFF;
             backdrop-filter: blur(14px);
-            border: 1px solid rgba(124,58,237,.3);
+            border: 1px solid rgba(37,99,235,.3);
             border-radius: var(--radius-xl);
             padding: 26px 30px;
             margin-bottom: 32px;
@@ -115,7 +115,7 @@
         }
         .xp-card-pro::before {
             content: ''; position: absolute; inset: -1px;
-            background: linear-gradient(135deg, rgba(167,139,250,.25), transparent 60%);
+            background: linear-gradient(135deg, rgba(37,99,235,.25), transparent 60%);
             pointer-events: none; z-index: 0;
         }
         .xp-card-pro > * { position: relative; z-index: 1; }
@@ -125,9 +125,9 @@
             border-radius: 22px;
             display: grid; place-items: center;
             font-size: 2.1rem;
-            background: rgba(255,255,255,.08);
+            background: rgba(37,99,235,.08);
             border: 1px solid rgba(255,255,255,.14);
-            box-shadow: 0 8px 22px rgba(124,58,237,.4);
+            box-shadow: 0 8px 22px rgba(37,99,235,.4);
             position: relative;
             flex-shrink: 0;
         }
@@ -138,7 +138,7 @@
         .xp-number {
             font-family: 'Space Grotesk', sans-serif;
             font-size: 1.8rem; font-weight: 800;
-            background: linear-gradient(135deg, #fff, #c4b5fd);
+            background: linear-gradient(135deg, #0C1E3B 15%, #2563EB 75%, #38BDF8 100%);
             -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
         }
         .xp-meta { font-size: var(--fs-xs); color: var(--text-muted); margin-top: 4px; }
@@ -150,7 +150,7 @@
         }
         .xp-bar-track {
             width: 100%; height: 14px;
-            background: rgba(255,255,255,.06);
+            background: rgba(37,99,235,.06);
             border: 1px solid var(--border-soft);
             border-radius: 99px; overflow: hidden;
             position: relative;
@@ -178,7 +178,7 @@
             font-size: var(--fs-xs); font-weight: 600;
             transition: .25s;
         }
-        .badge-chip:hover { border-color: rgba(124,58,237,.5); transform: translateY(-1px); }
+        .badge-chip:hover { border-color: rgba(37,99,235,.5); transform: translateY(-1px); }
         .badge-chip-icon { font-size: 1.05rem; }
 
         /* Ranking preview */
@@ -194,19 +194,19 @@
             border-radius: 14px;
             font-family: 'Space Grotesk', sans-serif;
             font-weight: 800; font-size: 1rem;
-            background: rgba(124,58,237,.18);
-            color: #c4b5fd;
-            border: 1px solid rgba(124,58,237,.4);
+            background: rgba(37,99,235,.18);
+            color: #2563EB;
+            border: 1px solid rgba(37,99,235,.4);
         }
         .rank-pos.top1 {
             background: linear-gradient(135deg, rgba(252,211,77,.25), rgba(245,158,11,.25));
-            color: #fcd34d;
+            color: #B45309;
             border-color: rgba(252,211,77,.5);
             box-shadow: 0 0 0 3px rgba(252,211,77,.15);
         }
         .rank-pos.top3 {
             background: rgba(34,211,238,.18);
-            color: #5eead4;
+            color: #38BDF8;
             border-color: rgba(34,211,238,.4);
         }
 
@@ -229,7 +229,7 @@
             position: relative;
             display: flex; flex-direction: column; gap: 10px;
             padding: 22px;
-            background: linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.015)), rgba(15,22,35,.55);
+            background: linear-gradient(180deg, rgba(37,99,235,.05), rgba(37,99,235,.02)), #FFFFFF;
             backdrop-filter: blur(14px);
             border: 1px solid var(--border-soft);
             border-radius: var(--radius-lg);
@@ -242,7 +242,7 @@
         .quick-card:hover { transform: translateY(-4px); border-color: var(--border-mid); box-shadow: var(--shadow-md); }
         .quick-card::before {
             content: ''; position: absolute; inset: 0; z-index: -1;
-            background: radial-gradient(420px circle at var(--mx,50%) var(--my,0%), var(--qc-glow, rgba(124,58,237,.18)), transparent 50%);
+            background: radial-gradient(420px circle at var(--mx,50%) var(--my,0%), var(--qc-glow, rgba(37,99,235,.18)), transparent 50%);
             opacity: 0; transition: opacity .35s;
         }
         .quick-card:hover::before { opacity: 1; }
@@ -252,7 +252,7 @@
             display: grid; place-items: center;
             font-size: 1.6rem;
             background: var(--qc-bg, var(--grad-primary));
-            box-shadow: 0 8px 22px var(--qc-shadow, rgba(124,58,237,.35));
+            box-shadow: 0 8px 22px var(--qc-shadow, rgba(37,99,235,.35));
             margin-bottom: 4px;
         }
         .quick-card h3 { font-family: 'Space Grotesk', sans-serif; font-size: 1.05rem; font-weight: 700; }
@@ -290,14 +290,14 @@
             font-size: .85rem;
         }
         .nota-aprobado  { background: rgba(52,211,153,.15); color: #34d399; }
-        .nota-reprobado { background: rgba(244,63,94,.15);  color: #fda4af; }
-        .nota-excelente { background: linear-gradient(135deg, rgba(252,211,77,.18), rgba(245,158,11,.18)); color: #fcd34d; }
+        .nota-reprobado { background: rgba(244,63,94,.15);  color: #DC2626; }
+        .nota-excelente { background: linear-gradient(135deg, rgba(252,211,77,.18), rgba(245,158,11,.18)); color: #B45309; }
 
         /* Módulos */
         .mod-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 18px; }
         .mod-card-pro {
             position: relative;
-            background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.01)), rgba(15,22,35,.5);
+            background: linear-gradient(180deg, rgba(37,99,235,.05), rgba(255,255,255,.01)), rgba(255,255,255,.5);
             backdrop-filter: blur(12px);
             border: 1px solid var(--border-soft);
             border-radius: var(--radius-lg);
@@ -318,13 +318,13 @@
             display: grid; place-items: center;
             font-size: 1.5rem;
             background: var(--mod-grad, var(--grad-primary));
-            box-shadow: 0 6px 18px rgba(124,58,237,.35);
+            box-shadow: 0 6px 18px rgba(37,99,235,.35);
             flex-shrink: 0;
         }
         .mod-meta { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 4px; }
         .mod-progress-wrap { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border-soft); }
         .mod-progress-label { display: flex; justify-content: space-between; font-size: var(--fs-xs); color: var(--text-muted); margin-bottom: 6px; }
-        .mod-progress-track { height: 6px; background: rgba(255,255,255,.06); border-radius: 99px; overflow: hidden; }
+        .mod-progress-track { height: 6px; background: rgba(37,99,235,.06); border-radius: 99px; overflow: hidden; }
         .mod-progress-fill { height: 100%; border-radius: 99px; transition: width 1s var(--ease-spring); }
         .mod-detail { max-height: 0; overflow: hidden; transition: max-height .4s ease, opacity .25s; opacity: 0; }
         .mod-detail.open { max-height: 800px; opacity: 1; padding-top: 14px; margin-top: 14px; border-top: 1px dashed var(--border-soft); }
@@ -332,10 +332,10 @@
         .mod-card-pro.is-open .mod-chevron { transform: rotate(180deg); }
 
         /* Badges Mineduc */
-        .b-pri { background: rgba(124,58,237,.18); color: #c4b5fd; padding: 3px 10px; border-radius: 99px; font-size: var(--fs-2xs); font-weight: 700; border: 1px solid rgba(124,58,237,.35); }
-        .b-warm { background: rgba(252,211,77,.18); color: #fcd34d; padding: 3px 10px; border-radius: 99px; font-size: var(--fs-2xs); font-weight: 700; border: 1px solid rgba(252,211,77,.35); }
+        .b-pri { background: rgba(37,99,235,.18); color: #2563EB; padding: 3px 10px; border-radius: 99px; font-size: var(--fs-2xs); font-weight: 700; border: 1px solid rgba(37,99,235,.35); }
+        .b-warm { background: rgba(252,211,77,.18); color: #B45309; padding: 3px 10px; border-radius: 99px; font-size: var(--fs-2xs); font-weight: 700; border: 1px solid rgba(252,211,77,.35); }
         .b-ok  { background: rgba(52,211,153,.18); color: #6ee7b7; padding: 3px 10px; border-radius: 99px; font-size: var(--fs-2xs); font-weight: 700; border: 1px solid rgba(52,211,153,.35); }
-        .b-mute{ background: rgba(255,255,255,.06); color: var(--text-muted); padding: 3px 10px; border-radius: 99px; font-size: var(--fs-2xs); font-weight: 600; }
+        .b-mute{ background: rgba(37,99,235,.06); color: var(--text-muted); padding: 3px 10px; border-radius: 99px; font-size: var(--fs-2xs); font-weight: 600; }
 
         /* Footer */
         footer { text-align: center; padding: 40px 24px; border-top: 1px solid var(--border-soft); color: var(--text-muted); font-size: .85rem; position: relative; z-index: 1; margin-top: 60px; }
@@ -487,28 +487,28 @@
             <span class="qc-cta">Iniciar quiz →</span>
         </a>
 
-        <a href="ranking.html" class="quick-card" style="--qc-bg: linear-gradient(135deg, #fbbf24, #f59e0b); --qc-shadow: rgba(245,158,11,.4); --qc-glow: rgba(251,191,36,.2);">
+        <a href="ranking.html" class="quick-card" style="--qc-bg: linear-gradient(135deg, #F59E0B, #f59e0b); --qc-shadow: rgba(245,158,11,.4); --qc-glow: rgba(251,191,36,.2);">
             <div class="qc-ico">🏆</div>
             <h3>Ranking</h3>
             <p>Compite con tu curso, sube de nivel y desbloquea medallas.</p>
             <span class="qc-cta">Ver ranking →</span>
         </a>
 
-        <a href="biblioteca.html" class="quick-card" style="--qc-bg: linear-gradient(135deg, #a78bfa, #7c3aed); --qc-shadow: rgba(124,58,237,.4); --qc-glow: rgba(167,139,250,.2);">
+        <a href="biblioteca.html" class="quick-card" style="--qc-bg: linear-gradient(135deg, #60A5FA, #2563EB); --qc-shadow: rgba(37,99,235,.4); --qc-glow: rgba(37,99,235,.2);">
             <div class="qc-ico">📚</div>
             <h3>Biblioteca</h3>
             <p>Guías, apuntes y fichas prácticas alineados al currículo Mineduc.</p>
             <span class="qc-cta">Ver materiales →</span>
         </a>
 
-        <a href="material.html" class="quick-card" id="materialCard" style="display:none; --qc-bg: linear-gradient(135deg, #22d3ee, #0d9488); --qc-shadow: rgba(13,148,136,.4); --qc-glow: rgba(34,211,238,.2);">
+        <a href="material.html" class="quick-card" id="materialCard" style="display:none; --qc-bg: linear-gradient(135deg, #38BDF8, #0d9488); --qc-shadow: rgba(13,148,136,.4); --qc-glow: rgba(34,211,238,.2);">
             <div class="qc-ico">📚</div>
             <h3>Generador de Material</h3>
             <p>Crea guías, apuntes, pruebas y controles con IA integrada.</p>
             <span class="qc-cta">Generar material →</span>
         </a>
 
-        <a href="planificacion.html" class="quick-card" id="profCard" style="display:none; --qc-bg: linear-gradient(135deg, #f472b6, #ec4899); --qc-shadow: rgba(236,72,153,.4); --qc-glow: rgba(244,114,182,.2);">
+        <a href="planificacion.html" class="quick-card" id="profCard" style="display:none; --qc-bg: linear-gradient(135deg, #DC2626, #ec4899); --qc-shadow: rgba(236,72,153,.4); --qc-glow: rgba(244,114,182,.2);">
             <div class="qc-ico">📋</div>
             <h3>Planificador</h3>
             <p>Crea planificaciones de clase con módulos Mineduc reales. Exporta PDF.</p>
@@ -522,7 +522,7 @@
             <span class="qc-cta">Abrir admin →</span>
         </a>
 
-        <a href="ranking.html#perfil" class="quick-card" style="--qc-bg: linear-gradient(135deg, #c4b5fd, #8b5cf6); --qc-shadow: rgba(139,92,246,.4); --qc-glow: rgba(196,181,253,.2);">
+        <a href="ranking.html#perfil" class="quick-card" style="--qc-bg: linear-gradient(135deg, #60A5FA, #2563EB); --qc-shadow: rgba(37,99,235,.4); --qc-glow: rgba(196,181,253,.2);">
             <div class="qc-ico">👤</div>
             <h3>Mi perfil</h3>
             <p>Tu historial completo de evaluaciones y logros desbloqueados.</p>
@@ -566,7 +566,7 @@
         <a href="ranking.html">Ranking</a>
     </div>
     <div class="foot-grid" style="margin-top:.4rem">
-        <a href="mailto:soporte.learn0@gmail.com?subject=Soporte%20Click&Clase" style="color:#a78bfa">✉ soporte.learn0@gmail.com</a>
+        <a href="mailto:soporte.learn0@gmail.com?subject=Soporte%20Click&Clase" style="color:#2563EB">✉ soporte.learn0@gmail.com</a>
         <a href="https://wa.me/56942532644?text=Hola%2C%20soy%20estudiante%20y%20necesito%20soporte%20con%20Click&Clase." target="_blank" rel="noopener" style="color:#25d366">💬 WhatsApp +56 9 4253 2644</a>
     </div>
     <p>Click&Clase © 2026 · Especialidad Electrónica · Chile</p>
@@ -598,7 +598,7 @@ ELAuth.onUserReady(function (user) {
 
     // ── Datos base ──
     var xp       = user.xp || 0;
-    var nivel    = (typeof calcularNivel === 'function')        ? calcularNivel(xp) : { nombre:'Aprendiz', icon:'⚡', color:'#7c3aed', desc:'' };
+    var nivel    = (typeof calcularNivel === 'function')        ? calcularNivel(xp) : { nombre:'Aprendiz', icon:'⚡', color:'#2563EB', desc:'' };
     var progInfo = (typeof xpParaSiguienteNivel === 'function') ? xpParaSiguienteNivel(xp) : { siguiente:null, xpFalta:0 };
     var pct      = (typeof porcentajeNivel === 'function')      ? porcentajeNivel(xp) : 0;
     var quizzes  = user.completedQuizzes || [];
@@ -708,7 +708,7 @@ ELAuth.onUserReady(function (user) {
                 '<td style="min-width:160px;"><span style="font-weight:600;">' + escTxt(mod) + '</span><span class="muted">' + escTxt(oa + ae) + '</span></td>' +
                 '<td><span style="font-family:\'Space Grotesk\';font-weight:700;">' + (q.score || 0) + '%</span></td>' +
                 '<td><span class="nota-badge ' + claseNota + '">' + nota.toFixed(1) + '</span></td>' +
-                '<td style="color:#5eead4;font-weight:700;">+' + xpQ + ' XP</td>' +
+                '<td style="color:#38BDF8;font-weight:700;">+' + xpQ + ' XP</td>' +
                 '<td class="muted" style="font-size: var(--fs-xs);">' + fecha + '</td>' +
             '</tr>';
         }).join('');
@@ -732,10 +732,10 @@ ELAuth.onUserReady(function (user) {
             : { evaluaciones: 0, promedioScore: 0, promedioNota: 0, mejor: 0 };
         var es3ro = m.level.indexOf('3ro') !== -1;
         var grad  = es3ro
-            ? 'linear-gradient(135deg, #7c3aed, #22d3ee)'
+            ? 'linear-gradient(135deg, #2563EB, #38BDF8)'
             : 'linear-gradient(135deg, #ec4899, #fcd34d)';
 
-        var barColor = '#94a3b8', barWidth = 0, progText = 'Sin evaluaciones aún';
+        var barColor = '#64748B', barWidth = 0, progText = 'Sin evaluaciones aún';
         if (prog.evaluaciones > 0) {
             barWidth = prog.promedioScore;
             progText = prog.evaluaciones + ' eval · Nota prom. ' + prog.promedioNota.toFixed(1) + ' · Mejor ' + prog.mejor + '%';
@@ -745,7 +745,7 @@ ELAuth.onUserReady(function (user) {
         }
         var aprendizajesHtml = (m.aprendizajes || []).map(function (a) {
             return '<li style="font-size:.85rem;color:var(--text-muted);padding:4px 0 4px 18px;position:relative;line-height:1.45;">' +
-                   '<span style="position:absolute;left:0;color:#a78bfa;">▸</span>' + escTxt(a) + '</li>';
+                   '<span style="position:absolute;left:0;color:#2563EB;">▸</span>' + escTxt(a) + '</li>';
         }).join('');
         var pillCls = es3ro ? 'b-pri' : 'b-warm';
         return '<article class="mod-card-pro" style="--mod-grad: ' + grad + ';" onclick="toggleMod(this)" tabindex="0" role="button" onkeypress="if(event.key===\'Enter\')toggleMod(this)" aria-expanded="false" aria-label="Módulo ' + m.num + ': ' + escAttr(m.name) + '">' +
@@ -770,7 +770,7 @@ ELAuth.onUserReady(function (user) {
             '</div>' +
             '<div class="mod-detail">' +
                 '<p class="muted" style="font-size:var(--fs-xs);font-style:italic;margin-bottom:8px;">' + escTxt(m.oa) + '</p>' +
-                '<p style="font-size:var(--fs-sm);font-weight:700;color:#5eead4;margin-bottom:6px;">Aprendizajes esperados</p>' +
+                '<p style="font-size:var(--fs-sm);font-weight:700;color:#38BDF8;margin-bottom:6px;">Aprendizajes esperados</p>' +
                 '<ul style="list-style:none;padding:0;margin:0;">' + aprendizajesHtml + '</ul>' +
                 '<div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap;">' +
                     '<a href="evaluaciones.html" class="btn-pro primary" onclick="event.stopPropagation();" style="padding:8px 14px;font-size:var(--fs-xs);">▶ Evaluar este módulo</a>' +
@@ -843,5 +843,7 @@ var MODULOS_DATA = [
 ];
 </script>
 
+<script src="js/ia-widget.js" defer></script>
+<script src="js/search-global.js" defer></script>
 </body>
 </html>

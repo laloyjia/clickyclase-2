@@ -5,7 +5,7 @@ Este documento explica cómo probar la Fase 0 (y siguientes) de manera
 
 ## Requisitos
 
-Firebase CLI instalado (ya lo tenés). Nada más.
+Firebase CLI instalado (ya lo tienes). Nada más.
 
 ## Iniciar el emulador
 
@@ -32,7 +32,7 @@ de clickyclase.cl.
 
 Abrí en el navegador: <http://localhost:4000>
 
-Ahí podés:
+Ahí puedes:
 
 - Ver todos los documentos Firestore que se crean.
 - Ver usuarios Auth simulados.
@@ -48,7 +48,7 @@ contra los emuladores, no contra Firebase real.
 
 ## Crear usuarios de prueba con roles múltiples
 
-Para probar los distintos paneles necesitás usuarios de test con
+Para probar los distintos paneles necesitas usuarios de test con
 distintos roles. Podés crearlos desde la UI del emulador (Auth →
 Add user) y después editar el doc Firestore correspondiente.
 
@@ -74,8 +74,8 @@ Add user) y después editar el doc Firestore correspondiente.
 ### Ejemplo: crear un usuario con roles múltiples
 
 Después de crear el user en Auth (email + password), en la UI del
-emulador andá a Firestore → colección `usuarios` → doc con el UID del
-user. Editá el doc y agregá:
+emulador anda a Firestore → colección `usuarios` → doc con el UID del
+user. Editá el doc y agrega:
 
 ```json
 {
@@ -102,13 +102,13 @@ El sistema lo trata como `roles: { admin: {} }` internamente.
 
 ## Testing manual de Fase 0
 
-1. Iniciá el emulador y abrí <http://localhost:5050/login.html>.
+1. Iniciá el emulador y abre <http://localhost:5050/login.html>.
 2. Loguéate con un user creado en el paso anterior.
 3. Verificá que te redirige al panel correcto según el rol principal.
-4. Verificá que si intentás abrir un panel al que no tenés acceso
+4. Verificá que si intentás abrir un panel al que no tienes acceso
    (ej: entrar a `/panel-director.html` como profesor), te redirige
    automáticamente a tu panel principal.
-5. Si tenés múltiples roles, el switcher debería aparecer en el header
+5. Si tienes múltiples roles, el switcher debería aparecer en el header
    (fases próximas lo integrarán al layout común).
 
 ## Parar el emulador

@@ -96,9 +96,38 @@
     { id: 'gen_emprender',  num: 'GEN5', nombre: 'Emprendimiento y empleabilidad',        nivel: '4M', horas: 76  }
   ];
 
-  // Obtener catálogo raw de la especialidad (nulo si no cargado)
+  // ── Mapeo inverso: slug del catálogo → id interno ──
+  // Se construye una sola vez para que labelEspecialidad y otras funciones
+  // acepten cualquiera de los dos formatos.
+  var _SLUG_A_ID = null;
+  function _slugAId(slug) {
+    if (!_SLUG_A_ID) {
+      _SLUG_A_ID = {};
+      Object.keys(SLUG_CURRICULA).forEach(function (k) { _SLUG_A_ID[SLUG_CURRICULA[k]] = k; });
+    }
+    return _SLUG_A_ID[slug] || null;
+  }
+
+  // Normaliza el input: acepta ID interno (tp_enfermeria) o slug (atencion-enfermeria).
+  // Devuelve el ID interno canónico (o el mismo string si no lo puede mapear).
+  function _normalizarId(especialidadOrSlug) {
+    if (!especialidadOrSlug) return '';
+    // Si ya es id interno con prefijo tp_
+    if (SLUG_CURRICULA[especialidadOrSlug]) return especialidadOrSlug;
+    // Si es slug, mapear a id interno
+    var id = _slugAId(especialidadOrSlug);
+    if (id) return id;
+    // Legacy: prefijar tp_ y probar (ej: 'electronica' → 'tp_electronica')
+    var tryPref = 'tp_' + especialidadOrSlug;
+    if (SLUG_CURRICULA[tryPref]) return tryPref;
+    return especialidadOrSlug;
+  }
+
+  // Obtener catálogo raw de la especialidad (nulo si no cargado).
+  // Acepta tanto ID interno como slug del catálogo.
   function _rawEspecialidad(especialidadId) {
-    var slug = SLUG_CURRICULA[especialidadId];
+    var idCanonico = _normalizarId(especialidadId);
+    var slug = SLUG_CURRICULA[idCanonico] || especialidadId;  // fallback: quizás ya es slug
     if (!slug) return null;
     if (!window.CURRICULA_FULL || !window.CURRICULA_FULL[slug]) return null;
     return window.CURRICULA_FULL[slug];
@@ -146,7 +175,14 @@
   }
 
   function labelEspecialidad(especialidadId) {
-    return ESPECIALIDAD_LABELS[especialidadId] || especialidadId;
+    // Aceptar tanto ID interno como slug del catálogo
+    if (ESPECIALIDAD_LABELS[especialidadId]) return ESPECIALIDAD_LABELS[especialidadId];
+    var idCanonico = _normalizarId(especialidadId);
+    if (ESPECIALIDAD_LABELS[idCanonico]) return ESPECIALIDAD_LABELS[idCanonico];
+    // Última: catálogo raw (si tiene título)
+    var raw = _rawEspecialidad(especialidadId);
+    if (raw && raw.titulo) return raw.titulo;
+    return especialidadId;
   }
 
   function todasLasEspecialidades() {
@@ -169,6 +205,8 @@
     labelModulo:             labelModulo,
     labelEspecialidad:       labelEspecialidad,
     todasLasEspecialidades:  todasLasEspecialidades,
-    cargarCatalogo:          cargarCatalogo
+    cargarCatalogo:          cargarCatalogo,
+    normalizarId:            _normalizarId,   // exponer para usar en adapter user
+    slugToId:                _slugAId          // ayudante público
   };
 })();

@@ -15,9 +15,9 @@
 <script src="js/roles-router.js"></script>
 <style>
 :root {
-  --bg: #0a0d1c; --panel: #151b35; --border: rgba(148,163,184,.15);
-  --text: #f1f5f9; --muted: #7b8aa5; --violet: #8b5cf6;
-  --green: #34d399; --gold: #fbbf24; --danger: #f87171; --cyan: #22d3ee;
+  --bg: #F0F7FF; --panel: #FFFFFF; --border: rgba(37,99,235,.14);
+  --text: #0C1E3B; --muted: #475569; --violet: #1D4ED8;
+  --green: #34d399; --gold: #F59E0B; --danger: #DC2626; --cyan: #38BDF8;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body {
@@ -28,13 +28,13 @@ body {
 .wrap { max-width: 720px; margin: 0 auto; }
 .back { color: var(--violet); text-decoration: none; font-size: .88rem; }
 h1 { font-size: 1.9rem; font-weight: 800; margin: 12px 0 8px; letter-spacing: -.5px; }
-.sub { color: var(--muted); margin-bottom: 32px; }
+.sub { color: #475569; margin-bottom: 32px; }
 .card { background: var(--panel); border: 1px solid var(--border); border-radius: 16px; padding: 32px; margin-bottom: 20px; }
 .card h2 { font-size: 1.1rem; font-weight: 700; margin-bottom: 8px; }
-.card p { color: var(--muted); margin-bottom: 20px; font-size: .92rem; }
+.card p { color: #475569; margin-bottom: 20px; font-size: .92rem; }
 .roles-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 20px; }
 .rol {
-  background: rgba(139,92,246,.06); border: 1px solid rgba(139,92,246,.2);
+  background: rgba(37,99,235,.06); border: 1px solid rgba(37,99,235,.20);
   border-radius: 8px; padding: 10px 14px; font-size: .85rem;
   display: flex; align-items: center; gap: 8px;
 }
@@ -44,13 +44,13 @@ h1 { font-size: 1.9rem; font-weight: 800; margin: 12px 0 8px; letter-spacing: -.
   color: white; border: none; padding: 14px 28px;
   font-size: 1rem; font-weight: 700; border-radius: 12px;
   cursor: pointer; font-family: inherit;
-  box-shadow: 0 4px 20px rgba(139,92,246,.35);
+  box-shadow: 0 4px 20px rgba(37,99,235,.35);
   transition: transform .15s; width: 100%;
 }
 .btn:hover:not(:disabled) { transform: translateY(-1px); }
 .btn:disabled { opacity: .5; cursor: not-allowed; }
 .log {
-  background: #05070f; border: 1px solid var(--border);
+  background: #F0F7FF; border: 1px solid var(--border);
   border-radius: 10px; padding: 20px;
   font-family: 'Courier New', monospace; font-size: .85rem;
   line-height: 1.7; min-height: 100px;
@@ -60,10 +60,10 @@ h1 { font-size: 1.9rem; font-weight: 800; margin: 12px 0 8px; letter-spacing: -.
 .log .ok { color: var(--green); }
 .log .err { color: var(--danger); }
 .log .info { color: var(--gold); }
-.log .dim { color: var(--muted); }
+.log .dim { color: #475569; }
 .auth-check { padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; font-size: .88rem; }
 .auth-check.ok { background: rgba(52,211,153,.08); border: 1px solid rgba(52,211,153,.25); color: var(--green); }
-.auth-check.no { background: rgba(248,113,113,.08); border: 1px solid rgba(248,113,113,.25); color: var(--danger); }
+.auth-check.no { background: rgba(220,38,38,.08); border: 1px solid rgba(220,38,38,.25); color: var(--danger); }
 .info-box { background: rgba(34,211,238,.06); border: 1px solid rgba(34,211,238,.2); border-radius: 8px; padding: 12px 16px; font-size: .86rem; color: var(--cyan); margin-top: 16px; }
 </style>
 </head>
@@ -182,14 +182,14 @@ function asignarRoles() {
   }).then(function () {
     log('✅ LISTO. Los 14 roles fueron asignados a tu cuenta.', 'ok');
     log('');
-    log('Ahora podés:', 'info');
+    log('Ahora puedes:', 'info');
     log('  1. Hacer Ctrl+F5 en cualquier panel', 'dim');
     log('  2. Vas a ver el dropdown "Ver como:" arriba', 'dim');
     log('  3. Elegir cualquier rol para probar ese panel', 'dim');
     log('');
     log('Los paneles disponibles:', 'info');
     log('  · panel-director.html  · panel-rector.html', 'dim');
-    log('  · panel-utp.html       · panel-profesor.html', 'dim');
+    log('  · panel-utp.html       · dashboard-profesor.html', 'dim');
     log('  · panel-apoyo.html     · panel-apoyo-prof.html', 'dim');
     log('  · panel-ambiente.html  · panel-ambiente-prof.html', 'dim');
     log('  · panel-pie.html       · panel-pie-edu.html', 'dim');

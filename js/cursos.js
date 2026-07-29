@@ -171,6 +171,11 @@
       var items = [];
       snap.forEach(function (doc) {
         var d = doc.data();
+        // Normalizar cursoId: fallback a d.id o al ID del documento.
+        // Todas las páginas del sistema esperan .cursoId; algunos docs solo tienen .id.
+        if (!d.cursoId) d.cursoId = d.id || doc.id;
+        // Normalizar nombreCompleto por si tampoco viene
+        if (!d.nombreCompleto) d.nombreCompleto = (d.nivel || '') + (d.letra || '');
         if (!liceo || d.liceoSlug === liceo) {
           if (opts.soloActivos === false || d.activo !== false) items.push(d);
         }

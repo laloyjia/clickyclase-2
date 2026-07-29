@@ -32,7 +32,12 @@
       'química':'QUI','quimica':'QUI',
       'educación física':'EFI','educacion fisica':'EFI',
       'artes visuales':'ART',
-      'música':'MUS','musica':'MUS'
+      'música':'MUS','musica':'MUS',
+      'tecnología':'TEC','tecnologia':'TEC',
+      'orientación':'ORI','orientacion':'ORI',
+      'consejo de curso':'CC','consejo curso':'CC','consejo':'CC',
+      'filosofía':'FIL','filosofia':'FIL',
+      'educación ciudadana':'EC','educacion ciudadana':'EC'
   };
 
   function _resolveAsigSiglaMat(nombre) {
@@ -84,19 +89,32 @@
       }
       u._modoHibrido = _esHibrido;
 
-      // 2) especialidad legacy: mapear del ID interno al slug del catálogo
-      //    (ej: 'tp_electronica' → 'electronica' que es la clave en CURRICULA_FULL)
+      // 2) especialidad: unificar a ID interno canónico (tp_xxx)
+      //    El catálogo CCTPCatalogo ya sabe traducirlo internamente al slug real.
       if (!u.especialidad && _tieneEspsNuevas) {
-          var _espId = u.especialidades[0];
-          if (typeof CCTPCatalogo !== 'undefined' && CCTPCatalogo.SLUG_CURRICULA && CCTPCatalogo.SLUG_CURRICULA[_espId]) {
-              u.especialidad = CCTPCatalogo.SLUG_CURRICULA[_espId];
-          } else {
-              // Fallback: quitar prefijo tp_
-              u.especialidad = String(_espId).replace(/^tp_/, '').replace(/_/g, '-');
-          }
+          u.especialidad = u.especialidades[0];
+      }
+      // Normalizar al ID interno (independientemente de cómo llegó guardado)
+      if (u.especialidad && typeof CCTPCatalogo !== 'undefined' &&
+          typeof CCTPCatalogo.normalizarId === 'function') {
+          u.especialidad = CCTPCatalogo.normalizarId(u.especialidad);
+      }
+      if (Array.isArray(u.especialidades) && typeof CCTPCatalogo !== 'undefined' &&
+          typeof CCTPCatalogo.normalizarId === 'function') {
+          u.especialidades = u.especialidades.map(function (e) { return CCTPCatalogo.normalizarId(e); });
       }
 
-      // 3) modulos legacy: aplanar user.modulosTP → array de IDs (['EN1','EN11'])
+      // 3) modulosTP: normalizar keys a ID interno + aplanar → u.modulos
+      //    Si guardado como slug ('atencion-enfermeria'), convertir a 'tp_enfermeria'
+      if (u.modulosTP && typeof u.modulosTP === 'object' &&
+          typeof CCTPCatalogo !== 'undefined' && typeof CCTPCatalogo.normalizarId === 'function') {
+          var _modsNormalizado = {};
+          Object.keys(u.modulosTP).forEach(function (k) {
+              var kNorm = CCTPCatalogo.normalizarId(k);
+              _modsNormalizado[kNorm] = (u.modulosTP[k] || []).slice();
+          });
+          u.modulosTP = _modsNormalizado;
+      }
       if ((!u.modulos || !u.modulos.length) && _tieneModulosTP) {
           u.modulos = [];
           Object.keys(u.modulosTP).forEach(function (espId) {
@@ -144,6 +162,7 @@
       if (!u.tipoProfesor && u.especialidad) {
           u.tipoProfesor = 'tecnico';
       }
+      // (normalización de especialidad ya se hace en bloque 2 más arriba)
       // Si no tiene niveles pero tiene cursos → usar cursos como niveles
       if ((!u.niveles || u.niveles.length === 0) && u.cursos && u.cursos.length > 0) {
           u.niveles = u.cursos.slice();
@@ -319,6 +338,28 @@
               });
               selAOMM.appendChild(og2);
           });
+
+          // TRANSVERSALES: Orientación / Consejo de Curso
+          if (u.puedeOrientacion || u.puedeConsejoCurso) {
+              var og3 = document.createElement('optgroup');
+              og3.label = '🌟 Asignaturas transversales';
+              if (u.puedeOrientacion) {
+                  var oOr = document.createElement('option');
+                  oOr.value = 'asig::Orientación';
+                  oOr.textContent = '🧭 Orientación';
+                  og3.appendChild(oOr);
+                  totalOpts++;
+              }
+              if (u.puedeConsejoCurso) {
+                  var oCC = document.createElement('option');
+                  oCC.value = 'asig::Consejo de Curso';
+                  oCC.textContent = '📋 Consejo de Curso';
+                  og3.appendChild(oCC);
+                  totalOpts++;
+              }
+              selAOMM.appendChild(og3);
+          }
+
           if (totalOpts === 0) {
               var oNone = document.createElement('option');
               oNone.disabled = true;
@@ -335,6 +376,17 @@
                   opt.value = a; opt.textContent = a;
                   selAsigLeg.appendChild(opt);
               });
+              // Transversales también al legacy
+              if (u.puedeOrientacion) {
+                  var oOrL = document.createElement('option');
+                  oOrL.value = 'Orientación'; oOrL.textContent = 'Orientación';
+                  selAsigLeg.appendChild(oOrL);
+              }
+              if (u.puedeConsejoCurso) {
+                  var oCCL = document.createElement('option');
+                  oCCL.value = 'Consejo de Curso'; oCCL.textContent = 'Consejo de Curso';
+                  selAsigLeg.appendChild(oCCL);
+              }
           }
           actualizarMencion();
           filtrarModulos();

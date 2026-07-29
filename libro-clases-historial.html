@@ -15,50 +15,63 @@
 <script src="js/roles-router.js"></script>
 <script src="js/cursos.js"></script>
 <script src="js/libro-clases.js"></script>
+<script src="js/cc-uikit.js"></script>
 <style>
-:root { --bg: #0b0d1e; --panel: #12162f; --border: rgba(148,163,184,.15); --text: #e5e7eb; --muted: #94a3b8; --cyan: #22d3ee; --violet: #7c3aed; }
 * { box-sizing: border-box; }
-body { margin: 0; font-family: 'Segoe UI', Roboto, Arial, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
-.header { padding: 18px 28px; border-bottom: 1px solid var(--border); background: linear-gradient(135deg, rgba(124,58,237,.08), rgba(34,211,238,.06)); display: flex; justify-content: space-between; align-items: center; }
-.header h1 { margin: 0; font-size: 1.35rem; font-weight: 700; }
-.breadcrumb { color: var(--muted); font-size: .82rem; }
+body { margin: 0; font-family: 'Segoe UI', Roboto, Arial, sans-serif; background: #F0F7FF; color: #0C1E3B; min-height: 100vh; }
 .container { max-width: 1300px; margin: 24px auto; padding: 0 24px; }
-.card { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 16px 20px; }
-.filtros { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 20px; }
-.fld label { display: block; font-size: .72rem; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 4px; }
-input, select { width: 100%; padding: 8px 10px; border-radius: 7px; background: rgba(255,255,255,.04); border: 1px solid rgba(148,163,184,.2); color: var(--text); font-size: .85rem; }
-.btn { padding: 8px 14px; border-radius: 7px; border: 1px solid var(--border); background: rgba(255,255,255,.04); color: var(--text); cursor: pointer; font-size: .82rem; font-weight: 600; text-decoration: none; display: inline-block; }
-.btn:hover { background: rgba(255,255,255,.08); }
-table { width: 100%; border-collapse: collapse; }
-th, td { padding: 10px 12px; border-bottom: 1px solid var(--border); font-size: .86rem; text-align: left; }
-th { background: rgba(255,255,255,.03); font-size: .7rem; text-transform: uppercase; letter-spacing: .8px; color: var(--muted); font-weight: 700; }
-.empty { padding: 60px; text-align: center; color: var(--muted); }
-.chip { display: inline-block; padding: 3px 9px; border-radius: 999px; font-size: .7rem; font-weight: 700; }
-.chip.firmado { background: rgba(34,197,94,.12); color: #86efac; border: 1px solid rgba(34,197,94,.35); }
-.chip.pendiente { background: rgba(251,191,36,.12); color: #fbbf24; border: 1px solid rgba(251,191,36,.35); }
+.filtros { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; align-items: end; }
+.fld label { display: block; font-size: .72rem; color: #64748B; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 4px; }
+input, select { width: 100%; padding: 9px 12px; border-radius: 8px; background: #fff; border: 1px solid rgba(37,99,235,.2); color: #0C1E3B; font-size: .88rem; }
+input:focus, select:focus { outline: none; border-color: #2563EB; box-shadow: 0 0 0 3px rgba(37,99,235,.12); }
+.tl-actions { display: flex; gap: 6px }
+.tl-actions .btn-ico { background: transparent; border: 1px solid rgba(37,99,235,.2); color: #2563EB; width: 32px; height: 32px; border-radius: 8px; cursor: pointer; font-size: .95rem; transition: .2s }
+.tl-actions .btn-ico:hover { background: rgba(37,99,235,.08) }
+.expand-body { margin-top: 12px; padding: 12px 14px; background: #F8FAFF; border-radius: 8px; font-size: .85rem; color: #334155; line-height: 1.5; display: none }
+.tl-full.expanded { grid-template-columns: 1fr }
+.tl-full.expanded .tl-full-inner { display: grid; grid-template-columns: 60px 1fr auto auto; gap: 14px; align-items: center }
+.tl-full.expanded .expand-body { display: block }
 </style>
 </head>
 <body>
-<div class="header">
-  <div><div class="breadcrumb">Docente</div><h1>📅 Historial del Libro</h1></div>
-  <div style="display:flex;gap:8px">
-    <a href="libro-clases.html" class="btn">← Nueva clase</a>
-    <a href="panel-profesor.html" class="btn">Panel</a>
-  </div>
-</div>
 
 <div class="container">
-  <div class="card">
+
+  <!-- Hero -->
+  <div id="ccHero"></div>
+
+  <!-- KPIs -->
+  <div id="ccKpis"></div>
+
+  <!-- Filtros -->
+  <div class="cck-card">
+    <h2>🔎 Filtros</h2>
     <div class="filtros">
-      <div class="fld"><label>Curso</label><select id="fCurso"><option value="">Todos</option></select></div>
-      <div class="fld"><label>Desde</label><input type="date" id="fDesde"></div>
-      <div class="fld"><label>Hasta</label><input type="date" id="fHasta"></div>
-      <div class="fld"><label>&nbsp;</label><button class="btn" onclick="cargar()" style="width:100%">🔍 Filtrar</button></div>
+      <div class="fld"><label>Curso</label><select id="fCurso" onchange="cargar()"><option value="">Todos</option></select></div>
+      <div class="fld"><label>Asignatura</label><select id="fAsig" onchange="cargar()"><option value="">Todas</option></select></div>
+      <div class="fld"><label>Estado</label>
+        <select id="fEstado" onchange="cargar()">
+          <option value="">Todos</option>
+          <option value="firmado">Solo firmados</option>
+          <option value="borrador">Solo borradores</option>
+        </select>
+      </div>
+      <div class="fld"><label>Desde</label><input type="date" id="fDesde" onchange="cargar()"></div>
+      <div class="fld"><label>Hasta</label><input type="date" id="fHasta" onchange="cargar()"></div>
     </div>
-    <table>
-      <thead><tr><th>Fecha</th><th>Curso</th><th>Asignatura</th><th style="width:80px">P/A/T/J</th><th>Contenido del día</th><th style="width:120px">Estado</th></tr></thead>
-      <tbody id="tbody"><tr><td colspan="6" class="empty">⏳ Cargando…</td></tr></tbody>
-    </table>
+  </div>
+
+  <!-- Timeline -->
+  <div id="tlWrap" class="cck-card">
+    <h2 style="display:flex;justify-content:space-between;align-items:center">
+      <span>📅 Registros del período</span>
+      <span id="tlCount" style="font-size:.78rem;color:#64748B;font-weight:600;text-transform:none"></span>
+    </h2>
+    <div id="tlBody">
+      <div class="cck-sk-row"><div class="cck-sk"></div><div class="cck-sk"></div><div class="cck-sk"></div></div>
+      <div class="cck-sk-row"><div class="cck-sk"></div><div class="cck-sk"></div><div class="cck-sk"></div></div>
+      <div class="cck-sk-row"><div class="cck-sk"></div><div class="cck-sk"></div><div class="cck-sk"></div></div>
+    </div>
   </div>
 </div>
 
@@ -67,10 +80,29 @@ if (window.CCRouter && window.CCRouter.guardPanel) {
   CCRouter.guardPanel(['profesor','jefe_curso','utp','encargado_area','pie_edu']);
 }
 
+var _regsCache = [];
+var _asigsSet = {};
+
 function esc(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
+function _renderHero() {
+  if (!window.CCKit) return;
+  document.getElementById('ccHero').innerHTML = CCKit.hero({
+    emoji: '📅',
+    title: 'Historial del Libro',
+    sub: 'Todas tus clases firmadas y pendientes',
+    actions: [
+      { label: 'Panel', emoji: '←', href: 'dashboard-profesor.html' },
+      { label: 'Nueva clase', emoji: '📖', href: 'libro-clases.html', primary: true },
+      { label: 'Exportar PDF', emoji: '📄', onclick: 'exportarPDF()' }
+    ]
+  });
+}
+
 function iniciar() {
-  var hoy = new Date(); var hace30 = new Date(hoy.getTime() - 30*24*60*60*1000);
+  _renderHero();
+  var hoy = new Date();
+  var hace30 = new Date(hoy.getTime() - 30*24*60*60*1000);
   document.getElementById('fDesde').value = hace30.toISOString().slice(0,10);
   document.getElementById('fHasta').value = hoy.toISOString().slice(0,10);
   CCCursos.misCursos().then(function(cursos) {
@@ -91,38 +123,179 @@ function cargar() {
     hasta: document.getElementById('fHasta').value
   };
   CCLibroClases.listarRegistros(opts).then(function(regs) {
-    var tb = document.getElementById('tbody');
-    if (!regs || !regs.length) {
-      tb.innerHTML = '<tr><td colspan="6" class="empty">Sin registros en el período seleccionado</td></tr>';
-      return;
+    regs = regs || [];
+    var fA = document.getElementById('fAsig').value;
+    var fE = document.getElementById('fEstado').value;
+    // Alimentar dropdown de asignatura únicas
+    _asigsSet = {};
+    regs.forEach(function(r){ if(r.asignatura) _asigsSet[r.asignatura]=1; });
+    var selA = document.getElementById('fAsig');
+    if (selA && selA.options.length <= 1) {
+      selA.innerHTML = '<option value="">Todas</option>' +
+        Object.keys(_asigsSet).sort().map(function(a){
+          return '<option value="'+esc(a)+'">'+esc(a)+'</option>';
+        }).join('');
     }
-    tb.innerHTML = regs.map(function(r) {
-      var cont = (r.contenidoDelDia || '').substring(0, 80);
-      if ((r.contenidoDelDia || '').length > 80) cont += '…';
-      var chip = r.firmado
-        ? '<span class="chip firmado">✍ Firmado</span>'
-        : '<span class="chip pendiente">Pendiente</span>';
-      return '<tr>' +
-        '<td>' + esc(r.fecha) + '</td>' +
-        '<td>' + esc(r.cursoNombre || r.cursoId) + '</td>' +
-        '<td>' + esc(r.asignatura) + '</td>' +
-        '<td style="font-size:.78rem">' +
-          (r.totalPresentes||0) + '/' + (r.totalAusentes||0) + '/' +
-          (r.totalAtrasados||0) + '/' + (r.totalJustificados||0) +
-        '</td>' +
-        '<td style="color:var(--muted);font-size:.82rem">' + esc(cont) + '</td>' +
-        '<td>' + chip + '</td>' +
-        '</tr>';
-    }).join('');
+    // Aplicar filtros post-fetch
+    if (fA) regs = regs.filter(function(r){ return r.asignatura === fA; });
+    if (fE === 'firmado') regs = regs.filter(function(r){ return r.firmado; });
+    if (fE === 'borrador') regs = regs.filter(function(r){ return !r.firmado; });
+
+    _regsCache = regs;
+    _renderKpis(regs);
+    _renderTimeline(regs);
   }).catch(function(err) {
-    document.getElementById('tbody').innerHTML =
-      '<tr><td colspan="6" class="empty" style="color:#fca5a5">Error: ' + esc(err.message) + '</td></tr>';
+    document.getElementById('tlBody').innerHTML =
+      '<div class="cck-empty"><div class="e-emoji">⚠</div><h3>Error al cargar</h3><p>' + esc(err.message) + '</p></div>';
   });
+}
+
+function _renderKpis(regs) {
+  var firmadas = 0, borr = 0, totP=0, totA=0, totT=0, totJ=0;
+  regs.forEach(function(r){
+    if (r.firmado) firmadas++; else borr++;
+    totP += (r.totalPresentes||0);
+    totA += (r.totalAusentes||0);
+    totT += (r.totalAtrasados||0);
+    totJ += (r.totalJustificados||0);
+  });
+  var totAsist = totP + totA + totT + totJ;
+  var pctAsist = totAsist ? Math.round(((totP+totJ+totT)/totAsist)*100) : 0;
+  document.getElementById('ccKpis').innerHTML = CCKit.kpiRow([
+    { emoji:'📚', label:'Clases totales', value: regs.length, tone:'info' },
+    { emoji:'✍', label:'Firmadas', value: firmadas, tone:'ok',
+      hint: regs.length ? Math.round(firmadas/regs.length*100) + '% del total' : '' },
+    { emoji:'⏳', label:'Borradores', value: borr, tone: borr>0?'warn':undefined,
+      hint: borr>0 ? 'Sin firmar aún' : 'Todo al día' },
+    { emoji:'✅', label:'Asistencia', value: pctAsist + '%', tone: pctAsist>=85?'ok':pctAsist>=70?'warn':'err',
+      hint: totP + ' presentes de ' + totAsist }
+  ]);
+}
+
+function _renderTimeline(regs) {
+  var body = document.getElementById('tlBody');
+  document.getElementById('tlCount').textContent =
+    regs.length ? regs.length + ' registro' + (regs.length!==1?'s':'') : '';
+
+  if (!regs.length) {
+    body.innerHTML = CCKit.emptyState({
+      emoji: '🌤',
+      title: 'Sin registros en el período',
+      body: 'Cambiá los filtros o abre una nueva clase para que aparezca acá.',
+      cta: { label: 'Abrir nueva clase', emoji: '📖', href: 'libro-clases.html' }
+    });
+    return;
+  }
+
+  // Agrupar por semana (ISO week start = lunes)
+  var grupos = {};
+  regs.forEach(function(r){
+    var d = new Date(r.fecha);
+    if (isNaN(d)) return;
+    var lun = new Date(d);
+    lun.setDate(d.getDate() - ((d.getDay() + 6) % 7));
+    var key = lun.toISOString().slice(0,10);
+    if (!grupos[key]) grupos[key] = [];
+    grupos[key].push(r);
+  });
+
+  var keys = Object.keys(grupos).sort().reverse();
+  var html = '';
+  keys.forEach(function(k){
+    var lun = new Date(k);
+    var dom = new Date(lun.getTime() + 6*86400000);
+    var titulo = 'Semana del ' + lun.getDate() + ' al ' +
+                 dom.getDate() + ' de ' +
+                 dom.toLocaleDateString('es-CL',{month:'long'});
+    html += '<div class="cck-tl-week-title">' + titulo + '</div>';
+    grupos[k].sort(function(a,b){ return String(b.fecha).localeCompare(String(a.fecha)); });
+    grupos[k].forEach(function(r){
+      html += _renderTLCard(r);
+    });
+  });
+  body.innerHTML = html;
+}
+
+function _renderTLCard(r) {
+  var fecha = new Date(r.fecha);
+  var day = isNaN(fecha) ? '—' : fecha.getDate();
+  var mes = isNaN(fecha) ? '' : fecha.toLocaleDateString('es-CL',{month:'short'}).replace('.','');
+  var estado = r.firmado
+    ? CCKit.badge({ text:'✍ Firmado', tone:'ok' })
+    : CCKit.badge({ text:'Borrador', tone:'warn' });
+  var conPin = r.firmaConPin ? ' 🔐' : '';
+  var asistBadges = '<div class="tl-asist">' +
+    '<span class="P">P ' + (r.totalPresentes||0) + '</span>' +
+    '<span class="A">A ' + (r.totalAusentes||0) + '</span>' +
+    '<span class="T">T ' + (r.totalAtrasados||0) + '</span>' +
+    '<span class="J">J ' + (r.totalJustificados||0) + '</span>' +
+    '</div>';
+  var acciones = '<div class="tl-actions">' +
+    '<button class="btn-ico" title="Ver detalle" onclick="toggleDetalle(this)">👁</button>' +
+    '<a class="btn-ico" title="Editar" href="libro-clases.html?regId=' + esc(r.regId||r.id||'') + '" style="text-decoration:none;display:inline-flex;align-items:center;justify-content:center">✏</a>' +
+    '</div>';
+  var contenido = r.contenidoDelDia
+    ? '<b>Contenido:</b> ' + esc(r.contenidoDelDia) +
+      (r.observacionesGenerales ? '<br><b>Observaciones:</b> ' + esc(r.observacionesGenerales) : '') +
+      (r.planificacionTitulo ? '<br><b>Planificación asociada:</b> ' + esc(r.planificacionTitulo) : '')
+    : '<em>Sin contenido registrado</em>';
+
+  return '<div class="cck-tl tl-full">' +
+    '<div class="tl-full-inner" style="display:contents">' +
+      '<div class="tl-date"><div class="tl-day">' + day + '</div><div class="tl-mon">' + mes + '</div></div>' +
+      '<div class="tl-info">' +
+        '<h4>' + esc(r.cursoNombre || r.cursoId) + ' · ' + esc(r.asignatura || '—') + ' ' + estado + '<span style="color:#94a3b8;font-size:.9rem">' + conPin + '</span></h4>' +
+        '<p>' + esc((r.contenidoDelDia || 'Sin contenido').slice(0, 90)) + ((r.contenidoDelDia||'').length>90?'…':'') + '</p>' +
+      '</div>' +
+      asistBadges +
+      acciones +
+    '</div>' +
+    '<div class="expand-body">' + contenido + '</div>' +
+  '</div>';
+}
+
+function toggleDetalle(btn) {
+  var card = btn.closest('.cck-tl');
+  if (!card) return;
+  card.classList.toggle('expanded');
+}
+
+function exportarPDF() {
+  // Impresión nativa del navegador con estilos ajustados
+  var contenido = document.getElementById('tlBody').innerHTML;
+  var w = window.open('', 'pdf', 'width=900,height=700');
+  var css = '<style>body{font-family:Segoe UI,Arial;color:#0C1E3B;padding:20px}' +
+    'h1{border-bottom:2px solid #2563EB;padding-bottom:8px}' +
+    '.cck-tl{border:1px solid #ccc;border-radius:8px;padding:10px 14px;margin-bottom:8px;' +
+    'display:grid;grid-template-columns:60px 1fr auto;gap:14px;align-items:center}' +
+    '.tl-day{font-size:1.4rem;font-weight:800}.tl-mon{font-size:.7rem;text-transform:uppercase;color:#666}' +
+    '.tl-info h4{margin:0 0 4px}.tl-info p{margin:0;color:#666;font-size:.85rem}' +
+    '.tl-asist{font-size:.75rem}.tl-asist span{padding:2px 6px;margin-right:4px;border-radius:4px;background:#eee}' +
+    '.cck-tl-week-title{font-size:.85rem;color:#666;margin:16px 0 6px;text-transform:uppercase;font-weight:700}' +
+    '.cck-badge{padding:2px 8px;border-radius:99px;font-size:.7rem;font-weight:700;margin-left:6px}' +
+    '.cck-badge.ok{background:#d1fae5;color:#059669}.cck-badge.warn{background:#fef3c7;color:#b45309}' +
+    '.tl-actions,.expand-body,.cck-sk,.cck-sk-row{display:none !important}' +
+    '@media print{.tl-actions{display:none}}' +
+    '</style>';
+  var u = (window.ELAuth && ELAuth.user) || {};
+  var titulo = 'Historial del libro de clases — ' + (u.nombre || u.email || '');
+  var desde = document.getElementById('fDesde').value;
+  var hasta = document.getElementById('fHasta').value;
+  w.document.write('<html><head><title>' + titulo + '</title>' + css + '</head><body>' +
+    '<h1>' + titulo + '</h1>' +
+    '<p><b>Período:</b> ' + desde + ' al ' + hasta + '  ·  ' +
+    '<b>Total de registros:</b> ' + _regsCache.length + '</p>' +
+    contenido +
+    '<script>window.onload=function(){window.print()}<' + '/script>' +
+    '</body></html>');
+  w.document.close();
 }
 
 if (window.ELAuth && ELAuth.onUserReady) {
   ELAuth.onUserReady(function(u){ if(u) iniciar(); });
 }
 </script>
+<script src="js/ia-widget.js" defer></script>
+<script src="js/search-global.js" defer></script>
 </body>
 </html>

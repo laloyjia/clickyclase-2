@@ -89,28 +89,30 @@
 <script src="js/curricula/plan-comun/musica.js"></script>
 <script src="js/curricula/plan-comun/tecnologia.js"></script>
 <script src="js/curricula/plan-comun/orientacion.js"></script>
+<script src="js/curricula/plan-comun/consejo-curso.js"></script>
 <script src="js/curricula/plan-comun/filosofia.js"></script>
 <script src="js/curricula/plan-comun/ed-ciudadana.js"></script>
+<script src="js/curricula/plan-comun/parvularia.js"></script>
 <script src="js/curricula/plan-comun/ciencias-ciudadania.js"></script>
 <script src="js/curricula/plan-comun/index.js"></script>
 <script src="js/curricula-chile.js"></script>
 
 <style>
-:root{--bg:#0f172a;--surface:#1e293b;--surface2:#273549;--border:rgba(99,102,241,.25);--accent:#6366f1;--accent2:#8b5cf6;--gold:#f59e0b;--green:#10b981;--red:#ef4444;--text:#e2e8f0;--muted:#94a3b8}
+:root{--bg:#F0F7FF;--surface:#FFFFFF;--surface2:#F8FAFF;--border:rgba(37,99,235,.18);--accent:#2563EB;--accent2:#1D4ED8;--gold:#F59E0B;--green:#059669;--red:#DC2626;--text:#0C1E3B;--muted:#475569}
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;visibility:hidden}
 .orb{position:fixed;border-radius:50%;filter:blur(80px);opacity:.12;pointer-events:none;z-index:0}
 .orb1{width:500px;height:500px;background:radial-gradient(var(--accent),transparent);top:-100px;left:-100px}
 .orb2{width:400px;height:400px;background:radial-gradient(var(--gold),transparent);bottom:-80px;right:-80px}
 .layout{display:grid;grid-template-columns:260px 1fr;min-height:100vh;position:relative;z-index:1}
-.sidebar{background:rgba(30,41,59,.95);border-right:1px solid var(--border);padding:24px 0;display:flex;flex-direction:column;gap:4px}
+.sidebar{background:#FFFFFF;border-right:1px solid var(--border);padding:24px 0;display:flex;flex-direction:column;gap:4px;box-shadow:2px 0 12px rgba(37,99,235,.04)}
 .sidebar-logo{padding:0 20px 20px;border-bottom:1px solid var(--border);margin-bottom:8px}
-.sidebar-logo h2{font-size:1.2rem;color:var(--accent);font-weight:700}
+.sidebar-logo h2{font-size:1.2rem;color:var(--accent);font-weight:800}
 .sidebar-logo p{font-size:.75rem;color:var(--muted)}
-.nav-item{display:flex;align-items:center;gap:10px;padding:10px 20px;cursor:pointer;transition:all .2s;color:var(--muted);font-size:.875rem;border-left:3px solid transparent}
-.nav-item:hover{background:rgba(99,102,241,.1);color:var(--text)}
-.nav-item.active{background:rgba(99,102,241,.15);color:var(--accent);border-left-color:var(--accent)}
-.nav-section{padding:16px 20px 6px;font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 20px;cursor:pointer;transition:all .2s;color:#334155;font-size:.875rem;border-left:3px solid transparent;font-weight:600}
+.nav-item:hover{background:rgba(37,99,235,.06);color:var(--accent)}
+.nav-item.active{background:rgba(37,99,235,.10);color:var(--accent);border-left-color:var(--accent);font-weight:700}
+.nav-section{padding:16px 20px 6px;font-size:.7rem;color:#1D4ED8;text-transform:uppercase;letter-spacing:.12em;font-weight:800}
 .main{padding:28px;overflow-y:auto}
 .page-header{margin-bottom:24px}
 .page-header h1{font-size:1.6rem;font-weight:700}
@@ -142,17 +144,17 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 .tbl-wrap{overflow-x:auto}
 table{width:100%;border-collapse:collapse;font-size:.85rem}
 th{background:var(--surface2);padding:10px 14px;text-align:left;color:var(--muted);font-weight:600;font-size:.75rem;text-transform:uppercase;letter-spacing:.05em}
-td{padding:10px 14px;border-bottom:1px solid rgba(99,102,241,.1);vertical-align:middle}
-tr:hover td{background:rgba(99,102,241,.05)}
+td{padding:10px 14px;border-bottom:1px solid rgba(37,99,235,.1);vertical-align:middle}
+tr:hover td{background:rgba(37,99,235,.05)}
 .badge{display:inline-block;padding:3px 10px;border-radius:12px;font-size:.75rem;font-weight:600}
 .badge-admin{background:rgba(245,158,11,.15);color:var(--gold);border:1px solid rgba(245,158,11,.3)}
-.badge-prof{background:rgba(99,102,241,.15);color:var(--accent);border:1px solid rgba(99,102,241,.3)}
+.badge-prof{background:rgba(37,99,235,.14);color:var(--accent);border:1px solid rgba(37,99,235,.3)}
 .badge-est{background:rgba(16,185,129,.15);color:var(--green);border:1px solid rgba(16,185,129,.3)}
-.badge-inact{background:rgba(148,163,184,.1);color:var(--muted);border:1px solid rgba(148,163,184,.2)}
+.badge-inact{background:rgba(148,163,184,.1);color:var(--muted);border:1px solid rgba(37,99,235,.18)}
 .search-row{display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap}
 .search-input{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 14px;color:var(--text);font-size:.875rem;outline:none;flex:1;min-width:200px}
 .search-input:focus{border-color:var(--accent)}
-.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100;align-items:center;justify-content:center}
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(12,30,59,.32);z-index:100;align-items:center;justify-content:center}
 .modal-bg.open{display:flex}
 .modal{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:28px;width:min(700px,95vw);max-height:90vh;overflow-y:auto;position:relative}
 .modal h2{font-size:1.2rem;margin-bottom:20px}
@@ -169,8 +171,8 @@ tr:hover td{background:rgba(99,102,241,.05)}
 .step-panel{display:none}
 .step-panel.active{display:block}
 .tipo-card{background:var(--surface2);border:2px solid var(--border);border-radius:12px;padding:20px;cursor:pointer;transition:all .2s}
-.tipo-card:hover{border-color:var(--accent);background:rgba(99,102,241,.1)}
-.tipo-card.selected{border-color:var(--accent);background:rgba(99,102,241,.15)}
+.tipo-card:hover{border-color:var(--accent);background:rgba(37,99,235,.1)}
+.tipo-card.selected{border-color:var(--accent);background:rgba(37,99,235,.14)}
 .notif{padding:12px 16px;border-radius:10px;font-size:.85rem;margin-bottom:16px;display:none}
 .notif.ok{background:rgba(16,185,129,.15);border:1px solid rgba(16,185,129,.3);color:var(--green)}
 .notif.err{background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.3);color:var(--red)}
@@ -201,21 +203,22 @@ tr:hover td{background:rgba(99,102,241,.05)}
     <div class="nav-section">Gestión de Usuarios</div>
     <div class="nav-item active" data-sec="usuarios" onclick="showSec(this,'usuarios')">
       <span>👥</span> Todos los Usuarios
-      <span id="sbCntUsers" style="margin-left:auto;background:rgba(99,102,241,.2);color:var(--accent);font-size:.68rem;padding:1px 7px;border-radius:10px;font-weight:700"></span>
+      <span id="sbCntUsers" style="margin-left:auto;background:rgba(37,99,235,.2);color:var(--accent);font-size:.68rem;padding:1px 7px;border-radius:10px;font-weight:700"></span>
     </div>
     <div class="nav-item" data-sec="profesores" onclick="showSec(this,'profesores')">
       <span>🎓</span> Profesores
-      <span id="sbCntProfs" style="margin-left:auto;background:rgba(99,102,241,.2);color:var(--accent);font-size:.68rem;padding:1px 7px;border-radius:10px;font-weight:700"></span>
+      <span id="sbCntProfs" style="margin-left:auto;background:rgba(37,99,235,.2);color:var(--accent);font-size:.68rem;padding:1px 7px;border-radius:10px;font-weight:700"></span>
     </div>
     <div class="nav-item" data-sec="liceos" onclick="showSec(this,'liceos')">
       <span>🏫</span> Liceos / Colegios
       <span id="sbCntLiceos" style="margin-left:auto;background:rgba(245,158,11,.2);color:var(--gold);font-size:.68rem;padding:1px 7px;border-radius:10px;font-weight:700"></span>
     </div>
-    <div class="nav-item" onclick="window.location.href='panel-superadmin.html'" style="background:linear-gradient(90deg,rgba(139,92,246,.15),transparent);border-left:3px solid #8b5cf6;cursor:pointer">
+    <div class="nav-item" onclick="window.location.href='panel-superadmin.html'" style="background:linear-gradient(90deg,rgba(37,99,235,.15),transparent);border-left:3px solid #2563EB;cursor:pointer">
       <span>🚀</span> SaaS · Colegios
-      <span style="margin-left:auto;background:#8b5cf6;color:white;font-size:.6rem;padding:1px 6px;border-radius:6px;font-weight:700">NUEVO</span>
+      <span style="margin-left:auto;background:#2563EB;color:white;font-size:.6rem;padding:1px 6px;border-radius:6px;font-weight:700">NUEVO</span>
     </div>
-    <div class="nav-item" data-sec="codigos" onclick="showSec(this,'codigos')">🔑 Códigos de Acceso</div>
+    <!-- Códigos de Acceso ocultos: no aplican al modelo SaaS actual (docentes se registran en signup, estudiantes vía admin_colegio) -->
+    <div class="nav-item" data-sec="codigos" onclick="showSec(this,'codigos')" style="display:none">🔑 Códigos de Acceso</div>
     <div class="nav-item" data-sec="comunicados" onclick="showSec(this,'comunicados')">📣 Comunicados</div>
 
     <div class="nav-section">Contenido</div>
@@ -231,11 +234,11 @@ tr:hover td{background:rgba(99,102,241,.05)}
     </div>
     <div class="nav-item" data-sec="monitoreo" onclick="showSec(this,'monitoreo')">
       <span>🟢</span> Monitoreo en vivo
-      <span id="sbCntOnline" style="margin-left:auto;background:rgba(34,197,94,.18);color:#86efac;font-size:.68rem;padding:1px 7px;border-radius:10px;font-weight:700"></span>
+      <span id="sbCntOnline" style="margin-left:auto;background:rgba(34,197,94,.18);color:#059669;font-size:.68rem;padding:1px 7px;border-radius:10px;font-weight:700"></span>
     </div>
     <div class="nav-item" data-sec="actividad" onclick="showSec(this,'actividad')">
       <span>📊</span> Registro de Actividad
-      <span id="sbCntActividad" style="margin-left:auto;background:rgba(244,114,182,.18);color:#f9a8d4;font-size:.68rem;padding:1px 7px;border-radius:10px;font-weight:700"></span>
+      <span id="sbCntActividad" style="margin-left:auto;background:rgba(244,114,182,.18);color:#DC2626;font-size:.68rem;padding:1px 7px;border-radius:10px;font-weight:700"></span>
     </div>
 
     <div class="nav-section">Acceso Rápido</div>
@@ -263,7 +266,8 @@ tr:hover td{background:rgba(99,102,241,.05)}
         <button class="btn btn-primary btn-sm" onclick="showSec(document.querySelector('[data-sec=profesores]'),'profesores');setTimeout(abrirWizard,100)">
           ➕ Nuevo Profesor
         </button>
-        <button class="btn btn-outline btn-sm" onclick="showSec(document.querySelector('[data-sec=codigos]'),'codigos')">
+        <!-- Botón "Códigos" oculto: sección deprecada en modelo SaaS -->
+        <button class="btn btn-outline btn-sm" onclick="showSec(document.querySelector('[data-sec=codigos]'),'codigos')" style="display:none">
           🔑 Códigos
         </button>
         <button class="btn btn-outline btn-sm" onclick="loadData()">
@@ -343,7 +347,7 @@ tr:hover td{background:rgba(99,102,241,.05)}
           <div style="font-weight:700;font-size:.9rem">Educación Básica</div>
           <div style="font-size:.72rem;color:var(--muted);margin-top:4px">1° a 8° Básico</div>
         </div>
-        <div style="background:linear-gradient(135deg,rgba(99,102,241,.15),rgba(139,92,246,.1));border:1px solid rgba(99,102,241,.3);border-radius:14px;padding:18px;text-align:center;cursor:pointer;transition:all .2s" onclick="abrirWizard()" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='none'">
+        <div style="background:linear-gradient(135deg,rgba(37,99,235,.14),rgba(37,99,235,.1));border:1px solid rgba(37,99,235,.3);border-radius:14px;padding:18px;text-align:center;cursor:pointer;transition:all .2s" onclick="abrirWizard()" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='none'">
           <div style="font-size:2rem;margin-bottom:8px">🧙</div>
           <div style="font-weight:700;font-size:.9rem;color:var(--accent)">Asistente Completo</div>
           <div style="font-size:.72rem;color:var(--muted);margin-top:4px">Seleccionar tipo al crear</div>
@@ -370,11 +374,11 @@ tr:hover td{background:rgba(99,102,241,.05)}
       <div class="page-header"><h1>🏫 Liceos / Colegios</h1><p>Catálogo institucional. Cada liceo se asigna a uno o más profesores y su logo aparece en el encabezado de los documentos generados.</p></div>
 
       <!-- ═══ WIZARD SAAS: contratar colegio nuevo ═══ -->
-      <div class="card" style="background:linear-gradient(135deg,rgba(139,92,246,.14),rgba(245,158,11,.06));border:2px solid rgba(139,92,246,.4);margin-bottom:14px">
+      <div class="card" style="background:linear-gradient(135deg,rgba(37,99,235,.14),rgba(245,158,11,.06));border:2px solid rgba(37,99,235,.4);margin-bottom:14px">
         <div style="display:flex;gap:18px;align-items:center;flex-wrap:wrap">
           <div style="font-size:2.6rem;flex-shrink:0">🚀</div>
           <div style="flex:1;min-width:280px">
-            <div style="font-weight:800;font-size:1.15rem;margin-bottom:6px;color:#c4b5fd">Contratar un colegio nuevo (Wizard SaaS)</div>
+            <div style="font-weight:800;font-size:1.15rem;margin-bottom:6px;color:#2563EB">Contratar un colegio nuevo (Wizard SaaS)</div>
             <div style="font-size:.9rem;color:var(--muted);line-height:1.55;margin-bottom:14px">
               Wizard de 4 pasos que crea el colegio, le asigna un plan comercial (<b>Basic $800k</b> · <b>Pro $1.5M</b> · <b>Enterprise $2.5M</b> al año), genera la cuenta del director con contraseña temporal y te la muestra lista para copiar y enviar por WhatsApp o mail.
             </div>
@@ -394,13 +398,13 @@ tr:hover td{background:rgba(99,102,241,.05)}
       </div>
 
       <!-- Banner informativo -->
-      <div class="card" style="background:rgba(99,102,241,.06);border-color:rgba(99,102,241,.25)">
+      <div class="card" style="background:rgba(37,99,235,.06);border-color:rgba(37,99,235,.22)">
         <div style="display:flex;gap:14px;align-items:flex-start">
           <div style="font-size:1.6rem">💡</div>
           <div style="flex:1">
             <div style="font-weight:700;margin-bottom:4px">Cómo subir el logo del liceo</div>
             <div style="font-size:.85rem;color:var(--muted);line-height:1.55">
-              Los logos viven como archivos estáticos en <code style="background:rgba(99,102,241,.15);padding:1px 6px;border-radius:4px;font-family:monospace;font-size:.78rem">assets/logos/colegios/&lt;slug&gt;.png</code>.
+              Los logos viven como archivos estáticos en <code style="background:rgba(37,99,235,.14);padding:1px 6px;border-radius:4px;font-family:monospace;font-size:.78rem">assets/logos/colegios/&lt;slug&gt;.png</code>.
               Después de crear el liceo aquí, sube el archivo PNG (mín. 256×256 px, fondo transparente) por git al repositorio. Si no existe el archivo se mostrará el logo por defecto.
             </div>
           </div>
@@ -527,7 +531,7 @@ tr:hover td{background:rgba(99,102,241,.05)}
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:20px">
         <div class="card" style="padding:16px;text-align:center;border:1px solid rgba(34,197,94,.3)">
           <div style="font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-weight:600">🟢 Online ahora</div>
-          <div id="monOnlineCount" style="font-size:2rem;font-weight:800;color:#86efac;margin-top:4px">0</div>
+          <div id="monOnlineCount" style="font-size:2rem;font-weight:800;color:#059669;margin-top:4px">0</div>
         </div>
         <div class="card" style="padding:16px;text-align:center">
           <div style="font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-weight:600">Eventos últimos 5 min</div>
@@ -535,7 +539,7 @@ tr:hover td{background:rgba(99,102,241,.05)}
         </div>
         <div class="card" style="padding:16px;text-align:center">
           <div style="font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-weight:600">Generaciones hoy</div>
-          <div id="monGenHoy" style="font-size:2rem;font-weight:800;color:#fbbf24;margin-top:4px">0</div>
+          <div id="monGenHoy" style="font-size:2rem;font-weight:800;color:#F59E0B;margin-top:4px">0</div>
         </div>
       </div>
 
@@ -590,7 +594,7 @@ tr:hover td{background:rgba(99,102,241,.05)}
         }
         .mon-tipo-badge {
           font-size:.68rem; font-weight:700; padding:2px 8px; border-radius:6px;
-          background:rgba(99,102,241,.15); color:#a5b4fc; white-space:nowrap;
+          background:rgba(37,99,235,.14); color:#1D4ED8; white-space:nowrap;
         }
         .mon-when { font-size:.72rem; color:var(--muted); margin-left:auto; white-space:nowrap; }
       </style>
@@ -604,20 +608,20 @@ tr:hover td{background:rgba(99,102,241,.05)}
       </div>
 
       <!-- Banner de alertas de seguridad -->
-      <div id="actAlertasBanner" style="display:none;margin-bottom:18px;padding:14px 18px;border-radius:12px;background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.4);color:#fecaca">
+      <div id="actAlertasBanner" style="display:none;margin-bottom:18px;padding:14px 18px;border-radius:12px;background:rgba(220,38,38,.1);border:1px solid rgba(220,38,38,.4);color:#DC2626">
         <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
           <div>
             <div style="font-weight:700;font-size:.95rem">🚨 <span id="actAlertasCount">0</span> alerta(s) de seguridad en últimas 24h</div>
             <div id="actAlertasResumen" style="font-size:.82rem;opacity:.85;margin-top:4px"></div>
           </div>
-          <button onclick="verAlertasDetalle()" style="padding:6px 14px;border-radius:8px;border:1px solid rgba(248,113,113,.5);background:rgba(248,113,113,.18);color:#fecaca;cursor:pointer;font-size:.78rem;font-weight:600">Ver detalle</button>
+          <button onclick="verAlertasDetalle()" style="padding:6px 14px;border-radius:8px;border:1px solid rgba(220,38,38,.5);background:rgba(220,38,38,.18);color:#DC2626;cursor:pointer;font-size:.78rem;font-weight:600">Ver detalle</button>
         </div>
       </div>
 
       <!-- Toolbar de mantenimiento -->
       <div style="display:flex;gap:10px;align-items:center;justify-content:flex-end;margin-bottom:14px;flex-wrap:wrap">
         <span id="actPurgaInfo" style="font-size:.74rem;color:var(--muted)"></span>
-        <button onclick="purgarActividadManual()" title="Borra eventos con más de 90 días de antigüedad" style="padding:6px 12px;border-radius:8px;border:1px solid rgba(251,191,36,.4);background:rgba(251,191,36,.1);color:#fbbf24;cursor:pointer;font-size:.78rem;font-weight:600">🧹 Purgar &gt;90 días</button>
+        <button onclick="purgarActividadManual()" title="Borra eventos con más de 90 días de antigüedad" style="padding:6px 12px;border-radius:8px;border:1px solid rgba(251,191,36,.4);background:rgba(251,191,36,.1);color:#F59E0B;cursor:pointer;font-size:.78rem;font-weight:600">🧹 Purgar &gt;90 días</button>
       </div>
 
       <!-- Estadísticas resumen -->
@@ -628,15 +632,15 @@ tr:hover td{background:rgba(99,102,241,.05)}
         </div>
         <div class="card" style="padding:16px;text-align:center">
           <div style="font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-weight:600">Hoy</div>
-          <div id="actStatHoy" style="font-size:1.8rem;font-weight:800;color:#86efac;margin-top:4px">—</div>
+          <div id="actStatHoy" style="font-size:1.8rem;font-weight:800;color:#059669;margin-top:4px">—</div>
         </div>
         <div class="card" style="padding:16px;text-align:center">
           <div style="font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-weight:600">Esta semana</div>
-          <div id="actStatSemana" style="font-size:1.8rem;font-weight:800;color:#fbbf24;margin-top:4px">—</div>
+          <div id="actStatSemana" style="font-size:1.8rem;font-weight:800;color:#F59E0B;margin-top:4px">—</div>
         </div>
         <div class="card" style="padding:16px;text-align:center">
           <div style="font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-weight:600">Usuarios activos hoy</div>
-          <div id="actStatUsuariosHoy" style="font-size:1.8rem;font-weight:800;color:#a5b4fc;margin-top:4px">—</div>
+          <div id="actStatUsuariosHoy" style="font-size:1.8rem;font-weight:800;color:#1D4ED8;margin-top:4px">—</div>
         </div>
       </div>
 
@@ -645,33 +649,33 @@ tr:hover td{background:rgba(99,102,241,.05)}
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;align-items:end">
           <div>
             <label style="font-size:.74rem;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.6px">Usuario (email)</label>
-            <input type="text" id="actFiltroEmail" placeholder="email o parte" style="width:100%;padding:7px 10px;border-radius:7px;background:rgba(255,255,255,.04);border:1px solid rgba(148,163,184,.2);color:#e5e7eb;font-size:.85rem;margin-top:4px">
+            <input type="text" id="actFiltroEmail" placeholder="email o parte" style="width:100%;padding:7px 10px;border-radius:7px;background:rgba(37,99,235,.05);border:1px solid rgba(37,99,235,.18);color:#0C1E3B;font-size:.85rem;margin-top:4px">
           </div>
           <div>
             <label style="font-size:.74rem;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.6px">Tipo de evento</label>
-            <select id="actFiltroTipo" style="width:100%;padding:7px 10px;border-radius:7px;background:rgba(255,255,255,.04);border:1px solid rgba(148,163,184,.2);color:#e5e7eb;font-size:.85rem;margin-top:4px">
+            <select id="actFiltroTipo" style="width:100%;padding:7px 10px;border-radius:7px;background:rgba(37,99,235,.05);border:1px solid rgba(37,99,235,.18);color:#0C1E3B;font-size:.85rem;margin-top:4px">
               <option value="">— Todos —</option>
             </select>
           </div>
           <div>
             <label style="font-size:.74rem;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.6px">Desde</label>
-            <input type="date" id="actFiltroDesde" style="width:100%;padding:7px 10px;border-radius:7px;background:rgba(255,255,255,.04);border:1px solid rgba(148,163,184,.2);color:#e5e7eb;font-size:.85rem;margin-top:4px">
+            <input type="date" id="actFiltroDesde" style="width:100%;padding:7px 10px;border-radius:7px;background:rgba(37,99,235,.05);border:1px solid rgba(37,99,235,.18);color:#0C1E3B;font-size:.85rem;margin-top:4px">
           </div>
           <div>
             <label style="font-size:.74rem;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.6px">Hasta</label>
-            <input type="date" id="actFiltroHasta" style="width:100%;padding:7px 10px;border-radius:7px;background:rgba(255,255,255,.04);border:1px solid rgba(148,163,184,.2);color:#e5e7eb;font-size:.85rem;margin-top:4px">
+            <input type="date" id="actFiltroHasta" style="width:100%;padding:7px 10px;border-radius:7px;background:rgba(37,99,235,.05);border:1px solid rgba(37,99,235,.18);color:#0C1E3B;font-size:.85rem;margin-top:4px">
           </div>
           <input type="hidden" id="actFiltroLiceo" value="">
           <div style="display:flex;gap:8px">
-            <button onclick="aplicarFiltrosActividad()" style="flex:1;padding:8px 14px;border-radius:8px;border:0;background:linear-gradient(135deg,#7c3aed,#22d3ee);color:#fff;font-weight:700;cursor:pointer;font-size:.82rem">🔍 Filtrar</button>
-            <button onclick="limpiarFiltrosActividad()" style="padding:8px 12px;border-radius:8px;border:1px solid rgba(148,163,184,.3);background:rgba(148,163,184,.08);color:#cbd5e1;cursor:pointer;font-size:.82rem">×</button>
+            <button onclick="aplicarFiltrosActividad()" style="flex:1;padding:8px 14px;border-radius:8px;border:0;background:linear-gradient(135deg,#2563EB,#38BDF8);color:#fff;font-weight:700;cursor:pointer;font-size:.82rem">🔍 Filtrar</button>
+            <button onclick="limpiarFiltrosActividad()" style="padding:8px 12px;border-radius:8px;border:1px solid rgba(148,163,184,.3);background:rgba(148,163,184,.08);color:#334155;cursor:pointer;font-size:.82rem">×</button>
           </div>
         </div>
         <div style="margin-top:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
           <span id="actCount" style="font-size:.78rem;color:var(--muted)">—</span>
           <span style="flex:1"></span>
-          <button onclick="exportarActividadCSV()" style="padding:7px 14px;border-radius:8px;border:1px solid rgba(34,197,94,.4);background:rgba(34,197,94,.12);color:#86efac;cursor:pointer;font-size:.78rem;font-weight:600">⬇ Exportar CSV</button>
-          <button onclick="recargarActividad()" style="padding:7px 14px;border-radius:8px;border:1px solid rgba(34,211,238,.4);background:rgba(34,211,238,.12);color:#67e8f9;cursor:pointer;font-size:.78rem;font-weight:600">↻ Refrescar</button>
+          <button onclick="exportarActividadCSV()" style="padding:7px 14px;border-radius:8px;border:1px solid rgba(34,197,94,.4);background:rgba(34,197,94,.12);color:#059669;cursor:pointer;font-size:.78rem;font-weight:600">⬇ Exportar CSV</button>
+          <button onclick="recargarActividad()" style="padding:7px 14px;border-radius:8px;border:1px solid rgba(34,211,238,.4);background:rgba(34,211,238,.12);color:#0369A1;cursor:pointer;font-size:.78rem;font-weight:600">↻ Refrescar</button>
         </div>
       </div>
 
@@ -721,15 +725,34 @@ tr:hover td{background:rgba(99,102,241,.05)}
         <h3>Modelo por defecto</h3>
         <p style="color:var(--muted);font-size:.85rem;margin-bottom:12px">
           Selecciona el modelo Gemini que usaran todos los profesores.
-          <strong>Gemini 2.5 Flash</strong> es el mas capaz dentro del plan gratuito.
+          <strong>Gemini 2.0 Flash</strong> es el recomendado (disponible para todas las cuentas con billing).
         </p>
         <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end">
           <div style="flex:1;min-width:240px">
             <select id="selectModeloAdmin"
               style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-size:.875rem;outline:none">
-              <option value="gemini-2.5-flash">Gemini 2.5 Flash — recomendado</option>
-              <option value="gemini-2.5-flash-lite-preview-06-17">Gemini 2.5 Flash Lite — mas ligero</option>
-              <option value="gemini-2.5-pro">Gemini 2.5 Pro — mas potente</option>
+              <optgroup label="⭐ Recomendados evergreen (siempre al día)">
+                <option value="gemini-flash-latest">Gemini Flash Latest — default recomendado</option>
+                <option value="gemini-flash-lite-latest">Gemini Flash Lite Latest — más barato para chat</option>
+                <option value="gemini-pro-latest">Gemini Pro Latest — máxima calidad</option>
+              </optgroup>
+              <optgroup label="Serie 3.x (más nuevos)">
+                <option value="gemini-3.5-flash">Gemini 3.5 Flash</option>
+                <option value="gemini-3.1-flash-lite">Gemini 3.1 Flash Lite</option>
+                <option value="gemini-3.1-pro-preview">Gemini 3.1 Pro Preview</option>
+                <option value="gemini-3-flash-preview">Gemini 3 Flash Preview</option>
+                <option value="gemini-3-pro-preview">Gemini 3 Pro Preview</option>
+              </optgroup>
+              <optgroup label="Serie 2.5 (estable)">
+                <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
+                <option value="gemini-2.5-flash-lite">Gemini 2.5 Flash Lite</option>
+                <option value="gemini-2.5-pro">Gemini 2.5 Pro</option>
+              </optgroup>
+              <optgroup label="Serie 2.0 (fallback)">
+                <option value="gemini-2.0-flash">Gemini 2.0 Flash</option>
+                <option value="gemini-2.0-flash-001">Gemini 2.0 Flash 001</option>
+                <option value="gemini-2.0-flash-lite">Gemini 2.0 Flash Lite</option>
+              </optgroup>
             </select>
           </div>
           <button class="btn btn-primary btn-sm" onclick="guardarModeloIA()" style="white-space:nowrap">Guardar modelo</button>
@@ -802,7 +825,12 @@ tr:hover td{background:rgba(99,102,241,.05)}
     <!-- Step 2 -->
     <div class="step-panel" id="sp2">
       <p style="color:var(--muted);margin-bottom:16px;font-size:.875rem">¿Qué tipo(s) de docente es? <span style="color:var(--accent)">Puede marcar más de uno</span> (ej: Básica + Plan Común).</p>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px">
+        <div class="tipo-card" id="tc-parvularia" onclick="toggleTipo('parvularia')">
+          <div style="font-size:2rem;text-align:center">🧸</div>
+          <div style="text-align:center;font-weight:600;margin-top:8px">Parvularia</div>
+          <div style="text-align:center;font-size:.75rem;color:var(--muted);margin-top:4px">NT1 · NT2 (Pre-K / K)</div>
+        </div>
         <div class="tipo-card" id="tc-basica" onclick="toggleTipo('basica')">
           <div style="font-size:2rem;text-align:center">📚</div>
           <div style="text-align:center;font-weight:600;margin-top:8px">Educación Básica</div>
@@ -875,6 +903,7 @@ tr:hover td{background:rgba(99,102,241,.05)}
       <label>Tipo de docente</label>
       <select id="ppTipo" onchange="ppBuildAsig()">
         <option value="">— Seleccionar —</option>
+        <option value="parvularia">🧸 Educación Parvularia (Pre-Kínder / Kínder)</option>
         <option value="basica">📚 Educación Básica</option>
         <option value="media">🎓 Plan Común (Enseñanza Media)</option>
         <option value="tecnico">⚙️ Técnico-Profesional (EMTP)</option>
@@ -896,9 +925,20 @@ tr:hover td{background:rgba(99,102,241,.05)}
           <input type="checkbox" id="ppPermMat"> 📚 Puede crear material
         </label>
       </div>
+      <label style="font-size:.85rem;font-weight:600;margin-bottom:8px;display:block">📚 Asignaturas transversales (opcional)</label>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px">
+        <label style="display:flex;align-items:center;gap:8px;font-size:.85rem;cursor:pointer;padding:8px 12px;background:rgba(34,197,94,.06);border:1px solid rgba(34,197,94,.20);border-radius:8px">
+          <input type="checkbox" id="ppOrientacion">
+          <span>🧭 <strong>Orientación</strong> — puede planificar y dar clases de Orientación en cualquier curso donde sea profesor/jefe.</span>
+        </label>
+        <label style="display:flex;align-items:center;gap:8px;font-size:.85rem;cursor:pointer;padding:8px 12px;background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.20);border-radius:8px">
+          <input type="checkbox" id="ppConsejoCurso">
+          <span>📋 <strong>Consejo de Curso</strong> — puede planificar y dar Consejo de Curso (típicamente para profesores jefes).</span>
+        </label>
+      </div>
       <label style="font-size:.85rem;font-weight:600;margin-bottom:8px;display:block">🎯 Capacidades pedagógicas avanzadas</label>
       <div style="display:flex;flex-direction:column;gap:8px">
-        <label style="display:flex;align-items:center;gap:8px;font-size:.85rem;cursor:pointer;padding:8px 12px;background:rgba(167,139,250,.06);border:1px solid rgba(167,139,250,.18);border-radius:8px">
+        <label style="display:flex;align-items:center;gap:8px;font-size:.85rem;cursor:pointer;padding:8px 12px;background:rgba(37,99,235,.06);border:1px solid rgba(37,99,235,.18);border-radius:8px">
           <input type="checkbox" id="ppPAES">
           <span>🎓 <strong>Formato PAES</strong> — pruebas/eval/guías en estructura oficial PAES (5 alternativas, estímulos, especificaciones).</span>
         </label>
@@ -1052,11 +1092,29 @@ var _liceosLoaded=false;
 
 ELAuth.onUserReady(function(user){
   if(!user){window.location.href='index.html';return;}
-  // SEGURIDAD: acceso admin ÚNICAMENTE por email explícito — el rol en Firestore no basta
+  // SEGURIDAD: acceso admin de plataforma ÚNICAMENTE por email explícito
   var adminEmails=window.EL_ADMIN_EMAILS||[EL_ADMIN_EMAIL];
   var esAdmin=adminEmails.indexOf(user.email)!==-1;
   if(!esAdmin){
-    window.location.href = user.role==='profesor' ? 'dashboard-profesor.html' : 'dashboard.html';
+    // Routing por rol al panel correspondiente (soporta roles legacy y multi-rol nuevo)
+    var roles = user.roles || {};
+    var role  = user.role  || '';
+    var dest;
+    if (roles.admin_colegio || role === 'admin_colegio')          dest = 'panel-admin-colegio.html';
+    else if (roles.rector    || role === 'rector')                dest = 'panel-rector.html';
+    else if (roles.director  || role === 'director')              dest = 'panel-director.html';
+    else if (roles.utp       || role === 'utp')                   dest = 'panel-utp.html';
+    else if (roles.pie_enc   || role === 'pie_enc')               dest = 'panel-pie.html';
+    else if (roles.pie_edu   || role === 'pie_edu')               dest = 'panel-pie-edu.html';
+    else if (roles.aps_enc   || role === 'aps_enc')               dest = 'panel-apoyo.html';
+    else if (roles.aps_prof  || role === 'aps_prof')              dest = 'panel-apoyo-prof.html';
+    else if (roles.amb_enc   || role === 'amb_enc')               dest = 'panel-ambiente.html';
+    else if (roles.amb_prof  || role === 'amb_prof')              dest = 'panel-ambiente-prof.html';
+    else if (roles.profesor  || roles.jefe_curso ||
+             role === 'profesor' || role === 'jefe_curso')        dest = 'dashboard-profesor.html';
+    else                                                          dest = 'dashboard.html';
+    console.log('[admin.html] Sin acceso admin plataforma, redirigiendo a', dest, 'por rol', role, roles);
+    window.location.href = dest;
     return;
   }
   // Confirmado admin: mostrar contenido (ocultado por CSS hasta este punto)
@@ -1137,14 +1195,14 @@ function crearComunicado(){
   var titulo=(document.getElementById('comTitulo').value||'').trim();
   var mensaje=(document.getElementById('comMensaje').value||'').trim();
   var n=document.getElementById('comNotif');
-  if(!titulo||!mensaje){ n.textContent='⚠ Completa el título y el mensaje.'; n.style.color='#fbbf24'; return; }
-  if(!window.EL_DB){ n.textContent='❌ Base de datos no disponible.'; n.style.color='#f87171'; return; }
+  if(!titulo||!mensaje){ n.textContent='⚠ Completa el título y el mensaje.'; n.style.color='#F59E0B'; return; }
+  if(!window.EL_DB){ n.textContent='❌ Base de datos no disponible.'; n.style.color='#DC2626'; return; }
   var doc={ tipo:tipo, titulo:titulo, mensaje:mensaje, activo:true, creadoEn:new Date().toISOString(), autorNombre:'Administración' };
   EL_DB.collection('anuncios').add(doc).then(function(){
     n.textContent='✅ Comunicado publicado. Los profesores lo verán al ingresar.'; n.style.color='#34d399';
     document.getElementById('comTitulo').value=''; document.getElementById('comMensaje').value='';
     loadComunicados();
-  }).catch(function(e){ n.textContent='❌ '+(e&&e.message||e); n.style.color='#f87171'; });
+  }).catch(function(e){ n.textContent='❌ '+(e&&e.message||e); n.style.color='#DC2626'; });
 }
 
 function loadComunicados(){
@@ -1160,12 +1218,12 @@ function loadComunicados(){
           '<strong>'+_comEsc(a.titulo||'')+'</strong>'+
           '<span style="font-size:.68rem;color:var(--muted);text-transform:uppercase">'+_comEsc(a.tipo||'')+'</span>'+
           '<span style="margin-left:auto;font-size:.72rem;color:var(--muted)">'+String(a.creadoEn||'').slice(0,10)+'</span>'+
-          '<button class="btn btn-sm" onclick="eliminarComunicado(\''+a._id+'\')" style="background:rgba(239,68,68,.15);color:#f87171;border:1px solid rgba(239,68,68,.3)">Eliminar</button>'+
+          '<button class="btn btn-sm" onclick="eliminarComunicado(\''+a._id+'\')" style="background:rgba(239,68,68,.15);color:#DC2626;border:1px solid rgba(239,68,68,.3)">Eliminar</button>'+
         '</div>'+
         '<div style="font-size:.84rem;color:var(--muted);margin-top:5px;white-space:pre-wrap">'+_comEsc(a.mensaje||'')+'</div>'+
       '</div>';
     }).join('');
-  }).catch(function(){ box.innerHTML='<p style="color:#f87171;text-align:center">Error al cargar los comunicados.</p>'; });
+  }).catch(function(){ box.innerHTML='<p style="color:#DC2626;text-align:center">Error al cargar los comunicados.</p>'; });
 }
 
 function eliminarComunicado(id){
@@ -1206,17 +1264,17 @@ function _monParseTs(u){
   return 0;
 }
 function _monColorTipo(tipo){
-  if(!tipo) return ['rgba(99,102,241,.15)','#a5b4fc'];
-  if(tipo.indexOf('login_fallido')===0||tipo.indexOf('alerta_')===0) return ['rgba(248,113,113,.18)','#fca5a5'];
-  if(tipo.indexOf('login')===0)                                       return ['rgba(34,197,94,.18)','#86efac'];
-  if(tipo.indexOf('logout')===0)                                      return ['rgba(148,163,184,.22)','#cbd5e1'];
+  if(!tipo) return ['rgba(37,99,235,.14)','#1D4ED8'];
+  if(tipo.indexOf('login_fallido')===0||tipo.indexOf('alerta_')===0) return ['rgba(220,38,38,.18)','#DC2626'];
+  if(tipo.indexOf('login')===0)                                       return ['rgba(34,197,94,.18)','#059669'];
+  if(tipo.indexOf('logout')===0)                                      return ['rgba(148,163,184,.22)','#334155'];
   if(tipo.indexOf('generar_')===0)                                    return ['rgba(251,191,36,.18)','#fcd34d'];
   if(tipo.indexOf('crear_planificacion')===0||tipo.indexOf('editar_planificacion')===0)
-                                                                       return ['rgba(34,211,238,.18)','#67e8f9'];
-  if(tipo.indexOf('descargar_')===0)                                  return ['rgba(244,114,182,.18)','#f9a8d4'];
+                                                                       return ['rgba(34,211,238,.18)','#0369A1'];
+  if(tipo.indexOf('descargar_')===0)                                  return ['rgba(244,114,182,.18)','#DC2626'];
   if(tipo.indexOf('admin_')===0)                                      return ['rgba(168,85,247,.18)','#d8b4fe'];
   if(tipo.indexOf('guardar_')===0)                                    return ['rgba(16,185,129,.18)','#6ee7b7'];
-  return ['rgba(99,102,241,.15)','#a5b4fc'];
+  return ['rgba(37,99,235,.14)','#1D4ED8'];
 }
 function _monTipoLabel(e){
   if(e.tipoLabel) return e.tipoLabel;
@@ -1239,7 +1297,7 @@ function iniciarMonitoreo(){
   if(_monStarted) return;
   _monStarted = true;
   if(!window.EL_DB){
-    document.getElementById('monOnlineList').innerHTML = '<p style="color:#f87171">Base de datos no disponible.</p>';
+    document.getElementById('monOnlineList').innerHTML = '<p style="color:#DC2626">Base de datos no disponible.</p>';
     return;
   }
 
@@ -1272,7 +1330,7 @@ function iniciarMonitoreo(){
       var nombre = u.nombre || u.displayName || (u.email||'').split('@')[0] || 'Usuario';
       var pag    = u.currentPageLabel || (u.currentPage ? u.currentPage.replace(/\.html$/,'') : '—');
       var rolBg  = u.role==='admin' ? 'rgba(168,85,247,.18)' : 'rgba(34,197,94,.18)';
-      var rolFg  = u.role==='admin' ? '#d8b4fe' : '#86efac';
+      var rolFg  = u.role==='admin' ? '#d8b4fe' : '#059669';
       return '<div class="mon-row">'+
         '<span class="mon-dot" style="background:#22c55e;box-shadow:0 0 0 3px rgba(34,197,94,.25)"></span>'+
         '<div style="display:flex;flex-direction:column;gap:2px;min-width:0">'+
@@ -1280,7 +1338,7 @@ function iniciarMonitoreo(){
           '<span style="font-size:.72rem;color:var(--muted)">'+_monEsc(u.email||'')+'</span>'+
         '</div>'+
         '<span style="font-size:.68rem;font-weight:700;padding:2px 8px;border-radius:6px;background:'+rolBg+';color:'+rolFg+';text-transform:uppercase">'+_monEsc(u.role||'usuario')+'</span>'+
-        '<span style="font-size:.78rem;color:#cbd5e1;background:var(--surface);padding:3px 9px;border-radius:6px;border:1px solid var(--border)">📄 '+_monEsc(pag)+'</span>'+
+        '<span style="font-size:.78rem;color:#334155;background:var(--surface);padding:3px 9px;border-radius:6px;border:1px solid var(--border)">📄 '+_monEsc(pag)+'</span>'+
         '<span class="mon-when">'+_monHaceCuanto(u._tsNum)+'</span>'+
       '</div>';
     }).join('');
@@ -1368,7 +1426,7 @@ var _actividadFiltrada = [];
 
 function cargarActividad() {
   if (typeof ELDB === 'undefined' || !ELDB.actividad) {
-    document.getElementById('actTbody').innerHTML = '<tr><td colspan="3" style="text-align:center;color:#fca5a5;padding:30px">Audit log no disponible (ELDB.actividad no cargó).</td></tr>';
+    document.getElementById('actTbody').innerHTML = '<tr><td colspan="3" style="text-align:center;color:#DC2626;padding:30px">Audit log no disponible (ELDB.actividad no cargó).</td></tr>';
     return;
   }
   // Poblar select de tipos
@@ -1528,15 +1586,15 @@ function renderActividadTabla() {
     }
     if (!nombre) nombre = '(usuario sin sesión)';
     if (!email)  email  = '—';
-    var tipoColor = (e.tipo === 'login' || e.tipo === 'logout') ? '#86efac'
-                  : (e.tipo === 'login_fallido') ? '#fca5a5'
-                  : (e.tipo === 'alerta_seguridad') ? '#f87171'
-                  : (e.tipo && e.tipo.indexOf('admin_') === 0) ? '#fbbf24'
-                  : (e.tipo && e.tipo.indexOf('generar_') === 0) ? '#67e8f9'
-                  : '#a5b4fc';
+    var tipoColor = (e.tipo === 'login' || e.tipo === 'logout') ? '#059669'
+                  : (e.tipo === 'login_fallido') ? '#DC2626'
+                  : (e.tipo === 'alerta_seguridad') ? '#DC2626'
+                  : (e.tipo && e.tipo.indexOf('admin_') === 0) ? '#F59E0B'
+                  : (e.tipo && e.tipo.indexOf('generar_') === 0) ? '#0369A1'
+                  : '#1D4ED8';
     return '<tr>' +
       '<td style="font-size:.78rem;color:var(--muted);white-space:nowrap">' + fechaTxt + '</td>' +
-      '<td><div style="font-weight:600;color:#e5e7eb">' + _esc(nombre) + '</div>' +
+      '<td><div style="font-weight:600;color:#0C1E3B">' + _esc(nombre) + '</div>' +
         '<div style="font-size:.74rem;color:var(--muted)">' + _esc(email) + '</div></td>' +
       '<td><span style="font-size:.82rem;color:' + tipoColor + ';font-weight:600">' + _esc(e.tipoLabel || e.tipo || '—') + '</span></td>' +
     '</tr>';
@@ -1649,22 +1707,58 @@ function filtrarUsuarios(){
   }));
 }
 
+function _labelEspecialidad(id) {
+  var map = {
+    'tp_electricidad': 'Electricidad',
+    'tp_electronica':  'Electrónica',
+    'tp_mec_auto':     'Mecánica Automotriz',
+    'tp_construccion': 'Construcción',
+    'tp_admin':        'Administración',
+    'tp_contabilidad': 'Contabilidad'
+  };
+  return map[id] || (id ? id.replace(/^tp_/,'').replace(/_/g,' ') : '');
+}
+
 function renderProfs(list){
   var tb=document.getElementById('profsTbody');
   if(!list.length){tb.innerHTML='<tr><td colspan="6" style="text-align:center;color:var(--muted)">Sin profesores</td></tr>';return;}
   tb.innerHTML=list.map(function(p){
-    var tipo=p.tipoProfesor==='basica'?'📚 Básica':p.tipoProfesor==='media'?'🎓 Plan Común':p.tipoProfesor==='tecnico'?'⚙️ EMTP':'—';
-    var asig=p.asignaturas&&p.asignaturas.length?p.asignaturas.join(', '):(p.especialidad||'—');
-    return '<tr><td><strong>'+(p.nombre||'—')+'</strong></td><td style="color:var(--muted)">'+p.email+'</td><td>'+tipo+'</td><td style="font-size:.8rem">'+asig+'</td><td style="font-size:.8rem">'+(p.niveles&&p.niveles.join(', ')||'—')+'</td><td style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn btn-outline btn-sm" onclick="editUser(\''+p.uid+'\')">✏️ Datos</button><button class="btn btn-primary btn-sm" onclick="editarPermisos(\''+p.uid+'\')">🔑 Permisos</button><button class="btn btn-outline btn-sm" onclick="editarLiceosProf(\''+p.uid+'\')">🏫 Liceos</button></td></tr>';
+    var tipos = Array.isArray(p.tiposProfesor) && p.tiposProfesor.length ? p.tiposProfesor : (p.tipoProfesor ? [p.tipoProfesor] : []);
+    var tipoLbl = tipos.map(function(t){
+      return t==='basica'?'📚 Básica':t==='media'?'🎓 Plan Común':t==='tecnico'?'⚙️ EMTP':'—';
+    }).join(' + ') || '—';
+
+    // Construir tags separados para plan común, TP y transversales
+    var tags = [];
+    // TP: especialidad(es) + módulos
+    var esps = Array.isArray(p.especialidades) ? p.especialidades : (p.especialidad ? [p.especialidad] : []);
+    esps.forEach(function(esp) {
+      var mods = (p.modulosTP && p.modulosTP[esp]) ? p.modulosTP[esp] : [];
+      var lbl = '⚙️ ' + _labelEspecialidad(esp);
+      if (mods.length) lbl += ' (' + mods.join(', ') + ')';
+      tags.push('<span style="background:#EEF2FF;color:#4338CA;padding:2px 8px;border-radius:6px;font-size:.72rem;font-weight:700">' + lbl + '</span>');
+    });
+    // Plan común: asignaturas
+    if (Array.isArray(p.asignaturas) && p.asignaturas.length) {
+      p.asignaturas.forEach(function(a) {
+        tags.push('<span style="background:#DBEAFE;color:#1E40AF;padding:2px 8px;border-radius:6px;font-size:.72rem;font-weight:700">' + a + '</span>');
+      });
+    }
+    // Transversales (Orientación, Consejo de Curso) — siempre disponibles
+    if (p.puedeOrientacion) tags.push('<span style="background:#DCFCE7;color:#166534;padding:2px 8px;border-radius:6px;font-size:.72rem;font-weight:700">🧭 Orientación</span>');
+    if (p.puedeConsejoCurso) tags.push('<span style="background:#FEF3C7;color:#92400E;padding:2px 8px;border-radius:6px;font-size:.72rem;font-weight:700">📋 Consejo de Curso</span>');
+
+    var asig = tags.length ? '<div style="display:flex;flex-wrap:wrap;gap:4px">' + tags.join('') + '</div>' : '—';
+    return '<tr><td><strong>'+(p.nombre||'—')+'</strong></td><td style="color:var(--muted);font-size:.85rem">'+p.email+'</td><td>'+tipoLbl+'</td><td style="font-size:.8rem">'+asig+'</td><td style="font-size:.8rem">'+(p.niveles&&p.niveles.join(', ')||'—')+'</td><td style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn btn-outline btn-sm" onclick="editUser(\''+p.uid+'\')">✏️ Datos</button><button class="btn btn-primary btn-sm" onclick="editarPermisos(\''+p.uid+'\')">🔑 Permisos</button><button class="btn btn-outline btn-sm" onclick="editarLiceosProf(\''+p.uid+'\')">🏫 Liceos</button></td></tr>';
   }).join('');
 }
 
-var TC={'guia':'#34d399','apunte':'#60a5fa','ficha':'#f59e0b','evaluacion':'#f43f5e','planificacion':'#818cf8'};
+var TC={'guia':'#34d399','apunte':'#60A5FA','ficha':'#f59e0b','evaluacion':'#f43f5e','planificacion':'#1D4ED8'};
 function renderMats(list){
   var tb=document.getElementById('matsTbody');
   if(!list.length){tb.innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--muted)">Sin materiales</td></tr>';return;}
   tb.innerHTML=list.map(function(m){
-    var c=TC[m.tipo]||'#94a3b8';
+    var c=TC[m.tipo]||'#64748B';
     var f=m.fechaISO?new Date(m.fechaISO).toLocaleDateString('es-CL'):'—';
     return '<tr><td><strong>'+(m.titulo||'Sin título')+'</strong></td><td><span class="badge" style="background:'+c+'22;color:'+c+';border:1px solid '+c+'44">'+(m.tipo||'?')+'</span></td><td style="font-size:.8rem">'+(m.profesor||m.email||'—')+'</td><td style="font-size:.8rem">'+(m.modulo||m.asignatura||'—')+'</td><td style="font-size:.8rem;color:var(--muted)">'+f+'</td><td>'+(m.vistas||0)+'</td><td><button class="btn btn-danger btn-sm" onclick="delMat(\''+m.id+'\')">🗑</button></td></tr>';
   }).join('');
@@ -2007,7 +2101,7 @@ function wNext(step){
   if(step===2){if(!wData.tipos||!wData.tipos.length){notif('wNotif','❌ Selecciona al menos un tipo de docente','err');return;}buildStep3();}
   if(step===3){
     var tipos=wData.tipos||[];
-    var pideAsig = tipos.indexOf('basica')!==-1 || tipos.indexOf('media')!==-1;
+    var pideAsig = tipos.indexOf('basica')!==-1 || tipos.indexOf('media')!==-1 || tipos.indexOf('parvularia')!==-1;
     var pideEsp  = tipos.indexOf('tecnico')!==-1;
     if(pideAsig && wData.asignaturas.length===0){notif('wNotif','❌ Selecciona al menos una asignatura','err');return;}
     if(pideEsp && !wData.especialidad){notif('wNotif','❌ Selecciona una especialidad EMTP','err');return;}
@@ -2047,7 +2141,7 @@ function buildStep3(){
     '</div>'+
     '<h3 style="margin-bottom:10px;font-size:.9rem">🎯 Capacidades pedagógicas avanzadas</h3>'+
     '<div style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px">'+
-      '<label style="display:flex;align-items:center;gap:8px;font-size:.85rem;cursor:pointer;padding:8px 12px;background:rgba(167,139,250,.06);border:1px solid rgba(167,139,250,.18);border-radius:8px">'+
+      '<label style="display:flex;align-items:center;gap:8px;font-size:.85rem;cursor:pointer;padding:8px 12px;background:rgba(37,99,235,.06);border:1px solid rgba(37,99,235,.18);border-radius:8px">'+
         '<input type="checkbox" id="wPAES"'+(wData.formatoPAES?' checked':'')+' onchange="wData.formatoPAES=this.checked">'+
         '<span>🎓 <strong>Formato PAES</strong> — habilita generar pruebas, evaluaciones y guías en estructura oficial PAES (5 alternativas, estímulos, tabla de especificaciones).</span>'+
       '</label>'+
@@ -2077,6 +2171,7 @@ function buildStep3(){
   var asigBlock='', nivBlock='', espBlock='';
   // Construimos el bloque de asignaturas combinado si hay basica/media
   var asigSources=[];
+  if(tipos.indexOf('parvularia')!==-1) asigSources.push({ key:'parvularia', titulo:'🧸 Educación Parvularia — Núcleos NT1/NT2' });
   if(tipos.indexOf('basica')!==-1) asigSources.push({ key:'basica', titulo:'📚 Asignaturas — Educación Básica' });
   if(tipos.indexOf('media')!==-1)  asigSources.push({ key:'media',  titulo:'🎓 Asignaturas — Plan Común (Media)' });
   asigSources.forEach(function(src){
@@ -2090,6 +2185,7 @@ function buildStep3(){
   });
   // Niveles: unión de los niveles disponibles según tipos
   var nivelesDisponibles=[];
+  if(tipos.indexOf('parvularia')!==-1) nivelesDisponibles = nivelesDisponibles.concat([['NT1','Pre-Kínder (NT1)'],['NT2','Kínder (NT2)']]);
   if(tipos.indexOf('basica')!==-1)  nivelesDisponibles = nivelesDisponibles.concat([['1B','1° Básico'],['2B','2° Básico'],['3B','3° Básico'],['4B','4° Básico'],['5B','5° Básico'],['6B','6° Básico'],['7B','7° Básico'],['8B','8° Básico']]);
   if(tipos.indexOf('media')!==-1)   nivelesDisponibles = nivelesDisponibles.concat([['1M','1° Medio'],['2M','2° Medio'],['3M','3° Medio'],['4M','4° Medio']]);
   if(tipos.indexOf('tecnico')!==-1) {
@@ -2298,7 +2394,7 @@ function tgMod(cb){if(cb.checked){if(wData.modulos.indexOf(cb.value)===-1)wData.
 
 function buildStep4(){
   var n=document.getElementById('pNombre').value.trim(),e=document.getElementById('pEmail').value.trim();
-  var labelMap={basica:'📚 Educación Básica',media:'🎓 Plan Común',tecnico:'⚙️ Técnico-Profesional'};
+  var labelMap={parvularia:'🧸 Parvularia (NT1/NT2)',basica:'📚 Educación Básica',media:'🎓 Plan Común',tecnico:'⚙️ Técnico-Profesional'};
   var tiposArr=(wData.tipos&&wData.tipos.length)?wData.tipos:(wData.tipo?[wData.tipo]:[]);
   var tipo=tiposArr.map(function(k){return labelMap[k]||k;}).join(' + ') || '—';
   var html='<div style="display:grid;gap:10px">';
@@ -2382,7 +2478,7 @@ function loadRModulos(){
   grid.innerHTML=mods.map(function(m){
     var recsMod=allRecursos.filter(function(r){return r.modulo===m.num||r.especialidad===key;});
     return '<div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden">'+
-      '<div style="background:linear-gradient(135deg,rgba(99,102,241,.2),rgba(139,92,246,.1));padding:16px;border-bottom:1px solid var(--border)">'+
+      '<div style="background:linear-gradient(135deg,rgba(37,99,235,.2),rgba(37,99,235,.1));padding:16px;border-bottom:1px solid var(--border)">'+
         '<div style="font-size:.7rem;color:var(--accent);font-weight:700;margin-bottom:4px">'+m.num+(m.horas?' · '+m.horas+' hrs':'')+'</div>'+
         '<div style="font-size:.9rem;font-weight:700">'+m.nombre+'</div>'+
         (espData?'<div style="font-size:.72rem;color:var(--muted);margin-top:2px">'+espData.sector+'</div>':'')+
@@ -2410,7 +2506,7 @@ function renderComunGrid(){
   var asigs=CURRICULA_CHILE.getAsignaturas('media');
   grid.innerHTML=asigs.map(function(a){
     return '<div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden">'+
-      '<div style="background:rgba(99,102,241,.12);padding:16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px">'+
+      '<div style="background:rgba(37,99,235,.12);padding:16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px">'+
         '<div style="width:12px;height:12px;border-radius:50%;background:'+(a.color||'#888')+';flex-shrink:0"></div>'+
         '<div><div style="font-size:.9rem;font-weight:700">'+a.nombre+'</div>'+
         '<div style="font-size:.72rem;color:var(--muted)">' + a.sigla + ' · Niveles: '+a.niveles.join(', ')+'</div></div>'+
@@ -2419,7 +2515,7 @@ function renderComunGrid(){
         '<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:10px">'+
         a.niveles.map(function(n){
           var us=CURRICULA_CHILE.getUnidades(a.sigla,n)||[];
-          return '<span style="font-size:.72rem;padding:3px 8px;background:rgba(99,102,241,.1);border:1px solid rgba(99,102,241,.2);border-radius:6px;color:#818cf8">'+n+' ('+us.length+' U)</span>';
+          return '<span style="font-size:.72rem;padding:3px 8px;background:rgba(37,99,235,.1);border:1px solid rgba(37,99,235,.2);border-radius:6px;color:#1D4ED8">'+n+' ('+us.length+' U)</span>';
         }).join('')+
         '</div>'+
         '<button class="btn btn-outline btn-sm" onclick="openAddRecursoMod(\''+a.sigla+'\',\'comun\')">➕ Recurso</button>'+
@@ -2452,8 +2548,8 @@ function renderRecursoChip(r){
   var iconos={programa:'📋',planificacion:'📅',guia:'📄',evaluacion:'📊',material:'📦',enlace:'🔗'};
   var ic=iconos[r.tipoRec]||'📎';
   return r.url?
-    '<a href="'+r.url+'" target="_blank" style="display:inline-flex;align-items:center;gap:4px;padding:3px 9px;background:rgba(99,102,241,.12);border:1px solid rgba(99,102,241,.25);border-radius:20px;font-size:.73rem;color:#818cf8;text-decoration:none;margin:2px">'+ic+' '+r.titulo+'</a>':
-    '<span style="display:inline-flex;align-items:center;gap:4px;padding:3px 9px;background:rgba(99,102,241,.12);border:1px solid rgba(99,102,241,.25);border-radius:20px;font-size:.73rem;color:#818cf8;margin:2px">'+ic+' '+r.titulo+'</span>';
+    '<a href="'+r.url+'" target="_blank" style="display:inline-flex;align-items:center;gap:4px;padding:3px 9px;background:rgba(37,99,235,.12);border:1px solid rgba(37,99,235,.22);border-radius:20px;font-size:.73rem;color:#1D4ED8;text-decoration:none;margin:2px">'+ic+' '+r.titulo+'</a>':
+    '<span style="display:inline-flex;align-items:center;gap:4px;padding:3px 9px;background:rgba(37,99,235,.12);border:1px solid rgba(37,99,235,.22);border-radius:20px;font-size:.73rem;color:#1D4ED8;margin:2px">'+ic+' '+r.titulo+'</span>';
 }
 
 function openAddRecurso(){
@@ -2524,6 +2620,11 @@ function editarPermisos(uid) {
   document.getElementById('ppPAES').checked     = !!prof.formatoPAES;
   document.getElementById('ppSIMCE').checked    = !!prof.formatoSIMCE;
   document.getElementById('ppMarzano').checked  = !!prof.taxonomiaMarzano;
+  // Transversales
+  var orEl = document.getElementById('ppOrientacion');
+  var ccEl = document.getElementById('ppConsejoCurso');
+  if (orEl) orEl.checked = !!prof.puedeOrientacion;
+  if (ccEl) ccEl.checked = !!prof.puedeConsejoCurso;
   document.getElementById('modalPermProf').classList.add('open');
 }
 
@@ -2531,7 +2632,22 @@ function ppBuildAsig() {
   _ppData.tipo = document.getElementById('ppTipo').value;
   var sec = document.getElementById('ppAsigSection');
   var html = '';
-  if (_ppData.tipo === 'basica') {
+  if (_ppData.tipo === 'parvularia') {
+    html += '<h4 style="margin-bottom:8px;font-size:.85rem;color:var(--muted)">🧸 Educación Parvularia — Núcleos MINEDUC (NT1 · NT2)</h4>';
+    html += '<div class="multi-select-box" id="ppAsigBox">';
+    CURRICULA_CHILE.getAsignaturas('parvularia').forEach(function(a) {
+      var chk = _ppData.asignaturas.indexOf(a.nombre) !== -1 ? 'checked' : '';
+      html += '<label><input type="checkbox" value="'+a.nombre+'" onchange="ppTgAsig(this)" '+chk+'><span class="cdot" style="background:'+(a.color||'#F59E0B')+'"></span>'+a.nombre+'</label>';
+    });
+    html += '</div>';
+    html += '<h4 style="margin:14px 0 8px;font-size:.85rem;color:var(--muted)">Niveles</h4>';
+    html += '<div class="multi-select-box" id="ppNivBox">';
+    [['NT1','Pre-Kínder (NT1)'],['NT2','Kínder (NT2)']].forEach(function(p) {
+      var chk = _ppData.niveles.indexOf(p[0]) !== -1 ? 'checked' : '';
+      html += '<label><input type="checkbox" value="'+p[0]+'" onchange="ppTgNiv(this)" '+chk+'>'+p[1]+'</label>';
+    });
+    html += '</div>';
+  } else if (_ppData.tipo === 'basica') {
     html += '<h4 style="margin-bottom:8px;font-size:.85rem;color:var(--muted)">📚 Asignaturas — Educación Básica</h4>';
     html += '<div class="multi-select-box" id="ppAsigBox">';
     CURRICULA_CHILE.getAsignaturas('basica').forEach(function(a) {
@@ -2602,13 +2718,25 @@ function guardarPermisos() {
   if (!uid) return;
   var btn = document.getElementById('btnGuardarPermisos');
   btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Guardando…';
+
+  // Limpieza según tipo:
+  //   - TP: NO llevan asignaturas plan común, solo especialidad + módulos
+  //   - Plan común / Básica: NO llevan especialidad TP ni módulos
+  var esTP    = _ppData.tipo === 'tecnico';
+  var asigsClean = esTP ? [] : (_ppData.asignaturas || []);
+  var espClean   = esTP ? _ppData.especialidad : '';
+  var mencClean  = esTP ? _ppData.mencion : '';
+  var modsClean  = esTP ? (_ppData.modulos || []) : [];
+
   var datos = {
     tipoProfesor: _ppData.tipo,
-    asignaturas:  _ppData.asignaturas,
+    asignaturas:  asigsClean,
     niveles:      _ppData.niveles,
-    especialidad: _ppData.especialidad,
-    mencion:      _ppData.mencion,
-    modulos:      _ppData.modulos,
+    especialidad: espClean,
+    especialidades: espClean ? [espClean] : [],
+    mencion:      mencClean,
+    modulos:      modsClean,
+    modulosTP:    espClean ? (function(){ var m={}; m[espClean] = modsClean; return m; })() : {},
     cursos:       document.getElementById('ppCursos').value.split(',').map(function(s){return s.trim();}).filter(Boolean),
     permisos: {
       planificar:    document.getElementById('ppPermPlan').checked,
@@ -2616,7 +2744,11 @@ function guardarPermisos() {
     },
     formatoPAES:      document.getElementById('ppPAES').checked,
     formatoSIMCE:     document.getElementById('ppSIMCE').checked,
-    taxonomiaMarzano: document.getElementById('ppMarzano').checked
+    taxonomiaMarzano: document.getElementById('ppMarzano').checked,
+    // Transversales: puede planificar/dar clases de Orientación y/o Consejo de Curso
+    // sin importar si es TP o Plan Común
+    puedeOrientacion:  (document.getElementById('ppOrientacion')  || {}).checked === true,
+    puedeConsejoCurso: (document.getElementById('ppConsejoCurso') || {}).checked === true
   };
   ELDB.usuarios.actualizar(uid, datos)
     .then(function() {
@@ -2656,13 +2788,13 @@ var _recursosInit=false;
 // =============================================
 //  CONFIGURACION IA - GESTION DE API KEYS
 // =============================================
-var _iaConfig = { keys: [], modelo: 'gemini-2.5-flash' };
+var _iaConfig = { keys: [], modelo: 'gemini-flash-latest' };
 
 function cargarConfigIA() {
   EL_DB.collection('sistema').doc('gemini').get()
     .then(function(doc) {
       if (doc.exists) {
-        _iaConfig = Object.assign({ keys: [], modelo: 'gemini-2.5-flash' }, doc.data());
+        _iaConfig = Object.assign({ keys: [], modelo: 'gemini-flash-latest' }, doc.data());
       }
       renderKeysIA();
       var sel = document.getElementById('selectModeloAdmin');
@@ -2670,7 +2802,7 @@ function cargarConfigIA() {
     })
     .catch(function(e) {
       var el = document.getElementById('listaKeysIA');
-      if (el) el.innerHTML = '<p style="color:#f87171">Error: ' + e.message + '</p>';
+      if (el) el.innerHTML = '<p style="color:#DC2626">Error: ' + e.message + '</p>';
     });
 }
 
@@ -2686,7 +2818,7 @@ function renderKeysIA() {
     return '<div style="display:flex;align-items:center;gap:10px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 14px">' +
       '<span style="font-family:monospace;font-size:.85rem;flex:1;color:var(--text)">' + masked + '</span>' +
       '<span style="font-size:.72rem;background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.2);color:#34d399;padding:2px 8px;border-radius:10px">Key ' + (i+1) + '</span>' +
-      '<button onclick="eliminarKeyIA(' + i + ')" style="background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.25);color:#f87171;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:.78rem">Eliminar</button>' +
+      '<button onclick="eliminarKeyIA(' + i + ')" style="background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.25);color:#DC2626;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:.78rem">Eliminar</button>' +
     '</div>';
   }).join('');
 }
@@ -2711,7 +2843,7 @@ function eliminarKeyIA(idx) {
 
 function guardarModeloIA() {
   var sel = document.getElementById('selectModeloAdmin');
-  _iaConfig.modelo = sel ? sel.value : 'gemini-2.5-flash';
+  _iaConfig.modelo = sel ? sel.value : 'gemini-flash-latest';
   guardarConfigIA('notifModeloIA', 'Modelo guardado: ' + _iaConfig.modelo);
 }
 
@@ -2724,7 +2856,7 @@ function guardarConfigIA(notifId, okMsg) {
 function notifIA(id, msg, tipo) {
   var el = document.getElementById(id);
   if (!el) return;
-  var color = tipo === 'ok' ? '#34d399' : tipo === 'warn' ? '#fbbf24' : '#f87171';
+  var color = tipo === 'ok' ? '#34d399' : tipo === 'warn' ? '#F59E0B' : '#DC2626';
   el.innerHTML = '<span style="color:' + color + '">' + msg + '</span>';
   setTimeout(function() { if(el) el.innerHTML = ''; }, 4000);
 }

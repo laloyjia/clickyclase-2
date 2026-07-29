@@ -133,7 +133,7 @@ if(window.ccStore)ccStore.getConfig('academico').then(function(a){var esp=(a&&a.
 <script>
 // Fase 0: proteger la página según rol del usuario.
 if (window.CCRouter && window.CCRouter.guardPanel) {
-  CCRouter.guardPanel(['encargado_area','utp']);
+  CCRouter.guardPanel(['encargado_area','utp','director','rector','admin_colegio','admin']);
 }
 </script>
 </body>

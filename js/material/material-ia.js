@@ -1100,17 +1100,35 @@
       document.getElementById('btnIA').disabled = true;
       // Llamada con 1 reintento autom\u00e1tico en 502/504 (timeout de hosting)
       function _llamarIA(reintento) {
+          // uid del usuario logueado (para enforcement de cuota anti-fraude)
+          var _uid = '';
+          try {
+              if (window.firebase && firebase.auth && firebase.auth().currentUser)
+                  _uid = firebase.auth().currentUser.uid;
+              else if (window.EL_USER && window.EL_USER.uid)
+                  _uid = window.EL_USER.uid;
+          } catch(_){}
           return fetch(window.IA_ENDPOINT || '/api/ia-asistente', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
                   tipo: 'raw',
-                  datos: { prompt: prompt, maxTokens: 16384, temperature: 0.7 }
+                  datos: {
+                      prompt: prompt,
+                      maxTokens: 16384,
+                      temperature: 0.7,
+                      uid: _uid,
+                      consumeQuota: true   // Esta llamada cuenta contra la cuota de particulares
+                  }
               })
           }).then(function(res) {
               return res.text().then(function(txt) {
                   var data;
                   try { data = JSON.parse(txt); } catch (_) { data = null; }
+                  // 402 = cuota agotada \u2192 NO reintentar, propagar el error especial
+                  if (res.status === 402 && data && data.errorCode === 'CUOTA_AGOTADA') {
+                      return data;
+                  }
                   // Si la respuesta es 5xx (server error o timeout), reintentar 1 vez
                   if (res.status >= 500 && res.status < 600 && !reintento) {
                       setIAStatus('loading', '<span class="ia-spinner">&#9696;</span> Servidor lento, reintentando\u2026');
@@ -1133,6 +1151,14 @@
           .then(function() { return _llamarIA(false); })
               .then(function(data) {
                   document.getElementById('btnIA').disabled = false;
+
+                  // \u2500\u2500 CUOTA AGOTADA (Prueba gratis usada 2/2) \u2500\u2500
+                  if (data && data.errorCode === 'CUOTA_AGOTADA') {
+                      _mostrarModalCuotaAgotada(data);
+                      setIAStatus('error', '\ud83c\udf81 Prueba gratis agotada. Contactanos para continuar.');
+                      return;
+                  }
+
                   if (data.error) {
                       var msg = (typeof data.error === 'string') ? data.error
                                 : (data.error.message || JSON.stringify(data.error));
@@ -1144,6 +1170,22 @@
                       }
                       setIAStatus('error', '&#10007; Error de la IA: ' + msg + hint);
                       return;
+                  }
+
+                  // Si respondi\u00f3 con info de cuota (particular), avisar cu\u00e1ntos quedan
+                  if (data && data.cuota && typeof data.cuota.restantes === 'number') {
+                      try {
+                          var r = data.cuota.restantes;
+                          if (r === 1) {
+                              setTimeout(function(){
+                                  _showBannerRestantes('\u26a0\ufe0f Te queda <b>1 material gratis</b>. Contactanos para desbloquear el uso ilimitado.');
+                              }, 800);
+                          } else if (r === 0) {
+                              setTimeout(function(){
+                                  _showBannerRestantes('\ud83c\udf81 Este fue tu <b>\u00faltimo material gratis</b>. Contactanos para seguir usando la IA sin l\u00edmites.');
+                              }, 800);
+                          }
+                      } catch(_){}
                   }
                   var text = data.resultado || '';
                   if (!text) {
@@ -1370,4 +1412,59 @@
   window.generarConIA          = generarConIA;
   window._generarPIEAdjunta    = _generarPIEAdjunta;
   window.setIAStatus           = setIAStatus;
+
+  // ═══════════════════════════════════════════════════════════════
+  //  MODAL: Cuota agotada (anti-fraude, prueba gratis usada 2/2)
+  // ═══════════════════════════════════════════════════════════════
+  function _mostrarModalCuotaAgotada(data) {
+    // Evitar duplicados
+    var yaExiste = document.getElementById('modalCuotaAgotada');
+    if (yaExiste) { yaExiste.style.display = 'flex'; return; }
+
+    var wa = (data && data.whatsapp) || 'https://wa.me/56942532644?text=Hola%2C%20agot%C3%A9%20mi%20prueba%20gratis%20de%20Click%26Clase%20y%20quiero%20info%20de%20planes';
+    var mail = (data && data.email) || 'soporte.learn0@gmail.com';
+    var usados = (data && data.usados != null) ? data.usados : '—';
+    var cuota  = (data && data.cuota  != null) ? data.cuota  : '—';
+
+    var modal = document.createElement('div');
+    modal.id = 'modalCuotaAgotada';
+    modal.style.cssText = 'position:fixed;inset:0;background:rgba(12,30,59,.72);display:flex;align-items:center;justify-content:center;z-index:10000;padding:20px;backdrop-filter:blur(6px)';
+    modal.innerHTML =
+      '<div style="background:#fff;border-radius:20px;max-width:520px;width:100%;padding:36px 30px;box-shadow:0 24px 60px rgba(0,0,0,.35);text-align:center;position:relative;font-family:Inter,system-ui,sans-serif">' +
+        '<div style="font-size:4.2rem;line-height:1;margin-bottom:14px">🎁</div>' +
+        '<h2 style="margin:0 0 10px;font-size:1.6rem;font-weight:800;color:#0C1E3B">¡Terminaste tu prueba gratis!</h2>' +
+        '<p style="color:#334155;margin:0 0 8px;font-size:1rem;line-height:1.5">Ya generaste tus <b>' + cuota + ' materiales</b> de prueba con IA. Esperamos que hayas visto la calidad ✨</p>' +
+        '<div style="background:#F0F7FF;border-radius:12px;padding:14px 16px;margin:18px 0;border:1px solid rgba(37,99,235,.2)">' +
+          '<div style="font-weight:700;color:#1D4ED8;font-size:.95rem;margin-bottom:4px">Para seguir usando la IA sin límites:</div>' +
+          '<div style="font-size:.88rem;color:#334155">Contactanos y activamos un plan adaptado a tus necesidades</div>' +
+        '</div>' +
+        '<div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:20px">' +
+          '<a href="' + wa + '" target="_blank" rel="noopener" style="padding:12px 22px;background:linear-gradient(135deg,#25D366,#128C7E);color:#fff;text-decoration:none;border-radius:12px;font-weight:700;font-size:.95rem;display:inline-flex;align-items:center;gap:8px">💬 WhatsApp</a>' +
+          '<a href="mailto:' + mail + '?subject=Ampliar%20plan%20Click%26Clase" style="padding:12px 22px;background:#F0F7FF;color:#1D4ED8;text-decoration:none;border-radius:12px;font-weight:700;font-size:.95rem;border:1px solid #2563EB">✉ Email</a>' +
+        '</div>' +
+        '<button type="button" style="margin-top:20px;background:transparent;border:0;color:#64748B;font-size:.85rem;cursor:pointer;text-decoration:underline" onclick="document.getElementById(\'modalCuotaAgotada\').style.display=\'none\'">Cerrar y seguir explorando el panel</button>' +
+      '</div>';
+    document.body.appendChild(modal);
+  }
+
+  // Banner sutil (esquina inferior) para avisar "te queda 1"
+  function _showBannerRestantes(html) {
+    var yaExiste = document.getElementById('bannerCuotaRest');
+    if (yaExiste) yaExiste.remove();
+    var b = document.createElement('div');
+    b.id = 'bannerCuotaRest';
+    b.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#FEF3C7,#FDE68A);color:#92400E;padding:14px 22px;border-radius:12px;box-shadow:0 12px 28px rgba(146,64,14,.28);border:1px solid #F59E0B;z-index:9500;max-width:600px;font-family:Inter,system-ui,sans-serif;font-size:.9rem;display:flex;align-items:center;gap:14px';
+    b.innerHTML =
+      '<div style="flex:1">' + html + '</div>' +
+      '<a href="https://wa.me/56942532644?text=Hola%2C%20quiero%20info%20de%20planes%20de%20Click%26Clase" target="_blank" rel="noopener" style="padding:8px 14px;background:linear-gradient(135deg,#25D366,#128C7E);color:#fff;border-radius:8px;text-decoration:none;font-weight:700;font-size:.82rem;white-space:nowrap">💬 Contactar</a>' +
+      '<button type="button" onclick="this.parentElement.remove()" style="background:transparent;border:0;color:#92400E;font-size:1.2rem;cursor:pointer;line-height:1">✕</button>';
+    document.body.appendChild(b);
+    setTimeout(function(){
+      var el = document.getElementById('bannerCuotaRest');
+      if (el) el.style.opacity = '0.85';
+    }, 15000);
+  }
+
+  window._mostrarModalCuotaAgotada = _mostrarModalCuotaAgotada;
+  window._showBannerRestantes      = _showBannerRestantes;
 })();

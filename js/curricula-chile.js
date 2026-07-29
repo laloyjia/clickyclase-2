@@ -1108,9 +1108,14 @@ var CURRICULA_CHILE = (function() {
   };
 
   // ════════════════════════════════════════════════════════════
-  //  ELECTIVOS MEDIA (3° y 4° Medio)
+  //  ELECTIVOS MEDIA (3° y 4° Medio) — DEPRECATED
+  //  Los electivos HC oficiales ahora viven en cada archivo de
+  //  plan-comun/*.js dentro del campo `.electivos` (formato moderno
+  //  DS 193/2019). El getter público `getElectivosHC()` lee sólo de
+  //  ahí. Este objeto queda como shim vacío por compatibilidad.
   // ════════════════════════════════════════════════════════════
-  var electivosMedia = {
+  var electivosMedia = {};
+  var _electivosMedia_LEGACY_UNUSED = {
     lenguaje: [
       {
         key:    "lec_esp",
@@ -1293,8 +1298,15 @@ var CURRICULA_CHILE = (function() {
 
   function _resolveEspKey(key) {
     if (!key) return null;
+    // Aceptar slug directo (formato TP_CATALOG)
     if (TP_CATALOG[key]) return key;
+    // Aceptar alias legacy
     if (TP_ALIASES[key] && TP_CATALOG[TP_ALIASES[key]]) return TP_ALIASES[key];
+    // Fix 2026-07: aceptar ID interno del catálogo TP (tp_enfermeria → atencion-enfermeria)
+    if (window.CCTPCatalogo && CCTPCatalogo.SLUG_CURRICULA && CCTPCatalogo.SLUG_CURRICULA[key]) {
+      var slug = CCTPCatalogo.SLUG_CURRICULA[key];
+      if (TP_CATALOG[slug]) return slug;
+    }
     return null;
   }
 
@@ -1369,6 +1381,15 @@ var CURRICULA_CHILE = (function() {
 
     // ── Helpers ────────────────────────────────────────────────
     getAsignaturas: function(nivel) {
+      // Educación Parvularia (NT1 = Pre-Kínder, NT2 = Kínder)
+      if (nivel === 'NT1' || nivel === 'NT2') {
+        return [{
+          sigla: 'PARV',
+          nombre: 'Educación Parvularia',
+          color: '#F59E0B',
+          niveles: ['NT1','NT2']
+        }];
+      }
       if (nivel.endsWith('B')) return basica.asignaturas.filter(function(a) {
         return a.niveles.indexOf(nivel) !== -1;
       });
@@ -1433,10 +1454,13 @@ var CURRICULA_CHILE = (function() {
         'MUS': 'musica',
         'TEC': 'tecnologia',
         'ORI': 'orientacion',
+        'CC':  'consejo-curso', 'CDC': 'consejo-curso',
         'CLA': 'chile-latam',
         'MUG': 'mundo-global',
         'FIL': 'filosofia',
-        'EC':  'ed-ciudadana'
+        'EC':  'ed-ciudadana',
+        // Educación Parvularia (Pre Kinder NT1 · Kinder NT2)
+        'PARV': 'parvularia', 'PAR': 'parvularia', 'PK': 'parvularia', 'KIN': 'parvularia'
       };
       return map[sigla] || (sigla || '').toLowerCase();
     },
@@ -1600,6 +1624,21 @@ var CURRICULA_CHILE = (function() {
     // siglas divergentes (HCS↔HIS, EF↔EDF, AV↔ART) colapsen en una sola entrada.
     // Retorna [{ key, nombre, sigla, color, niveles }].
     getAsignaturas: function(tramo) {
+      // Educación Parvularia: única "asignatura" que agrupa los 8 núcleos NT1/NT2
+      if (tramo === 'parvularia') {
+        var PC0 = (typeof window !== 'undefined' && window.CURRICULA_PLAN_COMUN) ? window.CURRICULA_PLAN_COMUN : {};
+        var par = PC0.parvularia;
+        if (par) {
+          return [{
+            key:     'parvularia',
+            nombre:  par.nombre || 'Educación Parvularia',
+            sigla:   par.sigla  || 'PARV',
+            color:   par.color  || '#F59E0B',
+            niveles: par.niveles || ['NT1','NT2']
+          }];
+        }
+        return [{ key:'parvularia', nombre:'Educación Parvularia', sigla:'PARV', color:'#F59E0B', niveles:['NT1','NT2'] }];
+      }
       if (tramo !== 'basica' && tramo !== 'media') return [];
       var self = this;
       var seen = {};       // key canónica → índice en out
@@ -1672,11 +1711,12 @@ var CURRICULA_CHILE = (function() {
     },
 
     getAllNiveles: function() {
-      return ['1B','2B','3B','4B','5B','6B','7B','8B','1M','2M','3M','4M'];
+      return ['NT1','NT2','1B','2B','3B','4B','5B','6B','7B','8B','1M','2M','3M','4M'];
     },
 
     getNivelLabel: function(nivel) {
       var map = {
+        'NT1':'Pre-Kínder (NT1)','NT2':'Kínder (NT2)',
         '1B':'1° Básico','2B':'2° Básico','3B':'3° Básico','4B':'4° Básico',
         '5B':'5° Básico','6B':'6° Básico','7B':'7° Básico','8B':'8° Básico',
         '1M':'1° Medio','2M':'2° Medio','3M':'3° Medio','4M':'4° Medio'

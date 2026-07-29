@@ -1019,7 +1019,7 @@ function toggleRecsPanel() {
     .rec-conceptos-label { font-size:0.72rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:.07em; margin-right:4px; }
     .rec-chip {
         background: rgba(129,140,248,0.15); border: 1px solid rgba(129,140,248,0.3);
-        color: #a5b4fc; border-radius: 99px; padding: 3px 10px; font-size:0.76rem;
+        color: #1D4ED8; border-radius: 99px; padding: 3px 10px; font-size:0.76rem;
     }
 
     /* ── Tabs ── */

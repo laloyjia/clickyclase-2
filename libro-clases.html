@@ -16,19 +16,22 @@
 <script src="js/roles-router.js"></script>
 <script src="js/cursos.js"></script>
 <script src="js/libro-clases.js"></script>
+<script src="js/pin-firma.js"></script>
+<script src="js/cc-uikit.js"></script>
+<script src="js/horarios.js"></script>
 
 <style>
 :root {
-  --bg: #0b0d1e; --panel: #12162f; --panel2: #1a1f3a;
-  --border: rgba(148,163,184,.15); --text: #e5e7eb; --muted: #94a3b8;
-  --cyan: #22d3ee; --violet: #7c3aed;
-  --presente: #86efac; --ausente: #fca5a5; --atrasado: #fbbf24; --justif: #93c5fd;
+  --bg: #F0F7FF; --panel: #FFFFFF; --panel2: #F8FAFF;
+  --border: rgba(37,99,235,.14); --text: #0C1E3B; --muted: #475569;
+  --cyan: #38BDF8; --violet: #2563EB;
+  --presente: #059669; --ausente: #DC2626; --atrasado: #F59E0B; --justif: #1D4ED8;
 }
 * { box-sizing: border-box; }
 body { margin: 0; font-family: 'Segoe UI', Roboto, Arial, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
-.header { padding: 18px 28px; border-bottom: 1px solid var(--border); background: linear-gradient(135deg, rgba(124,58,237,.08), rgba(34,211,238,.06)); display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+.header { padding: 18px 28px; border-bottom: 1px solid var(--border); background: linear-gradient(135deg, rgba(37,99,235,.08), rgba(34,211,238,.06)); display: flex; align-items: center; justify-content: space-between; gap: 20px; }
 .header h1 { margin: 0; font-size: 1.35rem; font-weight: 700; }
-.breadcrumb { color: var(--muted); font-size: .82rem; }
+.breadcrumb { color: #475569; font-size: .82rem; }
 
 .container { max-width: 1400px; margin: 24px auto; padding: 0 24px; }
 
@@ -40,21 +43,21 @@ body { margin: 0; font-family: 'Segoe UI', Roboto, Arial, sans-serif; background
   gap: 14px;
   align-items: flex-end;
 }
-.fld label { display: block; font-size: .72rem; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 4px; }
-input, select, textarea { width: 100%; padding: 9px 11px; border-radius: 8px; background: rgba(255,255,255,.04); border: 1px solid rgba(148,163,184,.2); color: var(--text); font-size: .9rem; font-family: inherit; }
+.fld label { display: block; font-size: .72rem; color: #475569; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 4px; }
+input, select, textarea { width: 100%; padding: 9px 11px; border-radius: 8px; background: rgba(37,99,235,.05); border: 1px solid rgba(37,99,235,.18); color: var(--text); font-size: .9rem; font-family: inherit; }
 
-.btn { padding: 10px 18px; border-radius: 8px; border: 1px solid var(--border); background: rgba(255,255,255,.04); color: var(--text); cursor: pointer; font-size: .85rem; font-weight: 600; white-space: nowrap; }
-.btn:hover { background: rgba(255,255,255,.08); }
-.btn.primary { background: linear-gradient(135deg, #7c3aed, #22d3ee); color: #fff; border-color: transparent; }
-.btn.success { background: rgba(34,197,94,.15); color: #86efac; border-color: rgba(34,197,94,.35); }
-.btn.danger { background: rgba(239,68,68,.12); color: #fca5a5; border-color: rgba(239,68,68,.35); }
+.btn { padding: 10px 18px; border-radius: 8px; border: 1px solid var(--border); background: rgba(37,99,235,.05); color: var(--text); cursor: pointer; font-size: .85rem; font-weight: 600; white-space: nowrap; }
+.btn:hover { background: rgba(37,99,235,.08); }
+.btn.primary { background: linear-gradient(135deg, #2563EB, #38BDF8); color: #fff; border-color: transparent; }
+.btn.success { background: rgba(34,197,94,.15); color: #059669; border-color: rgba(34,197,94,.35); }
+.btn.danger { background: rgba(239,68,68,.12); color: #DC2626; border-color: rgba(239,68,68,.35); }
 .btn.small { padding: 4px 10px; font-size: .74rem; }
 .btn:disabled { opacity: .5; cursor: not-allowed; }
 
 .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 18px; }
 .stat { padding: 12px 14px; border-radius: 10px; background: var(--panel); border: 1px solid var(--border); }
 .stat .v { font-size: 1.8rem; font-weight: 800; }
-.stat .l { font-size: .68rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 600; margin-top: 2px; }
+.stat .l { font-size: .68rem; color: #475569; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; margin-top: 2px; }
 .stat.P .v { color: var(--presente); }
 .stat.A .v { color: var(--ausente); }
 .stat.T .v { color: var(--atrasado); }
@@ -62,16 +65,16 @@ input, select, textarea { width: 100%; padding: 9px 11px; border-radius: 8px; ba
 
 .asist-tabla { width: 100%; border-collapse: separate; border-spacing: 0; }
 .asist-tabla th, .asist-tabla td { padding: 8px 10px; border-bottom: 1px solid var(--border); font-size: .88rem; text-align: left; }
-.asist-tabla th { background: rgba(255,255,255,.03); font-size: .7rem; text-transform: uppercase; letter-spacing: .8px; color: var(--muted); font-weight: 700; }
-.asist-tabla tr:hover td { background: rgba(255,255,255,.02); }
+.asist-tabla th { background: rgba(37,99,235,.05); font-size: .7rem; text-transform: uppercase; letter-spacing: .8px; color: #475569; font-weight: 700; }
+.asist-tabla tr:hover td { background: rgba(37,99,235,.03); }
 
 .estado-btns { display: inline-flex; gap: 4px; }
 .est-btn {
   width: 34px; height: 34px; border-radius: 8px; border: 1px solid transparent;
-  background: rgba(255,255,255,.04); color: var(--muted); cursor: pointer;
+  background: rgba(37,99,235,.05); color: #475569; cursor: pointer;
   font-weight: 800; font-size: .95rem;
 }
-.est-btn:hover { background: rgba(255,255,255,.08); }
+.est-btn:hover { background: rgba(37,99,235,.08); }
 .est-btn.act.P { background: rgba(134,239,172,.2); color: var(--presente); border-color: rgba(134,239,172,.45); }
 .est-btn.act.A { background: rgba(252,165,165,.2); color: var(--ausente); border-color: rgba(252,165,165,.45); }
 .est-btn.act.T { background: rgba(251,191,36,.2); color: var(--atrasado); border-color: rgba(251,191,36,.45); }
@@ -80,54 +83,53 @@ input, select, textarea { width: 100%; padding: 9px 11px; border-radius: 8px; ba
 .firmado-badge {
   display: inline-flex; align-items: center; gap: 6px;
   padding: 4px 10px; border-radius: 999px;
-  background: rgba(34,197,94,.15); color: #86efac;
+  background: rgba(34,197,94,.15); color: #059669;
   border: 1px solid rgba(34,197,94,.35);
   font-size: .78rem; font-weight: 700;
 }
 
-.empty { padding: 60px; text-align: center; color: var(--muted); font-size: .95rem; }
+.empty { padding: 60px; text-align: center; color: #475569; font-size: .95rem; }
 
 .acciones-fila { display: flex; gap: 10px; justify-content: flex-end; align-items: center; padding-top: 16px; border-top: 1px solid var(--border); margin-top: 16px; }
 </style>
 </head>
 <body>
 
-<div class="header">
-  <div>
-    <div class="breadcrumb">Docente</div>
-    <h1>📖 Libro de Clases</h1>
-  </div>
-  <div style="display:flex;gap:8px">
-    <a href="panel-profesor.html" class="btn">← Panel</a>
-    <a href="libro-clases-historial.html" class="btn">📅 Historial</a>
-  </div>
-</div>
-
 <div class="container">
 
-  <!-- Selector curso + asignatura + fecha -->
-  <div class="card">
-    <div class="selector">
-      <div class="fld">
-        <label>Curso</label>
-        <select id="selCurso" onchange="onCambioCurso()">
-          <option value="">— Elegir —</option>
-        </select>
+  <!-- Hero unificado -->
+  <div id="ccHero"></div>
+
+  <!-- KPIs del profe -->
+  <div id="ccKpis"></div>
+
+  <!-- Vista SEMANA — Nivel Google Calendar -->
+  <div class="cck-card" style="margin-bottom:22px;padding:14px">
+    <div class="hw-toolbar">
+      <div class="hw-nav">
+        <button class="hw-nav-btn" onclick="cambiarSemana(-1)" title="Semana anterior">◀</button>
+        <button class="hw-nav-btn hw-hoy-btn" onclick="cambiarSemana(0)" title="Volver a hoy">Hoy</button>
+        <button class="hw-nav-btn" onclick="cambiarSemana(1)" title="Semana siguiente">▶</button>
       </div>
-      <div class="fld">
-        <label>Asignatura</label>
-        <select id="selAsig" onchange="onCambioAsig()">
-          <option value="">— Elegir curso primero —</option>
-        </select>
+      <div class="hw-titulo">
+        <span id="semanaLabel">Cargando…</span>
       </div>
-      <div class="fld">
-        <label>Fecha</label>
-        <input type="date" id="selFecha">
-      </div>
-      <div class="fld">
-        <button class="btn primary" onclick="abrirRegistro()">📋 Abrir registro</button>
+      <div class="hw-actions">
+        <button class="hw-view-btn active" data-view="semana" onclick="cambiarVista('semana')">📅 Semana</button>
+        <button class="hw-view-btn" data-view="dia" onclick="cambiarVista('dia')">☀ Hoy</button>
       </div>
     </div>
+    <div id="semanaBody">
+      <div class="cck-sk-row"><div class="cck-sk"></div><div class="cck-sk"></div><div class="cck-sk"></div></div>
+      <div class="cck-sk-row"><div class="cck-sk"></div><div class="cck-sk"></div><div class="cck-sk"></div></div>
+    </div>
+  </div>
+
+  <!-- Selectores ocultos (mantenemos por compatibilidad con abrirRegistro) -->
+  <div style="display:none">
+    <select id="selCurso" onchange="onCambioCurso()"><option value="">— Elegir —</option></select>
+    <select id="selAsig" onchange="onCambioAsig()"><option value="">— Elegir curso primero —</option></select>
+    <input type="date" id="selFecha">
   </div>
 
   <!-- Registro del día -->
@@ -147,7 +149,21 @@ input, select, textarea { width: 100%; padding: 9px 11px; border-radius: 8px; ba
 
     <div class="card">
       <h3 style="margin:0 0 12px;font-size:.9rem;text-transform:uppercase;letter-spacing:.8px;color:var(--muted)">📝 Contenido del día</h3>
-      <textarea id="txtContenido" rows="3" placeholder="¿Qué se trabajó hoy? Objetivos, temas, actividades…"></textarea>
+
+      <div style="display:flex;gap:10px;align-items:center;margin-bottom:10px;flex-wrap:wrap">
+        <label for="selPlanClase" style="font-size:.78rem;color:var(--muted);font-weight:600;white-space:nowrap">
+          📋 Planificación asociada:
+        </label>
+        <select id="selPlanClase" style="flex:1;min-width:220px" onchange="usarPlanificacion(this.value)">
+          <option value="">— Sin enlazar (contenido libre) —</option>
+        </select>
+        <a id="linkVerPlan" href="#" target="_blank"
+           style="display:none;font-size:.78rem;color:var(--violet);text-decoration:none;font-weight:600">
+          👁 Ver planificación completa →
+        </a>
+      </div>
+
+      <textarea id="txtContenido" rows="3" placeholder="¿Qué se trabajó hoy? Objetivos, temas, actividades… (o seleccioná una planificación arriba para autocompletar)"></textarea>
       <h3 style="margin:16px 0 8px;font-size:.9rem;text-transform:uppercase;letter-spacing:.8px;color:var(--muted)">🔎 Observaciones generales</h3>
       <textarea id="txtObs" rows="2" placeholder="Situaciones especiales, tareas pedidas, próximas evaluaciones…"></textarea>
     </div>
@@ -162,7 +178,7 @@ input, select, textarea { width: 100%; padding: 9px 11px; border-radius: 8px; ba
       </div>
       <table class="asist-tabla">
         <thead>
-          <tr><th style="width:40px">N°</th><th>Estudiante</th><th style="width:200px">Estado</th><th>Motivo / Nota</th></tr>
+          <tr><th style="width:40px">N°</th><th>Apellidos</th><th>Nombres</th><th style="width:200px">Estado</th><th>Motivo / Nota</th></tr>
         </thead>
         <tbody id="tbAsist"></tbody>
       </table>
@@ -175,7 +191,7 @@ input, select, textarea { width: 100%; padding: 9px 11px; border-radius: 8px; ba
 
   </div>
 
-  <div id="emptyState" class="card empty">
+  <div id="emptyState" class="card empty" style="display:none">
     Elegí un curso, una asignatura y una fecha, después "Abrir registro" para pasar lista y anotar el contenido del día.
   </div>
 
@@ -197,14 +213,21 @@ function hoyISO() {
   return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
 }
 
+function _cid(c) { return c && (c.cursoId || c.id) || ''; }
+
 function cargar() {
   document.getElementById('selFecha').value = hoyISO();
+  _renderHeroYKpis();
   CCCursos.misCursos().then(function(cursos) {
-    _cursos = cursos || [];
+    _cursos = (cursos || []).map(function(c){
+      // Normalizar: garantizar cursoId siempre presente
+      if (!c.cursoId) c.cursoId = c.id || '';
+      return c;
+    });
     var sel = document.getElementById('selCurso');
     sel.innerHTML = '<option value="">— Elegir —</option>' +
       _cursos.map(function(c) {
-        return '<option value="' + esc(c.cursoId) + '">' + esc(c.nombreCompleto) +
+        return '<option value="' + esc(_cid(c)) + '">' + esc(c.nombreCompleto || (c.nivel+c.letra)) +
                (c.anio ? ' (' + c.anio + ')' : '') + '</option>';
       }).join('');
     if (_cursos.length === 0) {
@@ -212,24 +235,672 @@ function cargar() {
         'Todavía no estás asignado como jefe de curso ni docente de asignatura. ' +
         'Pedile al UTP que te asigne en <strong>Cursos y Estudiantes</strong>.';
     }
+    // Dashboard-first: cargar clases pendientes y KPIs
+    _cargarDashboard();
   });
 }
 
+/* ══════════════════════════════════════════════════════════════
+   DASHBOARD del docente: hero + KPIs + clases pendientes de hoy
+   ══════════════════════════════════════════════════════════════ */
+function _renderHeroYKpis() {
+  if (!window.CCKit) return;
+  var u = (window.ELAuth && ELAuth.user) || {};
+  var nombreCorto = (u.nombre || u.email || 'Docente').split(' ')[0];
+  var hoy = new Date();
+  var diaMes = hoy.toLocaleDateString('es-CL', { weekday:'long', day:'numeric', month:'long' });
+  document.getElementById('ccHero').innerHTML = CCKit.hero({
+    emoji: '📖',
+    title: 'Libro de Clases',
+    sub: 'Hola ' + nombreCorto + ' · ' + diaMes,
+    actions: [
+      { label: 'Panel', emoji: '←', href: 'dashboard-profesor.html' },
+      { label: 'Historial', emoji: '📅', href: 'libro-clases-historial.html' }
+    ]
+  });
+  var fechaEl = document.getElementById('clasesFecha');
+  if (fechaEl) fechaEl.textContent = diaMes.charAt(0).toUpperCase() + diaMes.slice(1);
+}
+
+function _cargarDashboard() {
+  var u = (window.ELAuth && ELAuth.user) || {};
+  var uid = u.uid || '';
+  if (!uid || !window.CCLibroClases || !CCLibroClases.listarRegistros) {
+    _pintarKpis({firmadasHoy:0, borrHoy:0, firmadasMes:0, cursos:_cursos.length});
+    _pintarSemana(null, []);
+    return;
+  }
+  // 1) Cargar registros del profe (para saber cuáles ya firmó)
+  //    y 2) el horario semanal desde CCHorarios en paralelo
+  Promise.all([
+    CCLibroClases.listarRegistros({ docenteUid: uid }).catch(function(){ return []; }),
+    window.CCHorarios ? CCHorarios.gridSemanaDocente(uid) : Promise.resolve(null)
+  ]).then(function (arr) {
+    var regs = arr[0] || [];
+    var grid = arr[1];
+    var hoyStr = hoyISO();
+    var mesStr = hoyStr.slice(0, 7);
+    var firmadasHoy = 0, borrHoy = 0, borrMes = 0, firmadasMes = 0;
+    regs.forEach(function (r) {
+      var f = String(r.fecha || '').slice(0,10);
+      if (f === hoyStr) { if (r.firmado) firmadasHoy++; else borrHoy++; }
+      if (f.slice(0,7) === mesStr) { if (r.firmado) firmadasMes++; else borrMes++; }
+    });
+    _pintarKpis({
+      firmadasHoy: firmadasHoy, borrHoy: borrHoy,
+      borrMes: borrMes, firmadasMes: firmadasMes,
+      cursos: _cursos.length
+    });
+    _pintarSemana(grid, regs);
+  });
+}
+
+/* ══════════════════════════════════════════════════════════════
+   VISTA SEMANA — Nivel Google Calendar
+   ══════════════════════════════════════════════════════════════ */
+var _semanaOffset = 0;      // 0 = esta semana, -1 = anterior, +1 = siguiente
+var _vistaActual = 'semana'; // 'semana' o 'dia'
+var _gridCache = null;
+var _regsCache = null;
+
+function cambiarSemana(delta) {
+  if (delta === 0) _semanaOffset = 0;
+  else _semanaOffset += delta;
+  if (_gridCache) _pintarSemana(_gridCache, _regsCache);
+}
+
+function cambiarVista(v) {
+  _vistaActual = v;
+  document.querySelectorAll('.hw-view-btn').forEach(function(b){
+    b.classList.toggle('active', b.getAttribute('data-view') === v);
+  });
+  if (_gridCache) _pintarSemana(_gridCache, _regsCache);
+}
+
+function _pintarSemana(grid, regs) {
+  var body = document.getElementById('semanaBody');
+  if (!body) return;
+
+  // Sin horario oficial → generar uno SUGERIDO desde las asignaciones del profe
+  var esSugerido = false;
+  if (!grid || !grid.bloques || !grid.bloques.length ||
+      !grid.semana || !_tieneAlgunaClase(grid.semana)) {
+    grid = _generarHorarioSugerido();
+    esSugerido = true;
+    if (!grid || !_tieneAlgunaClase(grid.semana)) {
+      body.innerHTML = CCKit.emptyState({
+        emoji: '🕐',
+        title: 'Todavía no tienes cursos ni asignaturas asignadas',
+        body: 'Pedile al UTP o al director que te asigne cursos desde el Panel de Administración → Cursos. Cuando estén cargados, acá vas a ver tus clases con acceso directo para firmar.'
+      });
+      return;
+    }
+  }
+  // Cachear para navegación por semana
+  _gridCache = grid;
+  _regsCache = regs;
+
+  var hoy = new Date();
+  var diaHoyKey = CCHorarios.DIA_ISO[hoy.getDay()] || null;
+  var horaAhora = hoy.toTimeString().slice(0,5); // "HH:MM"
+  var hoyISOStr = hoyISO();
+
+  // Fecha del lunes de la semana visible (con offset)
+  var lunSem = _lunes(hoy);
+  lunSem.setDate(lunSem.getDate() + _semanaOffset * 7);
+  var domSem = new Date(lunSem.getTime() + 4 * 86400000);
+  var esSemanaActual = _semanaOffset === 0;
+
+  var semLabel = document.getElementById('semanaLabel');
+  if (semLabel) {
+    var mesLun = lunSem.toLocaleDateString('es-CL',{month:'long'});
+    var mesDom = domSem.toLocaleDateString('es-CL',{month:'long'});
+    var txt;
+    if (mesLun === mesDom) {
+      txt = lunSem.getDate() + ' — ' + domSem.getDate() + ' ' + mesLun + ' ' + lunSem.getFullYear();
+    } else {
+      txt = lunSem.getDate() + ' ' + mesLun + ' — ' + domSem.getDate() + ' ' + mesDom + ' ' + lunSem.getFullYear();
+    }
+    semLabel.textContent = txt;
+  }
+
+  // Banner cuando el horario es sugerido (no oficial)
+  var bannerSug = esSugerido
+    ? '<div style="background:linear-gradient(135deg,rgba(245,158,11,.1),rgba(251,191,36,.05));' +
+      'border:1px solid rgba(245,158,11,.3);border-radius:10px;padding:10px 14px;margin-bottom:14px;' +
+      'font-size:.85rem;color:#B45309;display:flex;align-items:center;gap:10px">' +
+      '<span style="font-size:1.3rem">💡</span>' +
+      '<span><b>Horario sugerido</b> — generado desde tus asignaturas. Pedile al UTP que cargue tu horario oficial desde <b>Panel Admin → Horarios docentes</b> para verlo con horas reales.</span>' +
+      '</div>'
+    : '';
+
+  // Filtrar bloques que aparecen en semana (no mostrar bloques 100% vacíos)
+  var bloquesUsados = grid.bloques.filter(function (b) {
+    if (b.tipo === 'recreo' || b.tipo === 'almuerzo') return true;
+    return CCHorarios.DIAS.some(function (d) {
+      return (grid.semana[d] || []).some(function (e) { return e.bloque.id === b.id; });
+    });
+  });
+
+  // Mapa de registros por fecha+cursoId+asig para saber estado
+  var regsMap = {};
+  regs.forEach(function (r) {
+    var k = String(r.fecha||'').slice(0,10) + '|' + (r.cursoId||'') + '|' + (r.asignatura||'');
+    regsMap[k] = r;
+  });
+
+  // Si es VISTA DÍA (solo un día)
+  if (_vistaActual === 'dia') {
+    body.innerHTML = _renderVistaDia(grid, regsMap, bloquesUsados, hoy, diaHoyKey, horaAhora, hoyISOStr);
+    return;
+  }
+
+  // VISTA SEMANA — grilla completa
+  var html = '<div class="hor-week-wrap"><div class="hw-scroll"><table class="hor-week">' +
+    '<thead><tr><th class="hw-bloq-h">Horario</th>';
+  CCHorarios.DIAS.forEach(function (d, i) {
+    var f = new Date(lunSem.getTime() + i * 86400000);
+    var fISO = f.toISOString().slice(0,10);
+    var esHoy = esSemanaActual && d === diaHoyKey;
+    html += '<th class="' + (esHoy?'hw-hoy':'') + '">' + CCHorarios.DIAS_LABEL[d] +
+            '<span class="hw-dianum">' + f.getDate() + '</span></th>';
+  });
+  html += '</tr></thead><tbody>';
+
+  bloquesUsados.forEach(function (b) {
+    var isBreak = b.tipo === 'recreo' || b.tipo === 'almuerzo';
+    html += '<tr' + (isBreak ? ' class="hw-fila-break"' : '') + '>';
+    html += '<td class="hw-bloq">' + esc((b.horaInicio||'')) + '</td>';
+    if (isBreak) {
+      // Barra única que ocupa todos los días
+      var texto = b.tipo === 'recreo'
+        ? '☕ ' + b.nombre + ' · ' + (b.horaInicio||'') + '–' + (b.horaFin||'')
+        : '🍽 ' + b.nombre + ' · ' + (b.horaInicio||'') + '–' + (b.horaFin||'');
+      html += '<td colspan="' + CCHorarios.DIAS.length + '"><div class="hw-break-inner">' + esc(texto) + '</div></td>';
+      html += '</tr>';
+      return;
+    }
+    CCHorarios.DIAS.forEach(function (d, i) {
+      var f = new Date(lunSem.getTime() + i * 86400000);
+      var fISO = f.toISOString().slice(0,10);
+      var esHoy = esSemanaActual && d === diaHoyKey;
+      var esColHoy = esHoy;
+      var entry = ((grid.semana[d] || []).find(function (e) { return e.bloque.id === b.id; }) || {}).entrada;
+      if (!entry) {
+        html += '<td class="hw-empty' + (esColHoy?' hw-col-hoy':'') + '"></td>';
+        return;
+      }
+      // Estado
+      var estadoCls = 'hw-otro-dia', badge = '', accion = '';
+      if (esHoy) {
+        var k = hoyISOStr + '|' + (entry.cursoId||'') + '|' + (entry.asignatura||'');
+        var reg = regsMap[k];
+        if (reg && reg.firmado) {
+          estadoCls = 'hw-firmada';
+          badge = '<span class="hw-badge ok">Firmada</span>';
+        } else if (reg) {
+          estadoCls = 'hw-borrador';
+          badge = '<span class="hw-badge warn">Borrador</span>';
+        } else if (b.horaFin && b.horaFin < horaAhora) {
+          estadoCls = 'hw-pendiente';
+          badge = '<span class="hw-badge err">Sin firmar</span>';
+        } else if (b.horaInicio && b.horaInicio <= horaAhora && horaAhora <= b.horaFin) {
+          estadoCls = 'hw-ahora';
+          badge = '<span class="hw-badge info">● Ahora</span>';
+        } else {
+          estadoCls = 'hw-futura';
+        }
+        accion = 'onclick="_abrirDesdeSemana(\'' + esc(entry.cursoId||'') + '\',\'' + esc(entry.asignatura||'') + '\',\'' + hoyISOStr + '\')"';
+      } else if (esSemanaActual || _semanaOffset > 0) {
+        // Semana actual o futura — clickeable pero sin estado
+        accion = 'onclick="_abrirDesdeSemana(\'' + esc(entry.cursoId||'') + '\',\'' + esc(entry.asignatura||'') + '\',\'' + fISO + '\')"';
+      }
+      html += '<td class="' + estadoCls + (esColHoy?' hw-col-hoy':'') + '"><div class="hw-slot" ' + accion + '>' +
+        '<div class="hw-curso">' + esc(entry.cursoNombre || entry.cursoId) + '</div>' +
+        '<div class="hw-asig">' + esc(entry.asignatura) + '</div>' +
+        (entry.sala ? '<div class="hw-sala">📍 ' + esc(entry.sala) + '</div>' : '') +
+        (esHoy && badge ? badge : '') +
+        '</div></td>';
+    });
+    html += '</tr>';
+  });
+  // Línea de tiempo actual (solo si es semana actual y hora entre 08:00 y 16:00)
+  var lineaHtml = '';
+  if (esSemanaActual && horaAhora >= '07:30' && horaAhora <= '16:30') {
+    // Necesitamos calcular en qué % de la altura poner la línea
+    // La haremos con JS después via _pintarLineaAhora()
+  }
+  html += '</tbody></table></div>' + lineaHtml +
+    '<div class="hw-leyenda">' +
+      '<div class="hw-leyenda-item"><span class="hw-leyenda-dot" style="background:#10B981"></span>Firmada</div>' +
+      '<div class="hw-leyenda-item"><span class="hw-leyenda-dot" style="background:#F59E0B"></span>Borrador</div>' +
+      '<div class="hw-leyenda-item"><span class="hw-leyenda-dot" style="background:#EF4444"></span>Sin firmar</div>' +
+      '<div class="hw-leyenda-item"><span class="hw-leyenda-dot" style="background:#4F46E5"></span>En curso</div>' +
+      '<div class="hw-leyenda-item"><span class="hw-leyenda-dot" style="background:#F59E0B"></span>☕ Recreo</div>' +
+      '<div class="hw-leyenda-item"><span class="hw-leyenda-dot" style="background:#B45309"></span>🍽 Almuerzo</div>' +
+    '</div></div>';
+
+  // Inyectar estilos si no existen — Nivel Google Calendar profesional
+  if (!document.getElementById('hor-week-styles')) {
+    var s = document.createElement('style');
+    s.id = 'hor-week-styles';
+    s.textContent = [
+      /* ─── Toolbar superior ─── */
+      '.hw-toolbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;',
+      'flex-wrap:wrap;gap:12px;padding-bottom:12px;border-bottom:1px solid #E2E8F0}',
+      '.hw-nav{display:flex;gap:4px;align-items:center;background:#F8FAFF;border-radius:10px;padding:4px}',
+      '.hw-nav-btn{padding:8px 14px;border:none;background:transparent;color:#334155;cursor:pointer;',
+      'font-weight:700;font-size:.9rem;border-radius:8px;transition:.15s;min-width:38px}',
+      '.hw-nav-btn:hover{background:#E0E7FF;color:#4F46E5}',
+      '.hw-nav-btn.hw-hoy-btn{background:linear-gradient(135deg,#4F46E5,#6366F1);color:#fff;',
+      'box-shadow:0 2px 6px rgba(79,70,229,.25)}',
+      '.hw-nav-btn.hw-hoy-btn:hover{background:linear-gradient(135deg,#4338CA,#4F46E5);color:#fff;transform:translateY(-1px)}',
+      '.hw-titulo{font-size:1.05rem;font-weight:800;color:#0F172A;text-transform:capitalize;flex:1;text-align:center}',
+      '.hw-actions{display:flex;gap:4px;background:#F8FAFF;border-radius:10px;padding:4px}',
+      '.hw-view-btn{padding:8px 14px;border:none;background:transparent;color:#64748B;cursor:pointer;',
+      'font-weight:700;font-size:.82rem;border-radius:8px;transition:.15s}',
+      '.hw-view-btn.active{background:#fff;color:#0F172A;box-shadow:0 2px 4px rgba(15,23,42,.08)}',
+
+      /* ─── Contenedor ─── */
+      '.hor-week-wrap{background:#fff;border-radius:12px;overflow:hidden;position:relative;',
+      'box-shadow:0 1px 3px rgba(15,23,42,.04);border:1px solid #E2E8F0}',
+      '.hw-scroll{overflow-x:auto;overflow-y:visible;position:relative}',
+
+      /* ─── Grilla ─── */
+      '.hor-week{width:100%;border-collapse:separate;border-spacing:0;font-size:.85rem;',
+      'min-width:900px;table-layout:fixed}',
+
+      /* Header de días */
+      '.hor-week thead th{padding:14px 6px 12px;text-align:center;font-size:.72rem;letter-spacing:.6px;',
+      'color:#64748B;font-weight:700;text-transform:uppercase;background:#FAFBFC;',
+      'border-bottom:2px solid #E2E8F0;position:sticky;top:0;z-index:5}',
+      '.hor-week thead th .hw-dianum{display:block;font-size:1.5rem;font-weight:800;color:#0F172A;',
+      'margin-top:2px;letter-spacing:normal;text-transform:none;line-height:1}',
+      '.hor-week thead th.hw-hoy{background:#EEF2FF;color:#4F46E5}',
+      '.hor-week thead th.hw-hoy .hw-dianum{color:#fff;background:#4F46E5;width:38px;height:38px;',
+      'border-radius:50%;line-height:38px;margin:2px auto 0;display:block;box-shadow:0 4px 10px rgba(79,70,229,.35)}',
+      '.hor-week thead th.hw-bloq-h{width:78px;font-size:.66rem;background:#fff}',
+
+      /* Filas y celdas */
+      '.hor-week td{padding:3px;vertical-align:top;border-right:1px solid #F1F5F9;',
+      'border-bottom:1px solid #F1F5F9;height:70px;position:relative;background:#fff}',
+      '.hor-week td:last-child{border-right:none}',
+      '.hor-week tr:last-child td{border-bottom:none}',
+      '.hor-week td.hw-col-hoy{background:#FAFBFF}',
+
+      /* Columna de bloques (izquierda) */
+      '.hor-week td.hw-bloq{background:#FAFBFC;text-align:right;padding:6px 10px 0 0;color:#94A3B8;',
+      'font-weight:600;font-size:.7rem;border-right:2px solid #E2E8F0;vertical-align:top;',
+      'position:sticky;left:0;z-index:1;letter-spacing:.3px}',
+
+      /* Recreo/almuerzo — barra sutil */
+      '.hor-week tr.hw-fila-break td{background:#FFFBEB;height:auto;padding:0;',
+      'border-bottom:1px solid #FEF3C7}',
+      '.hor-week tr.hw-fila-break td.hw-bloq{background:#FEF3C7;color:#B45309}',
+      '.hor-week .hw-break-inner{padding:6px 10px;color:#B45309;font-weight:600;font-size:.75rem;',
+      'text-align:center;letter-spacing:.2px}',
+
+      /* Celda vacía */
+      '.hor-week td.hw-empty{background:#fff}',
+      '.hor-week td.hw-col-hoy.hw-empty{background:#FAFBFF}',
+
+      /* Slots interiores — cards MARCADAS con peso visual */
+      '.hor-week .hw-slot{padding:10px 12px;height:100%;display:flex;flex-direction:column;',
+      'justify-content:flex-start;text-align:left;gap:3px;cursor:default;transition:all .18s;',
+      'border-radius:8px;border-left:5px solid #94A3B8;background:#fff;overflow:hidden;',
+      'position:relative;box-shadow:0 1px 3px rgba(15,23,42,.08),0 1px 2px rgba(15,23,42,.06);',
+      'border-top:1px solid #E2E8F0;border-right:1px solid #E2E8F0;border-bottom:1px solid #E2E8F0}',
+      '.hor-week .hw-slot:hover{transform:translateY(-2px);',
+      'box-shadow:0 8px 20px rgba(15,23,42,.12),0 2px 6px rgba(15,23,42,.08)}',
+      /* Estados con color de fondo saturado y borde grueso */
+      '.hor-week td.hw-firmada .hw-slot{background:#D1FAE5;border-left-color:#10B981;',
+      'border-top-color:#A7F3D0;border-right-color:#A7F3D0;border-bottom-color:#A7F3D0}',
+      '.hor-week td.hw-borrador .hw-slot{background:#FEF3C7;border-left-color:#F59E0B;',
+      'border-top-color:#FDE68A;border-right-color:#FDE68A;border-bottom-color:#FDE68A}',
+      '.hor-week td.hw-pendiente .hw-slot{background:#FEE2E2;border-left-color:#EF4444;',
+      'border-top-color:#FECACA;border-right-color:#FECACA;border-bottom-color:#FECACA}',
+      '.hor-week td.hw-ahora .hw-slot{background:linear-gradient(135deg,#DBEAFE,#C7D2FE);',
+      'border-left-color:#4F46E5;border-left-width:6px;',
+      'box-shadow:0 8px 24px rgba(79,70,229,.28),0 0 0 2px rgba(79,70,229,.15)}',
+      '.hor-week td.hw-futura .hw-slot{background:#EFF6FF;border-left-color:#3B82F6;',
+      'border-top-color:#BFDBFE;border-right-color:#BFDBFE;border-bottom-color:#BFDBFE}',
+      '.hor-week td.hw-otro-dia .hw-slot{background:#F1F5F9;border-left-color:#64748B;',
+      'border-top-color:#CBD5E1;border-right-color:#CBD5E1;border-bottom-color:#CBD5E1}',
+      '.hor-week td.hw-firmada .hw-slot,.hor-week td.hw-borrador .hw-slot,',
+      '.hor-week td.hw-pendiente .hw-slot,.hor-week td.hw-ahora .hw-slot,',
+      '.hor-week td.hw-futura .hw-slot{cursor:pointer}',
+
+      /* Textos dentro del slot */
+      '.hor-week .hw-curso{font-weight:700;color:#0F172A;font-size:.88rem;line-height:1.15;',
+      'overflow:hidden;text-overflow:ellipsis;white-space:nowrap}',
+      '.hor-week .hw-asig{color:#4F46E5;font-size:.75rem;font-weight:600;line-height:1.2;',
+      'overflow:hidden;text-overflow:ellipsis;white-space:nowrap}',
+      '.hor-week .hw-sala{font-size:.68rem;color:#94A3B8;font-weight:500;margin-top:auto}',
+
+      /* Badges de estado */
+      '.hw-badge{display:inline-block;padding:2px 8px;border-radius:6px;font-size:.62rem;',
+      'font-weight:800;letter-spacing:.3px;margin-top:auto;align-self:flex-start;text-transform:uppercase}',
+      '.hw-badge.ok{background:#10B981;color:#fff}',
+      '.hw-badge.warn{background:#F59E0B;color:#fff}',
+      '.hw-badge.err{background:#EF4444;color:#fff}',
+      '.hw-badge.info{background:#4F46E5;color:#fff;animation:hw-pulse 1.6s infinite}',
+      '.hw-badge.gray{background:#CBD5E1;color:#334155}',
+      '@keyframes hw-pulse{0%,100%{opacity:1}50%{opacity:.65}}',
+
+      /* ─── Línea de tiempo actual ─── */
+      '.hw-linea-ahora{position:absolute;height:2px;background:#EF4444;',
+      'z-index:4;pointer-events:none;box-shadow:0 0 10px rgba(239,68,68,.6)}',
+      '.hw-linea-ahora::before{content:"";position:absolute;left:-7px;top:-5px;width:12px;height:12px;',
+      'border-radius:50%;background:#EF4444;box-shadow:0 0 0 4px rgba(239,68,68,.25)}',
+      '.hw-linea-ahora .hw-linea-etiq{position:absolute;left:-58px;top:-10px;',
+      'background:#EF4444;color:#fff;padding:3px 8px;border-radius:5px;font-size:.7rem;font-weight:800;letter-spacing:.3px}',
+
+      /* ─── Vista día única ─── */
+      '.hw-dia-single{padding:20px}',
+      '.hw-dia-titulo{font-size:1.4rem;font-weight:800;color:#0F172A;margin-bottom:20px;text-align:center}',
+      '.hw-dia-lista{display:flex;flex-direction:column;gap:8px;max-width:600px;margin:0 auto}',
+      '.hw-dia-clase{display:grid;grid-template-columns:90px 1fr auto;gap:14px;align-items:center;',
+      'padding:14px 18px;background:#fff;border:1px solid #E2E8F0;border-radius:12px;transition:.2s;',
+      'cursor:pointer;border-left:4px solid #94A3B8}',
+      '.hw-dia-clase:hover{transform:translateX(4px);box-shadow:0 6px 16px rgba(15,23,42,.08)}',
+      '.hw-dia-clase.firmada{border-left-color:#10B981;background:#ECFDF5}',
+      '.hw-dia-clase.borrador{border-left-color:#F59E0B;background:#FEFCE8}',
+      '.hw-dia-clase.pendiente{border-left-color:#EF4444;background:#FEF2F2}',
+      '.hw-dia-clase.ahora{border-left-color:#4F46E5;background:linear-gradient(135deg,#EEF2FF,#DDD6FE);box-shadow:0 4px 14px rgba(79,70,229,.15)}',
+      '.hw-dia-clase.break{border-left-color:#F59E0B;background:#FFFBEB;cursor:default}',
+      '.hw-dia-clase.break:hover{transform:none;box-shadow:none}',
+      '.hw-dia-hora{font-weight:800;color:#334155;text-align:center;font-size:.9rem;line-height:1.3}',
+      '.hw-dia-hora-sub{color:#94A3B8;font-size:.72rem;font-weight:500}',
+      '.hw-dia-info h4{margin:0;font-size:1rem;color:#0F172A;font-weight:700}',
+      '.hw-dia-info p{margin:2px 0 0;color:#4F46E5;font-size:.82rem;font-weight:600}',
+      '.hw-dia-info small{color:#94A3B8;font-size:.72rem}',
+
+      /* Leyenda */
+      '.hw-leyenda{display:flex;gap:16px;flex-wrap:wrap;margin-top:14px;padding:10px 16px;',
+      'background:#FAFBFC;border-radius:10px;font-size:.75rem;color:#64748B;border:1px solid #E2E8F0}',
+      '.hw-leyenda-item{display:flex;align-items:center;gap:6px}',
+      '.hw-leyenda-dot{width:14px;height:14px;border-radius:4px;flex-shrink:0}'
+    ].join('\n');
+    document.head.appendChild(s);
+  }
+  body.innerHTML = bannerSug + html;
+  // Pintar línea de tiempo actual con posición precisa (después del render)
+  if (esSemanaActual && horaAhora >= '07:30' && horaAhora <= '16:30') {
+    setTimeout(function(){ _pintarLineaAhora(horaAhora); }, 50);
+  }
+}
+
+function _pintarLineaAhora(horaAhora){
+  // Removemos línea anterior si existe
+  var vieja = document.querySelector('.hw-linea-ahora');
+  if (vieja) vieja.remove();
+
+  var scroll = document.querySelector('.hw-scroll');
+  var table  = document.querySelector('.hor-week');
+  if (!scroll || !table) return;
+
+  // Bloque actual según hora
+  var bloques = (_gridCache && _gridCache.bloques) || [];
+  var bloqueActual = null;
+  for (var i = 0; i < bloques.length; i++) {
+    var b = bloques[i];
+    if (b.horaInicio <= horaAhora && horaAhora < b.horaFin) { bloqueActual = b; break; }
+  }
+  if (!bloqueActual) return;
+
+  // Buscar el TR del bloque
+  var trs = table.querySelectorAll('tbody tr');
+  var targetTr = null, targetIdx = -1;
+  for (var j = 0; j < trs.length; j++) {
+    var tdBloq = trs[j].querySelector('.hw-bloq');
+    if (tdBloq && tdBloq.textContent.trim() === bloqueActual.horaInicio) {
+      targetTr = trs[j]; targetIdx = j; break;
+    }
+  }
+  if (!targetTr) return;
+
+  // Calcular Y sumando alturas: thead + tr anteriores + porcentaje del tr actual
+  // Esto es más confiable que getBoundingClientRect con positioning
+  var thead = table.querySelector('thead');
+  var offsetY = (thead ? thead.offsetHeight : 0);
+  for (var k = 0; k < targetIdx; k++) {
+    offsetY += trs[k].offsetHeight;
+  }
+  var minAhora = _minutos(horaAhora);
+  var minIni   = _minutos(bloqueActual.horaInicio);
+  var minFin   = _minutos(bloqueActual.horaFin);
+  var pct      = Math.max(0, Math.min(1, (minAhora - minIni) / (minFin - minIni)));
+  var posY     = offsetY + targetTr.offsetHeight * pct;
+
+  // Ancho: desde el borde de la primera columna
+  var tdBloq   = targetTr.querySelector('.hw-bloq');
+  var bloqW    = tdBloq ? tdBloq.offsetWidth : 78;
+
+  var linea = document.createElement('div');
+  linea.className = 'hw-linea-ahora';
+  linea.style.top    = posY + 'px';
+  linea.style.left   = bloqW + 'px';
+  linea.style.right  = '0';
+  linea.innerHTML = '<span class="hw-linea-etiq">' + horaAhora + '</span>';
+
+  scroll.style.position = 'relative';
+  scroll.appendChild(linea);
+}
+
+function _minutos(hhmm){
+  var p = String(hhmm||'').split(':');
+  return (parseInt(p[0],10)||0) * 60 + (parseInt(p[1],10)||0);
+}
+
+function _renderVistaDia(grid, regsMap, bloquesUsados, hoy, diaHoyKey, horaAhora, hoyISOStr){
+  var esSemanaActual = _semanaOffset === 0;
+  // Elegir día — si es semana actual, HOY. Si no, lunes de esa semana
+  var lunSem = _lunes(hoy);
+  lunSem.setDate(lunSem.getDate() + _semanaOffset * 7);
+  var diaKey = esSemanaActual && diaHoyKey && CCHorarios.DIAS.indexOf(diaHoyKey) !== -1 ? diaHoyKey : CCHorarios.DIAS[0];
+  var diaIdx = CCHorarios.DIAS.indexOf(diaKey);
+  var f = new Date(lunSem.getTime() + diaIdx * 86400000);
+  var fISO = f.toISOString().slice(0,10);
+  var fLabel = f.toLocaleDateString('es-CL',{weekday:'long', day:'numeric', month:'long'});
+
+  var html = '<div class="hw-dia-single"><div class="hw-dia-titulo">' + esc(fLabel) + '</div><div class="hw-dia-lista">';
+  bloquesUsados.forEach(function(b){
+    var isBreak = b.tipo === 'recreo' || b.tipo === 'almuerzo';
+    if (isBreak) {
+      var txt = b.tipo === 'recreo' ? '☕ ' + b.nombre : '🍽 ' + b.nombre;
+      html += '<div class="hw-dia-clase break">' +
+        '<div class="hw-dia-hora">' + b.horaInicio + '<div class="hw-dia-hora-sub">' + b.horaFin + '</div></div>' +
+        '<div class="hw-dia-info"><h4>' + txt + '</h4></div>' +
+        '<div></div>' +
+      '</div>';
+      return;
+    }
+    var entry = ((grid.semana[diaKey] || []).find(function(e){ return e.bloque.id === b.id; }) || {}).entrada;
+    if (!entry) return;
+
+    var cls = '', accion = '', badge = '';
+    var esHoy = esSemanaActual && diaKey === diaHoyKey;
+    if (esHoy) {
+      var k = hoyISOStr + '|' + (entry.cursoId||'') + '|' + (entry.asignatura||'');
+      var reg = regsMap[k];
+      if (reg && reg.firmado) { cls = 'firmada'; badge = '<span class="hw-badge ok">✓ Firmada</span>'; }
+      else if (reg) { cls = 'borrador'; badge = '<span class="hw-badge warn">Borrador</span>'; }
+      else if (b.horaFin < horaAhora) { cls = 'pendiente'; badge = '<span class="hw-badge err">Sin firmar</span>'; }
+      else if (b.horaInicio <= horaAhora && horaAhora <= b.horaFin) { cls = 'ahora'; badge = '<span class="hw-badge info">● Ahora</span>'; }
+      accion = 'onclick="_abrirDesdeSemana(\'' + esc(entry.cursoId||'') + '\',\'' + esc(entry.asignatura||'') + '\',\'' + hoyISOStr + '\')"';
+    } else {
+      accion = 'onclick="_abrirDesdeSemana(\'' + esc(entry.cursoId||'') + '\',\'' + esc(entry.asignatura||'') + '\',\'' + fISO + '\')"';
+    }
+    html += '<div class="hw-dia-clase ' + cls + '" ' + accion + '>' +
+      '<div class="hw-dia-hora">' + b.horaInicio + '<div class="hw-dia-hora-sub">' + b.horaFin + '</div></div>' +
+      '<div class="hw-dia-info">' +
+        '<h4>' + esc(entry.cursoNombre || entry.cursoId) + '</h4>' +
+        '<p>' + esc(entry.asignatura) + (entry.sala?' · 📍 ' + esc(entry.sala):'') + '</p>' +
+      '</div>' +
+      '<div>' + badge + '</div>' +
+    '</div>';
+  });
+  html += '</div></div>';
+  return '<div class="hor-week-wrap">' + html + '</div>';
+}
+
+/* Genera un horario semanal FICTICIO desde las asignaciones reales del profe
+   (para mostrar algo útil cuando el UTP no cargó el oficial). */
+function _generarHorarioSugerido() {
+  if (!window.CCHorarios) return null;
+  var u = (window.ELAuth && ELAuth.user) || {};
+  var uid = u.uid || '';
+  if (!_cursos.length) return null;
+
+  // Bloques base
+  var bloques = CCHorarios.BLOQUES_DEFAULT.slice();
+  var bloquesClase = bloques.filter(function(b){ return b.tipo === 'clase'; });
+  var dias = CCHorarios.DIAS;
+
+  // Sacar las asignaciones reales del profe
+  var asignaciones = [];
+  _cursos.forEach(function (c) {
+    (c.asignaturasAsignadas || []).forEach(function (a) {
+      if (a.docenteUid === uid && a.asignatura) {
+        asignaciones.push({
+          cursoId: c.cursoId, cursoNombre: c.nombreCompleto || c.nombre || '',
+          asignatura: a.asignatura
+        });
+      }
+    });
+    // Si es jefe sin asignaturas, agregar Consejo + Orientación
+    if (c.jefeUid === uid) {
+      var yaTiene = asignaciones.some(function(x){ return x.cursoId === c.cursoId; });
+      if (!yaTiene) {
+        asignaciones.push({ cursoId: c.cursoId, cursoNombre: c.nombreCompleto || c.nombre || '',
+                            asignatura: 'Consejo de Curso' });
+        asignaciones.push({ cursoId: c.cursoId, cursoNombre: c.nombreCompleto || c.nombre || '',
+                            asignatura: 'Orientación' });
+      }
+    }
+  });
+
+  if (!asignaciones.length) return null;
+
+  // Distribuir en la semana: cada asignatura 2-3 veces
+  var semana = {};
+  dias.forEach(function(d){ semana[d] = []; });
+  var usados = new Set();
+  var idx = 0;
+  asignaciones.forEach(function (a) {
+    var vecesPorSemana = 2 + (a.asignatura.length % 2);
+    for (var v = 0; v < vecesPorSemana; v++) {
+      for (var intento = 0; intento < 40; intento++) {
+        var d = dias[(idx + v + intento) % dias.length];
+        var b = bloquesClase[(idx + v * 3 + intento * 5) % bloquesClase.length];
+        var key = d + '|' + b.id;
+        if (!usados.has(key)) {
+          usados.add(key);
+          semana[d].push({ bloque: b, entrada: {
+            bloqueId: b.id, cursoId: a.cursoId,
+            cursoNombre: a.cursoNombre, asignatura: a.asignatura
+          }});
+          break;
+        }
+      }
+    }
+    idx++;
+  });
+
+  // Ordenar por hora
+  dias.forEach(function(d){
+    semana[d].sort(function(a,b){
+      return String(a.bloque.horaInicio).localeCompare(String(b.bloque.horaInicio));
+    });
+  });
+
+  return { bloques: bloques, semana: semana };
+}
+
+function _tieneAlgunaClase(semana) {
+  return CCHorarios.DIAS.some(function (d) { return (semana[d]||[]).length > 0; });
+}
+
+function _abrirDesdeSemana(cursoId, asignatura, fecha) {
+  // Abre la clase en una VENTANA EMERGENTE dedicada (mejor UX que pisar la vista).
+  var url = 'libro-clases-clase.html' +
+    '?cursoId=' + encodeURIComponent(cursoId) +
+    '&asig='    + encodeURIComponent(asignatura) +
+    '&fecha='   + encodeURIComponent(fecha || hoyISO());
+  var w = window.open(url, 'ccClase',
+    'width=1200,height=850,resizable=yes,scrollbars=yes,menubar=no,toolbar=no,location=no,status=no');
+  if (!w) {
+    // Bloqueó popups → fallback: navegar en la misma pestaña
+    window.location.href = url;
+    return;
+  }
+  w.focus();
+  // Cuando la ventana se cierre, refrescar el horario (estado de firmadas puede cambiar)
+  var poll = setInterval(function () {
+    if (w.closed) {
+      clearInterval(poll);
+      _cargarDashboard();
+    }
+  }, 800);
+}
+
+function _lunes(d) {
+  var x = new Date(d); x.setDate(d.getDate() - ((d.getDay()+6)%7));
+  return x;
+}
+function _fmtFecha(d) {
+  return d.getDate() + ' de ' + d.toLocaleDateString('es-CL',{month:'long'});
+}
+
+function _pintarKpis(k) {
+  if (!window.CCKit) return;
+  document.getElementById('ccKpis').innerHTML = CCKit.kpiRow([
+    { emoji:'✅', label:'Firmadas hoy', value:k.firmadasHoy, tone:'ok',
+      hint: k.firmadasHoy ? '¡Buen trabajo!' : 'Ninguna todavía' },
+    { emoji:'⏳', label:'Borradores hoy', value:k.borrHoy, tone: k.borrHoy?'warn':undefined,
+      hint: k.borrHoy ? 'Firmá antes de fin del día' : 'Todo al día' },
+    { emoji:'📅', label:'Firmadas este mes', value:k.firmadasMes||0, tone:'info' },
+    { emoji:'📚', label:'Mis cursos', value:k.cursos, tone:'info',
+      hint:'Con asignaturas o jefatura' }
+  ]);
+}
+
+/* Funciones legacy _sugerirClasesDelDia / _pintarClasesHoy / _abrirDesdeSugerencia
+   fueron reemplazadas por _pintarSemana + _abrirDesdeSemana. Ver sección VISTA SEMANA arriba. */
+
 function onCambioCurso() {
   var cursoId = document.getElementById('selCurso').value;
-  _cursoSel = _cursos.find(function(c) { return c.cursoId === cursoId; });
+  _cursoSel = _cursos.find(function(c) { return _cid(c) === cursoId; });
   var selA = document.getElementById('selAsig');
   if (!_cursoSel) {
     selA.innerHTML = '<option value="">— Elegir curso primero —</option>';
     return;
   }
   var uid = ELAuth.user ? ELAuth.user.uid : '';
-  var misAsigs = (_cursoSel.asignaturasAsignadas || []).filter(function(a) {
-    return a.docenteUid === uid || _cursoSel.jefeUid === uid;
-  });
+  var esJefe = _cursoSel.jefeUid === uid;
+  var esUtpOAdmin = ELAuth.user && (
+    ELAuth.user.role === 'utp' || ELAuth.user.role === 'admin' ||
+    ELAuth.user.role === 'director' || ELAuth.user.role === 'rector' ||
+    (ELAuth.user.roles && (ELAuth.user.roles.utp || ELAuth.user.roles.admin ||
+                            ELAuth.user.roles.director || ELAuth.user.roles.rector))
+  );
+  var todasAsigs = _cursoSel.asignaturasAsignadas || [];
+  var misAsigs;
+  if (esJefe || esUtpOAdmin) {
+    // Jefe de curso / UTP / director ven TODAS las asignaturas del curso
+    misAsigs = todasAsigs;
+  } else {
+    // Profe común: solo las que él dicta
+    misAsigs = todasAsigs.filter(function(a) { return a.docenteUid === uid; });
+  }
+  // Fallback: si el curso no tiene asignaturasAsignadas configuradas,
+  // ofrecer las asignaturas propias del profe
+  if (misAsigs.length === 0 && ELAuth.user && Array.isArray(ELAuth.user.asignaturas)) {
+    misAsigs = ELAuth.user.asignaturas.map(function(a){ return { asignatura: a }; });
+  }
   if (misAsigs.length === 0) {
-    // Si es jefe de curso, permitir todas las asignaturas asignadas
-    if (_cursoSel.jefeUid === uid) misAsigs = _cursoSel.asignaturasAsignadas || [];
+    selA.innerHTML = '<option value="">Sin asignaturas asignadas en este curso</option>';
+    return;
   }
   selA.innerHTML = '<option value="">— Elegir —</option>' +
     misAsigs.map(function(a) {
@@ -252,6 +923,7 @@ function abrirRegistro() {
     .then(function(reg) {
       _reg = reg;
       renderRegistro();
+      cargarPlanificacionesDelDia(cursoId, asig, fecha);
       document.getElementById('emptyState').style.display = 'none';
       document.getElementById('registroWrap').style.display = 'block';
       document.getElementById('btnGuardar').disabled = false;
@@ -287,7 +959,24 @@ function renderRegistro() {
     document.getElementById('firmadoBanner').style.display = 'none';
   }
 
-  // Renderizar tabla
+  // Orden estilo libro de clases chileno: por apellido paterno.
+  if (Array.isArray(_reg.asistencia)) {
+    if (window.CCNombre && CCNombre.comparar) {
+      _reg.asistencia.sort(function (a, b) {
+        return CCNombre.comparar(a.nombreCompleto || '', b.nombreCompleto || '');
+      });
+    } else {
+      _reg.asistencia.sort(function (a, b) {
+        return String(a.nombreCompleto || '').localeCompare(
+          String(b.nombreCompleto || ''), 'es', { sensitivity: 'base' }
+        );
+      });
+    }
+    // Recalcular ordinal 1..N tras el sort
+    _reg.asistencia.forEach(function (a, idx) { a.ordinal = idx + 1; });
+  }
+
+  // Renderizar tabla — apellidos y nombres en columnas separadas
   var tb = document.getElementById('tbAsist');
   tb.innerHTML = (_reg.asistencia || []).map(function(a, i) {
     var btns = ['P','A','T','J'].map(function(e) {
@@ -295,9 +984,11 @@ function renderRegistro() {
       return '<button class="est-btn' + act + '" onclick="marcarUno(' + i + ',\'' + e + '\')"' +
         (editable ? '' : ' disabled') + '>' + e + '</button>';
     }).join('');
+    var p = (window.CCNombre && CCNombre.parse) ? CCNombre.parse(a.nombreCompleto||'') : { apellidos:'', nombres:a.nombreCompleto||'' };
     return '<tr>' +
       '<td>' + a.ordinal + '</td>' +
-      '<td>' + esc(a.nombreCompleto) + '</td>' +
+      '<td><b>' + esc(p.apellidos || '') + '</b></td>' +
+      '<td>' + esc(p.nombres || '') + '</td>' +
       '<td><div class="estado-btns">' + btns + '</div></td>' +
       '<td><input type="text" value="' + esc(a.motivo || '') + '" onchange="editarMotivo(' + i + ', this.value)"' +
         (editable ? '' : ' disabled') + ' placeholder="—"></td>' +
@@ -355,25 +1046,216 @@ function guardarBorrador() {
 
 function firmarRegistro() {
   if (!_reg) return;
-  if (!confirm('Firmar el registro? Después de firmado NO se puede editar la asistencia ni el contenido.')) return;
-  // Primero guardar por si hay cambios sin guardar
+
+  // Guardar borrador antes de firmar
   _reg.contenidoDelDia = document.getElementById('txtContenido').value;
   _reg.observacionesGenerales = document.getElementById('txtObs').value;
-  CCLibroClases.guardar(_reg.regId, {
-    contenidoDelDia: _reg.contenidoDelDia,
-    observacionesGenerales: _reg.observacionesGenerales,
-    asistencia: _reg.asistencia
+
+  var planSel = document.getElementById('selPlanClase');
+  if (planSel && planSel.value) {
+    _reg.planificacionId = planSel.value;
+    var opt = planSel.options[planSel.selectedIndex];
+    _reg.planificacionTitulo = opt ? opt.textContent : '';
+  }
+
+  // PIN OBLIGATORIO para firma (estilo LIRMI).
+  // El propio modal del PIN ya contiene el mensaje "esto queda firmado",
+  // así que no mostramos un confirm() extra encima.
+  var pinPromise = (window.CCPinFirma && CCPinFirma.pedirYValidar)
+    ? CCPinFirma.pedirYValidar({
+        titulo: '🔐 Firmar libro de clases',
+        mensaje: 'Ingresá tu PIN personal de 6 dígitos. Al firmar, este registro queda cerrado y NO se podrá editar la asistencia ni el contenido.'
+      })
+    : Promise.resolve(true);
+
+  pinPromise.then(function () {
+    return CCLibroClases.guardar(_reg.regId, {
+      contenidoDelDia:         _reg.contenidoDelDia,
+      observacionesGenerales:  _reg.observacionesGenerales,
+      asistencia:              _reg.asistencia,
+      planificacionId:         _reg.planificacionId || '',
+      planificacionTitulo:     _reg.planificacionTitulo || ''
+    });
   }).then(function() {
-    return CCLibroClases.firmar(_reg.regId);
+    return CCLibroClases.firmar(_reg.regId, { conPin: true });
   }).then(function(hash) {
     return EL_DB.collection('libro_clases').doc(_reg.regId).get();
   }).then(function(snap) {
     _reg = snap.data();
     renderRegistro();
-    alert('✍ Registro firmado. Este registro queda como constancia oficial.');
+    alert('✍ Registro firmado con PIN. Este registro queda como constancia oficial.');
   }).catch(function(err) {
+    if (err && (err.message === 'cancelado' || err.message === 'pin_incorrecto' || err.message === 'sin_pin')) {
+      return; // usuario canceló o no tiene PIN; ya se le avisó
+    }
     alert('Error al firmar: ' + err.message);
   });
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ENLACE CON PLANIFICACIONES — carga las planificaciones del profe
+   filtradas por curso+asignatura, cercanas a la fecha del registro.
+   Al seleccionar una, autocompleta el textarea de contenido.
+   ═══════════════════════════════════════════════════════════════ */
+var _planCache = [];
+
+function cargarPlanificacionesDelDia(cursoId, asig, fecha) {
+  var sel = document.getElementById('selPlanClase');
+  var link = document.getElementById('linkVerPlan');
+  if (!sel) return;
+  sel.innerHTML = '<option value="">— Cargando planificaciones… —</option>';
+  link.style.display = 'none';
+  _planCache = [];
+
+  var user = (window.ELAuth && ELAuth.user) || {};
+  var email = user.email || '';
+  var uid = user.uid || '';
+  if (!email && !uid) {
+    sel.innerHTML = '<option value="">— Sin enlazar —</option>';
+    return;
+  }
+
+  // Normalizar strings para comparar asignaturas (quita tildes, plurales, "y"…)
+  function _normAsig(s) {
+    return String(s || '')
+      .toLowerCase()
+      .normalize('NFD').replace(/[̀-ͯ]/g, '') // sin tildes
+      .replace(/\s+y\s+/g, ' ')                        // "lengua y literatura" → "lengua literatura"
+      .replace(/[^a-z0-9]+/g, ' ')
+      .trim();
+  }
+  var asigKey = _normAsig(asig);
+
+  EL_DB.collection('planificaciones').get().then(function (snap) {
+    var arr = [];
+    snap.forEach(function (d) {
+      var p = d.data(); if (!p) return;
+
+      // 1) Dueño (por email o uid). Si no hay ninguno, descartar.
+      var esDelProfe = (email && p.profesor === email) ||
+                       (uid && (p.profesorUid === uid || p.autorUid === uid || p.docenteUid === uid));
+      if (!esDelProfe) return;
+
+      // 2) Asignatura — MATCH ESTRICTO. Si la planificación no tiene asignatura
+      //    ni módulo, se descarta (no queremos falsos positivos como que aparezca
+      //    "Electricidad" en la clase de "Lenguaje").
+      var pAsig = _normAsig(p.asignatura || p.modulo || p.materia || '');
+      if (!pAsig) return;
+      // Match si alguno contiene al otro (permite variantes: "lenguaje" ⇔ "lengua literatura")
+      var asigOk = pAsig === asigKey ||
+                   pAsig.indexOf(asigKey) !== -1 ||
+                   asigKey.indexOf(pAsig) !== -1;
+      if (!asigOk) return;
+
+      // 3) Curso — si la planificación indica curso o nivel, debe coincidir
+      //    con el curso seleccionado. Si no indica ninguno, se acepta.
+      if (p.cursoId && cursoId && p.cursoId !== cursoId) return;
+      if (p.curso   && cursoId && p.curso !== cursoId &&
+          _cursoNombreDelId(cursoId) !== p.curso) return;
+
+      arr.push(Object.assign({ id: d.id }, p));
+    });
+
+    // Ordenar por proximidad a la fecha del registro (más cercanas primero)
+    var fReg = fecha || '';
+    arr.sort(function (a, b) {
+      var fa = String(a.fecha || a.creadaEn || '').slice(0,10);
+      var fb = String(b.fecha || b.creadaEn || '').slice(0,10);
+      // Si tienen fecha, ordena por distancia a la fecha del registro
+      if (fa && fb && fReg) {
+        var da = Math.abs(_diffDias(fa, fReg));
+        var db = Math.abs(_diffDias(fb, fReg));
+        return da - db;
+      }
+      return fb.localeCompare(fa);  // fallback: más recientes primero
+    });
+
+    _planCache = arr;
+
+    if (!arr.length) {
+      sel.innerHTML = '<option value="">— No hay planificaciones para esta clase —</option>';
+      var hint = document.getElementById('_planHint');
+      if (!hint) {
+        hint = document.createElement('div');
+        hint.id = '_planHint';
+        hint.style.cssText = 'font-size:.75rem;color:#94a3b8;margin-top:4px;font-style:italic';
+        sel.parentNode.appendChild(hint);
+      }
+      hint.textContent = 'Creá una planificación en el módulo Planificaciones para poder enlazarla acá.';
+      return;
+    } else {
+      var h = document.getElementById('_planHint');
+      if (h) h.remove();
+    }
+
+    var opts = ['<option value="">— Sin enlazar (contenido libre) —</option>'];
+    arr.forEach(function (p) {
+      var titulo = p.titulo || p.tema || p.nombre || p.oa || 'Planificación';
+      var fechaP = String(p.fecha || p.creadaEn || '').slice(0,10);
+      var label = titulo + (fechaP ? '  ·  ' + fechaP : '');
+      if (label.length > 90) label = label.slice(0, 87) + '…';
+      opts.push('<option value="' + p.id + '">' + esc(label) + '</option>');
+    });
+    sel.innerHTML = opts.join('');
+
+    // Si el registro ya tenía una planificación asociada, seleccionarla
+    if (_reg && _reg.planificacionId) {
+      sel.value = _reg.planificacionId;
+      _actualizarLinkPlan(_reg.planificacionId);
+    }
+  }).catch(function (err) {
+    console.warn('[libro-clases] planificaciones:', err);
+    sel.innerHTML = '<option value="">— Error al cargar planificaciones —</option>';
+  });
+}
+
+function _diffDias(a, b) {
+  var da = new Date(a); var db = new Date(b);
+  if (isNaN(da) || isNaN(db)) return 9999;
+  return Math.round((da - db) / 86400000);
+}
+
+function _cursoNombreDelId(cursoId) {
+  // Devuelve el label del curso (para comparar contra p.curso legacy)
+  var sel = document.getElementById('selCurso');
+  if (!sel) return cursoId;
+  var opt = sel.options[sel.selectedIndex];
+  return opt ? opt.textContent.trim() : cursoId;
+}
+
+function usarPlanificacion(planId) {
+  var link = document.getElementById('linkVerPlan');
+  if (!planId) {
+    link.style.display = 'none';
+    return;
+  }
+  _actualizarLinkPlan(planId);
+
+  var p = _planCache.find(function (x) { return x.id === planId; });
+  if (!p) return;
+
+  var txt = document.getElementById('txtContenido');
+  // Solo autocompletar si el textarea está vacío (no pisar contenido escrito)
+  if (!txt.value.trim() || confirm('¿Reemplazar el contenido actual con el de la planificación?')) {
+    var partes = [];
+    if (p.titulo)      partes.push('📌 ' + p.titulo);
+    if (p.oa)          partes.push('OA: ' + p.oa);
+    if (p.tema)        partes.push('Tema: ' + p.tema);
+    if (p.objetivo)    partes.push('Objetivo: ' + p.objetivo);
+    if (p.contenido)   partes.push('\n' + String(p.contenido).slice(0, 800));
+    if (p.actividades) partes.push('\nActividades: ' + String(p.actividades).slice(0, 400));
+    txt.value = partes.join('\n');
+  }
+}
+
+function _actualizarLinkPlan(planId) {
+  var link = document.getElementById('linkVerPlan');
+  if (planId) {
+    link.href = 'planificacion.html?id=' + encodeURIComponent(planId);
+    link.style.display = 'inline-block';
+  } else {
+    link.style.display = 'none';
+  }
 }
 
 if (window.ELAuth && ELAuth.onUserReady) {
@@ -381,5 +1263,8 @@ if (window.ELAuth && ELAuth.onUserReady) {
 }
 </script>
 
+<script src="js/ia-widget.js" defer></script>
+<script src="js/session-guard.js" defer></script>
+<script src="js/search-global.js" defer></script>
 </body>
 </html>

@@ -237,16 +237,54 @@
    * asignaturas con muchos reprobados.
    */
   function reporteRiesgo(cursoId, semestre) {
-    return listarNotas({ cursoId: cursoId, semestre: semestre }).then(function (notas) {
-      var porEstAsig = {};
-      notas.forEach(function (n) {
-        var k = n.estudianteOrdinal + '|' + n.asignatura;
-        if (!porEstAsig[k]) porEstAsig[k] = { ordinal: n.estudianteOrdinal, nombre: n.estudianteNombre, asignatura: n.asignatura, notas: [] };
-        porEstAsig[k].notas.push(n);
-      });
+    // Combinamos 2 shapes de datos de notas:
+    //  1) Shape legacy: doc por (alumno × evaluación) con { estudianteOrdinal, estudianteNombre, asignatura, nota, ponderacion }
+    //  2) Shape agrupado: doc por evaluación con { cursoId, asignatura, notas: [{uid, nombre, nota}] }
+    var porEstAsig = {};
+
+    // Fuente 1: shape legacy (via listarNotas)
+    var p1 = listarNotas({ cursoId: cursoId, semestre: semestre })
+      .then(function (notas) {
+        notas.forEach(function (n) {
+          var k = 'ord:' + n.estudianteOrdinal + '|' + n.asignatura;
+          if (!porEstAsig[k]) porEstAsig[k] = { ordinal: n.estudianteOrdinal, nombre: n.estudianteNombre, asignatura: n.asignatura, notas: [] };
+          porEstAsig[k].notas.push(n);
+        });
+      })
+      .catch(function(){});
+
+    // Fuente 2: shape agrupado desde 'notas' con array de notas
+    var p2 = EL_DB.collection('notas')
+      .where('cursoId', '==', cursoId)
+      .get()
+      .then(function (snap) {
+        snap.forEach(function (doc) {
+          var d = doc.data() || {};
+          if (!Array.isArray(d.notas)) return;
+          // Si hay semestre marcado y no coincide, saltar
+          if ('semestre' in d && semestre && d.semestre !== semestre) return;
+          var asig = d.asignatura || 'General';
+          d.notas.forEach(function (n) {
+            if (typeof n.nota !== 'number') return;
+            var k = 'uid:' + (n.uid || n.nombre) + '|' + asig;
+            if (!porEstAsig[k]) porEstAsig[k] = { ordinal: 0, nombre: n.nombre, asignatura: asig, notas: [] };
+            porEstAsig[k].notas.push({ nota: n.nota, ponderacion: d.ponderacion || 1 });
+          });
+        });
+      })
+      .catch(function(e){ console.warn('[notas] shape agrupado', e); });
+
+    return Promise.all([p1, p2]).then(function () {
       var enRiesgo = [];
       Object.values(porEstAsig).forEach(function (item) {
+        if (!item.notas.length) return;
         var p = calcularPromedio(item.notas);
+        // Si calcularPromedio devuelve 0 pero hay notas, calcular simple
+        if (p.promedio === 0 && item.notas.length) {
+          var suma = item.notas.reduce(function(a, x){ return a + (x.nota || 0); }, 0);
+          p.promedio = Math.round((suma / item.notas.length) * 10) / 10;
+          p.aprobado = p.promedio >= MIN_APROBADO;
+        }
         if (p.promedio > 0 && p.promedio < MIN_APROBADO + 0.5) {
           enRiesgo.push({
             ordinal:    item.ordinal,

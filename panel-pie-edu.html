@@ -16,100 +16,406 @@
 <script src="js/cursos.js"></script>
 <script src="js/pie.js"></script>
 <style>
-:root { --bg: #0b0d1e; --panel: #12162f; --border: rgba(148,163,184,.15); --text: #e5e7eb; --muted: #94a3b8; --violet: #7c3aed; --pink: #f472b6; --cyan: #22d3ee; }
+:root {
+  --bg: #F0F7FF; --panel: #FFFFFF; --border: rgba(37,99,235,.14);
+  --text: #0C1E3B; --muted: #475569;
+  --ok: #10B981; --warn: #F59E0B; --danger: #DC2626; --info: #2563EB; --violet: #7C3AED; --pink: #EC4899;
+}
 * { box-sizing: border-box; }
 body { margin: 0; font-family: 'Segoe UI', Roboto, Arial, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
-.topbar { padding: 16px 28px; border-bottom: 1px solid var(--border); background: linear-gradient(135deg, rgba(244,114,182,.10), rgba(124,58,237,.05)); display: flex; align-items: center; justify-content: space-between; }
-.topbar h1 { margin: 0; font-size: 1.3rem; font-weight: 700; }
-.breadcrumb { color: var(--muted); font-size: .78rem; }
-.usr { font-size: .82rem; color: var(--muted); }
-.usr .salir { color: #fca5a5; text-decoration: none; margin-left: 10px; }
-.container { max-width: 1400px; margin: 22px auto; padding: 0 22px 40px; }
-.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 22px; }
-.kpi { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 14px 18px; }
-.kpi .l { font-size: .68rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
-.kpi .v { font-size: 1.9rem; font-weight: 800; margin-top: 4px; }
-.kpi.mis .v { color: #f472b6; } .kpi.sesion .v { color: #67e8f9; } .kpi.perm .v { color: #f472b6; } .kpi.trans .v { color: #c4b5fd; }
-.card { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 18px 22px; margin-bottom: 18px; }
-.card h3 { margin: 0 0 14px; font-size: .8rem; text-transform: uppercase; letter-spacing: .8px; color: var(--muted); font-weight: 700; display: flex; align-items: center; gap: 8px; }
-.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-@media (max-width: 900px) { .grid2 { grid-template-columns: 1fr; } }
-.fld { margin-bottom: 12px; }
-.fld label { display: block; font-size: .72rem; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 4px; }
-input, select, textarea { width: 100%; padding: 8px 10px; border-radius: 7px; background: rgba(255,255,255,.04); border: 1px solid rgba(148,163,184,.2); color: var(--text); font-size: .85rem; font-family: inherit; }
-textarea { resize: vertical; min-height: 60px; }
-.row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
-.btn { padding: 9px 15px; border-radius: 8px; border: 1px solid var(--border); background: rgba(255,255,255,.04); color: var(--text); cursor: pointer; font-size: .85rem; font-weight: 600; text-decoration: none; display: inline-block; }
-.btn.primary { background: linear-gradient(135deg, #f472b6, #7c3aed); color: white; border-color: transparent; }
-.btn:hover:not(:disabled) { background: rgba(255,255,255,.08); }
+a { color: inherit; text-decoration: none; }
+
+/* ═══ TOPBAR ═══ */
+.topbar {
+  padding: 12px 24px; border-bottom: 1px solid var(--border);
+  background: linear-gradient(135deg, rgba(236,72,153,.10), rgba(124,58,237,.05));
+  display: flex; align-items: center; gap: 16px; position: sticky; top: 0; z-index: 40;
+  backdrop-filter: blur(10px);
+}
+.topbar .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 1.1rem; }
+.topbar .brand .ico { font-size: 1.5rem; }
+.topbar .usr { margin-left: auto; font-size: .82rem; color: var(--muted); display: flex; align-items: center; gap: 12px; }
+.topbar .usr .salir { color: #DC2626; font-weight: 600; }
+.topbar .usr .role-badge { padding: 2px 10px; background: rgba(124,58,237,.15); color: #5B21B6; border-radius: 99px; font-size: .72rem; font-weight: 700; }
+
+/* ═══ LAYOUT ═══ */
+.wrap { display: grid; grid-template-columns: 240px minmax(0, 1fr); gap: 20px; padding: 18px 22px; }
+@media (max-width: 900px) { .wrap { grid-template-columns: 1fr; padding: 12px; } }
+
+.sidebar { position: sticky; top: 76px; align-self: start; }
+.sidebar .grp { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 10px 8px; margin-bottom: 10px; box-shadow: 0 4px 12px rgba(37,99,235,.04); }
+.sidebar .grp .grp-title { font-size: .68rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 700; padding: 4px 10px 8px; }
+.sidebar .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 8px; cursor: pointer; font-size: .88rem; font-weight: 500; color: var(--text); transition: all .15s; }
+.sidebar .nav-item:hover { background: rgba(124,58,237,.06); }
+.sidebar .nav-item.active { background: linear-gradient(90deg, rgba(124,58,237,.14), rgba(236,72,153,.06)); color: #7C3AED; font-weight: 700; }
+.sidebar .nav-item .ico { font-size: 1.1rem; width: 22px; text-align: center; }
+.sidebar .nav-item .badge { margin-left: auto; background: #DC2626; color: white; font-size: .68rem; font-weight: 700; padding: 1px 8px; border-radius: 99px; }
+
+/* ═══ SECCIONES ═══ */
+.section { display: none; }
+.section.active { display: block; animation: fadeIn .25s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+.section-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; flex-wrap: wrap; gap: 10px; }
+.section-head h2 { margin: 0; font-size: 1.35rem; font-weight: 700; }
+.section-head .sub { color: var(--muted); font-size: .84rem; margin-top: 2px; }
+.section-head .actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.btn { padding: 8px 14px; border-radius: 8px; border: 1px solid var(--border); background: #fff; color: var(--text); cursor: pointer; font-size: .84rem; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; }
+.btn:hover:not(:disabled) { background: rgba(37,99,235,.05); }
+.btn.primary { background: linear-gradient(135deg, #7C3AED, #EC4899); color: white; border-color: transparent; }
+.btn.primary:hover { transform: translateY(-1px); box-shadow: 0 6px 14px rgba(124,58,237,.35); }
 .btn:disabled { opacity: .5; cursor: not-allowed; }
+
+.card { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 16px 20px; box-shadow: 0 4px 14px rgba(37,99,235,.05); margin-bottom: 16px; }
+.card h3 { margin: 0 0 12px; font-size: .78rem; text-transform: uppercase; letter-spacing: .8px; color: var(--muted); font-weight: 700; display: flex; align-items: center; gap: 8px; }
+
+/* ═══ KPIs ═══ */
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 20px; }
+.kpi { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; }
+.kpi .l { font-size: .68rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 700; }
+.kpi .v { font-size: 1.9rem; font-weight: 800; margin-top: 4px; line-height: 1.1; }
+.kpi .d { font-size: .72rem; margin-top: 4px; color: var(--muted); }
+.kpi.mis .v    { color: #7C3AED; }
+.kpi.sesion .v { color: #059669; }
+.kpi.pend .v   { color: #B45309; }
+.kpi.perm .v   { color: #DC2626; }
+.kpi.trans .v  { color: #2563EB; }
+.kpi.asist .v  { color: #0369A1; }
+
+/* ═══ Alertas ═══ */
+.alerts-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; margin-bottom: 16px; }
+.alert-card { padding: 14px 16px; border-radius: 12px; border-left: 4px solid; background: #fff; }
+.alert-card .n { font-size: 2rem; font-weight: 800; line-height: 1; margin: 6px 0 2px; }
+.alert-card .l { font-size: .82rem; font-weight: 600; }
+.alert-card .s { font-size: .72rem; color: var(--muted); margin-top: 4px; }
+.alert-card.danger { border-color: #DC2626; background: linear-gradient(135deg, rgba(239,68,68,.08), transparent); }
+.alert-card.danger .n { color: #DC2626; }
+.alert-card.warn { border-color: #F59E0B; background: linear-gradient(135deg, rgba(245,158,11,.08), transparent); }
+.alert-card.warn .n { color: #B45309; }
+.alert-card.ok { border-color: #10B981; background: linear-gradient(135deg, rgba(16,185,129,.08), transparent); }
+.alert-card.ok .n { color: #059669; }
+
+/* ═══ Filtros y tabla ═══ */
+.filtros { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 14px; }
+input, select, textarea { padding: 10px 12px; border-radius: 8px; background: #fff; border: 1px solid rgba(37,99,235,.18); color: var(--text); font-size: .88rem; width: 100%; font-family: 'Segoe UI', Roboto, Arial, sans-serif; line-height: 1.5; box-sizing: border-box; }
+textarea { min-height: 90px; resize: vertical; }
+input:focus, select:focus, textarea:focus { outline: none; border-color: #7C3AED; box-shadow: 0 0 0 3px rgba(124,58,237,.12); }
 table { width: 100%; border-collapse: collapse; }
-th, td { padding: 9px 11px; border-bottom: 1px solid var(--border); font-size: .84rem; text-align: left; vertical-align: top; }
-th { background: rgba(255,255,255,.03); font-size: .68rem; text-transform: uppercase; letter-spacing: .8px; color: var(--muted); font-weight: 700; }
-tr:hover td { background: rgba(255,255,255,.02); cursor: pointer; }
+th, td { padding: 10px 12px; border-bottom: 1px solid var(--border); font-size: .84rem; text-align: left; vertical-align: middle; }
+th { background: rgba(124,58,237,.05); font-size: .7rem; text-transform: uppercase; letter-spacing: .8px; color: var(--muted); font-weight: 700; }
+tr:hover td { background: rgba(124,58,237,.03); cursor: pointer; }
 .empty { padding: 30px; text-align: center; color: var(--muted); }
-.filtros { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 14px; }
+
+.chip { display: inline-block; padding: 2px 8px; border-radius: 99px; font-size: .7rem; font-weight: 700; }
+.chip-verde { background: rgba(16,185,129,.15); color: #065F46; }
+.chip-amarillo { background: rgba(245,158,11,.15); color: #92400E; }
+.chip-rojo { background: rgba(239,68,68,.15); color: #991B1B; }
+.chip-info { background: rgba(37,99,235,.12); color: #1D4ED8; }
+
+/* ═══ Formulario profesional ═══ */
+.form-section { padding: 14px 16px; background: rgba(124,58,237,.04); border-left: 3px solid #7C3AED; border-radius: 8px; margin-bottom: 14px; }
+.form-section-title { font-size: .72rem; text-transform: uppercase; letter-spacing: 1px; color: #7C3AED; font-weight: 700; margin: 0 0 10px; display: flex; align-items: center; gap: 6px; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 10px; }
+.form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin-bottom: 10px; }
+@media (max-width: 700px) { .form-row, .form-row-3 { grid-template-columns: 1fr; } }
+.fld label { display: block; font-size: .78rem; color: #334155; font-weight: 600; margin-bottom: 5px; }
+
+/* ═══ Agenda semanal ═══ */
+.agenda-week { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+.agenda-day { background: rgba(124,58,237,.04); border: 1px solid rgba(124,58,237,.15); border-radius: 10px; padding: 10px; min-height: 140px; }
+.agenda-day.hoy { border-color: #7C3AED; background: rgba(124,58,237,.10); box-shadow: 0 4px 12px rgba(124,58,237,.15); }
+.agenda-day .day-name { font-size: .72rem; text-transform: uppercase; color: var(--muted); font-weight: 700; margin-bottom: 6px; }
+.agenda-day .day-num { font-size: 1.4rem; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+.agenda-day.hoy .day-num { color: #7C3AED; }
+.agenda-day .ses-item { padding: 5px 8px; background: #fff; border-radius: 6px; margin-bottom: 4px; font-size: .74rem; line-height: 1.3; border-left: 3px solid #EC4899; }
+.agenda-day .ses-item.pasada { opacity: .55; border-left-color: #94a3b8; }
+
+/* Modal genérico */
+.overlay-modal { display: none; position: fixed; inset: 0; background: rgba(15,23,42,.55); z-index: 1000; align-items: center; justify-content: center; padding: 20px; }
+.overlay-modal.show { display: flex; }
+.modal-box { background: #fff; border-radius: 14px; padding: 24px 28px; width: min(600px, 94vw); max-height: 92vh; overflow: auto; box-shadow: 0 20px 60px rgba(0,0,0,.35); }
+
+.spin { display: inline-block; animation: spin 1s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
 </style>
 </head>
 <body>
 
+<!-- ═══════════ TOPBAR ═══════════ -->
 <div class="topbar">
-  <div><div class="breadcrumb">Educadora Diferencial</div><h1>♿ Mis Estudiantes PIE</h1></div>
-  <div class="usr"><span id="userName">—</span><a href="login.html" class="salir">Salir</a></div>
+  <div class="brand"><span class="ico">♿</span> <span>Educadora Diferencial</span></div>
+  <div class="usr">
+    <span class="role-badge">PIE</span>
+    <span id="userName">—</span>
+    <a href="login.html" class="salir">Salir</a>
+  </div>
 </div>
 
-<div class="container">
+<div class="wrap">
 
-  <div class="kpis" id="kpisWrap"><div style="grid-column:1/-1;padding:20px;text-align:center;color:var(--muted)">⏳ Cargando…</div></div>
-
-  <div class="grid2">
-    <div class="card">
-      <h3><span>👥</span> Mis estudiantes asignados</h3>
-      <div class="filtros">
-        <select id="fltNEE" onchange="cargarMisEst()">
-          <option value="">Todas las NEE</option>
-          <option value="permanente">Permanentes</option>
-          <option value="transitoria">Transitorias</option>
-        </select>
-        <input type="text" id="fltNombre" placeholder="Buscar" oninput="cargarMisEst()">
-      </div>
-      <div id="tMisEst"><div class="empty">⏳ Cargando…</div></div>
+  <!-- ═══ SIDEBAR ═══ -->
+  <aside class="sidebar">
+    <div class="grp">
+      <div class="grp-title">Navegación</div>
+      <div class="nav-item active" data-sec="resumen"><span class="ico">📊</span><span>Resumen</span></div>
+      <div class="nav-item" data-sec="casos"><span class="ico">👥</span><span>Mis casos</span></div>
+      <div class="nav-item" data-sec="sesion"><span class="ico">➕</span><span>Registrar sesión</span></div>
+      <div class="nav-item" data-sec="historial"><span class="ico">📋</span><span>Historial</span></div>
+      <div class="nav-item" data-sec="horario"><span class="ico">📚</span><span>Mi horario</span></div>
+      <div class="nav-item" data-sec="agenda"><span class="ico">📅</span><span>Agenda semanal</span></div>
+      <div class="nav-item" data-sec="alertas"><span class="ico">🚨</span><span>Alertas</span> <span class="badge" id="badgeAlertas" style="display:none">0</span></div>
     </div>
+  </aside>
 
-    <div class="card">
-      <h3><span>➕</span> Registrar sesión PIE</h3>
-      <div class="fld"><label>Estudiante</label><select id="fEst"><option value="">— Elegir de mis casos —</option></select></div>
-      <div class="row3">
-        <div class="fld"><label>Fecha</label><input type="date" id="fFecha"></div>
-        <div class="fld"><label>Tipo</label><select id="fTipo">
-          <option value="individual">Individual</option>
-          <option value="grupal_pie">Grupal PIE</option>
-          <option value="coensenanza">Co-enseñanza</option>
-          <option value="evaluacion_dua">Evaluación DUA</option>
-        </select></div>
-        <div class="fld"><label>Asignatura</label><input id="fAsig" placeholder="Ej: Matemática"></div>
+  <!-- ═══ MAIN ═══ -->
+  <main>
+
+    <!-- ═══════════ RESUMEN ═══════════ -->
+    <section class="section active" id="sec-resumen">
+      <div class="section-head">
+        <div>
+          <h2>Mis Estudiantes PIE</h2>
+          <div class="sub">Panel de trabajo de la educadora diferencial · <span id="colegioNombre">—</span></div>
+        </div>
+        <div class="actions">
+          <button class="btn primary" onclick="mostrar('sesion')">➕ Registrar sesión</button>
+        </div>
       </div>
-      <div class="fld"><label>Tema trabajado</label><input id="fTema" placeholder="Ej: Fracciones equivalentes"></div>
-      <div class="fld"><label>Actividades realizadas</label><textarea id="fActividades" rows="2" placeholder="Qué se hizo en la sesión…"></textarea></div>
-      <div class="fld"><label>Logros observados</label><textarea id="fLogros" rows="2" placeholder="Avances del estudiante"></textarea></div>
-      <div class="fld"><label>Observaciones adicionales</label><textarea id="fObs" rows="2"></textarea></div>
-      <div class="row3">
-        <div class="fld"><label>Próxima sesión</label><input type="date" id="fProxima"></div>
-        <label style="margin-top:22px;font-size:.85rem"><input type="checkbox" id="fAsist" checked style="width:auto"> Estudiante asistió</label>
-        <div></div>
+
+      <!-- Alertas -->
+      <div class="alerts-grid" id="alertsWrap">
+        <div class="alert-card" style="grid-column:1/-1;text-align:center;color:var(--muted);border-color:transparent;background:transparent"><span class="spin">⏳</span> Calculando alertas…</div>
       </div>
-      <button class="btn primary" onclick="onGuardarSesion()" id="btnGuardar">💾 Registrar sesión</button>
-    </div>
-  </div>
 
-  <div class="card">
-    <h3><span>📅</span> Últimas sesiones</h3>
-    <table>
-      <thead><tr><th>Fecha</th><th>Estudiante</th><th>Tipo</th><th>Asignatura</th><th>Tema</th></tr></thead>
-      <tbody id="tSesiones"><tr><td colspan="5" class="empty">Elegí un estudiante en el registro para ver sus sesiones anteriores</td></tr></tbody>
-    </table>
-  </div>
+      <!-- KPIs -->
+      <div class="kpis" id="kpisWrap">
+        <div style="grid-column:1/-1;padding:20px;text-align:center;color:var(--muted)"><span class="spin">⏳</span> Cargando…</div>
+      </div>
 
+      <!-- Últimas sesiones + próximas -->
+      <div style="display:grid;grid-template-columns:1.2fr 1fr;gap:16px" id="grid2Resumen">
+        <div class="card">
+          <h3><span>📋</span> Mis casos activos</h3>
+          <div id="misCasosResumen"><div class="empty">⏳ Cargando…</div></div>
+        </div>
+        <div class="card">
+          <h3><span>📅</span> Próximas sesiones agendadas</h3>
+          <div id="proximasSesiones"><div class="empty">⏳ Cargando…</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════ MIS CASOS ═══════════ -->
+    <section class="section" id="sec-casos">
+      <div class="section-head">
+        <div>
+          <h2>Mis casos asignados</h2>
+          <div class="sub">Estudiantes bajo mi responsabilidad como educadora diferencial</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="filtros">
+          <select id="fltNEE" onchange="renderMisCasos()">
+            <option value="">Todas las NEE</option>
+            <option value="permanente">Permanentes</option>
+            <option value="transitoria">Transitorias</option>
+          </select>
+          <select id="fltCurso" onchange="renderMisCasos()"><option value="">Todos los cursos</option></select>
+          <select id="fltRiesgo" onchange="renderMisCasos()">
+            <option value="">Todos los estados</option>
+            <option value="verde">✓ Al día</option>
+            <option value="amarillo">⚠ Sin sesión >7 días</option>
+            <option value="rojo">🔴 Sin sesión >21 días</option>
+          </select>
+          <input type="text" id="fltNombre" placeholder="Buscar por nombre" oninput="renderMisCasos()">
+        </div>
+        <table>
+          <thead><tr>
+            <th>Estudiante</th>
+            <th>Curso</th>
+            <th>Diagnóstico</th>
+            <th>Última sesión</th>
+            <th>Total sesiones</th>
+            <th>Estado</th>
+            <th></th>
+          </tr></thead>
+          <tbody id="tbMisCasos"><tr><td colspan="7" class="empty"><span class="spin">⏳</span> Cargando…</td></tr></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ═══════════ REGISTRAR SESIÓN ═══════════ -->
+    <section class="section" id="sec-sesion">
+      <div class="section-head">
+        <div>
+          <h2>Registrar sesión PIE</h2>
+          <div class="sub">Documentá el trabajo realizado con el estudiante</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="form-section">
+          <div class="form-section-title">👤 Estudiante y contexto</div>
+          <div class="form-row">
+            <div class="fld"><label>Estudiante</label><select id="fEst"><option value="">— Elegir de mis casos —</option></select></div>
+            <div class="fld"><label>Fecha de la sesión</label><input type="date" id="fFecha"></div>
+          </div>
+          <div class="form-row-3">
+            <div class="fld"><label>Tipo de intervención</label><select id="fTipo">
+              <option value="individual">👤 Individual</option>
+              <option value="grupal_pie">👥 Grupal PIE</option>
+              <option value="coensenanza">🤝 Co-enseñanza en aula</option>
+              <option value="evaluacion_dua">📊 Evaluación DUA</option>
+              <option value="entrevista">👨‍👩‍👧 Entrevista familia</option>
+            </select></div>
+            <div class="fld"><label>Asignatura vinculada</label><input id="fAsig" placeholder="Ej: Matemática, Lenguaje…"></div>
+            <div class="fld"><label>Duración (min)</label><input type="number" id="fDuracion" placeholder="45" value="45" min="10" max="180"></div>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <div class="form-section-title">📝 Trabajo realizado</div>
+          <div class="fld" style="margin-bottom:10px">
+            <label>Tema u objetivo trabajado</label>
+            <input id="fTema" placeholder="Ej: Fracciones equivalentes · Comprensión lectora nivel literal">
+          </div>
+          <div class="fld" style="margin-bottom:10px">
+            <label>Actividades realizadas</label>
+            <textarea id="fActividades" placeholder="Describí paso a paso qué se hizo en la sesión: recursos, tiempos, estrategias, apoyo brindado…"></textarea>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <div class="form-section-title">🎯 Estrategias DUA aplicadas <span style="font-size:.65rem;font-weight:500;color:var(--muted);text-transform:none;letter-spacing:0">(opcional · marca las que usaste)</span></div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:6px">
+            <label style="display:flex;align-items:center;gap:6px;padding:6px 10px;background:#fff;border:1px solid rgba(124,58,237,.15);border-radius:6px;font-size:.8rem;cursor:pointer"><input type="checkbox" class="dua-chk" value="Múltiples formatos" style="width:auto"> Múltiples formatos</label>
+            <label style="display:flex;align-items:center;gap:6px;padding:6px 10px;background:#fff;border:1px solid rgba(124,58,237,.15);border-radius:6px;font-size:.8rem;cursor:pointer"><input type="checkbox" class="dua-chk" value="Apoyo visual" style="width:auto"> Apoyo visual</label>
+            <label style="display:flex;align-items:center;gap:6px;padding:6px 10px;background:#fff;border:1px solid rgba(124,58,237,.15);border-radius:6px;font-size:.8rem;cursor:pointer"><input type="checkbox" class="dua-chk" value="Tiempo extra" style="width:auto"> Tiempo extra</label>
+            <label style="display:flex;align-items:center;gap:6px;padding:6px 10px;background:#fff;border:1px solid rgba(124,58,237,.15);border-radius:6px;font-size:.8rem;cursor:pointer"><input type="checkbox" class="dua-chk" value="Organizadores gráficos" style="width:auto"> Organizadores gráficos</label>
+            <label style="display:flex;align-items:center;gap:6px;padding:6px 10px;background:#fff;border:1px solid rgba(124,58,237,.15);border-radius:6px;font-size:.8rem;cursor:pointer"><input type="checkbox" class="dua-chk" value="Trabajo por pares" style="width:auto"> Trabajo por pares</label>
+            <label style="display:flex;align-items:center;gap:6px;padding:6px 10px;background:#fff;border:1px solid rgba(124,58,237,.15);border-radius:6px;font-size:.8rem;cursor:pointer"><input type="checkbox" class="dua-chk" value="Refuerzo positivo" style="width:auto"> Refuerzo positivo</label>
+            <label style="display:flex;align-items:center;gap:6px;padding:6px 10px;background:#fff;border:1px solid rgba(124,58,237,.15);border-radius:6px;font-size:.8rem;cursor:pointer"><input type="checkbox" class="dua-chk" value="Vocabulario clave" style="width:auto"> Vocabulario clave</label>
+            <label style="display:flex;align-items:center;gap:6px;padding:6px 10px;background:#fff;border:1px solid rgba(124,58,237,.15);border-radius:6px;font-size:.8rem;cursor:pointer"><input type="checkbox" class="dua-chk" value="TIC / Tecnología asistida" style="width:auto"> TIC asistida</label>
+            <label style="display:flex;align-items:center;gap:6px;padding:6px 10px;background:#fff;border:1px solid rgba(124,58,237,.15);border-radius:6px;font-size:.8rem;cursor:pointer"><input type="checkbox" class="dua-chk" value="Pausas activas" style="width:auto"> Pausas activas</label>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <div class="form-section-title">📈 Logros y observaciones</div>
+          <div class="fld" style="margin-bottom:10px">
+            <label>Logros observados en el estudiante</label>
+            <textarea id="fLogros" placeholder="Avances concretos: comprensión, autonomía, participación, motivación…"></textarea>
+          </div>
+          <div class="fld">
+            <label>Observaciones adicionales (opcional)</label>
+            <textarea id="fObs" placeholder="Dificultades detectadas, ajustes necesarios, notas para el equipo PIE…" style="min-height:70px"></textarea>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <div class="form-section-title">📅 Seguimiento</div>
+          <div class="form-row-3">
+            <div class="fld"><label>Próxima sesión</label><input type="date" id="fProxima"></div>
+            <div class="fld"><label>Asistencia</label>
+              <label style="display:flex;align-items:center;gap:6px;padding:9px 12px;background:#fff;border:1px solid rgba(37,99,235,.18);border-radius:8px;cursor:pointer;font-size:.85rem"><input type="checkbox" id="fAsist" checked style="width:auto"> Estudiante asistió</label>
+            </div>
+            <div class="fld"><label>Compromiso con familia</label>
+              <label style="display:flex;align-items:center;gap:6px;padding:9px 12px;background:#fff;border:1px solid rgba(37,99,235,.18);border-radius:8px;cursor:pointer;font-size:.85rem"><input type="checkbox" id="fInformarFam" style="width:auto"> Informar al apoderado</label>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:10px;justify-content:flex-end;padding-top:14px;border-top:1px solid var(--border)">
+          <button class="btn" onclick="limpiarForm()">🧹 Limpiar</button>
+          <button class="btn primary" onclick="onGuardarSesion()" id="btnGuardar">💾 Registrar sesión</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════ HISTORIAL ═══════════ -->
+    <section class="section" id="sec-historial">
+      <div class="section-head">
+        <div>
+          <h2>Historial de sesiones</h2>
+          <div class="sub">Todas las sesiones registradas por mí (últimas 100)</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="filtros">
+          <select id="hFltEst" onchange="renderHistorial()"><option value="">Todos los estudiantes</option></select>
+          <select id="hFltTipo" onchange="renderHistorial()">
+            <option value="">Todos los tipos</option>
+            <option value="individual">Individual</option>
+            <option value="grupal_pie">Grupal PIE</option>
+            <option value="coensenanza">Co-enseñanza</option>
+            <option value="evaluacion_dua">Evaluación DUA</option>
+          </select>
+          <input type="text" id="hFltTema" placeholder="Buscar por tema" oninput="renderHistorial()">
+        </div>
+        <table>
+          <thead><tr><th>Fecha</th><th>Estudiante</th><th>Tipo</th><th>Asignatura</th><th>Tema</th><th>Asistió</th></tr></thead>
+          <tbody id="tSesiones"><tr><td colspan="6" class="empty"><span class="spin">⏳</span> Cargando historial…</td></tr></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ═══════════ MI HORARIO ═══════════ -->
+    <section class="section" id="sec-horario">
+      <div class="section-head">
+        <div>
+          <h2>📚 Mi horario semanal PIE</h2>
+          <div class="sub">Organizá tus atenciones fijas de la semana. Cada celda es un bloque de trabajo (individual, grupal, co-enseñanza). La coordinadora puede ver este horario.</div>
+        </div>
+        <div class="actions">
+          <button class="btn" onclick="horarioImprimir()">🖨 Imprimir</button>
+          <button class="btn primary" onclick="horarioLimpiar()">🧹 Limpiar todo</button>
+        </div>
+      </div>
+      <div class="card" style="padding:12px 14px">
+        <div id="horarioGrid" style="overflow-x:auto">
+          <div class="empty"><span class="spin">⏳</span> Cargando horario…</div>
+        </div>
+        <div style="margin-top:12px;padding-top:12px;border-top:1px dashed var(--border);font-size:.72rem;color:var(--muted);display:flex;gap:14px;flex-wrap:wrap">
+          <span style="display:inline-flex;align-items:center;gap:5px"><span style="width:14px;height:14px;border-radius:3px;background:linear-gradient(135deg,#EDE9FE,#DDD6FE);border:1px solid #A78BFA;display:inline-block"></span> Individual</span>
+          <span style="display:inline-flex;align-items:center;gap:5px"><span style="width:14px;height:14px;border-radius:3px;background:linear-gradient(135deg,#FCE7F3,#FBCFE8);border:1px solid #F472B6;display:inline-block"></span> Grupal PIE</span>
+          <span style="display:inline-flex;align-items:center;gap:5px"><span style="width:14px;height:14px;border-radius:3px;background:linear-gradient(135deg,#DCFCE7,#BBF7D0);border:1px solid #4ADE80;display:inline-block"></span> Co-enseñanza</span>
+          <span style="display:inline-flex;align-items:center;gap:5px"><span style="width:14px;height:14px;border-radius:3px;background:linear-gradient(135deg,#FEF3C7,#FDE68A);border:1px solid #FBBF24;display:inline-block"></span> Evaluación</span>
+          <span style="display:inline-flex;align-items:center;gap:5px"><span style="width:14px;height:14px;border-radius:3px;background:#F1F5F9;border:1px dashed #CBD5E1;display:inline-block"></span> Libre — click para agregar</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════ AGENDA SEMANAL ═══════════ -->
+    <section class="section" id="sec-agenda">
+      <div class="section-head">
+        <div>
+          <h2>Agenda semanal</h2>
+          <div class="sub">Próximas sesiones agendadas de esta semana</div>
+        </div>
+        <div class="actions">
+          <button class="btn" onclick="agendaNav(-1)">◀ Semana anterior</button>
+          <button class="btn" onclick="agendaHoy()">Hoy</button>
+          <button class="btn" onclick="agendaNav(1)">Siguiente ▶</button>
+        </div>
+      </div>
+      <div class="card">
+        <div style="font-weight:700;font-size:1rem;margin-bottom:10px;color:#7C3AED" id="agendaTitulo">—</div>
+        <div class="agenda-week" id="agendaWeek"></div>
+      </div>
+    </section>
+
+    <!-- ═══════════ ALERTAS ═══════════ -->
+    <section class="section" id="sec-alertas">
+      <div class="section-head">
+        <div>
+          <h2>Alertas de mis casos</h2>
+          <div class="sub">Estudiantes que requieren atención inmediata</div>
+        </div>
+      </div>
+      <div class="card" id="alertasDetalle"><div class="empty"><span class="spin">⏳</span> Calculando…</div></div>
+    </section>
+
+  </main>
 </div>
 
 <script>
@@ -117,119 +423,664 @@ if (window.CCRouter && window.CCRouter.guardPanel) {
   CCRouter.guardPanel(['pie_edu','pie_enc','director','rector','admin_colegio','admin']);
 }
 function esc(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function _hoyISO(){ return new Date().toISOString().slice(0,10); }
+function _diasEntre(fecha){ if (!fecha) return null; var d = new Date(fecha); var hoy = new Date(); hoy.setHours(0,0,0,0); d.setHours(0,0,0,0); return Math.round((hoy - d) / 86400000); }
 
 var _misFichas = [];
-var _estActivo = null;
+var _todasSesiones = [];  // caché consolidado
 
+/* ═══ Navegación sidebar ═══ */
+document.querySelectorAll('.sidebar .nav-item[data-sec]').forEach(function(el){
+  el.addEventListener('click', function(){ mostrar(el.dataset.sec); });
+});
+function mostrar(id){
+  document.querySelectorAll('.sidebar .nav-item[data-sec]').forEach(function(x){ x.classList.toggle('active', x.dataset.sec === id); });
+  document.querySelectorAll('.section').forEach(function(x){ x.classList.toggle('active', x.id === 'sec-' + id); });
+  if (id === 'casos')      renderMisCasos();
+  if (id === 'historial')  renderHistorial();
+  if (id === 'horario')    horarioInit();
+  if (id === 'agenda')     agendaRender();
+  if (id === 'alertas')    renderAlertasDetalle();
+  try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch(e){}
+}
+
+/* ═══ INIT ═══ */
 function iniciar() {
   var u = ELAuth.user || {};
   document.getElementById('userName').textContent = u.nombre || u.email || 'Educadora';
-  document.getElementById('fFecha').value = new Date().toISOString().slice(0,10);
-  cargarKPIs();
-  cargarMisEst();
+  document.getElementById('colegioNombre').textContent = u.liceoNombre || u.liceoSlug || '';
+  document.getElementById('fFecha').value = _hoyISO();
+  cargarTodo();
 }
 
-function cargarKPIs() {
-  CCPie.listarFichas({ educadoraUid: ELAuth.user.uid }).then(function(fichas) {
-    _misFichas = fichas;
-    var perm = fichas.filter(function(f){ return f.tipoNEE === 'permanente'; }).length;
-    var trans = fichas.filter(function(f){ return f.tipoNEE === 'transitoria'; }).length;
-
-    // Contar sesiones del mes por todos mis casos
-    var mes = new Date().toISOString().slice(0, 7);
-    var promesas = fichas.map(function(f) { return CCPie.listarSesiones(f.estUid).catch(function(){ return []; }); });
-    Promise.all(promesas).then(function(arrs) {
-      var todo = [].concat.apply([], arrs);
-      var mesSesiones = todo.filter(function(s){ return (s.fecha || '').slice(0,7) === mes && s.educadoraUid === ELAuth.user.uid; }).length;
-      document.getElementById('kpisWrap').innerHTML =
-        '<div class="kpi mis"><div class="l">Mis estudiantes</div><div class="v">' + fichas.length + '</div></div>' +
-        '<div class="kpi perm"><div class="l">NEE Permanentes</div><div class="v">' + perm + '</div></div>' +
-        '<div class="kpi trans"><div class="l">NEE Transitorias</div><div class="v">' + trans + '</div></div>' +
-        '<div class="kpi sesion"><div class="l">Sesiones este mes</div><div class="v">' + mesSesiones + '</div></div>';
+function cargarTodo(){
+  var u = ELAuth.user || {};
+  var esCoord = u.role === 'pie_enc' || (u.roles && u.roles.pie_enc);
+  var filtro = esCoord ? {} : { educadoraUid: u.uid };
+  CCPie.listarFichas(filtro).then(function(fichas){
+    _misFichas = fichas || [];
+    // Cargar todas las sesiones de mis casos
+    var promesas = _misFichas.map(function(f){ return CCPie.listarSesiones(f.estUid).catch(function(){ return []; }); });
+    return Promise.all(promesas);
+  }).then(function(arrs){
+    _todasSesiones = [];
+    arrs.forEach(function(arr, i){
+      var ficha = _misFichas[i];
+      (arr || []).forEach(function(s){
+        s._estUid = ficha.estUid;
+        s._estNombre = ficha.estudianteNombre;
+        s._cursoNombre = ficha.cursoNombre;
+        _todasSesiones.push(s);
+      });
     });
+    _renderKPIs();
+    _renderAlertas();
+    _renderCasosResumen();
+    _renderProximasSesiones();
+    _poblarSelectores();
+  }).catch(function(err){
+    console.error('Panel edu PIE error:', err);
+    document.getElementById('kpisWrap').innerHTML = '<div style="grid-column:1/-1;padding:20px;text-align:center;color:var(--danger)">Error al cargar: ' + (err.message || err) + '</div>';
   });
 }
 
-function cargarMisEst() {
+function _poblarSelectores(){
+  var opts = _misFichas.map(function(f){ return '<option value="' + esc(f.estUid) + '">' + esc(f.estudianteNombre) + ' (' + esc(f.cursoNombre||'') + ')</option>'; }).join('');
+  document.getElementById('fEst').innerHTML = '<option value="">— Elegir de mis casos —</option>' + opts;
+  document.getElementById('hFltEst').innerHTML = '<option value="">Todos los estudiantes</option>' + opts;
+  // Cursos únicos
+  var cursos = {}; _misFichas.forEach(function(f){ if (f.cursoNombre) cursos[f.cursoNombre] = true; });
+  document.getElementById('fltCurso').innerHTML = '<option value="">Todos los cursos</option>' +
+    Object.keys(cursos).sort().map(function(c){ return '<option value="' + esc(c) + '">' + esc(c) + '</option>'; }).join('');
+}
+
+/* ═══ KPIs ═══ */
+function _renderKPIs(){
+  var u = ELAuth.user || {};
+  var mes = _hoyISO().slice(0,7);
+  var sem = _semanaISO();
+  var perm = _misFichas.filter(function(f){ return f.tipoNEE === 'permanente'; }).length;
+  var trans = _misFichas.filter(function(f){ return f.tipoNEE === 'transitoria'; }).length;
+  var sesMes = _todasSesiones.filter(function(s){ return (s.fecha||'').slice(0,7) === mes; }).length;
+  var sesSem = _todasSesiones.filter(function(s){ return _semanaDeFecha(s.fecha) === sem; }).length;
+  var proxSes = _todasSesiones.filter(function(s){ return s.proximaSesion && new Date(s.proximaSesion) >= new Date(); }).length;
+  var totalAsist = _todasSesiones.length;
+  var conAsist = _todasSesiones.filter(function(s){ return s.asistenciaEstudiante !== false; }).length;
+  var tasaAsist = totalAsist ? Math.round(conAsist / totalAsist * 100) : 100;
+  document.getElementById('kpisWrap').innerHTML =
+    _kpi('mis',    'Mis casos',           _misFichas.length,  'estudiantes activos') +
+    _kpi('sesion', 'Sesiones esta semana', sesSem,             sesMes + ' este mes') +
+    _kpi('pend',   'Próximas agendadas',   proxSes,            'sesiones programadas') +
+    _kpi('perm',   'NEE Permanentes',      perm,               'entre mis casos') +
+    _kpi('trans',  'NEE Transitorias',     trans,              'entre mis casos') +
+    _kpi('asist',  'Tasa de asistencia',   tasaAsist + '%',    conAsist + ' de ' + totalAsist);
+}
+function _kpi(cls, l, v, d){ return '<div class="kpi ' + cls + '"><div class="l">' + l + '</div><div class="v">' + v + '</div><div class="d">' + d + '</div></div>'; }
+function _semanaISO(){
+  var d = new Date(); d.setHours(0,0,0,0);
+  d.setDate(d.getDate() + 4 - (d.getDay() || 7));
+  var yr = d.getFullYear();
+  var wk = Math.ceil((((d - new Date(yr,0,1)) / 86400000) + 1) / 7);
+  return yr + '-W' + String(wk).padStart(2,'0');
+}
+function _semanaDeFecha(fecha){
+  if (!fecha) return '';
+  var d = new Date(fecha); d.setHours(0,0,0,0);
+  d.setDate(d.getDate() + 4 - (d.getDay() || 7));
+  var yr = d.getFullYear();
+  var wk = Math.ceil((((d - new Date(yr,0,1)) / 86400000) + 1) / 7);
+  return yr + '-W' + String(wk).padStart(2,'0');
+}
+
+/* ═══ ALERTAS ═══ */
+function _calcAlertas(){
+  var casosSinSesion = [];      // >21 días sin sesión
+  var casosPocaFrec = [];       // >7 días sin sesión
+  var pacisVencidos = [];       // PACI vencido
+  var sinAsistir = [];          // últimas 3 sesiones no asistió
+  _misFichas.forEach(function(f){
+    var sesFicha = _todasSesiones.filter(function(s){ return s._estUid === f.estUid; }).sort(function(a,b){ return new Date(b.fecha) - new Date(a.fecha); });
+    var ultima = sesFicha[0];
+    var dias = ultima ? _diasEntre(ultima.fecha) : null;
+    if (dias === null || dias > 21) casosSinSesion.push({ f: f, dias: dias });
+    else if (dias > 7) casosPocaFrec.push({ f: f, dias: dias });
+    // PACI
+    var venc = f.paciFechaVencimiento || f.paciVigenciaHasta;
+    if (venc && new Date(venc) < new Date()) pacisVencidos.push({ f: f });
+    // 3 últimas ausencias
+    var ult3 = sesFicha.slice(0, 3);
+    if (ult3.length === 3 && ult3.every(function(s){ return s.asistenciaEstudiante === false; })) sinAsistir.push({ f: f });
+  });
+  return { casosSinSesion: casosSinSesion, casosPocaFrec: casosPocaFrec, pacisVencidos: pacisVencidos, sinAsistir: sinAsistir, total: casosSinSesion.length + pacisVencidos.length + sinAsistir.length };
+}
+function _renderAlertas(){
+  var a = _calcAlertas();
+  document.getElementById('alertsWrap').innerHTML =
+    _alertCard(a.casosSinSesion.length ? 'danger' : 'ok', a.casosSinSesion.length, 'Casos sin sesión >21 días', 'Requieren contacto urgente') +
+    _alertCard(a.casosPocaFrec.length ? 'warn' : 'ok', a.casosPocaFrec.length, 'Baja frecuencia', 'Sin sesión hace 7-21 días') +
+    _alertCard(a.pacisVencidos.length ? 'danger' : 'ok', a.pacisVencidos.length, 'PACI vencidos', 'Necesitan renovación') +
+    _alertCard(a.sinAsistir.length ? 'warn' : 'ok', a.sinAsistir.length, 'Ausencias reiteradas', '3 sesiones seguidas sin asistir');
+  var badge = document.getElementById('badgeAlertas');
+  if (a.total) { badge.textContent = a.total; badge.style.display = 'inline-block'; }
+  else badge.style.display = 'none';
+}
+function _alertCard(tone, n, label, sub){
+  return '<div class="alert-card ' + tone + '" onclick="mostrar(\'alertas\')" style="cursor:pointer">' +
+    '<div class="l">' + label + '</div>' +
+    '<div class="n">' + n + '</div>' +
+    '<div class="s">' + sub + '</div></div>';
+}
+function renderAlertasDetalle(){
+  var a = _calcAlertas();
+  var host = document.getElementById('alertasDetalle');
+  function _lista(titulo, arr, tone){
+    if (!arr.length) return '<div style="padding:12px;background:rgba(16,185,129,.06);color:#065F46;border-radius:8px;margin-bottom:12px">✓ ' + titulo + ': sin casos.</div>';
+    var body = arr.map(function(x){
+      var f = x.f;
+      var extra = x.dias != null ? ' <span style="color:var(--muted);font-size:.75rem">· ' + x.dias + ' días</span>' : '';
+      return '<div style="padding:9px 12px;border-bottom:1px solid var(--border);cursor:pointer" onclick="verFicha(\'' + esc(f.estUid) + '\')"><b>' + esc(f.estudianteNombre) + '</b> · ' + esc(f.cursoNombre||'') + extra + '</div>';
+    }).join('');
+    var color = tone === 'danger' ? '#DC2626' : (tone === 'warn' ? '#B45309' : '#1D4ED8');
+    return '<div style="margin-bottom:20px"><h3 style="color:' + color + ';margin-bottom:8px">🚨 ' + titulo + ' <span style="background:currentColor;color:white;padding:2px 9px;border-radius:99px;font-size:.72rem">' + arr.length + '</span></h3>' + body + '</div>';
+  }
+  host.innerHTML =
+    _lista('Casos sin sesión hace >21 días',  a.casosSinSesion, 'danger') +
+    _lista('Baja frecuencia (7-21 días)',      a.casosPocaFrec,  'warn') +
+    _lista('PACI vencidos',                    a.pacisVencidos,  'danger') +
+    _lista('Ausencias reiteradas',             a.sinAsistir,     'warn');
+}
+
+/* ═══ MIS CASOS ═══ */
+function _renderCasosResumen(){
+  var arr = _misFichas.slice(0, 6);
+  if (!arr.length) { document.getElementById('misCasosResumen').innerHTML = '<div class="empty">Sin casos asignados aún.</div>'; return; }
+  document.getElementById('misCasosResumen').innerHTML =
+    '<table><thead><tr><th>Estudiante</th><th>Diagnóstico</th><th>Últ. sesión</th></tr></thead><tbody>' +
+    arr.map(function(f){
+      var sesF = _todasSesiones.filter(function(s){ return s._estUid === f.estUid; }).sort(function(a,b){ return new Date(b.fecha) - new Date(a.fecha); });
+      var ult = sesF[0];
+      var dias = ult ? _diasEntre(ult.fecha) : null;
+      var chip = dias == null ? '<span class="chip chip-rojo">Sin registros</span>' :
+                 dias > 21 ? '<span class="chip chip-rojo">' + dias + 'd</span>' :
+                 dias > 7 ? '<span class="chip chip-amarillo">' + dias + 'd</span>' :
+                 '<span class="chip chip-verde">' + dias + 'd</span>';
+      return '<tr onclick="verFicha(\'' + esc(f.estUid) + '\')"><td><b>' + esc(f.estudianteNombre) + '</b><br><span style="color:var(--muted);font-size:.72rem">' + esc(f.cursoNombre||'') + '</span></td><td>' + CCPie.badgeDiagnostico(f.diagnostico) + '</td><td>' + chip + '</td></tr>';
+    }).join('') + '</tbody></table>' +
+    (_misFichas.length > 6 ? '<div style="text-align:center;padding:10px"><a onclick="mostrar(\'casos\')" style="color:#7C3AED;cursor:pointer;font-size:.85rem;font-weight:600">Ver los ' + _misFichas.length + ' casos →</a></div>' : '');
+}
+function renderMisCasos(){
   var q = (document.getElementById('fltNombre').value || '').toLowerCase().trim();
   var nee = document.getElementById('fltNEE').value;
-  var items = _misFichas.filter(function(f) {
+  var curso = document.getElementById('fltCurso').value;
+  var riesgo = document.getElementById('fltRiesgo').value;
+  var items = _misFichas.filter(function(f){
     if (nee && f.tipoNEE !== nee) return false;
-    if (q && (f.estudianteNombre || '').toLowerCase().indexOf(q) === -1) return false;
+    if (curso && f.cursoNombre !== curso) return false;
+    if (q && (f.estudianteNombre||'').toLowerCase().indexOf(q) === -1) return false;
+    if (riesgo) {
+      var sesF = _todasSesiones.filter(function(s){ return s._estUid === f.estUid; }).sort(function(a,b){ return new Date(b.fecha) - new Date(a.fecha); });
+      var dias = sesF[0] ? _diasEntre(sesF[0].fecha) : 999;
+      if (riesgo === 'verde' && !(dias <= 7)) return false;
+      if (riesgo === 'amarillo' && !(dias > 7 && dias <= 21)) return false;
+      if (riesgo === 'rojo' && !(dias > 21)) return false;
+    }
     return true;
   });
-  var wrap = document.getElementById('tMisEst');
-  if (!items.length) { wrap.innerHTML = '<div class="empty">Sin estudiantes asignados' + (q ? ' que coincidan' : '') + '</div>'; return; }
-  wrap.innerHTML = '<table><thead><tr><th>Estudiante</th><th>Curso</th><th>Diagnóstico</th></tr></thead><tbody>' +
-    items.map(function(f) {
-      return '<tr onclick="verEst(\'' + esc(f.estUid) + '\')">' +
-        '<td>' + esc(f.estudianteNombre) + '</td>' +
-        '<td>' + esc(f.cursoNombre) + '</td>' +
-        '<td>' + CCPie.badgeDiagnostico(f.diagnostico) + '</td>' +
-        '</tr>';
-    }).join('') + '</tbody></table>';
-
-  // Poblar select de sesion
-  var sel = document.getElementById('fEst');
-  sel.innerHTML = '<option value="">— Elegir de mis casos —</option>' +
-    _misFichas.map(function(f){ return '<option value="' + esc(f.estUid) + '" data-nom="' + esc(f.estudianteNombre) + '">' + esc(f.estudianteNombre) + ' (' + esc(f.cursoNombre) + ')</option>'; }).join('');
-  sel.addEventListener('change', cargarSesionesDelEst);
+  var tb = document.getElementById('tbMisCasos');
+  if (!items.length) { tb.innerHTML = '<tr><td colspan="7" class="empty">Sin casos que coincidan con los filtros.</td></tr>'; return; }
+  tb.innerHTML = items.map(function(f){
+    var sesF = _todasSesiones.filter(function(s){ return s._estUid === f.estUid; }).sort(function(a,b){ return new Date(b.fecha) - new Date(a.fecha); });
+    var ult = sesF[0];
+    var dias = ult ? _diasEntre(ult.fecha) : null;
+    var chip = dias == null ? '<span class="chip chip-rojo">🔴 Sin sesión</span>' :
+               dias > 21 ? '<span class="chip chip-rojo">🔴 Hace ' + dias + ' días</span>' :
+               dias > 7 ? '<span class="chip chip-amarillo">⚠ Hace ' + dias + ' días</span>' :
+               '<span class="chip chip-verde">✓ Hace ' + dias + ' días</span>';
+    var ultFecha = ult ? new Date(ult.fecha).toLocaleDateString('es-CL',{day:'2-digit',month:'short'}) : '—';
+    return '<tr>' +
+      '<td><b>' + esc(f.estudianteNombre) + '</b></td>' +
+      '<td>' + esc(f.cursoNombre||'') + '</td>' +
+      '<td>' + CCPie.badgeDiagnostico(f.diagnostico) + '</td>' +
+      '<td style="font-size:.82rem">' + ultFecha + '</td>' +
+      '<td style="font-weight:700;text-align:center">' + sesF.length + '</td>' +
+      '<td>' + chip + '</td>' +
+      '<td><button class="btn" style="padding:4px 10px;font-size:.75rem" onclick="event.stopPropagation();registrarSesRapido(\'' + esc(f.estUid) + '\')">➕ Sesión</button> <button class="btn" style="padding:4px 10px;font-size:.75rem" onclick="event.stopPropagation();verFicha(\'' + esc(f.estUid) + '\')">👁 Ficha</button></td>' +
+      '</tr>';
+  }).join('');
+}
+function registrarSesRapido(estUid){
+  mostrar('sesion');
+  setTimeout(function(){ document.getElementById('fEst').value = estUid; }, 100);
 }
 
-function verEst(estUid) {
-  window.location.href = 'pie-ficha.html?estUid=' + encodeURIComponent(estUid);
+/* ═══ PRÓXIMAS SESIONES ═══ */
+function _renderProximasSesiones(){
+  var hoy = new Date(); hoy.setHours(0,0,0,0);
+  var prox = _todasSesiones.filter(function(s){ return s.proximaSesion && new Date(s.proximaSesion) >= hoy; })
+    .sort(function(a,b){ return new Date(a.proximaSesion) - new Date(b.proximaSesion); })
+    .slice(0, 8);
+  var host = document.getElementById('proximasSesiones');
+  if (!prox.length) { host.innerHTML = '<div class="empty">Sin sesiones agendadas próximas.</div>'; return; }
+  host.innerHTML = prox.map(function(s){
+    var d = new Date(s.proximaSesion);
+    var dias = _diasEntre(s.proximaSesion) * -1;
+    var chip = dias === 0 ? '<span class="chip chip-info">Hoy</span>' : dias === 1 ? '<span class="chip chip-amarillo">Mañana</span>' : '<span class="chip chip-info">en ' + dias + ' días</span>';
+    return '<div style="padding:9px 12px;background:rgba(124,58,237,.05);border-radius:8px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;font-size:.85rem">' +
+      '<div><b>' + esc(s._estNombre||'—') + '</b><br><span style="color:var(--muted);font-size:.72rem">' + esc(s._cursoNombre||'') + ' · ' + d.toLocaleDateString('es-CL',{weekday:'short',day:'2-digit',month:'short'}) + '</span></div>' +
+      chip +
+      '</div>';
+  }).join('');
 }
 
-function cargarSesionesDelEst() {
-  var estUid = document.getElementById('fEst').value;
-  if (!estUid) return;
-  CCPie.listarSesiones(estUid).then(function(sesiones) {
-    var tb = document.getElementById('tSesiones');
-    if (!sesiones.length) { tb.innerHTML = '<tr><td colspan="5" class="empty">Sin sesiones registradas todavía</td></tr>'; return; }
-    var f = _misFichas.find(function(x) { return x.estUid === estUid; });
-    tb.innerHTML = sesiones.slice(0, 30).map(function(s) {
-      return '<tr>' +
-        '<td>' + esc(s.fecha) + '</td>' +
-        '<td>' + esc(f ? f.estudianteNombre : '—') + '</td>' +
-        '<td>' + esc(CCPie.TIPO_SESION_LABEL[s.tipo] || s.tipo) + '</td>' +
-        '<td>' + esc(s.asignatura || '—') + '</td>' +
-        '<td>' + esc(s.tema || '—') + '</td>' +
-        '</tr>';
-    }).join('');
-  });
+/* ═══ HISTORIAL ═══ */
+function renderHistorial(){
+  var fltEst = document.getElementById('hFltEst').value;
+  var fltTipo = document.getElementById('hFltTipo').value;
+  var fltTema = (document.getElementById('hFltTema').value||'').toLowerCase().trim();
+  var arr = _todasSesiones
+    .filter(function(s){
+      if (fltEst && s._estUid !== fltEst) return false;
+      if (fltTipo && s.tipo !== fltTipo) return false;
+      if (fltTema && (s.tema||'').toLowerCase().indexOf(fltTema) === -1) return false;
+      return true;
+    })
+    .sort(function(a,b){ return new Date(b.fecha) - new Date(a.fecha); })
+    .slice(0, 100);
+  var tb = document.getElementById('tSesiones');
+  if (!arr.length) { tb.innerHTML = '<tr><td colspan="6" class="empty">Sin sesiones registradas.</td></tr>'; return; }
+  tb.innerHTML = arr.map(function(s){
+    var asist = s.asistenciaEstudiante === false ? '<span class="chip chip-rojo">Ausente</span>' : '<span class="chip chip-verde">Asistió</span>';
+    return '<tr>' +
+      '<td>' + esc(s.fecha||'—') + '</td>' +
+      '<td>' + esc(s._estNombre||'—') + '</td>' +
+      '<td>' + esc(CCPie.TIPO_SESION_LABEL[s.tipo] || s.tipo || '—') + '</td>' +
+      '<td>' + esc(s.asignatura||'—') + '</td>' +
+      '<td>' + esc(s.tema||'—') + '</td>' +
+      '<td>' + asist + '</td>' +
+      '</tr>';
+  }).join('');
 }
 
+/* ═══ AGENDA SEMANAL ═══ */
+var _agendaOffset = 0; // semanas de offset (0 = esta semana)
+function agendaNav(delta){ _agendaOffset += delta; agendaRender(); }
+function agendaHoy(){ _agendaOffset = 0; agendaRender(); }
+function agendaRender(){
+  var base = new Date();
+  base.setDate(base.getDate() + _agendaOffset * 7);
+  var lunes = new Date(base);
+  var dw = base.getDay() || 7;
+  lunes.setDate(base.getDate() - dw + 1);
+  var meses = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  var fin = new Date(lunes); fin.setDate(lunes.getDate() + 4);
+  document.getElementById('agendaTitulo').textContent = 'Semana del ' + lunes.getDate() + ' al ' + fin.getDate() + ' de ' + meses[fin.getMonth()] + ' de ' + fin.getFullYear();
+  var hoyISO = _hoyISO();
+  var dias = ['LUN','MAR','MIÉ','JUE','VIE'];
+  var html = '';
+  for (var i = 0; i < 5; i++){
+    var d = new Date(lunes); d.setDate(lunes.getDate() + i);
+    var iso = d.toISOString().slice(0,10);
+    var esHoy = iso === hoyISO;
+    var eventos = _todasSesiones.filter(function(s){ return s.proximaSesion === iso; });
+    var pasada = iso < hoyISO;
+    html += '<div class="agenda-day' + (esHoy ? ' hoy' : '') + '">' +
+      '<div class="day-name">' + dias[i] + '</div>' +
+      '<div class="day-num">' + d.getDate() + '</div>' +
+      (eventos.length ? eventos.map(function(s){ return '<div class="ses-item' + (pasada?' pasada':'') + '"><b>' + esc((s._estNombre||'').split(' ')[0]) + '</b><br>' + esc(s.tema||CCPie.TIPO_SESION_LABEL[s.tipo]||'Sesión') + '</div>'; }).join('') : '<div style="color:#94a3b8;font-size:.7rem;font-style:italic">Sin sesiones</div>') +
+      '</div>';
+  }
+  document.getElementById('agendaWeek').innerHTML = html;
+}
+
+/* ═══ REGISTRAR SESIÓN ═══ */
 function onGuardarSesion() {
   var estUid = document.getElementById('fEst').value;
   if (!estUid) { alert('Elegí un estudiante'); return; }
   var tema = document.getElementById('fTema').value.trim();
   var acts = document.getElementById('fActividades').value.trim();
   if (!tema && !acts) { alert('Indicá al menos el tema o las actividades'); return; }
+  var dua = Array.prototype.slice.call(document.querySelectorAll('.dua-chk:checked')).map(function(c){ return c.value; });
   var datos = {
     liceoSlug: ELAuth.user.liceoSlug || ELAuth.user.liceoPrincipal || '',
     pieEstUid: estUid,
     fecha: document.getElementById('fFecha').value,
     tipo: document.getElementById('fTipo').value,
     asignatura: document.getElementById('fAsig').value.trim(),
+    duracion: parseInt(document.getElementById('fDuracion').value) || 45,
     tema: tema,
     actividades: acts,
+    duaAplicadas: dua,
     logros: document.getElementById('fLogros').value.trim(),
     observaciones: document.getElementById('fObs').value.trim(),
     asistenciaEstudiante: document.getElementById('fAsist').checked,
+    informarFamilia: document.getElementById('fInformarFam').checked,
     proximaSesion: document.getElementById('fProxima').value
   };
   var btn = document.getElementById('btnGuardar');
-  btn.disabled = true;
+  btn.disabled = true; btn.textContent = '⏳ Guardando…';
   CCPie.registrarSesion(datos).then(function() {
-    alert('✓ Sesión registrada');
-    ['fTema','fActividades','fLogros','fObs','fProxima'].forEach(function(id){ document.getElementById(id).value = ''; });
-    cargarSesionesDelEst();
-    cargarKPIs();
-    btn.disabled = false;
-  }).catch(function(err) { alert('Error: ' + err.message); btn.disabled = false; });
+    btn.disabled = false; btn.innerHTML = '💾 Registrar sesión';
+    // Feedback visual
+    var toast = document.createElement('div');
+    toast.textContent = '✓ Sesión registrada';
+    toast.style.cssText = 'position:fixed;bottom:24px;right:24px;padding:14px 22px;background:linear-gradient(135deg,#10B981,#059669);color:#fff;border-radius:10px;font-weight:600;box-shadow:0 8px 24px rgba(16,185,129,.35);z-index:9999';
+    document.body.appendChild(toast);
+    setTimeout(function(){ toast.remove(); }, 2400);
+    limpiarForm();
+    cargarTodo();
+  }).catch(function(err) { alert('Error: ' + err.message); btn.disabled = false; btn.innerHTML = '💾 Registrar sesión'; });
 }
+function limpiarForm(){
+  ['fTema','fActividades','fLogros','fObs','fProxima','fAsig'].forEach(function(id){ document.getElementById(id).value = ''; });
+  document.querySelectorAll('.dua-chk').forEach(function(c){ c.checked = false; });
+  document.getElementById('fAsist').checked = true;
+  document.getElementById('fInformarFam').checked = false;
+  document.getElementById('fDuracion').value = 45;
+  document.getElementById('fFecha').value = _hoyISO();
+}
+
+function verFicha(estUid){ window.location.href = 'pie-ficha.html?estUid=' + encodeURIComponent(estUid); }
+
+/* ═══════════════════════════════════════════════════
+   HORARIO SEMANAL PIE · editable por la educadora
+   ═══════════════════════════════════════════════════ */
+var DIAS = ['Lunes','Martes','Miércoles','Jueves','Viernes'];
+var BLOQUES_DEFAULT = [
+  { h: '08:00 - 08:45' }, { h: '08:45 - 09:30' }, { h: '09:45 - 10:30' },
+  { h: '10:30 - 11:15' }, { h: '11:30 - 12:15' }, { h: '12:15 - 13:00' },
+  { h: '14:00 - 14:45' }, { h: '14:45 - 15:30' }, { h: '15:45 - 16:30' }
+];
+var _horario = { celdas: {} };
+var _bloquesLiceo = null;
+
+function horarioInit(){
+  if (!_bloquesLiceo) {
+    _cargarBloquesLiceo().then(function(bl){
+      _bloquesLiceo = bl || BLOQUES_DEFAULT;
+      _cargarHorario();
+    });
+  } else {
+    _cargarHorario();
+  }
+}
+
+function _cargarBloquesLiceo(){
+  var slug = (ELAuth.user && ELAuth.user.liceoSlug) || null;
+  if (!slug || typeof EL_DB === 'undefined') return Promise.resolve(BLOQUES_DEFAULT);
+  return EL_DB.collection('bloques_liceo').doc(slug).get().then(function(sn){
+    if (!sn.exists) return BLOQUES_DEFAULT;
+    var d = sn.data() || {};
+    var b = d.bloques || [];
+    if (!b.length) return BLOQUES_DEFAULT;
+    return b.map(function(x){ return { h: (x.inicio||'—') + ' - ' + (x.fin||'—'), esRecreo: x.esRecreo, nombre: x.nombre }; });
+  }).catch(function(){ return BLOQUES_DEFAULT; });
+}
+
+function _cargarHorario(){
+  var uid = _slugHorarioDocId();
+  if (typeof EL_DB === 'undefined') { _horario = { celdas: {} }; horarioRender(); return; }
+  EL_DB.collection('pie_horarios').doc(uid).get().then(function(sn){
+    _horario = sn.exists ? (sn.data() || { celdas: {} }) : { celdas: {} };
+    if (!_horario.celdas) _horario.celdas = {};
+    horarioRender();
+  }).catch(function(){ _horario = { celdas: {} }; horarioRender(); });
+}
+function _slugHorarioDocId(){
+  var slug = (ELAuth.user && ELAuth.user.liceoSlug) || 'demo';
+  var uid = (ELAuth.user && ELAuth.user.uid) || 'anon';
+  return slug + '__' + uid;
+}
+
+var TIPO_STYLE = {
+  individual:    { bg: 'linear-gradient(135deg,#EDE9FE,#DDD6FE)', border: '#A78BFA', color: '#5B21B6', label: 'Individual', icon: '👤' },
+  grupal_pie:    { bg: 'linear-gradient(135deg,#FCE7F3,#FBCFE8)', border: '#F472B6', color: '#9D174D', label: 'Grupal PIE', icon: '👥' },
+  coensenanza:   { bg: 'linear-gradient(135deg,#DCFCE7,#BBF7D0)', border: '#4ADE80', color: '#065F46', label: 'Co-enseñanza', icon: '🤝' },
+  evaluacion:    { bg: 'linear-gradient(135deg,#FEF3C7,#FDE68A)', border: '#FBBF24', color: '#92400E', label: 'Evaluación', icon: '📊' },
+  reunion:       { bg: 'linear-gradient(135deg,#DBEAFE,#BFDBFE)', border: '#60A5FA', color: '#1E40AF', label: 'Reunión', icon: '💬' }
+};
+
+// Migración transparente: si la celda tiene el campo viejo `estUid`/`estNombre`, lo convertimos a array
+function _horNormalizarCelda(c){
+  if (!c) return c;
+  if (!c.estudiantes && (c.estUid || c.estNombre)) {
+    c.estudiantes = [{ uid: c.estUid || null, nombre: c.estNombre || '' }];
+  }
+  if (!c.estudiantes) c.estudiantes = [];
+  return c;
+}
+function _horLabelEstudiantes(c){
+  var arr = (c.estudiantes || []).filter(function(x){ return x && x.nombre; });
+  if (!arr.length) return c.titulo || '—';
+  if (arr.length === 1) return arr[0].nombre;
+  if (arr.length === 2) return arr.map(function(x){ return x.nombre.split(' ')[0]; }).join(' + ');
+  return arr[0].nombre.split(' ')[0] + ' + ' + (arr.length - 1) + ' más';
+}
+function _horTooltipEstudiantes(c){
+  var arr = (c.estudiantes || []).filter(function(x){ return x && x.nombre; });
+  return arr.map(function(x){ return x.nombre; }).join(', ');
+}
+
+function horarioRender(){
+  var b = _bloquesLiceo || BLOQUES_DEFAULT;
+  var html = '<table style="width:100%;min-width:900px;border-collapse:separate;border-spacing:2px">' +
+    '<thead><tr>' +
+      '<th style="background:#F1F5F9;font-size:.7rem;color:var(--muted);padding:8px 6px;width:110px">HORARIO</th>' +
+      DIAS.map(function(d){ return '<th style="background:linear-gradient(135deg,rgba(124,58,237,.12),rgba(236,72,153,.06));color:#5B21B6;font-size:.75rem;padding:8px 6px;font-weight:700">' + d.toUpperCase() + '</th>'; }).join('') +
+    '</tr></thead><tbody>';
+  b.forEach(function(bl, bi){
+    if (bl.esRecreo) {
+      html += '<tr><td colspan="6" style="padding:6px 12px;background:rgba(148,163,184,.08);color:#64748B;font-size:.72rem;font-style:italic;text-align:center;border-radius:6px">☕ ' + esc(bl.nombre || 'Recreo') + ' · ' + esc(bl.h) + '</td></tr>';
+      return;
+    }
+    html += '<tr><td style="background:#F8FAFC;font-size:.72rem;color:var(--muted);font-weight:600;padding:8px 6px;text-align:center;vertical-align:middle;border-radius:6px">' + esc(bl.h) + '</td>';
+    DIAS.forEach(function(dia, di){
+      var key = di + '_' + bi;
+      var c = _horNormalizarCelda(_horario.celdas[key]);
+      if (c && c.tipo) {
+        var st = TIPO_STYLE[c.tipo] || TIPO_STYLE.individual;
+        var labelEst = _horLabelEstudiantes(c);
+        var tooltipEst = _horTooltipEstudiantes(c);
+        var badgeCount = (c.estudiantes && c.estudiantes.length > 1) ? '<span style="background:' + st.border + ';color:#fff;font-size:.62rem;padding:1px 6px;border-radius:99px;margin-left:4px;font-weight:700">×' + c.estudiantes.length + '</span>' : '';
+        html += '<td style="padding:0;vertical-align:top" title="' + esc(tooltipEst) + '">' +
+          '<div onclick="horarioEditar(' + di + ',' + bi + ')" style="cursor:pointer;padding:8px 10px;min-height:64px;background:' + st.bg + ';border:1px solid ' + st.border + ';border-radius:6px;transition:transform .12s" onmouseover="this.style.transform=\'scale(1.02)\'" onmouseout="this.style.transform=\'scale(1)\'">' +
+            '<div style="font-size:.68rem;color:' + st.color + ';font-weight:700;text-transform:uppercase;display:flex;align-items:center">' + st.icon + ' ' + st.label + badgeCount + '</div>' +
+            '<div style="font-size:.85rem;font-weight:700;margin-top:2px;color:#0C1E3B;line-height:1.15">' + esc(labelEst) + '</div>' +
+            (c.aula ? '<div style="font-size:.72rem;color:' + st.color + ';margin-top:2px">📍 ' + esc(c.aula) + '</div>' : '') +
+            (c.asignatura ? '<div style="font-size:.68rem;color:' + st.color + ';margin-top:1px;opacity:.9">' + esc(c.asignatura) + '</div>' : '') +
+          '</div></td>';
+      } else {
+        html += '<td style="padding:0;vertical-align:top">' +
+          '<div onclick="horarioEditar(' + di + ',' + bi + ')" style="cursor:pointer;padding:8px 10px;min-height:64px;background:#F8FAFC;border:1px dashed #CBD5E1;border-radius:6px;display:flex;align-items:center;justify-content:center;color:#94A3B8;font-size:.72rem;transition:all .15s" onmouseover="this.style.background=\'rgba(124,58,237,.08)\';this.style.borderColor=\'#7C3AED\';this.style.color=\'#7C3AED\'" onmouseout="this.style.background=\'#F8FAFC\';this.style.borderColor=\'#CBD5E1\';this.style.color=\'#94A3B8\'">' +
+            '<span>+ agregar</span>' +
+          '</div></td>';
+      }
+    });
+    html += '</tr>';
+  });
+  html += '</tbody></table>';
+  document.getElementById('horarioGrid').innerHTML = html;
+}
+
+function horarioEditar(di, bi){
+  var key = di + '_' + bi;
+  var c = _horNormalizarCelda(_horario.celdas[key] || {});
+  var b = (_bloquesLiceo || BLOQUES_DEFAULT)[bi];
+  var seleccionadosUids = (c.estudiantes || []).map(function(x){ return x.uid; }).filter(Boolean);
+  // Ordenar: primero los ya seleccionados, después el resto por nombre
+  var listaOrdenada = _misFichas.slice().sort(function(a,b){
+    var aSel = seleccionadosUids.indexOf(a.estUid) !== -1;
+    var bSel = seleccionadosUids.indexOf(b.estUid) !== -1;
+    if (aSel !== bSel) return aSel ? -1 : 1;
+    return (a.estudianteNombre||'').localeCompare(b.estudianteNombre||'');
+  });
+  var estChecks = listaOrdenada.map(function(f){
+    var checked = seleccionadosUids.indexOf(f.estUid) !== -1;
+    return '<label style="display:flex;align-items:center;gap:8px;padding:6px 10px;background:#fff;border:1px solid ' + (checked ? '#7C3AED' : 'rgba(37,99,235,.15)') + ';border-radius:6px;font-size:.8rem;cursor:pointer' + (checked ? ';background:rgba(124,58,237,.08)' : '') + '"><input type="checkbox" class="hCeldaEstChk" value="' + esc(f.estUid) + '" data-nom="' + esc(f.estudianteNombre) + '"' + (checked ? ' checked' : '') + ' style="width:auto"> <span><b>' + esc(f.estudianteNombre) + '</b> <span style="color:var(--muted);font-size:.72rem">' + esc(f.cursoNombre||'') + '</span></span></label>';
+  }).join('');
+  var tipoOpts = Object.keys(TIPO_STYLE).map(function(k){ var s = TIPO_STYLE[k]; return '<option value="' + k + '"' + (c.tipo === k ? ' selected' : '') + '>' + s.icon + ' ' + s.label + '</option>'; }).join('');
+  var modalHTML =
+    '<div style="display:grid;gap:12px">' +
+    '<div style="padding:10px 12px;background:linear-gradient(135deg,rgba(124,58,237,.08),rgba(236,72,153,.04));border-radius:8px;font-size:.85rem"><b>📅 ' + DIAS[di] + '</b> · <b>⏰ ' + esc(b.h) + '</b></div>' +
+    '<div><label style="font-size:.75rem;color:var(--muted);font-weight:600;display:block;margin-bottom:4px">Tipo de bloque</label><select id="hCeldaTipo">' + tipoOpts + '</select></div>' +
+
+    '<div>' +
+      '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px">' +
+        '<label style="font-size:.75rem;color:var(--muted);font-weight:600">Estudiante(s) del bloque</label>' +
+        '<div style="display:flex;gap:6px">' +
+          '<input type="text" id="hCeldaEstBuscar" placeholder="Buscar…" oninput="_hFiltrarEstChecks()" style="width:140px;padding:4px 8px;font-size:.75rem">' +
+          '<button type="button" class="btn" style="padding:2px 8px;font-size:.7rem" onclick="_hMarcarTodosEst(true)">✓ Todos</button>' +
+          '<button type="button" class="btn" style="padding:2px 8px;font-size:.7rem" onclick="_hMarcarTodosEst(false)">✗ Ninguno</button>' +
+        '</div>' +
+      '</div>' +
+      '<div id="hCeldaEstList" style="display:grid;grid-template-columns:1fr 1fr;gap:6px;max-height:220px;overflow-y:auto;padding:6px;background:rgba(37,99,235,.03);border-radius:8px;border:1px solid rgba(37,99,235,.1)">' + (estChecks || '<div style="grid-column:1/-1;padding:14px;text-align:center;color:var(--muted);font-style:italic">Sin estudiantes asignados a tu carga PIE.</div>') + '</div>' +
+      '<div style="font-size:.7rem;color:var(--muted);margin-top:4px"><span id="hCeldaEstCount">' + seleccionadosUids.length + '</span> estudiante(s) seleccionado(s). Podés elegir varios para grupales o co-enseñanza.</div>' +
+    '</div>' +
+
+    '<div><label style="font-size:.75rem;color:var(--muted);font-weight:600;display:block;margin-bottom:4px">Título / descripción (opcional)</label><input type="text" id="hCeldaTit" value="' + esc(c.titulo || '') + '" placeholder="Ej: Grupo comprensión lectora · Reunión equipo PIE"></div>' +
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">' +
+      '<div><label style="font-size:.75rem;color:var(--muted);font-weight:600;display:block;margin-bottom:4px">Aula</label><input type="text" id="hCeldaAula" value="' + esc(c.aula || '') + '" placeholder="Sala PIE · Aula recursos"></div>' +
+      '<div><label style="font-size:.75rem;color:var(--muted);font-weight:600;display:block;margin-bottom:4px">Asignatura vinculada</label><input type="text" id="hCeldaAsig" value="' + esc(c.asignatura || '') + '" placeholder="Matemática"></div>' +
+    '</div>' +
+    '<div><label style="font-size:.75rem;color:var(--muted);font-weight:600;display:block;margin-bottom:4px">Observaciones (opcional)</label><textarea id="hCeldaObs" rows="2">' + esc(c.obs || '') + '</textarea></div>' +
+    '<div style="display:flex;gap:8px;justify-content:space-between;padding-top:10px;border-top:1px solid var(--border)">' +
+      (c.tipo ? '<button class="btn" style="color:#DC2626" onclick="horarioBorrarCelda(' + di + ',' + bi + ')">🗑 Vaciar bloque</button>' : '<div></div>') +
+      '<div style="display:flex;gap:8px"><button class="btn" onclick="pieCerrarModalGen()">Cancelar</button><button class="btn primary" onclick="horarioGuardarCelda(' + di + ',' + bi + ')">💾 Guardar</button></div>' +
+    '</div>' +
+    '</div>';
+  pieAbrirModalGen('Editar bloque · ' + DIAS[di] + ' ' + b.h, modalHTML);
+  // Listener para actualizar contador y estilo al marcar
+  var lista = document.getElementById('hCeldaEstList');
+  if (lista) {
+    lista.addEventListener('change', function(ev){
+      if (ev.target && ev.target.classList && ev.target.classList.contains('hCeldaEstChk')) {
+        _hActualizarContadorEst();
+        var lbl = ev.target.closest('label');
+        if (lbl) {
+          if (ev.target.checked) { lbl.style.borderColor = '#7C3AED'; lbl.style.background = 'rgba(124,58,237,.08)'; }
+          else { lbl.style.borderColor = 'rgba(37,99,235,.15)'; lbl.style.background = '#fff'; }
+        }
+      }
+    });
+  }
+}
+function _hActualizarContadorEst(){
+  var n = document.querySelectorAll('.hCeldaEstChk:checked').length;
+  var el = document.getElementById('hCeldaEstCount');
+  if (el) el.textContent = n;
+}
+function _hMarcarTodosEst(val){
+  // Solo marca los visibles (respeta filtro de búsqueda)
+  document.querySelectorAll('#hCeldaEstList label').forEach(function(lbl){
+    if (lbl.style.display === 'none') return;
+    var chk = lbl.querySelector('.hCeldaEstChk');
+    if (chk) {
+      chk.checked = val;
+      if (val) { lbl.style.borderColor = '#7C3AED'; lbl.style.background = 'rgba(124,58,237,.08)'; }
+      else { lbl.style.borderColor = 'rgba(37,99,235,.15)'; lbl.style.background = '#fff'; }
+    }
+  });
+  _hActualizarContadorEst();
+}
+function _hFiltrarEstChecks(){
+  var q = (document.getElementById('hCeldaEstBuscar').value || '').toLowerCase().trim();
+  document.querySelectorAll('#hCeldaEstList label').forEach(function(lbl){
+    var t = (lbl.textContent || '').toLowerCase();
+    lbl.style.display = (!q || t.indexOf(q) !== -1) ? '' : 'none';
+  });
+}
+function horarioGuardarCelda(di, bi){
+  var key = di + '_' + bi;
+  var estudiantes = Array.prototype.slice.call(document.querySelectorAll('.hCeldaEstChk:checked')).map(function(chk){
+    return { uid: chk.value, nombre: chk.getAttribute('data-nom') || '' };
+  });
+  _horario.celdas[key] = {
+    tipo: document.getElementById('hCeldaTipo').value,
+    estudiantes: estudiantes,
+    // Retrocompat: mantener campo simple con el primero (útil para paneles antiguos)
+    estUid: estudiantes[0] ? estudiantes[0].uid : null,
+    estNombre: estudiantes[0] ? estudiantes[0].nombre : null,
+    titulo: document.getElementById('hCeldaTit').value.trim(),
+    aula: document.getElementById('hCeldaAula').value.trim(),
+    asignatura: document.getElementById('hCeldaAsig').value.trim(),
+    obs: document.getElementById('hCeldaObs').value.trim(),
+    actualizadoEn: new Date().toISOString()
+  };
+  _horarioPersist();
+  pieCerrarModalGen();
+  horarioRender();
+}
+function horarioBorrarCelda(di, bi){
+  if (!confirm('¿Vaciar este bloque?')) return;
+  delete _horario.celdas[di + '_' + bi];
+  _horarioPersist();
+  pieCerrarModalGen();
+  horarioRender();
+}
+function horarioLimpiar(){
+  if (!confirm('¿Eliminar TODOS los bloques del horario? Esta acción no se puede deshacer.')) return;
+  _horario.celdas = {};
+  _horarioPersist();
+  horarioRender();
+}
+function _horarioPersist(){
+  var u = ELAuth.user || {};
+  _horario.liceoSlug = u.liceoSlug || 'demo';
+  _horario.eduUid = u.uid || 'anon';
+  _horario.eduNombre = u.nombre || u.email || '—';
+  _horario.actualizadoEn = new Date().toISOString();
+  if (typeof EL_DB !== 'undefined' && EL_DB) {
+    EL_DB.collection('pie_horarios').doc(_slugHorarioDocId()).set(_horario, { merge: true }).catch(function(err){ console.warn('horario save:', err); });
+  }
+}
+function horarioImprimir(){
+  var u = ELAuth.user || {};
+  var w = window.open('', '_blank');
+  var b = _bloquesLiceo || BLOQUES_DEFAULT;
+  var html = '<html><head><title>Horario PIE - ' + esc(u.nombre||'') + '</title><style>body{font-family:Segoe UI,Arial,sans-serif;padding:24px;color:#0C1E3B}h1{border-bottom:2px solid #7C3AED;padding-bottom:8px;margin:0 0 4px}h2{color:#7C3AED;font-size:1rem;font-weight:400;margin:0 0 20px}table{width:100%;border-collapse:collapse;margin-top:12px}th{background:#EDE9FE;color:#5B21B6;padding:8px;text-align:center;font-size:.75rem;border:1px solid #A78BFA}td{border:1px solid #E2E8F0;padding:6px 8px;font-size:.78rem;vertical-align:top;min-height:50px}.hora{background:#F1F5F9;font-weight:700;text-align:center;color:#475569}</style></head><body>' +
+    '<h1>📚 Horario PIE — ' + esc(u.nombre||'Educadora') + '</h1>' +
+    '<h2>' + esc(u.liceoNombre||u.liceoSlug||'') + ' · ' + new Date().toLocaleDateString('es-CL') + '</h2>' +
+    '<table><thead><tr><th style="width:100px">Hora</th>' + DIAS.map(function(d){return '<th>' + d + '</th>';}).join('') + '</tr></thead><tbody>';
+  b.forEach(function(bl, bi){
+    if (bl.esRecreo) { html += '<tr><td colspan="6" style="background:#F1F5F9;text-align:center;font-style:italic">☕ Recreo · ' + esc(bl.h) + '</td></tr>'; return; }
+    html += '<tr><td class="hora">' + esc(bl.h) + '</td>';
+    DIAS.forEach(function(d, di){
+      var c = _horNormalizarCelda(_horario.celdas[di + '_' + bi]);
+      if (c && c.tipo) {
+        var st = TIPO_STYLE[c.tipo] || TIPO_STYLE.individual;
+        var nombres = (c.estudiantes || []).map(function(x){ return x.nombre; }).filter(Boolean);
+        var listaN = nombres.length ? '<b>' + st.icon + ' ' + esc(nombres.length === 1 ? nombres[0] : (nombres.length + ' estudiantes')) + '</b>' + (nombres.length > 1 ? '<br><small>' + esc(nombres.join(' · ')) + '</small>' : '') : ('<b>' + st.icon + ' ' + esc(c.titulo || st.label) + '</b>');
+        html += '<td style="border-left:3px solid ' + st.border + '">' + listaN + (c.aula ? '<br><small>📍 ' + esc(c.aula) + '</small>' : '') + (c.asignatura ? '<br><small>' + esc(c.asignatura) + '</small>' : '') + '</td>';
+      } else {
+        html += '<td></td>';
+      }
+    });
+    html += '</tr>';
+  });
+  html += '</tbody></table><script>setTimeout(function(){window.print();},300);</scr' + 'ipt></body></html>';
+  w.document.write(html); w.document.close();
+}
+
+/* ═══ Modal genérico compartido ═══ */
+function pieAbrirModalGen(titulo, body){
+  var ov = document.getElementById('pieModalGenOv');
+  if (!ov) {
+    ov = document.createElement('div');
+    ov.id = 'pieModalGenOv';
+    ov.style.cssText = 'display:none;position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:1000;align-items:center;justify-content:center;padding:20px';
+    ov.innerHTML = '<div id="pieModalGenBox" style="background:#fff;border-radius:14px;padding:24px 28px;width:min(640px,94vw);max-height:92vh;overflow:auto;box-shadow:0 20px 60px rgba(0,0,0,.35)"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px"><h3 id="pieModalGenTit" style="margin:0;font-size:1.05rem">—</h3><button style="background:transparent;border:0;font-size:1.5rem;cursor:pointer;color:var(--muted)" onclick="pieCerrarModalGen()">×</button></div><div id="pieModalGenBody"></div></div>';
+    document.body.appendChild(ov);
+    ov.addEventListener('click', function(ev){ if (ev.target === ov) pieCerrarModalGen(); });
+  }
+  document.getElementById('pieModalGenTit').textContent = titulo;
+  document.getElementById('pieModalGenBody').innerHTML = body;
+  ov.style.display = 'flex';
+}
+function pieCerrarModalGen(){ var ov = document.getElementById('pieModalGenOv'); if (ov) ov.style.display = 'none'; }
 
 if (window.ELAuth && ELAuth.onUserReady) ELAuth.onUserReady(function(u){ if(u) iniciar(); });
 </script>
+<script src="js/ia-widget.js" defer></script>
+<script src="js/session-guard.js" defer></script>
+<script src="js/search-global.js" defer></script>
 </body>
 </html>

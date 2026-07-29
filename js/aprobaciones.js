@@ -200,7 +200,7 @@
       }
       var u = _userActual() || {};
       if (window.CCRoles && !CCRoles.puedeAprobarMaterial(u)) {
-        throw new Error('No tenés permiso para revisar material');
+        throw new Error('No tienes permiso para revisar material');
       }
       var historial = Array.isArray(d.historial) ? d.historial.slice() : [];
       historial.push(_nuevoEvento(ACCIONES.INICIO_REV));
@@ -231,7 +231,7 @@
       }
       var u = _userActual() || {};
       if (window.CCRoles && !CCRoles.puedeAprobarMaterial(u)) {
-        throw new Error('No tenés permiso para aprobar material');
+        throw new Error('No tienes permiso para aprobar material');
       }
       var historial = Array.isArray(d.historial) ? d.historial.slice() : [];
       historial.push(_nuevoEvento(ACCIONES.APROBACION, comentario));
@@ -273,7 +273,7 @@
       }
       var u = _userActual() || {};
       if (window.CCRoles && !CCRoles.puedeAprobarMaterial(u)) {
-        throw new Error('No tenés permiso para devolver material');
+        throw new Error('No tienes permiso para devolver material');
       }
       var historial = Array.isArray(d.historial) ? d.historial.slice() : [];
       historial.push(_nuevoEvento(ACCIONES.DEVOLUCION, observaciones));

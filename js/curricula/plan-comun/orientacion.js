@@ -13,7 +13,13 @@ window.CURRICULA_PLAN_COMUN = window.CURRICULA_PLAN_COMUN || {};
 CURRICULA_PLAN_COMUN['orientacion'] = {
   nombre: 'Orientación',
   sigla:  'ORI',
-  niveles: ['1B','2B','3B','4B','5B','6B','7B','8B','1M','2M'],
+  // Orientación oficial: 1B a 2M (DS 439/2012 y DS 369/2015).
+  // Para 3M y 4M NO existe como asignatura propia en el Plan Común MINEDUC —
+  // sus objetivos transversales se cubren típicamente en Consejo de Curso o
+  // en el Plan Diferenciado HC. Igual la incluimos para que profes que tienen
+  // "Orientación" como asignación transversal puedan planificar sesiones
+  // basadas en los OA extendidos de 2M (proyecto de vida, transición, etc.).
+  niveles: ['1B','2B','3B','4B','5B','6B','7B','8B','1M','2M','3M','4M'],
   unidades: {
     '1B': ['Grupos de pertenencia y afecto','Emociones y resolución de conflictos'],
     '2B': ['Grupos de pertenencia y afecto','Emociones y resolución de conflictos'],
@@ -24,7 +30,10 @@ CURRICULA_PLAN_COMUN['orientacion'] = {
     '7B': ['Crecimiento personal','Bienestar y autocuidado','Relaciones interpersonales','Pertenencia y participación democrática','Gestión y proyección del aprendizaje'],
     '8B': ['Crecimiento personal','Bienestar y autocuidado','Relaciones interpersonales','Pertenencia y participación democrática','Gestión y proyección del aprendizaje'],
     '1M': ['Crecimiento personal','Bienestar y autocuidado','Relaciones interpersonales','Pertenencia y participación democrática','Gestión y proyección del aprendizaje'],
-    '2M': ['Crecimiento personal','Bienestar y autocuidado','Relaciones interpersonales','Pertenencia y participación democrática','Gestión y proyección del aprendizaje']
+    '2M': ['Crecimiento personal','Bienestar y autocuidado','Relaciones interpersonales','Pertenencia y participación democrática','Gestión y proyección del aprendizaje'],
+    // 3M y 4M — extensión no-oficial para uso en Consejo de Curso/Orientación transversal
+    '3M': ['Proyecto de vida y orientación vocacional','Bienestar y salud mental','Relaciones interpersonales y afectividad','Ciudadanía y participación','Gestión académica y transición'],
+    '4M': ['Proyecto de vida y transición postsecundaria','Bienestar y salud mental','Relaciones interpersonales y afectividad','Ciudadanía activa','Cierre de ciclo escolar']
   },
   oas: {
     '1B': [
@@ -137,6 +146,26 @@ CURRICULA_PLAN_COMUN['orientacion'] = {
       { codigo: 'OA8',  eje: 'Pertenencia y Participación', descripcion: 'Liderar y colaborar en acciones colectivas que promuevan los derechos humanos, la inclusión, el cuidado del medio ambiente y la defensa de los derechos propios y de los demás.' },
       { codigo: 'OA9',  eje: 'Gestión del Aprendizaje',     descripcion: 'Gestionar autónomamente el propio aprendizaje considerando contextos cambiantes, definiendo metas a corto y mediano plazo, evaluando avances y reformulando estrategias cuando sea necesario.' },
       { codigo: 'OA10', eje: 'Gestión del Aprendizaje',     descripcion: 'Elaborar un proyecto de vida que integre intereses, motivaciones, capacidades y opciones académicas y vocacionales para el Plan Diferenciado de 3°M y 4°M y la transición a la educación superior o el mundo del trabajo.' }
+    ],
+    // ── 3°M y 4°M — extensión transversal (no oficial MINEDUC como asignatura,
+    //    pero usable en Consejo de Curso u Orientación transversal).
+    '3M': [
+      { codigo: 'OA1',  eje: 'Proyecto de Vida',            descripcion: 'Explorar y definir opciones de continuidad de estudios (universidad, CFT, IP), mundo laboral y otras alternativas post-secundarias, identificando requisitos, oportunidades y desafíos.' },
+      { codigo: 'OA2',  eje: 'Proyecto de Vida',            descripcion: 'Reflexionar sobre intereses vocacionales, aptitudes y motivaciones personales, conectándolos con áreas del conocimiento y campos profesionales del Chile actual.' },
+      { codigo: 'OA3',  eje: 'Bienestar y Salud Mental',    descripcion: 'Analizar factores de estrés y ansiedad propios del ciclo final de la educación media (PAES, decisiones vocacionales) y desarrollar estrategias de autocuidado y regulación emocional.' },
+      { codigo: 'OA4',  eje: 'Relaciones Interpersonales',  descripcion: 'Consolidar vínculos afectivos saludables basados en el respeto, la igualdad de género, el consentimiento y la responsabilidad recíproca.' },
+      { codigo: 'OA5',  eje: 'Ciudadanía y Participación',  descripcion: 'Ejercer una ciudadanía informada y participativa próxima a la mayoría de edad, comprendiendo mecanismos democráticos (elecciones, plebiscitos, participación local).' },
+      { codigo: 'OA6',  eje: 'Gestión Académica',           descripcion: 'Gestionar autónomamente estrategias de estudio, priorización y organización del tiempo frente a evaluaciones finales, ensayos PAES y postulación a la educación superior.' },
+      { codigo: 'OA7',  eje: 'Convivencia y Liderazgo',     descripcion: 'Ejercer roles de liderazgo positivo en el curso y el establecimiento, sirviendo de referente para cursos menores en convivencia democrática.' }
+    ],
+    '4M': [
+      { codigo: 'OA1',  eje: 'Proyecto de Vida',            descripcion: 'Concretar la elección vocacional/laboral realizando postulación a la educación superior (FUAS, matrícula, DEMRE), a becas (Junaeb) o al mundo del trabajo con claridad de objetivos.' },
+      { codigo: 'OA2',  eje: 'Proyecto de Vida',            descripcion: 'Anticipar y prepararse para la transición postsecundaria: independencia, autogestión económica, redes de apoyo y adaptación a nuevos contextos.' },
+      { codigo: 'OA3',  eje: 'Bienestar y Salud Mental',    descripcion: 'Aplicar estrategias de manejo del estrés y la incertidumbre en la etapa de cierre de ciclo escolar, cuidando su salud mental y física.' },
+      { codigo: 'OA4',  eje: 'Relaciones Interpersonales',  descripcion: 'Cerrar de manera consciente y saludable los vínculos escolares, valorando el aprendizaje colectivo y proyectando redes de apoyo hacia el futuro.' },
+      { codigo: 'OA5',  eje: 'Ciudadanía Activa',           descripcion: 'Ejercer plenamente la ciudadanía adulta a través de la participación en procesos democráticos, la deliberación pública y el compromiso con causas colectivas.' },
+      { codigo: 'OA6',  eje: 'Cierre de Ciclo',             descripcion: 'Reflexionar de manera crítica sobre el proceso escolar completo, sistematizar aprendizajes significativos y proyectar continuidades hacia la vida adulta.' },
+      { codigo: 'OA7',  eje: 'Convivencia y Legado',        descripcion: 'Aportar al clima del establecimiento como generación de egreso, dejando un legado positivo en convivencia democrática y participación estudiantil.' }
     ]
   },
   actitudes:   [],

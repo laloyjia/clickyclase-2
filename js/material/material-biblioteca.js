@@ -13,6 +13,69 @@
   'use strict';
 
   // =============================================
+  // MODAL DE VISIBILIDAD (Fase 10)
+  // =============================================
+  function _pedirVisibilidad() {
+    return new Promise(function (resolve) {
+      // Si ya existe, lo removemos
+      var prev = document.getElementById('modalVisibilidad');
+      if (prev) prev.remove();
+
+      var wrap = document.createElement('div');
+      wrap.id = 'modalVisibilidad';
+      wrap.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.78);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;';
+      wrap.innerHTML =
+        '<div style="background:#151b35;border:1px solid rgba(148,163,184,.22);border-radius:20px;max-width:520px;width:100%;padding:32px;box-shadow:0 20px 60px rgba(0,0,0,.6);font-family:Inter,system-ui,sans-serif;color:#f1f5f9">' +
+          '<div style="font-size:1.35rem;font-weight:800;margin-bottom:6px">📢 ¿Con quién compartís este material?</div>' +
+          '<div style="color:#94a3b8;font-size:.9rem;margin-bottom:22px">Podés elegir el nivel de visibilidad. Los directivos y UTP siempre pueden verlo.</div>' +
+          '<div id="visOpciones" style="display:flex;flex-direction:column;gap:10px">' +
+            _opcionVisibilidad('liceo',        '🏫', 'Todo el colegio',   'Cualquier docente del liceo puede verlo. Ideal para material terminado y aprobado.', true) +
+            _opcionVisibilidad('departamento', '👥', 'Mi departamento',    'Solo profesores de tu misma asignatura/especialidad. Perfecto para materiales por área.', false) +
+            _opcionVisibilidad('privada',      '🔒', 'Solo yo (borrador)', 'Nadie más lo ve. Útil para borradores en proceso. Podés cambiarlo después.', false) +
+          '</div>' +
+          '<div style="display:flex;justify-content:flex-end;gap:10px;margin-top:24px">' +
+            '<button id="visCancel" style="padding:10px 18px;background:transparent;border:1px solid rgba(148,163,184,.3);color:#cbd5e1;border-radius:10px;cursor:pointer;font-weight:600">Cancelar</button>' +
+            '<button id="visOk" style="padding:10px 20px;background:linear-gradient(135deg,#8b5cf6,#6d28d9);color:white;border:none;border-radius:10px;cursor:pointer;font-weight:700">💾 Publicar</button>' +
+          '</div>' +
+        '</div>';
+      document.body.appendChild(wrap);
+
+      // Bind selección
+      var opciones = wrap.querySelectorAll('[data-vis]');
+      opciones.forEach(function (op) {
+        op.addEventListener('click', function () {
+          opciones.forEach(function (o) {
+            o.style.background = 'rgba(255,255,255,.03)';
+            o.style.borderColor = 'rgba(148,163,184,.15)';
+          });
+          op.style.background = 'rgba(139,92,246,.12)';
+          op.style.borderColor = '#8b5cf6';
+          op.dataset.selected = 'true';
+        });
+      });
+
+      // Bind botones
+      wrap.querySelector('#visCancel').addEventListener('click', function () { wrap.remove(); resolve(null); });
+      wrap.querySelector('#visOk').addEventListener('click', function () {
+        var sel = wrap.querySelector('[data-selected="true"]');
+        var vis = sel ? sel.getAttribute('data-vis') : 'liceo';
+        wrap.remove(); resolve(vis);
+      });
+    });
+  }
+
+  function _opcionVisibilidad(id, ico, titulo, sub, seleccionada) {
+    return '<div data-vis="' + id + '"' + (seleccionada ? ' data-selected="true"' : '') +
+      ' style="padding:14px 16px;background:' + (seleccionada ? 'rgba(139,92,246,.12)' : 'rgba(255,255,255,.03)') +
+      ';border:1px solid ' + (seleccionada ? '#8b5cf6' : 'rgba(148,163,184,.15)') +
+      ';border-radius:12px;cursor:pointer;transition:all .15s;display:flex;gap:14px;align-items:flex-start">' +
+        '<div style="font-size:1.4rem">' + ico + '</div>' +
+        '<div style="flex:1"><div style="font-weight:700;font-size:.98rem;margin-bottom:2px">' + titulo + '</div>' +
+        '<div style="color:#94a3b8;font-size:.82rem;line-height:1.4">' + sub + '</div></div>' +
+      '</div>';
+  }
+
+  // =============================================
   // GUARDAR EN BIBLIOTECA
   // =============================================
   function guardarEnBiblioteca() {
@@ -25,6 +88,15 @@
       mostrarSaveMsg('⚠️ Debes iniciar sesión para publicar.', '#f59e0b');
       return;
     }
+
+    // Fase 10: pedir visibilidad antes de guardar
+    _pedirVisibilidad().then(function (visibilidad) {
+      if (!visibilidad) { mostrarSaveMsg('Cancelado.', '#94a3b8'); return; }
+      _hacerGuardar(preview, currentUserData, visibilidad);
+    });
+  }
+
+  function _hacerGuardar(preview, currentUserData, visibilidad) {
     var selMod = document.getElementById('selectModulo');
     var selAE  = document.getElementById('selectAE');
     var selOA  = document.getElementById('selectOA');
@@ -67,11 +139,17 @@
       : (document.getElementById('selectElectivoHC') ? document.getElementById('selectElectivoHC').value : '');
     Object.assign(entrada, {
       uid:          currentUserData.uid || '',
+      autorUid:     currentUserData.uid || '',
+      autorNombre:  currentUserData.nombre || currentUserData.name || currentUserData.email || '',
       email:        currentUserData.email || '',
+      liceoSlug:    currentUserData.liceoSlug || '',
       asignatura:   asigGuardar,
       electivoHC:   electivoHCGuardar || '',
       especialidad: currentUserData.especialidad || '',
-      tipoProfesor: currentUserData.tipoProfesor || ''
+      tipoProfesor: currentUserData.tipoProfesor || '',
+      // Fase 10: departamento (grupo del material) + visibilidad
+      departamento: (currentUserData.especialidad || asigGuardar || 'general').toString().toLowerCase().trim(),
+      visibilidad:  visibilidad
     });
 
     var guardarPromesa;
@@ -197,6 +275,73 @@
 
   // Expose en window
   window.guardarEnBiblioteca = guardarEnBiblioteca;
+
+  // ═════════════════════════════════════════════════════════════
+  //  ENVIAR A UTP DESDE EL EDITOR
+  //  Guarda el material y lo marca con estado 'enviada' para
+  //  que aparezca en la Bandeja de Revisión del UTP.
+  // ═════════════════════════════════════════════════════════════
+  function enviarAUtpDesdeEditor() {
+    var preview = document.getElementById('docPreview');
+    if (!preview || !preview.innerHTML.trim()) {
+      mostrarSaveMsg('⚠️ Primero generá el documento con IA.', '#f59e0b'); return;
+    }
+    var currentUserData = (typeof _matUser !== 'undefined' && _matUser) || (window.ELAuth && ELAuth.user) || null;
+    if (!currentUserData || !currentUserData.uid) {
+      mostrarSaveMsg('⚠️ Debes iniciar sesión.', '#f59e0b'); return;
+    }
+    if (!confirm('¿Enviar este material al UTP para revisión?\n\nEl UTP podrá aprobarlo o devolverlo con comentarios.')) return;
+
+    var selMod = document.getElementById('selectModulo');
+    var selAE  = document.getElementById('selectAE');
+    var selOA  = document.getElementById('selectOA');
+    var selCur = document.getElementById('selectCurso');
+    var inProf = document.getElementById('inputProfesor');
+    var modId   = selMod ? selMod.value : '';
+    var aeNum   = selAE ? selAE.value : '';
+    var oaId    = selOA ? selOA.value : '';
+    var curso   = selCur ? selCur.value : '';
+    var prof    = (inProf && inProf.value) || currentUserData.nombre || currentUserData.name || '—';
+    var tipo    = (typeof tipoDocSeleccionado !== 'undefined' && tipoDocSeleccionado) || 'guia';
+    var tipos   = {guia:'Guía de Aprendizaje',apunte:'Apunte de Clase',evaluacion:'Guía de Ejercicios',prueba:'Prueba Formal',control:'Control Rápido'};
+    var _modsRef = (typeof getCurriculaModulos === 'function')
+      ? getCurriculaModulos((document.getElementById('selectEspecialidad') ? document.getElementById('selectEspecialidad').value : '') || '')
+      : (typeof MODULOS !== 'undefined' ? MODULOS : {});
+    var modNom  = modId && _modsRef[modId] ? _modsRef[modId].nombre : modId;
+    var titulo  = (tipos[tipo]||tipo) + ' — ' + (modNom||modId) + (aeNum ? ' · AE' + aeNum : '');
+    var asig = currentUserData.tipoProfesor === 'tecnico'
+      ? (currentUserData.especialidad || '')
+      : (document.getElementById('selectAsignatura') ? document.getElementById('selectAsignatura').value : (currentUserData.asignaturas && currentUserData.asignaturas[0]) || '');
+
+    var doc = {
+      titulo:       titulo,
+      tipo:         tipo,
+      asignatura:   asig,
+      modulo:       modId,
+      nivel:        curso,
+      ae:           aeNum, oa: oaId,
+      profesor:     prof,
+      autorUid:     currentUserData.uid,
+      autorNombre:  currentUserData.nombre || prof,
+      uid:          currentUserData.uid,
+      liceoSlug:    currentUserData.liceoSlug || currentUserData.liceoPrincipal || '',
+      visibilidad:  'liceo',
+      contenido:    preview.innerHTML,
+      estado:       'enviada',
+      enviadoEn:    new Date().toISOString(),
+      estadoFecha:  new Date().toISOString(),
+      creadoEn:     new Date().toISOString()
+    };
+
+    mostrarSaveMsg('📤 Enviando a UTP…', '#a5b4fc');
+    EL_DB.collection('materiales').add(doc).then(function(){
+      mostrarSaveMsg('✅ Enviado al UTP. Aparecerá en su Bandeja de Revisión.', '#34d399');
+    }).catch(function(err){
+      console.error('[enviarAUtpDesdeEditor]', err);
+      mostrarSaveMsg('❌ Error al enviar: ' + (err.message || err), '#f87171');
+    });
+  }
+  window.enviarAUtpDesdeEditor = enviarAUtpDesdeEditor;
   window.mostrarSaveMsg      = mostrarSaveMsg;
   window._filterOAs          = _filterOAs;
   window._clearOASearch      = _clearOASearch;

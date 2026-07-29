@@ -123,7 +123,8 @@
    * Firma el registro. Después de firmado no se puede editar más
    * (regla de Firestore). El "hash" es informativo (no criptográfico).
    */
-  function firmar(regId) {
+  function firmar(regId, opts) {
+    opts = opts || {};
     var ref = EL_DB.collection('libro_clases').doc(regId);
     return ref.get().then(function (snap) {
       if (!snap.exists) throw new Error('Registro no encontrado');
@@ -138,10 +139,11 @@
         firmadoPor:    u.email || '',
         firmadoPorUid: u.uid || '',
         firmaHash:     hash,
+        firmaConPin:   !!opts.conPin,   // ← nuevo: trazabilidad de firma con PIN
         actualizadoEn: new Date().toISOString()
       };
       return ref.update(upd).then(function () {
-        _log('firmar_clase', { regId: regId, cursoId: d.cursoId, asignatura: d.asignatura });
+        _log('firmar_clase', { regId: regId, cursoId: d.cursoId, asignatura: d.asignatura, conPin: !!opts.conPin });
         return hash;
       });
     });
@@ -179,13 +181,20 @@
   function estadisticasCurso(opts) {
     opts = opts || {};
     if (!opts.cursoId) throw new Error('cursoId requerido');
-    return listarRegistros({ cursoId: opts.cursoId, desde: opts.desde, hasta: opts.hasta, todosDocentes: true })
+
+    // Combinamos 2 fuentes:
+    //  1) libro_clases (legacy) — shape { asistencia: [{ordinal, estado}] }
+    //  2) asistencia    (raíz) — shape { registros: [{uid, nombre, estado}], fecha }
+    var porEstudiante = {};
+    var totales = { P:0, A:0, T:0, J:0 };
+    var totalDias = 0;
+
+    // Fuente 1: libro_clases (shape legacy)
+    var p1 = listarRegistros({ cursoId: opts.cursoId, desde: opts.desde, hasta: opts.hasta, todosDocentes: true })
       .then(function (regs) {
-        var porEstudiante = {};
-        var totales = { P:0, A:0, T:0, J:0 };
         regs.forEach(function (r) {
           (r.asistencia || []).forEach(function (a) {
-            var key = a.ordinal;
+            var key = 'ord:' + a.ordinal;
             if (!porEstudiante[key]) {
               porEstudiante[key] = {
                 ordinal: a.ordinal, nombreCompleto: a.nombreCompleto,
@@ -198,16 +207,54 @@
             e.totalDias++;
           });
         });
-        var lista = Object.values(porEstudiante).map(function (e) {
-          var pres = e.P + e.T;  // presente o atrasado cuentan como asistencia
-          e.porcentajeAsistencia = e.totalDias > 0
-            ? Math.round((pres / e.totalDias) * 100)
-            : 0;
-          return e;
+        totalDias += regs.length;
+      })
+      .catch(function(){});
+
+    // Fuente 2: asistencia (raíz nueva)
+    var p2 = EL_DB.collection('asistencia')
+      .where('cursoId', '==', opts.cursoId)
+      .get()
+      .then(function (snap) {
+        var estadoMap = { presente: 'P', ausente: 'A', atrasado: 'T', justificado: 'J' };
+        snap.forEach(function (doc) {
+          var d = doc.data() || {};
+          if (opts.desde && d.fecha < opts.desde) return;
+          if (opts.hasta && d.fecha > opts.hasta) return;
+          var regs = Array.isArray(d.registros) ? d.registros : [];
+          regs.forEach(function (r) {
+            var letra = estadoMap[r.estado] || r.estado;
+            if (!(letra in totales)) return;
+            var key = 'uid:' + (r.uid || r.nombre);
+            if (!porEstudiante[key]) {
+              porEstudiante[key] = {
+                ordinal: 0, nombreCompleto: r.nombre || '',
+                P: 0, A: 0, T: 0, J: 0, totalDias: 0
+              };
+            }
+            totales[letra]++;
+            porEstudiante[key][letra]++;
+            porEstudiante[key].totalDias++;
+          });
+          totalDias++;
         });
-        lista.sort(function (a, b) { return a.ordinal - b.ordinal; });
-        return { porEstudiante: lista, totales: totales, totalDias: regs.length };
+      })
+      .catch(function(e){ console.warn('[libro-clases] asistencia', e); });
+
+    return Promise.all([p1, p2]).then(function () {
+      var lista = Object.values(porEstudiante).map(function (e) {
+        var pres = e.P + e.T; // presente o atrasado cuentan como asistencia
+        e.porcentajeAsistencia = e.totalDias > 0
+          ? Math.round((pres / e.totalDias) * 100)
+          : 0;
+        return e;
       });
+      lista.sort(function (a, b) {
+        if (a.ordinal !== b.ordinal) return (a.ordinal || 999) - (b.ordinal || 999);
+        return String(a.nombreCompleto || '').localeCompare(b.nombreCompleto || '');
+      });
+      return { porEstudiante: lista, totales: totales, totalDias: totalDias };
+    });
   }
 
   // ─── Helpers privados ──────────────────────────────────────
@@ -220,17 +267,42 @@
   }
 
   function _rosterInicial(estudiantes) {
-    return (estudiantes || []).map(function (e) {
-      var nom = ((e.apellidoP || '') + (e.apellidoM ? ' ' + e.apellidoM : '') +
-                 (e.nombre ? ', ' + e.nombre : '')).trim();
+    var arr = (estudiantes || []).map(function (e) {
+      // Tolerar 2 shapes:
+      //   nuevo:  { uid, nombre: "Camila Reyes González", rut }
+      //   legacy: { ordinal, apellidoP, apellidoM, nombre }
+      var nom = e.nombre && e.nombre.indexOf(' ') !== -1
+        ? e.nombre
+        : ((e.apellidoP || '') + (e.apellidoM ? ' ' + e.apellidoM : '') +
+           (e.nombre ? ', ' + e.nombre : '')).trim();
+      var p = (window.CCNombre && CCNombre.parse) ? CCNombre.parse(nom) : null;
       return {
-        ordinal:        e.ordinal,
-        nombreCompleto: nom,
-        estado:         'A',   // Por defecto ausente hasta que docente marque
-        motivo:         '',
-        horaLlegada:    ''
+        uid:              e.uid || '',
+        rut:              e.rut || '',
+        nombreCompleto:   nom,
+        apellidos:        p ? p.apellidos : '',
+        apellidoPaterno:  p ? p.apellidoPaterno : '',
+        apellidoMaterno:  p ? p.apellidoMaterno : '',
+        nombres:          p ? p.nombres : nom,
+        estado:           'A',   // Por defecto ausente hasta que docente marque
+        motivo:           '',
+        horaLlegada:      ''
       };
     });
+    // Orden estilo libro de clases chileno: por apellido paterno,
+    // materno y luego nombre.
+    if (window.CCNombre && CCNombre.comparar) {
+      arr.sort(CCNombre.comparar);
+    } else {
+      arr.sort(function (a, b) {
+        return String(a.nombreCompleto || '').localeCompare(
+          String(b.nombreCompleto || ''), 'es', { sensitivity: 'base' }
+        );
+      });
+    }
+    // Recalcular ordinal DESPUÉS del sort para tener 1..N alfabético
+    arr.forEach(function (r, idx) { r.ordinal = idx + 1; });
+    return arr;
   }
 
   /**

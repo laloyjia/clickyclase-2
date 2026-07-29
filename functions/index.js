@@ -24,7 +24,7 @@ const _db = getFirestore();
 // Cache en memoria de la config IA (se refresca cada 5 min)
 let _cachedIaConfig = null;
 let _cachedAt = 0;
-const _CACHE_TTL_MS = 5 * 60 * 1000;
+const _CACHE_TTL_MS = 30 * 1000; // 30s — cambios de modelo se reflejan casi al instante
 
 async function _cargarConfigIA() {
   const ahora = Date.now();
@@ -39,12 +39,29 @@ async function _cargarConfigIA() {
   return _cachedIaConfig;
 }
 
-const GEMINI_MODEL_DEFAULT = 'gemini-2.5-flash';
+const GEMINI_MODEL_DEFAULT = 'gemini-flash-latest';
 const GEMINI_MODELOS_PERMITIDOS = [
+  // Recomendados evergreen (siempre apuntan al mas nuevo)
+  'gemini-flash-latest',
+  'gemini-flash-lite-latest',
+  'gemini-pro-latest',
+  // Serie 3.x (2026)
+  'gemini-3.5-flash',
+  'gemini-3.1-flash-lite',
+  'gemini-3.1-flash-lite-preview',
+  'gemini-3.1-pro-preview',
+  'gemini-3-pro-preview',
+  'gemini-3-flash-preview',
+  // Serie 2.5 (2025)
   'gemini-2.5-flash',
   'gemini-2.5-flash-lite',
   'gemini-2.5-flash-lite-preview-06-17',
-  'gemini-2.5-pro'
+  'gemini-2.5-pro',
+  // Serie 2.0 (fallback estable)
+  'gemini-2.0-flash',
+  'gemini-2.0-flash-001',
+  'gemini-2.0-flash-lite',
+  'gemini-2.0-flash-lite-001'
 ];
 function _geminiUrl(modelo) {
   return `https://generativelanguage.googleapis.com/v1beta/models/${modelo}:generateContent`;
@@ -318,9 +335,77 @@ exports.iaAsistente = onRequest(
     const { tipo, datos } = req.body || {};
     if (!tipo) return res.status(400).json({ error: 'Parámetro tipo requerido' });
 
+    // ─────────────────────────────────────────────────────────────
+    // Enforcement de CUOTA para docentes particulares
+    // ─────────────────────────────────────────────────────────────
+    // Por defecto, TODAS las llamadas al backend cuentan como una generación,
+    // excepto:
+    //   - tipo 'chat' (widget conversacional, no produce material entregable)
+    //   - datos.consumeQuota === false (opt-out explícito, ej: refinar preview)
+    // Si el usuario es particular y ya agotó su cuota → 402 CUOTA_AGOTADA
+    let _quotaUidToCharge = null;
+    let _quotaUserRef = null;
+    try {
+      const uidCliente = (datos && typeof datos.uid === 'string') ? datos.uid : '';
+      const optOut = (datos && datos.consumeQuota === false);
+      const esChat = (tipo === 'chat');
+      const cuentaContraCuota = uidCliente && !optOut && !esChat;
+
+      if (cuentaContraCuota) {
+        _quotaUserRef = _db.collection('usuarios').doc(uidCliente);
+        const uSnap = await _quotaUserRef.get();
+        if (uSnap.exists) {
+          const uData = uSnap.data() || {};
+          if (uData.esParticular === true) {
+            const usados = Number(uData.materialesGeneradosIA || 0);
+            const cuota  = Number(uData.cuotaMateriales || 2);
+            if (usados >= cuota) {
+              console.log('[iaAsistente] Cuota agotada uid=' + uidCliente + ' usados=' + usados);
+              return res.status(402).json({
+                error: 'Prueba agotada',
+                errorCode: 'CUOTA_AGOTADA',
+                mensaje: 'Ya usaste tus ' + cuota + ' generaciones gratis con IA. Contactanos por WhatsApp para acceder a un plan sin límites.',
+                whatsapp: 'https://wa.me/56942532644?text=Hola%2C%20agot%C3%A9%20mi%20prueba%20gratis%20de%20Click%26Clase%20y%20quiero%20info%20de%20planes',
+                email: 'soporte.learn0@gmail.com',
+                usados: usados,
+                cuota: cuota
+              });
+            }
+            // OK, guardo el ref para incrementar tras respuesta exitosa
+            _quotaUidToCharge = uidCliente;
+          }
+        }
+      }
+    } catch (eqc) {
+      console.warn('[iaAsistente] Chequeo cuota falló (permitido):', eqc.message);
+      // No bloqueamos por errores del chequeo, seguimos
+    }
+
     let prompt;
     if (tipo === 'raw' && datos && typeof datos.prompt === 'string' && datos.prompt.length > 0) {
       prompt = datos.prompt;
+    } else if (tipo === 'chat') {
+      // Modo chat conversacional del widget "Preguntá a Click&Clase"
+      const mensaje   = (datos && typeof datos.mensaje === 'string') ? datos.mensaje.trim() : '';
+      const historial = Array.isArray(datos && datos.historial) ? datos.historial : [];
+      if (!mensaje) return res.status(400).json({ error: 'Falta el mensaje para el chat' });
+      const systemPrompt = `Sos "Click&Clase", un asistente pedagógico experto en el currículum Mineduc de Chile (Plan Común y Formación Diferenciada Técnico-Profesional).
+Ayudás a docentes chilenos a resolver dudas rápidas, sugerir actividades, redactar rúbricas, explicar OAs, dar consejos pedagógicos y proponer estrategias de aula.
+
+Estilo de respuesta:
+- Español chileno neutro y cercano ("tú" o "usted" según corresponda, sin excesivos modismos).
+- Respuestas concisas y accionables. Máximo 250 palabras salvo que pidan detalle.
+- Usá **negrita** para conceptos clave y \`código\` para nombres de OAs (ej: \`OA 05\`).
+- Cuando sugieras actividades, listalas numeradas con nombre + descripción breve + tiempo estimado.
+- Si te preguntan algo fuera del ámbito docente/pedagógico, redirigí amablemente al tema educativo.
+- Nunca inventes OAs o AEs que no existen: si no estás seguro, decilo.`;
+      const historialTexto = historial
+        .filter(m => m && m.rol && m.texto)
+        .map(m => (m.rol === 'user' ? 'DOCENTE: ' : 'ASISTENTE: ') + m.texto)
+        .join('\n\n');
+      prompt = systemPrompt + '\n\n' +
+        (historialTexto ? 'Conversación previa:\n' + historialTexto + '\n\n' : '') +
+        'DOCENTE: ' + mensaje + '\n\nASISTENTE:';
     } else {
       prompt = buildPrompt(tipo, datos || {});
     }
@@ -343,10 +428,21 @@ exports.iaAsistente = onRequest(
                          ? modeloPedido
                          : modeloDefectoAdmin;
 
-    // Gemini 2.5 Flash trae "thinking" activo por defecto, que añade 30-60s
-    // antes de empezar a escribir. Lo desactivamos para que la prueba formal
-    // termine dentro del límite de 60s de Firebase Hosting rewrite.
-    if (modeloUsado === 'gemini-2.5-flash' || modeloUsado === 'gemini-2.5-flash-lite') {
+    // Modelos con "thinking" activo por defecto añaden 30-60s de latencia antes
+    // de empezar a escribir. Firebase Hosting rewrite corta a los 60s, así que
+    // desactivamos thinking para todos los modelos flash-like para respuestas rápidas.
+    // Los usuarios que quieran razonamiento profundo pueden elegir gemini-pro-latest.
+    const modelosConThinking = [
+      'gemini-flash-latest',
+      'gemini-flash-lite-latest',
+      'gemini-2.5-flash',
+      'gemini-2.5-flash-lite',
+      'gemini-3.5-flash',
+      'gemini-3.1-flash-lite',
+      'gemini-3.1-flash-lite-preview',
+      'gemini-3-flash-preview'
+    ];
+    if (modelosConThinking.indexOf(modeloUsado) !== -1) {
       genCfg.thinkingConfig = { thinkingBudget: 0 };
     }
 
@@ -354,9 +450,19 @@ exports.iaAsistente = onRequest(
     for (let intento = 0; intento < apiKeysShuffled.length; intento++) {
       const apiKey = apiKeysShuffled[intento];
       try {
-        const r = await fetch(`${_geminiUrl(modeloUsado)}?key=${apiKey}`, {
+        // Autenticación uniforme: query string ?key=... para AMBOS formatos.
+        // Confirmado por curl directo que las keys AQ. (Google AI Studio 2026)
+        // funcionan con query string igual que las AIzaSy... viejas.
+        // El header x-goog-api-key da UNAUTHENTICATED con keys AQ.
+        const url = `${_geminiUrl(modeloUsado)}?key=${encodeURIComponent(apiKey)}`;
+        const headersFetch = { 'Content-Type': 'application/json' };
+
+        const keyType = apiKey.startsWith('AQ.') ? 'AQ.' : 'AIzaSy';
+        console.log(`[ia-asistente] Intento ${intento + 1}/${apiKeysShuffled.length} · modelo=${modeloUsado} · keyType=${keyType} · promptLen=${prompt.length}`);
+
+        const r = await fetch(url, {
           method:  'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: headersFetch,
           body: JSON.stringify({
             contents: [{ parts: [{ text: prompt }] }],
             generationConfig: genCfg,
@@ -367,9 +473,19 @@ exports.iaAsistente = onRequest(
             ]
           })
         });
+        // Log del status HTTP para diagnóstico
+        if (!r.ok) {
+          console.error(`[ia-asistente] Gemini HTTP ${r.status} ${r.statusText}`);
+        }
         const data = await r.json();
         if (data.error) {
-          const errMsg = data.error.message || JSON.stringify(data.error);
+          const errMsg  = data.error.message || JSON.stringify(data.error);
+          const errCode = data.error.code || r.status;
+          const errStat = data.error.status || '';
+          // Log del error real para poder diagnosticar
+          console.error(`[ia-asistente] Gemini ERROR ${errCode} ${errStat}: ${errMsg}`);
+          console.error('[ia-asistente] Full error:', JSON.stringify(data.error).slice(0, 500));
+
           const isQuota   = /RESOURCE_EXHAUSTED|quota|rate limit/i.test(errMsg);
           const isInvalid = /API_KEY_INVALID|API key not valid|PERMISSION_DENIED/i.test(errMsg);
           if ((isQuota || isInvalid) && intento < apiKeysShuffled.length - 1) {
@@ -377,7 +493,9 @@ exports.iaAsistente = onRequest(
             continue;
           }
           return res.status(502).json({
-            error: errMsg + (apiKeysShuffled.length > 1 ? ` (probadas ${intento + 1}/${apiKeysShuffled.length} keys)` : '')
+            error: errMsg + (apiKeysShuffled.length > 1 ? ` (probadas ${intento + 1}/${apiKeysShuffled.length} keys)` : ''),
+            gemini_code:   errCode,
+            gemini_status: errStat
           });
         }
         const textoRaw = data && data.candidates && data.candidates[0]
@@ -397,9 +515,34 @@ exports.iaAsistente = onRequest(
         const tamPrev  = textoRaw.length;
         const tamPost  = texto.length;
         const recortado = tamPrev - tamPost;
+
+        // Incrementar cuota si aplica (particular con consumeQuota:true)
+        let cuotaInfo = null;
+        if (_quotaUidToCharge && _quotaUserRef) {
+          try {
+            const FieldValue = require('firebase-admin/firestore').FieldValue;
+            await _quotaUserRef.update({
+              materialesGeneradosIA: FieldValue.increment(1),
+              ultimoMaterialGeneradoEn: new Date().toISOString()
+            });
+            // Releer para devolver info al frontend
+            const snap = await _quotaUserRef.get();
+            const d = snap.data() || {};
+            cuotaInfo = {
+              usados: Number(d.materialesGeneradosIA || 0),
+              cuota:  Number(d.cuotaMateriales || 2),
+              restantes: Math.max(0, Number(d.cuotaMateriales || 2) - Number(d.materialesGeneradosIA || 0))
+            };
+            console.log('[iaAsistente] Cuota incrementada uid=' + _quotaUidToCharge + ' usados=' + cuotaInfo.usados);
+          } catch (einc) {
+            console.error('[iaAsistente] No pude incrementar cuota:', einc.message);
+          }
+        }
+
         return res.status(200).json({
           resultado: texto,
           keysProbadas: intento + 1,
+          ...(cuotaInfo ? { cuota: cuotaInfo } : {}),
           ...(recortado > 100 ? { _saneado: { antes: tamPrev, despues: tamPost, recortados: recortado } } : {})
         });
       } catch (e) {
