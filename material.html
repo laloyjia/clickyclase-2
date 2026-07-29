@@ -985,211 +985,8 @@
         .doc-preview .bloom-tag-6 { background:#fff8e1; color:#b45309; }
 
         /* =====================================================
-         *  MAT3 LAYOUT — 3 columnas (idem planificador)
-         *  IZQ: inputs · CENTRO: documento generado · DER: NEE
+         *  REDISEÑO DASHBOARD — sidebar + FAB + header colapsable
          * ===================================================== */
-        .mat3-layout {
-            display: grid;
-            grid-template-columns: 400px minmax(0, 1fr) 320px;
-            gap: 20px;
-            align-items: start;
-            width: 100%;
-            max-width: none;
-            margin: 0;
-            padding: 0;
-        }
-        @media (min-width: 1500px) { .mat3-layout { grid-template-columns: 440px minmax(0, 1fr) 360px; gap: 24px; } }
-        @media (min-width: 1800px) { .mat3-layout { grid-template-columns: 480px minmax(0, 1fr) 400px; gap: 28px; } }
-        @media (max-width: 1200px) {
-            .mat3-layout { grid-template-columns: 360px minmax(0, 1fr); }
-            .mat3-col-right { grid-column: 1 / -1; position: static !important; margin-top: 12px; }
-        }
-        @media (max-width: 800px) {
-            .mat3-layout { grid-template-columns: 1fr; }
-            .mat3-col-left, .mat3-col-right { position: static !important; }
-        }
-        .mat3-col-left, .mat3-col-right {
-            position: sticky;
-            top: 14px;
-            max-height: calc(100vh - 30px);
-            overflow-y: auto;
-            padding-right: 6px;
-        }
-        .mat3-col-left::-webkit-scrollbar, .mat3-col-right::-webkit-scrollbar { width: 6px; }
-        .mat3-col-left::-webkit-scrollbar-thumb, .mat3-col-right::-webkit-scrollbar-thumb {
-            background: rgba(79,70,229,.2); border-radius: 3px;
-        }
-        /* Compactar secciones dentro de las columnas laterales */
-        .mat3-col-left .seccion-mat {
-            padding: 12px 14px;
-            margin-bottom: 12px;
-            border-radius: 10px;
-        }
-        .mat3-col-left .seccion-mat h2 {
-            font-size: .95rem;
-            margin: -12px -14px 10px;
-            padding: 8px 14px;
-        }
-        .mat3-col-left .seccion-mat h2 span:first-child { font-size: 1rem; }
-        /* Header compacto mat3 */
-        .mat3-header {
-            text-align: center;
-            margin-bottom: 14px;
-            padding: 6px 0 10px;
-            position: relative;
-        }
-        .mat3-header h1 {
-            font-size: clamp(1.4rem, 2.4vw, 2rem);
-            margin: 0 0 4px;
-            background: linear-gradient(135deg, #2563EB, #4F46E5 60%, #7C3AED);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            font-weight: 700;
-            letter-spacing: -0.5px;
-        }
-        .mat3-header p {
-            font-size: .82rem;
-            color: #64748b;
-            margin: 0;
-            opacity: .85;
-        }
-        /* Panel container reutilizable */
-        .mat3-panel {
-            background: rgba(255,255,255,.9);
-            border: 1px solid rgba(37,99,235,.12);
-            border-radius: 12px;
-            box-shadow: 0 4px 14px rgba(37,99,235,.05);
-            overflow: hidden;
-            margin-bottom: 14px;
-        }
-        .mat3-coltitle {
-            font-size: .72rem;
-            text-transform: uppercase;
-            font-weight: 700;
-            letter-spacing: .8px;
-            padding: 8px 12px;
-            margin-bottom: 0;
-            display: flex; align-items: center; gap: 6px;
-            border-bottom: 1px solid rgba(37,99,235,.15);
-        }
-        .mat3-coltitle.tt-center { background: linear-gradient(90deg, rgba(37,99,235,.15), rgba(37,99,235,.05)); color:#1D4ED8; }
-        .mat3-coltitle.tt-right  { background: linear-gradient(90deg, rgba(16,185,129,.15), rgba(16,185,129,.05)); color:#047857; border-bottom-color:rgba(16,185,129,.2); }
-        .mat3-panel > .mat3-body { padding: 12px 14px; }
-        /* Placeholder columna central */
-        .mat3-empty {
-            padding: 60px 30px;
-            text-align: center;
-            color: #94a3b8;
-        }
-        .mat3-empty .icon { font-size: 3.4rem; margin-bottom: 12px; opacity: .5; }
-        .mat3-empty h3 { color: #64748b; font-weight: 600; margin: 0 0 6px; font-size: 1.05rem; }
-        .mat3-empty p { font-size: .85rem; margin: 0 auto; max-width: 380px; line-height: 1.55; }
-        /* Botones generar sticky abajo de la izquierda */
-        .mat3-generate-block {
-            position: sticky;
-            bottom: 0;
-            background: linear-gradient(180deg, rgba(255,255,255,0), rgba(255,255,255,.95) 30%);
-            padding: 14px 0 8px;
-            z-index: 5;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-        .mat3-btn-ia, .mat3-btn-tpl {
-            width: 100%;
-            padding: 13px 18px;
-            border-radius: 12px;
-            border: 0;
-            font-weight: 700;
-            font-size: .92rem;
-            cursor: pointer;
-            display: flex; align-items: center; justify-content: center; gap: 8px;
-            transition: all .2s;
-        }
-        .mat3-btn-ia {
-            background: linear-gradient(135deg, #2563EB 0%, #4F46E5 50%, #7C3AED 100%);
-            color: #fff;
-            box-shadow: 0 6px 18px rgba(79,70,229,.35);
-        }
-        .mat3-btn-ia:hover { transform: translateY(-1px); box-shadow: 0 8px 22px rgba(79,70,229,.5); }
-        .mat3-btn-tpl {
-            background: #fff;
-            color: #4f46e5;
-            border: 1px solid rgba(79,70,229,.35);
-        }
-        .mat3-btn-tpl:hover { background: rgba(79,70,229,.06); }
-        /* Cuando mat3 está activo, ocultar el sidebar wizard viejo */
-        .mat3-active .mat-sidebar { display: none !important; }
-        .mat3-active .sidebar-toggle { display: none !important; }
-        .mat3-active .material-header.hero-pro { display: none !important; }
-        .mat3-active .btn-volver { display: none !important; }
-        /* Los nav-step no aplican en mat3 */
-        .mat3-active .nav-step { display: none !important; }
-        /* Doc generado dentro de la columna central, sin doble padding */
-        .mat3-col-center .doc-generado {
-            display: block !important;
-        }
-        .mat3-col-center .doc-generado .seccion-mat {
-            padding: 0;
-            background: transparent;
-            border: 0;
-            box-shadow: none;
-            margin: 0;
-        }
-        .mat3-col-center .doc-generado .seccion-mat h2 { display: none; }
-        /* Tipo de Documento: full-width fuera de la columna izquierda */
-        .mat3-active #seccionTipo {
-            position: relative;
-            width: 100%;
-            max-width: none;
-            margin: 0 0 16px !important;
-            padding: 14px 18px !important;
-            background: linear-gradient(135deg, rgba(37,99,235,.05), rgba(52,211,153,.03));
-            border: 1px solid rgba(37,99,235,.15);
-            border-radius: 14px;
-        }
-        .mat3-active #seccionTipo h2 {
-            font-size: 1rem !important;
-            margin: 0 0 10px !important;
-            padding: 0 !important;
-            background: transparent !important;
-        }
-        .mat3-active #seccionTipo .tipo-docs {
-            display: grid !important;
-            grid-template-columns: repeat(5, 1fr) !important;
-            gap: 10px !important;
-        }
-        @media (max-width: 1200px) {
-            .mat3-active #seccionTipo .tipo-docs { grid-template-columns: repeat(3, 1fr) !important; }
-        }
-        @media (max-width: 700px) {
-            .mat3-active #seccionTipo .tipo-docs { grid-template-columns: repeat(2, 1fr) !important; }
-        }
-        .mat3-active #seccionTipo .tipo-doc-card {
-            padding: 12px 10px !important;
-            text-align: center;
-        }
-        .mat3-active #seccionTipo .tipo-doc-card .icon { font-size: 1.6rem !important; margin-bottom: 4px !important; }
-        .mat3-active #seccionTipo .tipo-doc-card h3 { font-size: .85rem !important; margin: 4px 0 !important; }
-        .mat3-active #seccionTipo .tipo-doc-card p { font-size: .7rem !important; line-height: 1.35 !important; }
-
-        /* NEE card en columna derecha */
-        .mat3-nee-card {
-            padding: 10px 12px;
-            border-radius: 10px;
-            margin-bottom: 8px;
-            font-size: .78rem;
-        }
-        .mat3-nee-title { font-weight: 700; font-size: .82rem; margin-bottom: 5px; display: flex; align-items: center; gap: 6px; }
-        .mat3-nee-card ul { margin: 4px 0 0; padding-left: 18px; line-height: 1.45; }
-        .mat3-nee-card ul li { margin-bottom: 3px; }
-        .mat3-nee-tea    { background: rgba(79,70,229,.08);  color: #3730a3; border:1px solid rgba(79,70,229,.2); }
-        .mat3-nee-tdah   { background: rgba(245,158,11,.08); color: #92400e; border:1px solid rgba(245,158,11,.25); }
-        .mat3-nee-dea    { background: rgba(16,185,129,.08); color: #047857; border:1px solid rgba(16,185,129,.25); }
-        .mat3-nee-generic{ background: rgba(100,116,139,.08); color:#334155; border:1px solid rgba(100,116,139,.22); }
-
-        /* Legacy: mantener por retrocompat pero sin efecto en mat3 */
         .mat-layout {
             display: grid;
             grid-template-columns: 280px minmax(0, 1fr);
@@ -1602,27 +1399,18 @@
     <!-- CONTENIDO PRINCIPAL -->
     <main class="material-container">
 
-        <!-- Enlaces legacy ocultos (retrocompat) -->
-        <div style="display:none">
-            <a href="dashboard-profesor.html" class="btn-volver">Volver</a>
-            <a href="planificacion.html">Planificación</a>
-            <button class="sidebar-toggle" onclick="toggleSidebar()" type="button">Pasos</button>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:8px">
+            <a href="dashboard-profesor.html" class="btn-volver">&#8592; Volver al Panel Docente</a>
+            <a href="planificacion.html" style="font-size:.85rem;color:var(--secondary);text-decoration:none;display:flex;align-items:center;gap:6px;padding:6px 14px;background:rgba(56, 189, 248, .08);border:1px solid rgba(56, 189, 248, .2);border-radius:8px">
+                📅 Crear Planificación &#8594;
+            </a>
         </div>
 
-        <!-- ═══ HEADER COMPACTO ═══ -->
-        <div class="mat3-header">
-            <h1>📚 Generador de Material Educativo</h1>
-            <p>Crea guías, apuntes, pruebas y controles alineados al currículo Mineduc</p>
-        </div>
+        <!-- Toggle de sidebar para mobile -->
+        <button class="sidebar-toggle" onclick="toggleSidebar()" type="button">☰ Pasos</button>
 
-        <!-- ═══ LAYOUT 3 COLUMNAS ═══ -->
-        <div class="mat3-layout">
-
-          <!-- ═════════════ COLUMNA IZQUIERDA · CONFIGURACIÓN ═════════════ -->
-          <aside class="mat3-col-left">
-
-        <!-- Layout viejo mantenido para retrocompat (oculto por CSS .mat3-active) -->
-        <div class="mat-layout" style="display:contents">
+        <!-- Layout: sidebar + main -->
+        <div class="mat-layout">
 
             <!-- SIDEBAR — navegación tipo wizard -->
             <aside class="mat-sidebar" id="matSidebar">
@@ -1885,11 +1673,12 @@
                         <input type="text" id="inputProfesor" placeholder="Ej: Eduardo Yáñez">
                     </div>
                 </div>
-                <!-- rowSelectorLiceo eliminado: el liceo se toma automáticamente del perfil del profesor -->
-                <!-- Select oculto por retrocompat con el JS (cambiarLiceoActivo, selectLiceoProf) -->
-                <div style="display:none">
-                    <select id="selectLiceoProf" onchange="cambiarLiceoActivo(this.value)"></select>
-                    <div id="rowSelectorLiceo"></div>
+                <div class="campo-row" id="rowSelectorLiceo" style="display:none">
+                    <div class="campo" style="grid-column:1/-1">
+                        <label>🏫 Liceo del documento</label>
+                        <select id="selectLiceoProf" onchange="cambiarLiceoActivo(this.value)" style="width:100%"></select>
+                        <small style="color:var(--muted);font-size:.72rem;display:block;margin-top:4px">El logo y nombre del liceo seleccionado aparecerán en el encabezado del documento.</small>
+                    </div>
                 </div>
                 <!-- Capacidades pedagógicas avanzadas (solo si el admin habilitó al profe) -->
                 <div class="campo-row" id="rowCapAvanzadas" style="display:none;background:linear-gradient(135deg,rgba(37,99,235,.06),rgba(34,211,238,.04));border:1px solid rgba(37,99,235,.22);border-radius:10px;padding:12px 14px;margin-top:6px">
@@ -1929,22 +1718,26 @@
                         </select>
                     </div>
                 </div>
-                <!-- inputLiceo eliminado: se toma automáticamente del perfil del profesor -->
-                <!-- Se mantiene oculto para no romper el JS que lee su valor -->
-                <div style="display:none">
-                    <input type="text" id="inputLiceo" list="dlColegios">
-                    <datalist id="dlColegios"></datalist>
-                </div>
                 <div class="campo-row">
-                    <div class="campo" style="grid-column:1/-1">
+                    <div class="campo">
+                        <label>Institución / Liceo (aparece en el encabezado)</label>
+                        <input type="text" id="inputLiceo" list="dlColegios" placeholder="Ej: Liceo Salesiano de Talca">
+                        <datalist id="dlColegios"></datalist>
+                    </div>
+                    <div class="campo">
                         <label>Duración estimada</label>
                         <input type="text" id="inputDuracion" placeholder="Ej: 2 bloques (90 min)" value="2 bloques (90 min)">
                     </div>
                 </div>
-                <!-- Código y Puntaje total eliminados: se preguntan después al descargar/publicar -->
-                <div style="display:none">
-                    <input type="text" id="inputCodigoDoc">
-                    <input type="text" id="inputPuntajeDoc">
+                <div class="campo-row">
+                    <div class="campo">
+                        <label>Código del documento (opcional)</label>
+                        <input type="text" id="inputCodigoDoc" placeholder="Ej: GA-ELC-001">
+                    </div>
+                    <div class="campo">
+                        <label>Puntaje total (opcional)</label>
+                        <input type="text" id="inputPuntajeDoc" placeholder="Ej: 60 pts">
+                    </div>
                 </div>
             </div>
 
@@ -1961,17 +1754,17 @@
                     Una sola generación entrega todo.
                 </p>
 
-                <!-- Toggle: generar también versión PIE — aplica a TODOS los tipos de documento -->
-                <div class="pie-link-card" id="pruebaConPIE">
+                <!-- Toggle: generar también versión PIE (solo aplica para tipo='prueba') -->
+                <div class="pie-link-card" id="pruebaConPIE" style="display:none">
                     <label>
                         <input type="checkbox" id="chkAdjuntarPIE">
                         <span>
                             <strong>⚇ Generar también la versión adaptada (PIE)</strong>
                             <small>
-                                Se generan <strong>dos documentos</strong>: el material estándar para todo el curso y,
-                                a continuación, una <strong>versión diferenciada</strong> con los mismos OAs y contenido
-                                pero adaptada según el diagnóstico NEE que indiques abajo. Aplica a cualquier tipo
-                                (guía, apunte, prueba, ejercicios, control).
+                                Se generan <strong>dos documentos</strong>: la prueba sumativa estándar para todo el curso
+                                y, a continuación, una <strong>versión diferenciada</strong> con los mismos OAs y contenido
+                                pero adaptada según el diagnóstico NEE que indiques abajo. Garantiza que todos los estudiantes
+                                evalúen lo mismo, con las adecuaciones que correspondan.
                             </small>
                         </span>
                     </label>
@@ -2244,64 +2037,6 @@
 
             </div><!-- /.mat-main -->
         </div><!-- /.mat-layout -->
-
-        <!-- ═══ BOTONES GENERAR (sticky abajo columna izquierda) ═══ -->
-        <div class="mat3-generate-block">
-            <button class="mat3-btn-ia" type="button" onclick="generarConIA()">🤖 Generar con IA</button>
-            <button class="mat3-btn-tpl" type="button" onclick="generarMaterial()">📄 Generar con Plantilla</button>
-            <div id="fabStatusMirror" class="fab-status" style="display:none;font-size:.75rem;text-align:center;color:#64748b;padding:6px"></div>
-        </div>
-
-          </aside><!-- /columna izquierda -->
-
-          <!-- ═════════════ COLUMNA CENTRAL · OUTPUT ═════════════ -->
-          <main class="mat3-col-center">
-            <div class="mat3-panel">
-                <div class="mat3-coltitle tt-center">
-                    <i>📄</i> Documento generado
-                    <span style="margin-left:auto;font-size:.7rem;font-weight:500;color:#64748b;text-transform:none;letter-spacing:0">Al centro de todo el flujo</span>
-                </div>
-                <div class="mat3-body" id="mat3CentralHost">
-                    <div class="mat3-empty" id="mat3Empty">
-                        <div class="icon">📚</div>
-                        <h3>Tu material aparecerá acá</h3>
-                        <p>Completá los datos a la izquierda y presioná <strong>Generar con IA</strong> o <strong>Generar con Plantilla</strong>. Vas a poder previsualizar, descargar en Word/PDF y publicarlo en la Biblioteca.</p>
-                    </div>
-                </div>
-            </div>
-          </main>
-
-          <!-- ═════════════ COLUMNA DERECHA · NEE / RESUMEN ═════════════ -->
-          <aside class="mat3-col-right">
-            <div class="mat3-panel">
-                <div class="mat3-coltitle tt-right">
-                    <i>🧩</i> NEE del curso
-                    <span style="margin-left:auto;font-size:.7rem;font-weight:500;color:#64748b;text-transform:none;letter-spacing:0" id="mat3NeeCount">0 marcadas</span>
-                </div>
-                <div class="mat3-body" id="mat3NeePanel">
-                    <div style="color:#94a3b8;font-size:.82rem;text-align:center;padding:20px 10px;line-height:1.55">
-                        <div style="font-size:2rem;margin-bottom:8px;opacity:.4">🤝</div>
-                        <p style="margin:0">Al marcar diagnósticos NEE en la configuración, acá verás las <strong>adecuaciones sugeridas</strong> que se pueden incorporar al material.</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Mini resumen de configuración -->
-            <div class="mat3-panel" style="padding:10px 12px">
-                <div style="font-size:.72rem;color:#4f46e5;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">📌 Resumen</div>
-                <div style="font-size:.78rem;line-height:1.65;color:#475569" id="mat3ResumenBox">
-                    <div><strong>Tipo:</strong> <span id="mat3ResTipo" style="color:#94a3b8;font-style:italic">—</span></div>
-                    <div><strong>Curso:</strong> <span id="mat3ResCurso" style="color:#94a3b8;font-style:italic">—</span></div>
-                    <div><strong>Asig:</strong> <span id="mat3ResAsig" style="color:#94a3b8;font-style:italic">—</span></div>
-                    <div style="margin-top:6px;padding-top:6px;border-top:1px dashed rgba(79,70,229,.15)">
-                        <span style="display:inline-block;padding:2px 7px;background:rgba(79,70,229,.1);color:#4f46e5;border-radius:99px;font-size:.7rem;font-weight:600;margin-right:3px">🎯 <span id="mat3ResOAs">0</span> OA</span>
-                        <span style="display:inline-block;padding:2px 7px;background:rgba(16,185,129,.1);color:#047857;border-radius:99px;font-size:.7rem;font-weight:600">📝 <span id="mat3ResPreg">—</span> preg</span>
-                    </div>
-                </div>
-            </div>
-          </aside>
-
-        </div><!-- /.mat3-layout -->
     </main>
 
     <!-- Modal de previsualización (versión Estándar / NEE) -->
@@ -2451,6 +2186,14 @@
                 return;
             }
             _matUser = user;
+
+            // Quitar NT1/NT2 si el profesor tiene asignaturas de plan común (no
+            // existen en Educación Parvularia). Evita combos como "Ciencias Naturales · NT1".
+            if (user.tipoProfesor !== 'parvularia' && Array.isArray(user.niveles)
+                && Array.isArray(user.asignaturas) && user.asignaturas.length) {
+                user.niveles = user.niveles.filter(function (n) { return n !== 'NT1' && n !== 'NT2'; });
+            }
+
 
             var inProf = document.getElementById('inputProfesor');
             if (inProf) inProf.value = user.nombre || user.name || '';
@@ -3704,116 +3447,7 @@
     </script>
     <script src="js/recommendations.js"></script>
 <script src="js/ia-widget.js" defer></script>
-<script src="js/session-guard.js" defer></script>
 <script src="js/search-global.js" defer></script>
-
-<!-- ═══════════════════════════════════════════════════
-     MAT3 · Activador del layout 3 columnas
-     Se ejecuta después de todo el otro JS (para no perder listeners).
-     Mueve #docGenerado a la columna central y espeja resumen a la derecha.
-     ═══════════════════════════════════════════════════ -->
-<script>
-(function(){
-    function _mat3Init(){
-        document.body.classList.add('mat3-active');
-        // Mover documento generado a la columna central
-        var host = document.getElementById('mat3CentralHost');
-        var doc  = document.getElementById('docGenerado');
-        if (host && doc && doc.parentNode !== host) host.appendChild(doc);
-        // Mover "Tipo de Documento" a full-width, arriba del layout 3 cols
-        var tipoSec = document.getElementById('seccionTipo');
-        var layout  = document.querySelector('.mat3-layout');
-        if (tipoSec && layout && tipoSec.parentNode !== layout.parentNode) {
-            layout.parentNode.insertBefore(tipoSec, layout);
-        }
-        // Mover el bloque "Generar también la versión adaptada (PIE)" a la columna derecha
-        // APLICA A TODOS LOS TIPOS DE DOCUMENTO (guía, apunte, ejercicios, prueba, control)
-        var pruebaPIE = document.getElementById('pruebaConPIE');
-        var colRight  = document.querySelector('.mat3-col-right');
-        if (pruebaPIE && colRight && pruebaPIE.parentNode !== colRight) {
-            var wrap = document.createElement('div');
-            wrap.className = 'mat3-panel';
-            wrap.innerHTML = '<div class="mat3-coltitle tt-right" style="background:linear-gradient(90deg, rgba(236,72,153,.15), rgba(236,72,153,.05));color:#9d174d;border-bottom-color:rgba(236,72,153,.25)"><i>⚇</i> Versión adaptada (PIE)</div>';
-            var body = document.createElement('div');
-            body.className = 'mat3-body';
-            body.style.padding = '10px 12px';
-            body.appendChild(pruebaPIE);
-            wrap.appendChild(body);
-            colRight.appendChild(wrap);
-            pruebaPIE.style.padding = '0';
-            pruebaPIE.style.background = 'transparent';
-            pruebaPIE.style.border = '0';
-        }
-        // Forzar visibilidad SIEMPRE (por si algún JS externo lo ocultó basado en tipo)
-        if (pruebaPIE) {
-            pruebaPIE.style.display = 'block';
-            // Vigilar cambios y re-forzar si algo intenta ocultarlo
-            if (window.MutationObserver) {
-                new MutationObserver(function(){
-                    if (pruebaPIE.style.display === 'none') pruebaPIE.style.display = 'block';
-                }).observe(pruebaPIE, { attributes:true, attributeFilter:['style'] });
-            }
-        }
-        // Toggle placeholder según hay contenido
-        _mat3TogglePlaceholder();
-        _mat3ObservarOutput();
-        _mat3RefrescarResumen();
-        // Refrescar resumen al cambiar cualquier input
-        document.addEventListener('change', _mat3RefrescarResumen);
-        document.addEventListener('input',  _mat3RefrescarResumen);
-    }
-
-    function _mat3TogglePlaceholder(){
-        var empty = document.getElementById('mat3Empty');
-        var doc   = document.getElementById('docGenerado');
-        if (!empty) return;
-        // docGenerado se muestra cuando tiene contenido en el preview
-        var preview = document.getElementById('docPreview');
-        var hayContent = preview && preview.innerHTML.trim().length > 20;
-        var visible = doc && (doc.style.display === 'block' || doc.classList.contains('open') || hayContent);
-        empty.style.display = visible ? 'none' : 'block';
-    }
-
-    function _mat3ObservarOutput(){
-        var doc = document.getElementById('docGenerado');
-        var pv  = document.getElementById('docPreview');
-        if (window.MutationObserver) {
-            var mo = new MutationObserver(_mat3TogglePlaceholder);
-            if (doc) mo.observe(doc, { attributes:true, attributeFilter:['style','class'] });
-            if (pv)  mo.observe(pv,  { childList:true, characterData:true, subtree:true });
-        }
-    }
-
-    // Espejar los valores del #sidebarStatus (ssTipo, ssCurso, ssAsig, ssOAs, ssCant)
-    // en la mini card de resumen de la derecha (mat3ResTipo, mat3ResCurso, mat3ResAsig, mat3ResOAs, mat3ResPreg)
-    function _mat3RefrescarResumen(){
-        var pairs = [
-            ['ssTipo',  'mat3ResTipo'],
-            ['ssCurso', 'mat3ResCurso'],
-            ['ssAsig',  'mat3ResAsig'],
-            ['ssOAs',   'mat3ResOAs'],
-            ['ssCant',  'mat3ResPreg']
-        ];
-        pairs.forEach(function(p){
-            var src = document.getElementById(p[0]);
-            var dst = document.getElementById(p[1]);
-            if (!src || !dst) return;
-            var val = (src.textContent || '').trim();
-            var isEmpty = !val || val === '—' || val === '0';
-            dst.textContent = val || '—';
-            dst.style.color = isEmpty ? '#94a3b8' : '#0c1e3b';
-            dst.style.fontStyle = isEmpty ? 'italic' : 'normal';
-        });
-    }
-
-    // Init
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', function(){ setTimeout(_mat3Init, 300); });
-    } else {
-        setTimeout(_mat3Init, 300);
-    }
-})();
-</script>
 </body>
 </html>
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     

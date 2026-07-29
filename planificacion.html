@@ -42,36 +42,6 @@
         .planificador-header h1 { font-size: clamp(1.7rem, 2.8vw, 2.4rem); }
         .seccion-plan { padding: 1.6rem 1.8rem; }
 
-        /* ═══ Header compacto plan3 ═══ */
-        .plan3-header {
-            text-align: center;
-            margin-bottom: 14px;
-            padding: 6px 0 10px;
-            position: relative;
-        }
-        .plan3-header h1 {
-            font-size: clamp(1.4rem, 2.4vw, 2rem);
-            margin: 0 0 4px;
-            background: linear-gradient(135deg, #2563EB, #4F46E5 60%, #7C3AED);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            font-weight: 700;
-            letter-spacing: -0.5px;
-        }
-        .plan3-header p {
-            font-size: .82rem;
-            color: #64748b;
-            margin: 0;
-            opacity: .85;
-        }
-        .plan3-autosave {
-            position: absolute;
-            top: 8px;
-            right: 8px;
-            margin-top: 0;
-        }
-
         .planificador-header {
             text-align: center;
             margin-bottom: 2rem;
@@ -1090,17 +1060,16 @@
     <!-- CONTENIDO PRINCIPAL -->
     <main class="planificador-container">
 
-        <!-- Enlaces ocultos (retrocompat de navegación desde otros scripts) -->
-        <div style="display:none">
-            <a href="dashboard-profesor.html" class="btn-volver">Volver</a>
-            <a href="material.html">Material</a>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:8px">
+            <a href="dashboard-profesor.html" class="btn-volver">&#8592; Volver al Panel Docente</a>
+            <a href="material.html" style="font-size:.85rem;color:var(--secondary);text-decoration:none;display:flex;align-items:center;gap:6px;padding:6px 14px;background:rgba(56, 189, 248, .08);border:1px solid rgba(56, 189, 248, .2);border-radius:8px">
+                📚 Crear Material &#8594;
+            </a>
         </div>
 
-        <!-- ═══ HEADER COMPACTO ═══ -->
-        <div class="plan3-header">
+        <div class="planificador-header">
             <h1>📅 Planificador de Clases</h1>
-            <p>Crea planificaciones alineadas con el currículo Mineduc</p>
-            <span id="wizAutosave" class="wiz-autosave plan3-autosave">💾 Borrador guardado</span>
+            <p>Crea planificaciones alineadas con el currículo Mineduc · __</p>
         </div>
 
         <!-- ═══ BANNER RECUPERAR BORRADOR ═══ -->
@@ -1109,6 +1078,21 @@
             <span style="flex:1"><strong>Tenés un borrador guardado</strong> — <span id="wizDraftInfo">de hace X min</span>. ¿Querés continuar donde lo dejaste?</span>
             <button onclick="wizDescartarBorrador()">Descartar</button>
             <button class="wiz-draft-ok" onclick="wizRecuperarBorrador()">Recuperar</button>
+        </div>
+
+        <!-- ═══ TOPBAR compacta (reemplaza barra de pasos) ═══ -->
+        <div class="plan3-topbar">
+            <div style="display:flex;align-items:center;gap:14px;font-size:.86rem;color:#334155">
+                <span><i style="color:#4f46e5">📋</i> <strong>Configurá</strong> a la izquierda</span>
+                <span style="color:#94a3b8">·</span>
+                <span><i style="color:#1D4ED8">🤖</i> <strong>Generá</strong> con IA</span>
+                <span style="color:#94a3b8">·</span>
+                <span><i style="color:#047857">🧩</i> <strong>Adecuaciones</strong> a la derecha</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px">
+                <span id="wizAutosave" class="wiz-autosave" style="margin-top:0">💾 Borrador guardado</span>
+                <span style="font-size:.72rem;color:#94a3b8">Atajo: <kbd style="background:rgba(37,99,235,.1);padding:1px 6px;border-radius:4px;font-family:monospace;font-size:.7rem">Ctrl+Enter</kbd> generar</span>
+            </div>
         </div>
 
         <!-- ═══ LAYOUT 3 COLUMNAS ═══ -->
@@ -1314,11 +1298,27 @@
             </div>
         </div>
 
-        <!-- Objetivo específico eliminado a pedido del usuario -->
-        <!-- Textareas legacy quedan ocultos para no romper el JS que los referencia -->
-        <div style="display:none">
-            <textarea id="inputObjetivoEspecifico"></textarea>
-            <textarea id="inputConocimientosPrevios"></textarea>
+        <!-- ═══ OBJETIVO ESPECÍFICO — colapsable ═══ -->
+        <div class="seccion-plan">
+            <details class="dropdown-panel">
+                <summary>
+                    <span class="dp-title">🎯 Objetivo específico de esta clase
+                        <span class="wiz-tip" title="El OA es anual, pero cada clase necesita un objetivo alcanzable en 90 min. Redactalo empezando con 'Al finalizar la clase, el/la estudiante será capaz de…'">?</span>
+                    </span>
+                    <span class="dp-badge empty" id="badgeObjEsp">—</span>
+                </summary>
+                <div class="dp-body">
+                    <div class="campo">
+                        <label style="font-size:.78rem">Al finalizar la clase, el/la estudiante será capaz de…</label>
+                        <textarea id="inputObjetivoEspecifico" rows="2" placeholder="Ej: Explicar el proceso de fotosíntesis identificando reactantes, productos y rol de la clorofila."></textarea>
+                        <div style="font-size:.7rem;color:var(--text-muted);margin-top:3px">Usá un verbo observable (identificar, comparar, resolver, analizar, crear).</div>
+                    </div>
+                    <div class="campo">
+                        <label style="font-size:.78rem">Conocimientos previos <span style="font-size:.7rem;color:var(--text-muted);font-weight:400">(opcional)</span></label>
+                        <textarea id="inputConocimientosPrevios" rows="2" placeholder="Ej: Estructura celular básica, diferencia entre células animales y vegetales."></textarea>
+                    </div>
+                </div>
+            </details>
         </div>
 
             </div><!-- /paso 2 -->
@@ -1504,7 +1504,8 @@
         <!-- ========== RESULTADO ========== -->
         <div class="resultado-container" id="resultadoContainer">
             <div class="seccion-plan">
-                <p style="color: var(--text-muted); font-size:0.85rem; margin:0 0 1rem;">
+                <h2><span class="icono">&#128196;</span> Planificación Generada</h2>
+                <p style="color: var(--text-muted); font-size:0.85rem; margin-bottom:1rem;">
                     Haz clic en "Copiar" en cada campo para llevarlo a Word, PDF o donde necesites.
                 </p>
 
@@ -1544,7 +1545,7 @@
                 <span style="margin-left:auto;font-size:.7rem;font-weight:500;color:#64748b;text-transform:none;letter-spacing:0"><span id="badgeNEE">0</span> marcadas</span>
               </div>
               <div class="plan3-body" style="padding:10px 12px">
-                <p style="color:#64748b;font-size:.75rem;margin:0 0 8px;line-height:1.4">Marcá los diagnósticos presentes en tu curso. Al hacerlo, aparecerán abajo las <strong>adecuaciones sugeridas</strong> que puedes incluir en la clase.</p>
+                <p style="color:#64748b;font-size:.75rem;margin:0 0 8px;line-height:1.4">Marcá los diagnósticos presentes en tu curso. Al hacerlo, aparecerán abajo las <strong>adecuaciones sugeridas</strong> que podés incluir en la clase.</p>
                 <div class="checkbox-group" id="listaNEE" style="max-height:220px;overflow-y:auto;padding-right:4px;font-size:.82rem"></div>
               </div>
             </div>
@@ -1840,6 +1841,14 @@
         if ((!user.niveles || !user.niveles.length) && user.tipoProfesor === 'media')   user.niveles = ['1M','2M','3M','4M'];
         if ((!user.niveles || !user.niveles.length) && user.tipoProfesor === 'basica')  user.niveles = ['1B','2B','3B','4B','5B','6B','7B','8B'];
         if ((!user.cursos || !user.cursos.length) && _tieneCursosNvos) user.cursos = user.cursosAsignados.slice();
+
+        // Quitar NT1/NT2 si el profesor tiene asignaturas de plan común (no existen
+        // en Educación Parvularia). Evita mostrar combos como "Ciencias Naturales · NT1".
+        if (user.tipoProfesor !== 'parvularia' && Array.isArray(user.niveles)
+            && Array.isArray(user.asignaturas) && user.asignaturas.length) {
+            user.niveles = user.niveles.filter(function (n) { return n !== 'NT1' && n !== 'NT2'; });
+        }
+
         // ═════════════════════════════════════════════════════════════════
 
         // Mostrar barra de contexto del profesor
@@ -2933,14 +2942,6 @@
         });
 
         window._camposLIRMI = campos;
-        // Filtrar sección "ESTRATEGIAS DUA" si el docente no marcó ninguna estrategia
-        var _hayDUA = document.querySelectorAll('input[data-dua]:checked').length > 0;
-        if (!_hayDUA) {
-            campos = campos.filter(function(c){
-                return !(c.titulo && c.titulo.toUpperCase().indexOf('DUA') !== -1);
-            });
-            window._camposLIRMI = campos;
-        }
         var container = document.getElementById('camposLIRMI');
         container.innerHTML = '';
         campos.forEach(function(campo, idx) {
@@ -3768,23 +3769,14 @@
             '\ud83e\udde0 METACOGNICION: 3 preguntas para reflexionar sobre como aprendieron, que fue dificil y como lo superaron.\n\n' +
 
             '\ud83d\udcdd 5. EVALUACION FORMATIVA\n' +
-            'Ticket de salida con 2 preguntas de APLICACION (no de memoria). Incluye los indicadores de logro para cada pregunta.\n\n';
+            'Ticket de salida con 2 preguntas de APLICACION (no de memoria). Incluye los indicadores de logro para cada pregunta.\n\n' +
 
-        // \u2500\u2500 Secci\u00f3n DUA CONDICIONAL \u2014 solo aparece si el docente marc\u00f3 estrategias \u2500\u2500
-        var hayDUA = duaRepresentacion.length || duaAccion.length || duaImplicacion.length;
-        if (hayDUA) {
-            promptBase += '\u267f 6. ESTRATEGIAS DUA\n' +
-                'Integrar EXCLUSIVAMENTE las estrategias DUA seleccionadas por el docente (no agregar otras):\n';
-            if (duaRepresentacion.length) promptBase += '  \ud83d\udcd6 a) REPRESENTACION: ' + duaRepresentacion.join('; ') + '\n';
-            if (duaAccion.length)         promptBase += '  \u270d\ufe0f b) EXPRESION Y ACCION: ' + duaAccion.join('; ') + '\n';
-            if (duaImplicacion.length)    promptBase += '  \u267b\ufe0f c) MOTIVACION Y COMPROMISO: ' + duaImplicacion.join('; ') + '\n';
-            promptBase += '\n';
-        } else {
-            // Sin DUA marcado: instruir expl\u00edcitamente que NO agregue esa secci\u00f3n
-            promptBase += 'IMPORTANTE: El docente NO seleccion\u00f3 estrategias DUA. NO incluyas ninguna secci\u00f3n "ESTRATEGIAS DUA" ni "DUA" en la salida. Omitir por completo.\n\n';
-        }
-
-        promptBase += 'Lenguaje claro, directo y practico. Cada seccion debe ser ESPECIFICA para esta clase, NO generica ni abstracta. Extiendete en cada punto.';
+            '\u267f 6. ESTRATEGIAS DUA\n' +
+            '3 acciones concretas con ejemplos especificos para esta clase:\n' +
+            '  \ud83d\udcd6 a) REPRESENTACION: Como se presentara la informacion en multiples formatos.\n' +
+            '  \u270d\ufe0f b) EXPRESION Y ACCION: Variedad de formas para que los estudiantes demuestren su aprendizaje (oral, escrito, grafico, demostracion practica).\n' +
+            '  \u267b\ufe0f c) MOTIVACION Y COMPROMISO: Estrategias para mantener el interes, la autorregulacion y la participacion activa de todos.\n\n' +
+            'Lenguaje claro, directo y practico. Cada seccion debe ser ESPECIFICA para esta clase, NO generica ni abstracta. Extiendete en cada punto.';
 
         // ── FASE 2: bloque adicional de instrumento evaluación ──
         if (generarInstrumento && instrumentoEval) {
@@ -4055,7 +4047,7 @@
           '<script>setTimeout(function(){window.print();},600);<\/script>' +
           '</body></html>');
         w.document.close();
-        mostrarToast('📕 Ventana de impresión abierta — elige "Guardar como PDF"');
+        mostrarToast('📕 Ventana de impresión abierta — elegí "Guardar como PDF"');
     }
 
     // ═══════════════════════════════════════════════════════════════
@@ -4220,7 +4212,7 @@
           html += '<div style="background:rgba(37,99,235,.05);border-left:3px solid #4f46e5;padding:10px 14px;border-radius:6px;margin-bottom:12px"><strong>Contenido:</strong><br><span style="color:#475569;font-size:.85rem">' + contenido.replace(/</g,'&lt;') + '</span></div>';
         }
         if (warn.length) {
-          html += '<div style="background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.3);padding:10px 14px;border-radius:8px;color:#b91c1c;font-size:.85rem"><strong>⚠ Antes de generar, revisa:</strong><ul style="margin:6px 0 0;padding-left:20px">' + warn.map(function(w){return '<li>'+w+'</li>';}).join('') + '</ul></div>';
+          html += '<div style="background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.3);padding:10px 14px;border-radius:8px;color:#b91c1c;font-size:.85rem"><strong>⚠ Antes de generar, revisá:</strong><ul style="margin:6px 0 0;padding-left:20px">' + warn.map(function(w){return '<li>'+w+'</li>';}).join('') + '</ul></div>';
         } else {
           html += '<div style="background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.3);padding:10px 14px;border-radius:8px;color:#047857;font-size:.85rem"><strong>✓ Todo listo</strong> — la IA generará una planificación completa con todos los datos.</div>';
         }
@@ -4649,7 +4641,6 @@
 
     </script>
 <script src="js/ia-widget.js" defer></script>
-<script src="js/session-guard.js" defer></script>
 <script src="js/search-global.js" defer></script>
 </body>
 </html>

@@ -341,7 +341,7 @@ table.tabla th { font-size: .68rem; text-transform: uppercase; letter-spacing: 1
   <div class="section" id="sec-tp">
     <div class="card">
       <h2><span>🔧</span> Configuración Técnico-Profesional</h2>
-      <div class="sub">Activá TP si el colegio ofrece formación técnico-profesional y marca las especialidades del catálogo Mineduc chileno.</div>
+      <div class="sub">Activá TP si el colegio ofrece formación técnico-profesional y marcá las especialidades del catálogo Mineduc chileno.</div>
 
       <div class="fld" style="margin-bottom:20px">
         <label style="display:flex;align-items:center;gap:12px;cursor:pointer;padding:14px 18px;background:var(--panel-2);border-radius:10px;border:1px solid var(--border-strong)">
@@ -419,7 +419,7 @@ table.tabla th { font-size: .68rem; text-transform: uppercase; letter-spacing: 1
         <div><label style="display:block;font-size:.74rem;color:#475569;font-weight:600;text-transform:uppercase;margin-bottom:4px">Cargo</label><input id="pfCargo" style="width:100%;padding:8px 10px;border:1px solid #e2e8f0;border-radius:6px" placeholder="Profesora"></div>
         <div style="grid-column:1/-1">
           <label style="display:flex;justify-content:space-between;align-items:center;font-size:.74rem;color:#475569;font-weight:600;text-transform:uppercase;margin-bottom:6px">
-            <span>🎯 Roles asignados * <span style="color:#64748B;text-transform:none;font-weight:400">(puedes marcar más de uno; el <b>primero marcado</b> será el rol principal)</span></span>
+            <span>🎯 Roles asignados * <span style="color:#64748B;text-transform:none;font-weight:400">(podés marcar más de uno; el <b>primero marcado</b> será el rol principal)</span></span>
             <span style="text-transform:none;font-weight:normal">
               <button type="button" onclick="_marcarRoles(false)" style="padding:2px 8px;font-size:.7rem;border:1px solid #e2e8f0;background:#fff;color:#64748B;border-radius:4px;cursor:pointer">✗ Ninguno</button>
             </span>
@@ -1376,7 +1376,7 @@ function _filtrarAsigsPorNivel(){
     var aviso2 = document.createElement('div');
     aviso2.className = 'pf-aviso-vacio';
     aviso2.style.cssText = 'grid-column:1/-1;color:#B45309;background:#FFFBEB;border:1px solid #FCD34D;border-radius:6px;font-size:.82rem;padding:12px;text-align:center;line-height:1.5';
-    aviso2.innerHTML = '⚠ Este colegio aún no tiene asignaturas habilitadas para <b>'+nombresNivs+'</b>.<br>Andá a la pestaña <b>"Asignaturas y niveles"</b>, marca los cruces que correspondan (ej: <em>Educación Parvularia × NT1/NT2</em>) y presioná <b>Guardar</b>. Luego reabrí este modal.';
+    aviso2.innerHTML = '⚠ Este colegio aún no tiene asignaturas habilitadas para <b>'+nombresNivs+'</b>.<br>Andá a la pestaña <b>"Asignaturas y niveles"</b>, marcá los cruces que correspondan (ej: <em>Educación Parvularia × NT1/NT2</em>) y presioná <b>Guardar</b>. Luego reabrí este modal.';
     grid.appendChild(aviso2);
   }
 }
@@ -1492,6 +1492,18 @@ function _renderPersonal(){
 function _thPer(txt){
   return '<th style="text-align:left;padding:8px 10px;font-size:.7rem;color:#475569;text-transform:uppercase;letter-spacing:.4px;border-bottom:2px solid #E2E8F0;font-weight:700">'+txt+'</th>';
 }
+// Oculta combinaciones asignatura·nivel imposibles (ej. "ciencias__nt1").
+// Las asignaturas de plan común no existen en NT1/NT2 (Parvularia usa Núcleos).
+function _sinCombosParvularia(asigs){
+  if (!Array.isArray(asigs)) return asigs || [];
+  var NUCLEOS = ['parvularia','nucleo','exploracion','lenguaje_verbal','convivencia',
+                 'corporalidad','pensamiento','artistico','entorno','identidad','comunicacion'];
+  return asigs.filter(function(slug){
+    var s = String(slug||'').toLowerCase();
+    if (s.indexOf('nt1') === -1 && s.indexOf('nt2') === -1) return true;
+    return NUCLEOS.some(function(n){ return s.indexOf(n) !== -1; });
+  });
+}
 // Formatea slugs feos → nombres legibles: "biologia_nt1" → "Biología NT1"
 function _formatearAsig(slug){
   var s = String(slug||'').trim();
@@ -1558,7 +1570,7 @@ function _filaPersonal(u){
   var rolPrincipal = rolesArrRow.length
     ? _chipsLista(rolesArrRow, '#4F46E5', _rolLabel)
     : '<span style="color:#94a3b8">—</span>';
-  var asigsHtml = _chipsLista(u.asignaturas, '#4F46E5', _formatearAsig);
+  var asigsHtml = _chipsLista(_sinCombosParvularia(u.asignaturas), '#4F46E5', _formatearAsig);
   var nivsHtml  = _chipsLista(u.niveles, '#059669', function(x){ return String(x).toUpperCase(); });
   var estado = u.activo === false
     ? '<span style="display:inline-block;padding:3px 10px;background:#FEE2E2;color:#B91C1C;border-radius:99px;font-size:.7rem;font-weight:700">✗ Pausado</span>'
@@ -1818,7 +1830,7 @@ function onArchivoMasivo(input){
         return _normalizarFila(raw);
       }).filter(function(x){ return x.email; });
     } else {
-      alert('Para Excel .xlsx necesitas incluir la librería XLSX. Usá CSV por ahora.');
+      alert('Para Excel .xlsx necesitás incluir la librería XLSX. Usá CSV por ahora.');
       return;
     }
     _masivoFilas = filas;
@@ -1910,7 +1922,6 @@ if (typeof ELAuth !== 'undefined' && ELAuth.onUserReady) {
 </script>
 
 <script src="js/ia-widget.js" defer></script>
-<script src="js/session-guard.js" defer></script>
 <script src="js/search-global.js" defer></script>
 </body>
 </html>
