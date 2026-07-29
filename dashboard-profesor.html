@@ -1821,6 +1821,65 @@
     });
   }
 
+  // Cuenta cuántas asignaturas DISTINTAS hay (no combos). "ciencias_nat__1b" y
+  // "ciencias_nat__2b" cuentan como 1 asignatura.
+  function _contarAsigAgrupadasDP(slugs){
+    if (!Array.isArray(slugs)) return 0;
+    var set = {};
+    slugs.forEach(function(s){ set[String(s).split('__')[0]] = true; });
+    return Object.keys(set).length;
+  }
+
+  // Agrupa los slugs "asignatura__nivel" por asignatura y muestra el rango de
+  // niveles en UNA tarjeta legible. Ej: 12 slugs de "ciencias_nat__1b..4m" →
+  // "🔬 Ciencias Naturales · 1°B a 4°M". Mucho más limpio que 12 tarjetas.
+  function _agruparAsignaturasDP(slugs){
+    if (!Array.isArray(slugs) || !slugs.length) return '';
+    var ORDEN = ['nt1','nt2','1b','2b','3b','4b','5b','6b','7b','8b','1m','2m','3m','4m'];
+    var LABEL_NIVEL = {nt1:'NT1',nt2:'NT2','1b':'1°B','2b':'2°B','3b':'3°B','4b':'4°B',
+      '5b':'5°B','6b':'6°B','7b':'7°B','8b':'8°B','1m':'1°M','2m':'2°M','3m':'3°M','4m':'4°M'};
+    var LABEL_ASIG = {
+      ciencias_nat:'Ciencias Naturales', biologia:'Biología', fisica:'Física', quimica:'Química',
+      matematica:'Matemática', lenguaje:'Lenguaje', historia:'Historia', ingles:'Inglés',
+      artes:'Artes Visuales', musica:'Música', tecnologia:'Tecnología', ed_fisica:'Educación Física',
+      religion:'Religión', orientacion:'Orientación', filosofia:'Filosofía', ling_liter:'Lengua y Literatura',
+      cs_ciudadania:'Ciencias para la Ciudadanía', ed_ciudadana:'Educación Ciudadana'
+    };
+    var ICONO = {ciencias_nat:'🔬', biologia:'🧬', fisica:'⚛️', quimica:'🧪', matematica:'📐',
+      lenguaje:'📖', historia:'🏛️', ingles:'🌎', artes:'🎨', musica:'🎵', tecnologia:'💻',
+      ed_fisica:'⚽', religion:'✝️', orientacion:'🧭', filosofia:'🤔'};
+
+    // Agrupar niveles por asignatura
+    var grupos = {};
+    slugs.forEach(function(slug){
+      var partes = String(slug).split('__');
+      var asig = partes[0], niv = (partes[1]||'').toLowerCase();
+      if (!grupos[asig]) grupos[asig] = [];
+      if (niv) grupos[asig].push(niv);
+    });
+
+    return Object.keys(grupos).map(function(asig){
+      var niveles = grupos[asig].sort(function(a,b){ return ORDEN.indexOf(a) - ORDEN.indexOf(b); });
+      var nombre = LABEL_ASIG[asig] || _ASIG_LABELS_DP[asig] || asig;
+      var icono = ICONO[asig] || '📚';
+      // Rango de niveles: si son consecutivos, mostrar "1°B a 4°M"; si no, listar.
+      var rango;
+      if (niveles.length === 0) {
+        rango = '';
+      } else if (niveles.length === 1) {
+        rango = LABEL_NIVEL[niveles[0]] || niveles[0];
+      } else {
+        var primero = LABEL_NIVEL[niveles[0]] || niveles[0];
+        var ultimo  = LABEL_NIVEL[niveles[niveles.length-1]] || niveles[niveles.length-1];
+        rango = primero + ' a ' + ultimo;
+      }
+      var badge = niveles.length ? (' · <span style="color:#64748B;font-weight:600">' + escTxt(rango) + '</span> <span style="color:#94a3b8;font-size:.72rem">(' + niveles.length + ')</span>') : '';
+      return '<div style="padding:10px 14px;background:rgba(37,99,235,.04);border:1px solid rgba(37,99,235,.08);border-radius:10px;font-size:.9rem;display:flex;align-items:center;gap:8px">' +
+               '<span>' + icono + '</span><span style="font-weight:700">' + escTxt(nombre) + '</span>' + badge +
+             '</div>';
+    }).join('');
+  }
+
   function renderAsignacionResumen(user) {
     var el = document.getElementById('asignacionResumen');
     if (!el) return;
@@ -1844,9 +1903,7 @@
           '<div style="margin-bottom:14px">' +
             '<div style="font-family:Space Grotesk,sans-serif;font-weight:800;color:#2563EB;font-size:.78rem;margin-bottom:8px">🎓 Asignaturas del plan común</div>' +
             '<div style="display:flex;flex-direction:column;gap:6px">' +
-              asigsNuevo.map(function(a){
-                return '<div style="padding:8px 12px;background:rgba(37,99,235,.04);border:1px solid rgba(37,99,235,.06);border-radius:10px;font-size:.86rem">📚 ' + escTxt(_ASIG_LABELS_DP[a] || a) + '</div>';
-              }).join('') +
+              _agruparAsignaturasDP(asigsNuevo) +
             '</div>' +
           '</div>'
         );
@@ -1977,19 +2034,14 @@
 
         // Bloque asignaturas plan común
         if (asigsNuevo.length) {
+          var _agrupadas = _contarAsigAgrupadasDP(asigsNuevo);
           html += '<div class="card-pro" style="margin-bottom:18px">'
             + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px">'
             +   '<div style="font-weight:800;font-size:1.05rem">🎓 Asignaturas del plan común</div>'
-            +   '<span class="chip is-active">' + asigsNuevo.length + '</span>'
+            +   '<span class="chip is-active">' + _agrupadas + '</span>'
             + '</div>'
-            + '<div class="mod-grid">'
-            + asigsNuevo.map(function (a) {
-                return '<div class="mod-card-pro">'
-                  + '<div class="mc-code">PC</div>'
-                  + '<div class="mc-name">' + escTxt(_ASIG_LABELS_DP[a] || a) + '</div>'
-                  + '<div class="mc-meta">Plan común</div>'
-                  + '</div>';
-              }).join('')
+            + '<div style="display:flex;flex-direction:column;gap:8px">'
+            + _agruparAsignaturasDP(asigsNuevo)
             + '</div></div>';
         }
 
