@@ -95,7 +95,7 @@
 <script src="js/curricula/plan-comun/parvularia.js"></script>
 <script src="js/curricula/plan-comun/ciencias-ciudadania.js"></script>
 <script src="js/curricula/plan-comun/index.js"></script>
-<script src="js/curricula-chile.js?v=2"></script>
+<script src="js/curricula-chile.js"></script>
 
 <style>
 :root{--bg:#F0F7FF;--surface:#FFFFFF;--surface2:#F8FAFF;--border:rgba(37,99,235,.18);--accent:#2563EB;--accent2:#1D4ED8;--gold:#F59E0B;--green:#059669;--red:#DC2626;--text:#0C1E3B;--muted:#475569}
@@ -2424,8 +2424,10 @@ function crearProfesor(){
   btn.disabled=true;btn.innerHTML='<span class="spinner"></span> Creando…';
   var tiposArr=(wData.tipos&&wData.tipos.length)?wData.tipos:(wData.tipo?[wData.tipo]:[]);
   // tipoProfesor (string legacy) = primer tipo; tiposProfesor (array nuevo) = todos
-  var _tipoNiv = (tiposArr.indexOf('parvularia')!==-1 && tiposArr.length===1) ? 'parvularia' : (tiposArr[0]||'');
-  ELAuth.adminCrearProfesor({nombre:document.getElementById('pNombre').value.trim(),email:document.getElementById('pEmail').value.trim(),password:document.getElementById('pPass').value,tipoProfesor:tiposArr[0]||'',tiposProfesor:tiposArr,asignaturas:wData.asignaturas,especialidad:wData.especialidad,mencion:wData.mencion,modulos:wData.modulos,niveles:_sinNivelesParvularia(wData.asignaturas, wData.niveles, _tipoNiv),cursos:wData.cursos,liceos:wData.liceos,liceoPrincipal:wData.liceoPrincipal,permisos:wData.permisos,formatoPAES:!!wData.formatoPAES,formatoSIMCE:!!wData.formatoSIMCE,taxonomiaMarzano:!!wData.taxonomiaMarzano})
+  // Limpiar niveles incompatibles con las asignaturas (ej. Ciencias Naturales · NT1 no existe)
+  var _tipoParaNiveles = (tiposArr.indexOf('parvularia')!==-1 && tiposArr.length===1) ? 'parvularia' : (tiposArr[0]||'');
+  var wNivelesClean = _nivelesValidosParaAsignaturas(wData.asignaturas, wData.niveles, _tipoParaNiveles);
+  ELAuth.adminCrearProfesor({nombre:document.getElementById('pNombre').value.trim(),email:document.getElementById('pEmail').value.trim(),password:document.getElementById('pPass').value,tipoProfesor:tiposArr[0]||'',tiposProfesor:tiposArr,asignaturas:wData.asignaturas,especialidad:wData.especialidad,mencion:wData.mencion,modulos:wData.modulos,niveles:wNivelesClean,cursos:wData.cursos,liceos:wData.liceos,liceoPrincipal:wData.liceoPrincipal,permisos:wData.permisos,formatoPAES:!!wData.formatoPAES,formatoSIMCE:!!wData.formatoSIMCE,taxonomiaMarzano:!!wData.taxonomiaMarzano})
   .then(function(){
     notif('wNotif','✅ Profesor creado. Puede ingresar con su correo y contraseña desde cualquier dispositivo.','ok');
     loadData();btn.disabled=false;btn.innerHTML='✅ Crear Profesor';
@@ -2714,14 +2716,42 @@ function ppTgAsig(cb) { if(cb.checked){if(_ppData.asignaturas.indexOf(cb.value)=
 function ppTgNiv(cb)  { if(cb.checked){if(_ppData.niveles.indexOf(cb.value)===-1)_ppData.niveles.push(cb.value);}else{_ppData.niveles=_ppData.niveles.filter(function(n){return n!==cb.value;});}}
 function ppTgMod(cb)  { if(cb.checked){if(_ppData.modulos.indexOf(cb.value)===-1)_ppData.modulos.push(cb.value);}else{_ppData.modulos=_ppData.modulos.filter(function(m){return m!==cb.value;});}}
 
-// Quita NT1/NT2 cuando el profesor tiene asignaturas de plan común/básica/media.
-// Ciencias Naturales y demás asignaturas no existen en Educación Parvularia
-// (NT1/NT2), que se organiza por Núcleos de Aprendizaje. Evita combinaciones
-// imposibles como "Ciencias Naturales · NT1".
-function _sinNivelesParvularia(asignaturas, niveles, tipo) {
-  if (tipo === 'parvularia') return (niveles || []).slice();
-  if (!Array.isArray(niveles) || !Array.isArray(asignaturas) || !asignaturas.length) return niveles || [];
-  return niveles.filter(function(n){ return n !== 'NT1' && n !== 'NT2'; });
+// ── Compatibilidad asignatura ↔ nivel ──────────────────────────────
+// Las asignaturas del Plan Común / Básica (Ciencias Naturales, etc.) NO
+// existen en Educación Parvularia (NT1/NT2), que se organiza por Núcleos
+// de Aprendizaje, no por asignaturas. Esta función limpia los niveles
+// para que solo queden los válidos según lo que cada asignatura declara
+// en el currículo, evitando combinaciones imposibles como "Ciencias
+// Naturales · NT1".
+function _nivelesValidosParaAsignaturas(asignaturas, nivelesElegidos, tipo) {
+  asignaturas    = asignaturas    || [];
+  nivelesElegidos = nivelesElegidos || [];
+  var PARVULARIA = ['NT1','NT2'];
+  // Si es docente de parvularia (núcleos), los niveles NT son válidos.
+  if (tipo === 'parvularia') return nivelesElegidos.slice();
+  // Para el resto: descartar NT1/NT2, que no aplican a asignaturas.
+  var limpios = nivelesElegidos.filter(function(n){ return PARVULARIA.indexOf(n) === -1; });
+  // Además, si tenemos el catálogo, intersectar con los niveles que las
+  // asignaturas elegidas realmente cubren (unión de sus niveles válidos).
+  try {
+    if (typeof CURRICULA_CHILE !== 'undefined' && asignaturas.length) {
+      var catalogo = []
+        .concat(CURRICULA_CHILE.getAsignaturas('basica') || [])
+        .concat(CURRICULA_CHILE.getAsignaturas('media')  || []);
+      var permitidos = {};
+      catalogo.forEach(function(a){
+        if (asignaturas.indexOf(a.nombre) !== -1) {
+          (a.niveles || []).forEach(function(nv){ permitidos[nv] = true; });
+        }
+      });
+      // Solo filtramos si encontramos al menos un nivel permitido (evita
+      // vaciar por error si el catálogo no cargó).
+      if (Object.keys(permitidos).length) {
+        limpios = limpios.filter(function(n){ return permitidos[n]; });
+      }
+    }
+  } catch (e) { /* si algo falla, al menos ya quitamos NT1/NT2 */ }
+  return limpios;
 }
 
 function guardarPermisos() {
@@ -2738,11 +2768,14 @@ function guardarPermisos() {
   var espClean   = esTP ? _ppData.especialidad : '';
   var mencClean  = esTP ? _ppData.mencion : '';
   var modsClean  = esTP ? (_ppData.modulos || []) : [];
+  // Limpiar niveles incompatibles con las asignaturas (ej. Ciencias
+  // Naturales no existe en NT1/NT2). Evita combinaciones imposibles.
+  var nivelesClean = _nivelesValidosParaAsignaturas(asigsClean, _ppData.niveles, _ppData.tipo);
 
   var datos = {
     tipoProfesor: _ppData.tipo,
     asignaturas:  asigsClean,
-    niveles:      _sinNivelesParvularia(asigsClean, _ppData.niveles, _ppData.tipo),
+    niveles:      nivelesClean,
     especialidad: espClean,
     especialidades: espClean ? [espClean] : [],
     mencion:      mencClean,

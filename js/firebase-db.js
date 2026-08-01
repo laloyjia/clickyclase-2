@@ -77,13 +77,23 @@ var ELDB = (function() {
       var u = this._user();
       var roles = u.roles || {};
       var r = String(u.role || '').toLowerCase();
-      var apoyos = ['pie','educadora_diferencial','educador_diferencial','diferencial',
-                    'psicopedagoga','psicopedagogo','psicopedagogia','psicologo','psicologa',
-                    'psicosocial','apoyo','convivencia','educadora','fonoaudiologo','fonoaudiologa'];
+      // Roles reales del sistema (EL_ROLES en firebase-config.js):
+      //   pie_enc, pie_edu, aps_enc, aps_prof, amb_enc, amb_prof
+      // + coincidencia por profesión escrita libremente:
+      //   Psicopedagoga, Educadora Diferencial, Psicólogo/a, etc.
+      var apoyos = ['pie_enc','pie_edu','aps_enc','aps_prof','amb_enc','amb_prof'];
       if (apoyos.indexOf(r) !== -1) return true;
-      return !!(roles.pie || roles.educadora_diferencial || roles.diferencial ||
-                roles.psicopedagoga || roles.psicopedagogo || roles.psicosocial ||
-                roles.apoyo || roles.convivencia);
+      if (roles.pie_enc || roles.pie_edu || roles.aps_enc || roles.aps_prof || roles.amb_enc || roles.amb_prof) return true;
+      // Además: si el usuario declara una profesión de apoyo en su perfil.
+      var prof = String(u.profesion || u.cargo || '').toLowerCase();
+      if (prof.indexOf('psicopedag') === 0)   return true;
+      if (prof.indexOf('educadora dif') === 0) return true;
+      if (prof.indexOf('educador dif') === 0)  return true;
+      if (prof.indexOf('psicólog') === 0 || prof.indexOf('psicolog') === 0) return true;
+      if (prof.indexOf('trabajador') === 0)    return true;
+      if (prof.indexOf('fonoaud') === 0)       return true;
+      if (prof.indexOf('terapeut') === 0)      return true;
+      return false;
     },
 
     /**

@@ -678,8 +678,17 @@ function renderMateriales() {
         if (_visFiltro === 'privada') {
             matchVis = (m.visibilidad === 'privada' || !m.visibilidad) && m.autorUid === (currentUser && currentUser.uid);
         } else if (_visFiltro === 'departamento') {
-            const asig = String(m.asignatura || '').toLowerCase();
-            matchVis = m.visibilidad === 'departamento' || (asig && misAsigs.indexOf(asig) !== -1);
+            // Mi departamento: material de la misma asignatura del usuario
+            // (independiente de la visibilidad marcada — la lógica de si el
+            // usuario puede verlo YA la aplicó ELDB.materiales.listar según
+            // rol: profe jefe, misma asignatura, PIE con estudiante, psicoped)
+            const asig = String(m.asignatura || m.modulo || '').toLowerCase();
+            const mod  = String(m.modulo || '').toLowerCase();
+            const esPropio = m.autorUid === (currentUser && currentUser.uid);
+            matchVis = esPropio ||
+                       (asig && misAsigs.indexOf(asig) !== -1) ||
+                       (mod  && misAsigs.indexOf(mod)  !== -1) ||
+                       m.visibilidad === 'departamento';
         } else {
             // 'todos' — muestra los del liceo + los propios del usuario
             const esPropio = m.autorUid === (currentUser && currentUser.uid);

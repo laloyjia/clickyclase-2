@@ -1263,19 +1263,36 @@
             .eval-dual.with-pie { grid-template-columns: 1fr; }
         }
 
-        /* Chips de diagnóstico NEE — mismo lenguaje visual que planificación */
+        /* Chips de diagnóstico NEE multi-select */
         .pie-diag-chk {
-            display: flex; align-items: center; gap: 9px;
-            padding: 10px 13px;
-            background: rgba(100,116,139,.06);
-            border: 1px solid rgba(100,116,139,.18);
-            border-radius: 10px; cursor: pointer;
-            font-size: .82rem; font-weight: 600; color: #334155;
-            transition: all .16s ease; user-select: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            background: rgba(244,114,182,.05);
+            border: 1px solid rgba(244,114,182,.2);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: .85rem;
+            color: #f1d6e8;
+            transition: all .15s ease;
+            user-select: none;
         }
-        .pie-diag-chk:hover { background: rgba(100,116,139,.1); border-color: rgba(100,116,139,.3); }
-        .pie-diag-chk input[type=checkbox] { accent-color: #d6499a; width: 15px; height: 15px; margin: 0; flex-shrink: 0; }
-        .pie-diag-chk:has(input:checked) { background: rgba(236,72,153,.08); color: #9d174d; border: 1px solid rgba(236,72,153,.25); font-weight: 700; }
+        .pie-diag-chk:hover {
+            background: rgba(244,114,182,.12);
+            border-color: rgba(244,114,182,.45);
+        }
+        .pie-diag-chk input[type=checkbox] {
+            accent-color: #DC2626;
+            width: 14px;
+            height: 14px;
+            margin: 0;
+        }
+        .pie-diag-chk:has(input:checked) {
+            background: linear-gradient(135deg, rgba(244,114,182,.22), rgba(37,99,235,.14));
+            border-color: rgba(244,114,182,.6);
+            color: #ffffff;
+        }
 
         /* Paneles de configuración por NEE (uno por diagnóstico marcado) */
         .pie-panel {
@@ -1372,7 +1389,7 @@
     </nav>
 
     <!-- BARRA DE CONTEXTO PROFESOR -->
-    <div id="contextoBar" style="display:none !important;background:rgba(37, 99, 235, .08);border-bottom:1px solid rgba(37, 99, 235, .15);padding:8px 20px;font-size:.8rem;color:#1D4ED8;align-items:center;gap:16px;flex-wrap:wrap">
+    <div id="contextoBar" style="display:none;background:rgba(37, 99, 235, .08);border-bottom:1px solid rgba(37, 99, 235, .15);padding:8px 20px;font-size:.8rem;color:#1D4ED8;display:flex;align-items:center;gap:16px;flex-wrap:wrap">
         <span>👤 <strong id="ctxNombre">—</strong></span>
         <span id="ctxTipo" style="background:rgba(37, 99, 235, .2);border:1px solid rgba(37, 99, 235, .3);padding:2px 10px;border-radius:12px"></span>
         <span id="ctxEsp" style="color:#64748B"></span>
@@ -1486,11 +1503,6 @@
                     <div class="icon">&#9200;</div>
                     <h3>Control Rápido</h3>
                     <p>Quiz de 10–15 min para evaluación formativa de la clase</p>
-                </div>
-                <div class="tipo-doc-card" onclick="seleccionarTipo(this, 'presentacion'); abrirWizardPPT()" data-tipo="presentacion" style="border:2px solid #14b8a6;background:linear-gradient(135deg,rgba(20,184,166,.08),rgba(37,99,235,.05))">
-                    <div class="icon">&#127916;</div>
-                    <h3>Presentación IA <span style="background:linear-gradient(135deg,#14b8a6,#0EA5E9);color:#fff;font-size:.65rem;padding:2px 8px;border-radius:99px;margin-left:4px;vertical-align:middle">NUEVO</span></h3>
-                    <p>PowerPoint con imágenes generadas por IA · descarga .pptx editable</p>
                 </div>
             </div>
         </div>
@@ -2072,7 +2084,7 @@
     <script src="js/material/material-ia.js"></script>
     <script src="js/material/material-tabs.js"></script>
     <script src="js/colegios.js"></script>
-    <script src="js/curricula-chile.js?v=2"></script>
+    <script src="js/curricula-chile.js"></script>
     <!-- ── Plan Común (transversales + asignatura por archivo) ── -->
     <script src="js/curricula/plan-comun/_comun.js"></script>
     <script src="js/curricula/plan-comun/lenguaje.js"></script>
@@ -2175,7 +2187,15 @@
             }
             _matUser = user;
 
-            var inProf = document.getElementById('inputProfesor');
+            // FIX: quitar niveles NT1/NT2 si el profesor tiene asignaturas de
+            // plan común/básica/media (Ciencias Naturales, etc. no existen en
+            // Educación Parvularia, que usa Núcleos). Evita combinaciones como
+            // "Ciencias Naturales · NT1" heredadas de datos antiguos.
+            if (user.tipoProfesor !== 'parvularia' && Array.isArray(user.niveles)
+                && Array.isArray(user.asignaturas) && user.asignaturas.length) {
+                user.niveles = user.niveles.filter(function (n) { return n !== 'NT1' && n !== 'NT2'; });
+            }
+
             if (inProf) inProf.value = user.nombre || user.name || '';
 
             // Pre-cargar institución del perfil del profesor
@@ -3426,199 +3446,7 @@
 
     </script>
     <script src="js/recommendations.js"></script>
-
-<!-- ═══════════════════════════════════════════════════════════
-     GENERADOR DE PRESENTACIONES CON IA (Pollinations + PptxGenJS)
-     ═══════════════════════════════════════════════════════════ -->
-<script src="https://cdn.jsdelivr.net/gh/gitbrent/pptxgenjs@3.12.0/dist/pptxgen.bundle.js" defer></script>
-<script src="js/ppt-generator.js" defer></script>
-
-<!-- Modal Wizard PPT -->
-<div id="pptModalOv" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:9999;align-items:center;justify-content:center;padding:20px">
-  <div style="background:#fff;border-radius:14px;padding:24px 28px;width:min(720px,94vw);max-height:92vh;overflow:auto;box-shadow:0 20px 60px rgba(0,0,0,.35)">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
-      <h3 style="margin:0;font-size:1.15rem">🎬 <span id="pptModalTit">Generar Presentación con IA</span></h3>
-      <button style="background:transparent;border:0;font-size:1.5rem;cursor:pointer;color:#64748B" onclick="cerrarWizardPPT()">×</button>
-    </div>
-    <div id="pptModalBody"></div>
-  </div>
-</div>
-
-<script>
-/* ══════════════════════════════════════════════════════
-   Wizard PPT: configuración → generación → preview → descarga
-   ══════════════════════════════════════════════════════ */
-window._pptWizard = { instancia: null, paso: 1 };
-
-function abrirWizardPPT() {
-  window._pptWizard.paso = 1;
-  document.getElementById('pptModalOv').style.display = 'flex';
-  _renderPptStep1();
-}
-function cerrarWizardPPT() {
-  document.getElementById('pptModalOv').style.display = 'none';
-  window._pptWizard = { instancia: null, paso: 1 };
-}
-
-function _renderPptStep1() {
-  document.getElementById('pptModalTit').textContent = 'Paso 1 · Configuración';
-  var u = (window.ELAuth && ELAuth.user) || {};
-  var asignaturas = (u.asignaturas && u.asignaturas.length)
-    ? u.asignaturas.map(function(a){ return '<option value="' + a + '">' + a + '</option>'; }).join('')
-    : '<option value="">— Ninguna —</option>';
-  document.getElementById('pptModalBody').innerHTML =
-    '<div style="display:grid;gap:12px">' +
-    '<div style="padding:10px 14px;background:linear-gradient(135deg,rgba(20,184,166,.08),rgba(37,99,235,.04));border-left:4px solid #14b8a6;border-radius:8px;font-size:.85rem;line-height:1.5">' +
-      '💡 La IA generará una presentación completa con imágenes. Costo: <b>$0 CLP</b> (Pollinations Flux + Gemini gratis).' +
-    '</div>' +
-    '<div class="fld"><label style="font-weight:600;font-size:.8rem">Tema de la clase *</label>' +
-      '<input type="text" id="pptTema" placeholder="Ej: La célula: estructura y función" style="width:100%;padding:8px 10px;border-radius:6px;border:1px solid rgba(0,0,0,.15);font-size:.9rem"></div>' +
-    '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">' +
-      '<div class="fld"><label style="font-weight:600;font-size:.8rem">Asignatura</label>' +
-        '<select id="pptAsig" style="width:100%;padding:8px 10px;border-radius:6px;border:1px solid rgba(0,0,0,.15)">' + asignaturas + '</select></div>' +
-      '<div class="fld"><label style="font-weight:600;font-size:.8rem">Curso *</label>' +
-        '<input type="text" id="pptCurso" placeholder="Ej: 7° Básico" value="' + (u.cursoJefaturaNombre || '') + '" style="width:100%;padding:8px 10px;border-radius:6px;border:1px solid rgba(0,0,0,.15)"></div>' +
-      '<div class="fld"><label style="font-weight:600;font-size:.8rem">N° diapositivas</label>' +
-        '<input type="number" id="pptN" min="5" max="25" value="10" style="width:100%;padding:8px 10px;border-radius:6px;border:1px solid rgba(0,0,0,.15)"></div>' +
-    '</div>' +
-    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">' +
-      '<div class="fld"><label style="font-weight:600;font-size:.8rem">Estilo visual</label>' +
-        '<select id="pptEstilo" style="width:100%;padding:8px 10px;border-radius:6px;border:1px solid rgba(0,0,0,.15)">' +
-          '<option value="didactica">📘 Didáctico (azul)</option>' +
-          '<option value="formal">🎓 Formal (marino)</option>' +
-          '<option value="interactiva">✨ Interactivo (teal)</option>' +
-          '<option value="calida">🍂 Cálido (naranja)</option>' +
-        '</select></div>' +
-      '<div class="fld"><label style="font-weight:600;font-size:.8rem">Imágenes</label>' +
-        '<select id="pptImg" style="width:100%;padding:8px 10px;border-radius:6px;border:1px solid rgba(0,0,0,.15)">' +
-          '<option value="ia">🎨 Generadas por IA (Flux)</option>' +
-          '<option value="stock">📸 Foto stock (Unsplash)</option>' +
-          '<option value="ambas">🎭 Ambas mezcladas</option>' +
-          '<option value="ninguna">🚫 Sin imágenes</option>' +
-        '</select></div>' +
-    '</div>' +
-    '<div class="fld"><label style="font-weight:600;font-size:.8rem">OA MINEDUC (opcional)</label>' +
-      '<input type="text" id="pptOA" placeholder="Ej: OA 04 · Explicar la organización celular…" style="width:100%;padding:8px 10px;border-radius:6px;border:1px solid rgba(0,0,0,.15)"></div>' +
-    '<div class="fld"><label style="font-weight:600;font-size:.8rem">Instrucciones especiales (opcional)</label>' +
-      '<textarea id="pptInstr" rows="2" placeholder="Ej: incluir ejemplo de la Cordillera de los Andes · lenguaje sencillo para 3° básico · foco en experimentos prácticos…" style="width:100%;padding:8px 10px;border-radius:6px;border:1px solid rgba(0,0,0,.15);font-family:inherit;resize:vertical"></textarea></div>' +
-    '<div style="display:flex;gap:8px;justify-content:flex-end;padding-top:12px;border-top:1px solid rgba(0,0,0,.08)">' +
-      '<button onclick="cerrarWizardPPT()" style="padding:9px 16px;border:1px solid #cbd5e1;background:#fff;border-radius:8px;cursor:pointer">Cancelar</button>' +
-      '<button onclick="_pptGenerar()" style="padding:9px 18px;border:0;background:linear-gradient(135deg,#14b8a6,#0EA5E9);color:#fff;border-radius:8px;cursor:pointer;font-weight:700">🚀 Generar con IA</button>' +
-    '</div></div>';
-}
-
-function _pptGenerar() {
-  var tema = document.getElementById('pptTema').value.trim();
-  var curso = document.getElementById('pptCurso').value.trim();
-  if (!tema) { alert('Ingresá el tema de la clase'); return; }
-  if (!curso) { alert('Ingresá el curso'); return; }
-  var u = (window.ELAuth && ELAuth.user) || {};
-  var cfg = {
-    tema: tema,
-    curso: curso,
-    asignatura: document.getElementById('pptAsig').value,
-    nSlides: parseInt(document.getElementById('pptN').value, 10) || 10,
-    estilo: document.getElementById('pptEstilo').value,
-    imagenes: document.getElementById('pptImg').value,
-    oa: document.getElementById('pptOA').value.trim(),
-    instrucciones: document.getElementById('pptInstr').value.trim(),
-    profesorNombre: u.nombre || u.email || '',
-    liceoNombre: u.liceoNombre || u.liceoSlug || ''
-  };
-  if (typeof CCPptGenerator === 'undefined') { alert('El módulo generador no está cargado. Refrescá la página.'); return; }
-  window._pptWizard.instancia = new CCPptGenerator(cfg);
-  _renderPptStep2Cargando();
-  window._pptWizard.instancia.generar()
-    .then(function(){ _renderPptStep3Preview(); })
-    .catch(function(err){
-      document.getElementById('pptModalBody').innerHTML =
-        '<div style="padding:20px;text-align:center;color:#DC2626"><p><b>✕ Error al generar</b></p><p style="font-size:.85rem">' +
-        (err.message || err) + '</p><button onclick="_renderPptStep1()" style="margin-top:10px;padding:8px 16px;border:1px solid #cbd5e1;background:#fff;border-radius:8px;cursor:pointer">← Volver</button></div>';
-    });
-}
-
-function _renderPptStep2Cargando() {
-  document.getElementById('pptModalTit').textContent = 'Paso 2 · Generando…';
-  document.getElementById('pptModalBody').innerHTML =
-    '<div style="padding:40px;text-align:center">' +
-    '<div style="font-size:3rem;margin-bottom:16px;animation:spin 1.5s linear infinite;display:inline-block">🎨</div>' +
-    '<h3 style="margin:0 0 8px">La IA está diseñando tu presentación</h3>' +
-    '<p style="color:#64748B;margin:0;font-size:.9rem">Gemini está armando la estructura pedagógica…</p>' +
-    '<p style="color:#94A3B8;font-size:.8rem;margin-top:12px">Suele tardar 10-20 segundos</p>' +
-    '</div><style>@keyframes spin{to{transform:rotate(360deg)}}</style>';
-}
-
-function _renderPptStep3Preview() {
-  var e = window._pptWizard.instancia.estructura;
-  document.getElementById('pptModalTit').textContent = 'Paso 3 · Vista previa';
-  var slidesHtml = (e.slides || []).map(function(s, i){
-    var bullets = (s.bullets || []).map(function(b){ return '<li>' + b + '</li>'; }).join('');
-    return '<div style="padding:10px 12px;background:#fff;border:1px solid rgba(0,0,0,.08);border-left:3px solid #14b8a6;border-radius:6px;margin-bottom:8px">' +
-      '<div style="font-weight:700;font-size:.9rem;color:#0F766E">Slide ' + (i+2) + ': ' + s.titulo + '</div>' +
-      '<ul style="margin:6px 0 0 20px;font-size:.82rem;color:#334155">' + bullets + '</ul>' +
-      (s.notasProfesor ? '<div style="margin-top:6px;font-size:.75rem;color:#64748B;font-style:italic">🎙 ' + s.notasProfesor + '</div>' : '') +
-      '</div>';
-  }).join('');
-
-  document.getElementById('pptModalBody').innerHTML =
-    '<div style="max-height:60vh;overflow:auto;padding-right:6px">' +
-    '<div style="padding:14px 18px;background:linear-gradient(135deg,#14b8a6,#0EA5E9);color:#fff;border-radius:10px;margin-bottom:14px">' +
-      '<div style="font-size:1.2rem;font-weight:800">📘 ' + (e.titulo || 'Presentación') + '</div>' +
-      '<div style="font-size:.85rem;opacity:.9">' + (e.subtitulo || '') + '</div>' +
-      (e.portada && e.portada.resumen ? '<div style="font-size:.8rem;opacity:.85;margin-top:6px;font-style:italic">' + e.portada.resumen + '</div>' : '') +
-    '</div>' +
-    (e.aprendizajes && e.aprendizajes.length ?
-      '<div style="padding:10px 12px;background:rgba(37,99,235,.05);border-left:3px solid #2563EB;border-radius:6px;margin-bottom:8px;font-size:.85rem">🎯 <b>OA:</b> ' + e.aprendizajes.join(' · ') + '</div>' : '') +
-    slidesHtml +
-    (e.actividad ? '<div style="padding:10px 12px;background:rgba(245,158,11,.08);border-left:3px solid #F59E0B;border-radius:6px;margin-bottom:8px"><b style="color:#B45309">✏ ' + (e.actividad.titulo||'Actividad') + '</b><div style="font-size:.82rem;margin-top:4px">' + (e.actividad.descripcion||'') + '</div></div>' : '') +
-    (e.cierre ? '<div style="padding:10px 12px;background:rgba(220,38,38,.05);border-left:3px solid #DC2626;border-radius:6px"><b style="color:#B91C1C">👋 ' + (e.cierre.titulo||'Cierre') + '</b>' + (e.cierre.preguntas ? '<ul style="margin:6px 0 0 20px;font-size:.82rem">' + e.cierre.preguntas.map(function(p){return '<li>'+p+'</li>';}).join('') + '</ul>' : '') + '</div>' : '') +
-    '</div>' +
-    '<div id="pptProgress" style="display:none;padding:10px;background:rgba(20,184,166,.05);border-radius:6px;margin-top:12px;font-size:.85rem;text-align:center">🎨 Descargando imágenes… <span id="pptProgTxt">0/0</span></div>' +
-    '<div style="display:flex;gap:8px;justify-content:space-between;padding-top:12px;border-top:1px solid rgba(0,0,0,.08);margin-top:14px">' +
-      '<button onclick="_renderPptStep1()" style="padding:9px 16px;border:1px solid #cbd5e1;background:#fff;border-radius:8px;cursor:pointer">← Volver a configurar</button>' +
-      '<div style="display:flex;gap:8px">' +
-        '<button onclick="_pptRegenerar()" style="padding:9px 16px;border:1px solid #cbd5e1;background:#fff;border-radius:8px;cursor:pointer">🔄 Regenerar</button>' +
-        '<button onclick="_pptDescargar()" style="padding:9px 20px;border:0;background:linear-gradient(135deg,#14b8a6,#0EA5E9);color:#fff;border-radius:8px;cursor:pointer;font-weight:700">📥 Descargar .pptx</button>' +
-      '</div></div>';
-}
-
-function _pptRegenerar() { _pptGenerar(); }
-
-function _pptDescargar() {
-  var prog = document.getElementById('pptProgress');
-  var txt = document.getElementById('pptProgTxt');
-  if (prog) prog.style.display = 'block';
-  window._pptWizard.instancia.descargar(null, function(hecho, total){
-    if (txt) txt.textContent = hecho + '/' + total;
-  }).then(function(){
-    if (prog) prog.innerHTML = '✅ ¡Descargado! El archivo .pptx quedó en tu carpeta de Descargas.';
-    setTimeout(cerrarWizardPPT, 2000);
-    // Registrar como material en la biblioteca (opcional)
-    try {
-      if (window.ELDB && ELDB.materiales && ELDB.materiales.guardar) {
-        var e = window._pptWizard.instancia.estructura;
-        var cfg = window._pptWizard.instancia.config;
-        ELDB.materiales.guardar({
-          titulo: e.titulo || cfg.tema,
-          tipo: 'presentacion',
-          asignatura: cfg.asignatura || '',
-          curso: cfg.curso,
-          cursoNombre: cfg.curso,
-          nivel: cfg.curso,
-          descripcion: (e.portada && e.portada.resumen) || '',
-          contenido: JSON.stringify(e),
-          visibilidad: 'liceo'
-        }).catch(function(){});
-      }
-    } catch(e) { console.warn('No se pudo registrar en biblioteca:', e); }
-  }).catch(function(err){
-    if (prog) prog.innerHTML = '<span style="color:#DC2626">✕ Error: ' + (err.message||err) + '</span>';
-  });
-}
-</script>
-
 <script src="js/ia-widget.js" defer></script>
-<script src="js/session-guard.js" defer></script>
 <script src="js/search-global.js" defer></script>
 </body>
 </html>

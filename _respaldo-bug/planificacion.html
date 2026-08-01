@@ -1050,7 +1050,7 @@
     </nav>
 
     <!-- BARRA DE CONTEXTO PROFESOR -->
-    <div id="contextoBar" style="display:none !important;background:rgba(37, 99, 235, .08);border-bottom:1px solid rgba(37, 99, 235, .15);padding:8px 20px;font-size:.8rem;color:#1D4ED8;align-items:center;gap:16px;flex-wrap:wrap">
+    <div id="contextoBar" style="display:none;background:rgba(37, 99, 235, .08);border-bottom:1px solid rgba(37, 99, 235, .15);padding:8px 20px;font-size:.8rem;color:#1D4ED8;display:flex;align-items:center;gap:16px;flex-wrap:wrap">
         <span>👤 <strong id="ctxNombre">—</strong></span>
         <span id="ctxTipo" style="background:rgba(37, 99, 235, .2);border:1px solid rgba(37, 99, 235, .3);padding:2px 10px;border-radius:12px"></span>
         <span id="ctxEsp" style="color:#64748B"></span>
@@ -1610,7 +1610,7 @@
     <script src="js/presencia-logger.js"></script>
     <script>document.addEventListener('DOMContentLoaded',function(){ if(window.ELPresencia) ELPresencia.start('Planificación'); });</script>
     <script src="js/auth.js"></script>
-    <script src="js/curricula-chile.js?v=2"></script>
+    <script src="js/curricula-chile.js"></script>
     <!-- ── Plan Común (transversales + asignatura por archivo) ── -->
     <script src="js/curricula/plan-comun/_comun.js"></script>
     <script src="js/curricula/plan-comun/lenguaje.js"></script>
@@ -1712,28 +1712,6 @@
 
         ELAuth.onUserReady(function(user) {
             if (!user) return;
-
-            // ── FIX combos inválidos ──────────────────────────────────────
-            // Limpiar de una vez, apenas entra el usuario, las combinaciones
-            // asignatura·nivel imposibles (ej. "ciencias_nat__nt1"): las
-            // asignaturas de plan común no existen en NT1/NT2 (Parvularia usa
-            // Núcleos). Así TODA la página (barra de contexto incluida) recibe
-            // datos limpios.
-            if (Array.isArray(user.asignaturas)) {
-                var _NUCLEOS = ['parvularia','nucleo','exploracion','lenguaje_verbal','convivencia',
-                                'corporalidad','pensamiento','artistico','entorno','identidad','comunicacion'];
-                user.asignaturas = user.asignaturas.filter(function(slug){
-                    var s = String(slug||'').toLowerCase();
-                    if (s.indexOf('nt1') === -1 && s.indexOf('nt2') === -1) return true;
-                    return _NUCLEOS.some(function(n){ return s.indexOf(n) !== -1; });
-                });
-            }
-            if (user.tipoProfesor !== 'parvularia' && Array.isArray(user.niveles)
-                && Array.isArray(user.asignaturas) && user.asignaturas.length) {
-                user.niveles = user.niveles.filter(function(n){ return n !== 'NT1' && n !== 'NT2'; });
-            }
-            // ──────────────────────────────────────────────────────────────
-
             _planifUser = user;
 
             // Llenar nombre del profesor
@@ -1808,11 +1786,6 @@
 
     function _resolveAsigSiglaLocal(nombre) {
         if (!nombre) return null;
-        // FIX: si viene con nivel pegado (superadmin: "lenguaje__2b"), quitarlo y normalizar.
-        if (String(nombre).indexOf('__') !== -1) nombre = String(nombre).split('__')[0];
-        if (typeof CURRICULA_CHILE !== 'undefined' && CURRICULA_CHILE.nombreAsignaturaCanonico) {
-            nombre = CURRICULA_CHILE.nombreAsignaturaCanonico(nombre);
-        }
         var k = nombre.trim().toLowerCase()
             .replace(/[áéíóúñ]/g, function(c){return {á:'a',é:'e',í:'i',ó:'o',ú:'u',ñ:'n'}[c]||c;});
         if (_SIGLA_MAP_PLAN[k]) return _SIGLA_MAP_PLAN[k];
@@ -1820,18 +1793,6 @@
             if (k.indexOf(key) !== -1 || key.indexOf(k) !== -1) return _SIGLA_MAP_PLAN[key];
         }
         return null;
-    }
-
-    // Oculta combinaciones asignatura·nivel imposibles (ej. "ciencias_nat__nt1").
-    function _sinCombosPlan(asigs){
-        if (!Array.isArray(asigs)) return asigs || [];
-        var NUCLEOS = ['parvularia','nucleo','exploracion','lenguaje_verbal','convivencia',
-                       'corporalidad','pensamiento','artistico','entorno','identidad','comunicacion'];
-        return asigs.filter(function(slug){
-            var s = String(slug||'').toLowerCase();
-            if (s.indexOf('nt1') === -1 && s.indexOf('nt2') === -1) return true;
-            return NUCLEOS.some(function(n){ return s.indexOf(n) !== -1; });
-        });
     }
 
     function initCurriculo(user) {
@@ -1881,17 +1842,19 @@
         if ((!user.niveles || !user.niveles.length) && user.tipoProfesor === 'basica')  user.niveles = ['1B','2B','3B','4B','5B','6B','7B','8B'];
         if ((!user.cursos || !user.cursos.length) && _tieneCursosNvos) user.cursos = user.cursosAsignados.slice();
 
-        // Quitar NT1/NT2 si el profesor tiene asignaturas de plan común (no existen
-        // en Educación Parvularia). Evita mostrar combos como "Ciencias Naturales · NT1".
-        if (user.tipoProfesor !== 'parvularia' && Array.isArray(user.niveles)
-            && Array.isArray(user.asignaturas) && user.asignaturas.length) {
-            user.niveles = user.niveles.filter(function (n) { return n !== 'NT1' && n !== 'NT2'; });
+        // ── FIX: sanear niveles incompatibles con las asignaturas ──────────
+        // Un profesor de plan común/básica/media NO puede tener NT1/NT2 (esos
+        // niveles son de Educación Parvularia, que usa Núcleos, no asignaturas).
+        // Si por datos antiguos quedaron NT1/NT2 asignados junto a asignaturas
+        // como Ciencias Naturales, los quitamos para que no aparezcan aquí.
+        if (user.tipoProfesor !== 'parvularia' && Array.isArray(user.niveles)) {
+            var _hayAsigs = Array.isArray(user.asignaturas) && user.asignaturas.length > 0;
+            if (_hayAsigs) {
+                user.niveles = user.niveles.filter(function (n) {
+                    return n !== 'NT1' && n !== 'NT2';
+                });
+            }
         }
-        // También limpiar combos "asignatura__nt1/nt2" dentro de asignaturas.
-        if (Array.isArray(user.asignaturas)) {
-            user.asignaturas = _sinCombosPlan(user.asignaturas);
-        }
-
         // ═════════════════════════════════════════════════════════════════
 
         // Mostrar barra de contexto del profesor
@@ -1916,12 +1879,8 @@
             document.getElementById('ctxNombre').textContent = user.nombre || user.email || '—';
             document.getElementById('ctxTipo').textContent = tipos[user.tipoProfesor] || '—';
             if (user.especialidad) document.getElementById('ctxEsp').textContent = '⚙️ ' + user.especialidad;
-            if (user.asignaturas && user.asignaturas.length) {
-                // Mostrar un resumen limpio, no la lista cruda de 50+ combos feos.
-                var _nAsig = _sinCombosPlan(user.asignaturas).length;
-                document.getElementById('ctxEsp').textContent = _nAsig + (_nAsig === 1 ? ' asignatura' : ' asignaturas');
-            }
-            if (user.niveles && user.niveles.length) document.getElementById('ctxNiveles').textContent = user.niveles.length + ' niveles';
+            if (user.asignaturas && user.asignaturas.length) document.getElementById('ctxEsp').textContent = user.asignaturas.join(', ');
+            if (user.niveles && user.niveles.length) document.getElementById('ctxNiveles').textContent = 'Niveles: ' + user.niveles.join(', ');
         }
         var navInfo = document.getElementById('navProfesorInfo');
         if (navInfo) navInfo.textContent = user.nombre || '';
