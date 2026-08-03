@@ -2059,6 +2059,7 @@
     <script src="js/firebase-auth.js"></script>
 <script src="js/aprobaciones.js"></script>
     <script src="js/firebase-db.js"></script>
+    <script src="js/cuota-ia.js?v=1"></script>
     <script src="js/presencia-logger.js"></script>
     <script>document.addEventListener('DOMContentLoaded',function(){ if(window.ELPresencia) ELPresencia.start('Crear material'); });</script>
     <!-- Módulos extraídos de material.html (refactor incremental) -->
@@ -3430,8 +3431,9 @@
 <!-- ═══════════════════════════════════════════════════════════
      GENERADOR DE PRESENTACIONES CON IA (Pollinations + PptxGenJS)
      ═══════════════════════════════════════════════════════════ -->
-<script src="https://cdn.jsdelivr.net/gh/gitbrent/pptxgenjs@3.12.0/dist/pptxgen.bundle.js" defer></script>
-<script src="js/ppt-generator.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.11.0/dist/pptxgen.bundle.js"></script>
+<script src="js/ppt-generator.js?v=20260802-google-cse"></script>
 
 <!-- Modal Wizard PPT -->
 <div id="pptModalOv" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:9999;align-items:center;justify-content:center;padding:20px">
@@ -3460,28 +3462,150 @@ function cerrarWizardPPT() {
   window._pptWizard = { instancia: null, paso: 1 };
 }
 
+/* Helpers wizard: normalización de nivel y nombre asignatura */
+function _pptNormalizarNivel(cursoTxt) {
+  // Convierte "8° Básico" → "8B", "1° Medio" → "1M", "4MA" → "4M"
+  var t = String(cursoTxt || '').toLowerCase();
+  var m = t.match(/(\d)[\s°º]*(b[aá]sico|m[eé]dio|m|b)/);
+  if (m) return m[1] + (m[2].charAt(0) === 'b' ? 'B' : 'M');
+  m = t.match(/^(\d)([mb])/);
+  if (m) return m[1] + m[2].toUpperCase();
+  return '';
+}
+function _pptAsignaturaNombre(sigla) {
+  var MAP = {
+    lenguaje:'Lenguaje y Comunicación', ling_liter:'Lengua y Literatura',
+    matematica:'Matemática', historia:'Historia, Geografía y Cs. Sociales',
+    ed_ciudadana:'Educación Ciudadana', ingles:'Inglés',
+    ciencias_nat:'Ciencias Naturales', biologia:'Biología',
+    fisica:'Física', quimica:'Química', ed_fisica:'Educación Física y Salud',
+    artes_vis:'Artes Visuales', musica:'Música', artes_esc:'Artes Escénicas',
+    religion:'Religión', orientacion:'Orientación', tecnologia:'Tecnología',
+    filosofia:'Filosofía', cs_ciudadania:'Ciencias para la Ciudadanía',
+    // Especialidades TP
+    tp_electricidad:'Electricidad (EMTP)', tp_electronica:'Electrónica (EMTP)',
+    tp_mec_auto:'Mecánica Automotriz (EMTP)', tp_administracion:'Administración (EMTP)',
+    tp_contabilidad:'Contabilidad (EMTP)', tp_gastronomia:'Gastronomía (EMTP)',
+    tp_atencion_parvulos:'Atención de Párvulos (EMTP)', tp_enfermeria:'Atención de Enfermería (EMTP)'
+  };
+  // Si es tp_XXXX no mapeado, mostrar el slug formateado
+  if (MAP[sigla]) return MAP[sigla];
+  if (String(sigla).startsWith('tp_')) return sigla.replace(/^tp_/,'').replace(/_/g,' ') + ' (EMTP)';
+  return sigla;
+}
+/**
+ * Recopila las áreas didácticas del profesor.
+ * Devuelve dos grupos separados:
+ *  - comun[]: asignaturas de plan común  → OA (Objetivo de Aprendizaje)
+ *  - tp[]:    { especialidad, moduloId } → AE (Aprendizaje Esperado) + CE
+ */
+function _pptRecopilarAreas(user) {
+  var comun = [];
+  var tp = [];
+  var vistos = {};
+  function pushComun(v){
+    if (!v) return;
+    v = String(v).toLowerCase();
+    if (v.startsWith('tp_')) return;                        // TP se maneja aparte
+    if (vistos['c_'+v]) return; vistos['c_'+v] = true;
+    comun.push(v);
+  }
+  (user.asignaturas || []).forEach(pushComun);
+  if (user.asignatura) pushComun(user.asignatura);
+
+  // TP: módulos específicos (más granular) O especialidad completa como fallback
+  // Soporta 2 formatos:
+  //  a) modulosTP: { tp_electronica: ['EN2','EN4'] }
+  //  b) especialidad: 'electronica' + modulos: ['EN2','EN4']   ← legacy admin
+  var modsTP = user.modulosTP || {};
+  Object.keys(modsTP).forEach(function(esp){
+    var espNorm = esp.startsWith('tp_') ? esp : 'tp_' + esp;
+    (modsTP[esp] || []).forEach(function(modId){
+      var key = espNorm + '|' + modId;
+      if (vistos[key]) return; vistos[key] = true;
+      tp.push({ tipo:'modulo', especialidad:espNorm, moduloId:modId });
+    });
+  });
+  // Legacy: user.modulos (array plano) + user.especialidad singular
+  if (Array.isArray(user.modulos) && user.modulos.length && user.especialidad) {
+    var espN = user.especialidad.startsWith('tp_') ? user.especialidad : 'tp_' + user.especialidad;
+    user.modulos.forEach(function(modId){
+      var key = espN + '|' + modId;
+      if (vistos[key]) return; vistos[key] = true;
+      tp.push({ tipo:'modulo', especialidad:espN, moduloId:modId });
+    });
+  }
+  // Si tiene especialidad pero sin módulos específicos, agregar como área
+  (user.especialidades || []).forEach(function(esp){
+    var espNorm = esp.startsWith('tp_') ? esp : 'tp_' + esp;
+    if (modsTP[esp] || modsTP[espNorm]) return;             // ya tratado arriba
+    if (vistos['e_'+espNorm]) return; vistos['e_'+espNorm] = true;
+    tp.push({ tipo:'especialidad', especialidad:espNorm });
+  });
+  if (user.especialidad) {
+    var espN = user.especialidad.startsWith('tp_') ? user.especialidad : 'tp_' + user.especialidad;
+    if (!vistos['e_'+espN] && !modsTP[user.especialidad] && !modsTP[espN]) {
+      vistos['e_'+espN] = true;
+      tp.push({ tipo:'especialidad', especialidad:espN });
+    }
+  }
+  return { comun: comun, tp: tp };
+}
+
 function _renderPptStep1() {
   document.getElementById('pptModalTit').textContent = 'Paso 1 · Configuración';
   var u = (window.ELAuth && ELAuth.user) || {};
-  var asignaturas = (u.asignaturas && u.asignaturas.length)
-    ? u.asignaturas.map(function(a){ return '<option value="' + a + '">' + a + '</option>'; }).join('')
-    : '<option value="">— Ninguna —</option>';
+  var areas = _pptRecopilarAreas(u);
+  var asigOpts = '';
+  if (areas.comun.length) {
+    asigOpts += '<optgroup label="📚 Plan Común (Mineduc)">' +
+      areas.comun.map(function(a){ return '<option value="c:' + a + '">' + _pptAsignaturaNombre(a) + '</option>'; }).join('') +
+      '</optgroup>';
+  }
+  if (areas.tp.length) {
+    asigOpts += '<optgroup label="🔧 Formación Técnico-Profesional (EMTP)">';
+    areas.tp.forEach(function(item){
+      var espLabel = (window.CCTPCatalogo && CCTPCatalogo.labelEspecialidad) ? CCTPCatalogo.labelEspecialidad(item.especialidad) : item.especialidad.replace(/^tp_/, '');
+      if (item.tipo === 'modulo') {
+        var modLabel = (window.CCTPCatalogo && CCTPCatalogo.labelModulo) ? CCTPCatalogo.labelModulo(item.especialidad, item.moduloId) : item.moduloId;
+        asigOpts += '<option value="m:' + item.especialidad + ':' + item.moduloId + '">📗 ' + espLabel + ' — ' + modLabel + '</option>';
+      } else {
+        asigOpts += '<option value="e:' + item.especialidad + '">📘 Especialidad completa: ' + espLabel + '</option>';
+      }
+    });
+    asigOpts += '</optgroup>';
+  }
+  if (!asigOpts) asigOpts = '<option value="">— No tienes asignaturas ni módulos asignados —</option>';
+
   document.getElementById('pptModalBody').innerHTML =
     '<div style="display:grid;gap:12px">' +
     '<div style="padding:10px 14px;background:linear-gradient(135deg,rgba(20,184,166,.08),rgba(37,99,235,.04));border-left:4px solid #14b8a6;border-radius:8px;font-size:.85rem;line-height:1.5">' +
-      '💡 La IA generará una presentación completa con imágenes. Costo: <b>$0 CLP</b> (Pollinations Flux + Gemini gratis).' +
+      '🎓 <b>Apoyo docente Click&Clase</b> — La IA construirá tu presentación con estructura pedagógica alineada al currículo MINEDUC, incluyendo objetivo de aprendizaje, contenido y actividad de cierre.' +
     '</div>' +
     '<div class="fld"><label style="font-weight:600;font-size:.8rem">Tema de la clase *</label>' +
       '<input type="text" id="pptTema" placeholder="Ej: La célula: estructura y función" style="width:100%;padding:8px 10px;border-radius:6px;border:1px solid rgba(0,0,0,.15);font-size:.9rem"></div>' +
-    '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">' +
-      '<div class="fld"><label style="font-weight:600;font-size:.8rem">Asignatura</label>' +
-        '<select id="pptAsig" style="width:100%;padding:8px 10px;border-radius:6px;border:1px solid rgba(0,0,0,.15)">' + asignaturas + '</select></div>' +
-      '<div class="fld"><label style="font-weight:600;font-size:.8rem">Curso *</label>' +
-        '<input type="text" id="pptCurso" placeholder="Ej: 7° Básico" value="' + (u.cursoJefaturaNombre || '') + '" style="width:100%;padding:8px 10px;border-radius:6px;border:1px solid rgba(0,0,0,.15)"></div>' +
-      '<div class="fld"><label style="font-weight:600;font-size:.8rem">N° diapositivas</label>' +
-        '<input type="number" id="pptN" min="5" max="25" value="10" style="width:100%;padding:8px 10px;border-radius:6px;border:1px solid rgba(0,0,0,.15)"></div>' +
-    '</div>' +
+
     '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">' +
+      '<div class="fld"><label style="font-weight:600;font-size:.8rem">Asignatura *</label>' +
+        '<select id="pptAsig" onchange="_pptCargarOAs()" style="width:100%;padding:8px 10px;border-radius:6px;border:1px solid rgba(0,0,0,.15)">' + asigOpts + '</select>' +
+        ((areas.comun.length + areas.tp.length) ? '<div style="font-size:.7rem;color:#64748B;margin-top:3px">Tus asignaturas y módulos contratados</div>' : '<div style="font-size:.7rem;color:#DC2626;margin-top:3px">⚠ El admin del colegio debe asignarte al menos una asignatura o módulo TP</div>') +
+      '</div>' +
+      '<div class="fld"><label style="font-weight:600;font-size:.8rem">Curso *</label>' +
+        '<input type="text" id="pptCurso" placeholder="Ej: 7° Básico o 1° Medio" onchange="_pptCargarOAs()" style="width:100%;padding:8px 10px;border-radius:6px;border:1px solid rgba(0,0,0,.15)"></div>' +
+    '</div>' +
+
+    '<div class="fld"><label style="font-weight:600;font-size:.8rem"><span id="pptOALabel">Objetivo de Aprendizaje (OA) MINEDUC</span></label>' +
+      '<select id="pptOA" style="width:100%;padding:8px 10px;border-radius:6px;border:1px solid rgba(0,0,0,.15)">' +
+        '<option value="">— Elige asignatura + curso primero —</option>' +
+      '</select>' +
+      '<div style="font-size:.7rem;color:#64748B;margin-top:3px" id="pptOAHint">Se cargan automáticamente al elegir asignatura y curso</div>' +
+    '</div>' +
+
+    '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">' +
+      '<div class="fld"><label style="font-weight:600;font-size:.8rem">N° diapositivas <span style="color:#64748B;font-weight:400">(mín. 5 — máx. 25)</span></label>' +
+        '<input type="number" id="pptN" min="5" max="25" value="10" style="width:100%;padding:8px 10px;border-radius:6px;border:1px solid rgba(0,0,0,.15)">' +
+        '<div style="font-size:.7rem;color:#64748B;margin-top:3px">Sugerido: 8-12 para 45min de clase</div>' +
+      '</div>' +
       '<div class="fld"><label style="font-weight:600;font-size:.8rem">Estilo visual</label>' +
         '<select id="pptEstilo" style="width:100%;padding:8px 10px;border-radius:6px;border:1px solid rgba(0,0,0,.15)">' +
           '<option value="didactica">📘 Didáctico (azul)</option>' +
@@ -3489,22 +3613,137 @@ function _renderPptStep1() {
           '<option value="interactiva">✨ Interactivo (teal)</option>' +
           '<option value="calida">🍂 Cálido (naranja)</option>' +
         '</select></div>' +
-      '<div class="fld"><label style="font-weight:600;font-size:.8rem">Imágenes</label>' +
+      '<div class="fld"><label style="font-weight:600;font-size:.8rem">Imágenes ' +
+        '<a href="javascript:void(0)" onclick="_pptAbrirConfigGoogle()" style="float:right;font-weight:400;font-size:.72rem;color:#0EA5E9;text-decoration:underline">⚙️ Configurar Google</a></label>' +
         '<select id="pptImg" style="width:100%;padding:8px 10px;border-radius:6px;border:1px solid rgba(0,0,0,.15)">' +
-          '<option value="ia">🎨 Generadas por IA (Flux)</option>' +
-          '<option value="stock">📸 Foto stock (Unsplash)</option>' +
+          '<option value="google">🔍 Google Imágenes (calidad PRO)</option>' +
+          '<option value="web">🌐 Wikipedia + Openverse</option>' +
+          '<option value="ia">🎨 Generadas por IA</option>' +
           '<option value="ambas">🎭 Ambas mezcladas</option>' +
           '<option value="ninguna">🚫 Sin imágenes</option>' +
         '</select></div>' +
     '</div>' +
-    '<div class="fld"><label style="font-weight:600;font-size:.8rem">OA MINEDUC (opcional)</label>' +
-      '<input type="text" id="pptOA" placeholder="Ej: OA 04 · Explicar la organización celular…" style="width:100%;padding:8px 10px;border-radius:6px;border:1px solid rgba(0,0,0,.15)"></div>' +
+
+    '<div class="fld"><label style="font-weight:600;font-size:.8rem">🖼️ Palabras clave para imágenes <span style="font-weight:400;color:#64748b">(opcional, en inglés, separadas por coma)</span></label>' +
+      '<input id="pptImgKw" type="text" placeholder="Ej: npn transistor, oscilloscope, arduino uno, breadboard, mosfet, relay module" style="width:100%;padding:8px 10px;border-radius:6px;border:1px solid rgba(0,0,0,.15);font-family:inherit">' +
+      '<div style="font-size:.72rem;color:#64748b;margin-top:4px"><b>Escribí UNA palabra clave por diapositiva</b> separadas por coma. Ej: para una PPT de 6 slides poné 6 conceptos concretos en inglés. Se rota una por slide → cada lámina tiene imagen distinta.</div>' +
+    '</div>' +
+
     '<div class="fld"><label style="font-weight:600;font-size:.8rem">Instrucciones especiales (opcional)</label>' +
-      '<textarea id="pptInstr" rows="2" placeholder="Ej: incluir ejemplo de la Cordillera de los Andes · lenguaje sencillo para 3° básico · foco en experimentos prácticos…" style="width:100%;padding:8px 10px;border-radius:6px;border:1px solid rgba(0,0,0,.15);font-family:inherit;resize:vertical"></textarea></div>' +
+      '<textarea id="pptInstr" rows="2" placeholder="Ej: incluir ejemplo de la Cordillera de los Andes · lenguaje sencillo · foco en experimentos prácticos…" style="width:100%;padding:8px 10px;border-radius:6px;border:1px solid rgba(0,0,0,.15);font-family:inherit;resize:vertical"></textarea></div>' +
+
     '<div style="display:flex;gap:8px;justify-content:flex-end;padding-top:12px;border-top:1px solid rgba(0,0,0,.08)">' +
       '<button onclick="cerrarWizardPPT()" style="padding:9px 16px;border:1px solid #cbd5e1;background:#fff;border-radius:8px;cursor:pointer">Cancelar</button>' +
       '<button onclick="_pptGenerar()" style="padding:9px 18px;border:0;background:linear-gradient(135deg,#14b8a6,#0EA5E9);color:#fff;border-radius:8px;cursor:pointer;font-weight:700">🚀 Generar con IA</button>' +
     '</div></div>';
+
+  // Autocargar OAs si ya hay asignatura seleccionada
+  setTimeout(_pptCargarOAs, 100);
+}
+
+function _pptParsearAsig(valor) {
+  // "c:matematica"           → { tipo:'comun', asig:'matematica' }
+  // "m:tp_electronica:EN2"   → { tipo:'modulo', especialidad:'tp_electronica', moduloId:'EN2' }
+  // "e:tp_electronica"       → { tipo:'especialidad', especialidad:'tp_electronica' }
+  var p = String(valor||'').split(':');
+  if (p[0] === 'c') return { tipo:'comun', asig:p[1] };
+  if (p[0] === 'm') return { tipo:'modulo', especialidad:p[1], moduloId:p[2] };
+  if (p[0] === 'e') return { tipo:'especialidad', especialidad:p[1] };
+  return { tipo:'', asig:valor };  // fallback legacy
+}
+function _pptCargarOAs() {
+  var raw = document.getElementById('pptAsig').value;
+  var info = _pptParsearAsig(raw);
+  var curso = document.getElementById('pptCurso').value;
+  var nivel = _pptNormalizarNivel(curso);
+  var sel = document.getElementById('pptOA');
+  var hint = document.getElementById('pptOAHint');
+  var lbl = document.getElementById('pptOALabel');
+
+  // Cambiar dinámicamente etiqueta según tipo (OA plan común vs AE de TP)
+  if (info.tipo === 'modulo' || info.tipo === 'especialidad') {
+    if (lbl) lbl.textContent = 'Aprendizaje Esperado (AE) del módulo';
+  } else {
+    if (lbl) lbl.textContent = 'Objetivo de Aprendizaje (OA) MINEDUC';
+  }
+
+  // ── PLAN COMÚN ──
+  if (info.tipo === 'comun') {
+    if (!info.asig || !nivel) {
+      sel.innerHTML = '<option value="">— Elige asignatura + curso primero —</option>';
+      if (hint) hint.textContent = 'Se cargan automáticamente al elegir asignatura y curso';
+      return;
+    }
+    var oas = (typeof getPlanComunOAs === 'function') ? getPlanComunOAs(info.asig, nivel) : [];
+    if (!oas.length) {
+      sel.innerHTML = '<option value="">— Sin OAs para ' + _pptAsignaturaNombre(info.asig) + ' ' + nivel + ' —</option>';
+      if (hint) hint.textContent = 'Podés escribir el OA manualmente en "Instrucciones especiales"';
+      return;
+    }
+    sel.innerHTML = '<option value="">— Sin OA específico (opcional) —</option>' +
+      oas.map(function(oa){
+        var txt = (oa.codigo || 'OA') + ' — ' + (oa.descripcion || oa.enunciado || '');
+        var val = (oa.codigo || '') + ' · ' + (oa.descripcion || oa.enunciado || '');
+        return '<option value="' + val.replace(/"/g,'&quot;') + '">' + txt.slice(0, 120) + '</option>';
+      }).join('');
+    if (hint) hint.textContent = '✓ ' + oas.length + ' OAs cargados · ' + _pptAsignaturaNombre(info.asig) + ' · ' + nivel;
+    return;
+  }
+
+  // ── TP · MÓDULO específico → AE + CE ──
+  if (info.tipo === 'modulo' && window.CCTPCatalogo && CCTPCatalogo.moduloCompleto) {
+    var mod = CCTPCatalogo.moduloCompleto(info.especialidad, info.moduloId);
+    if (!mod) {
+      sel.innerHTML = '<option value="">— Sin catálogo para este módulo —</option>';
+      if (hint) hint.textContent = 'Podés escribir el AE manualmente en "Instrucciones especiales"';
+      return;
+    }
+    // AEs pueden ser OBJETO {OA1:{texto,ces}, OA2:{...}} o ARRAY.
+    // Normalizo a array [{codigo, texto, ces}]
+    var rawAes = mod.aes || mod.aprendizajesEsperados || mod.oas || {};
+    var aes = [];
+    if (Array.isArray(rawAes)) {
+      aes = rawAes.map(function(ae, i){
+        return {
+          codigo: ae.codigo || ae.id || ('AE' + (i+1)),
+          texto:  ae.descripcion || ae.enunciado || ae.texto || String(ae),
+          ces:    ae.ces || {}
+        };
+      });
+    } else if (typeof rawAes === 'object') {
+      Object.keys(rawAes).forEach(function(k){
+        var ae = rawAes[k] || {};
+        aes.push({
+          codigo: k,
+          texto:  ae.texto || ae.descripcion || ae.enunciado || (typeof ae === 'string' ? ae : ''),
+          ces:    ae.ces || {}
+        });
+      });
+    }
+    if (!aes.length) {
+      sel.innerHTML = '<option value="">— Módulo sin AEs catalogados —</option>';
+      if (hint) hint.textContent = 'Podés escribir el AE manualmente en "Instrucciones especiales"';
+      return;
+    }
+    sel.innerHTML = '<option value="">— Sin AE específico (opcional) —</option>' +
+      aes.map(function(ae){
+        var val = ae.codigo + ' · ' + ae.texto;
+        return '<option value="' + val.replace(/"/g,'&quot;') + '">' + ae.codigo + ' — ' + (ae.texto || '').slice(0, 110) + '</option>';
+      }).join('');
+    var modLabel = CCTPCatalogo.labelModulo(info.especialidad, info.moduloId);
+    if (hint) hint.textContent = '✓ ' + aes.length + ' AEs cargados · Módulo "' + modLabel + '"';
+    return;
+  }
+
+  // ── TP · Solo especialidad (sin módulo específico) ──
+  if (info.tipo === 'especialidad') {
+    sel.innerHTML = '<option value="">— Elegí un módulo específico para ver los AE —</option>';
+    if (hint) hint.textContent = 'Esta es la especialidad completa · para ver AE elegí un módulo específico o describilo en Instrucciones';
+    return;
+  }
+
+  sel.innerHTML = '<option value="">— Elige asignatura + curso primero —</option>';
+  if (hint) hint.textContent = 'Se cargan automáticamente al elegir asignatura y curso';
 }
 
 function _pptGenerar() {
@@ -3513,18 +3752,52 @@ function _pptGenerar() {
   if (!tema) { alert('Ingresá el tema de la clase'); return; }
   if (!curso) { alert('Ingresá el curso'); return; }
   var u = (window.ELAuth && ELAuth.user) || {};
+  var rawAsig = document.getElementById('pptAsig').value;
+  var info = _pptParsearAsig(rawAsig);
+  var asigNombre = '';
+  var extraInstr = '';
+  if (info.tipo === 'comun') {
+    asigNombre = _pptAsignaturaNombre(info.asig);
+  } else if (info.tipo === 'modulo') {
+    var espL = window.CCTPCatalogo ? CCTPCatalogo.labelEspecialidad(info.especialidad) : info.especialidad;
+    var modL = window.CCTPCatalogo ? CCTPCatalogo.labelModulo(info.especialidad, info.moduloId) : info.moduloId;
+    asigNombre = espL + ' — Módulo: ' + modL + ' (EMTP)';
+    extraInstr = 'Enfoque técnico-profesional (EMTP). Especialidad: ' + espL + '. Módulo específico: ' + modL + '. Vocabulario técnico apropiado a la especialidad.';
+  } else if (info.tipo === 'especialidad') {
+    var espN = window.CCTPCatalogo ? CCTPCatalogo.labelEspecialidad(info.especialidad) : info.especialidad;
+    asigNombre = 'Especialidad EMTP: ' + espN;
+    extraInstr = 'Enfoque técnico-profesional (EMTP). Especialidad: ' + espN + '. Vocabulario técnico.';
+  } else {
+    asigNombre = rawAsig || '';
+  }
+  var oaVal = document.getElementById('pptOA').value.trim();
+  var oaLabel = (info.tipo === 'modulo' || info.tipo === 'especialidad') ? 'Aprendizaje Esperado (AE)' : 'Objetivo de Aprendizaje (OA)';
+  var instrFinal = document.getElementById('pptInstr').value.trim();
+  if (extraInstr) instrFinal = extraInstr + (instrFinal ? ' — ' + instrFinal : '');
+
   var cfg = {
     tema: tema,
     curso: curso,
-    asignatura: document.getElementById('pptAsig').value,
+    asignatura: asigNombre,
     nSlides: parseInt(document.getElementById('pptN').value, 10) || 10,
     estilo: document.getElementById('pptEstilo').value,
     imagenes: document.getElementById('pptImg').value,
-    oa: document.getElementById('pptOA').value.trim(),
-    instrucciones: document.getElementById('pptInstr').value.trim(),
+    palabrasClaveImg: (document.getElementById('pptImgKw') || {}).value || '',
+    oa: oaVal ? (oaLabel + ': ' + oaVal) : '',
+    instrucciones: instrFinal,
     profesorNombre: u.nombre || u.email || '',
-    liceoNombre: u.liceoNombre || u.liceoSlug || ''
+    liceoNombre: u.liceoNombre || u.liceoSlug || '',
+    // Google Custom Search del user (leídas de Firestore al abrir wizard)
+    googleCseApiKey: u.googleCseApiKey || '',
+    googleCseId:     u.googleCseId     || ''
   };
+  // Validar: si eligió Google pero no tiene config → avisar y abrir modal
+  if (cfg.imagenes === 'google' && (!cfg.googleCseApiKey || !cfg.googleCseId)) {
+    if (confirm('Elegiste Google Imágenes pero no tenés configurada la API. ¿Configurarla ahora?')) {
+      _pptAbrirConfigGoogle();
+    }
+    return;
+  }
   if (typeof CCPptGenerator === 'undefined') { alert('El módulo generador no está cargado. Refrescá la página.'); return; }
   window._pptWizard.instancia = new CCPptGenerator(cfg);
   _renderPptStep2Cargando();
@@ -3584,6 +3857,118 @@ function _renderPptStep3Preview() {
 
 function _pptRegenerar() { _pptGenerar(); }
 
+// ═══ CONFIGURACIÓN GOOGLE CUSTOM SEARCH API ═══
+// Modal donde el docente pega su API key + Search Engine ID. Se guarda en su
+// perfil Firestore (users/{uid}) y se carga automáticamente al usar el wizard.
+function _pptAbrirConfigGoogle() {
+  // Cerrar wizard si está abierto (para que el modal no quede oculto)
+  var wiz = document.getElementById('pptWizard');
+  var mask = document.getElementById('pptMask');
+  var estabaAbierto = wiz && wiz.style.display !== 'none';
+  var u = (window.ELDB && ELDB.getCurrentUserSync && ELDB.getCurrentUserSync()) || window._matUser || {};
+  var apiKeyActual = u.googleCseApiKey || '';
+  var cseIdActual  = u.googleCseId     || '';
+  var maskC = document.createElement('div');
+  maskC.id = 'gCseMask';
+  maskC.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:10000;display:flex;align-items:center;justify-content:center;padding:20px;overflow:auto';
+  maskC.innerHTML =
+    '<div style="background:#fff;border-radius:14px;max-width:640px;width:100%;padding:24px;max-height:90vh;overflow:auto">' +
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">' +
+        '<h3 style="margin:0;font-size:1.15rem;color:#0C1E3B">🔍 Configurar Google Custom Search</h3>' +
+        '<button onclick="_pptCerrarConfigGoogle()" style="background:none;border:0;font-size:1.5rem;cursor:pointer;color:#64748b">×</button>' +
+      '</div>' +
+      '<div style="background:#f0f9ff;border-left:4px solid #0ea5e9;padding:12px;border-radius:6px;margin-bottom:16px;font-size:.85rem;color:#0c4a6e">' +
+        '<b>💡 Por qué esto vale la pena</b><br>' +
+        'Google Custom Search te da acceso a <b>Google Imágenes real</b> (100 búsquedas/día GRATIS). ' +
+        'Es la mejor calidad de imágenes disponible. Setup en 5 minutos, una sola vez.' +
+      '</div>' +
+      '<ol style="padding-left:20px;font-size:.85rem;color:#0C1E3B;line-height:1.7">' +
+        '<li><b>API Key</b> (Google Cloud):<br>' +
+          '<a href="https://console.cloud.google.com/apis/credentials" target="_blank" style="color:#0EA5E9">console.cloud.google.com/apis/credentials</a>' +
+          ' → "Create credentials" → "API key" → copiar el string que empieza con <code>AIza...</code><br>' +
+          '<span style="color:#64748b;font-size:.78rem">Antes: habilitar "Custom Search API" en <a href="https://console.cloud.google.com/apis/library/customsearch.googleapis.com" target="_blank" style="color:#0EA5E9">este link</a></span>' +
+        '</li>' +
+        '<li style="margin-top:10px"><b>Search Engine ID (cx)</b>:<br>' +
+          '<a href="https://programmablesearchengine.google.com/controlpanel/create" target="_blank" style="color:#0EA5E9">programmablesearchengine.google.com/create</a>' +
+          ' → nombre: "Click&amp;Clase Imágenes" → "Sitios a buscar": <b>elegir "Toda la web"</b> → "Búsqueda de imágenes": <b>ON</b> → Crear<br>' +
+          '<span style="color:#64748b;font-size:.78rem">Luego en "Panel de control" copiar el <b>ID del motor de búsqueda</b></span>' +
+        '</li>' +
+      '</ol>' +
+      '<div style="margin-top:16px">' +
+        '<label style="font-weight:600;font-size:.82rem;display:block;margin-bottom:4px">API Key</label>' +
+        '<input id="gCseApiKey" type="text" placeholder="AIzaSy..." value="' + apiKeyActual.replace(/"/g,'&quot;') + '" style="width:100%;padding:9px 10px;border-radius:6px;border:1px solid rgba(0,0,0,.15);font-family:monospace;font-size:.85rem">' +
+      '</div>' +
+      '<div style="margin-top:10px">' +
+        '<label style="font-weight:600;font-size:.82rem;display:block;margin-bottom:4px">Search Engine ID (cx)</label>' +
+        '<input id="gCseId" type="text" placeholder="a1b2c3d4e5f6..." value="' + cseIdActual.replace(/"/g,'&quot;') + '" style="width:100%;padding:9px 10px;border-radius:6px;border:1px solid rgba(0,0,0,.15);font-family:monospace;font-size:.85rem">' +
+      '</div>' +
+      '<div id="gCseMsg" style="margin-top:10px;font-size:.82rem;min-height:22px"></div>' +
+      '<div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px;padding-top:12px;border-top:1px solid rgba(0,0,0,.08)">' +
+        '<button onclick="_pptProbarGoogle()" style="padding:9px 14px;border:1px solid #cbd5e1;background:#fff;border-radius:8px;cursor:pointer">🧪 Probar</button>' +
+        '<button onclick="_pptGuardarConfigGoogle()" style="padding:9px 18px;border:0;background:linear-gradient(135deg,#14b8a6,#0EA5E9);color:#fff;border-radius:8px;cursor:pointer;font-weight:700">💾 Guardar</button>' +
+      '</div>' +
+    '</div>';
+  document.body.appendChild(maskC);
+  window._pptCfgAbiertoWiz = estabaAbierto;   // recordar si venía del wizard
+}
+
+function _pptCerrarConfigGoogle() {
+  var m = document.getElementById('gCseMask');
+  if (m) m.remove();
+}
+
+function _pptProbarGoogle() {
+  var key = document.getElementById('gCseApiKey').value.trim();
+  var cx  = document.getElementById('gCseId').value.trim();
+  var msg = document.getElementById('gCseMsg');
+  if (!key || !cx) { msg.innerHTML = '<span style="color:#dc2626">⚠️ Completá ambos campos.</span>'; return; }
+  msg.innerHTML = '<span style="color:#64748b">🔄 Probando con "computer science"...</span>';
+  var url = 'https://www.googleapis.com/customsearch/v1?' +
+    new URLSearchParams({ key: key, cx: cx, q: 'computer science', searchType: 'image', num: '1' });
+  fetch(url).then(function (r) { return r.json(); }).then(function (data) {
+    if (data.error) {
+      msg.innerHTML = '<span style="color:#dc2626">✗ Error: ' + (data.error.message || 'desconocido') + '</span>';
+    } else if (data.items && data.items.length) {
+      msg.innerHTML = '<span style="color:#059669">✓ ¡Funciona! Encontró ' + (data.searchInformation.totalResults || '?') + ' resultados.</span>';
+    } else {
+      msg.innerHTML = '<span style="color:#f59e0b">⚠️ Sin resultados. Verificá que el CSE tenga "Búsqueda de imágenes" ON y "Toda la web" activo.</span>';
+    }
+  }).catch(function (e) {
+    msg.innerHTML = '<span style="color:#dc2626">✗ Error de red: ' + e.message + '</span>';
+  });
+}
+
+function _pptGuardarConfigGoogle() {
+  var key = document.getElementById('gCseApiKey').value.trim();
+  var cx  = document.getElementById('gCseId').value.trim();
+  var msg = document.getElementById('gCseMsg');
+  if (!key || !cx) { msg.innerHTML = '<span style="color:#dc2626">⚠️ Completá ambos campos.</span>'; return; }
+  var uid = (window.ELAuth && ELAuth.user && ELAuth.user.uid) || (window._matUser && window._matUser.uid);
+  if (!uid) { msg.innerHTML = '<span style="color:#dc2626">✗ Sesión no encontrada. Recargá la página.</span>'; return; }
+  msg.innerHTML = '<span style="color:#64748b">💾 Guardando...</span>';
+  ELDB.usuarios.actualizar(uid, {
+    googleCseApiKey: key,
+    googleCseId:     cx,
+    googleCseSetupAt: new Date().toISOString()
+  }).then(function () {
+    msg.innerHTML = '<span style="color:#059669">✓ Guardado. Ya podés usar Google Imágenes en tus PPTs.</span>';
+    if (window._matUser) {
+      window._matUser.googleCseApiKey = key;
+      window._matUser.googleCseId = cx;
+    }
+    setTimeout(function () {
+      _pptCerrarConfigGoogle();
+      // Si venía del wizard, reabrirlo con el modo google ya seleccionado
+      if (window._pptCfgAbiertoWiz) {
+        var sel = document.getElementById('pptImg');
+        if (sel) sel.value = 'google';
+      }
+    }, 1200);
+  }).catch(function (e) {
+    msg.innerHTML = '<span style="color:#dc2626">✗ Error al guardar: ' + (e.message || e) + '</span>';
+  });
+}
+
 function _pptDescargar() {
   var prog = document.getElementById('pptProgress');
   var txt = document.getElementById('pptProgTxt');
@@ -3591,8 +3976,16 @@ function _pptDescargar() {
   window._pptWizard.instancia.descargar(null, function(hecho, total){
     if (txt) txt.textContent = hecho + '/' + total;
   }).then(function(){
-    if (prog) prog.innerHTML = '✅ ¡Descargado! El archivo .pptx quedó en tu carpeta de Descargas.';
-    setTimeout(cerrarWizardPPT, 2000);
+    if (prog) prog.innerHTML = '✅ <b>¡Descargado!</b> El archivo .pptx quedó en tu carpeta de Descargas.<br>' +
+      '<div style="margin-top:10px;padding:10px;background:rgba(37,99,235,.08);border-left:3px solid #2563EB;border-radius:6px;font-size:.82rem;color:#0C1E3B;text-align:left">' +
+      '<b>✨ Esta presentación incluye:</b><br>' +
+      '• Transición aleatoria entre slides (una nueva cada vez que generás)<br>' +
+      '• Animaciones automáticas de aparición (fade, wipe, fly-in u otras)<br>' +
+      '• Paleta de color y patrón de fondo elegidos al azar<br>' +
+      '• Texto autoajustado a cada lámina<br>' +
+      '<span style="color:#64748B">Si generás otra PPT ahora, va a verse distinta ✨</span>' +
+      '</div>';
+    setTimeout(cerrarWizardPPT, 8000);
     // Registrar como material en la biblioteca (opcional)
     try {
       if (window.ELDB && ELDB.materiales && ELDB.materiales.guardar) {

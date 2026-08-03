@@ -38,6 +38,7 @@
 <script src="js/presencia-logger.js"></script>
 <script>document.addEventListener('DOMContentLoaded',function(){ if(window.ELPresencia) ELPresencia.start('Panel admin'); });</script>
 <script src="js/colegios.js"></script>
+<script src="js/modal-usuario-unificado.js?v=1"></script>
 <!-- Datos curriculares TP por especialidad — cargan ANTES de curricula-chile.js -->
 <script src="js/curricula/tp/datos-electricidad.js"></script>
 <script src="js/curricula/tp/datos-mecanica-automotriz.js"></script>
@@ -200,24 +201,26 @@ tr:hover td{background:rgba(37,99,235,.05)}
       </div>
     </div>
 
-    <div class="nav-section">Gestión de Usuarios</div>
-    <div class="nav-item active" data-sec="usuarios" onclick="showSec(this,'usuarios')">
+    <div class="nav-section">Gestión</div>
+    <div class="nav-item active" data-sec="gestion" onclick="showSec(this,'gestion')">
+      <span>🏢</span> Gestión
+      <span id="sbCntGestion" style="margin-left:auto;background:linear-gradient(135deg,#14b8a6,#0EA5E9);color:#fff;font-size:.68rem;padding:1px 7px;border-radius:10px;font-weight:700"></span>
+    </div>
+    <!-- Sidebar items legacy (ocultos). Todo se maneja desde Gestión unificado. -->
+    <div class="nav-item" data-sec="usuarios" onclick="showSec(this,'usuarios')" style="display:none">
       <span>👥</span> Todos los Usuarios
       <span id="sbCntUsers" style="margin-left:auto;background:rgba(37,99,235,.2);color:var(--accent);font-size:.68rem;padding:1px 7px;border-radius:10px;font-weight:700"></span>
     </div>
-    <div class="nav-item" data-sec="profesores" onclick="showSec(this,'profesores')">
+    <div class="nav-item" data-sec="profesores" onclick="showSec(this,'profesores')" style="display:none">
       <span>🎓</span> Profesores
       <span id="sbCntProfs" style="margin-left:auto;background:rgba(37,99,235,.2);color:var(--accent);font-size:.68rem;padding:1px 7px;border-radius:10px;font-weight:700"></span>
     </div>
-    <div class="nav-item" data-sec="liceos" onclick="showSec(this,'liceos')">
+    <div class="nav-item" data-sec="liceos" onclick="showSec(this,'liceos')" style="display:none">
       <span>🏫</span> Liceos / Colegios
       <span id="sbCntLiceos" style="margin-left:auto;background:rgba(245,158,11,.2);color:var(--gold);font-size:.68rem;padding:1px 7px;border-radius:10px;font-weight:700"></span>
     </div>
-    <div class="nav-item" onclick="window.location.href='panel-superadmin.html'" style="background:linear-gradient(90deg,rgba(37,99,235,.15),transparent);border-left:3px solid #2563EB;cursor:pointer">
-      <span>🚀</span> SaaS · Colegios
-      <span style="margin-left:auto;background:#2563EB;color:white;font-size:.6rem;padding:1px 6px;border-radius:6px;font-weight:700">NUEVO</span>
-    </div>
-    <!-- Códigos de Acceso ocultos: no aplican al modelo SaaS actual (docentes se registran en signup, estudiantes vía admin_colegio) -->
+    <a href="panel-superadmin.html" class="nav-item" style="color:var(--muted);text-decoration:none;font-size:.82rem"><span>🚀</span> Métricas SaaS</a>
+    <!-- Códigos de Acceso ocultos: no aplican al modelo SaaS actual -->
     <div class="nav-item" data-sec="codigos" onclick="showSec(this,'codigos')" style="display:none">🔑 Códigos de Acceso</div>
     <div class="nav-item" data-sec="comunicados" onclick="showSec(this,'comunicados')">📣 Comunicados</div>
 
@@ -257,56 +260,85 @@ tr:hover td{background:rgba(37,99,235,.05)}
   <main class="main">
 
     <!-- Header del panel -->
-    <div class="page-header" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:20px">
+    <!-- Header global compacto (solo el título + botón actualizar) -->
+    <div class="page-header" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:14px">
       <div>
-        <h1 style="font-size:1.5rem;font-weight:800">🏫 Panel de Administración</h1>
-        <p style="color:var(--muted);font-size:.85rem;margin-top:2px">Salesianos Talca · Click&Clase</p>
+        <h1 style="font-size:1.35rem;font-weight:800">🏫 Panel de Administración</h1>
+        <p style="color:var(--muted);font-size:.8rem;margin-top:2px">Click&Clase · SuperAdmin</p>
       </div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <button class="btn btn-primary btn-sm" onclick="showSec(document.querySelector('[data-sec=profesores]'),'profesores');setTimeout(abrirWizard,100)">
-          ➕ Nuevo Profesor
-        </button>
-        <!-- Botón "Códigos" oculto: sección deprecada en modelo SaaS -->
-        <button class="btn btn-outline btn-sm" onclick="showSec(document.querySelector('[data-sec=codigos]'),'codigos')" style="display:none">
-          🔑 Códigos
-        </button>
-        <button class="btn btn-outline btn-sm" onclick="loadData()">
-          🔄 Actualizar
-        </button>
-      </div>
+      <button class="btn btn-outline btn-sm" onclick="loadData()">🔄 Actualizar</button>
+    </div>
+    <!-- KPIs globales del panel viejo: quedan ocultos porque el panel Gestión trae los suyos -->
+    <div class="stats-grid" style="display:none">
+      <div class="stat-card"><div class="stat-num" id="sTotalUsers">–</div><div class="stat-label">Usuarios totales</div></div>
+      <div class="stat-card"><div class="stat-num" id="sProfs">–</div><div class="stat-label">Profesores</div></div>
+      <div class="stat-card"><div class="stat-num" id="sEsts">–</div><div class="stat-label">Estudiantes</div></div>
+      <div class="stat-card"><div class="stat-num" id="sMats">–</div><div class="stat-label">Materiales</div></div>
+      <div class="stat-card"><div class="stat-num" id="sPlans">–</div><div class="stat-label">Planificaciones</div></div>
     </div>
 
-    <!-- Stats -->
-    <div class="stats-grid" style="grid-template-columns:repeat(auto-fill,minmax(160px,1fr));margin-bottom:20px">
-      <div class="stat-card" style="cursor:pointer" onclick="showSec(document.querySelector('[data-sec=usuarios]'),'usuarios')">
-        <div style="font-size:1.3rem;margin-bottom:4px">👥</div>
-        <div class="stat-num" id="sTotalUsers">–</div>
-        <div class="stat-label">Usuarios totales</div>
+    <!-- GESTIÓN UNIFICADA (por defecto) -->
+    <section id="sec-gestion" class="tab-section">
+      <div class="page-header" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+        <div>
+          <h1>🏢 Gestión</h1>
+          <p>Colegios, usuarios, planes y personal — todo en una sola vista.</p>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-outline" onclick="gestionNuevoColegio()">➕ Nuevo colegio</button>
+          <button class="btn btn-primary" onclick="gestionNuevoUsuario()">➕ Nuevo usuario</button>
+        </div>
       </div>
-      <div class="stat-card" style="cursor:pointer" onclick="showSec(document.querySelector('[data-sec=profesores]'),'profesores')">
-        <div style="font-size:1.3rem;margin-bottom:4px">🎓</div>
-        <div class="stat-num" id="sProfs">–</div>
-        <div class="stat-label">Profesores</div>
+
+      <!-- KPIs globales (grid horizontal explícito) -->
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px">
+        <div class="stat-card" style="padding:16px 12px">
+          <div style="font-size:1.4rem;margin-bottom:6px">👥</div>
+          <div style="font-size:1.6rem;font-weight:800;color:var(--accent)" id="gTotUsers">–</div>
+          <div style="font-size:.78rem;color:var(--muted);margin-top:2px">Usuarios totales</div>
+        </div>
+        <div class="stat-card" style="padding:16px 12px">
+          <div style="font-size:1.4rem;margin-bottom:6px">🏫</div>
+          <div style="font-size:1.6rem;font-weight:800;color:#0EA5E9" id="gTotColegios">–</div>
+          <div style="font-size:.78rem;color:var(--muted);margin-top:2px">Colegios</div>
+        </div>
+        <div class="stat-card" style="padding:16px 12px">
+          <div style="font-size:1.4rem;margin-bottom:6px">👤</div>
+          <div style="font-size:1.6rem;font-weight:800;color:#7C3AED" id="gTotIndiv">–</div>
+          <div style="font-size:.78rem;color:var(--muted);margin-top:2px">Individuales</div>
+        </div>
+        <div class="stat-card" style="padding:16px 12px">
+          <div style="font-size:1.4rem;margin-bottom:6px">💰</div>
+          <div style="font-size:1.6rem;font-weight:800;color:#F59E0B" id="gTotMRR">–</div>
+          <div style="font-size:.78rem;color:var(--muted);margin-top:2px">MRR estimado</div>
+        </div>
       </div>
-      <div class="stat-card" style="cursor:pointer" onclick="showSec(document.querySelector('[data-sec=usuarios]'),'usuarios')">
-        <div style="font-size:1.3rem;margin-bottom:4px">🎒</div>
-        <div class="stat-num" id="sEsts">–</div>
-        <div class="stat-label">Estudiantes</div>
+
+      <!-- Layout master-detail -->
+      <div style="display:grid;grid-template-columns:320px 1fr;gap:14px;align-items:start">
+        <!-- COLUMNA IZQUIERDA: LISTA DE COLEGIOS -->
+        <div class="card" style="padding:12px;max-height:75vh;overflow-y:auto">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+            <b style="font-size:.82rem;color:var(--text)">Colegios · Individuales</b>
+          </div>
+          <input class="search-input" id="gColSearch" placeholder="Buscar colegio…" oninput="gestionFiltrarColegios()" style="margin-bottom:10px">
+          <div id="gListaColegios" style="display:flex;flex-direction:column;gap:4px">
+            <div style="padding:14px;text-align:center;color:var(--muted);font-size:.82rem">Cargando…</div>
+          </div>
+        </div>
+
+        <!-- COLUMNA DERECHA: DETALLE DEL COLEGIO SELECCIONADO -->
+        <div id="gDetalle" class="card" style="padding:0;overflow:hidden">
+          <div style="padding:40px;text-align:center;color:var(--muted)">
+            <div style="font-size:3rem">👈</div>
+            <div style="margin-top:10px">Elegí un colegio a la izquierda para ver sus usuarios y configuración.</div>
+          </div>
+        </div>
       </div>
-      <div class="stat-card" style="cursor:pointer" onclick="showSec(document.querySelector('[data-sec=materiales]'),'materiales')">
-        <div style="font-size:1.3rem;margin-bottom:4px">📚</div>
-        <div class="stat-num" id="sMats">–</div>
-        <div class="stat-label">Materiales</div>
-      </div>
-      <div class="stat-card" style="cursor:pointer" onclick="showSec(document.querySelector('[data-sec=planificaciones]'),'planificaciones')">
-        <div style="font-size:1.3rem;margin-bottom:4px">📅</div>
-        <div class="stat-num" id="sPlans">–</div>
-        <div class="stat-label">Planificaciones</div>
-      </div>
-    </div>
+    </section>
 
     <!-- USUARIOS -->
-    <section id="sec-usuarios" class="tab-section">
+    <section id="sec-usuarios" class="tab-section" style="display:none">
       <div class="page-header"><h1>👥 Todos los Usuarios</h1><p>Gestiona todos los usuarios de la plataforma</p></div>
       <div class="card">
         <div class="search-row">
@@ -961,66 +993,106 @@ tr:hover td{background:rgba(37,99,235,.05)}
 
 <!-- MODAL LICEO / COLEGIO -->
 <div class="modal-bg" id="modalLiceo">
-  <div class="modal" style="max-width:680px">
-    <button class="modal-close" onclick="closeModal('modalLiceo')">✕</button>
-    <h2 id="liceoModalTitle">🏫 Nuevo Liceo</h2>
-    <div id="liceoNotif" class="notif"></div>
-    <input type="hidden" id="liceoEditingSlug">
-    <div class="form-grid">
-      <div class="form-group full-width">
-        <label>Nombre oficial del liceo *</label>
-        <input id="liceoNombre" placeholder="ej: Liceo Salesiano de Talca" oninput="liceoAutoSlug()">
+  <div class="modal" style="max-width:640px;padding:0;overflow:hidden">
+    <!-- HEADER con gradient -->
+    <div style="background:linear-gradient(135deg,#14b8a6,#0EA5E9);padding:22px 24px;color:#fff;position:relative">
+      <button class="modal-close" onclick="closeModal('modalLiceo')" style="color:#fff;top:14px;right:14px">✕</button>
+      <h2 id="liceoModalTitle" style="margin:0;font-size:1.35rem;font-weight:800;color:#fff">🏫 Nuevo colegio</h2>
+      <p style="margin:6px 0 0;font-size:.85rem;opacity:.92">Completá lo esencial. Después te llevo al panel completo para configurar plan, asignaturas, TP y personal.</p>
+    </div>
+
+    <div style="padding:22px 24px;max-height:70vh;overflow-y:auto">
+      <div id="liceoNotif" class="notif"></div>
+      <input type="hidden" id="liceoEditingSlug">
+
+      <!-- Sección 1: IDENTIDAD -->
+      <div style="margin-bottom:18px">
+        <div style="font-weight:700;font-size:.75rem;color:var(--muted);letter-spacing:.08em;margin-bottom:10px;display:flex;align-items:center;gap:6px">
+          <span style="width:22px;height:22px;background:#e0f2fe;color:#0EA5E9;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:800">1</span>
+          IDENTIDAD DEL COLEGIO
+        </div>
+        <div style="display:grid;grid-template-columns:1fr;gap:10px">
+          <div>
+            <label style="font-size:.8rem;font-weight:600;display:block;margin-bottom:4px">Nombre oficial <span style="color:#DC2626">*</span></label>
+            <input id="liceoNombre" placeholder="ej: Liceo Salesiano de Talca" oninput="liceoAutoSlug()"
+                   style="width:100%;padding:10px 12px;border-radius:8px;border:1px solid rgba(0,0,0,.15);font-size:.95rem">
+          </div>
+          <div>
+            <label style="font-size:.8rem;font-weight:600;display:block;margin-bottom:4px">ID único (slug) <span style="color:#DC2626">*</span> <span style="font-weight:400;color:var(--muted);font-size:.72rem">— se genera automático, podés editarlo</span></label>
+            <input id="liceoSlug" placeholder="liceo-salesiano-talca"
+                   style="width:100%;padding:10px 12px;border-radius:8px;border:1px solid rgba(0,0,0,.15);font-size:.9rem;font-family:monospace;background:#f8fafc">
+          </div>
+        </div>
       </div>
-      <div class="form-group">
-        <label>Slug (identificador) *</label>
-        <input id="liceoSlug" placeholder="liceo-salesiano-talca">
-        <small style="color:var(--muted);font-size:.7rem;margin-top:2px">Solo minúsculas, números y guiones. Debe coincidir con el nombre del archivo PNG del logo.</small>
-      </div>
-      <div class="form-group">
-        <label>RBD (Rol Base de Datos)</label>
-        <input id="liceoRbd" placeholder="ej: 2780-3" inputmode="numeric">
-      </div>
-      <div class="form-group">
-        <label>Comuna</label>
-        <input id="liceoComuna" placeholder="ej: Talca">
-      </div>
-      <div class="form-group">
-        <label>Región</label>
-        <input id="liceoRegion" placeholder="ej: Maule">
-      </div>
-      <div class="form-group">
-        <label>Dependencia</label>
-        <select id="liceoDependencia">
-          <option value="">— Seleccionar —</option>
+
+      <!-- Sección 2: TIPO DE ESTABLECIMIENTO -->
+      <div style="margin-bottom:18px">
+        <div style="font-weight:700;font-size:.75rem;color:var(--muted);letter-spacing:.08em;margin-bottom:10px;display:flex;align-items:center;gap:6px">
+          <span style="width:22px;height:22px;background:#e0f2fe;color:#0EA5E9;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:800">2</span>
+          TIPO DE ESTABLECIMIENTO <span style="color:#DC2626;font-weight:800">*</span>
+        </div>
+        <div id="liceoDepGrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+          <!-- se renderiza por JS -->
+        </div>
+        <select id="liceoDependencia" style="display:none">
+          <option value=""></option>
           <option value="municipal">Municipal</option>
-          <option value="slep">Servicio Local de Educación (SLEP)</option>
-          <option value="particular-subvencionado">Particular Subvencionado</option>
-          <option value="particular-pagado">Particular Pagado</option>
-          <option value="corporacion">Corporación / Administración Delegada</option>
+          <option value="slep">SLEP</option>
+          <option value="particular-subvencionado">Part. Subvencionado</option>
+          <option value="particular-pagado">Part. Pagado</option>
+          <option value="corporacion">Corporación</option>
           <option value="otro">Otro</option>
         </select>
       </div>
-      <div class="form-group full-width">
-        <label>Ruta del logo</label>
-        <input id="liceoLogoPath" placeholder="assets/logos/colegios/liceo-salesiano-talca.png">
-        <small style="color:var(--muted);font-size:.7rem;margin-top:2px">Auto-completada según el slug. Sube el archivo PNG a esa ruta por git.</small>
+
+      <!-- Sección 3: UBICACIÓN -->
+      <div style="margin-bottom:18px">
+        <div style="font-weight:700;font-size:.75rem;color:var(--muted);letter-spacing:.08em;margin-bottom:10px;display:flex;align-items:center;gap:6px">
+          <span style="width:22px;height:22px;background:#e0f2fe;color:#0EA5E9;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:800">3</span>
+          UBICACIÓN
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div>
+            <label style="font-size:.8rem;font-weight:600;display:block;margin-bottom:4px">Comuna</label>
+            <input id="liceoComuna" placeholder="ej: Talca" style="width:100%;padding:10px 12px;border-radius:8px;border:1px solid rgba(0,0,0,.15);font-size:.9rem">
+          </div>
+          <div>
+            <label style="font-size:.8rem;font-weight:600;display:block;margin-bottom:4px">Región</label>
+            <input id="liceoRegion" placeholder="ej: Maule" style="width:100%;padding:10px 12px;border-radius:8px;border:1px solid rgba(0,0,0,.15);font-size:.9rem">
+          </div>
+        </div>
       </div>
-      <div class="form-group full-width">
-        <label>Alias (separados por coma, opcional)</label>
-        <input id="liceoAlias" placeholder="liceo salesianos, salesianos talca, colegio salesiano talca">
+
+      <!-- Sección AVANZADA (colapsable) -->
+      <details style="margin-bottom:14px;background:#f8fafc;border-radius:8px;border:1px solid rgba(0,0,0,.06)">
+        <summary style="padding:10px 14px;cursor:pointer;font-weight:600;font-size:.85rem;color:var(--text);user-select:none">
+          ⚙️ Opciones avanzadas <span style="color:var(--muted);font-weight:400;font-size:.78rem">(RBD, alias, logo)</span>
+        </summary>
+        <div style="padding:14px;border-top:1px solid rgba(0,0,0,.06);display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div>
+            <label style="font-size:.78rem;font-weight:600;display:block;margin-bottom:3px">RBD MINEDUC</label>
+            <input id="liceoRbd" placeholder="ej: 2780-3" style="width:100%;padding:8px 10px;border-radius:6px;border:1px solid rgba(0,0,0,.15);font-size:.85rem">
+          </div>
+          <div>
+            <label style="font-size:.78rem;font-weight:600;display:block;margin-bottom:3px">Ruta del logo (auto)</label>
+            <input id="liceoLogoPath" placeholder="assets/logos/colegios/xxx.png" style="width:100%;padding:8px 10px;border-radius:6px;border:1px solid rgba(0,0,0,.15);font-size:.78rem;font-family:monospace">
+          </div>
+          <div style="grid-column:1/-1">
+            <label style="font-size:.78rem;font-weight:600;display:block;margin-bottom:3px">Alias (para búsqueda)</label>
+            <input id="liceoAlias" placeholder="ej: liceo salesianos, salesianos talca" style="width:100%;padding:8px 10px;border-radius:6px;border:1px solid rgba(0,0,0,.15);font-size:.85rem">
+          </div>
+        </div>
+      </details>
+
+      <!-- CALLOUT: qué pasa después -->
+      <div style="background:linear-gradient(135deg,rgba(20,184,166,.08),rgba(14,165,233,.05));border-left:3px solid #14b8a6;padding:12px 14px;border-radius:6px;font-size:.82rem;color:var(--text);margin-bottom:6px">
+        <b style="color:#0EA5E9">🚀 Al guardar</b> te llevo al panel completo con las pestañas: <b>Datos · Plan · Asignaturas · Límites · TP · Personal</b>. Ahí terminás la configuración.
       </div>
     </div>
-    <div style="margin-top:14px;background:var(--surface2);border-radius:10px;padding:12px 16px;display:flex;gap:14px;align-items:center">
-      <div style="font-size:.78rem;color:var(--muted);flex:1">
-        <strong style="color:var(--text)">Vista previa del logo:</strong> el sistema buscará la imagen en la ruta indicada al cargar documentos. Si no existe, se mostrará el logo por defecto.
-      </div>
-      <img id="liceoLogoPreview" src="assets/logos/colegios/default.svg"
-           onerror="this.onerror=null;this.src='assets/logos/colegios/default.svg';"
-           style="width:64px;height:64px;object-fit:contain;background:#fff;border-radius:8px;padding:4px">
-    </div>
-    <div style="text-align:right;margin-top:18px;display:flex;gap:8px;justify-content:flex-end">
+
+    <div style="padding:14px 24px;border-top:1px solid rgba(0,0,0,.08);display:flex;gap:8px;justify-content:flex-end;background:#fff">
       <button class="btn btn-outline" onclick="closeModal('modalLiceo')">Cancelar</button>
-      <button class="btn btn-primary" id="btnGuardarLiceo" onclick="guardarLiceo()">💾 Guardar liceo</button>
+      <button class="btn btn-primary" id="btnGuardarLiceo" onclick="guardarLiceo()" style="background:linear-gradient(135deg,#14b8a6,#0EA5E9);border:0">🚀 Crear y configurar →</button>
     </div>
   </div>
 </div>
@@ -1125,6 +1197,10 @@ ELAuth.onUserReady(function(user){
 });
 
 function loadData(){
+  // Precargar liceos (necesario para dropdown del modal unificado)
+  if (ELDB.liceos && typeof ELDB.liceos.listar === 'function' && !window._liceosCache) {
+    ELDB.liceos.listar(false).then(function (ls) { window._liceosCache = ls || []; }).catch(function(){});
+  }
   ELDB.usuarios.listarTodos().then(function(u){
     allUsers=u;
     var nProfs=u.filter(function(x){return x.role==='profesor';}).length;
@@ -1138,6 +1214,8 @@ function loadData(){
     renderUsers(u);
     renderProfs(u.filter(function(x){return x.role==='profesor'||x.role==='admin';}));
     mostrarToastDB(true,'✅ Base de datos conectada');
+    // Inicializar panel Gestión unificado (sección por defecto)
+    if (typeof gestionInit === 'function') gestionInit();
   }).catch(function(e){
     console.error('[Admin] Error cargando usuarios:',e);
     mostrarToastDB(false,'❌ Error DB: '+e.message);
@@ -1177,12 +1255,234 @@ function showSec(el,id){
   document.querySelectorAll('.nav-item[data-sec]').forEach(function(n){n.classList.remove('active');});
   document.getElementById('sec-'+id).style.display='block';
   el.classList.add('active');
+  if(id==='gestion'){gestionInit();}
   if(id==='recursos'&&!_recursosInit){_recursosInit=true;initRecursos();}
   if(id==='gemini'){cargarConfigIA();}
   if(id==='liceos'){_liceosLoaded=true;loadLiceos();}
   if(id==='actividad'){cargarActividad();}
   if(id==='comunicados'){loadComunicados();}
   if(id==='monitoreo'){iniciarMonitoreo();}
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  PANEL GESTIÓN UNIFICADO — colegios + usuarios + SaaS en 1 vista
+// ═══════════════════════════════════════════════════════════════
+var _gestionCache = { colegios: [], usuarios: [], slugActivo: null, tabActivo: 'personal' };
+var _gestionInit = false;
+
+function gestionInit() {
+  // Cargar colegios + usuarios en paralelo
+  var pColegios = (ELDB.liceos && ELDB.liceos.listar)
+    ? ELDB.liceos.listar(false).catch(function(){return [];})
+    : Promise.resolve([]);
+  var pUsuarios = ELDB.usuarios.listarTodos().catch(function(){return [];});
+  Promise.all([pColegios, pUsuarios]).then(function (res) {
+    _gestionCache.colegios = res[0] || [];
+    _gestionCache.usuarios = res[1] || [];
+    window._liceosCache = _gestionCache.colegios;
+    gestionActualizarKpis();
+    renderGestionColegios();
+    // Auto-seleccionar el primer colegio si no hay uno activo
+    if (!_gestionCache.slugActivo && _gestionCache.colegios.length) {
+      seleccionarColegio(_gestionCache.colegios[0].slug || _gestionCache.colegios[0].id);
+    } else if (_gestionCache.slugActivo) {
+      seleccionarColegio(_gestionCache.slugActivo);
+    }
+    // Actualizar badge del sidebar
+    var badge = document.getElementById('sbCntGestion');
+    if (badge) badge.textContent = _gestionCache.colegios.length;
+  });
+  _gestionInit = true;
+}
+
+function gestionActualizarKpis() {
+  var totU = _gestionCache.usuarios.length;
+  var totC = _gestionCache.colegios.length;
+  var indiv = _gestionCache.usuarios.filter(function (u) {
+    return !u.liceoSlug || u.liceoSlug === '' || u.esIndividual;
+  }).length;
+  var mrr = _gestionCache.colegios.reduce(function (s, c) {
+    var precio = c.planPrecio || (c.plan === 'enterprise' ? 2500000 : c.plan === 'pro' ? 1500000 : c.plan === 'basic' ? 800000 : 0);
+    return s + (precio / 12);
+  }, 0);
+  var mrrF = '$' + Math.round(mrr).toLocaleString('es-CL');
+  document.getElementById('gTotUsers').textContent = totU;
+  document.getElementById('gTotColegios').textContent = totC;
+  document.getElementById('gTotIndiv').textContent = indiv;
+  document.getElementById('gTotMRR').textContent = mrrF;
+}
+
+function renderGestionColegios() {
+  var q = ((document.getElementById('gColSearch')||{}).value || '').toLowerCase();
+  var colegios = _gestionCache.colegios.filter(function (c) {
+    if (!q) return true;
+    return String(c.nombre||c.slug||'').toLowerCase().indexOf(q) !== -1;
+  });
+  var indivCount = _gestionCache.usuarios.filter(function (u) {
+    return !u.liceoSlug || u.liceoSlug === '';
+  }).length;
+  var html = '';
+  // Item "Individuales" arriba
+  html += '<div class="g-col-item ' + (_gestionCache.slugActivo === '__individual__' ? 'active' : '') + '" ' +
+    'onclick="seleccionarColegio(\'__individual__\')" style="' +
+    'padding:10px 12px;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:8px;' +
+    'background:' + (_gestionCache.slugActivo === '__individual__' ? 'rgba(37,99,235,.12)' : 'transparent') + ';' +
+    'border-left:3px solid ' + (_gestionCache.slugActivo === '__individual__' ? '#2563EB' : 'transparent') + '">' +
+    '<div><div style="font-weight:700;font-size:.86rem;color:var(--text)">👤 Individuales</div>' +
+    '<div style="font-size:.72rem;color:var(--muted)">Sin colegio asignado</div></div>' +
+    '<span style="background:#e0e7ff;color:#4338ca;font-size:.72rem;padding:2px 8px;border-radius:10px;font-weight:700">' + indivCount + '</span>' +
+    '</div>';
+  html += '<div style="height:1px;background:var(--border);margin:8px 0"></div>';
+
+  if (!colegios.length) {
+    html += '<div style="padding:14px;text-align:center;color:var(--muted);font-size:.82rem">Sin colegios.</div>';
+  } else {
+    colegios.forEach(function (c) {
+      var slug = c.slug || c.id;
+      var count = _gestionCache.usuarios.filter(function (u) { return u.liceoSlug === slug; }).length;
+      var activo = _gestionCache.slugActivo === slug;
+      var plan = (c.plan || 'basic').toUpperCase();
+      var planColor = c.plan === 'enterprise' ? '#DC2626' : c.plan === 'pro' ? '#7C3AED' : '#059669';
+      html += '<div class="g-col-item" onclick="seleccionarColegio(\''+slug+'\')" style="' +
+        'padding:10px 12px;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:8px;' +
+        'background:' + (activo ? 'rgba(37,99,235,.12)' : 'transparent') + ';' +
+        'border-left:3px solid ' + (activo ? '#2563EB' : 'transparent') + '">' +
+        '<div style="min-width:0;flex:1"><div style="font-weight:600;font-size:.84rem;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' +
+        (c.nombre || slug) + '</div>' +
+        '<div style="font-size:.7rem;color:var(--muted)">' +
+        '<span style="background:'+planColor+'20;color:'+planColor+';padding:1px 6px;border-radius:4px;font-weight:700;font-size:.65rem">'+plan+'</span> · ' +
+        (c.comuna || '—') +
+        '</div></div>' +
+        '<span style="background:rgba(37,99,235,.15);color:#2563EB;font-size:.72rem;padding:2px 8px;border-radius:10px;font-weight:700">'+count+'</span>' +
+        '</div>';
+    });
+  }
+  document.getElementById('gListaColegios').innerHTML = html;
+}
+
+function gestionFiltrarColegios() { renderGestionColegios(); }
+
+function seleccionarColegio(slug) {
+  _gestionCache.slugActivo = slug;
+  renderGestionColegios();
+  var esIndiv = slug === '__individual__';
+  var colegio = esIndiv ? null : _gestionCache.colegios.find(function (c) { return (c.slug||c.id) === slug; });
+  if (!esIndiv && !colegio) {
+    document.getElementById('gDetalle').innerHTML = '<div style="padding:40px;text-align:center;color:var(--muted)">Colegio no encontrado.</div>';
+    return;
+  }
+  var users = esIndiv
+    ? _gestionCache.usuarios.filter(function (u) { return !u.liceoSlug || u.liceoSlug === ''; })
+    : _gestionCache.usuarios.filter(function (u) { return u.liceoSlug === slug; });
+
+  var titulo = esIndiv ? '👤 Usuarios individuales' : '🏫 ' + (colegio.nombre || slug);
+  var subLine = esIndiv
+    ? 'Docentes sin colegio (contratación individual)'
+    : ('Slug: <code>'+(colegio.slug||slug)+'</code> · Plan <b>' + String(colegio.plan||'basic').toUpperCase() + '</b> · ' + (colegio.comuna||'—'));
+
+  var linkColegio = esIndiv ? '' :
+    '<a href="panel-superadmin-colegio.html?slug='+slug+'" class="btn btn-outline btn-sm" style="font-size:.75rem;padding:4px 10px;text-decoration:none">⚙️ Datos · Plan · Asignaturas · TP · Personal →</a>';
+
+  var html =
+    '<div style="padding:18px 20px;border-bottom:1px solid var(--border);background:linear-gradient(135deg,rgba(37,99,235,.04),transparent)">'+
+      '<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px">'+
+        '<div style="flex:1;min-width:0">'+
+          '<h2 style="margin:0;font-size:1.1rem;color:var(--text)">'+titulo+'</h2>'+
+          '<p style="margin:4px 0 0;color:var(--muted);font-size:.82rem">'+subLine+'</p>'+
+          (linkColegio ? '<div style="margin-top:6px">'+linkColegio+'</div>' : '') +
+        '</div>'+
+        '<button class="btn btn-primary btn-sm" onclick="gestionNuevoUsuario()">➕ Agregar usuario</button>'+
+      '</div>'+
+    '</div>'+
+
+    '<div style="padding:12px 20px">'+
+      '<input class="search-input" id="gUserSearch" placeholder="Buscar por nombre, email o rol…" oninput="gestionFiltrarUsuarios()" style="margin-bottom:12px">'+
+      '<div id="gUsuariosTable"></div>'+
+    '</div>';
+
+  document.getElementById('gDetalle').innerHTML = html;
+  _gestionCache.usuariosActivos = users;
+  gestionRenderUsuarios(users);
+}
+
+function gestionFiltrarUsuarios() {
+  var q = ((document.getElementById('gUserSearch')||{}).value || '').toLowerCase();
+  var filt = (_gestionCache.usuariosActivos || []).filter(function (u) {
+    if (!q) return true;
+    return String(u.nombre||'').toLowerCase().indexOf(q) !== -1 ||
+           String(u.email||'').toLowerCase().indexOf(q) !== -1 ||
+           String(u.role||'').toLowerCase().indexOf(q) !== -1;
+  });
+  gestionRenderUsuarios(filt);
+}
+
+function gestionRenderUsuarios(users) {
+  var t = document.getElementById('gUsuariosTable');
+  if (!t) return;
+  if (!users.length) {
+    t.innerHTML = '<div style="padding:30px;text-align:center;color:var(--muted)"><div style="font-size:2rem">📭</div><div style="margin-top:8px">Sin usuarios todavía.</div><button class="btn btn-primary btn-sm" style="margin-top:12px" onclick="gestionNuevoUsuario()">➕ Agregar el primero</button></div>';
+    return;
+  }
+  var html = '<table style="width:100%;border-collapse:collapse;font-size:.85rem">'+
+    '<thead><tr style="background:var(--surface2);text-align:left">'+
+      '<th style="padding:8px 10px">Nombre</th>'+
+      '<th style="padding:8px 10px">Email</th>'+
+      '<th style="padding:8px 10px">Rol</th>'+
+      '<th style="padding:8px 10px">Estado</th>'+
+      '<th style="padding:8px 10px;width:130px">Acciones</th>'+
+    '</tr></thead><tbody>';
+  users.forEach(function (u) {
+    var role = u.role || '—';
+    var activo = u.activo !== false;
+    var emailEsc = String(u.email||'').replace(/'/g, "\\'");
+    var nomEsc = String(u.nombre||u.email||'').replace(/'/g, "\\'");
+    html += '<tr style="border-top:1px solid var(--border)">'+
+      '<td style="padding:8px 10px;font-weight:600">'+(u.nombre||'—')+'</td>'+
+      '<td style="padding:8px 10px;color:var(--muted)">'+(u.email||'—')+'</td>'+
+      '<td style="padding:8px 10px"><span style="background:rgba(37,99,235,.1);color:#2563EB;font-size:.72rem;padding:2px 8px;border-radius:10px;font-weight:600">'+role+'</span></td>'+
+      '<td style="padding:8px 10px">'+(activo?'<span style="color:#059669">✓ Activo</span>':'<span style="color:#64748b">Inactivo</span>')+'</td>'+
+      '<td style="padding:8px 10px">'+
+        '<button class="btn btn-outline btn-sm" onclick="editUser(\''+u.uid+'\')" title="Editar">✏️</button> '+
+        '<button class="btn btn-danger btn-sm" onclick="eliminarUsuarioCompleto(\''+u.uid+'\',\''+emailEsc+'\',\''+nomEsc+'\')" title="Eliminar" style="background:#dc2626">🗑️</button>'+
+      '</td></tr>';
+  });
+  html += '</tbody></table>';
+  t.innerHTML = html;
+}
+
+// Botón "+ Nuevo usuario" → modal unificado con colegio pre-seleccionado
+function gestionNuevoUsuario() {
+  if (typeof ELModalUsuario === 'undefined') { alert('Módulo del modal no disponible.'); return; }
+  var slugActivo = _gestionCache.slugActivo;
+  var esIndiv = slugActivo === '__individual__';
+  var colegiosLista = _gestionCache.colegios.map(function (c) {
+    return { slug: c.slug || c.id, nombre: c.nombre || c.slug };
+  });
+  var colegioActivo = !esIndiv && slugActivo ? _gestionCache.colegios.find(function(c){return (c.slug||c.id)===slugActivo;}) : null;
+  ELModalUsuario.abrir({
+    modo: 'crear',
+    colegios: colegiosLista,
+    colegioSlug: esIndiv ? '__individual__' : (slugActivo || null),
+    permitirSinColegio: true,
+    catalogoCruces: colegioActivo ? (colegioActivo.asignaturasPermitidas || []) : null,
+    onGuardar: function (datos) {
+      return crearUsuarioDesdeModal(datos).then(function () {
+        // Refrescar cache y re-renderizar
+        return ELDB.usuarios.listarTodos().then(function (u) {
+          _gestionCache.usuarios = u || [];
+          gestionActualizarKpis();
+          renderGestionColegios();
+          seleccionarColegio(_gestionCache.slugActivo);
+        });
+      });
+    }
+  });
+}
+
+// Botón "+ Nuevo colegio" → abre modal viejo de crear liceo
+function gestionNuevoColegio() {
+  if (typeof abrirModalLiceo === 'function') { abrirModalLiceo(); }
+  else { alert('Función de crear colegio no disponible.'); }
 }
 
 // ============================================================
@@ -1695,7 +1995,14 @@ function renderUsers(list){
     var bc=u.role==='admin'?'badge-admin':u.role==='profesor'?'badge-prof':'badge-est';
     var est=u.activo!==false?'<span class="badge" style="background:rgba(16,185,129,.1);color:#10b981">Activo</span>':'<span class="badge badge-inact">Inactivo</span>';
     var sp=(u.especialidad||(u.asignaturas&&u.asignaturas.join(', '))||'—');
-    return '<tr><td><strong>'+(u.nombre||'—')+'</strong></td><td style="color:var(--muted)">'+u.email+'</td><td><span class="badge '+bc+'">'+(u.role||'—')+'</span></td><td style="font-size:.8rem">'+sp+'</td><td>'+est+'</td><td><button class="btn btn-outline btn-sm" onclick="editUser(\''+u.uid+'\')">✏️</button> <button class="btn btn-danger btn-sm" onclick="desactivar(\''+u.uid+'\')">🚫</button></td></tr>';
+    var emailEsc = (u.email||'').replace(/'/g, "\\'");
+    var nomEsc   = (u.nombre||u.email||'').replace(/'/g, "\\'");
+    return '<tr><td><strong>'+(u.nombre||'—')+'</strong></td><td style="color:var(--muted)">'+u.email+'</td><td><span class="badge '+bc+'">'+(u.role||'—')+'</span></td><td style="font-size:.8rem">'+sp+'</td><td>'+est+'</td>'+
+      '<td style="white-space:nowrap">'+
+        '<button class="btn btn-outline btn-sm" onclick="editUser(\''+u.uid+'\')" title="Editar">✏️</button> '+
+        '<button class="btn btn-outline btn-sm" onclick="desactivar(\''+u.uid+'\')" title="Desactivar (mantiene la cuenta)">🚫</button> '+
+        '<button class="btn btn-danger btn-sm" onclick="eliminarUsuarioCompleto(\''+u.uid+'\',\''+emailEsc+'\',\''+nomEsc+'\')" title="ELIMINAR usuario + todo su material" style="background:#dc2626">🗑️</button>'+
+      '</td></tr>';
   }).join('');
 }
 
@@ -1832,6 +2139,78 @@ function guardarUsuario(){
 function desactivar(uid){if(!confirm('¿Desactivar usuario?'))return;ELAuth.adminDesactivarUsuario(uid).then(loadData).catch(function(e){alert(e.message);});}
 
 // ─────────────────────────────────────────────────────────────
+//  ELIMINAR USUARIO COMPLETO — doc + materiales + planificaciones
+//  + notificaciones. La cuenta de Firebase Auth NO se puede borrar
+//  desde el cliente (limitación de seguridad Firebase), pero se
+//  desactiva el doc y se le indica al admin cómo hacer wipe total.
+// ─────────────────────────────────────────────────────────────
+function eliminarUsuarioCompleto(uid, email, nombre) {
+  if (!uid || !email) { alert('Faltan datos del usuario.'); return; }
+  // Bloquear intento de borrar admin plataforma o cuenta propia
+  var propia = (window.ELAuth && ELAuth.user && ELAuth.user.uid === uid);
+  if (propia) { alert('No podés eliminar tu propia cuenta desde acá.'); return; }
+  var adminsProtegidos = ['eyanez@salesianostalca.cl', 'admin@clickyclase.cl'];
+  if (adminsProtegidos.indexOf(String(email).toLowerCase()) !== -1) {
+    alert('Cuenta de administrador protegida. No se puede eliminar desde el panel.');
+    return;
+  }
+  var msg = '⚠️  ELIMINAR USUARIO COMPLETAMENTE\n\n' +
+    'Usuario: ' + nombre + '\n' +
+    'Email:   ' + email + '\n\n' +
+    'Esto va a borrar:\n' +
+    '  • Su documento en usuarios/{uid}\n' +
+    '  • Todos sus materiales\n' +
+    '  • Todas sus planificaciones\n\n' +
+    '⚠️  La cuenta de Firebase Auth NO se puede borrar desde acá.\n' +
+    '    Para borrarla, corré:\n' +
+    '    node borrar-dominio.mjs --dominio=@' + (email.split('@')[1]||'') + ' --aplicar --confirmo\n\n' +
+    '¿Continuar? Esta acción es IRREVERSIBLE.';
+  if (!confirm(msg)) return;
+  var db = EL_DB;
+  var totales = { materiales: 0, planificaciones: 0 };
+  // 1) Borrar materiales del user
+  Promise.resolve()
+    .then(function () {
+      return db.collection(EL_COLLECTIONS.MATERIALES)
+        .where('creadoPor', '==', email).get()
+        .then(function (snap) {
+          var batch = db.batch();
+          snap.forEach(function (d) { batch.delete(d.ref); totales.materiales++; });
+          return snap.size ? batch.commit() : null;
+        });
+    })
+    // 2) Borrar planificaciones
+    .then(function () {
+      return db.collection(EL_COLLECTIONS.PLANIFICACIONES)
+        .where('creadoPor', '==', email).get()
+        .then(function (snap) {
+          var batch = db.batch();
+          snap.forEach(function (d) { batch.delete(d.ref); totales.planificaciones++; });
+          return snap.size ? batch.commit() : null;
+        });
+    })
+    // 3) Borrar doc de usuarios/{uid}
+    .then(function () {
+      return db.collection(EL_COLLECTIONS.USERS).doc(uid).delete();
+    })
+    .then(function () {
+      alert('✅ Usuario eliminado.\n\n' +
+        'Materiales borrados: ' + totales.materiales + '\n' +
+        'Planificaciones borradas: ' + totales.planificaciones + '\n' +
+        'Doc usuarios/{uid}: borrado\n\n' +
+        '⚠️  RECORDÁ: la cuenta Firebase Auth sigue existiendo. Corré:\n' +
+        'node borrar-dominio.mjs --dominio=@' + (email.split('@')[1]||'') + ' --aplicar --confirmo\n' +
+        'para eliminarla del todo.');
+      loadData();
+    })
+    .catch(function (e) {
+      alert('❌ Error al eliminar:\n' + (e.message || e) + '\n\n' +
+        'Puede haber quedado a medias. Revisá en Firestore y volvé a intentar.');
+      console.error('[admin] eliminarUsuarioCompleto:', e);
+    });
+}
+
+// ─────────────────────────────────────────────────────────────
 //  LICEOS / COLEGIOS — CRUD
 // ─────────────────────────────────────────────────────────────
 var DEPENDENCIAS_LBL={
@@ -1851,6 +2230,8 @@ function loadLiceos(){
   }
   ELDB.liceos.listar(inc).then(function(list){
     allLiceos=list||[];
+    // Cache global para el modal unificado (dropdown de colegios)
+    window._liceosCache = allLiceos;
     var sb=document.getElementById('sbCntLiceos');
     if(sb)sb.textContent=allLiceos.filter(function(l){return l.activo!==false;}).length;
     renderLiceos(allLiceos);
@@ -1905,32 +2286,65 @@ function filtrarLiceos(){
 
 function abrirModalLiceo(slug){
   var editing=!!slug;
-  document.getElementById('liceoModalTitle').textContent=editing?'✏️ Editar Liceo':'🏫 Nuevo Liceo';
+  document.getElementById('liceoModalTitle').textContent = editing ? '✏️ Editar colegio' : '🏫 Nuevo colegio';
   document.getElementById('liceoEditingSlug').value=editing?slug:'';
   // Limpiar
   ['liceoNombre','liceoSlug','liceoRbd','liceoComuna','liceoRegion','liceoLogoPath','liceoAlias'].forEach(function(id){
     var el=document.getElementById(id);if(el)el.value='';
   });
   document.getElementById('liceoDependencia').value='';
-  document.getElementById('liceoLogoPreview').src='assets/logos/colegios/default.svg';
   var notif=document.getElementById('liceoNotif');if(notif)notif.classList.remove('show');
+  // Render cards de dependencia (radio-cards visuales)
+  liceoRenderDependencias('');
   // En edición, el slug es inmutable
   document.getElementById('liceoSlug').readOnly=editing;
   document.getElementById('liceoSlug').style.opacity=editing?'.6':'1';
+  // Cambiar CTA según modo
+  var btn = document.getElementById('btnGuardarLiceo');
+  if (btn) btn.innerHTML = editing ? '💾 Guardar cambios' : '🚀 Crear y configurar →';
   if(editing){
     var l=allLiceos.find(function(x){return x.slug===slug;});
-    if(!l){alert('Liceo no encontrado: '+slug);return;}
+    if(!l){alert('Colegio no encontrado: '+slug);return;}
     document.getElementById('liceoNombre').value=l.nombre||'';
     document.getElementById('liceoSlug').value=l.slug||'';
     document.getElementById('liceoRbd').value=l.rbd||'';
     document.getElementById('liceoComuna').value=l.comuna||'';
     document.getElementById('liceoRegion').value=l.region||'';
     document.getElementById('liceoDependencia').value=l.dependencia||'';
+    liceoRenderDependencias(l.dependencia||'');
     document.getElementById('liceoLogoPath').value=l.logoPath||('assets/logos/colegios/'+l.slug+'.png');
     document.getElementById('liceoAlias').value=Array.isArray(l.alias)?l.alias.join(', '):'';
-    document.getElementById('liceoLogoPreview').src=l.logoPath||('assets/logos/colegios/'+l.slug+'.png');
   }
   document.getElementById('modalLiceo').classList.add('open');
+}
+
+// Renderiza las cards visuales de tipo de establecimiento
+function liceoRenderDependencias(seleccionada) {
+  var grid = document.getElementById('liceoDepGrid');
+  if (!grid) return;
+  var opciones = [
+    { id: 'municipal',                 label: 'Municipal',         emoji: '🏛️', color: '#2563EB' },
+    { id: 'slep',                      label: 'SLEP',              emoji: '🏢', color: '#0891B2' },
+    { id: 'particular-subvencionado',  label: 'Part. Subvenc.',    emoji: '📚', color: '#0EA5E9' },
+    { id: 'particular-pagado',         label: 'Part. Pagado',      emoji: '⭐', color: '#7C3AED' },
+    { id: 'corporacion',               label: 'Corporación',       emoji: '🤝', color: '#059669' },
+    { id: 'otro',                      label: 'Otro',              emoji: '📋', color: '#64748b' }
+  ];
+  grid.innerHTML = opciones.map(function (o) {
+    var sel = seleccionada === o.id;
+    return '<label onclick="liceoSelectDep(\''+o.id+'\')" style="' +
+      'display:flex;flex-direction:column;align-items:center;gap:4px;padding:12px 8px;' +
+      'border:2px solid '+(sel?o.color:'rgba(0,0,0,.08)')+';border-radius:10px;cursor:pointer;' +
+      'background:'+(sel?o.color+'12':'#fff')+';transition:all .15s;text-align:center">' +
+      '<div style="font-size:1.35rem">'+o.emoji+'</div>' +
+      '<div style="font-size:.78rem;font-weight:600;color:'+(sel?o.color:'var(--text)')+'">'+o.label+'</div>' +
+      '</label>';
+  }).join('');
+}
+
+function liceoSelectDep(id) {
+  document.getElementById('liceoDependencia').value = id;
+  liceoRenderDependencias(id);
 }
 
 function liceoAutoSlug(){
@@ -1944,16 +2358,13 @@ function liceoAutoSlug(){
   var logoIn=document.getElementById('liceoLogoPath');
   if(logoIn&&!logoIn.dataset.touched){
     logoIn.value=slug?('assets/logos/colegios/'+slug+'.png'):'';
-    document.getElementById('liceoLogoPreview').src=logoIn.value||'assets/logos/colegios/default.svg';
   }
 }
 
-// Si el admin escribe la ruta del logo a mano, marcar como "tocada" y actualizar preview
+// Si el admin escribe la ruta del logo a mano, marcar como "tocada"
 document.addEventListener('input',function(e){
   if(e.target&&e.target.id==='liceoLogoPath'){
     e.target.dataset.touched='1';
-    var p=document.getElementById('liceoLogoPreview');
-    if(p)p.src=e.target.value||'assets/logos/colegios/default.svg';
   }
 });
 
@@ -1963,7 +2374,9 @@ function guardarLiceo(){
   var nombre=document.getElementById('liceoNombre').value.trim();
   var slug=document.getElementById('liceoSlug').value.trim().toLowerCase();
   if(!nombre){notif('liceoNotif','❌ El nombre es obligatorio','err');return;}
-  if(!slug||!/^[a-z0-9-]+$/.test(slug)){notif('liceoNotif','❌ Slug inválido (solo minúsculas, números y guiones)','err');return;}
+  if(!slug||!/^[a-z0-9-]+$/.test(slug)){notif('liceoNotif','❌ El ID único (slug) es inválido (solo minúsculas, números y guiones)','err');return;}
+  var depSel = document.getElementById('liceoDependencia').value;
+  if(!depSel){notif('liceoNotif','❌ Elegí el tipo de establecimiento','err');return;}
   var alias=(document.getElementById('liceoAlias').value||'').split(',').map(function(s){return s.trim();}).filter(function(s){return s.length>0;});
   var data={
     slug:slug,
@@ -1981,9 +2394,18 @@ function guardarLiceo(){
     ? ELDB.liceos.actualizar(slugEdit,data)
     : ELDB.liceos.crear(data);
   p.then(function(){
-    notif('liceoNotif',editing?'✅ Liceo actualizado':'✅ Liceo creado','ok');
+    notif('liceoNotif',editing?'✅ Liceo actualizado':'✅ Colegio creado. Abriendo configuración completa…','ok');
     if(btn){btn.disabled=false;btn.textContent='💾 Guardar liceo';}
-    setTimeout(function(){closeModal('modalLiceo');loadLiceos();},900);
+    if (!editing) {
+      // NUEVO: si es alta de colegio, redirigir al panel completo con pestañas
+      // (Datos / Plan / Asignaturas / Límites / TP / Personal / Zona peligrosa)
+      // para que el admin complete la configuración en un solo lugar.
+      setTimeout(function(){
+        window.location.href = 'panel-superadmin-colegio.html?slug=' + encodeURIComponent(slug);
+      }, 700);
+    } else {
+      setTimeout(function(){ closeModal('modalLiceo'); loadLiceos(); if(typeof gestionInit==='function')gestionInit(); }, 900);
+    }
   }).catch(function(e){
     notif('liceoNotif','❌ '+(e&&e.message||'Error guardando'),'err');
     if(btn){btn.disabled=false;btn.textContent='💾 Guardar liceo';}
@@ -2064,17 +2486,59 @@ function filtrarProfs(){
   }));
 }
 
-// WIZARD
+// WIZARD → ahora usa el MODAL UNIFICADO (modal-usuario-unificado.js)
+// El wizard viejo de 4 pasos quedó reemplazado por un modal de 1 pantalla
+// que sirve para admin plataforma, admin colegio, y docente individual.
 function abrirWizard(){
-  wData={tipo:null,tipos:[],asignaturas:[],niveles:[],especialidad:'',mencion:'',modulos:[],cursos:[],liceos:[],liceoPrincipal:'',permisos:{planificar:true,crearMaterial:true},formatoPAES:false,formatoSIMCE:false,taxonomiaMarzano:false};
-  ['pNombre','pEmail','pPass'].forEach(function(id){document.getElementById(id).value='';});
-  document.querySelectorAll('.tipo-card').forEach(function(c){c.classList.remove('selected');});
-  document.querySelectorAll('.wstep').forEach(function(s){s.className='wstep';});
-  document.querySelectorAll('.step-panel').forEach(function(p){p.classList.remove('active');});
-  document.getElementById('ws1').classList.add('active');
-  document.getElementById('sp1').classList.add('active');
-  document.getElementById('wNotif').classList.remove('show');
-  document.getElementById('modalWizard').classList.add('open');
+  if (typeof ELModalUsuario === 'undefined') {
+    alert('El módulo del modal no está cargado. Refrescá la página.');
+    return;
+  }
+  // Obtener lista de colegios para el dropdown
+  var colegiosLista = (window._liceosCache || []).map(function (l) {
+    return { slug: l.slug || l.id, nombre: l.nombre || l.slug };
+  });
+  ELModalUsuario.abrir({
+    modo: 'crear',
+    colegios: colegiosLista,
+    permitirSinColegio: true,
+    onGuardar: function (datos) {
+      return crearUsuarioDesdeModal(datos);
+    }
+  });
+}
+function abrirWizardTipo(tipo){ abrirWizard(); }   // compat legacy
+
+// Persiste el usuario creado desde el modal unificado.
+// Usa ELAuth.adminCrearProfesor (que llama a Firebase Auth REST + crea doc Firestore).
+function crearUsuarioDesdeModal(datos) {
+  if (typeof ELAuth === 'undefined' || typeof ELAuth.adminCrearProfesor !== 'function') {
+    return Promise.reject(new Error('ELAuth.adminCrearProfesor no disponible'));
+  }
+  var tipoProfesor = datos.especialidadTP ? 'tecnico'
+                    : (datos.asignaturas && datos.asignaturas.length ? 'media' : 'directivo');
+  var payload = {
+    nombre:          datos.nombre,
+    email:           datos.email,
+    password:        datos.password,
+    role:            datos.rolPrincipal || 'profesor',
+    cargo:           datos.cargo || '',
+    tipoProfesor:    tipoProfesor,
+    tiposProfesor:   [tipoProfesor],
+    especialidad:    datos.especialidadTP || '',
+    asignaturas:     datos.asignaturas || [],
+    niveles:         datos.niveles || [],
+    liceos:          datos.colegioSlug ? [datos.colegioSlug] : [],
+    liceoPrincipal:  datos.colegioSlug || '',
+    // Extras específicos del modal unificado
+    liceoSlug:       datos.colegioSlug || '',
+    esIndividual:    !!datos.esIndividual,
+    roles:           datos.roles.reduce(function (a, r) { a[r] = true; return a; }, {}),
+    profesion:       datos.profesion || ''
+  };
+  return ELAuth.adminCrearProfesor(payload).then(function () {
+    if (typeof loadData === 'function') setTimeout(loadData, 400);
+  });
 }
 
 // Toggle múltiple: un profe puede ser Básica + Plan Común simultáneamente.

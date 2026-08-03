@@ -4,8 +4,18 @@
  * Variables de entorno requeridas: GEMINI_API_KEY
  */
 
-const GEMINI_MODEL_DEFAULT = 'gemini-2.5-flash';
+const GEMINI_MODEL_DEFAULT = 'gemini-3.6-flash';
 const GEMINI_MODELOS_PERMITIDOS = [
+  // Vigentes agosto 2026
+  'gemini-3.6-flash',
+  'gemini-3.5-flash-lite',
+  // Aliases y legacy — fallback si el ID vigente falla
+  'gemini-flash-latest',
+  'gemini-2.0-flash',
+  'gemini-2.0-flash-lite',
+  'gemini-1.5-flash',
+  'gemini-1.5-flash-8b',
+  'gemini-1.5-pro',
   'gemini-2.5-flash',
   'gemini-2.5-flash-lite',
   'gemini-2.5-pro'
@@ -596,12 +606,95 @@ PARTE III — DESARROLLO (2 preguntas de análisis o aplicación)`;
 }
 
 // ── Handler principal ────────────────────────────────────────
+// ─── VERIFICACIÓN DE CUOTA IA (opcional, se activa si hay FIREBASE_SERVICE_ACCOUNT) ───
+// Enforcement server-side: verifica que el liceo del user no haya excedido su
+// cuota mensual antes de gastar tokens de Gemini. Requiere:
+//   - Env var FIREBASE_SERVICE_ACCOUNT (JSON del service account de Firebase Admin)
+//   - Cliente enviando header "Authorization: Bearer <idToken>"
+// Si NO está configurada, la verificación se salta (retrocompat).
+let _adminApp = null;
+async function _getAdmin() {
+  if (_adminApp) return _adminApp;
+  const json = process.env.FIREBASE_SERVICE_ACCOUNT;
+  if (!json) return null;
+  try {
+    const admin = await import('firebase-admin');
+    if (!admin.apps || admin.apps.length === 0) {
+      admin.initializeApp({ credential: admin.credential.cert(JSON.parse(json)) });
+    }
+    _adminApp = admin;
+    return admin;
+  } catch (e) {
+    console.warn('[ia-asistente] Firebase Admin no disponible:', e.message);
+    return null;
+  }
+}
+async function _verificarCuotaBackend(req) {
+  const admin = await _getAdmin();
+  if (!admin) return { ok: true, skipped: 'no-admin' };
+  const auth = req.headers && (req.headers.authorization || req.headers.Authorization);
+  if (!auth || !auth.startsWith('Bearer ')) return { ok: true, skipped: 'no-token' };
+  const token = auth.slice(7).trim();
+  try {
+    const decoded = await admin.auth().verifyIdToken(token);
+    const uid = decoded.uid;
+    const db = admin.firestore();
+    const userSnap = await db.collection('usuarios').doc(uid).get();
+    if (!userSnap.exists) return { ok: true, skipped: 'no-user-doc' };
+    const user = userSnap.data();
+    const liceoSlug = user.liceoSlug || (user.liceos && user.liceos[0]) || '';
+    if (!liceoSlug) return { ok: true, skipped: 'individual' };
+    const liceoSnap = await db.collection('liceos').doc(liceoSlug).get();
+    if (!liceoSnap.exists) return { ok: true, skipped: 'no-liceo' };
+    const liceo = liceoSnap.data();
+    const limiteTotal = (liceo.limiteGeneracionesMes != null && !isNaN(liceo.limiteGeneracionesMes)) ? Number(liceo.limiteGeneracionesMes) : null;
+    const limiteDocente = (liceo.limiteGeneracionesDocente != null && !isNaN(liceo.limiteGeneracionesDocente)) ? Number(liceo.limiteGeneracionesDocente) : null;
+    if (limiteTotal == null && limiteDocente == null) return { ok: true, skipped: 'sin-limites' };
+    const mes = new Date().toISOString().slice(0, 7);
+    // Contar materiales + planificaciones del mes con ese liceo
+    const [mats, plans] = await Promise.all([
+      db.collection('materiales').where('liceoSlug', '==', liceoSlug).get().catch(() => ({ forEach: () => {} })),
+      db.collection('planificaciones').where('liceoSlug', '==', liceoSlug).get().catch(() => ({ forEach: () => {} }))
+    ]);
+    let total = 0, delDocente = 0;
+    const contar = (snap) => snap.forEach(d => {
+      const x = d.data() || {};
+      const f = String(x.creadoEn || x.fecha || x.createdAt || '').slice(0, 7);
+      if (f !== mes) return;
+      total++;
+      const u = x.autorUid || x.profesorUid || x.docenteUid || x.creadoPorUid;
+      if (u === uid) delDocente++;
+    });
+    contar(mats); contar(plans);
+    if (limiteDocente != null && delDocente >= limiteDocente) {
+      return { ok: false, razon: 'docente', consumoDocente: delDocente, limiteDocente, consumoTotal: total, limiteTotal, liceoNombre: liceo.nombre || liceoSlug };
+    }
+    if (limiteTotal != null && total >= limiteTotal) {
+      return { ok: false, razon: 'colegio', consumoTotal: total, limiteTotal, consumoDocente: delDocente, limiteDocente, liceoNombre: liceo.nombre || liceoSlug };
+    }
+    return { ok: true, consumoTotal: total, consumoDocente: delDocente, limiteTotal, limiteDocente };
+  } catch (e) {
+    console.warn('[ia-asistente] Error verificando cuota:', e.message);
+    return { ok: true, skipped: 'error:' + e.message };
+  }
+}
+
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin',  '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST')   return res.status(405).json({ error: 'Método no permitido' });
+
+  // ─── ENFORCEMENT DE CUOTA ───
+  const cuota = await _verificarCuotaBackend(req);
+  if (!cuota.ok) {
+    return res.status(429).json({
+      error: 'Cuota mensual de IA alcanzada',
+      razon: cuota.razon,
+      info: cuota
+    });
+  }
 
   // Pool de API keys: aceptamos GEMINI_API_KEY como key única o lista separada
   // por coma. También leemos GEMINI_API_KEYS (plural) si existe.
@@ -658,10 +751,13 @@ export default async function handler(req, res) {
                        ? modeloPedido
                        : GEMINI_MODEL_DEFAULT;
 
-  // Modelos a intentar: el pedido y, si es Flash, un respaldo más ligero
-  const modelosIntento = (modeloUsado === 'gemini-2.5-flash')
-    ? ['gemini-2.5-flash', 'gemini-2.5-flash-lite']
-    : [modeloUsado];
+  // Modelos a intentar: el pedido y, si falla, cae a los vigentes.
+  // Estrategia: siempre intenta el modelo vigente 3.6 como último recurso.
+  const modelosIntento = (modeloUsado === 'gemini-3.6-flash')
+    ? ['gemini-3.6-flash', 'gemini-3.5-flash-lite']
+    : (modeloUsado.startsWith('gemini-2') || modeloUsado.startsWith('gemini-1'))
+      ? [modeloUsado, 'gemini-3.6-flash', 'gemini-3.5-flash-lite']
+      : [modeloUsado, 'gemini-3.6-flash'];
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
   async function llamarGemini(apiKey, modelo) {

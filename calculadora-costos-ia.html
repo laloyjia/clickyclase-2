@@ -608,7 +608,12 @@ function recalcular() {
   });
 
   // Stats de docente (basado en Pro)
-  var precioPro = parseInt(document.getElementById('precio_pro').value, 10) || 0;
+  // BUG FIX: el ID 'precio_pro' se cambió a otro naming; buscar los inputs de precio pro
+  // en múltiples formatos (por retrocompat).
+  var pProEl = document.getElementById('precio_pro') ||
+               document.querySelector('input[data-plan="pro"][data-tipo="precio"]') ||
+               document.querySelector('[data-precio-pro]');
+  var precioPro = pProEl ? (parseInt(pProEl.value, 10) || 0) : 0;
   var costoPorDocAno = docentes > 0 ? costoAnualCLP / docentes : 0;
   var precioPorDocAno = docentes > 0 ? precioPro / docentes : 0;
   document.getElementById('statCostoDocente').textContent = fmtCLP(costoPorDocAno);

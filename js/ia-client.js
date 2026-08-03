@@ -16,16 +16,20 @@ var ELAsistente = (function () {
    * @returns {Promise<string>} Texto generado
    */
   function generar(tipo, datos) {
-    return fetch(_endpoint, {
-      method:  'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify({ tipo: tipo, datos: datos })
-    })
-    .then(function (res) { return res.json(); })
-    .then(function (data) {
-      if (data.error) throw new Error(data.error);
-      return data.resultado || '';
-    });
+    var body = JSON.stringify({ tipo: tipo, datos: datos });
+    // Si el módulo de cuota está cargado, usar el wrapper (verifica cuota + adjunta token).
+    // Si no, hacer fetch directo (retrocompat).
+    var doFetch = (window.CCCuotaIA && window.CCCuotaIA.wrapFetch)
+      ? window.CCCuotaIA.wrapFetch(_endpoint, { method:'POST', body: body })
+      : fetch(_endpoint, { method:'POST', headers:{'Content-Type':'application/json'}, body: body });
+    return doFetch
+      .then(function (res) { return res.json(); })
+      .then(function (data) {
+        if (data.error) throw new Error(data.error);
+        // Invalidar cache de cuota — acabamos de consumir 1 generación
+        if (window.CCCuotaIA && window.CCCuotaIA.invalidarCache) window.CCCuotaIA.invalidarCache();
+        return data.resultado || '';
+      });
   }
 
   /**

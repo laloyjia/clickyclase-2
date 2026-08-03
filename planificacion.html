@@ -1606,6 +1606,9 @@
     <script src="js/firebase-auth.js"></script>
 <script src="js/aprobaciones.js"></script>
     <script src="js/firebase-db.js"></script>
+    <script src="js/cuota-ia.js?v=1"></script>
+    <script src="js/catalogo-asignaturas-maestro.js?v=1"></script>
+    <script src="js/cc-asig.js?v=1"></script>
     <script src="js/tp-catalogo.js"></script>
     <script src="js/presencia-logger.js"></script>
     <script>document.addEventListener('DOMContentLoaded',function(){ if(window.ELPresencia) ELPresencia.start('Planificación'); });</script>
@@ -1808,7 +1811,19 @@
 
     function _resolveAsigSiglaLocal(nombre) {
         if (!nombre) return null;
-        // FIX: si viene con nivel pegado (superadmin: "lenguaje__2b"), quitarlo y normalizar.
+        // NUEVO: usar catálogo maestro CCAsig si está disponible.
+        // Resuelve alias, cruces asig__nivel, mayúsculas/tildes, y para electivos
+        // devuelve el id de la asignatura BASE (así se cargan los OA de la base).
+        if (window.CCAsig) {
+            var canon = CCAsig.normalizarId(nombre);
+            if (canon) {
+                // Si es electivo, usar la base para buscar OAs (fallback natural)
+                var asig = CCAsig.getById(canon);
+                var idParaSigla = (asig && asig.base) ? asig.base : canon;
+                return idParaSigla;
+            }
+        }
+        // FALLBACK legacy: si CCAsig no encuentra, usar resolver viejo
         if (String(nombre).indexOf('__') !== -1) nombre = String(nombre).split('__')[0];
         if (typeof CURRICULA_CHILE !== 'undefined' && CURRICULA_CHILE.nombreAsignaturaCanonico) {
             nombre = CURRICULA_CHILE.nombreAsignaturaCanonico(nombre);
@@ -2041,12 +2056,14 @@
             if (secReg) secReg.style.display = 'none';
 
             // Pre-poblar selectAsignatura legacy (se usa internamente en cargarOAsRegular)
+            // NUEVO: mostrar nombre bonito del catálogo maestro en vez del ID técnico
             var selAsigLegacy = document.getElementById('selectAsignatura');
             if (selAsigLegacy) {
                 selAsigLegacy.innerHTML = '<option value="">-- Seleccionar asignatura --</option>';
                 asigsList.forEach(function (a) {
                     var opt = document.createElement('option');
-                    opt.value = a; opt.textContent = a;
+                    opt.value = a;
+                    opt.textContent = (window.CCAsig) ? CCAsig.getNombre(a) : a;
                     selAsigLegacy.appendChild(opt);
                 });
             }
@@ -2216,22 +2233,55 @@
         cargarUnidadesRegular(sigla, nivel, electivoKey);
         actualizarBadgeOA();
 
-        if (!sigla || !nivel || typeof CURRICULA_CHILE === 'undefined') {
-            container.innerHTML = '<span style="color:var(--text-muted);font-size:0.85rem">Selecciona asignatura y nivel para ver los OA.</span>';
+        if (!nivel) {
+            container.innerHTML = '<span style="color:var(--text-muted);font-size:0.85rem">Selecciona el curso para ver los OA.</span>';
+            return;
+        }
+        if (!asigNombre) {
+            container.innerHTML = '<span style="color:var(--text-muted);font-size:0.85rem">Selecciona la asignatura para ver los OA.</span>';
             return;
         }
 
-        // Si hay electivo HC seleccionado → OAs del electivo; si no → OAs del FG
+        // NUEVO: usar CCAsig que hace resolución + fallback a la base automáticamente
         var oas;
-        if (electivoKey && typeof CURRICULA_CHILE.getOAsByKey === 'function') {
-            oas = CURRICULA_CHILE.getOAsByKey(electivoKey, nivel);
-        } else {
-            oas = CURRICULA_CHILE.getOAs(sigla, nivel);
+        var electivoInfo = null;
+        if (window.CCAsig) {
+            // Preferir el ID original (permite detectar electivos)
+            var idParaOA = asigNombre;
+            if (electivoKey) idParaOA = electivoKey;
+            oas = CCAsig.getOAs(idParaOA, nivel);
+            var asig = CCAsig.getById(idParaOA);
+            if (asig && asig.tipo === 'electivo' && !asig.tieneOAsCargados) {
+                electivoInfo = { nombre: asig.nombre, baseNombre: asig.base ? CCAsig.getNombre(asig.base) : null };
+            }
+        } else if (typeof CURRICULA_CHILE !== 'undefined') {
+            if (electivoKey && typeof CURRICULA_CHILE.getOAsByKey === 'function') {
+                oas = CURRICULA_CHILE.getOAsByKey(electivoKey, nivel);
+            } else {
+                oas = CURRICULA_CHILE.getOAs(sigla, nivel);
+            }
         }
+
         if (!oas || !oas.length) {
-            container.innerHTML = '<span style="color:var(--text-muted);font-size:0.85rem">No hay OA registrados para esta combinación.</span>';
+            // Mensaje MUCHO más claro según el caso
+            if (electivoInfo) {
+                container.innerHTML =
+                    '<div style="padding:12px;background:rgba(245,158,11,.08);border-left:3px solid #F59E0B;border-radius:6px;font-size:.85rem;color:#0C1E3B">' +
+                    '<b>⚠️ Los OA de "' + electivoInfo.nombre + '" aún no están cargados en el sistema.</b><br>' +
+                    (electivoInfo.baseNombre ? 'Podés usar los OA de la asignatura base <b>' + electivoInfo.baseNombre + '</b> como referencia mientras tanto.<br><br>' : '') +
+                    'De todas formas, podés escribir la planificación libre (los OA se completan de forma manual).' +
+                    '</div>';
+            } else {
+                container.innerHTML = '<span style="color:var(--text-muted);font-size:0.85rem">No hay OA registrados para esta combinación (asignatura + nivel).</span>';
+            }
             return;
         }
+
+        // Si vienen de la base (electivo), avisar
+        var deBase = oas.length > 0 && oas[0]._deBase;
+        var avisoBase = deBase ?
+            '<div style="padding:8px 12px;background:rgba(14,165,233,.08);border-left:3px solid #0EA5E9;border-radius:6px;font-size:.78rem;color:#0C1E3B;margin-bottom:8px">' +
+            'ℹ️ Mostrando OA de la asignatura base <b>' + (oas[0]._baseAsig || '') + '</b> (el electivo aún no tiene OA propios cargados)</div>' : '';
         // Agrupar por eje
         var byEje = {};
         oas.forEach(function(o) {
@@ -2239,7 +2289,7 @@
             if (!byEje[eje]) byEje[eje] = [];
             byEje[eje].push(o);
         });
-        var html = '';
+        var html = (typeof avisoBase !== 'undefined' ? avisoBase : '');
         Object.keys(byEje).forEach(function(eje) {
             html += '<div style="font-size:.78rem;color:var(--muted,#888);font-weight:700;margin:8px 0 4px;text-transform:uppercase">' + eje + '</div>';
             byEje[eje].forEach(function(o) {
@@ -2273,15 +2323,20 @@
         if (hidden)   { hidden.value = ''; }
         if (hint)     { hint.style.display = 'none'; }
 
-        if (!sigla || !nivel || typeof CURRICULA_CHILE === 'undefined') return;
-        // Si hay electivo HC seleccionado → unidades del electivo; si no → FG
+        if (!nivel) return;
+        // NUEVO: usar CCAsig con fallback a la base para electivos
         var unidades;
-        if (electivoKey && typeof CURRICULA_CHILE.getUnidadesByKey === 'function') {
-            unidades = CURRICULA_CHILE.getUnidadesByKey(electivoKey, nivel);
-        } else {
-            unidades = (typeof CURRICULA_CHILE.getUnidades === 'function')
-                ? CURRICULA_CHILE.getUnidades(sigla, nivel)
-                : [];
+        if (window.CCAsig) {
+            // Preferir el ID original (permite detectar electivos)
+            var idParaUnidades = electivoKey || sigla;
+            unidades = CCAsig.getUnidades(idParaUnidades, nivel);
+        } else if (typeof CURRICULA_CHILE !== 'undefined') {
+            if (electivoKey && typeof CURRICULA_CHILE.getUnidadesByKey === 'function') {
+                unidades = CURRICULA_CHILE.getUnidadesByKey(electivoKey, nivel);
+            } else {
+                unidades = (typeof CURRICULA_CHILE.getUnidades === 'function')
+                    ? CURRICULA_CHILE.getUnidades(sigla, nivel) : [];
+            }
         }
         if (!unidades || !unidades.length) {
             var optManual = document.createElement('option');
@@ -3060,7 +3115,7 @@
                 else if (window.EL_USER && window.EL_USER.uid)
                     _uid = window.EL_USER.uid;
             } catch(_){}
-            return fetch(window.IA_ENDPOINT || '/api/ia-asistente', {
+            return (window.CCCuotaIA && window.CCCuotaIA.wrapFetch ? window.CCCuotaIA.wrapFetch : fetch)(window.IA_ENDPOINT || '/api/ia-asistente', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -3873,7 +3928,7 @@
                 else if (window.EL_USER && window.EL_USER.uid)
                     _uid = window.EL_USER.uid;
             } catch(_){}
-            return fetch(window.IA_ENDPOINT || '/api/ia-asistente', {
+            return (window.CCCuotaIA && window.CCCuotaIA.wrapFetch ? window.CCCuotaIA.wrapFetch : fetch)(window.IA_ENDPOINT || '/api/ia-asistente', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

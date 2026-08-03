@@ -12,19 +12,30 @@
 //
 //  USO (desde setup-usuarios/):
 //    1) PRUEBA (solo lista, no borra nada):
-//         node borrar-dominio.mjs
+//         node borrar-dominio.mjs --dominio=@csjb.cl
 //    2) BORRAR DE VERDAD (requiere las DOS banderas, a propósito):
-//         node borrar-dominio.mjs --aplicar --confirmo
+//         node borrar-dominio.mjs --dominio=@csjb.cl --aplicar --confirmo
 //
 //    Para borrar también sus datos en Firestore, añade --con-firestore:
-//         node borrar-dominio.mjs --aplicar --confirmo --con-firestore
+//         node borrar-dominio.mjs --dominio=@csjb.cl --aplicar --confirmo --con-firestore
+//
+//    Ejemplos:
+//         node borrar-dominio.mjs --dominio=@laprovidencia.cl
+//         node borrar-dominio.mjs --dominio=@laprovidencia.cl --aplicar --confirmo --con-firestore
 // =============================================================================
 
 import admin from 'firebase-admin';
 import { readFileSync, existsSync } from 'node:fs';
 
 // ── Dominio a borrar ────────────────────────────────────────────────────────
-const DOMINIO = '@csjb.cl';
+// Se lee de --dominio=@xxx (por CLI). Si no se pasa, usa @csjb.cl como default.
+const argDom = process.argv.find(a => a.startsWith('--dominio='));
+let DOMINIO = argDom ? argDom.split('=')[1].trim() : '@csjb.cl';
+if (!DOMINIO.startsWith('@')) DOMINIO = '@' + DOMINIO;
+if (DOMINIO.length < 4) {
+  console.error('❌ Dominio inválido:', DOMINIO);
+  process.exit(1);
+}
 
 // ── Conexión (mismo patrón que tus otros scripts) ──────────────────────────
 const KEY_PATH = new URL('./serviceAccountKey.json', import.meta.url);

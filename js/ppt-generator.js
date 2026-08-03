@@ -23,15 +23,72 @@
   'use strict';
 
   var POLLINATIONS_URL = 'https://image.pollinations.ai/prompt/';
-  var UNSPLASH_URL     = 'https://source.unsplash.com/1600x900/?';
+  // Openverse: API PÚBLICA sin key, CORS habilitado, agrega Flickr + Wikimedia +
+  // Museos (Smithsonian, MET, etc). Solo devuelve imágenes con licencia libre.
+  // Es la MEJOR fuente de fotos reales educativas para presentaciones. La usamos
+  // como fuente principal reemplazando a Unsplash Source (que quedó deprecado
+  // en 2024 y ahora bloquea CORS).
+  var OPENVERSE_API = 'https://api.openverse.org/v1/images/';
+  // Wikimedia Commons: API pública sin key, CORS permitido con origin=*.
+  // Usamos como fallback secundario porque su buscador es más restrictivo.
+  var WIKIMEDIA_API = 'https://commons.wikimedia.org/w/api.php';
 
-  // Paletas por estilo pedagógico
+  // Paletas por estilo pedagógico (bg, primary, accent, text, muted, soft = fondo suave)
+  // Cada estilo tiene VARIANTES de color que se eligen aleatoriamente por generación.
   var TEMAS_COLOR = {
-    didactica:   { bg:'FFFFFF', primary:'2563EB', accent:'0EA5E9', text:'0C1E3B', muted:'475569' },
-    formal:      { bg:'FFFFFF', primary:'0F172A', accent:'1E40AF', text:'0F172A', muted:'475569' },
-    interactiva: { bg:'FFFFFF', primary:'0F766E', accent:'14B8A6', text:'0C1E3B', muted:'334155' },
-    calida:      { bg:'FFFFFF', primary:'C2410C', accent:'F97316', text:'431407', muted:'78350F' }
+    didactica: [
+      { bg:'FFFFFF', primary:'2563EB', accent:'0EA5E9', text:'0C1E3B', muted:'64748B', soft:'F0F7FF' },
+      { bg:'FFFFFF', primary:'1D4ED8', accent:'38BDF8', text:'0B1229', muted:'475569', soft:'EFF6FF' },
+      { bg:'FFFFFF', primary:'4338CA', accent:'6366F1', text:'1E1B4B', muted:'64748B', soft:'EEF2FF' }
+    ],
+    formal: [
+      { bg:'FFFFFF', primary:'0F172A', accent:'1E40AF', text:'0F172A', muted:'64748B', soft:'F8FAFC' },
+      { bg:'FFFFFF', primary:'1E293B', accent:'475569', text:'0F172A', muted:'64748B', soft:'F1F5F9' },
+      { bg:'FFFFFF', primary:'134E4A', accent:'0F766E', text:'042F2E', muted:'475569', soft:'F0FDFA' }
+    ],
+    interactiva: [
+      { bg:'FFFFFF', primary:'0F766E', accent:'14B8A6', text:'0C1E3B', muted:'475569', soft:'F0FDFA' },
+      { bg:'FFFFFF', primary:'059669', accent:'34D399', text:'064E3B', muted:'475569', soft:'ECFDF5' },
+      { bg:'FFFFFF', primary:'0891B2', accent:'22D3EE', text:'083344', muted:'475569', soft:'ECFEFF' }
+    ],
+    calida: [
+      { bg:'FFFFFF', primary:'C2410C', accent:'F97316', text:'431407', muted:'78350F', soft:'FFF7ED' },
+      { bg:'FFFFFF', primary:'B45309', accent:'F59E0B', text:'451A03', muted:'78350F', soft:'FFFBEB' },
+      { bg:'FFFFFF', primary:'BE185D', accent:'EC4899', text:'500724', muted:'831843', soft:'FDF2F8' }
+    ]
   };
+
+  // Patrones de fondo (variantes visuales por generación) — VISIBLES
+  var PATRONES_FONDO = [
+    'banda-izquierda',   // Franja vertical de 0.5" a la izquierda en color primary
+    'header-tinted',     // Todo el tercio superior con color soft de fondo
+    'cuadro-esquina',    // Cuadrado grande de color soft en esquina inferior derecha
+    'doble-franja',      // Dos franjas horizontales soft (una arriba y otra abajo)
+    'fondo-crema'        // Fondo entero color soft (no blanco)
+  ];
+
+  // Saneo de strings: elimina caracteres de control que rompen el XML del pptx.
+  // XML 1.0 solo permite: \t, \n, \r, [0x20-0xD7FF, 0xE000-0xFFFD, 0x10000-0x10FFFF]
+  function _sanit(s) {
+    if (s == null) return '';
+    return String(s).replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '').trim();
+  }
+  function _sanitEstructura(e) {
+    if (!e || typeof e !== 'object') return e;
+    e.titulo    = _sanit(e.titulo);
+    e.subtitulo = _sanit(e.subtitulo);
+    if (e.portada) { e.portada.resumen = _sanit(e.portada.resumen); e.portada.sugerenciaImagen = _sanit(e.portada.sugerenciaImagen); }
+    if (Array.isArray(e.aprendizajes)) e.aprendizajes = e.aprendizajes.map(_sanit);
+    if (Array.isArray(e.slides)) e.slides.forEach(function(s){
+      s.titulo         = _sanit(s.titulo);
+      s.notasProfesor  = _sanit(s.notasProfesor);
+      s.sugerenciaImagen = _sanit(s.sugerenciaImagen);
+      if (Array.isArray(s.bullets)) s.bullets = s.bullets.map(_sanit).filter(Boolean);
+    });
+    if (e.actividad) { e.actividad.titulo = _sanit(e.actividad.titulo); e.actividad.descripcion = _sanit(e.actividad.descripcion); e.actividad.tiempo = _sanit(e.actividad.tiempo); }
+    if (e.cierre) { e.cierre.titulo = _sanit(e.cierre.titulo); if (Array.isArray(e.cierre.preguntas)) e.cierre.preguntas = e.cierre.preguntas.map(_sanit).filter(Boolean); }
+    return e;
+  }
 
   function CCPptGenerator(config) {
     this.config = Object.assign({
@@ -41,7 +98,13 @@
       nSlides:     10,        // 5 a 25
       estilo:      'didactica', // didactica | formal | interactiva | calida
       oa:          '',        // Objetivo de aprendizaje MINEDUC
-      imagenes:    'ia',      // 'ia' (Pollinations) | 'stock' (Unsplash) | 'ambas' | 'ninguna'
+      imagenes:    'ia',      // 'web' | 'ia' | 'stock' | 'ambas' | 'ninguna'
+      palabrasClaveImg: '',   // Palabras clave del docente EN INGLÉS (opcional).
+      // Google Custom Search API (opcional, para modo 'google').
+      // Setup del user: crear en console.cloud.google.com + programmablesearchengine.google.com
+      // 100 queries/día gratis, sin costo.
+      googleCseApiKey: '',
+      googleCseId: '',
       profesorNombre: '',
       liceoNombre: '',
       instrucciones: ''       // Instrucciones extra del docente
@@ -54,13 +117,15 @@
   CCPptGenerator.prototype.generar = function () {
     var self = this;
     var prompt = this._construirPromptGemini();
-    return fetch('/api/ia-asistente', {
+    // Usar wrapper de cuota si está disponible (verifica límite + adjunta token)
+    var _fetchFn = (window.CCCuotaIA && window.CCCuotaIA.wrapFetch) ? window.CCCuotaIA.wrapFetch : fetch;
+    return _fetchFn('/api/ia-asistente', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         tipo: 'raw',
         datos: {
-          modelo: 'gemini-2.5-flash',
+          modelo: 'gemini-3.6-flash',
           prompt: prompt,
           maxTokens: 8000
         }
@@ -71,9 +136,13 @@
       return r.json();
     })
     .then(function (data) {
-      var texto = data.texto || data.text || data.contenido || data.result || data.content || '';
+      var texto = data.resultado || data.texto || data.text || data.contenido || data.result || data.content || '';
       if (!texto && data.candidates && data.candidates[0]) {
         texto = (data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts[0] && data.candidates[0].content.parts[0].text) || '';
+      }
+      if (!texto) {
+        console.error('[PPT] respuesta vacía del endpoint:', data);
+        throw new Error('El endpoint IA devolvió respuesta vacía. Verificá que la Cloud Function esté desplegada con la última versión.');
       }
       // Extraer JSON del texto (Gemini a veces envuelve con ```json)
       var m = texto.match(/```json\s*([\s\S]*?)\s*```/);
@@ -87,6 +156,8 @@
       } catch (e) {
         throw new Error('La IA devolvió un JSON inválido: ' + e.message);
       }
+      // Sanear caracteres de control que romperían el XML del pptx
+      self.estructura = _sanitEstructura(self.estructura);
       return self.estructura;
     });
   };
@@ -122,7 +193,11 @@
       'REGLAS OBLIGATORIAS:',
       '- Bullets: máximo 5 por slide, cada uno máx 12 palabras.',
       '- notasProfesor: siempre en español chileno, tono cercano, orientado al docente.',
-      '- sugerenciaImagen: SIEMPRE en inglés (para Flux/Unsplash), evocativo, educativo, SIN pedir texto en la imagen.',
+      '- sugerenciaImagen: PALABRAS CLAVE ESPECÍFICAS EN INGLÉS (2 a 3 palabras MÁX) que se puedan encontrar como FOTO REAL en un buscador. Debe describir un OBJETO CONCRETO, no un concepto abstracto.',
+      '  Ejemplos BUENOS: "npn transistor", "human heart", "roman colosseum", "solar panel", "microscope cell", "printed circuit board".',
+      '  Ejemplos MALOS (evitar): "abstract concept illustration", "modern educational design", "colorful diagram showing", "electronic circuit fundamentals".',
+      '  Para conceptos abstractos, elegí el objeto físico más representativo (ej: "flujo de corriente" → "electric wire", "álgebra" → "equation blackboard", "democracia" → "voting box").',
+      '  IMPORTANTÍSIMO: cada slide DEBE tener una sugerenciaImagen DISTINTA a la de los otros slides. NO repitas el mismo concepto en varios slides. Si el tema es "transistores", un slide puede pedir "npn transistor", otro "oscilloscope screen", otro "breadboard prototype", otro "power supply", otro "microcontroller board", etc. VARIEDAD.',
       '- N° total de slides = ' + c.nSlides + ' (contando portada + contenido + actividad + cierre).',
       '- Distribución sugerida: 1 portada + 1 OA + ' + Math.max(3, c.nSlides - 4) + ' contenido + 1 actividad + 1 cierre.',
       '- NO incluir taxonomías por nombre (Bloom, Marzano); usar niveles cognitivos si aplica.',
@@ -133,70 +208,316 @@
   };
 
   // ── Paso 2: Descargar imágenes ────────────────────────────
-  CCPptGenerator.prototype._descargarImagen = function (prompt, modo) {
-    var url;
-    if (modo === 'stock') {
-      // Unsplash: keywords separadas por coma
-      var keywords = prompt.split(/\s+/).slice(0, 5).join(',');
-      url = UNSPLASH_URL + encodeURIComponent(keywords);
-    } else {
-      // Pollinations Flux: prompt completo, calidad enhanced
-      url = POLLINATIONS_URL + encodeURIComponent(prompt) +
-            '?width=1024&height=576&model=flux&enhance=true&nologo=true';
-    }
-    return fetch(url)
+  // Descarga una imagen desde una URL específica y la convierte a dataURL.
+  // Valida que el content-type sea image/* y que el blob tenga tamaño > 1KB
+  // (Pollinations a veces devuelve 200 con página HTML de error).
+  CCPptGenerator.prototype._fetchDataUrl = function (url) {
+    return fetch(url).then(function (r) {
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      var ct = r.headers.get('content-type') || '';
+      if (ct.indexOf('image/') !== 0) throw new Error('content-type no es imagen: ' + ct);
+      return r.blob();
+    }).then(function (blob) {
+      if (!blob || blob.size < 1024) throw new Error('blob demasiado chico: ' + (blob ? blob.size : 0) + ' bytes');
+      return new Promise(function (resolve, reject) {
+        var reader = new FileReader();
+        reader.onload = function () {
+          var d = reader.result;
+          // Doble validación: el dataURL debe empezar con data:image/
+          if (typeof d !== 'string' || d.indexOf('data:image/') !== 0) {
+            reject(new Error('dataURL inválido'));
+            return;
+          }
+          resolve(d);
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
+    });
+  };
+
+  // Limpia el prompt: quita palabras vacías de estilo y deja solo los sustantivos
+  // clave. Esto mejora dramáticamente los resultados de búsqueda.
+  function _limpiarPrompt(p) {
+    return String(p || '')
+      .replace(/\b(no text|educational|illustration|style|high quality|clean|modern|beautiful|colorful|simple|abstract|concept|showing|of|the|a|an|with)\b/gi, ' ')
+      .replace(/[^\w\sÀ-ÿ]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  // Busca en Google Images vía Custom Search JSON API. Requiere que el user haya
+  // configurado sus credenciales (googleCseApiKey + googleCseId). 100 queries/día
+  // gratis. Es la fuente MÁS RELEVANTE porque son literalmente resultados de Google.
+  // Docs: https://developers.google.com/custom-search/v1/using_rest
+  CCPptGenerator.prototype._buscarGoogleCSE = function (query) {
+    var apiKey = this.config.googleCseApiKey;
+    var cseId  = this.config.googleCseId;
+    if (!apiKey || !cseId) return Promise.resolve(null);
+    var q = _limpiarPrompt(query);
+    if (!q) return Promise.resolve(null);
+    var params = new URLSearchParams({
+      key: apiKey, cx: cseId, q: q,
+      searchType: 'image',
+      num: '10',
+      safe: 'active',           // filtro seguro (obligatorio para uso educativo)
+      imgSize: 'large',         // preferir grandes (mejor calidad)
+      imgType: 'photo',         // preferir fotos (no clipart/lineart)
+      rights: 'cc_publicdomain,cc_attribute,cc_sharealike'   // licencias libres cuando sea posible
+    });
+    return fetch('https://www.googleapis.com/customsearch/v1?' + params.toString())
       .then(function (r) {
-        if (!r.ok) throw new Error('HTTP ' + r.status);
-        return r.blob();
+        if (!r.ok) {
+          return r.json().then(function (err) {
+            throw new Error('Google CSE ' + r.status + ': ' + ((err.error && err.error.message) || 'error'));
+          });
+        }
+        return r.json();
       })
-      .then(function (blob) {
-        return new Promise(function (resolve, reject) {
-          var reader = new FileReader();
-          reader.onload = function () { resolve(reader.result); };
-          reader.onerror = reject;
-          reader.readAsDataURL(blob);
-        });
+      .then(function (data) {
+        if (!data.items || !data.items.length) return null;
+        // Elegir aleatorio entre los top 3 para variedad
+        var top = data.items.slice(0, 3);
+        var elegida = top[Math.floor(Math.random() * top.length)];
+        return elegida.link;
       })
-      .catch(function (err) {
-        console.warn('[PPT] Falló imagen:', prompt, err.message);
+      .catch(function (e) {
+        console.warn('[PPT] Google CSE:', e.message);
         return null;
       });
   };
 
+  // Busca la imagen destacada del artículo Wikipedia del concepto. Es la fuente
+  // MÁS RELEVANTE para conceptos educativos concretos (transistor, célula,
+  // revolución francesa, etc.) porque devuelve la imagen que los editores de
+  // Wikipedia eligieron como representativa del artículo.
+  // API sin key, CORS OK via origin=*.
+  CCPptGenerator.prototype._buscarWikipediaArticulo = function (query) {
+    var q = _limpiarPrompt(query);
+    if (!q) return Promise.resolve(null);
+    // Buscar el artículo más relevante y obtener su pageimage
+    var params = new URLSearchParams({
+      action: 'query', format: 'json', origin: '*',
+      generator: 'search', gsrsearch: q, gsrlimit: '3',
+      prop: 'pageimages', piprop: 'thumbnail|original',
+      pithumbsize: '1024', pilimit: '3'
+    });
+    return fetch('https://en.wikipedia.org/w/api.php?' + params.toString())
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (data) {
+        if (!data || !data.query || !data.query.pages) return null;
+        var pages = Object.values(data.query.pages);
+        // Filtrar solo los que tienen imagen destacada
+        var conImg = pages.filter(function (p) {
+          return p.thumbnail && p.thumbnail.source;
+        });
+        if (conImg.length === 0) return null;
+        // El primer resultado del ranking (index más bajo)
+        conImg.sort(function (a, b) { return (a.index || 0) - (b.index || 0); });
+        return conImg[0].thumbnail.source;
+      })
+      .catch(function () { return null; });
+  };
+
+  // Busca imagen en Openverse (agrega Flickr, Wikimedia, museos). API PÚBLICA
+  // sin key, CORS OK. Devuelve URL de una foto real o null.
+  CCPptGenerator.prototype._buscarOpenverse = function (query) {
+    var q = _limpiarPrompt(query);
+    if (!q) return Promise.resolve(null);
+    // Toma solo las primeras 3 palabras (búsqueda más específica = mejores resultados)
+    q = q.split(/\s+/).slice(0, 3).join(' ');
+    var params = new URLSearchParams({
+      q: q,
+      page_size: '10',
+      license_type: 'commercial',
+      mature: 'false',
+      format: 'json',
+      // Preferir imágenes de tamaño mediano (evitar thumbnails minúsculos)
+      size: 'medium,large'
+    });
+    return fetch(OPENVERSE_API + '?' + params.toString(), {
+      headers: { 'Accept': 'application/json' }
+    })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (data) {
+        if (!data || !data.results || !data.results.length) return null;
+        // Filtrar candidatos con URL válida (thumbnail o URL directa)
+        var candidatos = data.results.filter(function (img) {
+          return img.thumbnail || img.url;
+        });
+        if (candidatos.length === 0) return null;
+        // Elegir uno al azar entre los top 5 (variedad entre generaciones)
+        var top = candidatos.slice(0, 5);
+        var elegida = top[Math.floor(Math.random() * top.length)];
+        return elegida.thumbnail || elegida.url;
+      })
+      .catch(function (e) {
+        console.warn('[PPT] Openverse error:', e.message);
+        return null;
+      });
+  };
+
+  // Busca imagen en Wikimedia Commons (fallback). Devuelve URL de la mejor
+  // imagen o null.
+  CCPptGenerator.prototype._buscarWikimedia = function (query) {
+    var q = _limpiarPrompt(query);
+    if (!q) return Promise.resolve(null);
+    // Solo primeras 3 palabras clave
+    q = q.split(/\s+/).slice(0, 3).join(' ');
+    var params = new URLSearchParams({
+      action: 'query', format: 'json', origin: '*',
+      generator: 'search', gsrnamespace: '6',
+      gsrsearch: 'filetype:bitmap ' + q, gsrlimit: '10',
+      prop: 'imageinfo', iiprop: 'url|size|mime',
+      iiurlwidth: '1024'
+    });
+    return fetch(WIKIMEDIA_API + '?' + params.toString())
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (data) {
+        if (!data || !data.query || !data.query.pages) return null;
+        var pages = Object.values(data.query.pages);
+        var candidatos = pages.filter(function (p) {
+          if (!p.imageinfo || !p.imageinfo[0]) return false;
+          var info = p.imageinfo[0];
+          var mime = info.mime || '';
+          if (mime.indexOf('image/jpeg') !== 0 && mime.indexOf('image/png') !== 0) return false;
+          if (!info.size || info.size < 10000) return false;
+          return true;
+        });
+        if (candidatos.length === 0) return null;
+        var elegida = candidatos[0].imageinfo[0];
+        return elegida.thumburl || elegida.url;
+      })
+      .catch(function () { return null; });
+  };
+
+  // Combina el prompt de este slide con las palabras clave del docente.
+  // NUEVA LÓGICA: si el docente escribió palabras separadas por comas, se rota
+  // UNA distinta por slide. La sugerencia específica del slide se PRESERVA.
+  //   • Sin palabras del docente → usa solo sugerenciaImagen del slide
+  //   • Con "kw1, kw2, kw3" → slide 0 usa "kw1", slide 1 usa "kw2", etc.
+  //   • Con palabra única "transistor" → se usa como contexto en todos
+  // Así se evita que todas las búsquedas devuelvan la misma imagen.
+  CCPptGenerator.prototype._promptEnriquecido = function (promptSlide, idxSlide) {
+    var kwRaw = String(this.config.palabrasClaveImg || '').trim();
+    var promptBase = String(promptSlide || '').trim();
+    if (!kwRaw) return promptBase;
+    var partes = kwRaw.split(/[,;\n]+/).map(function (s) { return s.trim(); }).filter(Boolean);
+    if (partes.length === 0) return promptBase;
+    if (partes.length === 1) {
+      // Palabra única: contexto general que se suma al específico del slide
+      return partes[0] + ' ' + promptBase;
+    }
+    // Múltiples: rotar por índice. La palabra del docente MANDA (más específica
+    // que la sugerencia genérica de Gemini).
+    var i = (typeof idxSlide === 'number' ? idxSlide : 0) % partes.length;
+    return partes[i];
+  };
+
+  // Selecciona la fuente y hace fallback en cadena hasta obtener imagen válida.
+  CCPptGenerator.prototype._descargarImagen = function (prompt, modo, idxSlide) {
+    var self = this;
+    var q = this._promptEnriquecido(prompt, idxSlide);
+    console.log('[PPT] Búsqueda slide ' + idxSlide + ':', q);
+    // Para Pollinations: enriquecer prompt pidiendo estilo fotográfico
+    var promptRico = q + ', professional photograph, high detail, sharp focus, educational, real photo';
+    var urlPollinations = POLLINATIONS_URL + encodeURIComponent(promptRico) +
+      '?width=1024&height=576&model=flux&nologo=true&enhance=true';
+
+    function viaGoogle() {
+      return self._buscarGoogleCSE(q).then(function (url) {
+        if (!url) return Promise.reject(new Error('sin resultado google'));
+        return self._fetchDataUrl(url);
+      });
+    }
+    function viaWikipedia() {
+      return self._buscarWikipediaArticulo(q).then(function (url) {
+        if (!url) return Promise.reject(new Error('sin artículo wikipedia'));
+        return self._fetchDataUrl(url);
+      });
+    }
+    function viaOpenverse() {
+      return self._buscarOpenverse(q).then(function (url) {
+        if (!url) return Promise.reject(new Error('sin resultados openverse'));
+        return self._fetchDataUrl(url);
+      });
+    }
+    function viaWikimedia() {
+      return self._buscarWikimedia(q).then(function (url) {
+        if (!url) return Promise.reject(new Error('sin resultados wikimedia'));
+        return self._fetchDataUrl(url);
+      });
+    }
+    function viaPollinations() { return self._fetchDataUrl(urlPollinations); }
+
+    // Cadena de fallback según modo. Google CSE se usa como primero SI está
+    // configurado (googleCseApiKey + googleCseId), sino se salta.
+    var tieneGoogle = !!(this.config.googleCseApiKey && this.config.googleCseId);
+    var pasos;
+    if (modo === 'google') {
+      // Modo explícito Google: Google CSE → Wikipedia → Openverse → Pollinations
+      pasos = tieneGoogle
+        ? [viaGoogle, viaWikipedia, viaOpenverse, viaPollinations]
+        : [viaWikipedia, viaOpenverse, viaWikimedia, viaPollinations];
+    } else if (modo === 'web' || modo === 'stock') {
+      // Modo fotos reales: prioriza Google si está, sino Wikipedia
+      pasos = tieneGoogle
+        ? [viaGoogle, viaWikipedia, viaOpenverse, viaWikimedia, viaPollinations]
+        : [viaWikipedia, viaOpenverse, viaWikimedia, viaPollinations];
+    } else {
+      // Modo IA: Pollinations primero
+      pasos = tieneGoogle
+        ? [viaPollinations, viaGoogle, viaWikipedia]
+        : [viaPollinations, viaWikipedia, viaOpenverse];
+    }
+
+    function intentar(i) {
+      if (i >= pasos.length) return Promise.resolve(null);
+      return pasos[i]().catch(function (err) {
+        console.warn('[PPT] intento ' + (i + 1) + '/' + pasos.length + ' (' + (err && err.message || err) + ')');
+        return intentar(i + 1);
+      });
+    }
+    return intentar(0);
+  };
+
+  // Descarga SECUENCIAL con delay entre imágenes para evitar 429.
   CCPptGenerator.prototype._descargarTodasImagenes = function (onProgress) {
     var self = this;
     if (this.config.imagenes === 'ninguna' || !this.estructura) return Promise.resolve();
-    var promesas = [];
     var slides = this.estructura.slides || [];
-    var total = slides.length + 1; // +1 portada
-    var hecho = 0;
-    function tick() {
-      hecho++;
-      if (typeof onProgress === 'function') onProgress(hecho, total);
-    }
-    // Portada
+    var tareas = [];
+    // Portada (idxSlide = -1 para que use la primera palabra clave del docente)
     if (this.estructura.portada && this.estructura.portada.sugerenciaImagen) {
-      promesas.push(
-        this._descargarImagen(this.estructura.portada.sugerenciaImagen, this._modoImagen('portada'))
-          .then(function (img) { self.imagenesGeneradas.portada = img; tick(); })
-      );
-    } else tick();
-    // Slides
+      tareas.push({ key: 'portada', prompt: this.estructura.portada.sugerenciaImagen, modo: this._modoImagen('portada'), idx: 0 });
+    }
+    // Slides (cada uno con su idx, para que rote las palabras clave del docente)
     slides.forEach(function (s, i) {
-      if (s.sugerenciaImagen) {
-        promesas.push(
-          self._descargarImagen(s.sugerenciaImagen, self._modoImagen(i))
-            .then(function (img) { self.imagenesGeneradas[i] = img; tick(); })
-        );
-      } else tick();
+      if (s.sugerenciaImagen) tareas.push({ key: i, prompt: s.sugerenciaImagen, modo: self._modoImagen(i), idx: i + 1 });
     });
-    return Promise.all(promesas);
+    var total = tareas.length;
+    var hecho = 0;
+    function tick() { hecho++; if (typeof onProgress === 'function') onProgress(hecho, total); }
+    function sleep(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+
+    // Ejecutar secuencial con delay 700ms entre requests (evita 429 en Pollinations).
+    return tareas.reduce(function (chain, t) {
+      return chain.then(function () {
+        return self._descargarImagen(t.prompt, t.modo, t.idx).then(function (img) {
+          if (img) self.imagenesGeneradas[t.key] = img;
+          tick();
+          return sleep(700);
+        });
+      });
+    }, Promise.resolve());
   };
 
   CCPptGenerator.prototype._modoImagen = function (idx) {
-    if (this.config.imagenes === 'stock') return 'stock';
-    if (this.config.imagenes === 'ia') return 'ia';
-    // 'ambas': portada IA + contenido intercalado
+    if (this.config.imagenes === 'stock')  return 'stock';
+    if (this.config.imagenes === 'ia')     return 'ia';
+    if (this.config.imagenes === 'web')    return 'web';    // Wikipedia + Openverse + ...
+    if (this.config.imagenes === 'google') return 'google'; // Google Custom Search
+    // 'ambas': portada IA + contenido intercalado IA/stock
     if (idx === 'portada') return 'ia';
     return (typeof idx === 'number' && idx % 2 === 0) ? 'ia' : 'stock';
   };
@@ -205,124 +526,610 @@
   CCPptGenerator.prototype.compilar = function (onProgress) {
     var self = this;
     if (!this.estructura) throw new Error('Primero llamá generar()');
-    if (typeof PptxGenJS === 'undefined') throw new Error('PptxGenJS no está cargado');
+    if (typeof PptxGenJS === 'undefined') throw new Error('PptxGenJS no está cargado (verificá CDN)');
+    // Verificar API mínima
+    try {
+      var _t = new PptxGenJS();
+      if (typeof _t.addSlide !== 'function' || typeof _t.write !== 'function') {
+        throw new Error('PptxGenJS cargado incorrectamente (falta addSlide/write)');
+      }
+    } catch (e) { throw new Error('PptxGenJS falla al instanciar: ' + e.message); }
 
     return this._descargarTodasImagenes(onProgress).then(function () {
+      // ═══ DISEÑO MEJORADO · con backgrounds, franjas de color y footer ═══
       var pptx = new PptxGenJS();
       pptx.layout = 'LAYOUT_16x9';
       pptx.author = self.config.profesorNombre || 'Click&Clase';
-      pptx.company = self.config.liceoNombre || 'Click&Clase';
-      pptx.title = self.estructura.titulo || 'Presentación';
-      pptx.subject = self.config.asignatura || '';
+      pptx.title  = self.estructura.titulo || 'Presentación';
 
-      var color = TEMAS_COLOR[self.config.estilo] || TEMAS_COLOR.didactica;
+      // ═══ ALEATORIEDAD POR GENERACIÓN ═══
+      // Cada vez que se compila un PPT, se elige UNA variante de color, UN patrón
+      // de fondo y UNA transición base. Los valores se guardan en self._diseno
+      // para que _inyectarTransiciones use la misma transición en TODOS los slides.
+      var variantesTema = TEMAS_COLOR[self.config.estilo] || TEMAS_COLOR.didactica;
+      var idxVariante = Math.floor(Math.random() * variantesTema.length);
+      var color = variantesTema[idxVariante];
+      var patronFondo = PATRONES_FONDO[Math.floor(Math.random() * PATRONES_FONDO.length)];
+      self._diseno = { color: color, patron: patronFondo, variante: idxVariante };
+      console.log('[PPT] Diseño aleatorio · estilo=' + self.config.estilo + ' variante=' + idxVariante + ' patrón=' + patronFondo);
+
+      var totalSlides = (self.estructura.slides || []).length;
+      var pieDocente = (self.config.profesorNombre || '') + '  ·  ' + (self.config.liceoNombre || 'Click&Clase');
+
+      // Helper: pinta el patrón de fondo decorativo. IMPORTANTE: los patrones
+      // se pintan ANTES del contenido para que queden debajo (visualmente).
+      // Todos son claramente visibles a diferencia entre generaciones.
+      function pintarPatron(slide, esPortada) {
+        // IMPORTANTE: ningún patrón invade el área del footer (y=5.35 a 5.63)
+        // ni el área del encabezado (y=0 a 0.15).
+        try {
+          if (patronFondo === 'banda-izquierda') {
+            // Franja vertical de 0.5" en color primary (a la izquierda), sin footer
+            slide.addShape(pptx.ShapeType.rect, {
+              x: 0, y: 0.15, w: 0.5, h: 5.2,
+              fill: { color: color.primary }, line: { type: 'none' }
+            });
+          } else if (patronFondo === 'header-tinted') {
+            // Tercio superior con color soft de fondo
+            slide.addShape(pptx.ShapeType.rect, {
+              x: 0, y: 0.15, w: 10, h: 1.35,
+              fill: { color: color.soft }, line: { type: 'none' }
+            });
+          } else if (patronFondo === 'cuadro-esquina') {
+            // Cuadrado grande de color soft en esquina inferior derecha
+            slide.addShape(pptx.ShapeType.rect, {
+              x: 7.5, y: 3.5, w: 2.5, h: 1.85,
+              fill: { color: color.soft }, line: { type: 'none' }
+            });
+          } else if (patronFondo === 'doble-franja') {
+            // Dos franjas soft: una en el header + una entre contenido y footer
+            slide.addShape(pptx.ShapeType.rect, {
+              x: 0, y: 0.15, w: 10, h: 0.7,
+              fill: { color: color.soft }, line: { type: 'none' }
+            });
+            slide.addShape(pptx.ShapeType.rect, {
+              x: 0, y: 4.75, w: 10, h: 0.6,
+              fill: { color: color.soft }, line: { type: 'none' }
+            });
+          } else if (patronFondo === 'fondo-crema') {
+            // Rectángulo full-slide en color soft (excluyendo header y footer)
+            slide.addShape(pptx.ShapeType.rect, {
+              x: 0, y: 0.15, w: 10, h: 5.2,
+              fill: { color: color.soft }, line: { type: 'none' }
+            });
+          }
+        } catch (e) { console.warn('[PPT] patrón fondo falló:', e.message); }
+      }
+
+      // Helper: agregar franja de color en un slide (barra decorativa)
+      // Sin line (border) para evitar renderizado inesperado de PowerPoint.
+      function franja(slide, x, y, w, h, colorHex) {
+        try {
+          slide.addShape(pptx.ShapeType.rect, {
+            x: x, y: y, w: w, h: h,
+            fill: { color: colorHex },
+            line: { type: 'none' }
+          });
+        } catch (e) { console.warn('[PPT] franja falló:', e.message); }
+      }
+      // Helper: footer compacto con nombre docente + número página
+      function footer(slide, pagIdx, pagTotal) {
+        franja(slide, 0, 5.35, 10, 0.28, color.primary);
+        slide.addText(pieDocente, {
+          x: 0.35, y: 5.35, w: 6.5, h: 0.28,
+          fontSize: 9, color: 'FFFFFF', valign: 'middle', fontFace: 'Calibri'
+        });
+        if (pagIdx && pagTotal) {
+          slide.addText(pagIdx + ' / ' + pagTotal, {
+            x: 8.3, y: 5.35, w: 1.4, h: 0.28,
+            fontSize: 9, color: 'FFFFFF', bold: true, align: 'right', valign: 'middle', fontFace: 'Calibri'
+          });
+        }
+      }
+      // Helper: encabezado consistente. UN SOLO objeto para la pill (fill+texto
+      // combinados) para evitar overlap raro con animaciones. Parámetro opcional
+      // pillColor permite variar el color de la pill por slide.
+      function encabezado(slide, categoria, titulo, pillColor) {
+        franja(slide, 0, 0, 10, 0.15, color.primary);
+        var pill = pillColor || color.accent;
+        if (categoria) {
+          try {
+            slide.addText(categoria, {
+              shape: pptx.ShapeType.rect,
+              x: 0.4, y: 0.4, w: 1.6, h: 0.32,
+              fontSize: 11, bold: true, color: 'FFFFFF',
+              align: 'center', valign: 'middle', fontFace: 'Calibri',
+              fill: { color: pill }, line: { type: 'none' }
+            });
+          } catch (e) {
+            franja(slide, 0.4, 0.4, 1.6, 0.32, pill);
+            slide.addText(categoria, {
+              x: 0.4, y: 0.4, w: 1.6, h: 0.32, fontSize: 11, bold: true,
+              color: 'FFFFFF', align: 'center', valign: 'middle', fontFace: 'Calibri'
+            });
+          }
+        }
+        var titY = categoria ? 0.85 : 0.4;
+        slide.addText(titulo || '', {
+          x: 0.4, y: titY, w: 9.2, h: 0.6, fontSize: 24, bold: true,
+          color: color.primary, valign: 'middle', fontFace: 'Calibri'
+        });
+        franja(slide, 0.4, titY + 0.65, 9.2, 0.03, color.accent);
+      }
 
       // ── PORTADA ──
       var p1 = pptx.addSlide();
-      p1.background = { color: color.bg };
-      if (self.imagenesGeneradas.portada) {
-        p1.addImage({ data: self.imagenesGeneradas.portada, x:0, y:0, w:10, h:5.63, sizing:{ type:'cover', w:10, h:5.63 } });
-        // Overlay oscuro para legibilidad
-        p1.addShape('rect', { x:0, y:0, w:10, h:5.63, fill:{ color:'000000', transparency:55 }, line:{ type:'none' } });
-        p1.addText(self.estructura.titulo || 'Presentación', { x:0.5, y:2, w:9, h:1.2, fontSize:44, bold:true, color:'FFFFFF', align:'center', fontFace:'Calibri' });
-        p1.addText(self.estructura.subtitulo || (self.config.asignatura + ' · ' + self.config.curso), { x:0.5, y:3.2, w:9, h:0.6, fontSize:20, color:'FFFFFF', align:'center', fontFace:'Calibri' });
-        if (self.estructura.portada && self.estructura.portada.resumen) {
-          p1.addText(self.estructura.portada.resumen, { x:0.5, y:3.9, w:9, h:0.8, fontSize:14, color:'FFFFFF', align:'center', italic:true, fontFace:'Calibri' });
-        }
-      } else {
-        // Sin imagen: barra de color superior + título
-        p1.addShape('rect', { x:0, y:0, w:10, h:1.2, fill:{ color:color.primary }, line:{ type:'none' } });
-        p1.addText(self.estructura.titulo || 'Presentación', { x:0.5, y:1.8, w:9, h:1.3, fontSize:40, bold:true, color:color.text, align:'center' });
-        p1.addText(self.estructura.subtitulo || (self.config.asignatura + ' · ' + self.config.curso), { x:0.5, y:3.1, w:9, h:0.6, fontSize:20, color:color.muted, align:'center' });
-        if (self.estructura.portada && self.estructura.portada.resumen) {
-          p1.addText(self.estructura.portada.resumen, { x:0.5, y:3.8, w:9, h:0.8, fontSize:14, color:color.muted, align:'center', italic:true });
-        }
+      p1.background = { color: color.soft };
+      pintarPatron(p1, true);
+      // Franja superior y línea acento (sin franja lateral grande que tapa)
+      franja(p1, 0, 0, 10, 0.25, color.primary);
+      franja(p1, 0, 5.38, 10, 0.25, color.accent);
+
+      p1.addText(self.estructura.titulo || 'Presentación', {
+        x: 0.7, y: 1.4, w: 8.6, h: 1.6, fontSize: 40, bold: true,
+        color: color.primary, align: 'left', valign: 'middle', fontFace: 'Calibri'
+      });
+      // Línea separadora bajo el título
+      franja(p1, 0.7, 3.05, 3, 0.05, color.accent);
+
+      p1.addText(self.estructura.subtitulo || (self.config.asignatura + ' · ' + self.config.curso), {
+        x: 0.7, y: 3.25, w: 8.6, h: 0.5, fontSize: 18, color: color.text, align: 'left', fontFace: 'Calibri'
+      });
+      if (self.estructura.portada && self.estructura.portada.resumen) {
+        p1.addText(self.estructura.portada.resumen, {
+          x: 0.7, y: 3.85, w: 8.6, h: 0.9, fontSize: 13,
+          color: color.muted, align: 'left', italic: true, fontFace: 'Calibri'
+        });
       }
-      p1.addText((self.config.profesorNombre || 'Click&Clase') + ' · ' + (self.config.liceoNombre || 'Colegio'), { x:0.5, y:5.15, w:9, h:0.3, fontSize:10, color:'FFFFFF', align:'center' });
+      p1.addText(pieDocente, {
+        x: 0.7, y: 4.85, w: 8.6, h: 0.3, fontSize: 11,
+        color: color.primary, bold: true, align: 'left', fontFace: 'Calibri'
+      });
 
       // ── OA / APRENDIZAJES ──
       if (self.estructura.aprendizajes && self.estructura.aprendizajes.length) {
         var pOA = pptx.addSlide();
         pOA.background = { color: color.bg };
-        pOA.addShape('rect', { x:0, y:0, w:10, h:0.5, fill:{ color:color.primary }, line:{ type:'none' } });
-        pOA.addText('🎯 Objetivo de la clase', { x:0.5, y:0.7, w:9, h:0.6, fontSize:28, bold:true, color:color.text });
-        var oaTxt = self.estructura.aprendizajes.map(function (a, i) { return { text:'• ' + a, options:{ fontSize:18, color:color.text, breakLine:true, paraSpaceAfter:12 } }; });
-        pOA.addText(oaTxt, { x:0.7, y:1.6, w:8.6, h:3.5 });
-        pOA.addText('Click&Clase · ' + (self.config.liceoNombre || ''), { x:0.5, y:5.15, w:9, h:0.3, fontSize:9, color:color.muted, align:'right' });
+        pintarPatron(pOA, false);
+        encabezado(pOA, 'OA', 'Objetivo de la clase');
+        var oaBullets = self.estructura.aprendizajes;
+        var cfgOA = ajustarTexto(oaBullets, false);
+        var oaText = oaBullets.map(function (a) { return '▸  ' + a; }).join(cfgOA.sep);
+        // Card con background suave
+        franja(pOA, 0.4, 1.6, 9.2, 3.6, color.soft);
+        pOA.addText(oaText, {
+          x: 0.7, y: 1.75, w: 8.6, h: 3.35, fontSize: cfgOA.fs, color: color.text,
+          valign: 'top', fontFace: 'Calibri', paraSpaceAfter: cfgOA.sp
+        });
+        footer(pOA, 1, totalSlides + 3);
+      }
+
+      // ── ÍNDICE (nuevo, después de OA) ──
+      if ((self.estructura.slides || []).length >= 4) {
+        var pIx = pptx.addSlide();
+        pIx.background = { color: color.bg };
+        pintarPatron(pIx, false);
+        encabezado(pIx, 'ÍNDICE', 'Recorrido de la clase');
+        var indiceLines = (self.estructura.slides || []).map(function(s, i) {
+          var num = String(i + 1).padStart(2, '0');
+          return num + '.  ' + (s.titulo || 'Diapositiva ' + (i+1));
+        }).join('\n');
+        var fsIndex = (self.estructura.slides.length > 12) ? 12 : (self.estructura.slides.length > 8) ? 13 : 15;
+        pIx.addText(indiceLines, {
+          x: 0.7, y: 1.75, w: 8.6, h: 3.4, fontSize: fsIndex, color: color.text,
+          valign: 'top', fontFace: 'Calibri', paraSpaceAfter: 4
+        });
+        footer(pIx, 2, totalSlides + 4);
       }
 
       // ── CONTENIDO (slides) ──
+      // Helper: calcula fontSize + spacing según CANTIDAD y LARGO de bullets
+      // para que el texto SIEMPRE quepa sin cortarse.
+      function ajustarTexto(bullets, conImagen) {
+        var n = bullets.length;
+        var largoProm = 0;
+        bullets.forEach(function (b) { largoProm += (b || '').length; });
+        largoProm = n ? Math.round(largoProm / n) : 0;
+        // "grande" si promedio > 70 chars, "mediano" si > 40, chico si <
+        var factorLargo = largoProm > 70 ? -2 : (largoProm > 40 ? -1 : 0);
+        var factorSpacing = largoProm > 70 ? -2 : (largoProm > 40 ? 0 : 2);
+
+        var base;
+        if (conImagen) {
+          if (n <= 3)      base = { fs: 16, sp: 12, sep: '\n\n' };
+          else if (n <= 4) base = { fs: 15, sp: 8,  sep: '\n\n' };
+          else if (n <= 5) base = { fs: 14, sp: 6,  sep: '\n' };
+          else             base = { fs: 12, sp: 4,  sep: '\n' };
+        } else {
+          if (n <= 3)      base = { fs: 20, sp: 14, sep: '\n\n' };
+          else if (n <= 4) base = { fs: 18, sp: 10, sep: '\n\n' };
+          else if (n <= 5) base = { fs: 16, sp: 8,  sep: '\n' };
+          else if (n <= 6) base = { fs: 15, sp: 6,  sep: '\n' };
+          else             base = { fs: 13, sp: 4,  sep: '\n' };
+        }
+        // Ajustar por largo
+        base.fs = Math.max(10, base.fs + factorLargo);
+        base.sp = Math.max(2,  base.sp + factorSpacing);
+        // Si es texto muy largo Y muchos bullets, forzar separador simple
+        if (n >= 5 || largoProm > 60) base.sep = '\n';
+        return base;
+      }
+      // Helper: elige tamaño de fuente para textos "libres" (párrafos únicos)
+      // según largo total en caracteres. Se usa en OA/actividad/cierre.
+      function fsPorLargo(texto, altoDisponibleIn, anchoDisponibleIn) {
+        var chars = (texto || '').length;
+        // Aproximación: cada char ocupa ~fs*0.15/72 pulgadas de ancho.
+        // Área disponible en "chars ~ area * 60"
+        var areaIn2 = (altoDisponibleIn || 3) * (anchoDisponibleIn || 8);
+        var densidad = chars / areaIn2;   // chars por pulgada cuadrada
+        if (densidad > 70) return 12;
+        if (densidad > 45) return 14;
+        if (densidad > 25) return 16;
+        return 18;
+      }
+
       (self.estructura.slides || []).forEach(function (s, i) {
         var ps = pptx.addSlide();
         ps.background = { color: color.bg };
+        pintarPatron(ps, false);
+
+        // Encabezado con número. La pill alterna entre 3 colores por slide para
+        // dar ritmo visual dentro de la misma PPT (accent → primary → text_muted).
+        var num = String(i + 1).padStart(2, '0');
+        var pillsPorSlide = [color.accent, color.primary, color.muted];
+        var pillColor = pillsPorSlide[i % pillsPorSlide.length];
+        encabezado(ps, num, s.titulo || ('Diapositiva ' + (i + 1)), pillColor);
+
         var tieneImg = !!self.imagenesGeneradas[i];
+        var bulletsArr = s.bullets || [];
+        var cfg = ajustarTexto(bulletsArr, tieneImg);
+        var bullets = bulletsArr.map(function (b) { return '▸  ' + b; }).join(cfg.sep);
 
-        // Barra superior con número
-        ps.addShape('rect', { x:0, y:0, w:10, h:0.5, fill:{ color:color.primary }, line:{ type:'none' } });
-        ps.addText((i + 1) + ' / ' + self.estructura.slides.length, { x:8.5, y:0.05, w:1.3, h:0.4, fontSize:12, color:'FFFFFF', bold:true, align:'right' });
+        // Área de contenido: y=1.6 (bajo el encabezado) hasta 5.2 (arriba del footer)
+        var yContent = 1.6;
+        var hContent = 3.6;
 
-        // Título
-        ps.addText(s.titulo || 'Diapositiva', { x:0.5, y:0.7, w:9, h:0.6, fontSize:26, bold:true, color:color.text });
-
-        // Layout: si hay imagen, texto a la izquierda + imagen a la derecha
         if (tieneImg) {
-          var bulletsData = (s.bullets || []).map(function (b) { return { text:b, options:{ fontSize:16, color:color.text, bullet:{ code:'25CF' }, paraSpaceAfter:8 } }; });
-          ps.addText(bulletsData, { x:0.5, y:1.5, w:5, h:3.6 });
-          ps.addImage({ data: self.imagenesGeneradas[i], x:5.8, y:1.5, w:3.8, h:3.6, sizing:{ type:'cover', w:3.8, h:3.6 } });
+          try {
+            // 3 layouts alternados por slide (i % 3) para dinamismo:
+            //   0 → texto IZQ + imagen DER (clásico)
+            //   1 → imagen IZQ + texto DER (invertido)
+            //   2 → imagen ARRIBA + texto ABAJO (horizontal)
+            var layoutIdx = i % 3;
+            if (layoutIdx === 0) {
+              // Texto izquierda, imagen derecha
+              ps.addImage({
+                data: self.imagenesGeneradas[i],
+                x: 5.75, y: yContent, w: 4.05, h: hContent,
+                sizing: { type: 'cover', w: 4.05, h: hContent }
+              });
+              franja(ps, 0.4, yContent, 5.25, hContent, color.soft);
+              ps.addText(bullets, {
+                x: 0.6, y: yContent + 0.1, w: 4.85, h: hContent - 0.2, fontSize: cfg.fs,
+                color: color.text, valign: 'top', fontFace: 'Calibri', paraSpaceAfter: cfg.sp
+              });
+            } else if (layoutIdx === 1) {
+              // Imagen izquierda, texto derecha
+              ps.addImage({
+                data: self.imagenesGeneradas[i],
+                x: 0.2, y: yContent, w: 4.05, h: hContent,
+                sizing: { type: 'cover', w: 4.05, h: hContent }
+              });
+              franja(ps, 4.35, yContent, 5.45, hContent, color.soft);
+              ps.addText(bullets, {
+                x: 4.55, y: yContent + 0.1, w: 5.05, h: hContent - 0.2, fontSize: cfg.fs,
+                color: color.text, valign: 'top', fontFace: 'Calibri', paraSpaceAfter: cfg.sp
+              });
+            } else {
+              // Imagen arriba (60% del alto), texto abajo (40%) — impactante
+              var hImg = hContent * 0.55;
+              var hTxt = hContent - hImg - 0.1;
+              ps.addImage({
+                data: self.imagenesGeneradas[i],
+                x: 0.4, y: yContent, w: 9.2, h: hImg,
+                sizing: { type: 'cover', w: 9.2, h: hImg }
+              });
+              franja(ps, 0.4, yContent + hImg + 0.1, 9.2, hTxt, color.soft);
+              // Ajustar texto: menos alto disponible ⇒ fuente más chica
+              var cfgH = ajustarTexto(bulletsArr, true);
+              cfgH.fs = Math.max(11, cfgH.fs - 2);
+              var bulletsH = bulletsArr.map(function (b) { return '▸  ' + b; }).join(cfgH.sep);
+              ps.addText(bulletsH, {
+                x: 0.6, y: yContent + hImg + 0.2, w: 9, h: hTxt - 0.2, fontSize: cfgH.fs,
+                color: color.text, valign: 'top', fontFace: 'Calibri', paraSpaceAfter: cfgH.sp
+              });
+            }
+          } catch (e) {
+            console.warn('[PPT] falló addImage slide ' + i + ':', e.message);
+            franja(ps, 0.4, yContent, 9.2, hContent, color.soft);
+            ps.addText(bullets, { x: 0.7, y: yContent + 0.1, w: 8.6, h: hContent - 0.2, fontSize: cfg.fs, color: color.text, valign: 'top', fontFace: 'Calibri', paraSpaceAfter: cfg.sp });
+          }
         } else {
-          var bulletsFull = (s.bullets || []).map(function (b) { return { text:b, options:{ fontSize:18, color:color.text, bullet:{ code:'25CF' }, paraSpaceAfter:10 } }; });
-          ps.addText(bulletsFull, { x:0.7, y:1.5, w:8.6, h:3.6 });
+          franja(ps, 0.4, yContent, 9.2, hContent, color.soft);
+          ps.addText(bullets, {
+            x: 0.7, y: yContent + 0.1, w: 8.6, h: hContent - 0.2, fontSize: cfg.fs, color: color.text,
+            valign: 'top', fontFace: 'Calibri', paraSpaceAfter: cfg.sp
+          });
         }
-
-        // Pie
-        ps.addText(self.estructura.titulo || '', { x:0.5, y:5.15, w:9, h:0.3, fontSize:9, color:color.muted });
-
-        // Notas del profesor
-        if (s.notasProfesor) ps.addNotes(s.notasProfesor);
+        footer(ps, i + 3, totalSlides + 4);
+        if (s.notasProfesor) {
+          try { ps.addNotes(s.notasProfesor); } catch (e) { console.warn('[PPT] falló addNotes:', e.message); }
+        }
       });
 
       // ── ACTIVIDAD ──
       if (self.estructura.actividad) {
         var pA = pptx.addSlide();
         pA.background = { color: color.bg };
-        pA.addShape('rect', { x:0, y:0, w:10, h:5.63, fill:{ color:color.accent, transparency:92 }, line:{ type:'none' } });
-        pA.addShape('rect', { x:0, y:0, w:10, h:0.5, fill:{ color:color.accent }, line:{ type:'none' } });
-        pA.addText('✏ Actividad de aula', { x:0.5, y:0.7, w:9, h:0.6, fontSize:28, bold:true, color:color.text });
-        pA.addText(self.estructura.actividad.titulo || '', { x:0.5, y:1.6, w:9, h:0.6, fontSize:22, bold:true, color:color.primary });
-        pA.addText(self.estructura.actividad.descripcion || '', { x:0.5, y:2.5, w:9, h:2.2, fontSize:16, color:color.text });
+        pintarPatron(pA, false);
+        encabezado(pA, 'ACTIVIDAD', self.estructura.actividad.titulo || 'Actividad de aula');
+        // Card con background suave
+        franja(pA, 0.4, 1.6, 9.2, 3.2, color.soft);
+        var descAct = self.estructura.actividad.descripcion || '';
+        pA.addText(descAct, {
+          x: 0.7, y: 1.75, w: 8.6, h: 2.9,
+          fontSize: fsPorLargo(descAct, 2.9, 8.6),
+          color: color.text, valign: 'top', fontFace: 'Calibri', paraSpaceAfter: 8
+        });
         if (self.estructura.actividad.tiempo) {
-          pA.addText('⏱ ' + self.estructura.actividad.tiempo, { x:0.5, y:4.8, w:3, h:0.4, fontSize:14, color:color.primary, bold:true });
+          pA.addText('Tiempo estimado: ' + self.estructura.actividad.tiempo, {
+            x: 0.7, y: 4.9, w: 6, h: 0.35, fontSize: 13, color: color.primary, bold: true, fontFace: 'Calibri'
+          });
         }
+        footer(pA, totalSlides + 3, totalSlides + 4);
       }
 
       // ── CIERRE ──
       if (self.estructura.cierre) {
         var pC = pptx.addSlide();
         pC.background = { color: color.primary };
-        pC.addText(self.estructura.cierre.titulo || '¡Gracias!', { x:0.5, y:1.8, w:9, h:1, fontSize:36, bold:true, color:'FFFFFF', align:'center' });
-        var pregs = (self.estructura.cierre.preguntas || []).map(function (p) { return { text:'• ' + p, options:{ fontSize:20, color:'FFFFFF', breakLine:true, paraSpaceAfter:14 } }; });
-        if (pregs.length) pC.addText(pregs, { x:1.5, y:3, w:7, h:2, align:'center' });
-        pC.addText('Click&Clase · ' + (self.config.liceoNombre || ''), { x:0.5, y:5.15, w:9, h:0.3, fontSize:10, color:'FFFFFF', align:'center', italic:true });
+        // (Cierre usa fondo primario oscuro, no aplica patrón decorativo)
+        // Marco decorativo
+        franja(pC, 0.5, 0.5, 9, 0.05, color.accent);
+        franja(pC, 0.5, 5.08, 9, 0.05, color.accent);
+
+        pC.addText(self.estructura.cierre.titulo || 'Cierre de la clase', {
+          x: 0.5, y: 1.4, w: 9, h: 1, fontSize: 34, bold: true,
+          color: 'FFFFFF', align: 'center', valign: 'middle', fontFace: 'Calibri'
+        });
+        if (self.estructura.cierre.preguntas && self.estructura.cierre.preguntas.length) {
+          var pregArr = self.estructura.cierre.preguntas;
+          var cfgP = ajustarTexto(pregArr, false);
+          var pregs = pregArr.map(function (p) { return '• ' + p; }).join(cfgP.sep);
+          pC.addText(pregs, {
+            x: 1.5, y: 2.7, w: 7, h: 2, fontSize: Math.min(18, cfgP.fs + 2),
+            color: 'FFFFFF', align: 'center', valign: 'top', fontFace: 'Calibri',
+            paraSpaceAfter: cfgP.sp
+          });
+        }
+        pC.addText(pieDocente, {
+          x: 0.5, y: 5.2, w: 9, h: 0.3, fontSize: 10,
+          color: 'FFFFFF', italic: true, align: 'center', fontFace: 'Calibri'
+        });
       }
 
-      return pptx.write({ outputType: 'blob' });
+      self._pptxListo = pptx;
+      return pptx;
     });
   };
 
   // ── Paso 4: Descargar en el navegador ─────────────────────
+  // Flujo:
+  //  1) Compilar con PptxGenJS
+  //  2) Generar blob con write({outputType:'blob'})
+  //  3) POST-PROCESAR con JSZip: inyectar <p:transition> en cada slide XML
+  //  4) Regenerar blob con MIME correcto y descargar
   CCPptGenerator.prototype.descargar = function (nombreArchivo, onProgress) {
     var self = this;
-    return this.compilar(onProgress).then(function (blob) {
-      var url = URL.createObjectURL(blob);
-      var a = document.createElement('a');
-      a.href = url;
-      a.download = nombreArchivo || (self._nombreArchivoDefault());
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+    return this.compilar(onProgress).then(function (pptx) {
+      var fileName = nombreArchivo || self._nombreArchivoDefault();
+      console.log('[PPT] Generando blob con transiciones ·', fileName);
+      // Generar blob de pptx (sin transiciones aún)
+      return pptx.write({ outputType: 'blob' }).then(function (blob) {
+        return self._inyectarTransiciones(blob);
+      }).then(function (blobFinal) {
+        console.log('[PPT] ✓ Blob final ·', Math.round(blobFinal.size / 1024) + ' KB');
+        // Descargar con MIME explícito
+        var mime = 'application/vnd.openxmlformats-officedocument.presentationml.presentation';
+        var url = URL.createObjectURL(new Blob([blobFinal], { type: mime }));
+        var a = document.createElement('a');
+        a.href = url; a.download = fileName;
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+        setTimeout(function() { URL.revokeObjectURL(url); }, 1000);
+        return fileName;
+      });
+    });
+  };
+
+  // Post-procesar el .pptx (ZIP) para inyectar <p:transition> Y <p:timing> (animaciones)
+  // en cada slideN.xml. Usa JSZip incluido en el bundle de PptxGenJS.
+  CCPptGenerator.prototype._inyectarTransiciones = function (blob) {
+    var self = this;
+    var JSZipRef = window.JSZip || (window.PptxGenJS && window.PptxGenJS.JSZip);
+    if (!JSZipRef) {
+      console.warn('[PPT] JSZip no disponible, transiciones/animaciones omitidas');
+      return Promise.resolve(blob);
+    }
+    // Catálogo de transiciones + peso por estilo (didáctica prefiere suaves,
+    // interactiva prefiere dinámicas)
+    var TRANSICIONES_TODAS = [
+      '<p:fade/>',
+      '<p:push dir="l"/>',  '<p:push dir="r"/>',  '<p:push dir="u"/>',  '<p:push dir="d"/>',
+      '<p:wipe dir="l"/>',  '<p:wipe dir="r"/>',
+      '<p:cover dir="l"/>', '<p:cover dir="d"/>',
+      '<p:split dir="in" orient="horz"/>',
+      '<p:split dir="out" orient="vert"/>',
+      '<p:dissolve/>',
+      '<p:zoom/>'
+    ];
+    // Sub-selección según estilo (para respetar el "clima" del PPT)
+    var TRANSICIONES_POR_ESTILO = {
+      didactica:   ['<p:fade/>','<p:push dir="l"/>','<p:wipe dir="l"/>','<p:cover dir="l"/>','<p:dissolve/>'],
+      formal:      ['<p:fade/>','<p:wipe dir="l"/>','<p:cover dir="d"/>','<p:dissolve/>'],
+      interactiva: TRANSICIONES_TODAS,
+      calida:      ['<p:fade/>','<p:zoom/>','<p:push dir="r"/>','<p:cover dir="l"/>','<p:split dir="in" orient="horz"/>']
+    };
+    var pool = TRANSICIONES_POR_ESTILO[self.config.estilo] || TRANSICIONES_TODAS;
+    // ÚNICA transición por generación: se elige aleatoria y se aplica a TODOS los slides
+    // (más coherencia visual dentro de la misma PPT; cada nueva PPT elige otra).
+    var xmlTransFija = pool[Math.floor(Math.random() * pool.length)];
+    var transXmlFinal = '<p:transition spd="med" advClick="1">' + xmlTransFija + '</p:transition>';
+    console.log('[PPT] Transición elegida para esta generación:', xmlTransFija);
+
+    // Preset de animación ÚNICO por generación (se guarda en self._diseno para
+    // que _generarTimingParaSlide lo use en todos los slides).
+    var PRESETS_ANIM = [
+      { id: 10, sub: 0,  nombre: 'Fade' },
+      { id: 1,  sub: 0,  nombre: 'Appear' },
+      { id: 2,  sub: 4,  nombre: 'Fly In desde abajo' },
+      { id: 2,  sub: 8,  nombre: 'Fly In desde izquierda' },
+      { id: 22, sub: 8,  nombre: 'Wipe desde izquierda' },
+      { id: 12, sub: 8,  nombre: 'Peek desde izquierda' },
+      { id: 4,  sub: 16, nombre: 'Box in' }
+    ];
+    var presetAnim = PRESETS_ANIM[Math.floor(Math.random() * PRESETS_ANIM.length)];
+    self._diseno = self._diseno || {};
+    self._diseno.presetAnim = presetAnim;
+    console.log('[PPT] Animación elegida para esta generación:', presetAnim.nombre);
+
+    return JSZipRef.loadAsync(blob).then(function (zip) {
+      var slideFiles = Object.keys(zip.files).filter(function (name) {
+        return /^ppt\/slides\/slide\d+\.xml$/.test(name);
+      });
+      console.log('[PPT] Inyectando transición + animaciones en ' + slideFiles.length + ' slides');
+      var promesas = slideFiles.map(function (name) {
+        return zip.file(name).async('string').then(function (xml) {
+          var nuevoXml = xml;
+          // 1) Transición entre slides (misma para toda la PPT)
+          if (nuevoXml.indexOf('<p:transition') === -1) {
+            nuevoXml = nuevoXml.replace('</p:sld>', transXmlFinal + '</p:sld>');
+          }
+          // 2) Timing con animaciones (solo shapes de texto, no decorativos)
+          if (nuevoXml.indexOf('<p:timing') === -1) {
+            var timingXml = self._generarTimingParaSlide(nuevoXml);
+            if (timingXml) {
+              nuevoXml = nuevoXml.replace('</p:sld>', timingXml + '</p:sld>');
+            }
+          }
+          zip.file(name, nuevoXml);
+        });
+      });
+      return Promise.all(promesas).then(function () {
+        return zip.generateAsync({
+          type: 'blob',
+          mimeType: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+          compression: 'DEFLATE',
+          compressionOptions: { level: 6 }
+        });
+      });
+    }).catch(function (err) {
+      console.warn('[PPT] Fallo al inyectar transiciones/animaciones:', err.message);
       return blob;
     });
+  };
+
+  // Genera un bloque <p:timing> con animación para los shapes CON TEXTO REAL
+  // (excluye franjas/decoraciones sin texto que causaban artifacts "fantasma").
+  // Usa el preset guardado en self._diseno.presetAnim (mismo para toda la PPT).
+  // Todos entran con afterEffect (auto, sin clic), escalonados 300ms.
+  CCPptGenerator.prototype._generarTimingParaSlide = function (slideXml) {
+    // Parseo shape-por-shape: por cada <p:sp>...</p:sp> extraigo el id y
+    // verifico si tiene <a:t>...</a:t> con contenido no vacío. Solo esos animo.
+    var ids = [];
+    var reShape = /<p:sp>[\s\S]*?<\/p:sp>/g;
+    var shapeMatch;
+    while ((shapeMatch = reShape.exec(slideXml)) !== null) {
+      var shapeXml = shapeMatch[0];
+      var idMatch = shapeXml.match(/<p:cNvPr\s+id="(\d+)"/);
+      if (!idMatch) continue;
+      var id = parseInt(idMatch[1], 10);
+      if (id <= 1) continue;
+      // Extraer texto real (concatenar todos los <a:t>...</a:t>)
+      var textos = shapeXml.match(/<a:t[^>]*>([^<]*)<\/a:t>/g) || [];
+      var textoTotal = textos.map(function (t) {
+        var m = t.match(/<a:t[^>]*>([^<]*)<\/a:t>/);
+        return m ? m[1] : '';
+      }).join('').trim();
+      // FILTROS de exclusión (evitar animar decoraciones o textos cortos):
+      // 1) Texto muy corto (pills "01", "OA", números de página, "3 / 8")
+      if (textoTotal.length < 15) continue;
+      // 2) Shape con fill sólido en spPr = pill/franja decorativa con texto
+      //    (los TextBox limpios NO tienen <a:solidFill> en <p:spPr>)
+      var spPrMatch = shapeXml.match(/<p:spPr>[\s\S]*?<\/p:spPr>/);
+      if (spPrMatch && spPrMatch[0].indexOf('<a:solidFill') !== -1) continue;
+      // 3) Textos del footer (contienen el nombre del docente o Click&Clase)
+      if (textoTotal.indexOf('Click&Clase') !== -1) continue;
+      if (ids.indexOf(id) === -1) ids.push(id);
+    }
+    if (ids.length === 0) return '';
+    // Limitar a 5 objetos animados por slide (evita saturar visualmente)
+    if (ids.length > 5) ids = ids.slice(0, 5);
+
+    // Preset fijo por generación (mismo para toda la PPT)
+    var preset = (this._diseno && this._diseno.presetAnim) || { id: 10, sub: 0 };
+
+    var seqId = 2;
+    function nextId(){ seqId++; return seqId; }
+
+    // Todas las animaciones son afterEffect (automáticas) con delay escalonado.
+    // SOLO usamos <p:set> style.visibility=visible — PowerPoint interpreta el
+    // presetID/presetSubtype y aplica el efecto visual correcto SIN necesidad
+    // del <p:anim> manual (que deformaba el ancho del shape con ppt_w).
+    var animsXml = ids.map(function (spId, idx) {
+      var delay = String(200 + idx * 300);
+      return '' +
+        '<p:par>' +
+          '<p:cTn id="' + nextId() + '" fill="hold">' +
+            '<p:stCondLst><p:cond delay="indefinite"/></p:stCondLst>' +
+            '<p:childTnLst>' +
+              '<p:par>' +
+                '<p:cTn id="' + nextId() + '" fill="hold">' +
+                  '<p:stCondLst><p:cond delay="0"/></p:stCondLst>' +
+                  '<p:childTnLst>' +
+                    '<p:par>' +
+                      '<p:cTn id="' + nextId() + '" presetID="' + preset.id + '" presetClass="entr" presetSubtype="' + preset.sub + '" fill="hold" grpId="0" nodeType="afterEffect">' +
+                        '<p:stCondLst><p:cond delay="' + delay + '"/></p:stCondLst>' +
+                        '<p:childTnLst>' +
+                          '<p:set>' +
+                            '<p:cBhvr>' +
+                              '<p:cTn id="' + nextId() + '" dur="1" fill="hold">' +
+                                '<p:stCondLst><p:cond delay="0"/></p:stCondLst>' +
+                              '</p:cTn>' +
+                              '<p:tgtEl><p:spTgt spid="' + spId + '"/></p:tgtEl>' +
+                              '<p:attrNameLst><p:attrName>style.visibility</p:attrName></p:attrNameLst>' +
+                            '</p:cBhvr>' +
+                            '<p:to><p:strVal val="visible"/></p:to>' +
+                          '</p:set>' +
+                        '</p:childTnLst>' +
+                      '</p:cTn>' +
+                    '</p:par>' +
+                  '</p:childTnLst>' +
+                '</p:cTn>' +
+              '</p:par>' +
+            '</p:childTnLst>' +
+          '</p:cTn>' +
+        '</p:par>';
+    }).join('');
+
+    // Envolver en la estructura completa de timing
+    return '' +
+      '<p:timing>' +
+        '<p:tnLst>' +
+          '<p:par>' +
+            '<p:cTn id="1" dur="indefinite" restart="never" nodeType="tmRoot">' +
+              '<p:childTnLst>' +
+                '<p:seq concurrent="1" nextAc="seek">' +
+                  '<p:cTn id="' + nextId() + '" dur="indefinite" nodeType="mainSeq">' +
+                    '<p:childTnLst>' + animsXml + '</p:childTnLst>' +
+                  '</p:cTn>' +
+                  '<p:prevCondLst><p:cond evt="onPrev" delay="0"><p:tgtEl><p:sldTgt/></p:tgtEl></p:cond></p:prevCondLst>' +
+                  '<p:nextCondLst><p:cond evt="onNext" delay="0"><p:tgtEl><p:sldTgt/></p:tgtEl></p:cond></p:nextCondLst>' +
+                '</p:seq>' +
+              '</p:childTnLst>' +
+            '</p:cTn>' +
+          '</p:par>' +
+        '</p:tnLst>' +
+      '</p:timing>';
   };
 
   CCPptGenerator.prototype._nombreArchivoDefault = function () {

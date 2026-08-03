@@ -1,0 +1,9 @@
+{
+  "name": "clickyclase-api",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "API serverless de Click&Clase (Vercel Functions)",
+  "dependencies": {
+    "firebase-admin": "^12.7.0"
+  }
+}

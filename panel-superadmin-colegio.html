@@ -16,6 +16,7 @@
 <script src="js/liceos.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="js/personal.js"></script>
+<script src="js/modal-usuario-unificado.js?v=1"></script>
 <style>
 :root {
   --bg: #F0F7FF; --bg-2: #FFFFFF; --panel: #FFFFFF; --panel-2: #F8FAFF;
@@ -838,7 +839,10 @@ function presetPlan() {
   var preset = PRESETS_PLAN[_liceo.planId];
   if (!preset) return;
   document.querySelectorAll('#matrizAsig input').forEach(function (cb) {
-    var parts = cb.getAttribute('data-key').split('__');
+    var key = cb.getAttribute('data-key');
+    // BUG FIX: checkboxes "seleccionar todo" no tienen data-key
+    if (!key || key.indexOf('__') === -1) return;
+    var parts = key.split('__');
     cb.checked = preset.asignaturas.indexOf(parts[0]) !== -1 &&
                  preset.niveles.indexOf(parts[1]) !== -1;
   });
@@ -924,10 +928,13 @@ function guardarAsig() {
   var asigsSet = new Set(), nivelesSet = new Set();
   document.querySelectorAll('#matrizAsig input:checked').forEach(function (cb) {
     var key = cb.getAttribute('data-key');
+    // BUG FIX: los checkboxes de "seleccionar todo" (columna/fila) no tienen
+    // data-key → saltarlos. Solo procesar checkboxes con clave asig__nivel.
+    if (!key || key.indexOf('__') === -1) return;
     seleccionadas.push(key);
     var parts = key.split('__');
-    asigsSet.add(parts[0]);
-    nivelesSet.add(parts[1]);
+    if (parts[0]) asigsSet.add(parts[0]);
+    if (parts[1]) nivelesSet.add(parts[1]);
   });
   CCLiceos.actualizar(_slug, {
     asignaturasPermitidas: seleccionadas,
@@ -1223,13 +1230,44 @@ function _rolLabel(id){
   return r ? (r.icon + ' ' + r.label) : id;
 }
 
+// Modal unificado (nuevo) — reemplaza el modal viejo modalPersonal.
+// El colegio queda fijo al slug actual (_slug) y usa los cruces asig+nivel del liceo.
 function abrirModalPersonal(){
-  ['pfNombre','pfEmail','pfPass','pfCargo'].forEach(function(id){
-    var el = document.getElementById(id); if (el) el.value = '';
+  if (typeof ELModalUsuario === 'undefined') {
+    // Fallback: si el módulo no cargó, abrir el modal viejo
+    ['pfNombre','pfEmail','pfPass','pfCargo'].forEach(function(id){
+      var el = document.getElementById(id); if (el) el.value = '';
+    });
+    _renderRoles(['profesor']);
+    _renderCheckboxes([], []);
+    document.getElementById('modalPersonal').style.display = 'flex';
+    return;
+  }
+  ELModalUsuario.abrir({
+    modo: 'crear',
+    colegios: [{ slug: _slug, nombre: (_liceo && (_liceo.nombre || _liceo.slug)) || _slug }],
+    colegioSlug: _slug,
+    colegioBloqueado: true,
+    permitirSinColegio: false,
+    catalogoCruces: (_liceo && _liceo.asignaturasPermitidas) || [],
+    onGuardar: function (datos) {
+      return new Promise(function (resolve, reject) {
+        _crearUnFuncionario({
+          nombre:      datos.nombre,
+          email:       datos.email,
+          password:    datos.password,
+          cargo:       datos.cargo,
+          rol:         datos.rolPrincipal,
+          roles:       datos.roles,
+          asignaturas: datos.asignaturasCruces || datos.asignaturas,   // guardamos los cruces
+          niveles:     datos.niveles
+        }).then(function (res) {
+          if (res.ok) { cargarPersonal(); resolve(); }
+          else reject(new Error(res.error || 'Error desconocido'));
+        }).catch(reject);
+      });
+    }
   });
-  _renderRoles(['profesor']);
-  _renderCheckboxes([], []);
-  document.getElementById('modalPersonal').style.display = 'flex';
 }
 
 // ── Roles como checkboxes multi-select con el mismo estilo que asig/nivel

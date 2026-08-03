@@ -15,6 +15,7 @@
 <script src="js/roles-router.js"></script>
 <script src="js/liceos.js"></script>
 <script src="js/personal.js"></script>
+<script src="js/modal-usuario-unificado.js?v=1"></script>
 <script src="js/pin-firma.js"></script>
 <script src="js/curricula-loader.js"></script>
 <script src="js/tp-catalogo.js"></script>
@@ -821,7 +822,7 @@ function renderAsignaturasForm() {
   var asigIds = _liceo.asignaturasIds || [];
   if (!asigIds.length && Array.isArray(_liceo.asignaturasPermitidas)) {
     var set = new Set();
-    _liceo.asignaturasPermitidas.forEach(function (k) { set.add(k.split('__')[0]); });
+    _liceo.asignaturasPermitidas.forEach(function (k) { if (k) set.add(String(k).split('__')[0]); });
     asigIds = Array.from(set);
   }
   var html = '';
@@ -1039,8 +1040,12 @@ function onRolesChange() {
   if (fld) fld.style.display = muestra ? 'block' : 'none';
 
   // Ajustar cargo sugerido según el primer rol
+  // BUG FIX: `fRolesSelect` fue reemplazado por `#rolesGridWrap` (checkboxes),
+  // así que no existe más como <select>. Usamos los roles ya leídos arriba.
   var sel = document.getElementById('fRolesSelect');
-  var rolesSel = Array.from(sel.selectedOptions).map(function (o) { return o.value; });
+  var rolesSel = sel && sel.selectedOptions
+    ? Array.from(sel.selectedOptions).map(function (o) { return o.value; })
+    : rolesMarcados;   // fallback: usar los checkboxes leídos arriba
   var cargoSel = document.getElementById('fCargo');
   if (cargoSel && !cargoSel.value && rolesSel.length) {
     var mapa = {
@@ -1186,6 +1191,42 @@ function abrirModalCrear() {
     alert('Alcanzaste el límite de ' + _liceo.limiteUsuarios + ' asientos de tu plan. Contactá a soporte para ampliarlo.');
     return;
   }
+  // Usar modal unificado si está disponible (colegio bloqueado al del user)
+  if (typeof ELModalUsuario !== 'undefined') {
+    ELModalUsuario.abrir({
+      modo: 'crear',
+      colegios: [{ slug: _liceo.slug, nombre: _liceo.nombre || _liceo.slug }],
+      colegioSlug: _liceo.slug,
+      colegioBloqueado: true,
+      permitirSinColegio: false,
+      catalogoCruces: _liceo.asignaturasPermitidas || [],
+      onGuardar: function (datos) {
+        var payload = {
+          nombre:          datos.nombre,
+          email:           datos.email,
+          telefono:        '',
+          rut:             '',
+          profesion:       datos.profesion || '',
+          asignaturas:     datos.asignaturasCruces && datos.asignaturasCruces.length
+                          ? datos.asignaturasCruces
+                          : datos.asignaturas,
+          especialidades:  datos.especialidadTP ? [datos.especialidadTP] : [],
+          modulosTP:       {},
+          cursosAsignados: [],
+          permisos:        { planificar: true, crearMaterial: true },
+          capacidades:     { formatoPAES:false, formatoSIMCE:false, taxonomiaMarzano:false, dua:false },
+          password:        datos.password,
+          usarRutComoPass: false,
+          roles:           datos.roles
+        };
+        return CCPersonal.crearMiembro(payload).then(function () {
+          if (typeof cargarPersonal === 'function') cargarPersonal();
+        });
+      }
+    });
+    return;
+  }
+  // Fallback modal viejo
   _editandoUid = null;
   document.getElementById('modalTitulo').textContent = 'Agregar miembro';
   document.getElementById('modalSub').textContent = 'Completá los datos. La contraseña inicial puede ser el RUT.';
