@@ -1,0 +1,265 @@
+/**
+ * permisos-docente.js — Click&Clase
+ * ─────────────────────────────────────────────────────────────
+ * Modal AUTOCONTENIDO para asignar a un docente: tipo, asignaturas,
+ * niveles, clases (cursos), y —para TP— especialidad + módulos.
+ * Guarda con ELDB.usuarios.actualizar (update seguro con updateMask,
+ * NUNCA set(), para no borrar campos del documento).
+ *
+ * Reutilizable en cualquier página que cargue:
+ *   firebase-db.js (ELDB), curricula-chile.js (CURRICULA_CHILE) y,
+ *   opcionalmente para TP, tp-catalogo.js (CCTPCatalogo).
+ *
+ * API:
+ *   PermisosDocente.abrir(uid, userObj, onSaved?)
+ *     - uid:      id del documento usuarios/{uid}
+ *     - userObj:  objeto del usuario (para precargar valores actuales)
+ *     - onSaved:  callback opcional tras guardar OK
+ */
+(function () {
+  'use strict';
+
+  var _uid = null;
+  var _onSaved = null;
+  var _d = { tipo:'', asignaturas:[], niveles:[], especialidad:'', modulos:[], cursos:[], planificar:true, material:true };
+
+  var NIVELES = {
+    parvularia: [['NT1','Pre-Kínder (NT1)'],['NT2','Kínder (NT2)']],
+    basica:     [['1B','1°'],['2B','2°'],['3B','3°'],['4B','4°'],['5B','5°'],['6B','6°'],['7B','7°'],['8B','8°']],
+    media:      [['1M','1° Medio'],['2M','2° Medio'],['3M','3° Medio'],['4M','4° Medio']],
+    tecnico:    [['3M','3° Medio'],['4M','4° Medio']]
+  };
+
+  function _cur() { return (typeof CURRICULA_CHILE !== 'undefined') ? CURRICULA_CHILE : null; }
+  function _tp()  { return (typeof CCTPCatalogo !== 'undefined') ? CCTPCatalogo : null; }
+  function _esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+  // ── Modal (se inyecta una sola vez) ──────────────────────────
+  function _ensureModal() {
+    if (document.getElementById('pd-ov')) return;
+    var ov = document.createElement('div');
+    ov.id = 'pd-ov';
+    ov.style.cssText = 'position:fixed;inset:0;z-index:2147482000;background:rgba(15,23,42,.5);display:none;align-items:center;justify-content:center;padding:20px;font-family:system-ui,-apple-system,sans-serif';
+    ov.innerHTML =
+      '<div style="background:#fff;max-width:560px;width:100%;max-height:88vh;overflow:auto;border-radius:16px;box-shadow:0 20px 60px -20px rgba(15,23,42,.5);padding:24px">' +
+        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">' +
+          '<h2 style="margin:0;font-size:1.2rem;color:#0f172a">🔑 Asignar clases al docente</h2>' +
+          '<button id="pd-x" style="background:none;border:none;font-size:1.3rem;cursor:pointer;color:#64748b">✕</button>' +
+        '</div>' +
+        '<div id="pd-info" style="background:#f1f5f9;border-radius:8px;padding:9px 12px;font-size:.85rem;margin-bottom:14px;color:#334155"></div>' +
+        '<div id="pd-msg" style="display:none;border-radius:8px;padding:9px 12px;font-size:.85rem;margin-bottom:12px"></div>' +
+        '<label style="font-weight:600;font-size:.82rem;display:block;margin-bottom:5px">Tipo de docente</label>' +
+        '<select id="pd-tipo" style="width:100%;padding:9px 11px;border:1px solid #cbd5e1;border-radius:8px;font-size:.9rem;margin-bottom:14px">' +
+          '<option value="">— Seleccionar —</option>' +
+          '<option value="parvularia">🧸 Educación Parvularia (NT1/NT2)</option>' +
+          '<option value="basica">📚 Educación Básica</option>' +
+          '<option value="media">🎓 Plan Común (Media)</option>' +
+          '<option value="tecnico">⚙️ Técnico-Profesional (EMTP)</option>' +
+        '</select>' +
+        '<div id="pd-asig"></div>' +
+        '<label style="font-weight:600;font-size:.82rem;display:block;margin:14px 0 5px">📋 Clase(s) asignada(s)</label>' +
+        '<input id="pd-cursos" placeholder="ej: 3° Medio A, 4° Medio B" style="width:100%;padding:9px 11px;border:1px solid #cbd5e1;border-radius:8px;font-size:.9rem;margin-bottom:14px">' +
+        '<div style="display:flex;gap:18px;flex-wrap:wrap;margin-bottom:18px">' +
+          '<label style="display:flex;align-items:center;gap:6px;font-size:.85rem;cursor:pointer"><input type="checkbox" id="pd-plan" checked> 📅 Puede planificar</label>' +
+          '<label style="display:flex;align-items:center;gap:6px;font-size:.85rem;cursor:pointer"><input type="checkbox" id="pd-mat" checked> 📚 Puede crear material</label>' +
+        '</div>' +
+        '<div style="display:flex;justify-content:flex-end;gap:8px">' +
+          '<button id="pd-cancel" style="background:#fff;border:1px solid #cbd5e1;color:#475569;border-radius:8px;padding:9px 16px;font-weight:600;cursor:pointer">Cancelar</button>' +
+          '<button id="pd-save" style="background:#2563EB;border:none;color:#fff;border-radius:8px;padding:9px 20px;font-weight:700;cursor:pointer">💾 Guardar</button>' +
+        '</div>' +
+      '</div>';
+    document.body.appendChild(ov);
+    document.getElementById('pd-x').addEventListener('click', _cerrar);
+    document.getElementById('pd-cancel').addEventListener('click', _cerrar);
+    document.getElementById('pd-tipo').addEventListener('change', function(){ _d.tipo = this.value; _buildAsig(); });
+    document.getElementById('pd-save').addEventListener('click', _guardar);
+    ov.addEventListener('click', function(e){ if (e.target === ov) _cerrar(); });
+  }
+
+  function _cerrar() { var ov=document.getElementById('pd-ov'); if(ov) ov.style.display='none'; }
+  function _msg(txt, ok) {
+    var m = document.getElementById('pd-msg');
+    m.style.display='block';
+    m.style.background = ok ? '#dcfce7' : '#fee2e2';
+    m.style.color = ok ? '#166534' : '#991b1b';
+    m.textContent = txt;
+  }
+
+  // ── Construir sección de asignaturas según tipo ──────────────
+  function _buildAsig() {
+    var sec = document.getElementById('pd-asig');
+    var cur = _cur();
+    var t = _d.tipo;
+    if (!t) { sec.innerHTML = '<p style="color:#64748b;font-size:.85rem">Elige un tipo de docente para ver las asignaturas.</p>'; return; }
+
+    // Para tipos de plan común/básica/media/parvularia necesitamos CURRICULA_CHILE.
+    // Si aún no está cargado (curricula-loader lo trae async), esperamos y reintentamos.
+    if (t !== 'tecnico' && !(cur && cur.getAsignaturas) && window.CURRICULA_READY) {
+      sec.innerHTML = '<p style="color:#64748b;font-size:.85rem">⏳ Cargando currículum…</p>';
+      window.CURRICULA_READY.then(function () { _buildAsig(); });
+      return;
+    }
+
+    var html = '';
+    if (t === 'tecnico') {
+      var tp = _tp();
+      html += '<label style="font-weight:600;font-size:.82rem;display:block;margin-bottom:5px">Especialidad EMTP</label>';
+      html += '<select id="pd-esp" style="width:100%;padding:9px 11px;border:1px solid #cbd5e1;border-radius:8px;font-size:.9rem;margin-bottom:12px"><option value="">— Selecciona —</option>';
+      if (tp && tp.ESPECIALIDAD_LABELS) {
+        Object.keys(tp.ESPECIALIDAD_LABELS).forEach(function(id){
+          html += '<option value="'+_esc(id)+'"'+(_d.especialidad===id?' selected':'')+'>'+_esc(tp.ESPECIALIDAD_LABELS[id])+'</option>';
+        });
+      }
+      html += '</select><div id="pd-mods"></div>';
+    } else if (cur && cur.getAsignaturas) {
+      var asigs = cur.getAsignaturas(t) || [];
+      html += '<label style="font-weight:600;font-size:.82rem;display:block;margin-bottom:6px">Asignaturas</label>';
+      html += '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px">';
+      asigs.forEach(function(a){
+        var nom = a.nombre || a;
+        var on = _d.asignaturas.indexOf(nom) !== -1;
+        html += '<label style="display:inline-flex;align-items:center;gap:5px;font-size:.82rem;background:'+(on?'#dbeafe':'#f8fafc')+';border:1px solid '+(on?'#93c5fd':'#e2e8f0')+';border-radius:8px;padding:5px 9px;cursor:pointer">'+
+          '<input type="checkbox" class="pd-a" value="'+_esc(nom)+'"'+(on?' checked':'')+'>'+_esc(nom)+'</label>';
+      });
+      html += '</div>';
+    } else {
+      html += '<p style="color:#b45309;font-size:.83rem">⚠ No se pudo cargar el currículum (CURRICULA_CHILE). Verifica que la página cargue curricula-chile.js.</p>';
+    }
+
+    // Niveles
+    var nivs = NIVELES[t] || [];
+    if (nivs.length) {
+      html += '<label style="font-weight:600;font-size:.82rem;display:block;margin-bottom:6px">Niveles</label>';
+      html += '<div style="display:flex;flex-wrap:wrap;gap:6px">';
+      nivs.forEach(function(p){
+        var on = _d.niveles.indexOf(p[0]) !== -1;
+        html += '<label style="display:inline-flex;align-items:center;gap:5px;font-size:.82rem;background:'+(on?'#dbeafe':'#f8fafc')+';border:1px solid '+(on?'#93c5fd':'#e2e8f0')+';border-radius:8px;padding:5px 9px;cursor:pointer">'+
+          '<input type="checkbox" class="pd-n" value="'+p[0]+'"'+(on?' checked':'')+'>'+_esc(p[1])+'</label>';
+      });
+      html += '</div>';
+    }
+    sec.innerHTML = html;
+
+    // Listeners
+    Array.prototype.forEach.call(sec.querySelectorAll('.pd-a'), function(cb){
+      cb.addEventListener('change', function(){ _toggle(_d.asignaturas, cb.value, cb.checked); });
+    });
+    Array.prototype.forEach.call(sec.querySelectorAll('.pd-n'), function(cb){
+      cb.addEventListener('change', function(){ _toggle(_d.niveles, cb.value, cb.checked); });
+    });
+    var espSel = document.getElementById('pd-esp');
+    if (espSel) {
+      espSel.addEventListener('change', function(){
+        if (this.value !== _d.especialidad) { _d.especialidad = this.value; _d.modulos = []; }
+        _buildMods();
+      });
+      if (_d.especialidad) _buildMods();
+    }
+  }
+
+  function _buildMods() {
+    var box = document.getElementById('pd-mods');
+    if (!box) return;
+    var tp = _tp();
+    if (!tp || !_d.especialidad) { box.innerHTML = ''; return; }
+
+    // El catálogo real de módulos (CURRICULA_FULL) se carga bajo demanda con
+    // cargarCatalogo() → loadCurriculaTP(). Esperamos a que esté antes de pintar,
+    // así mostramos los módulos reales de la especialidad y NO los genéricos.
+    box.innerHTML = '<p style="color:#64748b;font-size:.82rem;margin:6px 0">⏳ Cargando módulos de la especialidad…</p>';
+    var espActual = _d.especialidad;
+
+    var render = function () {
+      // Evitar carrera: si el usuario cambió de especialidad mientras cargaba, no pintar.
+      if (_d.especialidad !== espActual) return;
+      var mods = tp.modulos(espActual) || [];
+      if (!mods.length) { box.innerHTML = '<p style="color:#b45309;font-size:.82rem">No se encontraron módulos para esta especialidad.</p>'; return; }
+      var html = '<label style="font-weight:600;font-size:.82rem;display:block;margin:4px 0 6px">Módulos</label><div style="display:flex;flex-direction:column;gap:5px;margin-bottom:12px">';
+      mods.forEach(function (m) {
+        var on = _d.modulos.indexOf(m.id) !== -1;
+        html += '<label style="display:flex;align-items:center;gap:7px;font-size:.82rem;background:' + (on ? '#dbeafe' : '#f8fafc') + ';border:1px solid ' + (on ? '#93c5fd' : '#e2e8f0') + ';border-radius:8px;padding:6px 10px;cursor:pointer">' +
+          '<input type="checkbox" class="pd-m" value="' + _esc(m.id) + '"' + (on ? ' checked' : '') + '>' +
+          '<span>' + _esc(m.nombre) + (m.nivel ? ' · ' + _esc(m.nivel) : '') + '</span></label>';
+      });
+      html += '</div>';
+      box.innerHTML = html;
+      Array.prototype.forEach.call(box.querySelectorAll('.pd-m'), function (cb) {
+        cb.addEventListener('change', function () { _toggle(_d.modulos, cb.value, cb.checked); });
+      });
+    };
+
+    if (tp.cargarCatalogo) { tp.cargarCatalogo().then(render).catch(render); }
+    else render();
+  }
+
+  function _toggle(arr, val, on) {
+    var i = arr.indexOf(val);
+    if (on && i === -1) arr.push(val);
+    else if (!on && i !== -1) arr.splice(i, 1);
+  }
+
+  // ── Guardar (update seguro, no set) ──────────────────────────
+  function _guardar() {
+    if (!_uid) return;
+    if (typeof ELDB === 'undefined' || !ELDB.usuarios || !ELDB.usuarios.actualizar) {
+      _msg('No se pudo guardar: ELDB.usuarios no disponible.', false); return;
+    }
+    var btn = document.getElementById('pd-save');
+    btn.disabled = true; btn.textContent = 'Guardando…';
+
+    var esTP = _d.tipo === 'tecnico';
+    var cursos = document.getElementById('pd-cursos').value.split(',').map(function(s){return s.trim();}).filter(Boolean);
+    var nivelesLimpios = _d.niveles.slice();
+    if (_d.tipo !== 'parvularia') nivelesLimpios = nivelesLimpios.filter(function(n){ return n!=='NT1' && n!=='NT2'; });
+
+    var datos = {
+      tipoProfesor:   _d.tipo,
+      asignaturas:    esTP ? [] : _d.asignaturas.slice(),
+      niveles:        nivelesLimpios,
+      especialidad:   esTP ? _d.especialidad : '',
+      especialidades: esTP && _d.especialidad ? [_d.especialidad] : [],
+      modulos:        esTP ? _d.modulos.slice() : [],
+      modulosTP:      esTP && _d.especialidad ? (function(){ var m={}; m[_d.especialidad]=_d.modulos.slice(); return m; })() : {},
+      cursos:         cursos,
+      permisos: {
+        planificar:    document.getElementById('pd-plan').checked,
+        crearMaterial: document.getElementById('pd-mat').checked
+      }
+    };
+
+    ELDB.usuarios.actualizar(_uid, datos)
+      .then(function(){
+        _msg('✅ Asignación guardada correctamente.', true);
+        if (typeof _onSaved === 'function') { try { _onSaved(_uid, datos); } catch(e){} }
+        setTimeout(_cerrar, 1200);
+      })
+      .catch(function(e){ _msg('❌ Error: ' + (e && e.message ? e.message : e), false); })
+      .then(function(){ btn.disabled=false; btn.textContent='💾 Guardar'; });
+  }
+
+  // ── API pública ──────────────────────────────────────────────
+  function abrir(uid, u, onSaved) {
+    u = u || {};
+    _uid = uid;
+    _onSaved = onSaved || null;
+    _d = {
+      tipo:         u.tipoProfesor || '',
+      asignaturas:  (u.asignaturas || []).slice(),
+      niveles:      (u.niveles || []).slice(),
+      especialidad: u.especialidad || (u.especialidades && u.especialidades[0]) || '',
+      modulos:      (u.modulos || []).slice(),
+      cursos:       (u.cursos || []).slice()
+    };
+    _ensureModal();
+    document.getElementById('pd-info').innerHTML = '<strong>' + _esc(u.nombre || 'Sin nombre') + '</strong> · ' + _esc(u.email || '');
+    document.getElementById('pd-msg').style.display = 'none';
+    document.getElementById('pd-tipo').value = _d.tipo;
+    document.getElementById('pd-cursos').value = (_d.cursos || []).join(', ');
+    document.getElementById('pd-plan').checked = u.permisos ? u.permisos.planificar !== false : true;
+    document.getElementById('pd-mat').checked  = u.permisos ? u.permisos.crearMaterial !== false : true;
+    _buildAsig();
+    document.getElementById('pd-ov').style.display = 'flex';
+  }
+
+  window.PermisosDocente = { abrir: abrir };
+})();

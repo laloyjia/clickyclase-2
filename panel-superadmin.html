@@ -9,11 +9,16 @@
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
 <script src="js/firebase-rest.js"></script>
 <script src="js/firebase-config.js"></script>
+<script src="js/claims.js"></script>
 <script src="js/firebase-auth.js"></script>
+<script src="js/consentimiento.js"></script>
 <script src="js/firebase-db.js"></script>
 <script src="js/roles-permissions.js"></script>
 <script src="js/roles-router.js"></script>
 <script src="js/liceos.js"></script>
+<script src="js/curricula-loader.js"></script>
+<script src="js/tp-catalogo.js"></script>
+<script src="js/permisos-docente.js"></script>
 <style>
 :root {
   --bg: #F0F7FF; --panel: #FFFFFF; --border: rgba(37,99,235,.14);
@@ -221,6 +226,17 @@ tr:hover td { background: rgba(37,99,235,.03); }
     </div>
   </div>
 
+  <!-- Docentes sin colegio (independientes) -->
+  <div class="card" style="margin-top:18px">
+    <h2>👤 Docentes sin colegio (independientes)</h2>
+    <p style="color:var(--muted);font-size:.85rem;margin:2px 0 12px">Asigna aquí las clases y asignaturas contratadas por cada docente independiente.</p>
+    <input type="text" id="fltDocInd" placeholder="🔎 Buscar docente por nombre o email..." oninput="renderDocentesInd()"
+           style="width:100%;max-width:360px;padding:8px 12px;border:1px solid var(--border,#cbd5e1);border-radius:8px;margin-bottom:12px;font-size:.9rem">
+    <div id="docIndWrap">
+      <div class="empty"><div class="icon">⏳</div>Cargando docentes…</div>
+    </div>
+  </div>
+
 </div>
 
 <!-- ═══════════════════════════════════
@@ -391,6 +407,7 @@ function iniciar() {
 
   cargarKpis();
   cargarLista();
+  cargarDocentesInd();
   precargarPlanes();
 
   // Auto-abrir wizard si viene con ?wizard=1 (desde admin.html)
@@ -435,6 +452,64 @@ function cargarLista() {
     console.error(err);
     document.getElementById('tablaWrap').innerHTML = '<div class="empty"><div class="icon">⚠</div>Error cargando colegios: ' + esc(err.message) + '</div>';
   });
+}
+
+// ── Docentes sin colegio (independientes) ────────────────────────
+var _docentesInd = [];
+
+function cargarDocentesInd() {
+  var wrap = document.getElementById('docIndWrap');
+  if (!(window.ELDB && ELDB.usuarios && ELDB.usuarios.listarTodos)) {
+    if (wrap) wrap.innerHTML = '<div class="empty"><div class="icon">⚠</div>No se pudo cargar (ELDB no disponible).</div>';
+    return;
+  }
+  ELDB.usuarios.listarTodos().then(function (users) {
+    _docentesInd = (users || []).filter(function (u) {
+      var sinColegio = !u.liceoSlug && !u.liceoPrincipal && !(u.liceos && u.liceos.length);
+      var esProf = u.role === 'profesor' || (u.roles && u.roles.profesor);
+      return sinColegio && esProf;
+    });
+    renderDocentesInd();
+  }).catch(function (err) {
+    if (wrap) wrap.innerHTML = '<div class="empty"><div class="icon">⚠</div>Error: ' + esc(err.message) + '</div>';
+  });
+}
+
+function renderDocentesInd() {
+  var wrap = document.getElementById('docIndWrap');
+  if (!wrap) return;
+  var q = (document.getElementById('fltDocInd').value || '').toLowerCase().trim();
+  var lista = _docentesInd.filter(function (u) {
+    if (!q) return true;
+    return ((u.nombre || '') + ' ' + (u.email || '')).toLowerCase().indexOf(q) !== -1;
+  });
+  if (!lista.length) {
+    wrap.innerHTML = '<div class="empty"><div class="icon">👤</div>' +
+      (_docentesInd.length ? 'Ningún docente coincide con la búsqueda.' : 'No hay docentes independientes todavía.') + '</div>';
+    return;
+  }
+  var html = '<table><thead><tr><th>Docente</th><th>Email</th><th>Asignaturas / Especialidad</th><th>Acciones</th></tr></thead><tbody>';
+  lista.forEach(function (u) {
+    var areas = '—';
+    if (u.asignaturas && u.asignaturas.length) areas = u.asignaturas.join(', ');
+    else if (u.especialidad && typeof CCTPCatalogo !== 'undefined') areas = CCTPCatalogo.labelEspecialidad(u.especialidad);
+    else if (u.especialidad) areas = u.especialidad;
+    html += '<tr>' +
+      '<td><strong>' + esc(u.nombre || '—') + '</strong></td>' +
+      '<td style="color:var(--muted)">' + esc(u.email || '—') + '</td>' +
+      '<td style="font-size:.82rem">' + esc(areas) + '</td>' +
+      '<td><button class="btn primary small" onclick="asignarDocente(\'' + esc(u.uid) + '\')">🔑 Asignar clases</button></td>' +
+      '</tr>';
+  });
+  html += '</tbody></table>';
+  wrap.innerHTML = html;
+}
+
+function asignarDocente(uid) {
+  var u = _docentesInd.find(function (x) { return x.uid === uid; });
+  if (!u) { alert('Docente no encontrado'); return; }
+  if (typeof PermisosDocente === 'undefined') { alert('Módulo de asignación no cargado. Refresca la página.'); return; }
+  PermisosDocente.abrir(uid, u, function () { cargarDocentesInd(); });
 }
 
 function renderLista() {
