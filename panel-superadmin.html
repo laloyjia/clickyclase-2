@@ -17,7 +17,6 @@
 <script src="js/roles-router.js"></script>
 <script src="js/liceos.js"></script>
 <script src="js/curricula-loader.js"></script>
-<script src="js/tp-catalogo.js"></script>
 <script src="js/permisos-docente.js"></script>
 <style>
 :root {
@@ -492,8 +491,13 @@ function renderDocentesInd() {
   lista.forEach(function (u) {
     var areas = '—';
     if (u.asignaturas && u.asignaturas.length) areas = u.asignaturas.join(', ');
-    else if (u.especialidad && typeof CCTPCatalogo !== 'undefined') areas = CCTPCatalogo.labelEspecialidad(u.especialidad);
-    else if (u.especialidad) areas = u.especialidad;
+    else if (u.especialidad) {
+      areas = u.especialidad;
+      if (typeof CURRICULA_CHILE !== 'undefined' && CURRICULA_CHILE.getEspecialidades) {
+        var _e = (CURRICULA_CHILE.getEspecialidades() || []).find(function (x) { return x.key === u.especialidad; });
+        if (_e) areas = _e.nombre;
+      }
+    }
     html += '<tr>' +
       '<td><strong>' + esc(u.nombre || '—') + '</strong></td>' +
       '<td style="color:var(--muted)">' + esc(u.email || '—') + '</td>' +
