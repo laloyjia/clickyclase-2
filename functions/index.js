@@ -14,8 +14,10 @@
  */
 
 const { onRequest }    = require('firebase-functions/v2/https');
+const { onDocumentWritten } = require('firebase-functions/v2/firestore');
 const { initializeApp } = require('firebase-admin/app');
 const { getFirestore }  = require('firebase-admin/firestore');
+const { getAuth }       = require('firebase-admin/auth');
 
 // Inicializar Firebase Admin (usa credenciales de la propia function)
 try { initializeApp(); } catch (_) { /* ya inicializado */ }
@@ -564,6 +566,142 @@ Estilo de respuesta:
         // último recurso si res ya está roto
         return;
       }
+    }
+  }
+);
+
+// ═══════════════════════════════════════════════════════════════
+//  syncClaims — mantiene los custom claims sincronizados con el
+//  documento usuarios/{uid}. Se dispara en cada creación/edición,
+//  sin importar el origen (panel admin, signup o script).
+//
+//  Claims que escribe:  { rol, orgId, seg, tipo }
+//    - rol   ← data.role        (rol principal en formato string)
+//    - orgId ← data.orgId | data.liceoSlug | data.liceo
+//    - seg   ← data.seg          (segmento/ciclo: pre, b16, mhc, tp…)
+//    - tipo  ← data.tipo         (plataforma | colegio | independiente)
+//
+//  Es idempotente: solo llama a setCustomUserClaims si algo cambió,
+//  para no forzar refrescos de token innecesarios.
+//
+//  IMPORTANTE (compatibilidad): esta función NO modifica el doc de
+//  Firestore ni el comportamiento actual. Solo AGREGA claims al token.
+//  Las reglas y el frontend siguen funcionando igual hasta que se
+//  actualicen para leer los claims (paso siguiente, con fallback).
+// ═══════════════════════════════════════════════════════════════
+function _claimsDesdeDoc(data) {
+  if (!data) return null;
+  const orgId = data.orgId || data.liceoSlug || data.liceo || null;
+  return {
+    rol:   (typeof data.role === 'string' && data.role) ? data.role : null,
+    orgId: orgId || null,
+    seg:   (typeof data.seg === 'string' && data.seg) ? data.seg : null,
+    tipo:  (typeof data.tipo === 'string' && data.tipo) ? data.tipo : null,
+  };
+}
+
+function _claimsIguales(a, b) {
+  if (!a || !b) return false;
+  return a.rol === b.rol && a.orgId === b.orgId &&
+         a.seg === b.seg && a.tipo === b.tipo;
+}
+
+exports.syncClaims = onDocumentWritten('usuarios/{uid}', async (event) => {
+  const uid = event.params.uid;
+  const after = event.data && event.data.after;
+  // Doc borrado → no tocamos los claims (evita dejar sin acceso por error).
+  if (!after || !after.exists) return;
+
+  const nuevos = _claimsDesdeDoc(after.data());
+  if (!nuevos) return;
+
+  try {
+    const userRecord = await getAuth().getUser(uid);
+    const actuales = userRecord.customClaims || {};
+    const actualesNorm = {
+      rol:   actuales.rol   ?? null,
+      orgId: actuales.orgId ?? null,
+      seg:   actuales.seg   ?? null,
+      tipo:  actuales.tipo  ?? null,
+    };
+    if (_claimsIguales(actualesNorm, nuevos)) return; // nada cambió
+
+    // Preservar cualquier otro claim que exista (no lo pisamos).
+    const merged = Object.assign({}, actuales, nuevos);
+    await getAuth().setCustomUserClaims(uid, merged);
+    console.log(`[syncClaims] ${uid} → ${JSON.stringify(nuevos)}`);
+  } catch (e) {
+    // Doc Firestore sin cuenta Auth (huérfano) u otro error → log y seguir.
+    if (e && e.code === 'auth/user-not-found') {
+      console.warn(`[syncClaims] uid ${uid} sin cuenta Auth (huérfano). Se ignora.`);
+    } else {
+      console.error(`[syncClaims] error en ${uid}:`, e && e.message);
+    }
+  }
+});
+
+// ═══════════════════════════════════════════════════════════════
+//  imgSearch — proxy a Serper.dev (Google Imágenes) para el generador PPT.
+//  La API key de Serper vive SOLO en el servidor (Firestore sistema/gemini →
+//  campo serperKey), gestionada por el admin en Configuración IA. Ningún
+//  docente configura nada. Devuelve una lista de URLs de imágenes.
+//
+//  Endpoint (vía rewrite firebase.json): POST /api/img-search  { q: "query" }
+//  Respuesta: { images: ["https://...", ...] }
+// ═══════════════════════════════════════════════════════════════
+exports.imgSearch = onRequest(
+  {
+    region: 'us-central1',
+    timeoutSeconds: 30,
+    memory: '256MiB',
+    cors: true,
+    minInstances: 0,
+    maxInstances: 20,
+    invoker: 'public',
+    serviceAccount: '537489844804-compute@developer.gserviceaccount.com'
+  },
+  async (req, res) => {
+    try {
+      res.set('Access-Control-Allow-Origin', '*');
+      res.set('Access-Control-Allow-Methods', 'POST, OPTIONS');
+      res.set('Access-Control-Allow-Headers', 'Content-Type');
+      if (req.method === 'OPTIONS') return res.status(204).send('');
+      if (req.method !== 'POST')   return res.status(405).json({ error: 'Método no permitido' });
+
+      const q = (req.body && typeof req.body.q === 'string') ? req.body.q.trim() : '';
+      if (!q) return res.status(400).json({ error: 'Parámetro q requerido' });
+
+      // Leer la key de Serper desde Firestore (sistema/gemini.serperKey).
+      let serperKey = '';
+      try {
+        const snap = await _db.collection('sistema').doc('gemini').get();
+        const data = snap.exists ? (snap.data() || {}) : {};
+        serperKey = (typeof data.serperKey === 'string') ? data.serperKey.trim() : '';
+      } catch (e) { /* sigue con serperKey vacío */ }
+
+      if (!serperKey) {
+        return res.status(200).json({ images: [], _sinKey: true,
+          error: 'No hay API key de Serper configurada (admin.html → Configuración IA).' });
+      }
+
+      const r = await fetch('https://google.serper.dev/images', {
+        method: 'POST',
+        headers: { 'X-API-KEY': serperKey, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ q: q, num: 10 })
+      });
+      if (!r.ok) {
+        const txt = await r.text().catch(() => '');
+        return res.status(200).json({ images: [], error: 'Serper HTTP ' + r.status + ': ' + txt.slice(0, 200) });
+      }
+      const data = await r.json();
+      const images = Array.isArray(data.images)
+        ? data.images.map(function (im) { return im && (im.imageUrl || im.link || im.url); }).filter(Boolean)
+        : [];
+      return res.status(200).json({ images: images });
+    } catch (errTop) {
+      console.error('[imgSearch] error:', errTop && errTop.message);
+      try { return res.status(200).json({ images: [], error: 'Error interno: ' + (errTop && errTop.message) }); }
+      catch (_) { return; }
     }
   }
 );

@@ -81,6 +81,7 @@
     if (Array.isArray(e.aprendizajes)) e.aprendizajes = e.aprendizajes.map(_sanit);
     if (Array.isArray(e.slides)) e.slides.forEach(function(s){
       s.titulo         = _sanit(s.titulo);
+      s.momento        = _sanit(s.momento);
       s.notasProfesor  = _sanit(s.notasProfesor);
       s.sugerenciaImagen = _sanit(s.sugerenciaImagen);
       if (Array.isArray(s.bullets)) s.bullets = s.bullets.map(_sanit).filter(Boolean);
@@ -164,44 +165,66 @@
 
   CCPptGenerator.prototype._construirPromptGemini = function () {
     var c = this.config;
+    var nContenido = Math.max(3, c.nSlides - 4);
     return [
-      'Eres un asesor pedagógico experto en currículum chileno MINEDUC.',
-      'Diseña una presentación de clase profesional para un docente chileno con los siguientes datos:',
+      'Eres un asesor pedagógico experto en el currículum chileno MINEDUC, en didáctica de aula',
+      'y en Diseño Universal para el Aprendizaje (DUA). Diseña una presentación de clase real,',
+      'lista para proyectar, para un docente chileno, con estos datos:',
       '',
       '• Tema: ' + c.tema,
       '• Asignatura: ' + c.asignatura,
       '• Curso: ' + c.curso,
       '• N° de diapositivas: ' + c.nSlides,
       '• Estilo pedagógico: ' + c.estilo,
-      c.oa ? '• Objetivo de Aprendizaje MINEDUC: ' + c.oa : '',
+      c.oa ? '• Objetivo/Aprendizaje MINEDUC (ÁNCLA TODO a esto): ' + c.oa : '',
       c.instrucciones ? '• Instrucciones adicionales: ' + c.instrucciones : '',
       '',
       'RESPONDE EN JSON ESTRICTO con esta estructura (sin markdown, sin explicación):',
       '{',
       '  "titulo": "Título general de la clase",',
       '  "subtitulo": "Curso · Asignatura",',
-      '  "portada": { "resumen": "1 frase que resume la clase", "sugerenciaImagen": "prompt en inglés para imagen de portada, estilo educativo, sin texto" },',
-      '  "aprendizajes": ["OA que se abordará", "IE que se evaluará"],',
+      '  "portada": { "resumen": "1 frase que engancha y resume la clase", "sugerenciaImagen": "prompt en inglés para imagen de portada, estilo educativo, sin texto" },',
+      '  "aprendizajes": ["OA/AE: <texto del objetivo aterrizado a esta clase>", "Indicador de evaluación: <qué evidencia demuestra el logro>"],',
       '  "slides": [',
-      '    { "titulo": "Título del slide", "bullets": ["punto 1", "punto 2", "punto 3"], "notasProfesor": "Guion detallado en español para exponer, 2-3 oraciones", "sugerenciaImagen": "prompt en inglés educativo sin texto, o palabras clave si busca stock" },',
+      '    { "momento": "Inicio | Desarrollo | Práctica guiada | Cierre", "titulo": "Título del slide", "bullets": ["punto 1", "punto 2"], "notasProfesor": "Guion para exponer + 1 pregunta para hacer a la clase + tiempo sugerido (ej: 5 min).", "sugerenciaImagen": "palabras clave en inglés" },',
       '    ...',
       '  ],',
-      '  "actividad": { "titulo": "Actividad de aula", "descripcion": "Instrucción clara para el estudiante", "tiempo": "15 min" },',
-      '  "cierre": { "titulo": "Cierre de la clase", "preguntas": ["¿Qué aprendí?", "¿Cómo lo aplico?"] }',
+      '  "actividad": { "titulo": "Actividad de aula", "descripcion": "Instrucción clara para el estudiante.\\nMateriales: ...\\nCriterios de logro: ...\\nDiferenciación (DUA/NEE): ...", "tiempo": "15 min" },',
+      '  "cierre": { "titulo": "Cierre de la clase", "preguntas": ["pregunta de recuerdo", "pregunta de aplicación", "pregunta de análisis/creación"] }',
       '}',
       '',
-      'REGLAS OBLIGATORIAS:',
+      '════ SECUENCIA DIDÁCTICA (obligatoria) ════',
+      'Los slides de contenido DEBEN seguir un arco pedagógico y cada uno lleva su "momento":',
+      '  1) INICIO: activa conocimientos previos y motiva (pregunta gancho, situación cotidiana, ¿qué sabemos ya?).',
+      '  2) DESARROLLO: presenta el contenido nuevo de forma progresiva, de lo simple a lo complejo.',
+      '  3) PRÁCTICA GUIADA: un ejemplo resuelto paso a paso o un ejercicio modelado por el docente.',
+      '  4) El slide de CIERRE lo cubre el bloque "cierre".',
+      c.estilo ? ('Adapta el tono y la profundidad al estilo pedagógico "' + c.estilo + '".') : '',
+      'Reparte los ' + nContenido + ' slides de contenido: ~1 de inicio, la mayoría de desarrollo, ~1 de práctica guiada.',
+      '',
+      '════ ANCLAJE CURRICULAR ════',
+      c.oa ? '- TODO slide debe servir al objetivo indicado arriba; no incluyas relleno que no aporte al OA/AE.' : '- Define un foco de aprendizaje claro y coherente con el nivel.',
+      '- "aprendizajes" debe incluir el objetivo aterrizado a ESTA clase y al menos 1 indicador de evaluación observable.',
+      '- Vocabulario y ejemplos ajustados al nivel del curso (' + c.curso + ').',
+      '',
+      '════ VARIEDAD COGNITIVA Y EJEMPLOS ════',
+      '- Combina niveles de pensamiento: recordar, comprender, aplicar, analizar y crear (sin nombrar taxonomías).',
+      '- Usa ejemplos CONCRETOS y contextualizados a Chile y a la vida del estudiante (lugares, situaciones, oficios, cultura chilena) cuando sea pertinente.',
+      '- Las preguntas del cierre deben ir de menor a mayor exigencia cognitiva.',
+      '',
+      '════ NOTAS Y ACTIVIDAD ════',
+      '- notasProfesor: español chileno, tono cercano; incluye qué decir, UNA pregunta para lanzar a la clase y un tiempo sugerido.',
+      '- actividad.descripcion: además de la instrucción, agrega líneas para Materiales, Criterios de logro y Diferenciación (DUA/NEE), separadas por salto de línea (\\n).',
+      '',
+      '════ REGLAS DE FORMATO ════',
       '- Bullets: máximo 5 por slide, cada uno máx 12 palabras.',
-      '- notasProfesor: siempre en español chileno, tono cercano, orientado al docente.',
-      '- sugerenciaImagen: PALABRAS CLAVE ESPECÍFICAS EN INGLÉS (2 a 3 palabras MÁX) que se puedan encontrar como FOTO REAL en un buscador. Debe describir un OBJETO CONCRETO, no un concepto abstracto.',
-      '  Ejemplos BUENOS: "npn transistor", "human heart", "roman colosseum", "solar panel", "microscope cell", "printed circuit board".',
-      '  Ejemplos MALOS (evitar): "abstract concept illustration", "modern educational design", "colorful diagram showing", "electronic circuit fundamentals".',
-      '  Para conceptos abstractos, elegí el objeto físico más representativo (ej: "flujo de corriente" → "electric wire", "álgebra" → "equation blackboard", "democracia" → "voting box").',
-      '  IMPORTANTÍSIMO: cada slide DEBE tener una sugerenciaImagen DISTINTA a la de los otros slides. NO repitas el mismo concepto en varios slides. Si el tema es "transistores", un slide puede pedir "npn transistor", otro "oscilloscope screen", otro "breadboard prototype", otro "power supply", otro "microcontroller board", etc. VARIEDAD.',
-      '- N° total de slides = ' + c.nSlides + ' (contando portada + contenido + actividad + cierre).',
-      '- Distribución sugerida: 1 portada + 1 OA + ' + Math.max(3, c.nSlides - 4) + ' contenido + 1 actividad + 1 cierre.',
-      '- NO incluir taxonomías por nombre (Bloom, Marzano); usar niveles cognitivos si aplica.',
-      '- Vocabulario adecuado al nivel del curso.',
+      '- sugerenciaImagen: PALABRAS CLAVE ESPECÍFICAS EN INGLÉS (2 a 3 palabras MÁX) que existan como FOTO REAL. Objeto CONCRETO, no concepto abstracto.',
+      '  Ejemplos BUENOS: "npn transistor", "human heart", "roman colosseum", "solar panel", "microscope cell".',
+      '  Ejemplos MALOS: "abstract concept illustration", "modern educational design", "colorful diagram".',
+      '  Para conceptos abstractos usa el objeto físico más representativo (ej: "flujo de corriente" → "electric wire", "democracia" → "voting box").',
+      '  Cada slide DEBE tener una sugerenciaImagen DISTINTA a las demás. VARIEDAD.',
+      '- N° total de slides = ' + c.nSlides + ' (portada + OA + contenido + actividad + cierre).',
+      '- Distribución: 1 portada + 1 OA + ' + nContenido + ' contenido + 1 actividad + 1 cierre.',
       '',
       'DEVUELVE SOLO EL JSON, nada más.'
     ].filter(Boolean).join('\n');
@@ -450,25 +473,36 @@
     }
     function viaPollinations() { return self._fetchDataUrl(urlPollinations); }
 
-    // Cadena de fallback según modo. Google CSE se usa como primero SI está
-    // configurado (googleCseApiKey + googleCseId), sino se salta.
-    var tieneGoogle = !!(this.config.googleCseApiKey && this.config.googleCseId);
+    // Serper.dev (Google Imágenes real) vía proxy serverless — la key vive en el
+    // servidor (Firestore sistema/gemini.serperKey), ningún docente configura nada.
+    // Devuelve una lista de URLs; probamos cada una hasta que descargue bien.
+    function viaSerper() {
+      return fetch('/api/img-search', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ q: q })
+      })
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        var urls = (data && data.images) || [];
+        if (!urls.length) return Promise.reject(new Error('serper sin resultados'));
+        var i = 0;
+        function tryNext() {
+          if (i >= urls.length) return Promise.reject(new Error('serper: ninguna descargable'));
+          return self._fetchDataUrl(urls[i++]).catch(tryNext);
+        }
+        return tryNext();
+      });
+    }
+
+    // Cadena de fallback según modo. Serper (Google Imágenes) va primero en los
+    // modos de fotos reales; si no hay key o falla, cae a las fuentes gratuitas.
     var pasos;
-    if (modo === 'google') {
-      // Modo explícito Google: Google CSE → Wikipedia → Openverse → Pollinations
-      pasos = tieneGoogle
-        ? [viaGoogle, viaWikipedia, viaOpenverse, viaPollinations]
-        : [viaWikipedia, viaOpenverse, viaWikimedia, viaPollinations];
-    } else if (modo === 'web' || modo === 'stock') {
-      // Modo fotos reales: prioriza Google si está, sino Wikipedia
-      pasos = tieneGoogle
-        ? [viaGoogle, viaWikipedia, viaOpenverse, viaWikimedia, viaPollinations]
-        : [viaWikipedia, viaOpenverse, viaWikimedia, viaPollinations];
+    if (modo === 'google' || modo === 'web' || modo === 'stock') {
+      pasos = [viaSerper, viaWikipedia, viaOpenverse, viaWikimedia, viaPollinations];
     } else {
-      // Modo IA: Pollinations primero
-      pasos = tieneGoogle
-        ? [viaPollinations, viaGoogle, viaWikipedia]
-        : [viaPollinations, viaWikipedia, viaOpenverse];
+      // Modo IA: Pollinations primero, luego Serper y libres.
+      pasos = [viaPollinations, viaSerper, viaWikipedia, viaOpenverse];
     }
 
     function intentar(i) {
@@ -776,9 +810,11 @@
         // Encabezado con número. La pill alterna entre 3 colores por slide para
         // dar ritmo visual dentro de la misma PPT (accent → primary → text_muted).
         var num = String(i + 1).padStart(2, '0');
+        // Si la IA marcó el momento didáctico, lo mostramos en la pill (INICIO · 01).
+        var categoria = s.momento ? (String(s.momento).toUpperCase() + ' · ' + num) : num;
         var pillsPorSlide = [color.accent, color.primary, color.muted];
         var pillColor = pillsPorSlide[i % pillsPorSlide.length];
-        encabezado(ps, num, s.titulo || ('Diapositiva ' + (i + 1)), pillColor);
+        encabezado(ps, categoria, s.titulo || ('Diapositiva ' + (i + 1)), pillColor);
 
         var tieneImg = !!self.imagenesGeneradas[i];
         var bulletsArr = s.bullets || [];

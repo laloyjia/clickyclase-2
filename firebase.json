@@ -15,6 +15,13 @@
           "functionId": "iaAsistente",
           "region": "us-central1"
         }
+      },
+      {
+        "source": "/api/img-search",
+        "function": {
+          "functionId": "imgSearch",
+          "region": "us-central1"
+        }
       }
     ],
     "headers": [

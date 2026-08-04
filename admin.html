@@ -33,7 +33,9 @@
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
 <script src="js/firebase-rest.js"></script>
 <script src="js/firebase-config.js"></script>
+<script src="js/claims.js"></script>
 <script src="js/firebase-auth.js"></script>
+<script src="js/consentimiento.js"></script>
 <script src="js/firebase-db.js"></script>
 <script src="js/presencia-logger.js"></script>
 <script>document.addEventListener('DOMContentLoaded',function(){ if(window.ELPresencia) ELPresencia.start('Panel admin'); });</script>
@@ -752,6 +754,23 @@ tr:hover td{background:rgba(37,99,235,.05)}
           <p style="color:var(--muted);font-size:.85rem;font-style:italic">Cargando keys...</p>
         </div>
         <div id="notifKeysIA" style="margin-top:12px;font-size:.83rem"></div>
+      </div>
+      <div class="card" style="margin-bottom:20px">
+        <h3>🔍 Imágenes — Serper.dev (Google Imágenes)</h3>
+        <p style="color:var(--muted);font-size:.85rem;margin-bottom:14px">
+          API key de <a href="https://serper.dev" target="_blank" style="color:#0EA5E9">serper.dev</a> para las imágenes del generador de presentaciones
+          (calidad Google Imágenes, ~US$0,30 por 1.000 búsquedas, 2.500 gratis/mes). Se guarda en el servidor;
+          <strong>ningún docente configura nada</strong>.
+        </p>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end">
+          <div style="flex:1;min-width:280px">
+            <label style="font-size:.75rem;color:var(--muted);display:block;margin-bottom:4px">Serper API Key</label>
+            <input type="password" id="inputSerperKey" placeholder="Pega tu API key de serper.dev"
+              style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-family:monospace;font-size:.875rem;outline:none;box-sizing:border-box">
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="guardarSerperKey()" style="white-space:nowrap">💾 Guardar</button>
+        </div>
+        <div id="notifSerper" style="margin-top:12px;font-size:.83rem"></div>
       </div>
       <div class="card">
         <h3>Modelo por defecto</h3>
@@ -3064,7 +3083,12 @@ function guardarRecurso(){
 var _ppData = {tipo:'',asignaturas:[],niveles:[],especialidad:'',mencion:'',modulos:[]};
 
 function editarPermisos(uid) {
-  var prof = allUsers.find(function(u){ return u.uid === uid; });
+  // Buscar en la lista global y, como respaldo, en el cache de la vista Gestión
+  // (que se carga por separado) para que el botón funcione desde ambas vistas.
+  var prof = (allUsers || []).find(function(u){ return u.uid === uid; });
+  if (!prof && window._gestionCache && _gestionCache.usuarios) {
+    prof = _gestionCache.usuarios.find(function(u){ return u.uid === uid; });
+  }
   if (!prof) { alert('Profesor no encontrado'); return; }
   document.getElementById('ppUid').value = uid;
   document.getElementById('ppNombreInfo').innerHTML =
@@ -3274,6 +3298,8 @@ function cargarConfigIA() {
       renderKeysIA();
       var sel = document.getElementById('selectModeloAdmin');
       if (sel && _iaConfig.modelo) sel.value = _iaConfig.modelo;
+      var serp = document.getElementById('inputSerperKey');
+      if (serp && _iaConfig.serperKey) serp.value = _iaConfig.serperKey;
     })
     .catch(function(e) {
       var el = document.getElementById('listaKeysIA');
@@ -3320,6 +3346,12 @@ function guardarModeloIA() {
   var sel = document.getElementById('selectModeloAdmin');
   _iaConfig.modelo = sel ? sel.value : 'gemini-flash-latest';
   guardarConfigIA('notifModeloIA', 'Modelo guardado: ' + _iaConfig.modelo);
+}
+
+function guardarSerperKey() {
+  var inp = document.getElementById('inputSerperKey');
+  _iaConfig.serperKey = inp ? inp.value.trim() : '';
+  guardarConfigIA('notifSerper', _iaConfig.serperKey ? 'Key de Serper guardada.' : 'Key de Serper eliminada.');
 }
 
 function guardarConfigIA(notifId, okMsg) {
