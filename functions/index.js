@@ -319,6 +319,12 @@ exports.iaAsistente = onRequest(
     if (req.method === 'OPTIONS') return res.status(204).send('');
     if (req.method !== 'POST')   return res.status(405).json({ error: 'Método no permitido' });
 
+    // Búsqueda de imágenes (Serper). Reutiliza esta función pública para no
+    // crear una función nueva (evita el permiso IAM setIamPolicy).
+    if (req.body && req.body.accion === 'imgSearch') {
+      return await _handleImgSearch(req, res);
+    }
+
     // Cargar pool de keys y modelo por defecto desde Firestore (sistema/gemini)
     // El admin las gestiona desde admin.html → sección "Configuración IA".
     const iaCfg = await _cargarConfigIA();
@@ -641,67 +647,69 @@ exports.syncClaims = onDocumentWritten('usuarios/{uid}', async (event) => {
 });
 
 // ═══════════════════════════════════════════════════════════════
-//  imgSearch — proxy a Serper.dev (Google Imágenes) para el generador PPT.
-//  La API key de Serper vive SOLO en el servidor (Firestore sistema/gemini →
-//  campo serperKey), gestionada por el admin en Configuración IA. Ningún
-//  docente configura nada. Devuelve una lista de URLs de imágenes.
-//
-//  Endpoint (vía rewrite firebase.json): POST /api/img-search  { q: "query" }
+//  _handleImgSearch — búsqueda de imágenes vía Serper.dev (Google Imágenes).
+//  Se invoca DENTRO de iaAsistente (misma función pública ya desplegada), con
+//  body { accion: 'imgSearch', q: '...' }. Así NO se crea una función nueva
+//  (que requeriría permisos IAM extra que el proyecto no otorga).
+//  La(s) API key(s) de Serper viven en Firestore sistema/gemini (pool
+//  serperKeys[] o serperKey), gestionadas por el admin en Configuración IA.
 //  Respuesta: { images: ["https://...", ...] }
 // ═══════════════════════════════════════════════════════════════
-exports.imgSearch = onRequest(
-  {
-    region: 'us-central1',
-    timeoutSeconds: 30,
-    memory: '256MiB',
-    cors: true,
-    minInstances: 0,
-    maxInstances: 20,
-    invoker: 'public',
-    serviceAccount: '537489844804-compute@developer.gserviceaccount.com'
-  },
-  async (req, res) => {
+async function _handleImgSearch(req, res) {
     try {
-      res.set('Access-Control-Allow-Origin', '*');
-      res.set('Access-Control-Allow-Methods', 'POST, OPTIONS');
-      res.set('Access-Control-Allow-Headers', 'Content-Type');
-      if (req.method === 'OPTIONS') return res.status(204).send('');
-      if (req.method !== 'POST')   return res.status(405).json({ error: 'Método no permitido' });
-
       const q = (req.body && typeof req.body.q === 'string') ? req.body.q.trim() : '';
       if (!q) return res.status(400).json({ error: 'Parámetro q requerido' });
 
-      // Leer la key de Serper desde Firestore (sistema/gemini.serperKey).
-      let serperKey = '';
+      // Leer el POOL de keys de Serper desde Firestore (sistema/gemini).
+      //   - serperKeys: [ ... ]  (pool nuevo)
+      //   - serperKey:  '...'    (una sola, retro-compatible)
+      let pool = [];
       try {
         const snap = await _db.collection('sistema').doc('gemini').get();
         const data = snap.exists ? (snap.data() || {}) : {};
-        serperKey = (typeof data.serperKey === 'string') ? data.serperKey.trim() : '';
-      } catch (e) { /* sigue con serperKey vacío */ }
+        if (Array.isArray(data.serperKeys)) {
+          pool = data.serperKeys.filter(k => typeof k === 'string' && k.trim().length > 5).map(k => k.trim());
+        }
+        if (typeof data.serperKey === 'string' && data.serperKey.trim().length > 5 && pool.indexOf(data.serperKey.trim()) === -1) {
+          pool.push(data.serperKey.trim());
+        }
+      } catch (e) { /* pool vacío */ }
 
-      if (!serperKey) {
+      if (!pool.length) {
         return res.status(200).json({ images: [], _sinKey: true,
-          error: 'No hay API key de Serper configurada (admin.html → Configuración IA).' });
+          error: 'No hay API keys de Serper configuradas (admin.html → Configuración IA).' });
       }
 
-      const r = await fetch('https://google.serper.dev/images', {
-        method: 'POST',
-        headers: { 'X-API-KEY': serperKey, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ q: q, num: 10 })
-      });
-      if (!r.ok) {
-        const txt = await r.text().catch(() => '');
-        return res.status(200).json({ images: [], error: 'Serper HTTP ' + r.status + ': ' + txt.slice(0, 200) });
+      // Barajar el pool y probar una key tras otra hasta que una responda OK.
+      const keysShuffled = pool.map(k => ({ k, r: Math.random() })).sort((a, b) => a.r - b.r).map(x => x.k);
+      let ultimoError = '';
+      for (const key of keysShuffled) {
+        try {
+          const r = await fetch('https://google.serper.dev/images', {
+            method: 'POST',
+            headers: { 'X-API-KEY': key, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ q: q, num: 10 })
+          });
+          if (!r.ok) {
+            const txt = await r.text().catch(() => '');
+            ultimoError = 'HTTP ' + r.status + ': ' + txt.slice(0, 120);
+            // 429 (cuota) o 401/403 (key inválida) → probar siguiente key del pool.
+            continue;
+          }
+          const data = await r.json();
+          const images = Array.isArray(data.images)
+            ? data.images.map(function (im) { return im && (im.imageUrl || im.link || im.url); }).filter(Boolean)
+            : [];
+          return res.status(200).json({ images: images });
+        } catch (e) {
+          ultimoError = (e && e.message) ? e.message : String(e);
+          continue;
+        }
       }
-      const data = await r.json();
-      const images = Array.isArray(data.images)
-        ? data.images.map(function (im) { return im && (im.imageUrl || im.link || im.url); }).filter(Boolean)
-        : [];
-      return res.status(200).json({ images: images });
+      return res.status(200).json({ images: [], error: 'Todas las keys de Serper fallaron. Último: ' + ultimoError });
     } catch (errTop) {
       console.error('[imgSearch] error:', errTop && errTop.message);
       try { return res.status(200).json({ images: [], error: 'Error interno: ' + (errTop && errTop.message) }); }
       catch (_) { return; }
     }
-  }
-);
+}

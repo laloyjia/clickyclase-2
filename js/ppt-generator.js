@@ -477,10 +477,12 @@
     // servidor (Firestore sistema/gemini.serperKey), ningún docente configura nada.
     // Devuelve una lista de URLs; probamos cada una hasta que descargue bien.
     function viaSerper() {
-      return fetch('/api/img-search', {
+      // Reutiliza la función pública iaAsistente (accion:'imgSearch') para no
+      // requerir permisos IAM de una función nueva.
+      return fetch('/api/ia-asistente', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ q: q })
+        body: JSON.stringify({ accion: 'imgSearch', q: q })
       })
       .then(function (r) { return r.json(); })
       .then(function (data) {
