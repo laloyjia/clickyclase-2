@@ -853,6 +853,26 @@
         return 18;
       }
 
+      // Coloca una imagen dentro de un MARCO blanco tipo "figura": tarjeta
+      // blanca con borde suave y sombra, y la imagen CONTENIDA (sin recortar ni
+      // deformar). Así cualquier imagen —diagrama, foto o captura— se ve prolija
+      // y pareja, en vez de recortada o pegada sobre el fondo.
+      function imagenEnMarco(slide, dataUrl, x, y, w, h) {
+        try {
+          slide.addShape(pptx.ShapeType.roundRect, {
+            x: x, y: y, w: w, h: h, rectRadius: 0.06,
+            fill: { color: 'FFFFFF' }, line: { color: 'E2E8F0', width: 1 },
+            shadow: { type: 'outer', color: '94A3B8', blur: 5, offset: 2, angle: 90, opacity: 0.3 }
+          });
+        } catch (e) { /* si roundRect no está, seguimos sin marco */ }
+        var pad = 0.14;
+        slide.addImage({
+          data: dataUrl,
+          x: x + pad, y: y + pad, w: w - pad * 2, h: h - pad * 2,
+          sizing: { type: 'contain', w: w - pad * 2, h: h - pad * 2 }
+        });
+      }
+
       (self.estructura.slides || []).forEach(function (s, i) {
         var ps = pptx.addSlide();
         ps.background = { color: color.bg };
@@ -884,38 +904,26 @@
             //   2 → imagen ARRIBA + texto ABAJO (horizontal)
             var layoutIdx = i % 3;
             if (layoutIdx === 0) {
-              // Texto izquierda, imagen derecha
-              ps.addImage({
-                data: self.imagenesGeneradas[i],
-                x: 5.75, y: yContent, w: 4.05, h: hContent,
-                sizing: { type: 'cover', w: 4.05, h: hContent }
-              });
+              // Texto izquierda, imagen derecha (en marco)
               franja(ps, 0.4, yContent, 5.25, hContent, color.soft);
               ps.addText(bullets, {
                 x: 0.6, y: yContent + 0.1, w: 4.85, h: hContent - 0.2, fontSize: cfg.fs,
                 color: color.text, valign: 'top', fontFace: 'Calibri', paraSpaceAfter: cfg.sp
               });
+              imagenEnMarco(ps, self.imagenesGeneradas[i], 5.75, yContent, 4.05, hContent);
             } else if (layoutIdx === 1) {
-              // Imagen izquierda, texto derecha
-              ps.addImage({
-                data: self.imagenesGeneradas[i],
-                x: 0.2, y: yContent, w: 4.05, h: hContent,
-                sizing: { type: 'cover', w: 4.05, h: hContent }
-              });
-              franja(ps, 4.35, yContent, 5.45, hContent, color.soft);
+              // Imagen izquierda (en marco), texto derecha
+              imagenEnMarco(ps, self.imagenesGeneradas[i], 0.4, yContent, 4.05, hContent);
+              franja(ps, 4.7, yContent, 5.1, hContent, color.soft);
               ps.addText(bullets, {
-                x: 4.55, y: yContent + 0.1, w: 5.05, h: hContent - 0.2, fontSize: cfg.fs,
+                x: 4.9, y: yContent + 0.1, w: 4.7, h: hContent - 0.2, fontSize: cfg.fs,
                 color: color.text, valign: 'top', fontFace: 'Calibri', paraSpaceAfter: cfg.sp
               });
             } else {
-              // Imagen arriba (60% del alto), texto abajo (40%) — impactante
+              // Imagen arriba (en marco), texto abajo
               var hImg = hContent * 0.55;
               var hTxt = hContent - hImg - 0.1;
-              ps.addImage({
-                data: self.imagenesGeneradas[i],
-                x: 0.4, y: yContent, w: 9.2, h: hImg,
-                sizing: { type: 'cover', w: 9.2, h: hImg }
-              });
+              imagenEnMarco(ps, self.imagenesGeneradas[i], 2.2, yContent, 5.6, hImg);
               franja(ps, 0.4, yContent + hImg + 0.1, 9.2, hTxt, color.soft);
               // Ajustar texto: menos alto disponible ⇒ fuente más chica
               var cfgH = ajustarTexto(bulletsArr, true);
