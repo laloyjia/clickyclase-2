@@ -521,6 +521,14 @@
       .then(function (data) {
         var urls = (data && data.images) || [];
         if (!urls.length) return Promise.reject(new Error('serper sin resultados'));
+        // Barajar los resultados para que dos generaciones del mismo tema NO
+        // usen siempre la misma imagen. Tomamos de los primeros ~8 (los más
+        // relevantes) pero en orden aleatorio.
+        urls = urls.slice(0, 8);
+        for (var j = urls.length - 1; j > 0; j--) {
+          var k = Math.floor(Math.random() * (j + 1));
+          var tmp = urls[j]; urls[j] = urls[k]; urls[k] = tmp;
+        }
         // Descargar cada imagen A TRAVÉS DEL SERVIDOR (evita CORS/Mixed-Content):
         // pedimos a la función que baje la URL y nos la devuelva como dataURL.
         var i = 0;
@@ -629,12 +637,21 @@
       // El ESTILO se elige solo, ALEATORIO pero sesgado por el nivel del curso
       // (infantil/básica → vivo y dinámico; media → sobrio/profesional). Además
       // se elige una variante de color, un patrón de fondo y una transición base.
-      var estiloElegido = self._elegirEstilo();
+      // Elegir diseño evitando repetir el de la generación anterior (variedad real).
+      var _ultimo = '';
+      try { _ultimo = localStorage.getItem('cc_ppt_ultimo_diseno') || ''; } catch (e) {}
+      var estiloElegido, idxVariante, patronFondo, firma, _intentos = 0;
+      do {
+        estiloElegido = self._elegirEstilo();
+        var _vt = TEMAS_COLOR[estiloElegido] || TEMAS_COLOR.didactica;
+        idxVariante = Math.floor(Math.random() * _vt.length);
+        patronFondo = PATRONES_FONDO[Math.floor(Math.random() * PATRONES_FONDO.length)];
+        firma = estiloElegido + '|' + idxVariante + '|' + patronFondo;
+      } while (firma === _ultimo && ++_intentos < 6);
+      try { localStorage.setItem('cc_ppt_ultimo_diseno', firma); } catch (e) {}
       self.config.estilo = estiloElegido; // reflejar para transiciones y prompt
       var variantesTema = TEMAS_COLOR[estiloElegido] || TEMAS_COLOR.didactica;
-      var idxVariante = Math.floor(Math.random() * variantesTema.length);
       var color = variantesTema[idxVariante];
-      var patronFondo = PATRONES_FONDO[Math.floor(Math.random() * PATRONES_FONDO.length)];
       self._diseno = { color: color, patron: patronFondo, variante: idxVariante };
       console.log('[PPT] Diseño aleatorio · nivel=' + self._nivelDe() + ' estilo=' + estiloElegido + ' variante=' + idxVariante + ' patrón=' + patronFondo);
 
