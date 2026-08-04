@@ -34,31 +34,66 @@ service cloud.firestore {
     function _userDoc() {
       return get(/databases/$(database)/documents/usuarios/$(request.auth.uid)).data;
     }
+    // ── Fast-path por custom claims (trigger syncClaims + backfill) ──
+    // Los claims { rol, orgId } viajan en el token, así evitamos una
+    // lectura extra de Firestore en cada evaluación. Si el usuario aún
+    // no tiene claim (cuenta vieja sin re-login), caemos al get() de
+    // siempre → 100% retro-compatible.
+    function _hasTokenRol() {
+      return isSignedIn() && ('rol' in request.auth.token) &&
+             request.auth.token.rol != null;
+    }
+    function _tokenRol() {
+      return request.auth.token.rol;
+    }
+    function _hasTokenOrg() {
+      return isSignedIn() && ('orgId' in request.auth.token) &&
+             request.auth.token.orgId != null;
+    }
+    // OR con fallback: basta con que el token O el documento digan 'admin'.
+    // Nunca bloquea a un admin real por un claim ausente o desincronizado.
     function isAdmin() {
-      return isSignedIn() && _userDocExists() && _userRole() == 'admin';
+      return isSignedIn() && (
+        (_hasTokenRol() && _tokenRol() == 'admin') ||
+        (_userDocExists() && _userRole() == 'admin')
+      );
     }
     function isProfesor() {
-      return isSignedIn() && _userDocExists() &&
-        (_userRole() == 'profesor' || _userRole() == 'admin');
+      return isSignedIn() && (
+        (_hasTokenRol() && (_tokenRol() == 'profesor' || _tokenRol() == 'admin')) ||
+        (_userDocExists() && (_userRole() == 'profesor' || _userRole() == 'admin'))
+      );
     }
     // ── Helpers para roles múltiples (nuevo formato) ─────────────
     // Soporta tanto `role: 'string'` (legacy) como `roles: { <id>: {...} }`.
+    // Fast-path: si el rol del token coincide, true sin leer Firestore.
+    // Si no coincide, igual revisamos el doc (por si tiene el rol en el
+    // mapa `roles`, que el token no representa) → sin perder correctitud.
     function _hasRole(roleId) {
-      return isSignedIn() && _userDocExists() && (
-        (('role' in _userDoc()) && _userDoc().role == roleId) ||
-        (('roles' in _userDoc()) && (roleId in _userDoc().roles))
+      return isSignedIn() && (
+        (_hasTokenRol() && _tokenRol() == roleId) ||
+        (_userDocExists() && (
+          (('role' in _userDoc()) && _userDoc().role == roleId) ||
+          (('roles' in _userDoc()) && (roleId in _userDoc().roles))
+        ))
       );
     }
     function _hasAnyRole(rolesIds) {
-      return isSignedIn() && _userDocExists() && (
-        (('role' in _userDoc()) && _userDoc().role in rolesIds) ||
-        (('roles' in _userDoc()) &&
-          _userDoc().roles.keys().hasAny(rolesIds))
+      return isSignedIn() && (
+        (_hasTokenRol() && (_tokenRol() in rolesIds)) ||
+        (_userDocExists() && (
+          (('role' in _userDoc()) && _userDoc().role in rolesIds) ||
+          (('roles' in _userDoc()) &&
+            _userDoc().roles.keys().hasAny(rolesIds))
+        ))
       );
     }
     // Liceo del usuario autenticado (para filtros multi-tenant).
+    // Preferimos el claim orgId; si no está, el campo liceoSlug del doc.
     function _userLiceo() {
-      return _userDocExists() && ('liceoSlug' in _userDoc()) ? _userDoc().liceoSlug : '';
+      return _hasTokenOrg()
+        ? request.auth.token.orgId
+        : (_userDocExists() && ('liceoSlug' in _userDoc()) ? _userDoc().liceoSlug : '');
     }
     // Directivo: director, rector, admin_colegio o UTP.
     function isDirectivo() {
@@ -612,6 +647,23 @@ service cloud.firestore {
         (mismoLiceo() && _hasRole('aps_enc'));
     }
 
+    // ── apoyo_fichas/{fichaId} ────────────────────────────────────
+    // Ficha consolidada de apoyo psicosocial por estudiante
+    // (fichaId = liceoSlug-cursoId-ordinal). Cada doc lleva liceoSlug.
+    // Datos sensibles: solo equipo de apoyo, directivos y admin del liceo.
+    match /apoyo_fichas/{fichaId} {
+      allow list: if isAdmin() ||
+        (isSignedIn() && _userLiceo() != '' && (esEquipoApoyo() || isDirectivo()));
+      allow read:   if isAdmin() ||
+        (mismoLiceo() && (esEquipoApoyo() || isDirectivo()));
+      allow create: if isAdmin() ||
+        (mismoLiceoNuevo() && esEquipoApoyo());
+      allow update: if isAdmin() ||
+        (mismoLiceo() && esEquipoApoyo());
+      allow delete: if isAdmin() ||
+        (mismoLiceo() && _hasRole('aps_enc'));
+    }
+
     // ── entrevistas_convivencia/{id} ──────────────────────────────
     // Registro de entrevistas con apoderados y alumnos. Datos sensibles.
     match /entrevistas_convivencia/{entId} {
@@ -654,6 +706,26 @@ service cloud.firestore {
         // Derivación entrante (set con merge): docente actualiza estadoDerivacion
         (mismoLiceo() && isSignedIn() &&
          'origenDerivacion' in request.resource.data);
+      allow delete: if isAdmin() ||
+        (mismoLiceo() && _hasRole('pie_enc'));
+    }
+
+    // ── pie_estudiantes/{estUid}/sesiones/{sesId} ─────────────────
+    // Bitácora de sesiones PIE (subcolección de la ficha del estudiante).
+    // Cada doc lleva su propio liceoSlug. Solo equipo PIE, directivos y
+    // admin del mismo liceo. En list/read verificamos además que la ficha
+    // padre pertenezca al liceo del usuario (defensa extra, dato de menores).
+    match /pie_estudiantes/{estUid}/sesiones/{sesId} {
+      allow list: if isAdmin() ||
+        (isSignedIn() && _userLiceo() != '' && (esEquipoPIE() || isDirectivo()) &&
+         exists(/databases/$(database)/documents/pie_estudiantes/$(estUid)) &&
+         get(/databases/$(database)/documents/pie_estudiantes/$(estUid)).data.liceoSlug == _userLiceo());
+      allow get: if isAdmin() ||
+        (mismoLiceo() && (esEquipoPIE() || isDirectivo()));
+      allow create: if isAdmin() ||
+        (mismoLiceoNuevo() && esEquipoPIE());
+      allow update: if isAdmin() ||
+        (mismoLiceo() && esEquipoPIE());
       allow delete: if isAdmin() ||
         (mismoLiceo() && _hasRole('pie_enc'));
     }
