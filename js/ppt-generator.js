@@ -206,6 +206,11 @@
       c.oa ? '- TODO slide debe servir al objetivo indicado arriba; no incluyas relleno que no aporte al OA/AE.' : '- Define un foco de aprendizaje claro y coherente con el nivel.',
       '- "aprendizajes" debe incluir el objetivo aterrizado a ESTA clase y al menos 1 indicador de evaluación observable.',
       '- Vocabulario y ejemplos ajustados al nivel del curso (' + c.curso + ').',
+      (this._nivelDe() === 'infantil'
+        ? '- AUDIENCIA: NIÑOS (parvularia / 1°-4° básico). Lenguaje muy simple y cercano, frases cortas, tono lúdico y motivador, muchos ejemplos concretos y cotidianos; nada de tecnicismos ni textos largos. Bullets breves.'
+        : this._nivelDe() === 'media'
+          ? '- AUDIENCIA: adolescentes (enseñanza media). Puedes profundizar, usar vocabulario técnico apropiado y ejemplos más elaborados.'
+          : '- AUDIENCIA: 2° ciclo básico (5°-8°). Lenguaje claro y ejemplos concretos, con algo más de profundidad que en los primeros años.'),
       '',
       '════ VARIEDAD COGNITIVA Y EJEMPLOS ════',
       '- Combina niveles de pensamiento: recordar, comprender, aplicar, analizar y crear (sin nombrar taxonomías).',
@@ -228,6 +233,34 @@
       '',
       'DEVUELVE SOLO EL JSON, nada más.'
     ].filter(Boolean).join('\n');
+  };
+
+  // Detecta el nivel a partir del curso (texto libre): 'infantil' (pre-básica y
+  // 1°-4° básico), 'basica2' (5°-8° básico) o 'media'.
+  CCPptGenerator.prototype._nivelDe = function () {
+    var t = String(this.config.curso || '').toLowerCase();
+    if (/nt1|nt2|pre.?k|k[ií]nder|p[aá]rvul|transici/.test(t)) return 'infantil';
+    if (/medi|\b[1-4]\s*[°º]?\s*m\b|\bem\b/.test(t)) return 'media';
+    var m = t.match(/(\d)\s*[°ºa]?\s*b/);   // "3° básico", "3b", "3ª básico"
+    if (m) { var n = parseInt(m[1], 10); return n <= 4 ? 'infantil' : 'basica2'; }
+    var soloNum = t.match(/^\s*(\d)\b/);      // "3", "3ªE" → asumir básica
+    if (soloNum) { var n2 = parseInt(soloNum[1], 10); return n2 <= 4 ? 'infantil' : 'basica2'; }
+    return 'media';
+  };
+
+  // Elige el ESTILO visual de forma ALEATORIA, sesgado por el nivel:
+  //   infantil → cálido/interactivo (colorido y dinámico, ideal para niños)
+  //   basica2  → mezcla equilibrada
+  //   media    → didáctico/formal (sobrio y profesional)
+  // Ya no depende de ningún selector; varía en cada presentación.
+  CCPptGenerator.prototype._elegirEstilo = function () {
+    var poolPorNivel = {
+      infantil: ['calida','interactiva','calida','interactiva','didactica'],
+      basica2:  ['interactiva','didactica','calida','interactiva','formal'],
+      media:    ['didactica','formal','interactiva','didactica','formal']
+    };
+    var pool = poolPorNivel[this._nivelDe()] || poolPorNivel.media;
+    return pool[Math.floor(Math.random() * pool.length)];
   };
 
   // ── Paso 2: Descargar imágenes ────────────────────────────
@@ -488,10 +521,24 @@
       .then(function (data) {
         var urls = (data && data.images) || [];
         if (!urls.length) return Promise.reject(new Error('serper sin resultados'));
+        // Descargar cada imagen A TRAVÉS DEL SERVIDOR (evita CORS/Mixed-Content):
+        // pedimos a la función que baje la URL y nos la devuelva como dataURL.
         var i = 0;
         function tryNext() {
           if (i >= urls.length) return Promise.reject(new Error('serper: ninguna descargable'));
-          return self._fetchDataUrl(urls[i++]).catch(tryNext);
+          var u = urls[i++];
+          return fetch('/api/ia-asistente', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ accion: 'fetchImg', url: u })
+          })
+          .then(function (r) { return r.json(); })
+          .then(function (resp) {
+            var d = resp && resp.dataUrl;
+            if (typeof d === 'string' && d.indexOf('data:image/') === 0) return d;
+            throw new Error(resp && resp.error ? resp.error : 'sin dataUrl');
+          })
+          .catch(tryNext);
         }
         return tryNext();
       });
@@ -579,15 +626,17 @@
       pptx.title  = self.estructura.titulo || 'Presentación';
 
       // ═══ ALEATORIEDAD POR GENERACIÓN ═══
-      // Cada vez que se compila un PPT, se elige UNA variante de color, UN patrón
-      // de fondo y UNA transición base. Los valores se guardan en self._diseno
-      // para que _inyectarTransiciones use la misma transición en TODOS los slides.
-      var variantesTema = TEMAS_COLOR[self.config.estilo] || TEMAS_COLOR.didactica;
+      // El ESTILO se elige solo, ALEATORIO pero sesgado por el nivel del curso
+      // (infantil/básica → vivo y dinámico; media → sobrio/profesional). Además
+      // se elige una variante de color, un patrón de fondo y una transición base.
+      var estiloElegido = self._elegirEstilo();
+      self.config.estilo = estiloElegido; // reflejar para transiciones y prompt
+      var variantesTema = TEMAS_COLOR[estiloElegido] || TEMAS_COLOR.didactica;
       var idxVariante = Math.floor(Math.random() * variantesTema.length);
       var color = variantesTema[idxVariante];
       var patronFondo = PATRONES_FONDO[Math.floor(Math.random() * PATRONES_FONDO.length)];
       self._diseno = { color: color, patron: patronFondo, variante: idxVariante };
-      console.log('[PPT] Diseño aleatorio · estilo=' + self.config.estilo + ' variante=' + idxVariante + ' patrón=' + patronFondo);
+      console.log('[PPT] Diseño aleatorio · nivel=' + self._nivelDe() + ' estilo=' + estiloElegido + ' variante=' + idxVariante + ' patrón=' + patronFondo);
 
       var totalSlides = (self.estructura.slides || []).length;
       var pieDocente = (self.config.profesorNombre || '') + '  ·  ' + (self.config.liceoNombre || 'Click&Clase');

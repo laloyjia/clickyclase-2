@@ -3603,18 +3603,11 @@ function _renderPptStep1() {
       '<div style="font-size:.7rem;color:#64748B;margin-top:3px" id="pptOAHint">Se cargan automáticamente al elegir asignatura y curso</div>' +
     '</div>' +
 
-    '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">' +
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">' +
       '<div class="fld"><label style="font-weight:600;font-size:.8rem">N° diapositivas <span style="color:#64748B;font-weight:400">(mín. 5 — máx. 25)</span></label>' +
         '<input type="number" id="pptN" min="5" max="25" value="10" style="width:100%;padding:8px 10px;border-radius:6px;border:1px solid rgba(0,0,0,.15)">' +
         '<div style="font-size:.7rem;color:#64748B;margin-top:3px">Sugerido: 8-12 para 45min de clase</div>' +
       '</div>' +
-      '<div class="fld"><label style="font-weight:600;font-size:.8rem">Estilo visual</label>' +
-        '<select id="pptEstilo" style="width:100%;padding:8px 10px;border-radius:6px;border:1px solid rgba(0,0,0,.15)">' +
-          '<option value="didactica">📘 Didáctico (azul)</option>' +
-          '<option value="formal">🎓 Formal (marino)</option>' +
-          '<option value="interactiva">✨ Interactivo (teal)</option>' +
-          '<option value="calida">🍂 Cálido (naranja)</option>' +
-        '</select></div>' +
       '<div class="fld"><label style="font-weight:600;font-size:.8rem">Imágenes</label>' +
         '<select id="pptImg" style="width:100%;padding:8px 10px;border-radius:6px;border:1px solid rgba(0,0,0,.15)">' +
           '<option value="google">🔍 Google Imágenes (alta calidad)</option>' +
@@ -3781,7 +3774,7 @@ function _pptGenerar() {
     curso: curso,
     asignatura: asigNombre,
     nSlides: parseInt(document.getElementById('pptN').value, 10) || 10,
-    estilo: document.getElementById('pptEstilo').value,
+    // El estilo visual ahora se elige solo (aleatorio, según el nivel) en el generador.
     imagenes: document.getElementById('pptImg').value,
     palabrasClaveImg: (document.getElementById('pptImgKw') || {}).value || '',
     oa: oaVal ? (oaLabel + ': ' + oaVal) : '',

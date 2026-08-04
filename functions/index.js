@@ -319,10 +319,13 @@ exports.iaAsistente = onRequest(
     if (req.method === 'OPTIONS') return res.status(204).send('');
     if (req.method !== 'POST')   return res.status(405).json({ error: 'Método no permitido' });
 
-    // Búsqueda de imágenes (Serper). Reutiliza esta función pública para no
-    // crear una función nueva (evita el permiso IAM setIamPolicy).
+    // Búsqueda de imágenes (Serper) y descarga server-side. Reutilizan esta
+    // función pública para no crear funciones nuevas (evita permiso IAM).
     if (req.body && req.body.accion === 'imgSearch') {
       return await _handleImgSearch(req, res);
+    }
+    if (req.body && req.body.accion === 'fetchImg') {
+      return await _handleFetchImg(req, res);
     }
 
     // Cargar pool de keys y modelo por defecto desde Firestore (sistema/gemini)
@@ -712,4 +715,31 @@ async function _handleImgSearch(req, res) {
       try { return res.status(200).json({ images: [], error: 'Error interno: ' + (errTop && errTop.message) }); }
       catch (_) { return; }
     }
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  _handleFetchImg — descarga una imagen EN EL SERVIDOR y la devuelve como
+//  dataURL base64. Evita el bloqueo CORS/Mixed-Content del navegador al
+//  descargar imágenes de sitios externos (Serper devuelve URLs de terceros
+//  que casi nunca permiten fetch cross-origin). Se invoca desde iaAsistente
+//  con { accion: 'fetchImg', url: 'https://...' }.
+//  Respuesta: { dataUrl: 'data:image/...;base64,...' } | { error }
+// ═══════════════════════════════════════════════════════════════
+async function _handleFetchImg(req, res) {
+  try {
+    const url = (req.body && typeof req.body.url === 'string') ? req.body.url.trim() : '';
+    if (!/^https?:\/\//i.test(url)) return res.status(400).json({ error: 'url inválida' });
+    const r = await fetch(url, { redirect: 'follow', headers: { 'User-Agent': 'Mozilla/5.0 (ClickYClase image proxy)' } });
+    if (!r.ok) return res.status(200).json({ error: 'HTTP ' + r.status });
+    const ct = (r.headers.get('content-type') || '').toLowerCase();
+    if (ct.indexOf('image/') !== 0) return res.status(200).json({ error: 'no es imagen: ' + ct.slice(0, 40) });
+    const buf = Buffer.from(await r.arrayBuffer());
+    if (buf.length < 1024) return res.status(200).json({ error: 'imagen muy chica' });
+    if (buf.length > 6 * 1024 * 1024) return res.status(200).json({ error: 'imagen muy grande' });
+    const mime = ct.split(';')[0].trim();
+    const dataUrl = 'data:' + mime + ';base64,' + buf.toString('base64');
+    return res.status(200).json({ dataUrl: dataUrl });
+  } catch (e) {
+    return res.status(200).json({ error: (e && e.message) ? e.message : String(e) });
+  }
 }
