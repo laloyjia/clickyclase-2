@@ -27,6 +27,8 @@
     ['5B','5° Básico'],['6B','6° Básico'],['7B','7° Básico'],['8B','8° Básico'],
     ['1M','1° Medio'],['2M','2° Medio'],['3M','3° Medio'],['4M','4° Medio']
   ];
+  var EVAL_TIPOS = ['Prueba de unidad','Prueba parcial','Control','Trabajo de investigación','Proyecto','Presentación / disertación','Portafolio','Guía evaluada','Ensayo','Informe de laboratorio','Taller práctico','Evaluación de desempeño','Coevaluación','Autoevaluación'];
+  var EVAL_INSTR = ['Rúbrica','Lista de cotejo','Escala de apreciación','Pauta de corrección','Prueba escrita','Cuestionario','Ticket de salida','Registro de observación'];
   var _cache = null;         // lista de unidades cargadas
   var _editId = null;        // id de la unidad en edición (null = nueva)
   var _d = null;             // borrador en edición
@@ -130,24 +132,63 @@
   }
 
   // ── Currículo (best-effort): sugerir OA por asignatura + nivel ─
-  function sugerirOAs(asig, nivel) {
-    var out = [];
+  // Devuelve { oas, aes, ces } del currículo para una asignatura/módulo + nivel.
+  function _curriculoDe(asig, nivel) {
+    var r = { oas: [], aes: [], ces: [] };
     try {
-      // Módulo TP: valor 'mod:esp:modId' → OAs del módulo.
+      // Módulo TP ('mod:esp:modId') → OA + AE + CE del módulo.
       if (typeof asig === 'string' && asig.indexOf('mod:') === 0 && window.CURRICULA_CHILE && CURRICULA_CHILE.getModuloCompat) {
         var p = asig.split(':'); var mod = CURRICULA_CHILE.getModuloCompat(p[1], p[2]);
-        if (mod && mod.oas) Object.keys(mod.oas).forEach(function (k) { out.push(k + ': ' + (mod.oas[k] || '')); });
-        return out;
+        if (mod) {
+          if (mod.oas) Object.keys(mod.oas).forEach(function (k) { r.oas.push(k + ': ' + (mod.oas[k] || '')); });
+          if (mod.aes) Object.keys(mod.aes).forEach(function (k) {
+            var ae = mod.aes[k];
+            var num = (typeof k === 'string' && k.indexOf('OA') === 0) ? k.replace('OA', '') : k;
+            r.aes.push('AE ' + num + ': ' + (ae.texto || ''));
+            if (ae.ces) Object.keys(ae.ces).forEach(function (ck) { r.ces.push(ck + ': ' + (ae.ces[ck].texto || '')); });
+          });
+        }
+        return r;
       }
+      // Plan común → OAs.
       var raw = null;
       if (window.CCAsig && CCAsig.getOAs) raw = CCAsig.getOAs(asig, nivel);
       if ((!raw || !raw.length) && window.CURRICULA_CHILE && CURRICULA_CHILE.getOAs) raw = CURRICULA_CHILE.getOAs(asig, nivel);
       (raw || []).forEach(function (o) {
-        if (typeof o === 'string') out.push(o);
-        else if (o && (o.codigo || o.oa || o.texto)) out.push(((o.codigo || o.oa || '') + (o.texto ? ': ' + o.texto : '')).trim());
+        if (typeof o === 'string') r.oas.push(o);
+        else if (o && (o.codigo || o.oa || o.texto)) r.oas.push(((o.codigo || o.oa || '') + (o.texto ? ': ' + o.texto : '')).trim());
       });
     } catch (e) { /* best-effort */ }
-    return out;
+    return r;
+  }
+
+  // Lee la asignatura/nivel actuales (select o "otra") para consultar el currículo.
+  function _lookupActual() {
+    var aSel = document.getElementById('cu-asig'), nSel = document.getElementById('cu-nivel');
+    return {
+      asig: (aSel.value && aSel.value !== '__otra__') ? aSel.value : document.getElementById('cu-asig-otra').value.trim(),
+      nivel: (nSel.value && nSel.value !== '__otra__') ? nSel.value : document.getElementById('cu-nivel-otra').value.trim()
+    };
+  }
+
+  // Panel de selección múltiple (casillas) inyectado bajo el campo.
+  function _renderPicker(containerId, titulo, items, targetArr) {
+    var el = document.getElementById(containerId); if (!el) return;
+    if (!items.length) { el.innerHTML = '<div style="font-size:.82rem;color:#b45309;margin-top:6px">No se encontró currículo para esa asignatura/nivel. Escríbelos a mano, o elige la asignatura/módulo del desplegable.</div>'; return; }
+    el.innerHTML = '<div style="border:1px solid #c7d2fe;background:#eef2ff;border-radius:8px;padding:10px;margin-top:6px">' +
+      '<div style="font-weight:600;font-size:.8rem;margin-bottom:6px;color:#3730a3">' + _esc(titulo) + ' — marca los que quieras agregar:</div>' +
+      '<div style="max-height:200px;overflow:auto">' +
+        items.map(function (t, i) { return '<label style="display:flex;gap:6px;align-items:flex-start;font-size:.82rem;padding:3px 0;cursor:pointer"><input type="checkbox" class="cu-pk" value="' + i + '" style="margin-top:3px"><span>' + _esc(t) + '</span></label>'; }).join('') +
+      '</div>' +
+      '<div style="text-align:right;margin-top:6px"><button type="button" id="cu-pk-add" style="' + BTN + ';background:#4f46e5;color:#fff;padding:6px 12px;font-size:.82rem">Agregar seleccionados</button> <button type="button" id="cu-pk-close" style="' + BTN + ';background:#fff;border:1px solid #cbd5e1;color:#475569;padding:6px 12px;font-size:.82rem">Cerrar</button></div>' +
+    '</div>';
+    document.getElementById('cu-pk-add').addEventListener('click', function () {
+      Array.prototype.forEach.call(el.querySelectorAll('.cu-pk:checked'), function (cb) {
+        var t = items[parseInt(cb.value, 10)]; if (t && targetArr.indexOf(t) === -1) targetArr.push(t);
+      });
+      el.innerHTML = ''; _renderChips();
+    });
+    document.getElementById('cu-pk-close').addEventListener('click', function () { el.innerHTML = ''; });
   }
 
   // ── Modal ────────────────────────────────────────────────────
@@ -260,14 +301,16 @@
     var _asigOtraSel = !!(_d.asignatura && !_asigEnLista);
     var _asigOpts = _areas.asignaturas.map(function (o) { return '<option value="' + _esc(o.value) + '"' + (_d.asignaturaId === o.value ? ' selected' : '') + '>' + _esc(o.label) + '</option>'; }).join('') +
       '<option value="__otra__"' + (_asigOtraSel ? ' selected' : '') + '>✎ Escribir otra…</option>';
-    // Niveles: los del docente primero, luego el catálogo estándar, + "otro".
-    var _nivVistos = {}, _nivLista = [];
-    _areas.niveles.forEach(function (o) { if (!_nivVistos[o.value]) { _nivVistos[o.value] = 1; _nivLista.push(o); } });
-    NIVELES_STD.forEach(function (p) { if (!_nivVistos[p[0]]) { _nivVistos[p[0]] = 1; _nivLista.push({ value: p[0], label: p[1] }); } });
+    // Niveles: SOLO los asignados al docente (+ "otro" como escape).
+    var _nivLista = _areas.niveles.slice();
     var _nivEnLista = _nivLista.some(function (o) { return o.value === _d.nivelId || o.label === _d.nivel; });
     var _nivOtraSel = !!(_d.nivel && !_nivEnLista);
     var _nivOpts = _nivLista.map(function (o) { return '<option value="' + _esc(o.value) + '"' + ((_d.nivelId === o.value || _d.nivel === o.label) ? ' selected' : '') + '>' + _esc(o.label) + '</option>'; }).join('') +
       '<option value="__otra__"' + (_nivOtraSel ? ' selected' : '') + '>✎ Escribir otro…</option>';
+    var _evTipoOtra = !!(_d.evaluacion.tipo && EVAL_TIPOS.indexOf(_d.evaluacion.tipo) === -1);
+    var _evTipoOpts = EVAL_TIPOS.map(function (t) { return '<option' + (_d.evaluacion.tipo === t ? ' selected' : '') + '>' + _esc(t) + '</option>'; }).join('') + '<option value="__otro__"' + (_evTipoOtra ? ' selected' : '') + '>✎ Otro…</option>';
+    var _evInstOtra = !!(_d.evaluacion.instrumento && EVAL_INSTR.indexOf(_d.evaluacion.instrumento) === -1);
+    var _evInstOpts = EVAL_INSTR.map(function (t) { return '<option' + (_d.evaluacion.instrumento === t ? ' selected' : '') + '>' + _esc(t) + '</option>'; }).join('') + '<option value="__otro__"' + (_evInstOtra ? ' selected' : '') + '>✎ Otro…</option>';
 
     b.innerHTML =
       '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">' +
@@ -302,13 +345,16 @@
         '<button id="cu-ae-add" style="' + BTN + ';background:#e0e7ff;color:#3730a3;padding:8px 12px">+ Agregar</button>' +
         '<button id="cu-ae-cur" style="' + BTN + ';background:#dcfce7;color:#166534;padding:8px 12px">📘 Del currículo</button>' +
       '</div>' +
+      '<div id="cu-ae-picker"></div>' +
 
       '<label style="' + LB + '">Criterios de evaluación (CE / indicadores)</label>' +
       '<div id="cu-ce"></div>' +
-      '<div style="display:flex;gap:6px;margin-top:6px">' +
-        '<input id="cu-ce-in" style="' + IN + ';flex:1" placeholder="Escribe un criterio y presiona Agregar">' +
+      '<div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap">' +
+        '<input id="cu-ce-in" style="' + IN + ';flex:1;min-width:200px" placeholder="Escribe un criterio y presiona Agregar">' +
         '<button id="cu-ce-add" style="' + BTN + ';background:#e0e7ff;color:#3730a3;padding:8px 12px">+ Agregar</button>' +
+        '<button id="cu-ce-cur" style="' + BTN + ';background:#dcfce7;color:#166534;padding:8px 12px">📘 Del currículo</button>' +
       '</div>' +
+      '<div id="cu-ce-picker"></div>' +
 
       '<label style="' + LB + '">Contenidos / temas</label>' +
       '<textarea id="cu-cont" rows="2" style="' + IN + '">' + _esc(_d.contenidos) + '</textarea>' +
@@ -317,9 +363,11 @@
 
       '<label style="' + LB + '">Evaluación de la unidad</label>' +
       '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">' +
-        '<input id="cu-ev-tipo" style="' + IN + '" value="' + _esc(_d.evaluacion.tipo) + '" placeholder="Tipo (ej: Prueba de unidad)">' +
-        '<input id="cu-ev-inst" style="' + IN + '" value="' + _esc(_d.evaluacion.instrumento) + '" placeholder="Instrumento (ej: Rúbrica)">' +
-        '<input id="cu-ev-fecha" type="date" style="' + IN + '" value="' + _esc(_d.evaluacion.fecha) + '">' +
+        '<div><select id="cu-ev-tipo" style="' + IN + '"><option value="">Tipo de evaluación…</option>' + _evTipoOpts + '</select>' +
+          '<input id="cu-ev-tipo-otro" style="' + IN + ';margin-top:5px;display:' + (_evTipoOtra ? 'block' : 'none') + '" placeholder="Otro tipo" value="' + _esc(_evTipoOtra ? _d.evaluacion.tipo : '') + '"></div>' +
+        '<div><select id="cu-ev-inst" style="' + IN + '"><option value="">Instrumento…</option>' + _evInstOpts + '</select>' +
+          '<input id="cu-ev-inst-otro" style="' + IN + ';margin-top:5px;display:' + (_evInstOtra ? 'block' : 'none') + '" placeholder="Otro instrumento" value="' + _esc(_evInstOtra ? _d.evaluacion.instrumento : '') + '"></div>' +
+        '<div><input id="cu-ev-fecha" type="date" style="' + IN + '" value="' + _esc(_d.evaluacion.fecha) + '"></div>' +
       '</div>' +
 
       '<div style="display:flex;justify-content:space-between;gap:8px;margin-top:18px">' +
@@ -341,12 +389,19 @@
       if (v) { _d.criterios.push(v); document.getElementById('cu-ce-in').value = ''; _renderChips(); }
     });
     document.getElementById('cu-ae-cur').addEventListener('click', _abrirCurriculo);
+    document.getElementById('cu-ce-cur').addEventListener('click', _abrirCurriculoCE);
 
     document.getElementById('cu-asig').addEventListener('change', function () {
       document.getElementById('cu-asig-otra').style.display = (this.value === '__otra__') ? 'block' : 'none';
     });
     document.getElementById('cu-nivel').addEventListener('change', function () {
       document.getElementById('cu-nivel-otra').style.display = (this.value === '__otra__') ? 'block' : 'none';
+    });
+    document.getElementById('cu-ev-tipo').addEventListener('change', function () {
+      document.getElementById('cu-ev-tipo-otro').style.display = (this.value === '__otro__') ? 'block' : 'none';
+    });
+    document.getElementById('cu-ev-inst').addEventListener('change', function () {
+      document.getElementById('cu-ev-inst-otro').style.display = (this.value === '__otro__') ? 'block' : 'none';
     });
   }
 
@@ -371,19 +426,14 @@
   }
 
   function _abrirCurriculo() {
-    var aSel = document.getElementById('cu-asig'), nSel = document.getElementById('cu-nivel');
-    var asigLookup = (aSel.value && aSel.value !== '__otra__') ? aSel.value : document.getElementById('cu-asig-otra').value.trim();
-    var nivLookup = (nSel.value && nSel.value !== '__otra__') ? nSel.value : document.getElementById('cu-nivel-otra').value.trim();
-    var oas = sugerirOAs(asigLookup, nivLookup);
-    if (!oas.length) { _msg('No se encontraron OA del currículo para esa asignatura/nivel. Puedes escribirlos manualmente.', false); return; }
-    var picked = window.prompt('OA disponibles (' + oas.length + '). Escribe los números separados por coma para agregarlos:\n\n' +
-      oas.map(function (o, i) { return (i + 1) + '. ' + (o.length > 90 ? o.slice(0, 90) + '…' : o); }).join('\n'));
-    if (!picked) return;
-    picked.split(',').forEach(function (n) {
-      var idx = parseInt(n.trim(), 10) - 1;
-      if (idx >= 0 && idx < oas.length && _d.aprendizajes.indexOf(oas[idx]) === -1) _d.aprendizajes.push(oas[idx]);
-    });
-    _renderChips();
+    var lk = _lookupActual();
+    var cur = _curriculoDe(lk.asig, lk.nivel);
+    _renderPicker('cu-ae-picker', 'Objetivos y aprendizajes (OA/AE)', cur.oas.concat(cur.aes), _d.aprendizajes);
+  }
+  function _abrirCurriculoCE() {
+    var lk = _lookupActual();
+    var cur = _curriculoDe(lk.asig, lk.nivel);
+    _renderPicker('cu-ce-picker', 'Criterios de evaluación (CE)', cur.ces, _d.criterios);
   }
 
   function _msg(txt, ok) {
@@ -422,8 +472,8 @@
       contenidos: document.getElementById('cu-cont').value.trim(),
       actividades: document.getElementById('cu-act').value.trim(),
       evaluacion: {
-        tipo: document.getElementById('cu-ev-tipo').value.trim(),
-        instrumento: document.getElementById('cu-ev-inst').value.trim(),
+        tipo: (document.getElementById('cu-ev-tipo').value === '__otro__') ? document.getElementById('cu-ev-tipo-otro').value.trim() : document.getElementById('cu-ev-tipo').value,
+        instrumento: (document.getElementById('cu-ev-inst').value === '__otro__') ? document.getElementById('cu-ev-inst-otro').value.trim() : document.getElementById('cu-ev-inst').value,
         fecha: document.getElementById('cu-ev-fecha').value
       }
     };
