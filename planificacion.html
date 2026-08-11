@@ -1157,6 +1157,19 @@
                 </div>
             </div>
 
+            <!-- Unidad de aprendizaje (agrupa esta clase) -->
+            <div class="campo-row">
+                <div class="campo" style="grid-column:1/-1">
+                    <label>Unidad de aprendizaje <span style="font-weight:400;color:var(--text-muted);font-size:.8rem">(opcional — agrupa esta clase en una unidad)</span></label>
+                    <div style="display:flex;gap:8px;align-items:center">
+                        <select id="selectMiUnidad" onfocus="if(window.CCUnidades)CCUnidades.poblarSelect('selectMiUnidad')" style="flex:1">
+                            <option value="">— Sin unidad —</option>
+                        </select>
+                        <button type="button" onclick="if(window.CCUnidades)CCUnidades.abrir()" title="Crear o administrar unidades" style="white-space:nowrap;font-size:.82rem;color:#3730a3;cursor:pointer;padding:8px 12px;background:rgba(99,102,241,.10);border:1px solid rgba(99,102,241,.25);border-radius:8px;font-weight:600">📚 Gestionar</button>
+                    </div>
+                </div>
+            </div>
+
             <!-- Nombre del profesor (auto-llenado) -->
             <div class="campo-row">
                 <div class="campo" style="grid-column:1/-1">
@@ -1645,7 +1658,7 @@
     <!-- Unidades oficiales Mineduc (sobrescriben los ejes genéricos) -->
     <script src="js/curricula/unidades-programas-estudio.js"></script>
     <!-- Módulo: unidades de aprendizaje del docente (crear/editar/listar) -->
-    <script src="js/unidades.js?v=20260805-1"></script>
+    <script src="js/unidades.js?v=20260805-2"></script>
 
     <!-- ── Especialidades TP (un archivo por especialidad) ── -->
     <script src="js/datos-curriculares.js"></script>
@@ -3595,6 +3608,9 @@
         var prof   = document.getElementById('inputProfesor').value || user.nombre || '—';
         var horas  = document.getElementById('inputHoras').value || '2';
         var contenido = document.getElementById('inputContenido').value || '';
+        var _selUni = document.getElementById('selectMiUnidad');
+        var unidadId = _selUni ? _selUni.value : '';
+        var unidadNombre = (_selUni && _selUni.value && _selUni.selectedIndex >= 0) ? _selUni.options[_selUni.selectedIndex].text : '';
 
         var camposEl = document.getElementById('camposLIRMI');
         if (!camposEl || !camposEl.innerHTML.trim()) {
@@ -3622,6 +3638,8 @@
             fecha:       fecha ? new Date(fecha).toISOString() : new Date().toISOString(),
             profesor:    prof,
             horas:       horas,
+            unidadId:    unidadId || '',
+            unidadNombre: unidadNombre || '',
             descripcion: (asig || modId) + (electivoHC ? ' · Electivo HC' : '') + ' — ' + cursoLabel + ' — ' + horas + ' horas',
             contenido:   '<h2>' + titulo + '</h2>' +
                          '<p><strong>Profesor:</strong> ' + prof + ' | <strong>' + (isTP ? 'Módulo' : 'Asignatura') + ':</strong> ' + (asig || modId) + ' | <strong>Nivel:</strong> ' + cursoLabel + ' | <strong>Horas:</strong> ' + horas + '</p>' +

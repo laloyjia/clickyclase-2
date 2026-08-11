@@ -63,6 +63,20 @@
     return EL_DB.collection(COLL).doc(id).update({ activo: false });
   }
 
+  // Clases (planificaciones) del docente vinculadas a una unidad, indexadas por unidadId.
+  function _clasesPorUnidad() {
+    if (!(window.ELDB && ELDB.planificaciones && ELDB.planificaciones.listar)) return Promise.resolve({});
+    return ELDB.planificaciones.listar({ uid: _uid() }).then(function (items) {
+      var byU = {};
+      (items || []).forEach(function (p) {
+        if (p.tipo === 'planificacion' && p.unidadId && p.activo !== false) {
+          (byU[p.unidadId] = byU[p.unidadId] || []).push(p);
+        }
+      });
+      return byU;
+    }).catch(function () { return {}; });
+  }
+
   // ── Currículo (best-effort): sugerir OA por asignatura + nivel ─
   function sugerirOAs(asig, nivel) {
     var out = [];
@@ -108,7 +122,8 @@
     document.getElementById('cu-x').addEventListener('click', _cerrar);
     document.getElementById('cu-nueva').addEventListener('click', function () { _editId = null; _d = _nuevoBorrador(); _renderForm(); });
 
-    listar().then(function (items) {
+    Promise.all([listar(), _clasesPorUnidad()]).then(function (res) {
+      var items = res[0], byU = res[1] || {};
       _cache = items;
       var cont = document.getElementById('cu-list');
       if (!items.length) {
@@ -118,16 +133,26 @@
       cont.innerHTML = items.map(function (u) {
         var dur = [u.semanas ? u.semanas + ' sem' : '', (u.fechaInicio || u.fechaFin) ? ((u.fechaInicio||'') + ' → ' + (u.fechaFin||'')) : '', u.horas ? u.horas + ' hrs' : ''].filter(Boolean).join(' · ');
         var nAE = (u.aprendizajes || []).length, nCE = (u.criterios || []).length;
+        var clases = byU[u.id] || [];
+        clases.sort(function (a, b) { return String(a.fecha || '').localeCompare(String(b.fecha || '')); });
+        var clasesHtml = clases.length
+          ? '<div style="margin-top:8px;border-top:1px dashed #e2e8f0;padding-top:7px">' +
+              clases.map(function (c) {
+                var f = c.fecha ? new Date(c.fecha).toLocaleDateString('es-CL') : '';
+                return '<div style="font-size:.8rem;color:#475569;padding:2px 0">🗓 ' + (f ? '<b>' + _esc(f) + '</b> · ' : '') + _esc((c.titulo || 'Clase').replace(/^Planificación\s*/, '')) + (c.horas ? ' · ' + _esc(c.horas) + ' h' : '') + '</div>';
+              }).join('') +
+            '</div>'
+          : '';
         return '<div style="border:1px solid #e2e8f0;border-radius:10px;padding:12px 14px;margin-bottom:10px">' +
           '<div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start">' +
-            '<div><div style="font-weight:700;color:#0f172a">' + (u.numero ? 'Unidad ' + _esc(u.numero) + ' · ' : '') + _esc(u.titulo || 'Sin título') + '</div>' +
+            '<div style="flex:1"><div style="font-weight:700;color:#0f172a">' + (u.numero ? 'Unidad ' + _esc(u.numero) + ' · ' : '') + _esc(u.titulo || 'Sin título') + '</div>' +
             '<div style="font-size:.82rem;color:#64748b;margin-top:2px">' + _esc([u.asignatura, u.nivel].filter(Boolean).join(' · ')) + (dur ? ' · ' + _esc(dur) : '') + '</div>' +
-            '<div style="font-size:.78rem;color:#94a3b8;margin-top:3px">' + nAE + ' aprendizajes · ' + nCE + ' criterios</div></div>' +
+            '<div style="font-size:.78rem;color:#94a3b8;margin-top:3px">' + nAE + ' aprendizajes · ' + nCE + ' criterios · <b style="color:#4f46e5">' + clases.length + ' clase' + (clases.length === 1 ? '' : 's') + '</b></div></div>' +
             '<div style="white-space:nowrap">' +
               '<button data-id="' + u.id + '" class="cu-edit" style="' + BTN + ';background:#fff;border:1px solid #cbd5e1;color:#334155;padding:5px 10px;font-size:.8rem">✏️ Editar</button> ' +
               '<button data-id="' + u.id + '" class="cu-del" style="' + BTN + ';background:#fee2e2;color:#b91c1c;padding:5px 10px;font-size:.8rem">🗑️</button>' +
             '</div>' +
-          '</div></div>';
+          '</div>' + clasesHtml + '</div>';
       }).join('');
       Array.prototype.forEach.call(cont.querySelectorAll('.cu-edit'), function (btn) {
         btn.addEventListener('click', function () {
@@ -314,5 +339,18 @@
 
   function abrir() { _ensureModal(); document.getElementById('cu-ov').style.display = 'flex'; _renderLista(); }
 
-  window.CCUnidades = { abrir: abrir, listar: listar };
+  // Poblar un <select> con las unidades del docente (para vincular una clase).
+  function poblarSelect(selId, selectedId) {
+    var sel = document.getElementById(selId); if (!sel) return;
+    var cur = selectedId || sel.value;
+    listar().then(function (items) {
+      sel.innerHTML = '<option value="">— Sin unidad —</option>' +
+        (items || []).map(function (u) {
+          return '<option value="' + _esc(u.id) + '"' + (cur === u.id ? ' selected' : '') + '>' +
+            (u.numero ? 'U' + _esc(u.numero) + ' · ' : '') + _esc(u.titulo || 'Sin título') + '</option>';
+        }).join('');
+    }).catch(function () {});
+  }
+
+  window.CCUnidades = { abrir: abrir, listar: listar, poblarSelect: poblarSelect };
 })();
