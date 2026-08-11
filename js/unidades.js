@@ -21,6 +21,12 @@
   'use strict';
 
   var COLL = 'planificaciones';
+  var NIVELES_STD = [
+    ['NT1','Pre-Kínder (NT1)'],['NT2','Kínder (NT2)'],
+    ['1B','1° Básico'],['2B','2° Básico'],['3B','3° Básico'],['4B','4° Básico'],
+    ['5B','5° Básico'],['6B','6° Básico'],['7B','7° Básico'],['8B','8° Básico'],
+    ['1M','1° Medio'],['2M','2° Medio'],['3M','3° Medio'],['4M','4° Medio']
+  ];
   var _cache = null;         // lista de unidades cargadas
   var _editId = null;        // id de la unidad en edición (null = nueva)
   var _d = null;             // borrador en edición
@@ -29,7 +35,7 @@
   function _user() { return (window.ELAuth && ELAuth.user) || {}; }
   function _esc(s) { return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
   function _nuevoBorrador() {
-    return { titulo:'', numero:'', asignatura:'', asignaturaId:'', nivel:'', semanas:'', fechaInicio:'', fechaFin:'', horas:'',
+    return { titulo:'', numero:'', asignatura:'', asignaturaId:'', nivel:'', nivelId:'', semanas:'', fechaInicio:'', fechaFin:'', horas:'',
              aprendizajes:[], criterios:[], contenidos:'', actividades:'',
              evaluacion:{ tipo:'', instrumento:'', fecha:'' } };
   }
@@ -234,7 +240,7 @@
 
   function _cargarBorrador(u) {
     return {
-      titulo: u.titulo || '', numero: u.numero || '', asignatura: u.asignatura || '', asignaturaId: u.asignaturaId || '', nivel: u.nivel || '',
+      titulo: u.titulo || '', numero: u.numero || '', asignatura: u.asignatura || '', asignaturaId: u.asignaturaId || '', nivel: u.nivel || '', nivelId: u.nivelId || '',
       semanas: u.semanas || '', fechaInicio: u.fechaInicio || '', fechaFin: u.fechaFin || '', horas: u.horas || '',
       aprendizajes: (u.aprendizajes || []).slice(), criterios: (u.criterios || []).slice(),
       contenidos: u.contenidos || '', actividades: u.actividades || '',
@@ -249,8 +255,19 @@
     // Prefijar asignatura/nivel del usuario si están vacíos y hay datos.
     var u = _user();
     var _areas = _areasDocente();
-    var _asigOpts = _areas.asignaturas.map(function (o) { return '<option value="' + _esc(o.value) + '"' + (_d.asignaturaId === o.value ? ' selected' : '') + '>' + _esc(o.label) + '</option>'; }).join('');
-    var _nivOpts = _areas.niveles.map(function (o) { return '<option value="' + _esc(o.value) + '">' + _esc(o.label) + '</option>'; }).join('');
+    // Asignaturas: opciones del docente + "escribir otra".
+    var _asigEnLista = _areas.asignaturas.some(function (o) { return o.value === _d.asignaturaId; });
+    var _asigOtraSel = !!(_d.asignatura && !_asigEnLista);
+    var _asigOpts = _areas.asignaturas.map(function (o) { return '<option value="' + _esc(o.value) + '"' + (_d.asignaturaId === o.value ? ' selected' : '') + '>' + _esc(o.label) + '</option>'; }).join('') +
+      '<option value="__otra__"' + (_asigOtraSel ? ' selected' : '') + '>✎ Escribir otra…</option>';
+    // Niveles: los del docente primero, luego el catálogo estándar, + "otro".
+    var _nivVistos = {}, _nivLista = [];
+    _areas.niveles.forEach(function (o) { if (!_nivVistos[o.value]) { _nivVistos[o.value] = 1; _nivLista.push(o); } });
+    NIVELES_STD.forEach(function (p) { if (!_nivVistos[p[0]]) { _nivVistos[p[0]] = 1; _nivLista.push({ value: p[0], label: p[1] }); } });
+    var _nivEnLista = _nivLista.some(function (o) { return o.value === _d.nivelId || o.label === _d.nivel; });
+    var _nivOtraSel = !!(_d.nivel && !_nivEnLista);
+    var _nivOpts = _nivLista.map(function (o) { return '<option value="' + _esc(o.value) + '"' + ((_d.nivelId === o.value || _d.nivel === o.label) ? ' selected' : '') + '>' + _esc(o.label) + '</option>'; }).join('') +
+      '<option value="__otra__"' + (_nivOtraSel ? ' selected' : '') + '>✎ Escribir otro…</option>';
 
     b.innerHTML =
       '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">' +
@@ -265,11 +282,11 @@
       '</div>' +
       '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">' +
         '<div><label style="' + LB + '">Asignatura / Módulo</label>' +
-          (_areas.asignaturas.length ? '<select id="cu-asig-sel" style="' + IN + ';margin-bottom:5px"><option value="">— Elegir de mis asignaturas / módulos —</option>' + _asigOpts + '</select>' : '') +
-          '<input id="cu-asig" style="' + IN + '" value="' + _esc(_d.asignatura) + '" placeholder="Asignatura o módulo"></div>' +
+          '<select id="cu-asig" style="' + IN + '"><option value="">— Selecciona —</option>' + _asigOpts + '</select>' +
+          '<input id="cu-asig-otra" style="' + IN + ';margin-top:5px;display:' + (_asigOtraSel ? 'block' : 'none') + '" placeholder="Escribe la asignatura o módulo" value="' + _esc(_asigOtraSel ? _d.asignatura : '') + '"></div>' +
         '<div><label style="' + LB + '">Nivel / Curso</label>' +
-          (_areas.niveles.length ? '<select id="cu-nivel-sel" style="' + IN + ';margin-bottom:5px"><option value="">— Elegir de mis niveles —</option>' + _nivOpts + '</select>' : '') +
-          '<input id="cu-nivel" style="' + IN + '" value="' + _esc(_d.nivel) + '" placeholder="Ej: 3° Medio"></div>' +
+          '<select id="cu-nivel" style="' + IN + '"><option value="">— Selecciona —</option>' + _nivOpts + '</select>' +
+          '<input id="cu-nivel-otra" style="' + IN + ';margin-top:5px;display:' + (_nivOtraSel ? 'block' : 'none') + '" placeholder="Ej: 3° Medio" value="' + _esc(_nivOtraSel ? _d.nivel : '') + '"></div>' +
       '</div>' +
       '<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px">' +
         '<div><label style="' + LB + '">Semanas</label><input id="cu-sem" type="number" min="0" style="' + IN + '" value="' + _esc(_d.semanas) + '"></div>' +
@@ -325,16 +342,11 @@
     });
     document.getElementById('cu-ae-cur').addEventListener('click', _abrirCurriculo);
 
-    var asigSel = document.getElementById('cu-asig-sel');
-    if (asigSel) asigSel.addEventListener('change', function () {
-      if (!this.value) return;
-      document.getElementById('cu-asig').value = this.options[this.selectedIndex].text;
-      _d.asignaturaId = this.value;  // guarda slug/módulo para cargar OA del currículo
+    document.getElementById('cu-asig').addEventListener('change', function () {
+      document.getElementById('cu-asig-otra').style.display = (this.value === '__otra__') ? 'block' : 'none';
     });
-    var nivSel = document.getElementById('cu-nivel-sel');
-    if (nivSel) nivSel.addEventListener('change', function () {
-      if (!this.value) return;
-      document.getElementById('cu-nivel').value = this.options[this.selectedIndex].text;
+    document.getElementById('cu-nivel').addEventListener('change', function () {
+      document.getElementById('cu-nivel-otra').style.display = (this.value === '__otra__') ? 'block' : 'none';
     });
   }
 
@@ -359,9 +371,10 @@
   }
 
   function _abrirCurriculo() {
-    _d.asignatura = document.getElementById('cu-asig').value.trim();
-    _d.nivel = document.getElementById('cu-nivel').value.trim();
-    var oas = sugerirOAs(_d.asignaturaId || _d.asignatura, _d.nivel);
+    var aSel = document.getElementById('cu-asig'), nSel = document.getElementById('cu-nivel');
+    var asigLookup = (aSel.value && aSel.value !== '__otra__') ? aSel.value : document.getElementById('cu-asig-otra').value.trim();
+    var nivLookup = (nSel.value && nSel.value !== '__otra__') ? nSel.value : document.getElementById('cu-nivel-otra').value.trim();
+    var oas = sugerirOAs(asigLookup, nivLookup);
     if (!oas.length) { _msg('No se encontraron OA del currículo para esa asignatura/nivel. Puedes escribirlos manualmente.', false); return; }
     var picked = window.prompt('OA disponibles (' + oas.length + '). Escribe los números separados por coma para agregarlos:\n\n' +
       oas.map(function (o, i) { return (i + 1) + '. ' + (o.length > 90 ? o.slice(0, 90) + '…' : o); }).join('\n'));
@@ -384,13 +397,22 @@
   function _guardarForm() {
     _d.titulo = document.getElementById('cu-titulo').value.trim();
     if (!_d.titulo) { _msg('Ponle un nombre a la unidad.', false); return; }
+    var aSel = document.getElementById('cu-asig'), nSel = document.getElementById('cu-nivel');
+    var asignatura, asignaturaId, nivel, nivelId;
+    if (aSel.value === '__otra__') { asignatura = document.getElementById('cu-asig-otra').value.trim(); asignaturaId = ''; }
+    else if (aSel.value) { asignatura = aSel.options[aSel.selectedIndex].text; asignaturaId = aSel.value; }
+    else { asignatura = ''; asignaturaId = ''; }
+    if (nSel.value === '__otra__') { nivel = document.getElementById('cu-nivel-otra').value.trim(); nivelId = ''; }
+    else if (nSel.value) { nivel = nSel.options[nSel.selectedIndex].text; nivelId = nSel.value; }
+    else { nivel = ''; nivelId = ''; }
     var datos = {
       tipo: 'unidad',
       titulo: _d.titulo,
       numero: document.getElementById('cu-num').value.trim(),
-      asignatura: document.getElementById('cu-asig').value.trim(),
-      asignaturaId: _d.asignaturaId || '',
-      nivel: document.getElementById('cu-nivel').value.trim(),
+      asignatura: asignatura,
+      asignaturaId: asignaturaId,
+      nivel: nivel,
+      nivelId: nivelId,
       semanas: document.getElementById('cu-sem').value.trim(),
       horas: document.getElementById('cu-horas').value.trim(),
       fechaInicio: document.getElementById('cu-ini').value,
