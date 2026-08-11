@@ -77,6 +77,15 @@
     }).catch(function () { return {}; });
   }
 
+  // Todas las clases (planificaciones) del docente, ordenadas por fecha.
+  function _todasLasClases() {
+    if (!(window.ELDB && ELDB.planificaciones && ELDB.planificaciones.listar)) return Promise.resolve([]);
+    return ELDB.planificaciones.listar({ uid: _uid() }).then(function (items) {
+      return (items || []).filter(function (p) { return p.tipo === 'planificacion' && p.activo !== false; })
+        .sort(function (a, b) { return String(a.fecha || '').localeCompare(String(b.fecha || '')); });
+    }).catch(function () { return []; });
+  }
+
   // ── Currículo (best-effort): sugerir OA por asignatura + nivel ─
   function sugerirOAs(asig, nivel) {
     var out = [];
@@ -115,11 +124,13 @@
     b.innerHTML =
       '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">' +
         '<h2 style="margin:0;font-size:1.25rem;color:#0f172a">📚 Mis Unidades de Aprendizaje</h2>' +
-        '<div><button id="cu-nueva" style="' + BTN + ';background:#2563EB;color:#fff;margin-right:8px">+ Nueva unidad</button>' +
+        '<div><button id="cu-cal" style="' + BTN + ';background:#eef2ff;color:#4338ca;margin-right:8px">🗓 Calendario</button>' +
+        '<button id="cu-nueva" style="' + BTN + ';background:#2563EB;color:#fff;margin-right:8px">+ Nueva unidad</button>' +
         '<button id="cu-x" style="background:none;border:none;font-size:1.3rem;cursor:pointer;color:#64748b">✕</button></div>' +
       '</div>' +
       '<div id="cu-list"><p style="color:#64748b">Cargando…</p></div>';
     document.getElementById('cu-x').addEventListener('click', _cerrar);
+    document.getElementById('cu-cal').addEventListener('click', _renderCalendario);
     document.getElementById('cu-nueva').addEventListener('click', function () { _editId = null; _d = _nuevoBorrador(); _renderForm(); });
 
     Promise.all([listar(), _clasesPorUnidad()]).then(function (res) {
@@ -334,6 +345,54 @@
     }).catch(function (e) {
       _msg('❌ Error: ' + (e && e.message ? e.message : e), false);
       btn.disabled = false; btn.textContent = '💾 Guardar unidad';
+    });
+  }
+
+  // ── Vista CALENDARIO (agenda de clases por fecha, color por unidad) ──
+  function _renderCalendario() {
+    var b = _box(); if (!b) return;
+    b.innerHTML =
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">' +
+        '<h2 style="margin:0;font-size:1.2rem;color:#0f172a">🗓 Calendario de clases</h2>' +
+        '<div><button id="cu-back" style="' + BTN + ';background:#fff;border:1px solid #cbd5e1;color:#334155;margin-right:8px">← Unidades</button>' +
+        '<button id="cu-x3" style="background:none;border:none;font-size:1.3rem;cursor:pointer;color:#64748b">✕</button></div>' +
+      '</div>' +
+      '<div id="cu-cal-body"><p style="color:#64748b">Cargando…</p></div>';
+    document.getElementById('cu-x3').addEventListener('click', _cerrar);
+    document.getElementById('cu-back').addEventListener('click', _renderLista);
+
+    Promise.all([_todasLasClases(), listar()]).then(function (res) {
+      var clases = res[0], unidades = res[1] || [];
+      var body = document.getElementById('cu-cal-body');
+      var PAL = ['#4f46e5', '#0ea5e9', '#059669', '#d97706', '#db2777', '#7c3aed', '#0891b2'];
+      var colorDe = {};
+      unidades.forEach(function (u, i) { colorDe[u.id] = PAL[i % PAL.length]; });
+      if (!clases.length) {
+        body.innerHTML = '<div style="text-align:center;color:#64748b;padding:30px"><div style="font-size:2rem">🗓</div><p>Aún no hay clases planificadas. Planifica una clase (con fecha y unidad) y aparecerá aquí.</p></div>';
+        return;
+      }
+      var grupos = {};
+      clases.forEach(function (c) {
+        var d = c.fecha ? new Date(c.fecha) : null;
+        var key = (d && !isNaN(d.getTime())) ? d.toISOString().slice(0, 10) : 'sin-fecha';
+        (grupos[key] = grupos[key] || []).push(c);
+      });
+      var keys = Object.keys(grupos).sort();
+      body.innerHTML = keys.map(function (k) {
+        var fechaLbl = (k === 'sin-fecha') ? 'Sin fecha'
+          : new Date(k + 'T00:00:00').toLocaleDateString('es-CL', { weekday: 'long', day: 'numeric', month: 'long' });
+        var cards = grupos[k].map(function (c) {
+          var col = colorDe[c.unidadId] || '#94a3b8';
+          var uni = c.unidadNombre ? _esc(c.unidadNombre) : 'Sin unidad';
+          return '<div style="border-left:4px solid ' + col + ';background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:8px 12px;margin-bottom:6px">' +
+            '<div style="font-weight:600;color:#0f172a;font-size:.88rem">' + _esc((c.titulo || 'Clase').replace(/^Planificación\s*/, '')) + '</div>' +
+            '<div style="font-size:.78rem;color:#64748b;margin-top:2px"><span style="color:' + col + ';font-weight:600">' + uni + '</span>' + (c.horas ? ' · ' + _esc(c.horas) + ' h' : '') + (c.nivel ? ' · ' + _esc(c.nivel) : '') + '</div>' +
+          '</div>';
+        }).join('');
+        return '<div style="margin-bottom:14px"><div style="font-weight:700;color:#334155;font-size:.9rem;text-transform:capitalize;border-bottom:2px solid #e2e8f0;padding-bottom:4px;margin-bottom:8px">' + _esc(fechaLbl) + '</div>' + cards + '</div>';
+      }).join('');
+    }).catch(function (e) {
+      var body = document.getElementById('cu-cal-body'); if (body) body.innerHTML = '<p style="color:#b91c1c">Error: ' + _esc(e && e.message) + '</p>';
     });
   }
 
