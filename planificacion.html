@@ -1063,7 +1063,7 @@
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:8px">
             <a href="dashboard-profesor.html" class="btn-volver">&#8592; Volver al Panel Docente</a>
             <div style="display:flex;gap:8px;flex-wrap:wrap">
-              <button type="button" onclick="if(window.CCUnidades)CCUnidades.abrir();else alert('Módulo de unidades no cargado. Refresca la página.');" style="font-size:.85rem;color:#3730a3;cursor:pointer;display:flex;align-items:center;gap:6px;padding:6px 14px;background:rgba(99,102,241,.10);border:1px solid rgba(99,102,241,.25);border-radius:8px;font-weight:600">
+              <button type="button" onclick="_mostrarUnidades()" style="font-size:.85rem;color:#3730a3;cursor:pointer;display:flex;align-items:center;gap:6px;padding:6px 14px;background:rgba(99,102,241,.10);border:1px solid rgba(99,102,241,.25);border-radius:8px;font-weight:600">
                   📚 Mis Unidades
               </button>
               <a href="material.html" style="font-size:.85rem;color:var(--secondary);text-decoration:none;display:flex;align-items:center;gap:6px;padding:6px 14px;background:rgba(56, 189, 248, .08);border:1px solid rgba(56, 189, 248, .2);border-radius:8px">
@@ -1071,6 +1071,20 @@
               </a>
             </div>
         </div>
+
+        <!-- ═══ SECCIÓN FIJA: MIS UNIDADES (in-page, no modal) ═══ -->
+        <section id="ccUnidadesSection" style="display:none;background:#fff;border:1px solid #e2e8f0;border-radius:14px;box-shadow:0 8px 24px -16px rgba(15,23,42,.25);padding:18px 20px;margin-bottom:1.5rem">
+            <div id="ccUnidadesContent"></div>
+        </section>
+        <script>
+          function _mostrarUnidades() {
+            var sec = document.getElementById('ccUnidadesSection');
+            if (!window.CCUnidades) { alert('Módulo de unidades no cargado. Refresca la página.'); return; }
+            // Toggle: si ya está visible, la ocultamos.
+            if (sec && sec.style.display !== 'none') { sec.style.display = 'none'; return; }
+            CCUnidades.montar('ccUnidadesSection', 'ccUnidadesContent');
+          }
+        </script>
 
         <div class="planificador-header">
             <h1>📅 Planificador de Clases</h1>
@@ -1165,7 +1179,7 @@
                         <select id="selectMiUnidad" onfocus="if(window.CCUnidades)CCUnidades.poblarSelect('selectMiUnidad')" style="flex:1">
                             <option value="">— Sin unidad —</option>
                         </select>
-                        <button type="button" onclick="if(window.CCUnidades)CCUnidades.abrir()" title="Crear o administrar unidades" style="white-space:nowrap;font-size:.82rem;color:#3730a3;cursor:pointer;padding:8px 12px;background:rgba(99,102,241,.10);border:1px solid rgba(99,102,241,.25);border-radius:8px;font-weight:600">📚 Gestionar</button>
+                        <button type="button" onclick="_mostrarUnidades()" title="Crear o administrar unidades" style="white-space:nowrap;font-size:.82rem;color:#3730a3;cursor:pointer;padding:8px 12px;background:rgba(99,102,241,.10);border:1px solid rgba(99,102,241,.25);border-radius:8px;font-weight:600">📚 Gestionar</button>
                     </div>
                 </div>
             </div>
@@ -1658,7 +1672,7 @@
     <!-- Unidades oficiales Mineduc (sobrescriben los ejes genéricos) -->
     <script src="js/curricula/unidades-programas-estudio.js"></script>
     <!-- Módulo: unidades de aprendizaje del docente (crear/editar/listar) -->
-    <script src="js/unidades.js?v=20260805-3-calendario"></script>
+    <script src="js/unidades.js?v=20260805-4-seccion-fija"></script>
 
     <!-- ── Especialidades TP (un archivo por especialidad) ── -->
     <script src="js/datos-curriculares.js"></script>

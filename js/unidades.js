@@ -111,8 +111,14 @@
     document.body.appendChild(ov);
     ov.addEventListener('click', function (e) { if (e.target === ov) _cerrar(); });
   }
-  function _cerrar() { var ov = document.getElementById('cu-ov'); if (ov) ov.style.display = 'none'; }
-  function _box() { return document.getElementById('cu-box'); }
+  // Render objetivo: 'cu-box' = modal (por defecto); o un contenedor inline (sección fija).
+  var _targetId = 'cu-box';
+  var _inlineSection = null;
+  function _cerrar() {
+    if (_targetId === 'cu-box') { var ov = document.getElementById('cu-ov'); if (ov) ov.style.display = 'none'; }
+    else if (_inlineSection) { _inlineSection.style.display = 'none'; }
+  }
+  function _box() { return document.getElementById(_targetId); }
 
   var IN = 'width:100%;padding:8px 11px;border:1px solid #cbd5e1;border-radius:8px;font-size:.9rem;box-sizing:border-box';
   var LB = 'font-weight:600;font-size:.8rem;display:block;margin:10px 0 4px;color:#334155';
@@ -396,7 +402,20 @@
     });
   }
 
-  function abrir() { _ensureModal(); document.getElementById('cu-ov').style.display = 'flex'; _renderLista(); }
+  function abrir() { _targetId = 'cu-box'; _ensureModal(); document.getElementById('cu-ov').style.display = 'flex'; _renderLista(); }
+
+  // Montar el panel como SECCIÓN FIJA dentro de la página (no modal).
+  //   sectionId: contenedor que se muestra/oculta.  contentId: dónde se renderiza.
+  function montar(sectionId, contentId) {
+    var sec = document.getElementById(sectionId);
+    var cont = document.getElementById(contentId);
+    if (!sec || !cont) return;
+    _inlineSection = sec;
+    _targetId = contentId;
+    sec.style.display = '';
+    _renderLista();
+    try { sec.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (e) {}
+  }
 
   // Poblar un <select> con las unidades del docente (para vincular una clase).
   function poblarSelect(selId, selectedId) {
@@ -411,5 +430,5 @@
     }).catch(function () {});
   }
 
-  window.CCUnidades = { abrir: abrir, listar: listar, poblarSelect: poblarSelect };
+  window.CCUnidades = { abrir: abrir, montar: montar, listar: listar, poblarSelect: poblarSelect };
 })();
