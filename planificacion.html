@@ -1062,9 +1062,14 @@
 
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:8px">
             <a href="dashboard-profesor.html" class="btn-volver">&#8592; Volver al Panel Docente</a>
-            <a href="material.html" style="font-size:.85rem;color:var(--secondary);text-decoration:none;display:flex;align-items:center;gap:6px;padding:6px 14px;background:rgba(56, 189, 248, .08);border:1px solid rgba(56, 189, 248, .2);border-radius:8px">
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <button type="button" onclick="if(window.CCUnidades)CCUnidades.abrir();else alert('Módulo de unidades no cargado. Refresca la página.');" style="font-size:.85rem;color:#3730a3;cursor:pointer;display:flex;align-items:center;gap:6px;padding:6px 14px;background:rgba(99,102,241,.10);border:1px solid rgba(99,102,241,.25);border-radius:8px;font-weight:600">
+                  📚 Mis Unidades
+              </button>
+              <a href="material.html" style="font-size:.85rem;color:var(--secondary);text-decoration:none;display:flex;align-items:center;gap:6px;padding:6px 14px;background:rgba(56, 189, 248, .08);border:1px solid rgba(56, 189, 248, .2);border-radius:8px">
                 📚 Crear Material &#8594;
-            </a>
+              </a>
+            </div>
         </div>
 
         <div class="planificador-header">
@@ -1603,7 +1608,9 @@
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
     <script src="js/firebase-rest.js"></script>
     <script src="js/firebase-config.js"></script>
+    <script src="js/claims.js"></script>
     <script src="js/firebase-auth.js"></script>
+    <script src="js/consentimiento.js"></script>
 <script src="js/aprobaciones.js"></script>
     <script src="js/firebase-db.js"></script>
     <script src="js/cuota-ia.js?v=1"></script>
@@ -1637,6 +1644,8 @@
     <script src="js/curricula/plan-comun/index.js"></script>
     <!-- Unidades oficiales Mineduc (sobrescriben los ejes genéricos) -->
     <script src="js/curricula/unidades-programas-estudio.js"></script>
+    <!-- Módulo: unidades de aprendizaje del docente (crear/editar/listar) -->
+    <script src="js/unidades.js?v=20260805-1"></script>
 
     <!-- ── Especialidades TP (un archivo por especialidad) ── -->
     <script src="js/datos-curriculares.js"></script>
