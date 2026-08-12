@@ -1084,6 +1084,20 @@
             if (sec && sec.style.display !== 'none') { sec.style.display = 'none'; return; }
             CCUnidades.montar('ccUnidadesSection', 'ccUnidadesContent');
           }
+          // Si llegamos desde el dashboard con ?unidad=<id>, preseleccionar esa unidad.
+          (function () {
+            var uid = new URLSearchParams(location.search).get('unidad');
+            if (!uid) return;
+            var t = setInterval(function () {
+              var s = document.getElementById('selectMiUnidad');
+              if (s && window.CCUnidades) {
+                clearInterval(t);
+                CCUnidades.poblarSelect('selectMiUnidad', uid);
+                try { s.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (e) {}
+              }
+            }, 300);
+            setTimeout(function () { clearInterval(t); }, 8000);
+          })();
         </script>
 
         <div class="planificador-header">
@@ -1672,7 +1686,7 @@
     <!-- Unidades oficiales Mineduc (sobrescriben los ejes genéricos) -->
     <script src="js/curricula/unidades-programas-estudio.js"></script>
     <!-- Módulo: unidades de aprendizaje del docente (crear/editar/listar) -->
-    <script src="js/unidades.js?v=20260805-9-cascada-planif"></script>
+    <script src="js/unidades.js?v=20260805-11-dashboard"></script>
 
     <!-- ── Especialidades TP (un archivo por especialidad) ── -->
     <script src="js/datos-curriculares.js"></script>

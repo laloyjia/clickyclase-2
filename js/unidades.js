@@ -207,7 +207,13 @@
     var el = document.getElementById('cu-cascada'); if (!el) return;
     var mod = _modData();
     if (!mod || !mod.oas) {
-      el.innerHTML = '<div style="font-size:.82rem;color:#64748b;margin:2px 0 6px">Elige un módulo TP arriba para cargar OA/AE/CE en cascada. Para plan común, usa “📘 Del currículo” o escribe a mano.</div>';
+      el.innerHTML = '<div style="font-size:.82rem;color:#64748b;margin:2px 0 6px">Elige un módulo TP arriba para cargar OA/AE/CE en cascada, o escribe los aprendizajes/criterios a mano abajo.</div>';
+      return;
+    }
+    // Colapsada: mostrar solo un botón para reabrir (se colapsa al agregar).
+    if (_d._cascadaAbierta === false) {
+      el.innerHTML = '<div style="margin:2px 0 6px"><button type="button" id="cu-cas-open" style="' + BTN + ';background:#eef2ff;color:#4338ca;padding:8px 14px;font-size:.82rem">➕ Agregar OA / AE / CE del currículo</button></div>';
+      document.getElementById('cu-cas-open').addEventListener('click', function () { _d._cascadaAbierta = true; _renderCascada(); });
       return;
     }
     var oaKeys = Object.keys(mod.oas);
@@ -245,6 +251,8 @@
         });
       }
       _renderChips();
+      _d._cascadaAbierta = false; _d._selOA = ''; _d._selAE = '';  // colapsar tras agregar
+      _renderCascada();
     });
   }
 
@@ -291,8 +299,10 @@
   // Render objetivo: 'cu-box' = modal (por defecto); o un contenedor inline (sección fija).
   var _targetId = 'cu-box';
   var _inlineSection = null;
+  var _inlinePermanente = false;
   function _cerrar() {
     if (_targetId === 'cu-box') { var ov = document.getElementById('cu-ov'); if (ov) ov.style.display = 'none'; }
+    else if (_inlinePermanente) { _renderLista(); }   // permanente: no ocultar, volver a la lista
     else if (_inlineSection) { _inlineSection.style.display = 'none'; }
   }
   function _box() { return document.getElementById(_targetId); }
@@ -409,49 +419,37 @@
       '</div>' +
       '<div id="cu-msg" style="display:none;border-radius:8px;padding:8px 11px;font-size:.85rem;margin-bottom:10px"></div>' +
 
-      '<div style="display:grid;grid-template-columns:3fr 1fr;gap:10px">' +
+      '<div style="display:grid;grid-template-columns:' + (_areas.cursos.length ? '1fr 70px 160px' : '1fr 70px') + ';gap:10px">' +
         '<div><label style="' + LB + '">Nombre de la unidad *</label><input id="cu-titulo" style="' + IN + '" value="' + _esc(_d.titulo) + '" placeholder="Ej: Circuitos de conmutación"></div>' +
         '<div><label style="' + LB + '">N°</label><input id="cu-num" type="number" min="1" style="' + IN + '" value="' + _esc(_d.numero) + '"></div>' +
+        (_areas.cursos.length ? ('<div><label style="' + LB + '">Curso</label><select id="cu-curso" style="' + IN + '"><option value="">— Curso —</option>' + _cursoOpts + '</select></div>') : '') +
       '</div>' +
       '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">' +
         '<div><label style="' + LB + '">Asignatura / Módulo</label>' +
           '<select id="cu-asig" style="' + IN + '"><option value="">— Selecciona —</option>' + _asigOpts + '</select>' +
           '<input id="cu-asig-otra" style="' + IN + ';margin-top:5px;display:' + (_asigOtraSel ? 'block' : 'none') + '" placeholder="Escribe la asignatura o módulo" value="' + _esc(_asigOtraSel ? _d.asignatura : '') + '"></div>' +
-        '<div><label style="' + LB + '">Nivel / Curso</label>' +
+        '<div><label style="' + LB + '">Nivel</label>' +
           '<select id="cu-nivel" style="' + IN + '"><option value="">— Selecciona —</option>' + _nivOpts + '</select>' +
           '<input id="cu-nivel-otra" style="' + IN + ';margin-top:5px;display:' + (_nivOtraSel ? 'block' : 'none') + '" placeholder="Ej: 3° Medio" value="' + _esc(_nivOtraSel ? _d.nivel : '') + '"></div>' +
       '</div>' +
-      (_areas.cursos.length ? ('<label style="' + LB + '">Curso</label><select id="cu-curso" style="' + IN + '"><option value="">— Curso asignado —</option>' + _cursoOpts + '</select>') : '') +
-      '<div id="cu-cascada"></div>' +
-      '<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px">' +
+      '<div style="display:grid;grid-template-columns:84px 84px 1fr 1fr;gap:10px">' +
         '<div><label style="' + LB + '">Semanas</label><input id="cu-sem" type="number" min="0" style="' + IN + '" value="' + _esc(_d.semanas) + '"></div>' +
         '<div><label style="' + LB + '">Horas</label><input id="cu-horas" type="number" min="0" style="' + IN + '" value="' + _esc(_d.horas) + '"></div>' +
         '<div><label style="' + LB + '">Inicio</label><input id="cu-ini" type="date" style="' + IN + '" value="' + _esc(_d.fechaInicio) + '"></div>' +
         '<div><label style="' + LB + '">Término</label><input id="cu-fin" type="date" style="' + IN + '" value="' + _esc(_d.fechaFin) + '"></div>' +
       '</div>' +
 
-      '<label style="' + LB + '">Aprendizajes esperados (OA/AE)</label>' +
-      '<div id="cu-ae"></div>' +
-      '<div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap">' +
-        '<input id="cu-ae-in" style="' + IN + ';flex:1;min-width:200px" placeholder="Escribe un aprendizaje y presiona Agregar">' +
-        '<button id="cu-ae-add" style="' + BTN + ';background:#e0e7ff;color:#3730a3;padding:8px 12px">+ Agregar</button>' +
-        '<button id="cu-ae-cur" style="' + BTN + ';background:#dcfce7;color:#166534;padding:8px 12px">📘 Del currículo</button>' +
-      '</div>' +
-      '<div id="cu-ae-picker"></div>' +
+      '<div id="cu-cascada"></div>' +
 
-      '<label style="' + LB + '">Criterios de evaluación (CE / indicadores)</label>' +
-      '<div id="cu-ce"></div>' +
-      '<div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap">' +
-        '<input id="cu-ce-in" style="' + IN + ';flex:1;min-width:200px" placeholder="Escribe un criterio y presiona Agregar">' +
-        '<button id="cu-ce-add" style="' + BTN + ';background:#e0e7ff;color:#3730a3;padding:8px 12px">+ Agregar</button>' +
-        '<button id="cu-ce-cur" style="' + BTN + ';background:#dcfce7;color:#166534;padding:8px 12px">📘 Del currículo</button>' +
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">' +
+        '<div><label style="' + LB + '">Aprendizajes (OA/AE)</label><div id="cu-ae"></div></div>' +
+        '<div><label style="' + LB + '">Criterios de evaluación</label><div id="cu-ce"></div></div>' +
       '</div>' +
-      '<div id="cu-ce-picker"></div>' +
 
-      '<label style="' + LB + '">Contenidos / temas</label>' +
-      '<textarea id="cu-cont" rows="2" style="' + IN + '">' + _esc(_d.contenidos) + '</textarea>' +
-      '<label style="' + LB + '">Actividades clave</label>' +
-      '<textarea id="cu-act" rows="2" style="' + IN + '">' + _esc(_d.actividades) + '</textarea>' +
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">' +
+        '<div><label style="' + LB + '">Contenidos / temas</label><textarea id="cu-cont" rows="2" style="' + IN + '">' + _esc(_d.contenidos) + '</textarea></div>' +
+        '<div><label style="' + LB + '">Actividades clave</label><textarea id="cu-act" rows="2" style="' + IN + '">' + _esc(_d.actividades) + '</textarea></div>' +
+      '</div>' +
 
       '<label style="' + LB + '">Evaluaciones de la unidad</label>' +
       '<div id="cu-evals"></div>' +
@@ -465,17 +463,6 @@
     document.getElementById('cu-volver').addEventListener('click', _renderLista);
     document.getElementById('cu-save').addEventListener('click', _guardarForm);
     _renderChips();
-
-    document.getElementById('cu-ae-add').addEventListener('click', function () {
-      var v = document.getElementById('cu-ae-in').value.trim();
-      if (v) { _d.aprendizajes.push(v); document.getElementById('cu-ae-in').value = ''; _renderChips(); }
-    });
-    document.getElementById('cu-ce-add').addEventListener('click', function () {
-      var v = document.getElementById('cu-ce-in').value.trim();
-      if (v) { _d.criterios.push(v); document.getElementById('cu-ce-in').value = ''; _renderChips(); }
-    });
-    document.getElementById('cu-ae-cur').addEventListener('click', _abrirCurriculo);
-    document.getElementById('cu-ce-cur').addEventListener('click', _abrirCurriculoCE);
 
     document.getElementById('cu-asig').addEventListener('change', function () {
       document.getElementById('cu-asig-otra').style.display = (this.value === '__otra__') ? 'block' : 'none';
@@ -631,9 +618,11 @@
   // Enlace con planificaciones: cierra el panel de unidades y deja el
   // formulario de planificación de clase con esta unidad pre-seleccionada.
   function _planificarDeUnidad(id) {
-    _cerrar();
     var sel = document.getElementById('selectMiUnidad');
-    if (sel) { poblarSelect('selectMiUnidad', id); }
+    // Si no estamos en la página de planificación (p. ej. el dashboard), ir a ella con la unidad.
+    if (!sel) { window.location.href = 'planificacion.html?unidad=' + encodeURIComponent(id); return; }
+    _cerrar();
+    poblarSelect('selectMiUnidad', id);
     var ancla = document.getElementById('selectCurso') || document.querySelector('.planificador-header') || document.body;
     try { ancla.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (e) {}
   }
@@ -642,15 +631,16 @@
 
   // Montar el panel como SECCIÓN FIJA dentro de la página (no modal).
   //   sectionId: contenedor que se muestra/oculta.  contentId: dónde se renderiza.
-  function montar(sectionId, contentId) {
+  function montar(sectionId, contentId, permanente) {
     var sec = document.getElementById(sectionId);
     var cont = document.getElementById(contentId);
     if (!sec || !cont) return;
     _inlineSection = sec;
     _targetId = contentId;
+    _inlinePermanente = !!permanente;
     sec.style.display = '';
     _renderLista();
-    try { sec.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (e) {}
+    if (!permanente) { try { sec.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (e) {} }
   }
 
   // Poblar un <select> con las unidades del docente (para vincular una clase).

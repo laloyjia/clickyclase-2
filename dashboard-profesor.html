@@ -34,7 +34,9 @@
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
 <script src="js/firebase-rest.js"></script>
 <script src="js/firebase-config.js"></script>
+<script src="js/claims.js"></script>
 <script src="js/firebase-auth.js"></script>
+<script src="js/consentimiento.js"></script>
 <script src="js/firebase-db.js"></script>
 <script src="js/cuota-ia.js?v=1"></script>
 <script src="js/tp-catalogo.js"></script>
@@ -77,6 +79,7 @@
 <script src="js/curricula/tp/datos-programacion.js"></script>
 <script src="js/curricula/tp/datos-vestuario-confeccion.js"></script>
 <script src="js/curricula-chile.js?v=2"></script>
+<script src="js/unidades.js?v=20260805-11-dashboard"></script>
 <script src="js/ia-client.js"></script>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -845,6 +848,19 @@
           <div class="stat-lbl">Niveles a cargo</div>
         </div>
       </div>
+
+      <!-- Unidades de aprendizaje + calendario (permanente) -->
+      <div class="card-pro" style="margin-bottom:24px">
+        <div id="ccUnidadesContent"></div>
+      </div>
+      <script>
+        (function () {
+          function _montarUnidades() { if (window.CCUnidades) CCUnidades.montar('ccUnidadesContent', 'ccUnidadesContent', true); }
+          if (window.ELAuth && ELAuth.onUserReady) ELAuth.onUserReady(function () { _montarUnidades(); });
+          else if (document.readyState !== 'loading') _montarUnidades();
+          else document.addEventListener('DOMContentLoaded', _montarUnidades);
+        })();
+      </script>
 
       <!-- Acceso rápido — 3 filas jerárquicas -->
       <div class="card-pro" style="margin-bottom:24px">
