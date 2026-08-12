@@ -334,10 +334,10 @@
         cont.innerHTML = '<div style="text-align:center;color:#64748b;padding:30px 10px"><div style="font-size:2rem">📭</div><p>Aún no tienes unidades. Crea la primera con “+ Nueva unidad”.</p></div>';
         return;
       }
-      cont.innerHTML = items.map(function (u) {
+      var _card = function (u) {
         var dur = [u.semanas ? u.semanas + ' sem' : '', (u.fechaInicio || u.fechaFin) ? ((u.fechaInicio||'') + ' → ' + (u.fechaFin||'')) : '', u.horas ? u.horas + ' hrs' : ''].filter(Boolean).join(' · ');
         var nAE = (u.aprendizajes || []).length, nCE = (u.criterios || []).length;
-        var clases = byU[u.id] || [];
+        var clases = (byU[u.id] || []).slice();
         clases.sort(function (a, b) { return String(a.fecha || '').localeCompare(String(b.fecha || '')); });
         var clasesHtml = clases.length
           ? '<div style="margin-top:8px;border-top:1px dashed #e2e8f0;padding-top:7px">' +
@@ -350,7 +350,7 @@
         return '<div style="border:1px solid #e2e8f0;border-radius:10px;padding:12px 14px;margin-bottom:10px">' +
           '<div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start">' +
             '<div style="flex:1"><div style="font-weight:700;color:#0f172a">' + (u.numero ? 'Unidad ' + _esc(u.numero) + ' · ' : '') + _esc(u.titulo || 'Sin título') + '</div>' +
-            '<div style="font-size:.82rem;color:#64748b;margin-top:2px">' + _esc([u.asignatura, u.nivel].filter(Boolean).join(' · ')) + (dur ? ' · ' + _esc(dur) : '') + '</div>' +
+            '<div style="font-size:.82rem;color:#64748b;margin-top:2px">' + _esc([u.nivel, u.curso].filter(Boolean).join(' · ')) + (dur ? ' · ' + _esc(dur) : '') + '</div>' +
             '<div style="font-size:.78rem;color:#94a3b8;margin-top:3px">' + nAE + ' aprendizajes · ' + nCE + ' criterios · <b style="color:#4f46e5">' + clases.length + ' clase' + (clases.length === 1 ? '' : 's') + '</b></div></div>' +
             '<div style="white-space:nowrap">' +
               '<button data-id="' + u.id + '" class="cu-plan" style="' + BTN + ';background:#dbeafe;color:#1e40af;padding:5px 10px;font-size:.8rem">🗓 Planificar clase</button> ' +
@@ -358,6 +358,16 @@
               '<button data-id="' + u.id + '" class="cu-del" style="' + BTN + ';background:#fee2e2;color:#b91c1c;padding:5px 10px;font-size:.8rem">🗑️</button>' +
             '</div>' +
           '</div>' + clasesHtml + '</div>';
+      };
+      // Agrupar por módulo / asignatura (plan anual por módulo).
+      var grupos = {};
+      items.forEach(function (u) { var k = u.asignatura || 'Sin módulo / asignatura'; (grupos[k] = grupos[k] || []).push(u); });
+      var gkeys = Object.keys(grupos).sort(function (a, b) { return a.localeCompare(b, 'es'); });
+      cont.innerHTML = gkeys.map(function (mod) {
+        return '<div style="margin-bottom:16px">' +
+          '<div style="font-weight:700;color:#1e40af;font-size:.9rem;display:flex;align-items:center;gap:6px;margin-bottom:8px;padding-bottom:5px;border-bottom:2px solid #dbeafe"><span>📦</span><span>' + _esc(mod) + '</span><span style="color:#94a3b8;font-weight:400;font-size:.8rem">(' + grupos[mod].length + ')</span></div>' +
+          grupos[mod].map(_card).join('') +
+        '</div>';
       }).join('');
       Array.prototype.forEach.call(cont.querySelectorAll('.cu-edit'), function (btn) {
         btn.addEventListener('click', function () {
