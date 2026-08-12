@@ -37,9 +37,9 @@
   function _user() { return (window.ELAuth && ELAuth.user) || {}; }
   function _esc(s) { return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
   function _nuevoBorrador() {
-    return { titulo:'', numero:'', asignatura:'', asignaturaId:'', nivel:'', nivelId:'', semanas:'', fechaInicio:'', fechaFin:'', horas:'',
-             aprendizajes:[], criterios:[], contenidos:'', actividades:'',
-             evaluacion:{ tipo:'', instrumento:'', fecha:'' } };
+    return { titulo:'', numero:'', asignatura:'', asignaturaId:'', nivel:'', nivelId:'', curso:'', semanas:'', fechaInicio:'', fechaFin:'', horas:'',
+             aprendizajes:[], criterios:[], oag:[], contenidos:'', actividades:'',
+             evaluaciones:[], _selOA:'', _selAE:'' };
   }
 
   // Áreas asignadas al docente: asignaturas de plan común + módulos TP + niveles.
@@ -76,7 +76,8 @@
     var nivs = (u.niveles || []).map(function (n) {
       return { value: n, label: (window.CURRICULA_CHILE && CURRICULA_CHILE.getNivelLabel) ? CURRICULA_CHILE.getNivelLabel(n) : n };
     });
-    return { asignaturas: asigs, niveles: nivs };
+    var cursos = (u.cursos || []).map(function (c) { return { value: String(c), label: String(c) }; });
+    return { asignaturas: asigs, niveles: nivs, cursos: cursos };
   }
 
   // ── Datos: guardar / listar / actualizar / eliminar ──────────
@@ -191,6 +192,92 @@
     document.getElementById('cu-pk-close').addEventListener('click', function () { el.innerHTML = ''; });
   }
 
+  // Datos del módulo TP seleccionado (para la cascada OA→AE→CE→OAG).
+  function _modData() {
+    var aSel = document.getElementById('cu-asig');
+    var v = aSel ? aSel.value : '';
+    if (v && v.indexOf('mod:') === 0 && window.CURRICULA_CHILE && CURRICULA_CHILE.getModuloCompat) {
+      var p = v.split(':'); try { return CURRICULA_CHILE.getModuloCompat(p[1], p[2]); } catch (e) {}
+    }
+    return null;
+  }
+
+  // Cascada de currículo (para módulos TP): OA → AE → CE (+OAG) → "Agregar a la unidad".
+  function _renderCascada() {
+    var el = document.getElementById('cu-cascada'); if (!el) return;
+    var mod = _modData();
+    if (!mod || !mod.oas) {
+      el.innerHTML = '<div style="font-size:.82rem;color:#64748b;margin:2px 0 6px">Elige un módulo TP arriba para cargar OA/AE/CE en cascada. Para plan común, usa “📘 Del currículo” o escribe a mano.</div>';
+      return;
+    }
+    var oaKeys = Object.keys(mod.oas);
+    var aeKeys = mod.aes ? Object.keys(mod.aes) : [];
+    var selAE = _d._selAE;
+    var ces = (selAE && mod.aes && mod.aes[selAE] && mod.aes[selAE].ces) ? mod.aes[selAE].ces : null;
+    var html = '<div style="border:1px solid #c7d2fe;background:#f5f7ff;border-radius:8px;padding:10px;margin:2px 0 6px">' +
+      '<div style="font-weight:600;font-size:.8rem;color:#3730a3;margin-bottom:6px">Currículo del módulo (cascada)</div>' +
+      '<label style="' + LB + ';margin-top:0">Objetivo de aprendizaje (OA)</label>' +
+      '<select id="cu-cas-oa" style="' + IN + '"><option value="">— Selecciona OA —</option>' + oaKeys.map(function (k) { return '<option value="' + _esc(k) + '"' + (_d._selOA === k ? ' selected' : '') + '>' + _esc(k + ': ' + (mod.oas[k] || '')) + '</option>'; }).join('') + '</select>' +
+      '<label style="' + LB + '">Aprendizaje esperado (AE)</label>' +
+      '<select id="cu-cas-ae" style="' + IN + '"><option value="">— Selecciona AE —</option>' + aeKeys.map(function (k) { var num = (typeof k === 'string' && k.indexOf('OA') === 0) ? k.replace('OA', '') : k; return '<option value="' + _esc(k) + '"' + (selAE === k ? ' selected' : '') + '>' + _esc('AE ' + num + ': ' + ((mod.aes[k] && mod.aes[k].texto) || '')) + '</option>'; }).join('') + '</select>';
+    if (ces) {
+      html += '<label style="' + LB + '">Criterios de evaluación (CE)</label><div style="max-height:150px;overflow:auto">';
+      Object.keys(ces).forEach(function (ck) { html += '<label style="display:flex;gap:6px;font-size:.82rem;padding:2px 0;cursor:pointer"><input type="checkbox" class="cu-cas-ce" value="' + _esc(ck) + '" checked style="margin-top:3px"><span><b>' + _esc(ck) + '</b> — ' + _esc(ces[ck].texto || '') + '</span></label>'; });
+      html += '</div>';
+    }
+    html += '<div style="text-align:right;margin-top:8px"><button type="button" id="cu-cas-add" style="' + BTN + ';background:#4f46e5;color:#fff;padding:7px 14px;font-size:.82rem">➕ Agregar a la unidad</button></div></div>';
+    el.innerHTML = html;
+    document.getElementById('cu-cas-oa').addEventListener('change', function () { _d._selOA = this.value; _renderCascada(); });
+    document.getElementById('cu-cas-ae').addEventListener('change', function () { _d._selAE = this.value; _renderCascada(); });
+    var addBtn = document.getElementById('cu-cas-add');
+    if (addBtn) addBtn.addEventListener('click', function () {
+      var m = _modData(); if (!m) return;
+      var oa = _d._selOA, ae = _d._selAE;
+      if (oa && m.oas[oa]) { var t = oa + ': ' + m.oas[oa]; if (_d.aprendizajes.indexOf(t) === -1) _d.aprendizajes.push(t); }
+      if (ae && m.aes && m.aes[ae]) {
+        var num = (ae.indexOf('OA') === 0) ? ae.replace('OA', '') : ae;
+        var tae = 'AE ' + num + ': ' + (m.aes[ae].texto || ''); if (_d.aprendizajes.indexOf(tae) === -1) _d.aprendizajes.push(tae);
+        var aeCes = m.aes[ae].ces || {};
+        Array.prototype.forEach.call(el.querySelectorAll('.cu-cas-ce:checked'), function (cb) {
+          var ck = cb.value, tc = ck + ': ' + ((aeCes[ck] && aeCes[ck].texto) || '');
+          if (_d.criterios.indexOf(tc) === -1) _d.criterios.push(tc);
+          if (aeCes[ck] && aeCes[ck].oag) aeCes[ck].oag.forEach(function (g) { if (_d.oag.indexOf(g) === -1) _d.oag.push(g); });
+        });
+      }
+      _renderChips();
+    });
+  }
+
+  // Evaluaciones múltiples (filas repetibles con tipo + instrumento + fecha).
+  function _renderEvals() {
+    var el = document.getElementById('cu-evals'); if (!el) return;
+    var tOpts = EVAL_TIPOS.map(function (t) { return '<option>' + _esc(t) + '</option>'; }).join('');
+    var iOpts = EVAL_INSTR.map(function (t) { return '<option>' + _esc(t) + '</option>'; }).join('');
+    var rows = _d.evaluaciones.map(function (ev, i) {
+      return '<div style="display:grid;grid-template-columns:1fr 1fr 130px auto;gap:8px;margin-bottom:6px;align-items:center">' +
+        '<select class="cu-ev-t" data-i="' + i + '" style="' + IN + '"><option value="">Tipo…</option>' + tOpts.replace('>' + _esc(ev.tipo || '') + '<', ' selected>' + _esc(ev.tipo || '') + '<') + '</select>' +
+        '<select class="cu-ev-i" data-i="' + i + '" style="' + IN + '"><option value="">Instrumento…</option>' + iOpts.replace('>' + _esc(ev.instrumento || '') + '<', ' selected>' + _esc(ev.instrumento || '') + '<') + '</select>' +
+        '<input class="cu-ev-f" data-i="' + i + '" type="date" style="' + IN + '" value="' + _esc(ev.fecha || '') + '">' +
+        '<button type="button" class="cu-ev-rm" data-i="' + i + '" title="Quitar" style="background:none;border:none;color:#b91c1c;cursor:pointer;font-weight:700;font-size:1rem">✕</button>' +
+      '</div>';
+    }).join('');
+    el.innerHTML = rows + '<button type="button" id="cu-ev-add" style="' + BTN + ';background:#e0e7ff;color:#3730a3;padding:7px 12px;font-size:.82rem;margin-top:4px">➕ Agregar evaluación</button>';
+    function sync() {
+      _d.evaluaciones = [];
+      Array.prototype.forEach.call(el.querySelectorAll('.cu-ev-t'), function (t) {
+        var i = t.getAttribute('data-i');
+        var inst = el.querySelector('.cu-ev-i[data-i="' + i + '"]');
+        var f = el.querySelector('.cu-ev-f[data-i="' + i + '"]');
+        _d.evaluaciones.push({ tipo: t.value, instrumento: inst ? inst.value : '', fecha: f ? f.value : '' });
+      });
+    }
+    Array.prototype.forEach.call(el.querySelectorAll('.cu-ev-t,.cu-ev-i,.cu-ev-f'), function (inp) { inp.addEventListener('change', sync); });
+    Array.prototype.forEach.call(el.querySelectorAll('.cu-ev-rm'), function (btn) {
+      btn.addEventListener('click', function () { sync(); _d.evaluaciones.splice(parseInt(btn.getAttribute('data-i'), 10), 1); _renderEvals(); });
+    });
+    document.getElementById('cu-ev-add').addEventListener('click', function () { sync(); _d.evaluaciones.push({ tipo: '', instrumento: '', fecha: '' }); _renderEvals(); });
+  }
+
   // ── Modal ────────────────────────────────────────────────────
   function _ensureModal() {
     if (document.getElementById('cu-ov')) return;
@@ -256,6 +343,7 @@
             '<div style="font-size:.82rem;color:#64748b;margin-top:2px">' + _esc([u.asignatura, u.nivel].filter(Boolean).join(' · ')) + (dur ? ' · ' + _esc(dur) : '') + '</div>' +
             '<div style="font-size:.78rem;color:#94a3b8;margin-top:3px">' + nAE + ' aprendizajes · ' + nCE + ' criterios · <b style="color:#4f46e5">' + clases.length + ' clase' + (clases.length === 1 ? '' : 's') + '</b></div></div>' +
             '<div style="white-space:nowrap">' +
+              '<button data-id="' + u.id + '" class="cu-plan" style="' + BTN + ';background:#dbeafe;color:#1e40af;padding:5px 10px;font-size:.8rem">🗓 Planificar clase</button> ' +
               '<button data-id="' + u.id + '" class="cu-edit" style="' + BTN + ';background:#fff;border:1px solid #cbd5e1;color:#334155;padding:5px 10px;font-size:.8rem">✏️ Editar</button> ' +
               '<button data-id="' + u.id + '" class="cu-del" style="' + BTN + ';background:#fee2e2;color:#b91c1c;padding:5px 10px;font-size:.8rem">🗑️</button>' +
             '</div>' +
@@ -273,6 +361,9 @@
           eliminar(btn.getAttribute('data-id')).then(_renderLista);
         });
       });
+      Array.prototype.forEach.call(cont.querySelectorAll('.cu-plan'), function (btn) {
+        btn.addEventListener('click', function () { _planificarDeUnidad(btn.getAttribute('data-id')); });
+      });
     }).catch(function (e) {
       var cont = document.getElementById('cu-list');
       if (cont) cont.innerHTML = '<p style="color:#b91c1c">Error al cargar: ' + _esc(e && e.message) + '</p>';
@@ -280,12 +371,14 @@
   }
 
   function _cargarBorrador(u) {
+    var evs = Array.isArray(u.evaluaciones) ? u.evaluaciones.slice()
+            : (u.evaluacion && (u.evaluacion.tipo || u.evaluacion.instrumento || u.evaluacion.fecha)) ? [u.evaluacion] : [];
     return {
-      titulo: u.titulo || '', numero: u.numero || '', asignatura: u.asignatura || '', asignaturaId: u.asignaturaId || '', nivel: u.nivel || '', nivelId: u.nivelId || '',
+      titulo: u.titulo || '', numero: u.numero || '', asignatura: u.asignatura || '', asignaturaId: u.asignaturaId || '', nivel: u.nivel || '', nivelId: u.nivelId || '', curso: u.curso || '',
       semanas: u.semanas || '', fechaInicio: u.fechaInicio || '', fechaFin: u.fechaFin || '', horas: u.horas || '',
-      aprendizajes: (u.aprendizajes || []).slice(), criterios: (u.criterios || []).slice(),
+      aprendizajes: (u.aprendizajes || []).slice(), criterios: (u.criterios || []).slice(), oag: (u.oag || []).slice(),
       contenidos: u.contenidos || '', actividades: u.actividades || '',
-      evaluacion: Object.assign({ tipo:'', instrumento:'', fecha:'' }, u.evaluacion || {})
+      evaluaciones: evs, _selOA: '', _selAE: ''
     };
   }
 
@@ -307,10 +400,7 @@
     var _nivOtraSel = !!(_d.nivel && !_nivEnLista);
     var _nivOpts = _nivLista.map(function (o) { return '<option value="' + _esc(o.value) + '"' + ((_d.nivelId === o.value || _d.nivel === o.label) ? ' selected' : '') + '>' + _esc(o.label) + '</option>'; }).join('') +
       '<option value="__otra__"' + (_nivOtraSel ? ' selected' : '') + '>✎ Escribir otro…</option>';
-    var _evTipoOtra = !!(_d.evaluacion.tipo && EVAL_TIPOS.indexOf(_d.evaluacion.tipo) === -1);
-    var _evTipoOpts = EVAL_TIPOS.map(function (t) { return '<option' + (_d.evaluacion.tipo === t ? ' selected' : '') + '>' + _esc(t) + '</option>'; }).join('') + '<option value="__otro__"' + (_evTipoOtra ? ' selected' : '') + '>✎ Otro…</option>';
-    var _evInstOtra = !!(_d.evaluacion.instrumento && EVAL_INSTR.indexOf(_d.evaluacion.instrumento) === -1);
-    var _evInstOpts = EVAL_INSTR.map(function (t) { return '<option' + (_d.evaluacion.instrumento === t ? ' selected' : '') + '>' + _esc(t) + '</option>'; }).join('') + '<option value="__otro__"' + (_evInstOtra ? ' selected' : '') + '>✎ Otro…</option>';
+    var _cursoOpts = _areas.cursos.map(function (o) { return '<option value="' + _esc(o.value) + '"' + (_d.curso === o.value ? ' selected' : '') + '>' + _esc(o.label) + '</option>'; }).join('');
 
     b.innerHTML =
       '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">' +
@@ -331,6 +421,8 @@
           '<select id="cu-nivel" style="' + IN + '"><option value="">— Selecciona —</option>' + _nivOpts + '</select>' +
           '<input id="cu-nivel-otra" style="' + IN + ';margin-top:5px;display:' + (_nivOtraSel ? 'block' : 'none') + '" placeholder="Ej: 3° Medio" value="' + _esc(_nivOtraSel ? _d.nivel : '') + '"></div>' +
       '</div>' +
+      (_areas.cursos.length ? ('<label style="' + LB + '">Curso</label><select id="cu-curso" style="' + IN + '"><option value="">— Curso asignado —</option>' + _cursoOpts + '</select>') : '') +
+      '<div id="cu-cascada"></div>' +
       '<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px">' +
         '<div><label style="' + LB + '">Semanas</label><input id="cu-sem" type="number" min="0" style="' + IN + '" value="' + _esc(_d.semanas) + '"></div>' +
         '<div><label style="' + LB + '">Horas</label><input id="cu-horas" type="number" min="0" style="' + IN + '" value="' + _esc(_d.horas) + '"></div>' +
@@ -361,14 +453,8 @@
       '<label style="' + LB + '">Actividades clave</label>' +
       '<textarea id="cu-act" rows="2" style="' + IN + '">' + _esc(_d.actividades) + '</textarea>' +
 
-      '<label style="' + LB + '">Evaluación de la unidad</label>' +
-      '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">' +
-        '<div><select id="cu-ev-tipo" style="' + IN + '"><option value="">Tipo de evaluación…</option>' + _evTipoOpts + '</select>' +
-          '<input id="cu-ev-tipo-otro" style="' + IN + ';margin-top:5px;display:' + (_evTipoOtra ? 'block' : 'none') + '" placeholder="Otro tipo" value="' + _esc(_evTipoOtra ? _d.evaluacion.tipo : '') + '"></div>' +
-        '<div><select id="cu-ev-inst" style="' + IN + '"><option value="">Instrumento…</option>' + _evInstOpts + '</select>' +
-          '<input id="cu-ev-inst-otro" style="' + IN + ';margin-top:5px;display:' + (_evInstOtra ? 'block' : 'none') + '" placeholder="Otro instrumento" value="' + _esc(_evInstOtra ? _d.evaluacion.instrumento : '') + '"></div>' +
-        '<div><input id="cu-ev-fecha" type="date" style="' + IN + '" value="' + _esc(_d.evaluacion.fecha) + '"></div>' +
-      '</div>' +
+      '<label style="' + LB + '">Evaluaciones de la unidad</label>' +
+      '<div id="cu-evals"></div>' +
 
       '<div style="display:flex;justify-content:space-between;gap:8px;margin-top:18px">' +
         '<button id="cu-volver" style="' + BTN + ';background:#fff;border:1px solid #cbd5e1;color:#475569">← Volver</button>' +
@@ -393,16 +479,13 @@
 
     document.getElementById('cu-asig').addEventListener('change', function () {
       document.getElementById('cu-asig-otra').style.display = (this.value === '__otra__') ? 'block' : 'none';
+      _d._selOA = ''; _d._selAE = ''; _renderCascada();  // recargar cascada del nuevo módulo
     });
     document.getElementById('cu-nivel').addEventListener('change', function () {
       document.getElementById('cu-nivel-otra').style.display = (this.value === '__otra__') ? 'block' : 'none';
     });
-    document.getElementById('cu-ev-tipo').addEventListener('change', function () {
-      document.getElementById('cu-ev-tipo-otro').style.display = (this.value === '__otro__') ? 'block' : 'none';
-    });
-    document.getElementById('cu-ev-inst').addEventListener('change', function () {
-      document.getElementById('cu-ev-inst-otro').style.display = (this.value === '__otro__') ? 'block' : 'none';
-    });
+    _renderCascada();
+    _renderEvals();
   }
 
   function _renderChips() {
@@ -455,6 +538,17 @@
     if (nSel.value === '__otra__') { nivel = document.getElementById('cu-nivel-otra').value.trim(); nivelId = ''; }
     else if (nSel.value) { nivel = nSel.options[nSel.selectedIndex].text; nivelId = nSel.value; }
     else { nivel = ''; nivelId = ''; }
+    var cursoEl = document.getElementById('cu-curso');
+    // Leer evaluaciones múltiples directamente del DOM (por si falta un change).
+    var evs = [];
+    var evEl = document.getElementById('cu-evals');
+    if (evEl) Array.prototype.forEach.call(evEl.querySelectorAll('.cu-ev-t'), function (t) {
+      var i = t.getAttribute('data-i');
+      var inst = evEl.querySelector('.cu-ev-i[data-i="' + i + '"]');
+      var f = evEl.querySelector('.cu-ev-f[data-i="' + i + '"]');
+      var tipo = t.value, instr = inst ? inst.value : '', fe = f ? f.value : '';
+      if (tipo || instr || fe) evs.push({ tipo: tipo, instrumento: instr, fecha: fe });
+    });
     var datos = {
       tipo: 'unidad',
       titulo: _d.titulo,
@@ -463,19 +557,17 @@
       asignaturaId: asignaturaId,
       nivel: nivel,
       nivelId: nivelId,
+      curso: cursoEl ? cursoEl.value : (_d.curso || ''),
       semanas: document.getElementById('cu-sem').value.trim(),
       horas: document.getElementById('cu-horas').value.trim(),
       fechaInicio: document.getElementById('cu-ini').value,
       fechaFin: document.getElementById('cu-fin').value,
       aprendizajes: _d.aprendizajes.slice(),
       criterios: _d.criterios.slice(),
+      oag: _d.oag.slice(),
       contenidos: document.getElementById('cu-cont').value.trim(),
       actividades: document.getElementById('cu-act').value.trim(),
-      evaluacion: {
-        tipo: (document.getElementById('cu-ev-tipo').value === '__otro__') ? document.getElementById('cu-ev-tipo-otro').value.trim() : document.getElementById('cu-ev-tipo').value,
-        instrumento: (document.getElementById('cu-ev-inst').value === '__otro__') ? document.getElementById('cu-ev-inst-otro').value.trim() : document.getElementById('cu-ev-inst').value,
-        fecha: document.getElementById('cu-ev-fecha').value
-      }
+      evaluaciones: evs
     };
     var btn = document.getElementById('cu-save');
     btn.disabled = true; btn.textContent = 'Guardando…';
@@ -534,6 +626,16 @@
     }).catch(function (e) {
       var body = document.getElementById('cu-cal-body'); if (body) body.innerHTML = '<p style="color:#b91c1c">Error: ' + _esc(e && e.message) + '</p>';
     });
+  }
+
+  // Enlace con planificaciones: cierra el panel de unidades y deja el
+  // formulario de planificación de clase con esta unidad pre-seleccionada.
+  function _planificarDeUnidad(id) {
+    _cerrar();
+    var sel = document.getElementById('selectMiUnidad');
+    if (sel) { poblarSelect('selectMiUnidad', id); }
+    var ancla = document.getElementById('selectCurso') || document.querySelector('.planificador-header') || document.body;
+    try { ancla.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (e) {}
   }
 
   function abrir() { _targetId = 'cu-box'; _ensureModal(); document.getElementById('cu-ov').style.display = 'flex'; _renderLista(); }
