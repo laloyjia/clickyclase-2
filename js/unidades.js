@@ -57,22 +57,27 @@
       pushA(a, lbl);
     });
     if (u.asignatura) pushA(u.asignatura, (window.CCAsig && CCAsig.getNombre) ? CCAsig.getNombre(u.asignatura) : u.asignatura);
-    // Módulos TP (formato nuevo modulosTP:{esp:[mods]})
-    var mods = u.modulosTP || {};
-    Object.keys(mods).forEach(function (esp) {
-      (mods[esp] || []).forEach(function (modId) {
+    // Especialidad resuelta desde el campo singular o el array (schemas mezclados).
+    var espUser = u.especialidad || (Array.isArray(u.especialidades) && u.especialidades[0]) || '';
+    function _pushMod(esp, modId) {
+      if (esp) {
         var eL = (window.CCTPCatalogo && CCTPCatalogo.labelEspecialidad) ? CCTPCatalogo.labelEspecialidad(esp) : esp;
         var mL = (window.CCTPCatalogo && CCTPCatalogo.labelModulo) ? CCTPCatalogo.labelModulo(esp, modId) : modId;
         pushA('mod:' + esp + ':' + modId, eL + ' — ' + mL);
-      });
+      } else {
+        // Sin especialidad conocida: mostramos el módulo igual (valor = id crudo).
+        pushA(String(modId), 'Módulo ' + modId);
+      }
+    }
+    // Módulos TP (formato nuevo modulosTP:{esp:[mods]})
+    var mods = u.modulosTP || {};
+    var _huboModulosTP = false;
+    Object.keys(mods).forEach(function (esp) {
+      (mods[esp] || []).forEach(function (modId) { _huboModulosTP = true; _pushMod(esp, modId); });
     });
-    // TP legacy: especialidad + modulos[]
-    if (u.especialidad && Array.isArray(u.modulos)) {
-      u.modulos.forEach(function (modId) {
-        var eL = (window.CCTPCatalogo && CCTPCatalogo.labelEspecialidad) ? CCTPCatalogo.labelEspecialidad(u.especialidad) : u.especialidad;
-        var mL = (window.CCTPCatalogo && CCTPCatalogo.labelModulo) ? CCTPCatalogo.labelModulo(u.especialidad, modId) : modId;
-        pushA('mod:' + u.especialidad + ':' + modId, eL + ' — ' + mL);
-      });
+    // TP legacy: modulos[] (aunque falte especialidad). Solo si modulosTP no los cubrió.
+    if (!_huboModulosTP && Array.isArray(u.modulos)) {
+      u.modulos.forEach(function (modId) { _pushMod(espUser, modId); });
     }
     var nivs = (u.niveles || []).map(function (n) {
       return { value: n, label: (window.CURRICULA_CHILE && CURRICULA_CHILE.getNivelLabel) ? CURRICULA_CHILE.getNivelLabel(n) : n };
