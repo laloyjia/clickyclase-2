@@ -69,3 +69,32 @@ html { scroll-behavior: smooth; }
   body { background: #fff !important; }
   .card-pro, .card { box-shadow: none !important; border-color: #ccc !important; }
 }
+
+/* ============================================================
+   Refinamiento de componentes (universal y suave)
+   Estandariza el foco de campos y el feedback de botones sin
+   cambiar la identidad de cada página.
+   ============================================================ */
+
+/* Foco de campos con glow de marca (consistente en toda la app) */
+input:not([type="checkbox"]):not([type="radio"]):focus,
+select:focus,
+textarea:focus {
+  border-color: #2563EB;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, .15);
+  outline: none;
+}
+
+/* Feedback al presionar botones (micro-interacción) */
+button:not(:disabled):active,
+.btn:not(:disabled):active,
+.btn-pro:not(:disabled):active,
+[role="button"]:active {
+  transform: translateY(1px) scale(.99);
+}
+
+/* Enlaces de texto: subrayado suave al pasar (no toca botones/tarjetas) */
+a:not([class]):hover { text-decoration: underline; text-underline-offset: 2px; }
+
+/* Placeholders algo más legibles */
+::placeholder { color: #94a3b8; opacity: 1; }
