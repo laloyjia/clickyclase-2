@@ -2224,6 +2224,9 @@
             // Inicializar curriculo según perfil del profesor
             try { initCurriculoMat(user); } catch (e) { console.warn('[material] initCurriculoMat:', e); }
 
+            // Preseleccionar módulo/asignatura si viene desde el dashboard/módulo (?asig=)
+            try { _preselDesdeURLMat(); } catch (e) { console.warn('[material] preselDesdeURLMat:', e); }
+
             // Cablear listeners de la tabla de tipos de pregunta y de los inputs de cantidad/puntaje.
             try {
                 var inputsItem = document.querySelectorAll('#tiposPregTabla input[data-cantitem]');
@@ -2247,6 +2250,41 @@
     // -> en js/material/material-ui.js
     // =============================================
 
+
+    // Preselecciona el módulo/asignatura del dropdown a partir de ?asig= (viene del panel de módulo).
+    function _preselDesdeURLMat() {
+        var q = new URLSearchParams(location.search);
+        var asig = q.get('asig');
+        if (!asig) return;
+        var sel = document.getElementById('selectAsigOModMat');
+        if (!sel) return;
+        var target;
+        if (asig.indexOf('mod:') === 0) {
+            var p = asig.split(':');
+            target = 'mod::' + p[1] + '::' + p[2];
+        } else if (asig === 'orientacion') {
+            target = 'asig::Orientación';
+        } else if (asig === 'consejo_curso') {
+            target = 'asig::Consejo de Curso';
+        } else {
+            target = 'asig::' + asig;
+        }
+        var opt = null;
+        Array.prototype.forEach.call(sel.querySelectorAll('option'), function (o) {
+            if (!opt && o.value === target) opt = o;
+        });
+        if (!opt && asig.indexOf('mod:') === 0) {
+            var mid = asig.split(':')[2];
+            Array.prototype.forEach.call(sel.querySelectorAll('option'), function (o) {
+                if (!opt && o.value.indexOf('mod::') === 0 && o.value.slice(-('::' + mid).length) === ('::' + mid)) opt = o;
+            });
+        }
+        if (opt) {
+            sel.value = opt.value;
+            if (typeof onCambioAsigOModMat === 'function') onCambioAsigOModMat();
+        }
+    }
+    window._preselDesdeURLMat = _preselDesdeURLMat;
 
     function generarMaterial() {
         if (!tipoDocSeleccionado) { showToast('Selecciona un tipo de documento.', 'warn'); return; }

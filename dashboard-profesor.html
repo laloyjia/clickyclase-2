@@ -79,7 +79,7 @@
 <script src="js/curricula/tp/datos-programacion.js"></script>
 <script src="js/curricula/tp/datos-vestuario-confeccion.js"></script>
 <script src="js/curricula-chile.js?v=2"></script>
-<script src="js/unidades.js?v=20260805-16-nuevaunidad"></script>
+<script src="js/unidades.js?v=20260805-17-modulopage"></script>
 <script src="js/horarios.js"></script>
 <script src="js/agenda-hoy.js?v=20260812-1"></script>
 <script src="js/ia-client.js"></script>
@@ -877,68 +877,6 @@
         </a>
       </div>
 
-      <!-- Unidades de aprendizaje (permanente) -->
-      <div class="card-pro" style="margin-bottom:24px">
-        <div id="ccUnidadesContent"></div>
-      </div>
-      <script>
-        (function () {
-          function _montarUnidades() { if (window.CCUnidades) CCUnidades.montar('ccUnidadesContent', 'ccUnidadesContent', true); }
-          if (window.ELAuth && ELAuth.onUserReady) ELAuth.onUserReady(function () { _montarUnidades(); });
-          else if (document.readyState !== 'loading') _montarUnidades();
-          else document.addEventListener('DOMContentLoaded', _montarUnidades);
-        })();
-      </script>
-
-      <!-- Acceso rápido — uso diario + herramientas -->
-      <div class="card-pro" style="margin-bottom:24px">
-        <h3 style="font-size:1.05rem;font-weight:800;margin-bottom:6px">⚡ Acceso rápido</h3>
-
-        <div class="qr-section-title">📅 Uso diario</div>
-        <div class="qr-daily">
-          <a class="quick-card qc-emerald" href="libro-clases.html">
-            <div class="qc-icon">📖</div>
-            <div class="qc-title">Libro de clases</div>
-            <div class="qc-sub">Asistencia y contenido del día</div>
-          </a>
-          <a class="quick-card qc-amber" href="notas.html">
-            <div class="qc-icon">💯</div>
-            <div class="qc-title">Notas</div>
-            <div class="qc-sub">Calificaciones por asignatura</div>
-          </a>
-          <a class="quick-card qc-cyan" href="alumnos.html">
-            <div class="qc-icon">🔍</div>
-            <div class="qc-title">Buscar alumno</div>
-            <div class="qc-sub">Ficha completa del estudiante</div>
-          </a>
-          <a class="quick-card qc-rose" onclick="if(window.showSec){showSec('calendario');return false}" href="javascript:void(0)" data-sec="calendario">
-            <div class="qc-icon">📆</div>
-            <div class="qc-title">Calendario</div>
-            <div class="qc-sub">Clases y evaluaciones del mes</div>
-          </a>
-        </div>
-
-        <div class="qr-section-title">🧰 Herramientas y recursos</div>
-        <div class="qr-tools">
-          <a class="quick-card qc-amber" href="biblioteca.html">
-            <div class="qc-icon">📚</div>
-            <div class="qc-body"><div class="qc-title">Biblioteca</div><div class="qc-mini">Recursos del liceo</div></div>
-          </a>
-          <a class="quick-card qc-rose" onclick="if(window.showSec){showSec('modulos');return false}" href="javascript:void(0)" data-sec="modulos">
-            <div class="qc-icon">📦</div>
-            <div class="qc-body"><div class="qc-title">Mis módulos</div><div class="qc-mini">Asignaturas y TP</div></div>
-          </a>
-          <a class="quick-card qc-amber" href="alertas.html">
-            <div class="qc-icon">🚨</div>
-            <div class="qc-body"><div class="qc-title">Alertas apoderado</div><div class="qc-mini">Bandeja enviadas</div></div>
-          </a>
-          <a class="quick-card qc-violet" href="derivaciones.html">
-            <div class="qc-icon">🔀</div>
-            <div class="qc-body"><div class="qc-title">Derivaciones</div><div class="qc-mini">Enviadas / recibidas</div></div>
-          </a>
-        </div>
-      </div>
-
       <!-- ═══════════ 6 · HERRAMIENTAS DE PROFESOR JEFE (solo si aplica) ═══════════ -->
       <div id="jefaturaToolsCard" class="card-pro" style="margin-bottom:24px;display:none">
         <h3 style="font-size:1.05rem;font-weight:800;margin-bottom:6px;display:flex;align-items:center;gap:8px">🎓 Herramientas de profesor jefe</h3>
@@ -955,20 +893,6 @@
             <div class="qc-icon">🤝</div>
             <div class="qc-body"><div class="qc-title">Entrevistas</div><div class="qc-mini">Apoderados</div></div>
           </a>
-        </div>
-      </div>
-
-      <!-- ═══════════ 7 · TU RESUMEN (AL FINAL) ═══════════ -->
-      <div id="resumenDiaBanner" class="card-pro" style="margin-bottom:20px;background:linear-gradient(135deg,rgba(37,99,235,.10),rgba(34,211,238,.06));border:1px solid rgba(37,99,235,.25)">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px">
-          <div>
-            <h3 style="font-size:1.05rem;font-weight:800;display:flex;align-items:center;gap:8px;margin-bottom:4px">📊 Tu resumen — <span id="resumenFecha" style="color:#1D4ED8">cargando…</span></h3>
-            <p style="font-size:.78rem;color:var(--muted);margin:0">Tu agenda y avisos relevantes para hoy y esta semana</p>
-          </div>
-          <button id="btnResumenReload" class="btn-pro ghost" onclick="cargarResumenDia()" style="padding:6px 12px;font-size:.78rem">↻ Actualizar</button>
-        </div>
-        <div id="resumenContent" style="display:grid;gap:10px">
-          <div style="padding:20px;text-align:center;color:var(--muted);font-size:.86rem">⏳ Cargando resumen del día…</div>
         </div>
       </div>
 
@@ -1960,15 +1884,12 @@
           : 'Curso por asignar');
     var cards = [];
     function card(titulo, sub, icon, asigId) {
-      var idAttr = escTxt(asigId || '');
-      var lblAttr = escTxt(titulo);
-      return '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:14px 16px;display:flex;flex-direction:column">' +
+      var href = 'modulo.html?asig=' + encodeURIComponent(asigId || '') + '&label=' + encodeURIComponent(titulo || '');
+      return '<a href="' + href + '" class="mm-card" style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;text-decoration:none;color:inherit;transition:transform .15s,box-shadow .15s,border-color .15s">' +
         '<div style="font-weight:700;color:#0f172a;font-size:.9rem;line-height:1.3">' + icon + ' ' + escTxt(titulo) + '</div>' +
         '<div style="font-size:.78rem;color:#64748b;margin-top:6px">👥 ' + escTxt(sub) + '</div>' +
-        '<div style="display:flex;gap:6px;margin-top:12px;flex-wrap:wrap">' +
-          '<button type="button" class="mm-unidad" data-asig="' + idAttr + '" data-lbl="' + lblAttr + '" style="border:none;border-radius:8px;padding:5px 10px;font-size:.76rem;font-weight:700;cursor:pointer;background:#ede9fe;color:#6d28d9">📚 Crear unidad</button>' +
-          '<a class="mm-plan" href="planificacion.html?asig=' + encodeURIComponent(asigId || '') + '&asiglbl=' + encodeURIComponent(titulo || '') + '" style="border:none;border-radius:8px;padding:5px 10px;font-size:.76rem;font-weight:700;cursor:pointer;background:#dbeafe;color:#1e40af;text-decoration:none">📅 Planificar</a>' +
-        '</div></div>';
+        '<div style="font-size:.76rem;color:#1e40af;font-weight:700;margin-top:12px">Abrir módulo → <span style="font-weight:500;color:#64748b">unidades · planificar · material</span></div>' +
+      '</a>';
     }
     var modsTP = (user.modulosTP && typeof user.modulosTP === 'object') ? user.modulosTP : {};
     Object.keys(modsTP).forEach(function (esp) {
@@ -1997,17 +1918,9 @@
       return;
     }
     el.innerHTML = cards.join('');
-    Array.prototype.forEach.call(el.querySelectorAll('.mm-unidad'), function (btn) {
-      btn.addEventListener('click', function () {
-        var pref = { asignaturaId: btn.getAttribute('data-asig'), asignatura: btn.getAttribute('data-lbl') };
-        if (window.CCUnidades && CCUnidades.nuevaUnidad) {
-          CCUnidades.nuevaUnidad(pref);
-          var box = document.getElementById('ccUnidadesContent');
-          if (box && box.scrollIntoView) { try { box.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (e) {} }
-        } else {
-          window.location.href = 'planificacion.html?asig=' + encodeURIComponent(pref.asignaturaId || '') + '&asiglbl=' + encodeURIComponent(pref.asignatura || '');
-        }
-      });
+    Array.prototype.forEach.call(el.querySelectorAll('.mm-card'), function (c) {
+      c.addEventListener('mouseenter', function () { c.style.transform = 'translateY(-3px)'; c.style.boxShadow = '0 16px 34px rgba(37,99,235,.16)'; c.style.borderColor = 'rgba(37,99,235,.35)'; });
+      c.addEventListener('mouseleave', function () { c.style.transform = ''; c.style.boxShadow = ''; c.style.borderColor = '#e2e8f0'; });
     });
   }
 

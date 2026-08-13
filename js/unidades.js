@@ -306,6 +306,8 @@
   var _targetId = 'cu-box';
   var _inlineSection = null;
   var _inlinePermanente = false;
+  var _filtroAsig = '';      // si se monta filtrado a un módulo/asignatura
+  var _prefOpts = null;      // prefill para nuevas unidades (desde página de módulo)
   function _cerrar() {
     if (_targetId === 'cu-box') { var ov = document.getElementById('cu-ov'); if (ov) ov.style.display = 'none'; }
     else if (_inlinePermanente) { _renderLista(); }   // permanente: no ocultar, volver a la lista
@@ -330,10 +332,19 @@
       '<div id="cu-list"><p style="color:#64748b">Cargando…</p></div>';
     document.getElementById('cu-x').addEventListener('click', _cerrar);
     document.getElementById('cu-cal').addEventListener('click', _renderCalendario);
-    document.getElementById('cu-nueva').addEventListener('click', function () { _editId = null; _d = _nuevoBorrador(); _renderForm(); });
+    document.getElementById('cu-nueva').addEventListener('click', function () {
+      if (_prefOpts && (_prefOpts.asignaturaId || _prefOpts.asignatura)) { nuevaUnidad(_prefOpts); }
+      else { _editId = null; _d = _nuevoBorrador(); _renderForm(); }
+    });
 
     Promise.all([listar(), _clasesPorUnidad()]).then(function (res) {
       var items = res[0], byU = res[1] || {};
+      if (_filtroAsig) {
+        items = items.filter(function (u) {
+          return u.asignaturaId === _filtroAsig || u.asignatura === _filtroAsig ||
+                 (_prefOpts && _prefOpts.asignatura && u.asignatura === _prefOpts.asignatura);
+        });
+      }
       _cache = items; _clasesByU = byU;
       var cont = document.getElementById('cu-list');
       if (!items.length) {
@@ -861,13 +872,15 @@
 
   // Montar el panel como SECCIÓN FIJA dentro de la página (no modal).
   //   sectionId: contenedor que se muestra/oculta.  contentId: dónde se renderiza.
-  function montar(sectionId, contentId, permanente) {
+  function montar(sectionId, contentId, permanente, opts) {
     var sec = document.getElementById(sectionId);
     var cont = document.getElementById(contentId);
     if (!sec || !cont) return;
     _inlineSection = sec;
     _targetId = contentId;
     _inlinePermanente = !!permanente;
+    _filtroAsig = (opts && opts.filtroAsig) || '';
+    _prefOpts = (opts && (opts.asignaturaId || opts.asignatura)) ? opts : null;
     sec.style.display = '';
     _renderLista();
     if (!permanente) { try { sec.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (e) {} }

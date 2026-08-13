@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Módulo — Click&Clase</title>
+<meta name="description" content="Panel del módulo: crea unidades, planificaciones y material.">
+
+<!-- Firebase SDK v10 compat -->
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="js/firebase-rest.js"></script>
+<script src="js/firebase-config.js"></script>
+<script src="js/claims.js"></script>
+<script src="js/firebase-auth.js"></script>
+<script src="js/consentimiento.js"></script>
+<script src="js/firebase-db.js"></script>
+<script src="js/tp-catalogo.js"></script>
+<!-- Datos curriculares TP por especialidad — cargan ANTES de curricula-chile.js -->
+<script src="js/curricula/tp/datos-electricidad.js"></script>
+<script src="js/curricula/tp/datos-mecanica-automotriz.js"></script>
+<script src="js/curricula/tp/datos-mecanica-industrial.js"></script>
+<script src="js/curricula/tp/datos-electronica.js"></script>
+<script src="js/curricula/tp/datos-administracion.js"></script>
+<script src="js/curricula/tp/datos-contabilidad.js"></script>
+<script src="js/curricula/tp/datos-grafica.js"></script>
+<script src="js/curricula/tp/datos-construccion.js"></script>
+<script src="js/curricula/tp/datos-metalurgia-extractiva.js"></script>
+<script src="js/curricula/tp/datos-mantenimiento-aeronaves.js"></script>
+<script src="js/curricula/tp/datos-tripulacion-naves.js"></script>
+<script src="js/curricula/tp/datos-muebles-madera.js"></script>
+<script src="js/curricula/tp/datos-quimica-industrial.js"></script>
+<script src="js/curricula/tp/datos-atencion-enfermeria.js"></script>
+<script src="js/curricula/tp/datos-agropecuaria.js"></script>
+<script src="js/curricula/tp/datos-elaboracion-alimentos.js"></script>
+<script src="js/curricula/tp/datos-construcciones-metalicas.js"></script>
+<script src="js/curricula/tp/datos-instalaciones-sanitarias.js"></script>
+<script src="js/curricula/tp/datos-montaje-industrial.js"></script>
+<script src="js/curricula/tp/datos-telecomunicaciones.js"></script>
+<script src="js/curricula/tp/datos-dibujo-tecnico.js"></script>
+<script src="js/curricula/tp/datos-gastronomia.js"></script>
+<script src="js/curricula/tp/datos-servicios-hoteleros.js"></script>
+<script src="js/curricula/tp/datos-servicios-turismo.js"></script>
+<script src="js/curricula/tp/datos-forestal.js"></script>
+<script src="js/curricula/tp/datos-acuicultura.js"></script>
+<script src="js/curricula/tp/datos-operacion-portuaria.js"></script>
+<script src="js/curricula/tp/datos-pesqueria.js"></script>
+<script src="js/curricula/tp/datos-asistencia-geologia.js"></script>
+<script src="js/curricula/tp/datos-explotacion-minera.js"></script>
+<script src="js/curricula/tp/datos-atencion-parvulos.js"></script>
+<script src="js/curricula/tp/datos-refrigeracion-climatizacion.js"></script>
+<script src="js/curricula/tp/datos-conectividad-redes.js"></script>
+<script src="js/curricula/tp/datos-programacion.js"></script>
+<script src="js/curricula/tp/datos-vestuario-confeccion.js"></script>
+<script src="js/curricula-chile.js?v=2"></script>
+<script src="js/unidades.js?v=20260805-17-modulopage"></script>
+<script src="js/ia-client.js"></script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  body { margin:0; font-family:'Inter',system-ui,sans-serif; background:#eef4ff; color:#0f172a; }
+  .wrap { max-width:1100px; margin:0 auto; padding:24px 18px 60px; }
+  .topbar { display:flex; align-items:center; gap:12px; margin-bottom:18px; }
+  .back { display:inline-flex; align-items:center; gap:6px; text-decoration:none; color:#1e40af; font-weight:700; font-size:.9rem; background:#fff; border:1px solid #dbeafe; border-radius:10px; padding:8px 14px; }
+  .hero { background:linear-gradient(135deg,#2563EB,#60A5FA); color:#fff; border-radius:16px; padding:22px 24px; margin-bottom:22px; }
+  .hero .eyebrow { font-size:.78rem; opacity:.9; font-weight:600; letter-spacing:.5px; text-transform:uppercase; }
+  .hero h1 { font-family:'Space Grotesk',sans-serif; font-size:1.6rem; margin:6px 0 4px; line-height:1.15; }
+  .hero .curso { font-size:.9rem; opacity:.95; }
+  .acciones { display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:16px; margin-bottom:26px; }
+  .acc { background:#fff; border:1px solid #e2e8f0; border-radius:14px; padding:20px; text-decoration:none; color:inherit; display:flex; flex-direction:column; gap:6px; transition:transform .15s, box-shadow .15s, border-color .15s; cursor:pointer; }
+  .acc:hover { transform:translateY(-3px); box-shadow:0 16px 34px rgba(37,99,235,.16); border-color:rgba(37,99,235,.35); }
+  .acc .ico { font-size:1.8rem; }
+  .acc .t { font-weight:800; font-size:1.05rem; }
+  .acc .s { font-size:.84rem; color:#64748b; line-height:1.4; }
+  .card { background:#fff; border:1px solid #e2e8f0; border-radius:14px; padding:18px 20px; }
+  @media (max-width:640px){ .hero h1{font-size:1.3rem;} }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <a class="back" href="dashboard-profesor.html">← Volver al panel</a>
+    </div>
+
+    <div class="hero">
+      <div class="eyebrow">📦 Módulo / Asignatura</div>
+      <h1 id="modTitulo">Cargando…</h1>
+      <div class="curso" id="modCurso"></div>
+    </div>
+
+    <div class="acciones">
+      <a class="acc" id="accUnidad">
+        <div class="ico">📚</div>
+        <div class="t">Crear unidad</div>
+        <div class="s">Define tiempo, aprendizajes (OA/AE), criterios y evaluaciones. Base para planificar.</div>
+      </a>
+      <a class="acc" id="accPlan">
+        <div class="ico">📅</div>
+        <div class="t">Planificar clase</div>
+        <div class="s">Estructura Mineduc con OA/AE/CE oficiales, ya preseleccionado este módulo.</div>
+      </a>
+      <a class="acc" id="accMaterial">
+        <div class="ico">🪄</div>
+        <div class="t">Crear material (IA)</div>
+        <div class="s">Guías, apuntes, pruebas, rúbricas y presentaciones con IA.</div>
+      </a>
+    </div>
+
+    <!-- Panel de unidades del módulo (filtrado) -->
+    <div class="card" id="uniSection">
+      <div id="uniContent"></div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      var q = new URLSearchParams(location.search);
+      var asig  = q.get('asig') || '';
+      var label = q.get('label') || q.get('asiglbl') || '';
+
+      function _labelDe(asigId, fallback) {
+        if (asigId && asigId.indexOf('mod:') === 0 && typeof CCTPCatalogo !== 'undefined' && CCTPCatalogo.labelModulo) {
+          var p = asigId.split(':');
+          var eL = CCTPCatalogo.labelEspecialidad ? CCTPCatalogo.labelEspecialidad(p[1]) : p[1];
+          var mL = CCTPCatalogo.labelModulo(p[1], p[2]);
+          if (mL) return (eL ? eL + ' — ' : '') + mL;
+        }
+        if (asigId && typeof CCAsig !== 'undefined' && CCAsig.getNombre) {
+          var n = CCAsig.getNombre(asigId); if (n) return n;
+        }
+        return fallback || asigId || 'Módulo';
+      }
+
+      function init(user) {
+        user = user || {};
+        var nombre = _labelDe(asig, label);
+        document.getElementById('modTitulo').textContent = nombre;
+        var cursoLine = (Array.isArray(user.cursos) && user.cursos.length)
+          ? user.cursos.join(' · ')
+          : (Array.isArray(user.niveles) && user.niveles.length
+              ? user.niveles.map(function (n) { return (typeof CURRICULA_CHILE !== 'undefined' && CURRICULA_CHILE.getNivelLabel) ? CURRICULA_CHILE.getNivelLabel(n) : n; }).join(' · ')
+              : 'Curso por asignar');
+        document.getElementById('modCurso').textContent = '👥 ' + cursoLine;
+
+        var qs = 'asig=' + encodeURIComponent(asig) + '&asiglbl=' + encodeURIComponent(nombre);
+        document.getElementById('accPlan').href = 'planificacion.html?' + qs;
+        document.getElementById('accMaterial').href = 'material.html?' + qs;
+
+        // Panel de unidades filtrado a este módulo, con prefill al crear.
+        if (window.CCUnidades && CCUnidades.montar) {
+          CCUnidades.montar('uniSection', 'uniContent', true, {
+            filtroAsig: asig, asignaturaId: asig, asignatura: nombre
+          });
+        }
+        // "Crear unidad" abre el formulario prellenado.
+        document.getElementById('accUnidad').addEventListener('click', function (e) {
+          e.preventDefault();
+          if (window.CCUnidades && CCUnidades.nuevaUnidad) {
+            CCUnidades.nuevaUnidad({ asignaturaId: asig, asignatura: nombre });
+            var box = document.getElementById('uniSection');
+            if (box && box.scrollIntoView) { try { box.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (x) {} }
+          }
+        });
+      }
+
+      if (window.ELAuth && ELAuth.onUserReady) ELAuth.onUserReady(init);
+      else document.addEventListener('DOMContentLoaded', function () { init((window.ELAuth && ELAuth.user) || {}); });
+    })();
+  </script>
+</body>
+</html>
