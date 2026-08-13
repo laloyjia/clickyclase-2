@@ -633,12 +633,21 @@ exports.syncClaims = onDocumentWritten('usuarios/{uid}', async (event) => {
       seg:   actuales.seg   ?? null,
       tipo:  actuales.tipo  ?? null,
     };
-    if (_claimsIguales(actualesNorm, nuevos)) return; // nada cambió
+    // Anti-degradación: si el doc no trae un valor (null), conservamos el
+    // claim válido actual en vez de borrarlo. Así un doc parcial/dañado o un
+    // write incompleto NUNCA deja al usuario sin rol/orgId (causa del incidente).
+    const objetivo = {
+      rol:   nuevos.rol   ?? actualesNorm.rol,
+      orgId: nuevos.orgId ?? actualesNorm.orgId,
+      seg:   nuevos.seg   ?? actualesNorm.seg,
+      tipo:  nuevos.tipo  ?? actualesNorm.tipo,
+    };
+    if (_claimsIguales(actualesNorm, objetivo)) return; // nada cambió
 
     // Preservar cualquier otro claim que exista (no lo pisamos).
-    const merged = Object.assign({}, actuales, nuevos);
+    const merged = Object.assign({}, actuales, objetivo);
     await getAuth().setCustomUserClaims(uid, merged);
-    console.log(`[syncClaims] ${uid} → ${JSON.stringify(nuevos)}`);
+    console.log(`[syncClaims] ${uid} → ${JSON.stringify(objetivo)}`);
   } catch (e) {
     // Doc Firestore sin cuenta Auth (huérfano) u otro error → log y seguir.
     if (e && e.code === 'auth/user-not-found') {

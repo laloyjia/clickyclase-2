@@ -80,7 +80,7 @@
 <script src="js/curricula/tp/datos-vestuario-confeccion.js"></script>
 <script src="js/curricula-chile.js?v=2"></script>
 <script src="js/cc-asig.js?v=1"></script>
-<script src="js/unidades.js?v=20260805-18-anual"></script>
+<script src="js/unidades.js?v=20260805-19-eval"></script>
 <script src="js/horarios.js"></script>
 <script src="js/agenda-hoy.js?v=20260812-1"></script>
 <script src="js/ia-client.js"></script>
@@ -820,7 +820,10 @@
 
       <!-- ═══════════ 2 · MÓDULOS / ASIGNATURAS + CURSO ═══════════ -->
       <div class="card-pro" style="margin:24px 0 28px">
-        <h3 style="font-size:1.05rem;font-weight:800;margin-bottom:16px;display:flex;align-items:center;gap:8px">📦 Mis módulos y asignaturas</h3>
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:16px">
+          <h3 style="font-size:1.05rem;font-weight:800;margin:0;display:flex;align-items:center;gap:8px">📦 Mis módulos y asignaturas</h3>
+          <button id="btnExportAnual" type="button" class="btn-pro ghost" style="padding:7px 14px;font-size:.8rem">📄 Exportar planificación anual</button>
+        </div>
         <div id="misModulosCards" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:20px">
           <div class="empty-pro"><span class="e-emoji">⏳</span><p>Cargando…</p></div>
         </div>
@@ -916,7 +919,13 @@
           }
           function _montarAgenda() { if (window.CCAgenda) CCAgenda.montar('agendaDiaBox', 'agendaMesBox'); }
           function _cards() { try { if (typeof renderMisModulosCards === 'function') renderMisModulosCards((window.ELAuth && ELAuth.user) || {}); } catch (e) {} }
-          function _init() { _msgDia(); _montarAgenda(); _cards(); }
+          function _exportAnual() {
+            var b = document.getElementById('btnExportAnual'); if (!b) return;
+            b.addEventListener('click', function () {
+              if (window.CCUnidades && CCUnidades.exportarConjunto) CCUnidades.exportarConjunto({ titulo: 'Planificación anual' });
+            });
+          }
+          function _init() { _msgDia(); _montarAgenda(); _cards(); _exportAnual(); }
           if (window.ELAuth && ELAuth.onUserReady) ELAuth.onUserReady(_init);
           else if (document.readyState !== 'loading') _init();
           else document.addEventListener('DOMContentLoaded', _init);

@@ -29,6 +29,7 @@
   ];
   var EVAL_TIPOS = ['Prueba de unidad','Prueba parcial','Control','Trabajo de investigación','Proyecto','Presentación / disertación','Portafolio','Guía evaluada','Ensayo','Informe de laboratorio','Taller práctico','Evaluación de desempeño','Coevaluación','Autoevaluación'];
   var EVAL_INSTR = ['Rúbrica','Lista de cotejo','Escala de apreciación','Pauta de corrección','Prueba escrita','Cuestionario','Ticket de salida','Registro de observación'];
+  var EVAL_CARACTER = ['Diagnóstica','Formativa','Sumativa'];  // Decreto 67
   var _cache = null;         // lista de unidades cargadas
   var _clasesByU = {};       // clases (planificaciones) indexadas por unidadId
   var _editId = null;        // id de la unidad en edición (null = nueva)
@@ -267,8 +268,10 @@
     var el = document.getElementById('cu-evals'); if (!el) return;
     var tOpts = EVAL_TIPOS.map(function (t) { return '<option>' + _esc(t) + '</option>'; }).join('');
     var iOpts = EVAL_INSTR.map(function (t) { return '<option>' + _esc(t) + '</option>'; }).join('');
+    var cOpts = EVAL_CARACTER.map(function (t) { return '<option>' + _esc(t) + '</option>'; }).join('');
     var rows = _d.evaluaciones.map(function (ev, i) {
-      return '<div style="display:grid;grid-template-columns:1fr 1fr 130px auto;gap:8px;margin-bottom:6px;align-items:center">' +
+      return '<div style="display:grid;grid-template-columns:130px 1fr 1fr 120px auto;gap:8px;margin-bottom:6px;align-items:center">' +
+        '<select class="cu-ev-c" data-i="' + i + '" style="' + IN + '"><option value="">Carácter…</option>' + cOpts.replace('>' + _esc(ev.caracter || '') + '<', ' selected>' + _esc(ev.caracter || '') + '<') + '</select>' +
         '<select class="cu-ev-t" data-i="' + i + '" style="' + IN + '"><option value="">Tipo…</option>' + tOpts.replace('>' + _esc(ev.tipo || '') + '<', ' selected>' + _esc(ev.tipo || '') + '<') + '</select>' +
         '<select class="cu-ev-i" data-i="' + i + '" style="' + IN + '"><option value="">Instrumento…</option>' + iOpts.replace('>' + _esc(ev.instrumento || '') + '<', ' selected>' + _esc(ev.instrumento || '') + '<') + '</select>' +
         '<input class="cu-ev-f" data-i="' + i + '" type="date" style="' + IN + '" value="' + _esc(ev.fecha || '') + '">' +
@@ -280,16 +283,17 @@
       _d.evaluaciones = [];
       Array.prototype.forEach.call(el.querySelectorAll('.cu-ev-t'), function (t) {
         var i = t.getAttribute('data-i');
+        var car = el.querySelector('.cu-ev-c[data-i="' + i + '"]');
         var inst = el.querySelector('.cu-ev-i[data-i="' + i + '"]');
         var f = el.querySelector('.cu-ev-f[data-i="' + i + '"]');
-        _d.evaluaciones.push({ tipo: t.value, instrumento: inst ? inst.value : '', fecha: f ? f.value : '' });
+        _d.evaluaciones.push({ caracter: car ? car.value : '', tipo: t.value, instrumento: inst ? inst.value : '', fecha: f ? f.value : '' });
       });
     }
-    Array.prototype.forEach.call(el.querySelectorAll('.cu-ev-t,.cu-ev-i,.cu-ev-f'), function (inp) { inp.addEventListener('change', sync); });
+    Array.prototype.forEach.call(el.querySelectorAll('.cu-ev-c,.cu-ev-t,.cu-ev-i,.cu-ev-f'), function (inp) { inp.addEventListener('change', sync); });
     Array.prototype.forEach.call(el.querySelectorAll('.cu-ev-rm'), function (btn) {
       btn.addEventListener('click', function () { sync(); _d.evaluaciones.splice(parseInt(btn.getAttribute('data-i'), 10), 1); _renderEvals(); });
     });
-    document.getElementById('cu-ev-add').addEventListener('click', function () { sync(); _d.evaluaciones.push({ tipo: '', instrumento: '', fecha: '' }); _renderEvals(); });
+    document.getElementById('cu-ev-add').addEventListener('click', function () { sync(); _d.evaluaciones.push({ caracter: '', tipo: '', instrumento: '', fecha: '' }); _renderEvals(); });
   }
 
   // ── Modal ────────────────────────────────────────────────────
@@ -440,8 +444,8 @@
     }
     function txt(s) { return esc(s || '').replace(/\n/g, '<br>') || '—'; }
     var evalRows = (u.evaluaciones || []).map(function (ev) {
-      return '<tr><td>' + esc(ev.tipo || '—') + '</td><td>' + esc(ev.instrumento || '—') + '</td><td>' + esc(ev.fecha || '—') + '</td></tr>';
-    }).join('') || '<tr><td colspan="3" style="color:#666">Sin evaluaciones</td></tr>';
+      return '<tr><td>' + esc(ev.caracter || '—') + '</td><td>' + esc(ev.tipo || '—') + '</td><td>' + esc(ev.instrumento || '—') + '</td><td>' + esc(ev.fecha || '—') + '</td></tr>';
+    }).join('') || '<tr><td colspan="4" style="color:#666">Sin evaluaciones</td></tr>';
     var clasesRows = clases.map(function (c) {
       var f = c.fecha ? c.fecha : '—';
       var tit = (c.titulo || c.tema || 'Clase').replace(/^Planificaci[oó]n\s*/i, '');
@@ -462,7 +466,7 @@
       (u.oag && u.oag.length ? ('<h2>Aprendizajes genéricos (OAG)</h2>' + li(u.oag)) : '') +
       '<h2>Contenidos / temas</h2><p>' + txt(u.contenidos) + '</p>' +
       '<h2>Actividades clave</h2><p>' + txt(u.actividades) + '</p>' +
-      '<h2>Evaluaciones</h2><table><tr><th>Tipo</th><th>Instrumento</th><th>Fecha</th></tr>' + evalRows + '</table>' +
+      '<h2>Evaluaciones</h2><table><tr><th>Carácter</th><th>Tipo</th><th>Instrumento</th><th>Fecha</th></tr>' + evalRows + '</table>' +
       '<h2>Clases planificadas</h2><table><tr><th>Fecha</th><th>Clase</th><th>Horas</th></tr>' + clasesRows + '</table>';
   }
 
@@ -812,10 +816,11 @@
     var evEl = document.getElementById('cu-evals');
     if (evEl) Array.prototype.forEach.call(evEl.querySelectorAll('.cu-ev-t'), function (t) {
       var i = t.getAttribute('data-i');
+      var car = evEl.querySelector('.cu-ev-c[data-i="' + i + '"]');
       var inst = evEl.querySelector('.cu-ev-i[data-i="' + i + '"]');
       var f = evEl.querySelector('.cu-ev-f[data-i="' + i + '"]');
-      var tipo = t.value, instr = inst ? inst.value : '', fe = f ? f.value : '';
-      if (tipo || instr || fe) evs.push({ tipo: tipo, instrumento: instr, fecha: fe });
+      var carac = car ? car.value : '', tipo = t.value, instr = inst ? inst.value : '', fe = f ? f.value : '';
+      if (carac || tipo || instr || fe) evs.push({ caracter: carac, tipo: tipo, instrumento: instr, fecha: fe });
     });
     var datos = {
       tipo: 'unidad',
