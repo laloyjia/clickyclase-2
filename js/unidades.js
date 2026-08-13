@@ -873,6 +873,22 @@
     if (!permanente) { try { sec.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (e) {} }
   }
 
+  // Abre el formulario de NUEVA unidad ya prellenado con un módulo/asignatura.
+  // pref = { asignatura, asignaturaId, nivel, nivelId, curso }
+  function nuevaUnidad(pref) {
+    pref = pref || {};
+    _editId = null;
+    _d = _nuevoBorrador();
+    if (pref.asignaturaId) _d.asignaturaId = String(pref.asignaturaId);
+    if (pref.asignatura)   _d.asignatura   = String(pref.asignatura);
+    if (pref.nivel)        _d.nivel        = String(pref.nivel);
+    if (pref.nivelId)      _d.nivelId      = String(pref.nivelId);
+    if (pref.curso)        _d.curso        = String(pref.curso);
+    _renderForm();
+    var t = document.getElementById('cu-titulo');
+    if (t && t.scrollIntoView) { try { t.scrollIntoView({ behavior: 'smooth', block: 'center' }); t.focus(); } catch (e) {} }
+  }
+
   // Poblar un <select> con las unidades del docente (para vincular una clase).
   function poblarSelect(selId, selectedId) {
     var sel = document.getElementById(selId); if (!sel) return;
@@ -886,5 +902,5 @@
     }).catch(function () {});
   }
 
-  window.CCUnidades = { abrir: abrir, montar: montar, listar: listar, poblarSelect: poblarSelect };
+  window.CCUnidades = { abrir: abrir, montar: montar, listar: listar, poblarSelect: poblarSelect, nuevaUnidad: nuevaUnidad };
 })();

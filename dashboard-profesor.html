@@ -79,7 +79,9 @@
 <script src="js/curricula/tp/datos-programacion.js"></script>
 <script src="js/curricula/tp/datos-vestuario-confeccion.js"></script>
 <script src="js/curricula-chile.js?v=2"></script>
-<script src="js/unidades.js?v=20260805-15-genclases"></script>
+<script src="js/unidades.js?v=20260805-16-nuevaunidad"></script>
+<script src="js/horarios.js"></script>
+<script src="js/agenda-hoy.js?v=20260812-1"></script>
 <script src="js/ia-client.js"></script>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -764,6 +766,8 @@
             });
             var link = document.getElementById('linkJefatura');
             if (link && esJefe) link.style.display = '';
+            var jt = document.getElementById('jefaturaToolsCard');
+            if (jt && esJefe) jt.style.display = '';
           }).catch(function(){});
         }
         if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', chk); else chk();
@@ -785,31 +789,19 @@
 
     <!-- ═══════════ INICIO ═══════════ -->
     <section id="sec-inicio">
+      <!-- ═══════════ 1 · BIENVENIDA + MENSAJE DEL DÍA ═══════════ -->
       <div class="hero-pro">
         <div class="hero-prof">
           <div class="hero-avatar-big" id="heroAvatar">P</div>
           <div>
             <h1 id="welcomeTitle" class="hero-grad" style="font-size:2rem;font-weight:800;line-height:1.1">¡Bienvenido!</h1>
             <p id="welcomeSub" class="hero-sub">Panel de gestión pedagógica · Click&Clase</p>
+            <p id="welcomeMensajeDia" style="margin:6px 0 0;font-size:.9rem;color:#1D4ED8;font-weight:600"></p>
           </div>
           <div class="hero-cta">
             <a class="btn-pro primary" href="material.html" data-perm="material">➕ Crear material</a>
             <a class="btn-pro ghost" href="planificacion.html" data-perm="planificar">📅 Planificar</a>
           </div>
-        </div>
-      </div>
-
-      <!-- ═══════════ RESUMEN DEL DÍA / SEMANA ═══════════ -->
-      <div id="resumenDiaBanner" class="card-pro" style="margin-bottom:20px;background:linear-gradient(135deg,rgba(37,99,235,.10),rgba(34,211,238,.06));border:1px solid rgba(37,99,235,.25)">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px">
-          <div>
-            <h3 style="font-size:1.05rem;font-weight:800;display:flex;align-items:center;gap:8px;margin-bottom:4px">📊 Tu resumen — <span id="resumenFecha" style="color:#1D4ED8">cargando…</span></h3>
-            <p style="font-size:.78rem;color:var(--muted);margin:0">Tu agenda y avisos relevantes para hoy y esta semana</p>
-          </div>
-          <button id="btnResumenReload" class="btn-pro ghost" onclick="cargarResumenDia()" style="padding:6px 12px;font-size:.78rem">↻ Actualizar</button>
-        </div>
-        <div id="resumenContent" style="display:grid;gap:10px">
-          <div style="padding:20px;text-align:center;color:var(--muted);font-size:.86rem">⏳ Cargando resumen del día…</div>
         </div>
       </div>
 
@@ -825,7 +817,43 @@
         <div id="avisosList" style="display:grid;gap:10px"></div>
       </div>
 
-      <!-- Stats animadas -->
+      <!-- ═══════════ 2 · MÓDULOS / ASIGNATURAS + CURSO ═══════════ -->
+      <div class="card-pro" style="margin-bottom:20px">
+        <h3 style="font-size:1.05rem;font-weight:800;margin-bottom:12px;display:flex;align-items:center;gap:8px">📦 Mis módulos y asignaturas</h3>
+        <div id="misModulosCards" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:16px">
+          <div class="empty-pro"><span class="e-emoji">⏳</span><p>Cargando…</p></div>
+        </div>
+      </div>
+
+      <!-- ═══════════ 3 · CALENDARIO: AGENDA DEL DÍA + MINI-MES ═══════════ -->
+      <div style="display:grid;grid-template-columns:1.7fr 1fr;gap:20px;margin-bottom:20px" class="grid-2-pro">
+        <div class="card-pro">
+          <h3 style="font-size:1.05rem;font-weight:800;margin-bottom:12px;display:flex;align-items:center;gap:8px">🗓️ Tu día</h3>
+          <div id="agendaDiaBox"></div>
+        </div>
+        <div class="card-pro">
+          <h3 style="font-size:1.05rem;font-weight:800;margin-bottom:12px;display:flex;align-items:center;gap:8px">📆 Este mes</h3>
+          <div id="agendaMesBox"></div>
+        </div>
+      </div>
+
+      <!-- ═══════════ 4 · DOS PANELES: PLANIFICACIÓN / MATERIAL ═══════════ -->
+      <div class="qr-hero" style="margin-bottom:20px">
+        <a class="quick-card qc-violet" href="planificacion.html" data-perm="planificar">
+          <div class="qc-icon">📅</div>
+          <div class="qc-title">Planificación</div>
+          <div class="qc-sub">Estructura Mineduc con OA/AE/CE oficiales por asignatura o módulo TP.</div>
+          <span class="qc-cta">Planificar ahora →</span>
+        </a>
+        <a class="quick-card qc-emerald" href="material.html" data-perm="material">
+          <div class="qc-icon">🪄</div>
+          <div class="qc-title">Creación de material</div>
+          <div class="qc-sub">Guías, apuntes, pruebas, rúbricas y más — todo con OA oficiales.</div>
+          <span class="qc-cta">Crear ahora →</span>
+        </a>
+      </div>
+
+      <!-- ═══════════ 5 · CUATRO TARJETAS ═══════════ -->
       <div class="stats-row" id="statsRow">
         <div class="stat-pro s-teal">
           <div class="stat-ico">📚</div>
@@ -837,19 +865,19 @@
           <div class="stat-num" id="statPlans" data-cu-target="0">0</div>
           <div class="stat-lbl">Planificaciones</div>
         </div>
-        <div class="stat-pro s-amber">
-          <div class="stat-ico">📦</div>
-          <div class="stat-num" id="statModulos" data-cu-target="0">0</div>
-          <div class="stat-lbl">Módulos asignados</div>
-        </div>
-        <div class="stat-pro s-green">
-          <div class="stat-ico">👥</div>
-          <div class="stat-num" id="statNiveles" data-cu-target="0">0</div>
-          <div class="stat-lbl">Niveles a cargo</div>
-        </div>
+        <a class="stat-pro s-amber" href="alertas.html" style="text-decoration:none;cursor:pointer">
+          <div class="stat-ico">🚨</div>
+          <div class="stat-num">Ver</div>
+          <div class="stat-lbl">Alertas</div>
+        </a>
+        <a class="stat-pro s-green" href="notas.html" style="text-decoration:none;cursor:pointer">
+          <div class="stat-ico">💯</div>
+          <div class="stat-num">Ver</div>
+          <div class="stat-lbl">Notas</div>
+        </a>
       </div>
 
-      <!-- Unidades de aprendizaje + calendario (permanente) -->
+      <!-- Unidades de aprendizaje (permanente) -->
       <div class="card-pro" style="margin-bottom:24px">
         <div id="ccUnidadesContent"></div>
       </div>
@@ -862,28 +890,10 @@
         })();
       </script>
 
-      <!-- Acceso rápido — 3 filas jerárquicas -->
+      <!-- Acceso rápido — uso diario + herramientas -->
       <div class="card-pro" style="margin-bottom:24px">
         <h3 style="font-size:1.05rem;font-weight:800;margin-bottom:6px">⚡ Acceso rápido</h3>
 
-        <!-- FILA 1: HERO — herramientas IA destacadas -->
-        <div class="qr-section-title">✨ Tus herramientas IA</div>
-        <div class="qr-hero">
-          <a class="quick-card qc-violet" href="material.html" data-perm="material">
-            <div class="qc-icon">🪄</div>
-            <div class="qc-title">Crear material con IA</div>
-            <div class="qc-sub">Guías, apuntes, pruebas, rúbricas y más — todo con OA oficiales.</div>
-            <span class="qc-cta">Empezar ahora →</span>
-          </a>
-          <a class="quick-card qc-emerald" href="planificacion.html" data-perm="planificar">
-            <div class="qc-icon">📅</div>
-            <div class="qc-title">Planificar clase</div>
-            <div class="qc-sub">Estructura Mineduc con OA/AE/CE oficiales por asignatura o módulo TP.</div>
-            <span class="qc-cta">Planificar ahora →</span>
-          </a>
-        </div>
-
-        <!-- FILA 2: DIARIO — lo que el profe usa cada día -->
         <div class="qr-section-title">📅 Uso diario</div>
         <div class="qr-daily">
           <a class="quick-card qc-emerald" href="libro-clases.html">
@@ -908,7 +918,6 @@
           </a>
         </div>
 
-        <!-- FILA 3: HERRAMIENTAS — bandejas y recursos -->
         <div class="qr-section-title">🧰 Herramientas y recursos</div>
         <div class="qr-tools">
           <a class="quick-card qc-amber" href="biblioteca.html">
@@ -930,25 +939,64 @@
         </div>
       </div>
 
-      <!-- Asignación + últimos materiales -->
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px" class="grid-2-pro">
-        <div class="card-pro">
-          <h3 style="font-size:1rem;font-weight:800;margin-bottom:14px;display:flex;align-items:center;gap:8px">🗂️ Mi asignación curricular</h3>
-          <div id="asignacionResumen">
-            <div class="empty-pro"><span class="e-emoji">⏳</span><p>Cargando asignación…</p></div>
-          </div>
-        </div>
-
-        <div class="card-pro">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
-            <h3 style="font-size:1rem;font-weight:800;display:flex;align-items:center;gap:8px">📋 Últimos materiales</h3>
-            <a class="btn-pro ghost" onclick="if(window.showSec){showSec('materiales');return false}" href="javascript:void(0)" data-sec="materiales" style="padding:5px 12px;font-size:.78rem">Ver todos →</a>
-          </div>
-          <div id="ultimosMats">
-            <div class="empty-pro"><span class="e-emoji">📂</span><p>Cargando…</p></div>
-          </div>
+      <!-- ═══════════ 6 · HERRAMIENTAS DE PROFESOR JEFE (solo si aplica) ═══════════ -->
+      <div id="jefaturaToolsCard" class="card-pro" style="margin-bottom:24px;display:none">
+        <h3 style="font-size:1.05rem;font-weight:800;margin-bottom:6px;display:flex;align-items:center;gap:8px">🎓 Herramientas de profesor jefe</h3>
+        <div class="qr-tools">
+          <a class="quick-card qc-violet" href="mi-jefatura.html">
+            <div class="qc-icon">🎓</div>
+            <div class="qc-body"><div class="qc-title">Mi jefatura</div><div class="qc-mini">Panel del curso</div></div>
+          </a>
+          <a class="quick-card qc-cyan" href="anotaciones.html">
+            <div class="qc-icon">📝</div>
+            <div class="qc-body"><div class="qc-title">Anotaciones</div><div class="qc-mini">Libro de conducta</div></div>
+          </a>
+          <a class="quick-card qc-amber" href="entrevistas.html">
+            <div class="qc-icon">🤝</div>
+            <div class="qc-body"><div class="qc-title">Entrevistas</div><div class="qc-mini">Apoderados</div></div>
+          </a>
         </div>
       </div>
+
+      <!-- ═══════════ 7 · TU RESUMEN (AL FINAL) ═══════════ -->
+      <div id="resumenDiaBanner" class="card-pro" style="margin-bottom:20px;background:linear-gradient(135deg,rgba(37,99,235,.10),rgba(34,211,238,.06));border:1px solid rgba(37,99,235,.25)">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px">
+          <div>
+            <h3 style="font-size:1.05rem;font-weight:800;display:flex;align-items:center;gap:8px;margin-bottom:4px">📊 Tu resumen — <span id="resumenFecha" style="color:#1D4ED8">cargando…</span></h3>
+            <p style="font-size:.78rem;color:var(--muted);margin:0">Tu agenda y avisos relevantes para hoy y esta semana</p>
+          </div>
+          <button id="btnResumenReload" class="btn-pro ghost" onclick="cargarResumenDia()" style="padding:6px 12px;font-size:.78rem">↻ Actualizar</button>
+        </div>
+        <div id="resumenContent" style="display:grid;gap:10px">
+          <div style="padding:20px;text-align:center;color:var(--muted);font-size:.86rem">⏳ Cargando resumen del día…</div>
+        </div>
+      </div>
+
+      <!-- Montaje: mensaje del día · tarjetas de módulos · agenda/calendario -->
+      <script>
+        (function () {
+          var MENSAJES = [
+            'Enseñar es dejar una huella que nunca se borra.',
+            'Cada clase es una nueva oportunidad de inspirar.',
+            'Un buen docente enseña; un gran docente motiva.',
+            'La educación es el arma más poderosa para cambiar el mundo.',
+            'Hoy es un gran día para encender la curiosidad.',
+            'Los pequeños avances de hoy son los grandes logros de mañana.',
+            'Tu vocación transforma vidas todos los días.'
+          ];
+          function _msgDia() {
+            var el = document.getElementById('welcomeMensajeDia'); if (!el) return;
+            var idx = (new Date().getDate() + new Date().getMonth()) % MENSAJES.length;
+            el.textContent = '💡 ' + MENSAJES[idx];
+          }
+          function _montarAgenda() { if (window.CCAgenda) CCAgenda.montar('agendaDiaBox', 'agendaMesBox'); }
+          function _cards() { try { if (typeof renderMisModulosCards === 'function') renderMisModulosCards((window.ELAuth && ELAuth.user) || {}); } catch (e) {} }
+          function _init() { _msgDia(); _montarAgenda(); _cards(); }
+          if (window.ELAuth && ELAuth.onUserReady) ELAuth.onUserReady(_init);
+          else if (document.readyState !== 'loading') _init();
+          else document.addEventListener('DOMContentLoaded', _init);
+        })();
+      </script>
     </section>
 
     <!-- ═══════════ MÓDULOS ═══════════ -->
@@ -1451,6 +1499,9 @@
       cu(document.getElementById('statNiveles'), (user.niveles && user.niveles.length) || 0);
     });
 
+    // ── Tarjetas "Mis módulos y asignaturas" del dashboard ──
+    try { renderMisModulosCards(user); } catch (eMods) { console.warn('[dashboard] renderMisModulosCards:', eMods); }
+
     // ── Asignación curricular ── (defensivo)
     try {
       renderAsignacionResumen(user);
@@ -1895,6 +1946,69 @@
                '<span>' + icono + '</span><span style="font-weight:700">' + escTxt(nombre) + '</span>' + badge +
              '</div>';
     }).join('');
+  }
+
+  // Tarjetas "Mis módulos y asignaturas" (módulo/asignatura + curso) del dashboard.
+  function renderMisModulosCards(user) {
+    var el = document.getElementById('misModulosCards');
+    if (!el) return;
+    user = user || {};
+    var cursoLine = (Array.isArray(user.cursos) && user.cursos.length)
+      ? user.cursos.join(' · ')
+      : (Array.isArray(user.niveles) && user.niveles.length
+          ? user.niveles.map(function (n) { return (typeof CURRICULA_CHILE !== 'undefined' && CURRICULA_CHILE.getNivelLabel) ? CURRICULA_CHILE.getNivelLabel(n) : n; }).join(' · ')
+          : 'Curso por asignar');
+    var cards = [];
+    function card(titulo, sub, icon, asigId) {
+      var idAttr = escTxt(asigId || '');
+      var lblAttr = escTxt(titulo);
+      return '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:14px 16px;display:flex;flex-direction:column">' +
+        '<div style="font-weight:700;color:#0f172a;font-size:.9rem;line-height:1.3">' + icon + ' ' + escTxt(titulo) + '</div>' +
+        '<div style="font-size:.78rem;color:#64748b;margin-top:6px">👥 ' + escTxt(sub) + '</div>' +
+        '<div style="display:flex;gap:6px;margin-top:12px;flex-wrap:wrap">' +
+          '<button type="button" class="mm-unidad" data-asig="' + idAttr + '" data-lbl="' + lblAttr + '" style="border:none;border-radius:8px;padding:5px 10px;font-size:.76rem;font-weight:700;cursor:pointer;background:#ede9fe;color:#6d28d9">📚 Crear unidad</button>' +
+          '<a class="mm-plan" href="planificacion.html?asig=' + encodeURIComponent(asigId || '') + '&asiglbl=' + encodeURIComponent(titulo || '') + '" style="border:none;border-radius:8px;padding:5px 10px;font-size:.76rem;font-weight:700;cursor:pointer;background:#dbeafe;color:#1e40af;text-decoration:none">📅 Planificar</a>' +
+        '</div></div>';
+    }
+    var modsTP = (user.modulosTP && typeof user.modulosTP === 'object') ? user.modulosTP : {};
+    Object.keys(modsTP).forEach(function (esp) {
+      (modsTP[esp] || []).forEach(function (mid) {
+        var lbl = (typeof CCTPCatalogo !== 'undefined' && CCTPCatalogo.labelModulo) ? CCTPCatalogo.labelModulo(esp, mid) : mid;
+        cards.push(card(lbl, cursoLine, '📖', 'mod:' + esp + ':' + mid));
+      });
+    });
+    if (!cards.length && Array.isArray(user.modulos)) {
+      var esp0 = user.especialidad || (user.especialidades && user.especialidades[0]) || '';
+      user.modulos.forEach(function (mid) {
+        var lbl = (esp0 && typeof CCTPCatalogo !== 'undefined' && CCTPCatalogo.labelModulo) ? CCTPCatalogo.labelModulo(esp0, mid) : ('Módulo ' + mid);
+        cards.push(card(lbl, cursoLine, '📖', esp0 ? ('mod:' + esp0 + ':' + mid) : String(mid)));
+      });
+    }
+    if (Array.isArray(user.asignaturas)) {
+      user.asignaturas.forEach(function (a) {
+        var lbl = (typeof CCAsig !== 'undefined' && CCAsig.getNombre) ? CCAsig.getNombre(a) : a;
+        cards.push(card(lbl, cursoLine, '🎓', a));
+      });
+    }
+    if (user.puedeOrientacion) cards.push(card('Orientación', cursoLine, '🧭', 'orientacion'));
+    if (user.puedeConsejoCurso) cards.push(card('Consejo de Curso', cursoLine, '📋', 'consejo_curso'));
+    if (!cards.length) {
+      el.innerHTML = '<div class="empty-pro"><span class="e-emoji">📦</span><p>Aún no tienes módulos ni asignaturas asignadas.<br>Pídele al administrador que te asigne en el panel.</p></div>';
+      return;
+    }
+    el.innerHTML = cards.join('');
+    Array.prototype.forEach.call(el.querySelectorAll('.mm-unidad'), function (btn) {
+      btn.addEventListener('click', function () {
+        var pref = { asignaturaId: btn.getAttribute('data-asig'), asignatura: btn.getAttribute('data-lbl') };
+        if (window.CCUnidades && CCUnidades.nuevaUnidad) {
+          CCUnidades.nuevaUnidad(pref);
+          var box = document.getElementById('ccUnidadesContent');
+          if (box && box.scrollIntoView) { try { box.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (e) {} }
+        } else {
+          window.location.href = 'planificacion.html?asig=' + encodeURIComponent(pref.asignaturaId || '') + '&asiglbl=' + encodeURIComponent(pref.asignatura || '');
+        }
+      });
+    });
   }
 
   function renderAsignacionResumen(user) {

@@ -1686,7 +1686,7 @@
     <!-- Unidades oficiales Mineduc (sobrescriben los ejes genéricos) -->
     <script src="js/curricula/unidades-programas-estudio.js"></script>
     <!-- Módulo: unidades de aprendizaje del docente (crear/editar/listar) -->
-    <script src="js/unidades.js?v=20260805-15-genclases"></script>
+    <script src="js/unidades.js?v=20260805-16-nuevaunidad"></script>
 
     <!-- ── Especialidades TP (un archivo por especialidad) ── -->
     <script src="js/datos-curriculares.js"></script>
@@ -1820,6 +1820,9 @@
 
             // Inicializar curriculo según perfil del profesor
             initCurriculo(user);
+
+            // Preseleccionar módulo/asignatura si viene desde el dashboard (?asig=)
+            try { _preselDesdeURL(); } catch (e) { console.warn('[planificacion] preselDesdeURL:', e); }
         }); // cierra onUserReady
     }); // cierra DOMContentLoaded
 
@@ -2176,6 +2179,44 @@
         }
     }
     window.onCambioAsigOMod = onCambioAsigOMod;
+
+    // Preselecciona el módulo/asignatura del dropdown unificado a partir de ?asig=
+    // (viene desde las tarjetas "Mis módulos y asignaturas" del dashboard).
+    function _preselDesdeURL() {
+        var q = new URLSearchParams(location.search);
+        var asig = q.get('asig');
+        if (!asig) return;
+        var sel = document.getElementById('selectAsigOMod');
+        if (!sel) return;
+        var target;
+        if (asig.indexOf('mod:') === 0) {
+            var p = asig.split(':');
+            target = 'mod::' + p[1] + '::' + p[2];
+        } else if (asig === 'orientacion') {
+            target = 'asig::Orientación';
+        } else if (asig === 'consejo_curso') {
+            target = 'asig::Consejo de Curso';
+        } else {
+            target = 'asig::' + asig;
+        }
+        var opt = null;
+        Array.prototype.forEach.call(sel.querySelectorAll('option'), function (o) {
+            if (!opt && o.value === target) opt = o;
+        });
+        // Fallback para TP: buscar por el modId al final del value.
+        if (!opt && asig.indexOf('mod:') === 0) {
+            var mid = asig.split(':')[2];
+            Array.prototype.forEach.call(sel.querySelectorAll('option'), function (o) {
+                if (!opt && o.value.indexOf('mod::') === 0 && o.value.slice(-('::' + mid).length) === ('::' + mid)) opt = o;
+            });
+        }
+        if (opt) {
+            sel.value = opt.value;
+            if (typeof onCambioAsigOMod === 'function') onCambioAsigOMod();
+            try { sel.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (e) {}
+        }
+    }
+    window._preselDesdeURL = _preselDesdeURL;
 
     // ═══════════════════════════════════════════════════════════════
     // TOGGLE MODO PLAN COMÚN vs TP (solo profesores híbridos)
