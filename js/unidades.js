@@ -416,14 +416,23 @@
   }
 
   // ---- Exportar planificación de unidad a Word (.doc) --------------------
-  function _exportarUnidad(uid) {
-    var u = (_cache || []).filter(function (x) { return x.id === uid; })[0];
-    if (!u) return;
-    var user = _user();
+  // Estilos comunes del documento Word.
+  var _DOC_CSS =
+    'body{font-family:Calibri,Arial,sans-serif;color:#1e2a44;font-size:11pt;}' +
+    'h1{font-size:16pt;text-align:center;}' +
+    'h2{font-size:12pt;color:#185FA5;border-bottom:1pt solid #c8cdd2;padding-bottom:3pt;margin:14pt 0 4pt;}' +
+    'table{width:100%;border-collapse:collapse;margin:6pt 0;}' +
+    'th,td{border:1pt solid #4a5560;padding:4pt 7pt;text-align:left;font-size:10pt;vertical-align:top;}' +
+    'th{background:#eef2f7;}' +
+    '.meta th,.meta td{border:1pt solid #c8cdd2;}' +
+    'ul{margin:4pt 0 4pt 16pt;}' +
+    '.tit{background:#1e2a44;color:#fff;text-align:center;font-weight:700;padding:6pt;letter-spacing:1pt;text-transform:uppercase;margin:6pt 0;}' +
+    '.brk{page-break-before:always;}';
+
+  // Bloque HTML de UNA unidad (sin wrapper de documento). clases = planificaciones de esa unidad.
+  function _unidadBloqueHTML(u, clases) {
     var esc = _esc;
-    var clases = (_clasesByU[uid] || []).slice().sort(function (a, b) {
-      return String(a.fecha || '').localeCompare(String(b.fecha || ''));
-    });
+    clases = (clases || []).slice().sort(function (a, b) { return String(a.fecha || '').localeCompare(String(b.fecha || '')); });
     function li(arr) {
       return (arr && arr.length)
         ? '<ul>' + arr.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ul>'
@@ -443,23 +452,10 @@
       u.horas ? u.horas + ' horas' : '',
       (u.fechaInicio || u.fechaFin) ? ((u.fechaInicio || '¿?') + ' → ' + (u.fechaFin || '¿?')) : ''
     ].filter(Boolean).join(' · ') || '—';
-    var html = '<html><head><meta charset="utf-8"><style>' +
-      'body{font-family:Calibri,Arial,sans-serif;color:#1e2a44;font-size:11pt;}' +
-      'h1{font-size:15pt;text-align:center;}' +
-      'h2{font-size:12pt;color:#185FA5;border-bottom:1pt solid #c8cdd2;padding-bottom:3pt;margin:14pt 0 4pt;}' +
-      'table{width:100%;border-collapse:collapse;margin:6pt 0;}' +
-      'th,td{border:1pt solid #4a5560;padding:4pt 7pt;text-align:left;font-size:10pt;vertical-align:top;}' +
-      'th{background:#eef2f7;}' +
-      '.meta th,.meta td{border:1pt solid #c8cdd2;}' +
-      'ul{margin:4pt 0 4pt 16pt;}' +
-      '.tit{background:#1e2a44;color:#fff;text-align:center;font-weight:700;padding:6pt;letter-spacing:1pt;text-transform:uppercase;margin:6pt 0;}' +
-      '</style></head><body>' +
-      '<div style="text-align:center;font-weight:700;font-size:13pt;">' + esc(user.liceoNombre || user.liceoSlug || 'Click&Clase') + '</div>' +
-      '<div class="tit">Planificación de Unidad</div>' +
+    return '<div class="tit">' + (u.numero ? 'Unidad N° ' + esc(u.numero) + ' — ' : 'Unidad — ') + esc(u.titulo || '') + '</div>' +
       '<table class="meta">' +
-        '<tr><th>Unidad</th><td>' + (u.numero ? ('N° ' + esc(u.numero) + ' · ') : '') + esc(u.titulo || '') + '</td><th>Módulo / Asignatura</th><td>' + esc(u.asignatura || '—') + '</td></tr>' +
-        '<tr><th>Nivel</th><td>' + esc(u.nivel || '—') + '</td><th>Curso</th><td>' + esc(u.curso || '—') + '</td></tr>' +
-        '<tr><th>Duración</th><td>' + esc(dur) + '</td><th>Docente</th><td>' + esc(user.nombre || user.email || '—') + '</td></tr>' +
+        '<tr><th>Módulo / Asignatura</th><td>' + esc(u.asignatura || '—') + '</td><th>Nivel · Curso</th><td>' + esc([u.nivel, u.curso].filter(Boolean).join(' · ') || '—') + '</td></tr>' +
+        '<tr><th>Duración</th><td>' + esc(dur) + '</td><th>Docente</th><td>' + esc(_user().nombre || _user().email || '—') + '</td></tr>' +
       '</table>' +
       '<h2>Aprendizajes esperados (OA / AE)</h2>' + li(u.aprendizajes) +
       '<h2>Criterios de evaluación</h2>' + li(u.criterios) +
@@ -467,21 +463,65 @@
       '<h2>Contenidos / temas</h2><p>' + txt(u.contenidos) + '</p>' +
       '<h2>Actividades clave</h2><p>' + txt(u.actividades) + '</p>' +
       '<h2>Evaluaciones</h2><table><tr><th>Tipo</th><th>Instrumento</th><th>Fecha</th></tr>' + evalRows + '</table>' +
-      '<h2>Clases planificadas</h2><table><tr><th>Fecha</th><th>Clase</th><th>Horas</th></tr>' + clasesRows + '</table>' +
-      '<p style="margin-top:16pt;font-size:8.5pt;color:#888;text-align:right;">Generado con Click&Clase · ' + new Date().toLocaleDateString('es-CL') + '</p>' +
-      '</body></html>';
+      '<h2>Clases planificadas</h2><table><tr><th>Fecha</th><th>Clase</th><th>Horas</th></tr>' + clasesRows + '</table>';
+  }
+
+  // Descarga un documento Word (.doc) a partir de HTML interno.
+  function _descargarDoc(innerHTML, filename) {
+    var html = '<html><head><meta charset="utf-8"><style>' + _DOC_CSS + '</style></head><body>' + innerHTML +
+      '<p style="margin-top:16pt;font-size:8.5pt;color:#888;text-align:right;">Generado con Click&Clase · ' + new Date().toLocaleDateString('es-CL') + '</p></body></html>';
+    var blob = new Blob(['﻿', html], { type: 'application/msword' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = filename.replace(/[^\w\s-]/g, '').trim().replace(/\s+/g, '-') + '.doc';
+    document.body.appendChild(a); a.click();
+    setTimeout(function () { document.body.removeChild(a); URL.revokeObjectURL(a.href); }, 500);
+  }
+
+  function _exportarUnidad(uid) {
+    var u = (_cache || []).filter(function (x) { return x.id === uid; })[0];
+    if (!u) return;
+    var user = _user();
     try {
-      var blob = new Blob(['﻿', html], { type: 'application/msword' });
-      var a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = ('Unidad-' + (u.numero || '') + '-' + (u.titulo || 'unidad'))
-        .replace(/[^\w\s-]/g, '').trim().replace(/\s+/g, '-') + '.doc';
-      document.body.appendChild(a); a.click();
-      setTimeout(function () { document.body.removeChild(a); URL.revokeObjectURL(a.href); }, 500);
+      var inner = '<div style="text-align:center;font-weight:700;font-size:13pt;">' + _esc(user.liceoNombre || user.liceoSlug || 'Click&Clase') + '</div>' +
+        _unidadBloqueHTML(u, _clasesByU[uid] || []);
+      _descargarDoc(inner, 'Unidad-' + (u.numero || '') + '-' + (u.titulo || 'unidad'));
       if (typeof showToast === 'function') showToast('Planificación descargada en Word (.doc).', 'success');
     } catch (e) {
       alert('No se pudo exportar: ' + (e && e.message));
     }
+  }
+
+  // Exporta en UN documento todas las unidades (opcionalmente filtradas por módulo).
+  // opts = { filtroAsig, titulo } — si no hay filtro, exporta todas las del docente.
+  function exportarConjunto(opts) {
+    opts = opts || {};
+    var user = _user();
+    return Promise.all([listar(), _clasesPorUnidad()]).then(function (res) {
+      var items = res[0] || [], byU = res[1] || {};
+      if (opts.filtroAsig) {
+        items = items.filter(function (u) { return u.asignaturaId === opts.filtroAsig || u.asignatura === opts.filtroAsig || (opts.asignatura && u.asignatura === opts.asignatura); });
+      }
+      if (!items.length) { if (typeof showToast === 'function') showToast('No hay unidades para exportar.', 'warn'); else alert('No hay unidades para exportar.'); return; }
+      var tituloDoc = opts.titulo || 'Planificación anual';
+      var totalSem = items.reduce(function (s, u) { return s + (parseInt(u.semanas, 10) || 0); }, 0);
+      var totalHrs = items.reduce(function (s, u) { return s + (parseInt(u.horas, 10) || 0); }, 0);
+      var portada =
+        '<div style="text-align:center;font-weight:700;font-size:13pt;">' + _esc(user.liceoNombre || user.liceoSlug || 'Click&Clase') + '</div>' +
+        '<h1>' + _esc(tituloDoc) + '</h1>' +
+        '<table class="meta">' +
+          '<tr><th>Docente</th><td>' + _esc(user.nombre || user.email || '—') + '</td><th>Unidades</th><td>' + items.length + '</td></tr>' +
+          '<tr><th>Semanas totales</th><td>' + (totalSem || '—') + '</td><th>Horas totales</th><td>' + (totalHrs || '—') + '</td></tr>' +
+        '</table>' +
+        '<h2>Índice de unidades</h2><ul>' +
+          items.map(function (u) { return '<li>' + (u.numero ? 'U' + _esc(u.numero) + ' · ' : '') + _esc(u.titulo || '') + ' <span style="color:#666">(' + _esc(u.asignatura || '') + ')</span></li>'; }).join('') +
+        '</ul>';
+      var cuerpo = items.map(function (u, i) {
+        return '<div' + (i > 0 ? ' class="brk"' : '') + '>' + _unidadBloqueHTML(u, byU[u.id] || []) + '</div>';
+      }).join('');
+      _descargarDoc(portada + cuerpo, tituloDoc);
+      if (typeof showToast === 'function') showToast('Planificación anual exportada (' + items.length + ' unidades).', 'success');
+    });
   }
 
   // ---- Generar clases automáticamente desde una unidad -------------------
@@ -915,5 +955,5 @@
     }).catch(function () {});
   }
 
-  window.CCUnidades = { abrir: abrir, montar: montar, listar: listar, poblarSelect: poblarSelect, nuevaUnidad: nuevaUnidad };
+  window.CCUnidades = { abrir: abrir, montar: montar, listar: listar, poblarSelect: poblarSelect, nuevaUnidad: nuevaUnidad, exportarConjunto: exportarConjunto };
 })();

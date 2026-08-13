@@ -54,7 +54,7 @@
 <script src="js/curricula/tp/datos-vestuario-confeccion.js"></script>
 <script src="js/curricula-chile.js?v=2"></script>
 <script src="js/cc-asig.js?v=1"></script>
-<script src="js/unidades.js?v=20260805-17-modulopage"></script>
+<script src="js/unidades.js?v=20260805-18-anual"></script>
 <script src="js/ia-client.js"></script>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -107,6 +107,20 @@
         <div class="t">Crear material (IA)</div>
         <div class="s">Guías, apuntes, pruebas, rúbricas y presentaciones con IA.</div>
       </a>
+      <a class="acc" id="accExport">
+        <div class="ico">📄</div>
+        <div class="t">Exportar planificación</div>
+        <div class="s">Descarga en Word todas las unidades de este módulo (formato para UTP/dirección).</div>
+      </a>
+    </div>
+
+    <!-- Cobertura curricular del módulo -->
+    <div class="card" id="coberturaCard" style="margin-bottom:22px;display:none">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:12px">
+        <h3 style="margin:0;font-size:1.1rem;color:#0f172a">📈 Cobertura curricular</h3>
+        <span id="cobResumen" style="font-size:.82rem;color:#64748b"></span>
+      </div>
+      <div id="coberturaBody"><div style="color:#94a3b8;font-size:.85rem">Cargando…</div></div>
     </div>
 
     <!-- Panel de unidades del módulo (filtrado) -->
@@ -155,6 +169,8 @@
             filtroAsig: asig, asignaturaId: asig, asignatura: nombre
           });
         }
+        renderCobertura(asig, user);
+
         // "Crear unidad" abre el formulario prellenado.
         document.getElementById('accUnidad').addEventListener('click', function (e) {
           e.preventDefault();
@@ -164,6 +180,63 @@
             if (box && box.scrollIntoView) { try { box.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (x) {} }
           }
         });
+
+        // "Exportar planificación" → Word con todas las unidades del módulo.
+        document.getElementById('accExport').addEventListener('click', function (e) {
+          e.preventDefault();
+          if (window.CCUnidades && CCUnidades.exportarConjunto) {
+            CCUnidades.exportarConjunto({ filtroAsig: asig, asignatura: nombre, titulo: 'Planificación — ' + nombre });
+          }
+        });
+      }
+
+      // ── Cobertura curricular: AE cubiertos por unidades/planificaciones vs pendientes ──
+      function _esc2(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+      function renderCobertura(asigId, user) {
+        var card = document.getElementById('coberturaCard');
+        var body = document.getElementById('coberturaBody');
+        var resumen = document.getElementById('cobResumen');
+        if (!card || !body) return;
+        // Solo módulos TP tienen AE estructurados (getModuloCompat).
+        if (!asigId || asigId.indexOf('mod:') !== 0 || !(window.CURRICULA_CHILE && CURRICULA_CHILE.getModuloCompat)) { card.style.display = 'none'; return; }
+        var p = asigId.split(':');
+        var mod = CURRICULA_CHILE.getModuloCompat(p[1], p[2]);
+        if (!mod || !mod.aes || !Object.keys(mod.aes).length) { card.style.display = 'none'; return; }
+        card.style.display = '';
+        var aeKeys = Object.keys(mod.aes);
+        var uid = (user && user.uid) || (window.ELAuth && ELAuth.user && ELAuth.user.uid) || '';
+        var pUnits = (window.CCUnidades && CCUnidades.listar) ? CCUnidades.listar() : Promise.resolve([]);
+        var pPlans = (window.ELDB && ELDB.planificaciones && ELDB.planificaciones.listar) ? ELDB.planificaciones.listar({ uid: uid }) : Promise.resolve([]);
+        Promise.all([pUnits, pPlans]).then(function (res) {
+          var units = (res[0] || []).filter(function (u) { return u.asignaturaId === asigId; });
+          var plans = (res[1] || []).filter(function (pl) { return pl.tipo === 'planificacion' && (pl.modulo === p[2] || pl.asignaturaId === asigId); });
+          var textos = [];
+          units.forEach(function (u) { (u.aprendizajes || []).forEach(function (a) { textos.push(String(a)); }); });
+          var aePlan = {};
+          plans.forEach(function (pl) { if (pl.ae) aePlan[String(pl.ae).replace(/[^0-9]/g, '')] = true; });
+          var cub = 0, pend = [];
+          aeKeys.forEach(function (k) {
+            var num = k.indexOf('OA') === 0 ? k.replace('OA', '') : k;
+            var re = new RegExp('AE\\s*0*' + num + '(\\D|$)', 'i');
+            var cov = !!aePlan[num] || textos.some(function (t) { return re.test(t); });
+            if (cov) cub++; else pend.push('AE ' + num + ': ' + ((mod.aes[k] && mod.aes[k].texto) || ''));
+          });
+          var total = aeKeys.length;
+          var pct = total ? Math.round(cub / total * 100) : 0;
+          if (resumen) resumen.textContent = cub + ' de ' + total + ' AE · ' + units.length + ' unidad(es)';
+          var barra =
+            '<div style="background:#e2e8f0;border-radius:999px;height:12px;overflow:hidden;margin-bottom:6px">' +
+              '<div style="height:100%;width:' + pct + '%;background:' + (pct >= 70 ? '#16a34a' : pct >= 35 ? '#f59e0b' : '#ef4444') + ';border-radius:999px;transition:width .4s"></div>' +
+            '</div>' +
+            '<div style="font-size:.82rem;color:#334155;font-weight:700;margin-bottom:10px">' + pct + '% cubierto</div>';
+          var pendHtml = pend.length
+            ? '<div style="font-size:.82rem;font-weight:700;color:#b45309;margin-bottom:6px">Pendientes (' + pend.length + '):</div>' +
+              '<ul style="margin:0;padding-left:18px;font-size:.8rem;color:#475569;line-height:1.5">' +
+                pend.slice(0, 12).map(function (t) { return '<li>' + _esc2(t) + '</li>'; }).join('') +
+              '</ul>' + (pend.length > 12 ? '<div style="font-size:.75rem;color:#94a3b8;margin-top:4px">…y ' + (pend.length - 12) + ' más</div>' : '')
+            : '<div style="font-size:.85rem;color:#16a34a;font-weight:700">✅ Todos los AE del módulo están cubiertos.</div>';
+          body.innerHTML = barra + pendHtml;
+        }).catch(function () { card.style.display = 'none'; });
       }
 
       if (window.ELAuth && ELAuth.onUserReady) ELAuth.onUserReady(init);

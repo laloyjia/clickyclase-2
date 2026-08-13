@@ -175,9 +175,24 @@ var EL_DB = (function () {
     });
   };
 
-  /** SET (reemplaza el documento completo) */
-  DocRef.prototype.set = function (data) {
+  /**
+   * SET
+   *  - set(data)                → reemplaza el documento completo (semántica Firestore estándar).
+   *  - set(data, {merge:true})  → merge NO destructivo: solo escribe los campos provistos
+   *                               (usa updateMask; nunca borra otros campos). Crea el doc si no existe.
+   *  - set(data, {mergeFields:[...]}) → también merge (equivale a merge:true para este cliente).
+   *
+   * IMPORTANTE: honrar `merge` evita el bug histórico en que un set(...,{merge:true})
+   * terminaba reemplazando el doc completo y borrando campos.
+   */
+  DocRef.prototype.set = function (data, options) {
     var self = this;
+    var merge = !!(options && (options.merge === true ||
+                   (Array.isArray(options.mergeFields) && options.mergeFields.length)));
+    if (merge) {
+      // Merge seguro reutilizando update() (commit con updateMask sobre los campos provistos).
+      return self.update(data);
+    }
     return _fetch(_baseUrl + '/' + self.path, {
       method: 'PATCH',
       body:   JSON.stringify(_toFSDoc(data))
@@ -420,9 +435,19 @@ var EL_DB = (function () {
   // ════════════════════════════════════════════════════════════
   function Batch() { this._writes = []; }
 
-  Batch.prototype.set = function (docRef, data) {
+  Batch.prototype.set = function (docRef, data, options) {
     var docPath = 'projects/' + _project + '/databases/(default)/documents/' + docRef.path;
-    this._writes.push({ update: Object.assign({ name: docPath }, _toFSDoc(data)) });
+    var merge = !!(options && (options.merge === true ||
+                   (Array.isArray(options.mergeFields) && options.mergeFields.length)));
+    if (merge) {
+      // Merge seguro: updateMask con los campos provistos (no borra otros).
+      this._writes.push({
+        update:     Object.assign({ name: docPath }, _toFSDoc(data)),
+        updateMask: { fieldPaths: Object.keys(data) }
+      });
+    } else {
+      this._writes.push({ update: Object.assign({ name: docPath }, _toFSDoc(data)) });
+    }
     return this;
   };
 
