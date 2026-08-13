@@ -187,6 +187,7 @@ tr:hover td{background:rgba(37,99,235,.05)}
 @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 @media(max-width:768px){.layout{grid-template-columns:1fr}.sidebar{display:none}.form-grid{grid-template-columns:1fr}}
 </style>
+  <link rel="stylesheet" href="css/theme-polish.css">
 </head>
 <body>
 <div class="orb orb1"></div>
@@ -758,17 +759,20 @@ tr:hover td{background:rgba(37,99,235,.05)}
       <div class="card" style="margin-bottom:20px">
         <h3>🔍 Imágenes — Serper.dev (Google Imágenes)</h3>
         <p style="color:var(--muted);font-size:.85rem;margin-bottom:14px">
-          API key de <a href="https://serper.dev" target="_blank" style="color:#0EA5E9">serper.dev</a> para las imágenes del generador de presentaciones
-          (calidad Google Imágenes, ~US$0,30 por 1.000 búsquedas, 2.500 gratis/mes). Se guarda en el servidor;
-          <strong>ningún docente configura nada</strong>.
+          Pool de API keys de <a href="https://serper.dev" target="_blank" style="color:#0EA5E9">serper.dev</a> para las imágenes del generador de presentaciones
+          (calidad Google Imágenes). El sistema elige una al azar en cada búsqueda y rota a otra si una falla o agota su cuota.
+          Puedes agregar <strong>varias</strong>. Se guardan en el servidor; <strong>ningún docente configura nada</strong>.
         </p>
-        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end">
+        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-bottom:16px">
           <div style="flex:1;min-width:280px">
-            <label style="font-size:.75rem;color:var(--muted);display:block;margin-bottom:4px">Serper API Key</label>
-            <input type="password" id="inputSerperKey" placeholder="Pega tu API key de serper.dev"
+            <label style="font-size:.75rem;color:var(--muted);display:block;margin-bottom:4px">Nueva Serper API Key</label>
+            <input type="password" id="inputSerperKey" placeholder="Pega una API key de serper.dev"
               style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-family:monospace;font-size:.875rem;outline:none;box-sizing:border-box">
           </div>
-          <button class="btn btn-primary btn-sm" onclick="guardarSerperKey()" style="white-space:nowrap">💾 Guardar</button>
+          <button class="btn btn-primary btn-sm" onclick="agregarSerperKey()" style="white-space:nowrap">+ Agregar Key</button>
+        </div>
+        <div id="listaSerperKeys" style="display:flex;flex-direction:column;gap:8px">
+          <p style="color:var(--muted);font-size:.85rem;font-style:italic">Cargando keys...</p>
         </div>
         <div id="notifSerper" style="margin-top:12px;font-size:.83rem"></div>
       </div>
@@ -3298,8 +3302,12 @@ function cargarConfigIA() {
       renderKeysIA();
       var sel = document.getElementById('selectModeloAdmin');
       if (sel && _iaConfig.modelo) sel.value = _iaConfig.modelo;
-      var serp = document.getElementById('inputSerperKey');
-      if (serp && _iaConfig.serperKey) serp.value = _iaConfig.serperKey;
+      // Migrar key única legacy → pool, y renderizar la lista.
+      if (!Array.isArray(_iaConfig.serperKeys)) _iaConfig.serperKeys = [];
+      if (_iaConfig.serperKey && _iaConfig.serperKeys.indexOf(_iaConfig.serperKey) === -1) {
+        _iaConfig.serperKeys.push(_iaConfig.serperKey);
+      }
+      renderSerperKeys();
     })
     .catch(function(e) {
       var el = document.getElementById('listaKeysIA');
@@ -3348,10 +3356,41 @@ function guardarModeloIA() {
   guardarConfigIA('notifModeloIA', 'Modelo guardado: ' + _iaConfig.modelo);
 }
 
-function guardarSerperKey() {
-  var inp = document.getElementById('inputSerperKey');
-  _iaConfig.serperKey = inp ? inp.value.trim() : '';
-  guardarConfigIA('notifSerper', _iaConfig.serperKey ? 'Key de Serper guardada.' : 'Key de Serper eliminada.');
+function renderSerperKeys() {
+  var cont = document.getElementById('listaSerperKeys');
+  if (!cont) return;
+  var keys = _iaConfig.serperKeys || [];
+  if (!keys.length) {
+    cont.innerHTML = '<p style="color:var(--muted);font-size:.85rem;font-style:italic">No hay keys de Serper. Agrega al menos una para imágenes de calidad Google.</p>';
+    return;
+  }
+  cont.innerHTML = keys.map(function(k, i) {
+    var masked = (k.length > 10) ? (k.substring(0, 6) + '..........' + k.slice(-4)) : '••••••';
+    return '<div style="display:flex;align-items:center;gap:10px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 14px">' +
+      '<span style="font-family:monospace;font-size:.85rem;flex:1;color:var(--text)">' + masked + '</span>' +
+      '<span style="font-size:.72rem;background:rgba(14,165,233,.12);border:1px solid rgba(14,165,233,.2);color:#0EA5E9;padding:2px 8px;border-radius:10px">Serper ' + (i+1) + '</span>' +
+      '<button onclick="eliminarSerperKey(' + i + ')" style="background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.25);color:#DC2626;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:.78rem">Eliminar</button>' +
+    '</div>';
+  }).join('');
+}
+
+function agregarSerperKey() {
+  var input = document.getElementById('inputSerperKey');
+  var key = input ? input.value.trim() : '';
+  if (!key || key.length < 10) { notifIA('notifSerper', 'Ingresa una API Key de Serper válida.', 'warn'); return; }
+  if (!Array.isArray(_iaConfig.serperKeys)) _iaConfig.serperKeys = [];
+  if (_iaConfig.serperKeys.indexOf(key) !== -1) { notifIA('notifSerper', 'Esa key ya está en el pool.', 'warn'); return; }
+  _iaConfig.serperKeys.push(key);
+  guardarConfigIA('notifSerper', 'Key de Serper agregada.').then(function() {
+    if (input) input.value = '';
+    renderSerperKeys();
+  });
+}
+
+function eliminarSerperKey(idx) {
+  if (!confirm('Eliminar esta key de Serper del pool?')) return;
+  _iaConfig.serperKeys.splice(idx, 1);
+  guardarConfigIA('notifSerper', 'Key de Serper eliminada.').then(renderSerperKeys);
 }
 
 function guardarConfigIA(notifId, okMsg) {

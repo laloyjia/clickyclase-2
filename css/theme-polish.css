@@ -1,0 +1,71 @@
+/* ============================================================
+   theme-polish.css — Capa GLOBAL de pulido y accesibilidad
+   Click&Clase · Cielo Chile
+   ------------------------------------------------------------
+   Aditiva y de bajo riesgo: se carga al final en todas las
+   páginas. NO reescribe estilos existentes; solo mejora foco,
+   transiciones, responsive de imágenes/tablas y consistencia.
+   Paleta base: azul #2563EB (primary), celeste #38BDF8.
+   ============================================================ */
+
+/* ---- Accesibilidad: foco visible y coherente (WCAG) ------- */
+:where(a, button, input, select, textarea, [tabindex], [role="button"]):focus-visible {
+  outline: 2px solid #2563EB;
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+/* No mostrar el anillo cuando el foco viene del mouse (solo teclado) */
+:where(a, button, input, select, textarea):focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* ---- Área táctil mínima cómoda en móvil (no fuerza tamaño) - */
+@media (hover: none) and (pointer: coarse) {
+  button, a[role="button"], .btn, .btn-pro { min-height: 40px; }
+}
+
+/* ---- Responsive universal: imágenes y multimedia ---------- */
+img, svg, video, canvas { max-width: 100%; height: auto; }
+
+/* ---- Tablas: scroll horizontal en móvil en vez de romper -- */
+@media (max-width: 640px) {
+  table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+}
+
+/* ---- Transiciones suaves y consistentes en interacción ---- */
+a, button, .btn, .btn-pro, .quick-card, .card-pro, .stat-pro {
+  transition: color .18s ease, background-color .18s ease,
+              border-color .18s ease, box-shadow .18s ease, transform .18s ease;
+}
+
+/* ---- Cursor y estados coherentes ------------------------- */
+button:not(:disabled), [role="button"] { cursor: pointer; }
+button:disabled { cursor: not-allowed; opacity: .6; }
+
+/* ---- Selección de texto con la identidad de marca -------- */
+::selection { background: rgba(37, 99, 235, .18); color: #0C1E3B; }
+
+/* ---- Scroll suave + barra de scroll sobria (webkit) ------ */
+html { scroll-behavior: smooth; }
+* { scrollbar-width: thin; scrollbar-color: #93b4e8 transparent; }
+*::-webkit-scrollbar { width: 10px; height: 10px; }
+*::-webkit-scrollbar-thumb { background: #b8ccec; border-radius: 999px; border: 2px solid transparent; background-clip: padding-box; }
+*::-webkit-scrollbar-thumb:hover { background: #93b4e8; background-clip: padding-box; }
+
+/* ---- Respeta a quien prefiere menos movimiento ----------- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ---- Impresión: ocultar cromo, aprovechar el papel ------- */
+@media print {
+  .side-pro, .btn-hamb, .foot-pro, .hero-cta, .side-actions,
+  [data-noprint], .no-print { display: none !important; }
+  body { background: #fff !important; }
+  .card-pro, .card { box-shadow: none !important; border-color: #ccc !important; }
+}

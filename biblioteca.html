@@ -36,7 +36,9 @@
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
     <script src="js/firebase-rest.js"></script>
     <script src="js/firebase-config.js"></script>
+    <script src="js/claims.js"></script>
     <script src="js/firebase-auth.js"></script>
+    <script src="js/consentimiento.js"></script>
 <script src="js/aprobaciones.js"></script>
     <script src="js/firebase-db.js"></script>
     <script src="js/presencia-logger.js"></script>
@@ -300,6 +302,7 @@
             .nav-user span#userName { display: none; }
         }
     </style>
+  <link rel="stylesheet" href="css/theme-polish.css">
 </head>
 <body>
 
@@ -370,10 +373,14 @@
                 <option>EN5</option><option>EN6</option><option>EN7</option><option>EN8</option>
                 <option>EN9</option><option>EN11</option>
             </select>
+            <select class="bib-select" id="bibFiltroUnidad" onchange="renderMateriales()" aria-label="Filtrar por unidad">
+                <option value="">Todas las unidades</option>
+            </select>
             <select class="bib-select" id="bibOrden" onchange="renderMateriales()" aria-label="Ordenar">
                 <option value="reciente">Más recientes</option>
                 <option value="antiguo">Más antiguos</option>
                 <option value="modulo">Por módulo</option>
+                <option value="unidad">Por unidad</option>
                 <option value="titulo">Por título A-Z</option>
             </select>
             <span class="bib-results-count" id="bibCount">0 resultados</span>
@@ -658,10 +665,23 @@ function setVisibilidadFilter(vis, btn) {
     renderMateriales();
 }
 
+function poblarFiltroUnidad() {
+    const sel = document.getElementById('bibFiltroUnidad');
+    if (!sel) return;
+    const cur = sel.value;
+    const nombres = {};
+    _allMateriales.forEach(m => { if (m.tipo === 'planificacion' && m.unidadNombre) nombres[m.unidadNombre] = true; });
+    const lista = Object.keys(nombres).sort((a, b) => a.localeCompare(b, 'es'));
+    sel.innerHTML = '<option value="">Todas las unidades</option>' +
+        lista.map(n => `<option value="${n.replace(/"/g,'&quot;')}"${cur === n ? ' selected' : ''}>${n}</option>`).join('');
+}
+
 function renderMateriales() {
+    poblarFiltroUnidad();
     const buscar = (document.getElementById('bibSearch').value || '').toLowerCase();
     const tipo   = document.getElementById('bibFiltroTipo').value;
     const mod    = document.getElementById('bibFiltroMod').value;
+    const uni    = (document.getElementById('bibFiltroUnidad') || {}).value || '';
     const orden  = document.getElementById('bibOrden').value;
     const misAsigs = (currentUser && Array.isArray(currentUser.asignaturas)) ? currentUser.asignaturas.map(a => String(a).toLowerCase()) : [];
 
@@ -673,6 +693,7 @@ function renderMateriales() {
             (m.curso    || '').toLowerCase().includes(buscar);
         const matchTipo = !tipo || m.tipo === tipo;
         const matchMod  = !mod  || m.modulo === mod;
+        const matchUnidad = !uni || (m.unidadNombre === uni);
         // Filtro por visibilidad
         let matchVis = true;
         if (_visFiltro === 'privada') {
@@ -694,13 +715,14 @@ function renderMateriales() {
             const esPropio = m.autorUid === (currentUser && currentUser.uid);
             matchVis = m.visibilidad === 'liceo' || m.visibilidad === 'departamento' || !m.visibilidad || esPropio;
         }
-        return matchTxt && matchTipo && matchMod && matchVis;
+        return matchTxt && matchTipo && matchMod && matchUnidad && matchVis;
     });
 
     filtrados.sort((a, b) => {
         if (orden === 'reciente') return new Date(b.fecha || 0) - new Date(a.fecha || 0);
         if (orden === 'antiguo')  return new Date(a.fecha || 0) - new Date(b.fecha || 0);
         if (orden === 'modulo')   return (a.modulo || '').localeCompare(b.modulo || '');
+        if (orden === 'unidad')   return (a.unidadNombre || '~').localeCompare(b.unidadNombre || '~', 'es');
         if (orden === 'titulo')   return (a.titulo || '').localeCompare(b.titulo || '');
         return 0;
     });
