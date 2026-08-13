@@ -30,6 +30,7 @@
   var EVAL_TIPOS = ['Prueba de unidad','Prueba parcial','Control','Trabajo de investigación','Proyecto','Presentación / disertación','Portafolio','Guía evaluada','Ensayo','Informe de laboratorio','Taller práctico','Evaluación de desempeño','Coevaluación','Autoevaluación'];
   var EVAL_INSTR = ['Rúbrica','Lista de cotejo','Escala de apreciación','Pauta de corrección','Prueba escrita','Cuestionario','Ticket de salida','Registro de observación'];
   var _cache = null;         // lista de unidades cargadas
+  var _clasesByU = {};       // clases (planificaciones) indexadas por unidadId
   var _editId = null;        // id de la unidad en edición (null = nueva)
   var _d = null;             // borrador en edición
 
@@ -328,7 +329,7 @@
 
     Promise.all([listar(), _clasesPorUnidad()]).then(function (res) {
       var items = res[0], byU = res[1] || {};
-      _cache = items;
+      _cache = items; _clasesByU = byU;
       var cont = document.getElementById('cu-list');
       if (!items.length) {
         cont.innerHTML = '<div style="text-align:center;color:#64748b;padding:30px 10px"><div style="font-size:2rem">📭</div><p>Aún no tienes unidades. Crea la primera con “+ Nueva unidad”.</p></div>';
@@ -354,6 +355,7 @@
             '<div style="font-size:.78rem;color:#94a3b8;margin-top:3px">' + nAE + ' aprendizajes · ' + nCE + ' criterios · <b style="color:#4f46e5">' + clases.length + ' clase' + (clases.length === 1 ? '' : 's') + '</b></div></div>' +
             '<div style="white-space:nowrap">' +
               '<button data-id="' + u.id + '" class="cu-plan" style="' + BTN + ';background:#dbeafe;color:#1e40af;padding:5px 10px;font-size:.8rem">🗓 Planificar clase</button> ' +
+              '<button data-id="' + u.id + '" class="cu-doc" style="' + BTN + ';background:#eff6ff;color:#1d4ed8;padding:5px 10px;font-size:.8rem">📄 Word</button> ' +
               '<button data-id="' + u.id + '" class="cu-edit" style="' + BTN + ';background:#fff;border:1px solid #cbd5e1;color:#334155;padding:5px 10px;font-size:.8rem">✏️ Editar</button> ' +
               '<button data-id="' + u.id + '" class="cu-del" style="' + BTN + ';background:#fee2e2;color:#b91c1c;padding:5px 10px;font-size:.8rem">🗑️</button>' +
             '</div>' +
@@ -384,10 +386,82 @@
       Array.prototype.forEach.call(cont.querySelectorAll('.cu-plan'), function (btn) {
         btn.addEventListener('click', function () { _planificarDeUnidad(btn.getAttribute('data-id')); });
       });
+      Array.prototype.forEach.call(cont.querySelectorAll('.cu-doc'), function (btn) {
+        btn.addEventListener('click', function () { _exportarUnidad(btn.getAttribute('data-id')); });
+      });
     }).catch(function (e) {
       var cont = document.getElementById('cu-list');
       if (cont) cont.innerHTML = '<p style="color:#b91c1c">Error al cargar: ' + _esc(e && e.message) + '</p>';
     });
+  }
+
+  // ---- Exportar planificación de unidad a Word (.doc) --------------------
+  function _exportarUnidad(uid) {
+    var u = (_cache || []).filter(function (x) { return x.id === uid; })[0];
+    if (!u) return;
+    var user = _user();
+    var esc = _esc;
+    var clases = (_clasesByU[uid] || []).slice().sort(function (a, b) {
+      return String(a.fecha || '').localeCompare(String(b.fecha || ''));
+    });
+    function li(arr) {
+      return (arr && arr.length)
+        ? '<ul>' + arr.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ul>'
+        : '<p style="color:#666">—</p>';
+    }
+    function txt(s) { return esc(s || '').replace(/\n/g, '<br>') || '—'; }
+    var evalRows = (u.evaluaciones || []).map(function (ev) {
+      return '<tr><td>' + esc(ev.tipo || '—') + '</td><td>' + esc(ev.instrumento || '—') + '</td><td>' + esc(ev.fecha || '—') + '</td></tr>';
+    }).join('') || '<tr><td colspan="3" style="color:#666">Sin evaluaciones</td></tr>';
+    var clasesRows = clases.map(function (c) {
+      var f = c.fecha ? c.fecha : '—';
+      var tit = (c.titulo || c.tema || 'Clase').replace(/^Planificaci[oó]n\s*/i, '');
+      return '<tr><td>' + esc(f) + '</td><td>' + esc(tit) + '</td><td>' + esc(c.horas || c.horasPedagogicas || '') + '</td></tr>';
+    }).join('') || '<tr><td colspan="3" style="color:#666">Sin clases planificadas aún</td></tr>';
+    var dur = [
+      u.semanas ? u.semanas + ' semanas' : '',
+      u.horas ? u.horas + ' horas' : '',
+      (u.fechaInicio || u.fechaFin) ? ((u.fechaInicio || '¿?') + ' → ' + (u.fechaFin || '¿?')) : ''
+    ].filter(Boolean).join(' · ') || '—';
+    var html = '<html><head><meta charset="utf-8"><style>' +
+      'body{font-family:Calibri,Arial,sans-serif;color:#1e2a44;font-size:11pt;}' +
+      'h1{font-size:15pt;text-align:center;}' +
+      'h2{font-size:12pt;color:#185FA5;border-bottom:1pt solid #c8cdd2;padding-bottom:3pt;margin:14pt 0 4pt;}' +
+      'table{width:100%;border-collapse:collapse;margin:6pt 0;}' +
+      'th,td{border:1pt solid #4a5560;padding:4pt 7pt;text-align:left;font-size:10pt;vertical-align:top;}' +
+      'th{background:#eef2f7;}' +
+      '.meta th,.meta td{border:1pt solid #c8cdd2;}' +
+      'ul{margin:4pt 0 4pt 16pt;}' +
+      '.tit{background:#1e2a44;color:#fff;text-align:center;font-weight:700;padding:6pt;letter-spacing:1pt;text-transform:uppercase;margin:6pt 0;}' +
+      '</style></head><body>' +
+      '<div style="text-align:center;font-weight:700;font-size:13pt;">' + esc(user.liceoNombre || user.liceoSlug || 'Click&Clase') + '</div>' +
+      '<div class="tit">Planificación de Unidad</div>' +
+      '<table class="meta">' +
+        '<tr><th>Unidad</th><td>' + (u.numero ? ('N° ' + esc(u.numero) + ' · ') : '') + esc(u.titulo || '') + '</td><th>Módulo / Asignatura</th><td>' + esc(u.asignatura || '—') + '</td></tr>' +
+        '<tr><th>Nivel</th><td>' + esc(u.nivel || '—') + '</td><th>Curso</th><td>' + esc(u.curso || '—') + '</td></tr>' +
+        '<tr><th>Duración</th><td>' + esc(dur) + '</td><th>Docente</th><td>' + esc(user.nombre || user.email || '—') + '</td></tr>' +
+      '</table>' +
+      '<h2>Aprendizajes esperados (OA / AE)</h2>' + li(u.aprendizajes) +
+      '<h2>Criterios de evaluación</h2>' + li(u.criterios) +
+      (u.oag && u.oag.length ? ('<h2>Aprendizajes genéricos (OAG)</h2>' + li(u.oag)) : '') +
+      '<h2>Contenidos / temas</h2><p>' + txt(u.contenidos) + '</p>' +
+      '<h2>Actividades clave</h2><p>' + txt(u.actividades) + '</p>' +
+      '<h2>Evaluaciones</h2><table><tr><th>Tipo</th><th>Instrumento</th><th>Fecha</th></tr>' + evalRows + '</table>' +
+      '<h2>Clases planificadas</h2><table><tr><th>Fecha</th><th>Clase</th><th>Horas</th></tr>' + clasesRows + '</table>' +
+      '<p style="margin-top:16pt;font-size:8.5pt;color:#888;text-align:right;">Generado con Click&Clase · ' + new Date().toLocaleDateString('es-CL') + '</p>' +
+      '</body></html>';
+    try {
+      var blob = new Blob(['﻿', html], { type: 'application/msword' });
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = ('Unidad-' + (u.numero || '') + '-' + (u.titulo || 'unidad'))
+        .replace(/[^\w\s-]/g, '').trim().replace(/\s+/g, '-') + '.doc';
+      document.body.appendChild(a); a.click();
+      setTimeout(function () { document.body.removeChild(a); URL.revokeObjectURL(a.href); }, 500);
+      if (typeof showToast === 'function') showToast('Planificación descargada en Word (.doc).', 'success');
+    } catch (e) {
+      alert('No se pudo exportar: ' + (e && e.message));
+    }
   }
 
   function _cargarBorrador(u) {
