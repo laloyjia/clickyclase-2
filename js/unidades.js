@@ -275,7 +275,7 @@
         '<select class="cu-ev-t" data-i="' + i + '" style="' + IN + '"><option value="">Tipo…</option>' + tOpts.replace('>' + _esc(ev.tipo || '') + '<', ' selected>' + _esc(ev.tipo || '') + '<') + '</select>' +
         '<select class="cu-ev-i" data-i="' + i + '" style="' + IN + '"><option value="">Instrumento…</option>' + iOpts.replace('>' + _esc(ev.instrumento || '') + '<', ' selected>' + _esc(ev.instrumento || '') + '<') + '</select>' +
         '<input class="cu-ev-f" data-i="' + i + '" type="date" style="' + IN + '" value="' + _esc(ev.fecha || '') + '">' +
-        '<button type="button" class="cu-ev-rm" data-i="' + i + '" title="Quitar" style="background:none;border:none;color:#b91c1c;cursor:pointer;font-weight:700;font-size:1rem">✕</button>' +
+        '<button type="button" class="cu-ev-rm" data-i="' + i + '" title="Quitar" aria-label="Quitar evaluación" style="background:none;border:none;color:#b91c1c;cursor:pointer;font-weight:700;font-size:1rem">✕</button>' +
       '</div>';
     }).join('');
     el.innerHTML = rows + '<button type="button" id="cu-ev-add" style="' + BTN + ';background:#e0e7ff;color:#3730a3;padding:7px 12px;font-size:.82rem;margin-top:4px">➕ Agregar evaluación</button>';
@@ -331,7 +331,7 @@
         '<h2 style="margin:0;font-size:1.25rem;color:#0f172a">📚 Mis Unidades de Aprendizaje</h2>' +
         '<div><button id="cu-cal" style="' + BTN + ';background:#eef2ff;color:#4338ca;margin-right:8px">🗓 Calendario</button>' +
         '<button id="cu-nueva" style="' + BTN + ';background:#2563EB;color:#fff;margin-right:8px">+ Nueva unidad</button>' +
-        '<button id="cu-x" style="background:none;border:none;font-size:1.3rem;cursor:pointer;color:#64748b">✕</button></div>' +
+        '<button id="cu-x" aria-label="Cerrar" title="Cerrar" style="background:none;border:none;font-size:1.3rem;cursor:pointer;color:#64748b">✕</button></div>' +
       '</div>' +
       '<div id="cu-list"><p style="color:#64748b">Cargando…</p></div>';
     document.getElementById('cu-x').addEventListener('click', _cerrar);
@@ -378,7 +378,7 @@
               '<button data-id="' + u.id + '" class="cu-plan" style="' + BTN + ';background:#dbeafe;color:#1e40af;padding:5px 10px;font-size:.8rem">🗓 Planificar clase</button> ' +
               '<button data-id="' + u.id + '" class="cu-doc" style="' + BTN + ';background:#eff6ff;color:#1d4ed8;padding:5px 10px;font-size:.8rem">📄 Word</button> ' +
               '<button data-id="' + u.id + '" class="cu-edit" style="' + BTN + ';background:#fff;border:1px solid #cbd5e1;color:#334155;padding:5px 10px;font-size:.8rem">✏️ Editar</button> ' +
-              '<button data-id="' + u.id + '" class="cu-del" style="' + BTN + ';background:#fee2e2;color:#b91c1c;padding:5px 10px;font-size:.8rem">🗑️</button>' +
+              '<button data-id="' + u.id + '" class="cu-del" aria-label="Eliminar unidad" title="Eliminar unidad" style="' + BTN + ';background:#fee2e2;color:#b91c1c;padding:5px 10px;font-size:.8rem">🗑️</button>' +
             '</div>' +
           '</div>' + clasesHtml + '</div>';
       };
@@ -550,7 +550,7 @@
       '<div style="background:#fff;border-radius:14px;max-width:440px;width:100%;padding:20px 22px;box-shadow:0 20px 50px rgba(0,0,0,.3)">' +
         '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">' +
           '<h3 style="margin:0;font-size:1.1rem;color:#0f172a">⚡ Generar clases</h3>' +
-          '<button id="cu-gen-x" style="background:none;border:none;font-size:1.3rem;cursor:pointer;color:#64748b">✕</button>' +
+          '<button id="cu-gen-x" aria-label="Cerrar" title="Cerrar" style="background:none;border:none;font-size:1.3rem;cursor:pointer;color:#64748b">✕</button>' +
         '</div>' +
         '<p style="margin:0 0 12px;font-size:.85rem;color:#64748b">Unidad <b>' + _esc(u.titulo || '') + '</b> · ' + _esc(u.asignatura || '') + (u.nivel ? ' · ' + _esc(u.nivel) : '') + '</p>' +
         (yaTiene ? '<div style="background:#fef9c3;border:1px solid #fde68a;color:#854d0e;border-radius:8px;padding:7px 10px;font-size:.8rem;margin-bottom:10px">Esta unidad ya tiene ' + yaTiene + ' clase(s). Las nuevas se agregarán, no reemplazan.</div>' : '') +
@@ -700,7 +700,7 @@
     b.innerHTML =
       '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">' +
         '<h2 style="margin:0;font-size:1.2rem;color:#0f172a">' + (_editId ? '✏️ Editar unidad' : '📝 Nueva unidad') + '</h2>' +
-        '<button id="cu-x2" style="background:none;border:none;font-size:1.3rem;cursor:pointer;color:#64748b">✕</button>' +
+        '<button id="cu-x2" aria-label="Cerrar" title="Cerrar" style="background:none;border:none;font-size:1.3rem;cursor:pointer;color:#64748b">✕</button>' +
       '</div>' +
       '<div id="cu-msg" style="display:none;border-radius:8px;padding:8px 11px;font-size:.85rem;margin-bottom:10px"></div>' +
 
@@ -770,7 +770,7 @@
     el.innerHTML = arr.map(function (t, i) {
       return '<div style="display:flex;gap:8px;align-items:flex-start;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:6px 10px;margin-bottom:5px;font-size:.85rem">' +
         '<span style="flex:1">' + _esc(t) + '</span>' +
-        '<button data-box="' + id + '" data-i="' + i + '" class="cu-rm" style="background:none;border:none;color:#b91c1c;cursor:pointer;font-weight:700">✕</button></div>';
+        '<button data-box="' + id + '" data-i="' + i + '" class="cu-rm" aria-label="Quitar" title="Quitar" style="background:none;border:none;color:#b91c1c;cursor:pointer;font-weight:700">✕</button></div>';
     }).join('');
     Array.prototype.forEach.call(el.querySelectorAll('.cu-rm'), function (btn) {
       btn.addEventListener('click', function () {
@@ -860,7 +860,7 @@
       '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">' +
         '<h2 style="margin:0;font-size:1.2rem;color:#0f172a">🗓 Calendario de clases</h2>' +
         '<div><button id="cu-back" style="' + BTN + ';background:#fff;border:1px solid #cbd5e1;color:#334155;margin-right:8px">← Unidades</button>' +
-        '<button id="cu-x3" style="background:none;border:none;font-size:1.3rem;cursor:pointer;color:#64748b">✕</button></div>' +
+        '<button id="cu-x3" aria-label="Cerrar" title="Cerrar" style="background:none;border:none;font-size:1.3rem;cursor:pointer;color:#64748b">✕</button></div>' +
       '</div>' +
       '<div id="cu-cal-body"><p style="color:#64748b">Cargando…</p></div>';
     document.getElementById('cu-x3').addEventListener('click', _cerrar);
