@@ -359,6 +359,7 @@
             '<div style="font-size:.82rem;color:#64748b;margin-top:2px">' + _esc([u.nivel, u.curso].filter(Boolean).join(' · ')) + (dur ? ' · ' + _esc(dur) : '') + '</div>' +
             '<div style="font-size:.78rem;color:#94a3b8;margin-top:3px">' + nAE + ' aprendizajes · ' + nCE + ' criterios · <b style="color:#4f46e5">' + clases.length + ' clase' + (clases.length === 1 ? '' : 's') + '</b></div></div>' +
             '<div style="white-space:nowrap">' +
+              '<button data-id="' + u.id + '" class="cu-gen" style="' + BTN + ';background:#ede9fe;color:#6d28d9;padding:5px 10px;font-size:.8rem">⚡ Generar clases</button> ' +
               '<button data-id="' + u.id + '" class="cu-plan" style="' + BTN + ';background:#dbeafe;color:#1e40af;padding:5px 10px;font-size:.8rem">🗓 Planificar clase</button> ' +
               '<button data-id="' + u.id + '" class="cu-doc" style="' + BTN + ';background:#eff6ff;color:#1d4ed8;padding:5px 10px;font-size:.8rem">📄 Word</button> ' +
               '<button data-id="' + u.id + '" class="cu-edit" style="' + BTN + ';background:#fff;border:1px solid #cbd5e1;color:#334155;padding:5px 10px;font-size:.8rem">✏️ Editar</button> ' +
@@ -393,6 +394,9 @@
       });
       Array.prototype.forEach.call(cont.querySelectorAll('.cu-doc'), function (btn) {
         btn.addEventListener('click', function () { _exportarUnidad(btn.getAttribute('data-id')); });
+      });
+      Array.prototype.forEach.call(cont.querySelectorAll('.cu-gen'), function (btn) {
+        btn.addEventListener('click', function () { _modalGenerarClases(btn.getAttribute('data-id')); });
       });
     }).catch(function (e) {
       var cont = document.getElementById('cu-list');
@@ -467,6 +471,143 @@
     } catch (e) {
       alert('No se pudo exportar: ' + (e && e.message));
     }
+  }
+
+  // ---- Generar clases automáticamente desde una unidad -------------------
+  function _addDias(fechaYMD, n) {
+    var d = fechaYMD ? new Date(fechaYMD + 'T00:00:00') : new Date();
+    if (isNaN(d.getTime())) d = new Date();
+    d.setDate(d.getDate() + n);
+    return d.toISOString().slice(0, 10);
+  }
+
+  function _modalGenerarClases(uid) {
+    var u = (_cache || []).filter(function (x) { return x.id === uid; })[0];
+    if (!u) return;
+    var yaTiene = (_clasesByU[uid] || []).length;
+    var nDef = parseInt(u.semanas, 10) || 4;
+    var hDef = (parseInt(u.horas, 10) && nDef) ? Math.max(1, Math.round(parseInt(u.horas, 10) / nDef)) : (parseInt(u.horas, 10) || 2);
+    var iniDef = u.fechaInicio || new Date().toISOString().slice(0, 10);
+    var ov = document.createElement('div');
+    ov.id = 'cu-gen-ov';
+    ov.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,.45);z-index:99999;display:flex;align-items:center;justify-content:center;padding:16px';
+    ov.innerHTML =
+      '<div style="background:#fff;border-radius:14px;max-width:440px;width:100%;padding:20px 22px;box-shadow:0 20px 50px rgba(0,0,0,.3)">' +
+        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">' +
+          '<h3 style="margin:0;font-size:1.1rem;color:#0f172a">⚡ Generar clases</h3>' +
+          '<button id="cu-gen-x" style="background:none;border:none;font-size:1.3rem;cursor:pointer;color:#64748b">✕</button>' +
+        '</div>' +
+        '<p style="margin:0 0 12px;font-size:.85rem;color:#64748b">Unidad <b>' + _esc(u.titulo || '') + '</b> · ' + _esc(u.asignatura || '') + (u.nivel ? ' · ' + _esc(u.nivel) : '') + '</p>' +
+        (yaTiene ? '<div style="background:#fef9c3;border:1px solid #fde68a;color:#854d0e;border-radius:8px;padding:7px 10px;font-size:.8rem;margin-bottom:10px">Esta unidad ya tiene ' + yaTiene + ' clase(s). Las nuevas se agregarán, no reemplazan.</div>' : '') +
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">' +
+          '<div><label style="' + LB + '">N° de clases</label><input id="cu-gen-n" type="number" min="1" max="60" value="' + nDef + '" style="' + IN + '"></div>' +
+          '<div><label style="' + LB + '">Horas por clase</label><input id="cu-gen-h" type="number" min="1" value="' + hDef + '" style="' + IN + '"></div>' +
+          '<div><label style="' + LB + '">Primera clase</label><input id="cu-gen-ini" type="date" value="' + _esc(iniDef) + '" style="' + IN + '"></div>' +
+          '<div><label style="' + LB + '">Cada (días)</label><input id="cu-gen-cada" type="number" min="1" value="7" style="' + IN + '"></div>' +
+        '</div>' +
+        '<p style="font-size:.76rem;color:#94a3b8;margin:8px 0 14px">Se crearán N clases enlazadas a la unidad, con fechas espaciadas y los aprendizajes/criterios de la unidad. Luego puedes editar cada una.</p>' +
+        '<div id="cu-gen-msg" style="display:none;font-size:.82rem;margin-bottom:10px"></div>' +
+        '<div style="display:flex;justify-content:flex-end;gap:8px">' +
+          '<button id="cu-gen-cancel" style="' + BTN + ';background:#f1f5f9;color:#475569;padding:8px 14px">Cancelar</button>' +
+          '<button id="cu-gen-ok" style="' + BTN + ';background:#7c3aed;color:#fff;padding:8px 16px;font-weight:700">Generar</button>' +
+        '</div>' +
+      '</div>';
+    document.body.appendChild(ov);
+    function cerrar() { if (ov.parentNode) ov.parentNode.removeChild(ov); }
+    ov.addEventListener('click', function (e) { if (e.target === ov) cerrar(); });
+    document.getElementById('cu-gen-x').addEventListener('click', cerrar);
+    document.getElementById('cu-gen-cancel').addEventListener('click', cerrar);
+    document.getElementById('cu-gen-ok').addEventListener('click', function () {
+      var n = parseInt(document.getElementById('cu-gen-n').value, 10) || 0;
+      var h = document.getElementById('cu-gen-h').value || '';
+      var ini = document.getElementById('cu-gen-ini').value || new Date().toISOString().slice(0, 10);
+      var cada = parseInt(document.getElementById('cu-gen-cada').value, 10) || 7;
+      var msg = document.getElementById('cu-gen-msg');
+      if (n < 1 || n > 60) { msg.style.display = 'block'; msg.style.color = '#b91c1c'; msg.textContent = 'Indica entre 1 y 60 clases.'; return; }
+      var btnOk = document.getElementById('cu-gen-ok');
+      btnOk.disabled = true; btnOk.textContent = 'Generando…';
+      _generarClases(u, n, h, ini, cada).then(function (creadas) {
+        cerrar();
+        if (typeof showToast === 'function') showToast('Se generaron ' + creadas + ' clases para la unidad.', 'success');
+        _renderLista();
+      }).catch(function (e) {
+        btnOk.disabled = false; btnOk.textContent = 'Generar';
+        msg.style.display = 'block'; msg.style.color = '#b91c1c'; msg.textContent = 'Error: ' + (e && e.message);
+      });
+    });
+  }
+
+  function _generarClases(u, n, horas, iniYMD, cadaDias) {
+    if (!(window.ELDB && ELDB.planificaciones && ELDB.planificaciones.guardar)) {
+      return Promise.reject(new Error('ELDB.planificaciones no disponible'));
+    }
+    var user = _user();
+    var asigId = u.asignaturaId || u.asignatura || '';
+    var esMod = typeof asigId === 'string' && asigId.indexOf('mod:') === 0;
+    var modId = esMod ? asigId.split(':')[2] : '';
+    var esp = esMod ? asigId.split(':')[1] : (u.especialidad || (user.especialidades && user.especialidades[0]) || '');
+    var asigLabel = u.asignatura || '';
+    var nivelVal = u.nivelId || u.nivel || '';
+    var apr = (u.aprendizajes || []);
+    var cri = (u.criterios || []);
+    var aprHtml = apr.length ? '<h3>Aprendizajes (de la unidad)</h3><ul>' + apr.map(function (t) { return '<li>' + _esc(t) + '</li>'; }).join('') + '</ul>' : '';
+    var criHtml = cri.length ? '<h3>Criterios de evaluación</h3><ul>' + cri.map(function (t) { return '<li>' + _esc(t) + '</li>'; }).join('') + '</ul>' : '';
+    var tasks = [];
+    for (var i = 0; i < n; i++) {
+      (function (idx) {
+        var fechaYMD = _addDias(iniYMD, cadaDias * idx);
+        var fechaISO = new Date(fechaYMD + 'T00:00:00').toISOString();
+        var titulo = 'Clase ' + (idx + 1) + ' — ' + (u.titulo || 'Unidad');
+        var cursoLabel = u.nivel || nivelVal || '';
+        var contenido =
+          '<h2>' + _esc(titulo) + '</h2>' +
+          '<p><strong>Unidad:</strong> ' + _esc(u.titulo || '') + (u.numero ? ' (N° ' + _esc(u.numero) + ')' : '') +
+          ' | <strong>' + (esMod ? 'Módulo' : 'Asignatura') + ':</strong> ' + _esc(asigLabel) +
+          (cursoLabel ? ' | <strong>Nivel:</strong> ' + _esc(cursoLabel) : '') +
+          (horas ? ' | <strong>Horas:</strong> ' + _esc(horas) : '') + '</p>' +
+          aprHtml + criHtml +
+          '<p style="color:#64748b"><em>Clase generada automáticamente desde la unidad. Edítala para completar inicio/desarrollo/cierre, actividades y evaluación.</em></p>';
+        var entrada = {
+          id: 'plan_' + Date.now() + '_' + idx,
+          tipo: 'planificacion',
+          titulo: titulo,
+          modulo: modId,
+          asignatura: asigLabel,
+          nivel: nivelVal,
+          curso: u.curso || '',
+          fecha: fechaISO,
+          fechaClase: fechaISO,
+          profesor: user.nombre || user.email || '—',
+          horas: String(horas || ''),
+          unidadId: u.id,
+          unidadNombre: (u.numero ? 'Unidad ' + u.numero + ' · ' : '') + (u.titulo || ''),
+          descripcion: asigLabel + (cursoLabel ? ' — ' + cursoLabel : '') + ' — ' + (horas ? horas + ' horas' : '') + ' · desde unidad',
+          contenido: contenido,
+          uid: user.uid || '',
+          email: user.email || '',
+          especialidad: esp || '',
+          tipoProfesor: user.tipoProfesor || '',
+          autogenerada: true
+        };
+        var p = ELDB.planificaciones.guardar(entrada).then(function (saved) {
+          try {
+            var planId = (saved && saved.id) || entrada.id;
+            if (user.uid && ELDB.calendario && ELDB.calendario.upsertDesdeOrigen) {
+              ELDB.calendario.upsertDesdeOrigen({
+                uid: user.uid, origenTipo: 'planificacion', origenId: planId,
+                titulo: titulo, fecha: fechaYMD, tipo: 'planificacion',
+                asignatura: asigLabel || modId || '',
+                descripcion: 'Clase de unidad · ' + (cursoLabel || '') + (horas ? ' · ' + horas + ' h' : ''),
+                email: user.email || ''
+              });
+            }
+          } catch (e) { /* no-fatal */ }
+          return saved;
+        });
+        tasks.push(p);
+      })(i);
+    }
+    return Promise.all(tasks).then(function (r) { return r.length; });
   }
 
   function _cargarBorrador(u) {
