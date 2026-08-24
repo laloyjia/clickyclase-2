@@ -37,8 +37,10 @@
     // ═══════════════════════════════════════════════════════════════
     // PLAN COMÚN — Formación General (Básica + Media)
     // ═══════════════════════════════════════════════════════════════
-    { id:'lenguaje',     nombre:'Lenguaje y Comunicación',       sigla:'LEN', grupo:'general', tipo:'plan_comun', niveles:['1b','2b','3b','4b','5b','6b','7b','8b','1m','2m'], curriculumFile:'lenguaje.js', tieneOAsCargados:true, ordenSort:10 },
-    { id:'ling_liter',   nombre:'Lengua y Literatura',           sigla:'LEN', grupo:'media',   tipo:'plan_comun', niveles:['3m','4m'], base:'lenguaje', curriculumFile:'lenguaje.js', tieneOAsCargados:true, ordenSort:11 },
+    // MINEDUC: "Lenguaje y Comunicación" es 1°–6° básico (DS 439/2012).
+    { id:'lenguaje',     nombre:'Lenguaje y Comunicación',       sigla:'LEN', grupo:'general', tipo:'plan_comun', niveles:['1b','2b','3b','4b','5b','6b'], curriculumFile:'lenguaje.js', tieneOAsCargados:true, ordenSort:10 },
+    // MINEDUC: "Lengua y Literatura" es 7° básico a 4° medio (DS 369/2015 y Bases 3°-4° medio).
+    { id:'ling_liter',   nombre:'Lengua y Literatura',           sigla:'LEN', grupo:'general', tipo:'plan_comun', niveles:['7b','8b','1m','2m','3m','4m'], base:'lenguaje', curriculumFile:'lenguaje.js', tieneOAsCargados:true, ordenSort:11 },
     { id:'matematica',   nombre:'Matemática',                    sigla:'MAT', grupo:'general', tipo:'plan_comun', niveles:['1b','2b','3b','4b','5b','6b','7b','8b','1m','2m','3m','4m'], curriculumFile:'matematica.js', tieneOAsCargados:true, ordenSort:20 },
     { id:'ciencias_nat', nombre:'Ciencias Naturales',            sigla:'CN',  grupo:'general', tipo:'plan_comun', niveles:['1b','2b','3b','4b','5b','6b','7b','8b','1m','2m'], curriculumFile:'ciencias.js', tieneOAsCargados:true, ordenSort:30 },
     { id:'biologia',     nombre:'Biología',                      sigla:'BIO', grupo:'media',   tipo:'plan_comun', niveles:['1m','2m'], base:'ciencias_nat', curriculumFile:'biologia.js', tieneOAsCargados:true, ordenSort:31 },

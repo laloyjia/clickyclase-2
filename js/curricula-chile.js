@@ -23,7 +23,7 @@ var CURRICULA_CHILE = (function() {
         nombre: 'Lenguaje y Comunicación',
         sigla:  'LEN',
         color:  '#3b82f6',
-        niveles: ['1B','2B','3B','4B','5B','6B','7B','8B'],
+        niveles: ['1B','2B','3B','4B','5B','6B'],
         unidades: {
           '1B': ["Lectura", "Escritura", "Comunicación oral"],
           '2B': ["Lectura", "Escritura", "Comunicación oral"],
@@ -259,6 +259,18 @@ var CURRICULA_CHILE = (function() {
             {codigo:"OA25",eje:"Lectura",desc:"Realizar investigaciones sobre diversos temas para complementar sus lecturas o"},
             {codigo:"OA26",eje:"Lectura",desc:"Sintetizar, registrar y ordenar las ideas principales de textos escuchados o leídos para"}
           ]
+        }
+      },
+      {
+        // MINEDUC: desde 7° básico la asignatura pasa a llamarse "Lengua y Literatura"
+        // (DS 369/2015). Comparte sigla LEN → los OA se resuelven por sigla (getOAs).
+        nombre: 'Lengua y Literatura',
+        sigla:  'LEN',
+        color:  '#3b82f6',
+        niveles: ['7B','8B'],
+        unidades: {
+          '7B': ["Lectura", "Escritura", "Comunicación oral", "Investigación sobre lengua y literatura"],
+          '8B': ["Lectura", "Escritura", "Comunicación oral", "Investigación sobre lengua y literatura"]
         }
       },
       {
@@ -1495,7 +1507,7 @@ var CURRICULA_CHILE = (function() {
     },
 
     _NOMBRE_CANONICO: {
-      'lenguaje y comunicación':'Lenguaje y Comunicación','lenguaje y comunicacion':'Lenguaje y Comunicación','lengua y literatura':'Lenguaje y Comunicación',
+      'lenguaje y comunicación':'Lenguaje y Comunicación','lenguaje y comunicacion':'Lenguaje y Comunicación','lengua y literatura':'Lengua y Literatura',
       'tecnología':'Tecnología','tecnologia':'Tecnología','educación tecnológica':'Tecnología','educacion tecnologica':'Tecnología',
       'orientación':'Orientación','orientacion':'Orientación','orientación y bienestar':'Orientación','orientacion y bienestar':'Orientación',
       'historia, geografía y cs':'Historia, Geografía y CS','historia, geografia y cs':'Historia, Geografía y CS','historia, geografía y ciencias sociales':'Historia, Geografía y CS',

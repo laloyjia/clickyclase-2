@@ -52,8 +52,9 @@
 <script src="js/curricula/tp/datos-conectividad-redes.js"></script>
 <script src="js/curricula/tp/datos-programacion.js"></script>
 <script src="js/curricula/tp/datos-vestuario-confeccion.js"></script>
-<script src="js/curricula-chile.js?v=2"></script>
+<script src="js/curricula-chile.js?v=3"></script>
 <script src="js/cc-asig.js?v=1"></script>
+<script src="js/cobertura.js?v=1"></script>
 <script src="js/unidades.js?v=20260805-20-a11y"></script>
 <script src="js/ia-client.js"></script>
 
@@ -211,19 +212,9 @@
         Promise.all([pUnits, pPlans]).then(function (res) {
           var units = (res[0] || []).filter(function (u) { return u.asignaturaId === asigId; });
           var plans = (res[1] || []).filter(function (pl) { return pl.tipo === 'planificacion' && (pl.modulo === p[2] || pl.asignaturaId === asigId); });
-          var textos = [];
-          units.forEach(function (u) { (u.aprendizajes || []).forEach(function (a) { textos.push(String(a)); }); });
-          var aePlan = {};
-          plans.forEach(function (pl) { if (pl.ae) aePlan[String(pl.ae).replace(/[^0-9]/g, '')] = true; });
-          var cub = 0, pend = [];
-          aeKeys.forEach(function (k) {
-            var num = k.indexOf('OA') === 0 ? k.replace('OA', '') : k;
-            var re = new RegExp('AE\\s*0*' + num + '(\\D|$)', 'i');
-            var cov = !!aePlan[num] || textos.some(function (t) { return re.test(t); });
-            if (cov) cub++; else pend.push('AE ' + num + ': ' + ((mod.aes[k] && mod.aes[k].texto) || ''));
-          });
-          var total = aeKeys.length;
-          var pct = total ? Math.round(cub / total * 100) : 0;
+          var r = (window.CCCobertura && CCCobertura.calcularModulo) ? CCCobertura.calcularModulo(asigId, units, plans) : null;
+          if (!r) { card.style.display = 'none'; return; }
+          var cub = r.cubiertos, pend = r.pendientes, total = r.total, pct = r.pct;
           if (resumen) resumen.textContent = cub + ' de ' + total + ' AE · ' + units.length + ' unidad(es)';
           var barra =
             '<div style="background:#e2e8f0;border-radius:999px;height:12px;overflow:hidden;margin-bottom:6px">' +

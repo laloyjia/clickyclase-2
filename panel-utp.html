@@ -20,6 +20,46 @@
 <script src="js/roles-permissions.js"></script>
 <script src="js/roles-router.js"></script>
 <script src="js/firebase-db.js"></script>
+<!-- Currículo (para cobertura institucional real) -->
+<script src="js/tp-catalogo.js"></script>
+<script src="js/curricula/tp/datos-electricidad.js"></script>
+<script src="js/curricula/tp/datos-mecanica-automotriz.js"></script>
+<script src="js/curricula/tp/datos-mecanica-industrial.js"></script>
+<script src="js/curricula/tp/datos-electronica.js"></script>
+<script src="js/curricula/tp/datos-administracion.js"></script>
+<script src="js/curricula/tp/datos-contabilidad.js"></script>
+<script src="js/curricula/tp/datos-grafica.js"></script>
+<script src="js/curricula/tp/datos-construccion.js"></script>
+<script src="js/curricula/tp/datos-metalurgia-extractiva.js"></script>
+<script src="js/curricula/tp/datos-mantenimiento-aeronaves.js"></script>
+<script src="js/curricula/tp/datos-tripulacion-naves.js"></script>
+<script src="js/curricula/tp/datos-muebles-madera.js"></script>
+<script src="js/curricula/tp/datos-quimica-industrial.js"></script>
+<script src="js/curricula/tp/datos-atencion-enfermeria.js"></script>
+<script src="js/curricula/tp/datos-agropecuaria.js"></script>
+<script src="js/curricula/tp/datos-elaboracion-alimentos.js"></script>
+<script src="js/curricula/tp/datos-construcciones-metalicas.js"></script>
+<script src="js/curricula/tp/datos-instalaciones-sanitarias.js"></script>
+<script src="js/curricula/tp/datos-montaje-industrial.js"></script>
+<script src="js/curricula/tp/datos-telecomunicaciones.js"></script>
+<script src="js/curricula/tp/datos-dibujo-tecnico.js"></script>
+<script src="js/curricula/tp/datos-gastronomia.js"></script>
+<script src="js/curricula/tp/datos-servicios-hoteleros.js"></script>
+<script src="js/curricula/tp/datos-servicios-turismo.js"></script>
+<script src="js/curricula/tp/datos-forestal.js"></script>
+<script src="js/curricula/tp/datos-acuicultura.js"></script>
+<script src="js/curricula/tp/datos-operacion-portuaria.js"></script>
+<script src="js/curricula/tp/datos-pesqueria.js"></script>
+<script src="js/curricula/tp/datos-asistencia-geologia.js"></script>
+<script src="js/curricula/tp/datos-explotacion-minera.js"></script>
+<script src="js/curricula/tp/datos-atencion-parvulos.js"></script>
+<script src="js/curricula/tp/datos-refrigeracion-climatizacion.js"></script>
+<script src="js/curricula/tp/datos-conectividad-redes.js"></script>
+<script src="js/curricula/tp/datos-programacion.js"></script>
+<script src="js/curricula/tp/datos-vestuario-confeccion.js"></script>
+<script src="js/curricula-chile.js?v=3"></script>
+<script src="js/cc-asig.js?v=1"></script>
+<script src="js/cobertura.js?v=1"></script>
 <script src="js/aprobaciones.js"></script>
 <script src="js/cursos.js"></script>
 <script src="js/notas.js"></script>
@@ -322,6 +362,103 @@ function mkCob(id){
  Chart.defaults.color='#6B7280';Chart.defaults.borderColor='#E6E9F1';Chart.defaults.font.family='Inter';
  _charts[id]=new Chart(el,{type:'bar',data:{labels:d.cob.map(function(c){return c[0]}),datasets:[{data:d.cob.map(function(c){return c[1]}),backgroundColor:'#5B4BE0'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{max:100}}}});
 }
+// Cobertura curricular INSTITUCIONAL real: cruza unidades + planificaciones del liceo
+// con los AE del currículo (CCCobertura). Fallback a demo si no hay datos/currículo.
+function cargarCoberturaInst(){
+ var el=document.getElementById('chCob2');
+ var tb=document.getElementById('tb-cob'); var cnt=document.getElementById('cnt-cob');
+ var u=(window.ELAuth&&ELAuth.user)||window.EL_USER||{};
+ var slug=u.liceoSlug||u.liceoPrincipal||'';
+ if(typeof EL_DB==='undefined'||!slug||!window.CCCobertura){ mkCob('chCob2'); return; }
+ if(tb) tb.innerHTML='<tr><td colspan="3" style="color:#94a3b8">Calculando cobertura…</td></tr>';
+ EL_DB.collection('planificaciones').where('liceoSlug','==',slug).get().then(function(sn){
+  var items=[]; sn.forEach(function(doc){ items.push(doc.data()); });
+  var g=CCCobertura.agrupar(items);
+  var rows=[];
+  Object.keys(g.units).forEach(function(asigId){
+   if(asigId.indexOf('mod:')!==0) return;
+   var mid=asigId.split(':')[2];
+   var plans=(g.plansByMod[mid]||[]).concat(g.plansByAsig[asigId]||[]);
+   var r=CCCobertura.calcularModulo(asigId, g.units[asigId], plans);
+   if(r) rows.push([CCCobertura.labelModulo(asigId), r.pct, r.cubiertos, r.total]);
+  });
+  rows.sort(function(a,b){return a[1]-b[1];}); // peor cobertura primero
+  if(!rows.length){ mkCob('chCob2'); if(tb) tb.innerHTML='<tr><td colspan="3" style="color:#94a3b8">Aún no hay unidades registradas para calcular cobertura real. (Se muestra referencia.)</td></tr>'; return; }
+  if(_charts['chCob2']) _charts['chCob2'].destroy();
+  if(el&&typeof Chart!=='undefined'){
+   Chart.defaults.color='#6B7280';Chart.defaults.font.family='Inter';
+   _charts['chCob2']=new Chart(el,{type:'bar',data:{labels:rows.map(function(r){return r[0];}),datasets:[{data:rows.map(function(r){return r[1];}),backgroundColor:rows.map(function(r){return r[1]>=70?'#16a34a':(r[1]>=40?'#f59e0b':'#ef4444');})}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{max:100}}}});
+  }
+  if(tb) tb.innerHTML=rows.map(function(r){var est=r[1]>=85?'Al día':(r[1]>=60?'En avance':'Atrasada'); return '<tr><td>'+r[0]+'</td><td>'+r[1]+'% <span style="color:#94a3b8">('+r[2]+'/'+r[3]+' AE)</span></td><td>'+est+'</td></tr>';}).join('');
+  if(cnt) cnt.textContent=String(rows.length);
+ }).catch(function(e){ console.warn('[UTP] cobertura institucional:',e); mkCob('chCob2'); });
+}
+// ── Bandeja real de aprobación de planificaciones (estados + retroalimentación) ──
+function _escUtp(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function cargarBandejaPlan(){
+ var tb=document.getElementById('tb-plan'); var cnt=document.getElementById('cnt-plan');
+ if(!tb||!window.CCAprobaciones){ return; }
+ var u=(window.ELAuth&&ELAuth.user)||window.EL_USER||{};
+ var liceo=u.liceoSlug||u.liceoPrincipal||'';
+ tb.innerHTML='<tr><td colspan="4" style="color:#94a3b8">Cargando…</td></tr>';
+ CCAprobaciones.listarPendientesRevision({liceoSlug:liceo, coleccion:'planificaciones', limit:200}).then(function(items){
+  if(cnt) cnt.textContent=String((items||[]).length);
+  if(!items||!items.length){ tb.innerHTML='<tr><td colspan="4" style="color:#94a3b8">No hay planificaciones pendientes de revisión. 🎉</td></tr>'; return; }
+  tb.innerHTML=items.map(function(it){
+   var titulo=it.titulo||it.nombre||'Planificación';
+   var ca=[it.asignatura||it.modulo||'', it.nivel||it.curso||''].filter(Boolean).join(' · ');
+   var prof=it.profesor||it.autorNombre||(it.autorEmail?it.autorEmail.split('@')[0]:(it.email||'—'));
+   var badge=(CCAprobaciones.getEstadoBadgeHTML?CCAprobaciones.getEstadoBadgeHTML(it.estado):_escUtp(it.estado));
+   return '<tr>'+
+     '<td>'+_escUtp(titulo)+'</td>'+
+     '<td>'+_escUtp(ca||'—')+'</td>'+
+     '<td>'+_escUtp(prof)+'</td>'+
+     '<td>'+badge+'<div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap">'+
+       '<button class="btn sm" data-ap="'+_escUtp(it.id)+'" style="background:#16a34a;border-color:#16a34a">Aprobar</button>'+
+       '<button class="btn ghost sm" data-dv="'+_escUtp(it.id)+'">Devolver…</button>'+
+     '</div></td>'+
+   '</tr>';
+  }).join('');
+  Array.prototype.forEach.call(tb.querySelectorAll('[data-ap]'),function(b){b.addEventListener('click',function(){_accBandeja('aprobar',b.getAttribute('data-ap'));});});
+  Array.prototype.forEach.call(tb.querySelectorAll('[data-dv]'),function(b){b.addEventListener('click',function(){_accBandeja('devolver',b.getAttribute('data-dv'));});});
+ }).catch(function(e){ tb.innerHTML='<tr><td colspan="4" style="color:#ef4444">Error al cargar: '+_escUtp(e&&e.message)+'</td></tr>'; });
+}
+function _accBandeja(accion,id){
+ if(accion==='aprobar'){
+  var c=prompt('Comentario para el docente (opcional):','')||'';
+  CCAprobaciones.aprobar('planificaciones',id,c).then(function(){ cargarBandejaPlan(); }).catch(function(e){ alert('No se pudo aprobar: '+(e&&e.message)); });
+ }else{
+  var obs=prompt('Observaciones (obligatorias) para devolver al docente:','');
+  if(obs===null) return;
+  obs=(obs||'').trim(); if(!obs){ alert('Las observaciones son obligatorias al devolver.'); return; }
+  CCAprobaciones.devolver('planificaciones',id,obs).then(function(){ cargarBandejaPlan(); }).catch(function(e){ alert('No se pudo devolver: '+(e&&e.message)); });
+ }
+}
+// ── Calendario de evaluaciones institucional (anti-solapamiento) ──
+function cargarEvaluacionesInst(){
+ var tb=document.getElementById('tb-eval'); var cnt=document.getElementById('cnt-eval');
+ if(!tb) return;
+ var u=(window.ELAuth&&ELAuth.user)||window.EL_USER||{};
+ var liceo=u.liceoSlug||u.liceoPrincipal||'';
+ if(typeof EL_DB==='undefined'||!liceo){ return; }
+ tb.innerHTML='<tr><td colspan="4" style="color:#94a3b8">Cargando…</td></tr>';
+ var pPlan=EL_DB.collection('planificaciones').where('liceoSlug','==',liceo).get().catch(function(){return {forEach:function(){}};});
+ var pEval=EL_DB.collection('evaluaciones').where('liceoSlug','==',liceo).get().catch(function(){return {forEach:function(){}};});
+ Promise.all([pPlan,pEval]).then(function(res){
+  var evs=[];
+  res[0].forEach(function(doc){ var d=doc.data()||{}; if(d.tipo==='unidad'&&Array.isArray(d.evaluaciones)){ d.evaluaciones.forEach(function(ev){ if(ev&&ev.fecha) evs.push({fecha:(''+ev.fecha).slice(0,10),asig:d.asignatura||'',tipo:ev.caracter||ev.tipo||'',curso:d.curso||d.nivel||''}); }); } });
+  res[1].forEach(function(doc){ var d=doc.data()||{}; if(d.fecha) evs.push({fecha:(''+d.fecha).slice(0,10),asig:d.asignatura||d.titulo||'',tipo:d.tipo||d.caracter||'',curso:d.curso||d.nivel||''}); });
+  var key={}; evs.forEach(function(e){ var k=(e.curso||'')+'|'+(e.fecha||''); key[k]=(key[k]||0)+1; });
+  evs.sort(function(a,b){return String(a.fecha).localeCompare(String(b.fecha));});
+  if(cnt) cnt.textContent=String(evs.length);
+  if(!evs.length){ tb.innerHTML='<tr><td colspan="4" style="color:#94a3b8">Sin evaluaciones registradas aún. Se llenan con las unidades y evaluaciones de los docentes.</td></tr>'; return; }
+  tb.innerHTML=evs.map(function(e){
+   var k=(e.curso||'')+'|'+(e.fecha||''); var clash=key[k]>1;
+   var estado=_escUtp(e.curso||'—')+(clash?' <span style="color:#ef4444;font-weight:700">⚠ '+key[k]+' el mismo día</span>':'');
+   return '<tr'+(clash?' style="background:#fef2f2"':'')+'><td>'+_escUtp(e.fecha)+'</td><td>'+_escUtp(e.asig||'Evaluación')+'</td><td>'+_escUtp(e.tipo||'—')+'</td><td>'+estado+'</td></tr>';
+  }).join('');
+ }).catch(function(e){ tb.innerHTML='<tr><td colspan="4" style="color:#ef4444">Error: '+_escUtp(e&&e.message)+'</td></tr>'; });
+}
 function renderAll(){
  window.CC_PREFIX='utp_'+_seg;
  document.getElementById('segScope').textContent=SEG[_seg].niv;
@@ -339,7 +476,7 @@ function renderCalColegio(){
 }
 var NAV=[['dashboard','Resumen','resumen'],['groups','Mis profesores','profes'],['assignment_ind','Asignar profesores','asignar'],['description','Planificaciones','plan'],['folder_shared','Documentos','docs'],['checklist','Cobertura','cobertura'],['event_note','Evaluaciones','eval'],['visibility','Acompañamiento','acomp']];
 document.getElementById('nav').innerHTML=NAV.map(function(n,i){return '<div class="nav-item'+(i===0?' active':'')+'" data-s="'+n[2]+'">'+ic(n[0])+'<span>'+n[1]+'</span></div>'}).join('');
-function show(s){document.querySelectorAll('.nav-item').forEach(function(x){x.classList.toggle('active',x.dataset.s===s)});document.querySelectorAll('.sec').forEach(function(x){x.classList.toggle('active',x.id==='sec-'+s)});if(s==='cobertura')mkCob('chCob2');if(s==='docs')_utpDocsCargar();}
+function show(s){document.querySelectorAll('.nav-item').forEach(function(x){x.classList.toggle('active',x.dataset.s===s)});document.querySelectorAll('.sec').forEach(function(x){x.classList.toggle('active',x.id==='sec-'+s)});if(s==='cobertura')cargarCoberturaInst();if(s==='plan')cargarBandejaPlan();if(s==='eval')cargarEvaluacionesInst();if(s==='docs')_utpDocsCargar();}
 document.querySelectorAll('.nav-item').forEach(function(x){x.addEventListener('click',function(){show(x.dataset.s)})});
 document.addEventListener('input',function(e){var inp=e.target;if(!inp.dataset||!inp.dataset.f)return;var q=inp.value.toLowerCase(),cont=document.getElementById('tb-'+inp.dataset.f);cont.querySelectorAll('[data-txt]').forEach(function(row){row.style.display=row.dataset.txt.indexOf(q)!==-1?'':'none'});});
 var _impKey=null;
