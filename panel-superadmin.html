@@ -465,8 +465,11 @@ function cargarDocentesInd() {
   }
   ELDB.usuarios.listarTodos().then(function (users) {
     _docentesInd = (users || []).filter(function (u) {
-      var sinColegio = !u.liceoSlug && !u.liceoPrincipal && !(u.liceos && u.liceos.length);
-      var esProf = u.role === 'profesor' || (u.roles && u.roles.profesor);
+      // "Sin colegio" = sin liceoSlug (mismo criterio que el panel admin,
+      // para que TODO docente individual aparezca aquí y se le pueda asignar).
+      var sinColegio = !u.liceoSlug || u.liceoSlug === '' || u.esIndividual;
+      var esProf = u.role === 'profesor' || (u.roles && u.roles.profesor) ||
+                   u.role === 'admin'; // admin multi-rol también puede asignarse
       return sinColegio && esProf;
     });
     renderDocentesInd();
